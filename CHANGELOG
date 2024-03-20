@@ -1,0 +1,13 @@
+For a condensed, easy to read changelog of stable releases, please see 
+http://odamex.net/wiki/Releases
+
+If you would like to see a more detailed list of changes, we highly recommend
+checking out the repository through one of these methods:
+
+- Via a git client:
+git clone https://github.com/odamex/odamex.git --recurse-submodules
+
+We recommend Github Desktop (https://desktop.github.com) /or git-scm (https://git-scm.com/).
+
+- Via the web: https://github.com/odamex/odamex
+
