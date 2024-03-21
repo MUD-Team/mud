@@ -36,9 +36,6 @@
 #ifdef OSX
 #include "i_musicsystem_au.h"
 #endif
-#ifdef PORTMIDI
-#include "i_musicsystem_portmidi.h"
-#endif
 #include "i_musicsystem_sdl.h"
 
 MusicSystem* musicsystem = NULL;
@@ -197,12 +194,6 @@ void I_InitMusic(MusicSystemType musicsystem_type)
 			musicsystem = new AuMusicSystem();
 			break;
 		#endif	// OSX
-
-		#ifdef PORTMIDI
-		case MS_PORTMIDI:
-			musicsystem = new PortMidiMusicSystem();
-			break;
-		#endif	// PORTMIDI
 
 		case MS_SDLMIXER:	// fall through
 		default:

@@ -38,8 +38,7 @@ typedef enum
 {
 	MS_NONE			= 0,
 	MS_SDLMIXER		= 1,
-	MS_AUDIOUNIT	= 2,
-	MS_PORTMIDI		= 3
+	MS_AUDIOUNIT	= 2
 } MusicSystemType;
 
 bool S_MusicIsMus(byte* data, size_t length);
