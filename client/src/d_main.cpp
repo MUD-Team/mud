@@ -75,7 +75,7 @@
 #include "r_sky.h"
 #include "d_main.h"
 #include "d_dehacked.h"
-#include "cl_download.h"
+// #include "cl_download.h"
 #include "gi.h"
 #include "stats.h"
 #include "p_ctf.h"
@@ -233,7 +233,8 @@ void D_Display()
 
 	// We always want to service downloads, even outside of a specific
 	// download gamestate.
-	CL_DownloadTick();
+	// commented out until curl is re-enabled - Dasho
+	// CL_DownloadTick();
 
 	switch (gamestate)
 	{
@@ -850,8 +851,9 @@ void D_DoomMain()
 	I_FinishClockCalibration();
 
 	// Initialize HTTP subsystem
-	CL_DownloadInit();
-	atterm(CL_DownloadShutdown);
+	// commented until curl is re-enabled - Dasho
+	// CL_DownloadInit();
+	// atterm(CL_DownloadShutdown);
 
 	Printf(PRINT_HIGH, "D_CheckNetGame: Checking network game status.\n");
 	D_CheckNetGame();

@@ -43,7 +43,7 @@
 #include "st_stuff.h"
 #include "s_sound.h"
 #include "cl_responderkeys.h"
-#include "cl_download.h"
+// #include "cl_download.h"
 #include "g_gametype.h"
 #include "m_fileio.h"
 
@@ -1739,6 +1739,8 @@ void C_DrawConsole()
 		// Amount of space remaining.
 		int remain = primary_surface_width - 16 - C_StringWidth(version);
 
+		// no-op until curl is re-enabled - Dasho
+		/*
 		if (CL_IsDownloading())
 		{
 			// Use the remaining space for a download bar.
@@ -1790,6 +1792,7 @@ void C_DrawConsole()
 			// Draw the thing.
 			screen->PrintStr(left + 2, ConBottom - 12, download.c_str(), CR_GREEN);
 		}
+		*/
 
 		if (TickerMax)
 		{

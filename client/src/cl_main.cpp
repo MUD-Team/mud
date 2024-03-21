@@ -49,7 +49,7 @@
 #include "m_fileio.h"
 #include "r_sky.h"
 #include "cl_demo.h"
-#include "cl_download.h"
+// #include "cl_download.h"
 #include "cl_maplist.h"
 #include "cl_vote.h"
 #include "p_mobj.h"
@@ -153,8 +153,9 @@ EXTERN_CVAR (mute_enemies)
 EXTERN_CVAR (cl_autoaim)
 
 EXTERN_CVAR (cl_interp)
-EXTERN_CVAR (cl_serverdownload)
-EXTERN_CVAR (cl_forcedownload)
+// commented until curl is re-enabled - Dasho
+// EXTERN_CVAR (cl_serverdownload)
+// EXTERN_CVAR (cl_forcedownload)
 
 // [SL] Force enemies to have the specified color
 EXTERN_CVAR (r_forceenemycolor)
@@ -1470,7 +1471,9 @@ void CL_RequestConnectInfo(void)
  */
 void CL_QuitAndTryDownload(const OWantFile& missing_file)
 {
-	// Need to set this here, otherwise we render a frame of wild pointers
+// Commented out for now until curl support is re-enabled - Dasho
+
+/*	// Need to set this here, otherwise we render a frame of wild pointers
 	// filled with garbage data.
 	gamestate = GS_FULLCONSOLE;
 
@@ -1536,6 +1539,7 @@ void CL_QuitAndTryDownload(const OWantFile& missing_file)
 
 	// Start the download.
 	CL_StartDownload(downloadsites, missing_file, DL_RECONNECT);
+	*/
 }
 
 //
@@ -1715,7 +1719,7 @@ bool CL_PrepareConnect()
 		CL_QuitNetGame(NQ_ABORT);
 		return false;
 	}
-	else if (!ok && !missingfiles.empty() || cl_forcedownload)
+	else if (!ok && !missingfiles.empty())//  || cl_forcedownload) - needs curl re-enabled - Dasho
 	{
 		if (::missingCommercialIWAD)
 		{
@@ -1735,7 +1739,7 @@ bool CL_PrepareConnect()
 			missing_file = missingfiles.front();
 		}
 
-		CL_QuitAndTryDownload(missing_file);
+		// CL_QuitAndTryDownload(missing_file); - needs curl re-enabled - Dasho
 		return false;
 	}
 

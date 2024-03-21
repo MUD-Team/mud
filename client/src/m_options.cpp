@@ -174,7 +174,8 @@ EXTERN_CVAR (cl_prednudge)
 EXTERN_CVAR (cl_predictpickup)
 EXTERN_CVAR (cl_predictsectors)
 EXTERN_CVAR (cl_predictweapons)
-EXTERN_CVAR (cl_serverdownload)
+// commented until curl is re-enabled - Dasho
+// EXTERN_CVAR (cl_serverdownload)
 
 // Demo Options
 EXTERN_CVAR(cl_splitnetdemos)
@@ -639,7 +640,8 @@ static menuitem_t NetworkItems[] = {
 	{ discrete,		"Predict sector actions",		{&cl_predictsectors},{3.0},		{0.0},		{0.0},		{PredictSectors} },
 	{ discrete,		"Predict weapon effects",		{&cl_predictweapons},{2.0},		{0.0},		{0.0},		{OnOff} },
 	{ redtext,		" ",							{NULL},				{0.0}, 		{0.0}, 		{0.0}, 		{NULL} },
-	{ discrete, 	"Download From Server", 		{&cl_serverdownload}, {2.0}, 		{0.0}, 		{0.0}, 		{OnOff} },
+	// commented until curl is re-enabled - Dasho
+	//{ discrete, 	"Download From Server", 		{&cl_serverdownload}, {2.0}, 		{0.0}, 		{0.0}, 		{OnOff} },
 
 	{ redtext,		" ",							{NULL},				{0.0},		{0.0},		{0.0},		{NULL} },
 	{ yellowtext,	"Netdemo Settings",				{NULL},				{0.0},		{0.0},		{0.0},		{NULL} },
