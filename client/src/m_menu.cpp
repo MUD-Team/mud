@@ -53,10 +53,6 @@
 #include "g_skill.h"
 #include "m_fileio.h"
 
-#ifdef _XBOX
-#include "i_xbox.h"
-#endif
-
 EXTERN_CVAR(g_resetinvonexit)
 
 // temp for screenblocks (0-9)
@@ -753,11 +749,7 @@ void M_SaveSelect (int choice)
 	saveSlot = choice;
 	strcpy(saveOldString,savegamestrings[choice]);
 
-	// If on a game console, auto-fill with date and time to save name
-
-#ifndef GCONSOLE
 	if (!LoadSavegameMenu[choice].status)
-#endif
 	{
 		strncpy(savegamestrings[choice], asctime(lt) + 4, 20);
 	}

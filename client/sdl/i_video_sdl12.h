@@ -46,11 +46,7 @@ public:
 
 	virtual const EDisplayType getDisplayType() const
 	{
-		#ifdef GCONSOLE
-		return DISPLAY_FullscreenOnly;
-		#else
 		return DISPLAY_Both;
-		#endif
 	}
 
 	virtual const IVideoMode& getNativeMode() const

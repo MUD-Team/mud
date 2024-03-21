@@ -26,9 +26,7 @@
 
 #include <iostream>
 
-#ifdef _XBOX
-#include "xbox_main.h"
-#elif defined(_WIN32)
+#if defined(_WIN32)
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <WinSock2.h>
