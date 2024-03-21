@@ -321,11 +321,7 @@ menu_t OptionMenu = {
  *=======================================*/
 
 static menuitem_t ControlsItems[] = {
-#ifdef _XBOX
-	{ whitetext,"A to change, START to clear", {NULL}, {0.0}, {0.0}, {0.0}, {NULL} },
-#else
 	{ whitetext,"ENTER to change, BACKSPACE to clear", {NULL}, {0.0}, {0.0}, {0.0}, {NULL} },
-#endif
 	{ redtext,	" ",					{NULL},	{0.0}, {0.0}, {0.0}, {NULL} },
 	{ yellowtext,"Basic Movement",		{NULL},	{0.0}, {0.0}, {0.0}, {NULL} },
 	{ control,	"Move forward",			{NULL}, {0.0}, {0.0}, {0.0}, {(value_t *)"+forward"} },
@@ -1106,13 +1102,8 @@ void M_RestoreVideoMode()
 
 static value_t Depths[22];
 
-#ifdef _XBOX
-static const char VMEnterText[] = "Press A to set mode";
-static const char VMTestText[] = "Press X to test mode for 5 seconds";
-#else
 static const char VMEnterText[] = "Press ENTER to set mode";
 static const char VMTestText[] = "Press T to test mode for 5 seconds";
-#endif
 
 static const char VMTestWaitText[] = "Please wait 5 seconds...";
 
@@ -1144,11 +1135,7 @@ static value_t WidescreenMode[] = {
 };
 
 static menuitem_t ModesItems[] = {
-#ifdef GCONSOLE
-	{ slider, "Overscan",				{&vid_overscan},		{0.84375}, {1.0}, {0.03125}, {NULL} },
-#else
 	{ discrete, "Fullscreen",			{&vid_fullscreen},		{3.0}, {0.0},	{0.0}, {FullScreenOptions} },
-#endif
 	{ discrete,	"Widescreen",			{&vid_widescreen},		{6.0}, {0.0},	{0.0}, {WidescreenMode} } ,
 	{ discrete,	"VSync",				{&vid_vsync},			{2.0}, {0.0},	{0.0}, {YesNo} },
 	{ discrete, "Framerate",			{&vid_maxfps},			{9.0}, {0.0},	{0.0}, {VidFPSCaps} },
@@ -2379,11 +2366,7 @@ void M_OptResponder (event_t *ev)
 		}
 		else
 		{
-#ifdef _XBOX
-		if (ev->data3 == 't' || ev->data1 == OKEY_JOY3)
-#else
 		if (ev->data3 == 't')
-#endif
 		{
 			// Test selected resolution
 			if (CurrentMenu == &ModesMenu)

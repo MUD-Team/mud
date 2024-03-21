@@ -22,7 +22,7 @@
 //-----------------------------------------------------------------------------
 
 
-#if defined UNIX && defined HAVE_BACKTRACE && !defined GCONSOLE
+#if defined UNIX && defined HAVE_BACKTRACE
 
 #include "odamex.h"
 
@@ -180,54 +180,6 @@ void I_SetCrashDir(const char* crashdir)
 
 	// Copy the crash directory.
 	memcpy(::gCrashDir, crashdir, len);
-}
-
-#endif
-
-#if defined(__SWITCH__)
-
-#include <switch.h>
-#include <stdlib.h>
-
-extern "C"
-{
-
-alignas(16) u8 __nx_exception_stack[0x1000];
-u64 __nx_exception_stack_size = sizeof(__nx_exception_stack);
-
-void __libnx_exception_handler(ThreadExceptionDump *ctx)
-{
-	fprintf(stderr, "FATAL CRASH! See odamex_crash.log for details\n");
-
-	FILE *f = fopen("./odamex_crash.log", "w");
-	if (f == NULL) return;
-
-	fprintf(f, "error_desc: 0x%x\n", ctx->error_desc);
-	for(int i = 0; i < 29; i++)
-		fprintf(f, "[X%d]: 0x%lx\n", i, ctx->cpu_gprs[i].x);
-
-	fprintf(f, "fp: 0x%lx\n", ctx->fp.x);
-	fprintf(f, "lr: 0x%lx\n", ctx->lr.x);
-	fprintf(f, "sp: 0x%lx\n", ctx->sp.x);
-	fprintf(f, "pc: 0x%lx\n", ctx->pc.x);
-
-	fprintf(f, "pstate: 0x%x\n", ctx->pstate);
-	fprintf(f, "afsr0: 0x%x\n", ctx->afsr0);
-	fprintf(f, "afsr1: 0x%x\n", ctx->afsr1);
-	fprintf(f, "esr: 0x%x\n", ctx->esr);
-
-	fprintf(f, "far: 0x%lx\n", ctx->far.x);
-
-	fclose(f);
-}
-}
-
-void I_SetCrashCallbacks()
-{
-}
-
-void I_SetCrashDir(const char* crashdir)
-{
 }
 
 #endif

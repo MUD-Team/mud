@@ -42,12 +42,6 @@
 #include "i_system.h"
 #include "hu_stuff.h"
 
-#ifdef _XBOX
-	#include "i_xbox.h"
-#elif __SWITCH__
-	#include "nx_io.h"
-#endif
-
 #if defined(SDL12)
 #include "i_input_sdl12.h"
 #elif defined(SDL20)
@@ -245,11 +239,6 @@ static void I_InitializeKeyNameTable()
 	key_names[OKEY_HAT6] = "hat2right";
 	key_names[OKEY_HAT7] = "hat2down";
 	key_names[OKEY_HAT8] = "hat2left";
-
-#ifdef __SWITCH__
-	NX_InitializeKeyNameTable();
-#endif
-
 }
 
 
@@ -351,10 +340,6 @@ static bool I_CanRepeat()
 //
 static bool I_CanGrab()
 {
-	#ifdef GCONSOLE
-	return true;
-	#endif
-
 	extern bool configuring_controls;
 	extern constate_e ConsoleState;
 
@@ -430,7 +415,6 @@ void I_ForceUpdateGrab()
 //
 static void I_UpdateGrab()
 {
-#ifndef GCONSOLE
 	// force I_ResumeMouse or I_PauseMouse if toggling between fullscreen/windowed
 	bool fullscreen = I_GetWindow()->isFullScreen();
 	static bool prev_fullscreen = fullscreen;
@@ -443,7 +427,6 @@ static void I_UpdateGrab()
 		I_GrabInput();
 	else if (input_subsystem->isInputGrabbed() && !I_CanGrab())
 		I_UngrabInput();
-#endif
 }
 
 
@@ -451,13 +434,7 @@ CVAR_FUNC_IMPL(use_joystick)
 {
 	if (var == 0.0f)
 	{
-#ifdef GCONSOLE
-		// Don't let console users disable joystick support because
-		// they won't have any way to reenable through the menu.
-		var = 1.0f;
-#else
 		I_CloseJoystick();
-#endif
 	}
 	else
 	{
@@ -477,13 +454,6 @@ CVAR_FUNC_IMPL(joy_active)
 			return;
 		}
 	}
-
-#ifdef GCONSOLE	
-	// Don't let console users choose an invalid joystick because
-	// they won't have any way to reenable through the menu.
-	if (!devices.empty())
-		var = devices.front().mId;
-#endif
 }
 
 

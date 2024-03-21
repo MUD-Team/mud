@@ -65,10 +65,6 @@
 #include "g_gametype.h"
 #include "p_horde.h"
 
-#ifdef _XBOX
-#include "i_xbox.h"
-#endif
-
 #include <math.h> // for pow()
 
 #define SAVESTRINGSIZE	24
@@ -1621,11 +1617,7 @@ void G_SaveGame (int slot, char *description)
  */
 void G_BuildSaveName(std::string &name, int slot)
 {
-#ifdef _XBOX
-	std::string path = xbox_GetSavePath(name, slot);
-#else
 	std::string path = M_GetUserFileName(name.c_str());
-#endif
 	StrFormat(name, "%s" PATHSEP "odasv%d.ods", path.c_str(), slot);
 }
 
@@ -1646,10 +1638,6 @@ void G_DoSaveGame()
 	{
         return;
 	}
-
-#ifdef _XBOX
-	xbox_WriteSaveMeta(name.substr(0, name.rfind(PATHSEPCHAR)), description);
-#endif
 
 	Printf (PRINT_HIGH, "Saving game to '%s'...\n", name.c_str());
 

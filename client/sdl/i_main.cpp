@@ -28,10 +28,8 @@
 // denis - todo - remove
 #include "win32inc.h"
 #ifdef _WIN32
-    #ifndef _XBOX
         #undef GetMessage
         typedef BOOL (WINAPI *SetAffinityFunc)(HANDLE hProcess, DWORD mask);
-    #endif // !_XBOX
 #else
     #include <sched.h>
 #endif // WIN32
@@ -40,9 +38,6 @@
 // for getuid and geteuid
 #include <unistd.h>
 #include <sys/types.h>
-#ifdef __SWITCH__
-#include "nx_system.h"
-#endif
 #endif
 
 #include <new>
@@ -64,12 +59,8 @@
 #include "c_console.h"
 #include "z_zone.h"
 
-#ifdef _XBOX
-#include "i_xbox.h"
-#endif
-
 // Use main() on windows for msvc
-#if defined(_MSC_VER) && !defined(GCONSOLE)
+#if defined(_MSC_VER)
 #    pragma comment(linker, "/subsystem:windows /ENTRY:mainCRTStartup")
 #endif
 
@@ -92,26 +83,7 @@ void STACK_ARGS call_terms (void)
 		TermFuncs.top().first(), TermFuncs.pop();
 }
 
-#ifdef __SWITCH__
-void STACK_ARGS nx_early_init (void)
-{
-	socketInitializeDefault();
-#ifdef ODAMEX_DEBUG
-	nxlinkStdio();
-#endif
-}
-void STACK_ARGS nx_early_deinit (void)
-{
-	socketExit();
-}
-#endif
-
-
-#if defined GCONSOLE && !defined __SWITCH__ 
-int I_Main(int argc, char *argv[])
-#else
 int main(int argc, char *argv[])
-#endif
 {
 	// [AM] Set crash callbacks, so we get something useful from crashes.
 #ifdef NDEBUG
@@ -120,13 +92,7 @@ int main(int argc, char *argv[])
 
 	try
 	{
-
-#if defined(__SWITCH__)
-		nx_early_init();
-		atterm(nx_early_deinit);
-#endif
-
-#if defined(UNIX) && !defined(GCONSOLE)
+#if defined(UNIX)
 		if(!getuid() || !geteuid())
 			I_FatalError("root user detected, quitting odamex immediately");
 #endif
@@ -197,7 +163,7 @@ int main(int argc, char *argv[])
 		SDL_putenv((char*)"SDL_VIDEO_CENTERED=1");
 #endif
 
-#if defined _WIN32 && !defined _XBOX
+#if defined _WIN32
 
 	#if defined(SDL12)
     	// From the SDL 1.2.10 release notes:
@@ -248,7 +214,7 @@ int main(int argc, char *argv[])
                     LOG << "Failed to set process affinity mask: " << GetLastError() << std::endl;
             }
         }
-#endif	// _WIN32 && !_XBOX
+#endif	// _WIN32
 
 #ifdef X11
 	#if defined(SDL12)

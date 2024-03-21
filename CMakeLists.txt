@@ -53,13 +53,6 @@ set(PROJECT_COPYRIGHT "2006-2023")
 set(PROJECT_RC_VERSION "10,4,0,0")
 set(PROJECT_COMPANY "The Odamex Team")
 
-# Include early required commands for specific systems
-if (NSWITCH)
-	include("switch.cmake" REQUIRED)  # Nintendo Switch
-elseif(VWII)
-  include("wii.cmake" REQUIRED)     # Wii/vWii
-endif()
-
 # Ensure that we can use folders in projects.
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 

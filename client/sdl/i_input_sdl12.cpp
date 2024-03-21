@@ -577,10 +577,8 @@ ISDL12JoystickInputDevice::~ISDL12JoystickInputDevice()
 
 	SDL_JoystickEventState(SDL_IGNORE);
 
-	#ifndef _XBOX // This is to avoid a bug in SDLx
 	if (mJoystick != NULL)
 		SDL_JoystickClose(mJoystick);
-	#endif
 
 	delete [] mHatStates;
 }
