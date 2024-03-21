@@ -441,14 +441,7 @@ void I_InitSound()
 	if (I_IsHeadless() || Args.CheckParm("-nosound"))
 		return;
 		
-    #if defined(SDL12)
-    const char *driver = getenv("SDL_AUDIODRIVER");
-
-	if(!driver)
-		driver = "default";
-		
-    Printf(PRINT_HIGH, "I_InitSound: Initializing SDL's sound subsystem (%s)\n", driver);
-    #elif defined(SDL20)
+    #if defined(SDL20)
     Printf("I_InitSound: Initializing SDL's sound subsystem\n");
     #endif
 

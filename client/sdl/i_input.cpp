@@ -42,9 +42,7 @@
 #include "i_system.h"
 #include "hu_stuff.h"
 
-#if defined(SDL12)
-#include "i_input_sdl12.h"
-#elif defined(SDL20)
+#if defined(SDL20)
 #include "i_input_sdl20.h"
 #endif
 
@@ -566,9 +564,7 @@ bool I_InitInput()
 
 	atterm(I_ShutdownInput);
 
-	#if defined(SDL12)
-	input_subsystem = new ISDL12InputSubsystem();
-	#elif defined(SDL20)
+	#if defined(SDL20)
 	input_subsystem = new ISDL20InputSubsystem();
 	#endif
 

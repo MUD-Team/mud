@@ -253,9 +253,7 @@ void SdlMixerMusicSystem::_RegisterSong(byte* data, size_t length)
 // We can read the midi data directly from memory
 #ifdef SDL20
 	m_registeredSong.Track = Mix_LoadMUS_RW(m_registeredSong.Data, 0);
-#elif defined SDL12
-	m_registeredSong.Track = Mix_LoadMUS_RW(m_registeredSong.Data);
-#endif // SDL12
+#endif
 
 	if (!m_registeredSong.Track)
 	{
