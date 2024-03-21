@@ -83,7 +83,6 @@
 #include "g_mapinfo.h"
 #include "g_horde.h"
 #include "w_ident.h"
-#include "gui_boot.h"
 
 #ifdef GEKKO
 #include "i_wii.h"
@@ -143,7 +142,6 @@ EXTERN_CVAR (vid_widescreen)
 EXTERN_CVAR (vid_fullscreen)
 EXTERN_CVAR (vid_vsync)
 EXTERN_CVAR (g_resetinvonexit)
-EXTERN_CVAR (i_skipbootwin)
 
 std::string LOG_FILE;
 
@@ -769,45 +767,6 @@ void D_DoomMain()
 	if (iwadParam)
 	{
 		iwad = iwadParam;
-	}
-	else if (!::i_skipbootwin)
-	{
-		// Skip boot window if any of these params are passed.
-		const char* skipParams[] = {
-		    "+connect", "+demotest", "+map",      "+netplay",  "+playdemo",
-		    "-connect", "-file",     "-playdemo", "-timedemo", "-warp",
-		};
-
-		bool shouldSkip = false;
-		for (size_t i = 0; i < ARRAY_LENGTH(skipParams); i++)
-		{
-			if (::Args.CheckValue(skipParams[i]))
-			{
-				shouldSkip = true;
-				break;
-			}
-		}
-
-		// Skip boot window if we pass a single argument that isn't the
-		// start of a standard parameter - it must be a path.
-		if (!shouldSkip && ::Args.NumArgs() == 2 && ::Args[1][0] != '+' &&
-		    ::Args[1][0] != '-')
-		{
-			shouldSkip = true;
-		}
-
-		if (!shouldSkip)
-		{
-			scannedWADs_t wads = GUI_BootWindow();
-			iwad = wads.iwad;
-			pwads = wads.pwads;
-
-			for (StringTokens::iterator it = wads.options.begin();
-		    	 it != wads.options.end(); ++it)
-			{
-				Args.AppendArg((*it).c_str());
-			}
-		}
 	}
 
 	OWantFiles newwadfiles, newpatchfiles;
