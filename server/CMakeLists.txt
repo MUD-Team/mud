@@ -29,10 +29,6 @@ source_group("Server" FILES ${SERVER_SOURCES})
 source_group("Win32" FILES ${SERVER_WIN32_SOURCES})
 
 # Server definitions
-if(USE_MINIUPNP)
-  add_definitions(-DODA_HAVE_MINIUPNP)
-endif()
-
 if(WIN32 AND NOT MSVC)
   add_definitions(-DWINVER=0x0500)
 endif()
@@ -64,16 +60,6 @@ else()
   find_package(PkgConfig REQUIRED)
   pkg_check_modules(JSONCPP jsoncpp REQUIRED IMPORTED_TARGET)
   target_link_libraries(odasrv PkgConfig::JSONCPP)
-endif()
-
-if(USE_MINIUPNP)
-  if(USE_INTERNAL_MINIUPNP)
-    target_link_libraries(odasrv miniupnpc::miniupnpc)
-  else()
-    find_package(PkgConfig REQUIRED)
-    pkg_check_modules(MINIUPNPC miniupnpc REQUIRED IMPORTED_TARGET)
-    target_link_libraries(odasrv PkgConfig::MINIUPNPC)
-  endif()
 endif()
 
 if(WIN32)

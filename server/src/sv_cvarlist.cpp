@@ -116,23 +116,6 @@ CVAR_RANGE_FUNC_DECL(sv_maxrate, "200", "Forces clients to be on or below this r
 CVAR_RANGE_FUNC_DECL(sv_waddownloadcap, "200", "Cap wad file downloading to a specific rate",
 				CVARTYPE_INT, CVAR_SERVERARCHIVE | CVAR_NOENABLEDISABLE, 7.0f, 100000.0f)
 
-#ifdef ODA_HAVE_MINIUPNP
-CVAR(			sv_upnp, "1", "Enable UPnP support",
-				CVARTYPE_BOOL, CVAR_SERVERARCHIVE)
-
-CVAR_RANGE(		sv_upnp_discovertimeout, "2000", "UPnP Router discovery timeout",
-				CVARTYPE_INT, CVAR_SERVERARCHIVE | CVAR_NOENABLEDISABLE, 500.0f, 10000.0f)
-
-CVAR(			sv_upnp_description, "",  "Router-side description of port mapping",
-				CVARTYPE_STRING, CVAR_SERVERARCHIVE | CVAR_NOENABLEDISABLE)
-
-CVAR(			sv_upnp_internalip, "", "Set to the local machine IP address",
-				CVARTYPE_STRING, CVAR_NOSET | CVAR_NOENABLEDISABLE)
-
-CVAR(			sv_upnp_externalip, "", "Set to the router IP address",
-				CVARTYPE_STRING, CVAR_NOSET | CVAR_NOENABLEDISABLE)
-#endif
-
 // Gameplay settings
 // =================
 
