@@ -97,8 +97,6 @@ std::string I_GetVideoDriverName();
 const PixelFormat* I_Get8bppPixelFormat();
 const PixelFormat* I_Get32bppPixelFormat();
 
-void I_DrawLoadingIcon();
-
 
 // ****************************************************************************
 

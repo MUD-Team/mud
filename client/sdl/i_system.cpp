@@ -97,19 +97,6 @@
 	#include "i_wii.h"
 #endif
 
-#ifndef GCONSOLE // I will add this back later -- Hyper_Eye
-	// For libtextscreen to link properly
-	extern "C"
-	{
-	#include "txt_main.h"
-	}
-	#define ENDOOM_W 80
-	#define ENDOOM_H 25
-#endif // _XBOX
-
-EXTERN_CVAR (r_loadicon)
-EXTERN_CVAR (r_showendoom)
-
 ticcmd_t emptycmd;
 ticcmd_t *I_BaseTiccmd(void)
 {
@@ -129,9 +116,6 @@ const size_t min_heapsize = 8;
 size_t got_heapsize = 0;
 
 DWORD LanguageIDs[4];
-
-// Endoom screen is showing
-bool in_endoom = false;
 
 //
 // I_MegabytesToBytes
@@ -201,8 +185,6 @@ void *I_ZoneBase (size_t *size)
 
 void I_BeginRead()
 {
-	if (r_loadicon)
-		I_DrawLoadingIcon();
 }
 
 void I_EndRead(void)
@@ -412,68 +394,6 @@ void I_Init (void)
 
 void I_FinishClockCalibration ()
 {
-}
-
-//
-// Displays the text mode ending screen after the game quits
-//
-
-void I_Endoom(void)
-{
-#ifndef GCONSOLE // I will return to this -- Hyper_Eye
-	unsigned char *endoom_data;
-	unsigned char *screendata;
-	int y;
-	int indent;
-
-    if (!r_showendoom || Args.CheckParm ("-novideo"))
-        return;
-
-    // Hack to stop crash with disk icon
-    in_endoom = true;
-
-	endoom_data = (unsigned char *)W_CacheLumpName("ENDOOM", PU_STATIC);
-
-	// Set up text mode screen
-
-	TXT_Init();
-
-	I_SetWindowCaption(D_GetTitleString());
-    I_SetWindowIcon();
-
-	// Write the data to the screen memory
-
-	screendata = TXT_GetScreenData();
-
-    if(NULL != screendata)
-    {
-        indent = (ENDOOM_W - TXT_SCREEN_W) / 2;
-
-        for (y=0; y<TXT_SCREEN_H; ++y)
-        {
-            memcpy(screendata + (y * TXT_SCREEN_W * 2),
-                    endoom_data + (y * ENDOOM_W + indent) * 2,
-                    TXT_SCREEN_W * 2);
-        }
-
-        // Wait for a keypress
-        while (true)
-        {
-            TXT_UpdateScreen();
-
-            if (TXT_GetChar() > 0)
-                break;
-
-            TXT_Sleep(0);
-        }
-    }
-
-	// Shut down text mode screen
-
-	TXT_Shutdown();
-
-	in_endoom = false;
-#endif // Hyper_Eye
 }
 
 //

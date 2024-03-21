@@ -136,28 +136,13 @@ endif()
 # Client target
 if(TARGET SDL2::SDL2 OR TARGET SDL::SDL)
 
-  if (NOT GCONSOLE)
-    # Textscreen
-    set(TEXTSCREEN_LIBRARY "textscreen")
-    set(TEXTSCREEN_DIR ../libraries/textscreen)
-    set(TEXTSCREEN_HEADERS ${TEXTSCREEN_DIR}/txt_sdl.h ${TEXTSCREEN_DIR}/txt_main.h)
-    set(TEXTSCREEN_SOURCES ${TEXTSCREEN_DIR}/txt_sdl.c)
-
-    include_directories(${TEXTSCREEN_DIR})
-    add_library(${TEXTSCREEN_LIBRARY} STATIC ${TEXTSCREEN_SOURCES} ${TEXTSCREEN_HEADERS})
-  endif()
-
   if(TARGET SDL::SDL)
-    target_link_libraries(${TEXTSCREEN_LIBRARY} SDL::SDL)
+    target_link_libraries(SDL::SDL)
   else()
-    target_link_libraries(${TEXTSCREEN_LIBRARY} SDL2::SDL2)
+    target_link_libraries(SDL2::SDL2)
   endif()
 
-  if (NOT GCONSOLE)
-    target_include_directories(${TEXTSCREEN_LIBRARY} PRIVATE ../common)
-  else()
-    include_directories(../common)
-  endif()
+  include_directories(../common)
 
   add_executable(odamex MACOSX_BUNDLE WIN32
     ${CLIENT_SOURCES} ${CLIENT_SDL_SOURCES} ${COMMON_SOURCES} ${CLIENT_GUI_SOURCES})
@@ -191,7 +176,6 @@ if(TARGET SDL2::SDL2 OR TARGET SDL::SDL)
     set_target_properties(odamex PROPERTIES LINK_FLAGS "/MANIFEST:NO")
   endif()
 
-  target_link_libraries(odamex ${TEXTSCREEN_LIBRARY})
   target_link_libraries(odamex odamex-common odaproto)
   if(TARGET SDL::SDL)
     target_link_libraries(odamex SDL::SDL)

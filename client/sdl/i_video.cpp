@@ -80,9 +80,6 @@ static IWindowSurface* emulated_surface = NULL;
 
 extern int NewWidth, NewHeight, NewBits, DisplayBits;
 
-static int loading_icon_expire = -1;
-static IWindowSurface* loading_icon_background_surface = NULL;
-
 EXTERN_CVAR(vid_32bpp)
 EXTERN_CVAR(vid_fullscreen)
 EXTERN_CVAR(vid_vsync)
@@ -716,8 +713,6 @@ bool I_VideoInitialized()
 //
 void STACK_ARGS I_ShutdownHardware()
 {
-	I_FreeSurface(loading_icon_background_surface);
-
 	delete video_subsystem;
 	video_subsystem = NULL;
 }
@@ -988,88 +983,6 @@ static void I_UnlockAllSurfaces()
 
 
 //
-// I_DrawLoadingIcon
-//
-// Sets a flag to indicate that I_FinishUpdate should draw the loading (disk)
-// icon in the lower right corner of the screen.
-//
-void I_DrawLoadingIcon()
-{
-	loading_icon_expire = gametic;
-}
-
-
-//
-// I_BlitLoadingIcon
-//
-// Takes care of the actual drawing of the loading icon.
-//
-static void I_BlitLoadingIcon()
-{
-	const patch_t* diskpatch = W_CachePatch("STDISK");
-	IWindowSurface* surface = I_GetPrimarySurface();
-
-	surface->lock();
-
-	int bpp = surface->getBitsPerPixel();
-	int scale = std::min(CleanXfac, CleanYfac);
-	int w = diskpatch->width() * scale;
-	int h = diskpatch->height() * scale;
-	int x = surface->getWidth() - w;
-	int y = surface->getHeight() - h;
-
-	// offset x and y for the lower right corner of the screen
-	int ofsx = x + (scale * diskpatch->leftoffset());
-	int ofsy = y + (scale * diskpatch->topoffset());
-
-	// save the area where the icon will be drawn to an off-screen surface
-	// so that it can be restored after the frame is blitted
-	if (!loading_icon_background_surface ||
-		loading_icon_background_surface->getWidth() != w ||
-		loading_icon_background_surface->getHeight() != h ||
-		loading_icon_background_surface->getBitsPerPixel() != bpp)
-	{
-		I_FreeSurface(loading_icon_background_surface);
-
-		loading_icon_background_surface = I_AllocateSurface(w, h, bpp);
-	}
-
-	loading_icon_background_surface->lock();
-
-	loading_icon_background_surface->blit(surface, x, y, w, h, 0, 0, w, h);
-	surface->getDefaultCanvas()->DrawPatchStretched(diskpatch, ofsx, ofsy, w, h);
-
-	loading_icon_background_surface->unlock();
-	surface->unlock();
-}
-
-
-//
-// I_RestoreLoadingIcon
-//
-// Restores the background area that was saved prior to blitting the
-// loading icon.
-//
-static void I_RestoreLoadingIcon()
-{
-	IWindowSurface* surface = I_GetPrimarySurface();
-
-	surface->lock();
-	loading_icon_background_surface->lock();
-
-	int w = loading_icon_background_surface->getWidth();
-	int h = loading_icon_background_surface->getHeight();
-	int x = surface->getWidth() - w;
-	int y = surface->getHeight() - h;
-
-	surface->blit(loading_icon_background_surface, 0, 0, w, h, x, y, w, h);
-
-	loading_icon_background_surface->unlock();
-	surface->unlock();
-}
-
-
-//
 // I_BeginUpdate
 //
 // Called at the start of drawing a new video frame. This locks the primary
@@ -1104,10 +1017,6 @@ void I_FinishUpdate()
 		if (vid_displayfps)
 			V_DrawFPSWidget();
 
-		// draws a disk loading icon in the lower right corner
-		if (gametic <= loading_icon_expire)
-			I_BlitLoadingIcon();
-
 		// Handle blitting our 8bpp surface to the 32bpp video window surface
 		if (converted_surface)
 		{
@@ -1120,10 +1029,6 @@ void I_FinishUpdate()
 		I_UnlockAllSurfaces();
 
 		I_GetWindow()->finishRefresh();
-
-		// restores the background underneath the disk loading icon in the lower right corner
-		if (gametic <= loading_icon_expire)
-			I_RestoreLoadingIcon();
 	}
 }
 

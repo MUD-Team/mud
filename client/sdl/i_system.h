@@ -49,7 +49,6 @@ void I_EndRead (void);
 
 // Called by DoomMain.
 void I_Init (void);
-void I_Endoom(void);
 
 // Called by startup code
 // to get the ammount of memory to malloc
