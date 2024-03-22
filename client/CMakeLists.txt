@@ -65,9 +65,32 @@ endif()
 
 find_package(SDL2 CONFIG REQUIRED)
 
+# Dasho - Using SDL2_mixer 2.0.4 until this dep is removed
+
 ### SDL2_mixer ###
 
-find_package(SDL2_mixer CONFIG REQUIRED)
+if(WIN32)
+
+  set(SDL2_MIXER_DIR "${CMAKE_CURRENT_LIST_DIR}/sdl2_mixer")
+  set(SDL2_MIXER_INCLUDE_DIR "${SDL2_MIXER_DIR}/include" CACHE PATH "")
+  if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    set(SDL2_MIXER_LIBRARY "${SDL2_MIXER_DIR}/lib/x64/SDL2_mixer.lib" CACHE FILEPATH "")
+  else()
+    set(SDL2_MIXER_LIBRARY "${SDL2_MIXER_DIR}/lib/x86/SDL2_mixer.lib" CACHE FILEPATH "")
+  endif()
+
+  find_package(SDL2_mixer)
+
+  if(SDL2_MIXER_FOUND)
+    # SDL2_mixer target.
+    add_library(SDL2::mixer UNKNOWN IMPORTED GLOBAL)
+    set_target_properties(SDL2::mixer PROPERTIES
+      INTERFACE_INCLUDE_DIRECTORIES "${SDL2_MIXER_INCLUDE_DIR}"
+      INTERFACE_LINK_LIBRARIES SDL2::SDL2
+      IMPORTED_LOCATION "${SDL2_MIXER_LIBRARY}")
+  endif()
+
+endif()
 
 # Client target
 
@@ -115,7 +138,7 @@ if(TARGET SDL2::SDL2)
   if(TARGET SDL2::SDL2main)
     target_link_libraries(odamex SDL2::SDL2main)
   endif()
-  target_link_libraries(odamex SDL2_mixer::SDL2_mixer)
+  target_link_libraries(odamex SDL2::mixer)
 
   target_link_libraries(odamex ${PNG_LIBRARY} ${ZLIB_LIBRARY}) # CURL::libcurl
 
