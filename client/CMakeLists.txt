@@ -61,14 +61,19 @@ if(NOT APPLE AND NOT WIN32)
   add_definitions(-DINSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}")
 endif()
 
-# Client target
-if(TARGET SDL2::SDL2 OR TARGET SDL::SDL)
+### SDL2 ###
 
-  if(TARGET SDL::SDL)
-    target_link_libraries(SDL::SDL)
-  else()
-    target_link_libraries(SDL2::SDL2)
-  endif()
+find_package(SDL2 CONFIG REQUIRED)
+
+### SDL2_mixer ###
+
+find_package(SDL2_mixer CONFIG REQUIRED)
+
+# Client target
+
+if(TARGET SDL2::SDL2)
+
+  target_link_libraries(SDL2::SDL2)
 
   include_directories(../common)
 
@@ -105,19 +110,13 @@ if(TARGET SDL2::SDL2 OR TARGET SDL::SDL)
   endif()
 
   target_link_libraries(odamex odamex-common odaproto)
-  if(TARGET SDL::SDL)
-    target_link_libraries(odamex SDL::SDL)
-    if(TARGET SDL::SDLmain)
-      target_link_libraries(odamex SDL::SDLmain)
-    endif()
-    target_link_libraries(odamex SDL::mixer)
-  else()
-    target_link_libraries(odamex SDL2::SDL2)
-    if(TARGET SDL2::SDL2main)
-      target_link_libraries(odamex SDL2::SDL2main)
-    endif()
-    target_link_libraries(odamex SDL2::mixer)
+
+  target_link_libraries(odamex SDL2::SDL2)
+  if(TARGET SDL2::SDL2main)
+    target_link_libraries(odamex SDL2::SDL2main)
   endif()
+  target_link_libraries(odamex SDL2_mixer::SDL2_mixer)
+
   target_link_libraries(odamex ${PNG_LIBRARY} ${ZLIB_LIBRARY}) # CURL::libcurl
 
   target_link_libraries(odamex ZLIB::ZLIB PNG::PNG)
