@@ -16,8 +16,6 @@ cmake_minimum_required(VERSION 3.13)
 
 project(Odamex VERSION 10.4.0)
 
-include(CMakeDependentOption)
-
 # CMAKE_INSTALL_BINDIR and CMAKE_INSTALL_DATADIR will be changed if GNUInstallDirs is availible
 set(CMAKE_INSTALL_BINDIR "bin")
 set(CMAKE_INSTALL_DATADIR "share")
@@ -26,22 +24,13 @@ include(GNUInstallDirs OPTIONAL)
 add_definitions(-DINSTALL_BINDIR="${CMAKE_INSTALL_BINDIR}")
 add_definitions(-DINSTALL_DATADIR="${CMAKE_INSTALL_DATADIR}")
 
-if(WIN32)
-  set(USE_INTERNAL_LIBS 1)
-else()
-  set(USE_INTERNAL_LIBS 0)
-endif()
-
 # options
 option(BUILD_CLIENT "Build client target" 1)
 option(BUILD_SERVER "Build server target" 1)
 option(BUILD_MASTER "Build master server target" 1)
 option(BUILD_OR_FAIL "Must build the BUILD_* targets or else generation will fail" 0)
-option(USE_INTERNAL_DEUTEX "Use internal DeuTex" ${USE_INTERNAL_LIBS})
+option(USE_INTERNAL_DEUTEX "Use internal DeuTex" 1)
 option(USE_LTO "Build Release builds with Link Time Optimization" 1)
-cmake_dependent_option( USE_INTERNAL_PNG "Use internal libpng" ${USE_INTERNAL_LIBS} BUILD_CLIENT 0 )
-# cmake_dependent_option( USE_INTERNAL_CURL "Use internal libcurl" ${USE_INTERNAL_LIBS} BUILD_CLIENT 0 )
-cmake_dependent_option( USE_INTERNAL_JSONCPP "Use internal JsonCpp" 1 BUILD_SERVER 0 )
 
 set(PROJECT_COPYRIGHT "2006-2023")
 set(PROJECT_RC_VERSION "10,4,0,0")
@@ -138,7 +127,166 @@ string(REGEX REPLACE "^(heads\/|tags\/)(.+)(-0-g)([0-9a-f]+)"
   "\\4" GIT_SHORT_HASH "${GIT_DESCRIBE}")
 
 # Libraries
-add_subdirectory(libraries)
+
+### zlib ###
+
+if(BUILD_CLIENT OR BUILD_SERVER)
+  find_package(ZLIB REQUIRED)
+endif()
+
+### libpng (dep: zlib) ###
+
+if(BUILD_CLIENT)
+  find_package(PNG)
+endif()
+
+### libcurl ###
+
+# if(BUILD_CLIENT)
+#  find_package(CURL REQUIRED)
+#  if(TARGET CURL::libcurl)
+#    set_target_properties(CURL::libcurl PROPERTIES IMPORTED_GLOBAL True)
+#    if(WIN32)
+#      target_link_libraries(CURL::libcurl INTERFACE ws2_32 crypt32)
+#    endif()
+#  endif()
+# endif()
+
+
+### JsonCpp ###
+
+if(BUILD_SERVER)
+  find_package(jsoncpp CONFIG REQUIRED)
+endif()
+
+### SDL libraries ###
+
+if(BUILD_CLIENT)
+
+  ### SDL2 ###
+
+  if(WIN32)
+    if(MSVC)
+      file(DOWNLOAD
+        "https://www.libsdl.org/release/SDL2-devel-2.0.20-VC.zip"
+        "${CMAKE_CURRENT_BINARY_DIR}/SDL2-VC.zip"
+        EXPECTED_HASH SHA256=5b1512ca6c9d2427bd2147da01e5e954241f8231df12f54a7074dccde416df18)
+      execute_process(COMMAND "${CMAKE_COMMAND}" -E tar xf
+        "${CMAKE_CURRENT_BINARY_DIR}/SDL2-VC.zip"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+
+      set(SDL2_DIR "${CMAKE_CURRENT_BINARY_DIR}/SDL2-2.0.20")
+      set(SDL2_INCLUDE_DIR "${SDL2_DIR}/include" CACHE PATH "")
+      if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        set(SDL2_LIBRARY "${SDL2_DIR}/lib/x64/SDL2.lib" CACHE FILEPATH "")
+        set(SDL2MAIN_LIBRARY "${SDL2_DIR}/lib/x64/SDL2main.lib" CACHE FILEPATH "")
+      else()
+        set(SDL2_LIBRARY "${SDL2_DIR}/lib/x86/SDL2.lib" CACHE FILEPATH "")
+        set(SDL2MAIN_LIBRARY "${SDL2_DIR}/lib/x86/SDL2main.lib" CACHE FILEPATH "")
+      endif()
+    else()
+      file(DOWNLOAD
+        "https://www.libsdl.org/release/SDL2-devel-2.0.20-mingw.tar.gz"
+        "${CMAKE_CURRENT_BINARY_DIR}/SDL2-mingw.tar.gz"
+        EXPECTED_HASH SHA256=38094d82a857d6c62352e5c5cdec74948c5b4d25c59cbd298d6d233568976bd1)
+      execute_process(COMMAND "${CMAKE_COMMAND}" -E tar xf
+        "${CMAKE_CURRENT_BINARY_DIR}/SDL2-mingw.tar.gz"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+
+      if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        set(SDL2_DIR "${CMAKE_CURRENT_BINARY_DIR}/SDL2-2.0.20/x86_64-w64-mingw32")
+      else()
+        set(SDL2_DIR "${CMAKE_CURRENT_BINARY_DIR}/SDL2-2.0.20/i686-w64-mingw32")
+      endif()
+      set(SDL2_INCLUDE_DIR "${SDL2_DIR}/include/SDL2" CACHE PATH "")
+      set(SDL2_LIBRARY "${SDL2_DIR}/lib/libSDL2.dll.a" CACHE FILEPATH "")
+      set(SDL2MAIN_LIBRARY "${SDL2_DIR}/lib/libSDL2main.a" CACHE FILEPATH "")
+    endif()
+  endif()
+
+  find_package(SDL2)
+
+  if(SDL2_FOUND)
+    # SDL2 target.
+    add_library(SDL2::SDL2 UNKNOWN IMPORTED GLOBAL)
+    set_target_properties(SDL2::SDL2 PROPERTIES
+      INTERFACE_INCLUDE_DIRECTORIES "${SDL2_INCLUDE_DIR}"
+      IMPORTED_LOCATION "${SDL2_LIBRARY}")
+
+    if(SDL2MAIN_LIBRARY)
+      # SDL2main target.
+      if(MINGW)
+        # Gross hack to get mingw32 first in the linker order.
+        add_library(SDL2::_SDL2main_detail UNKNOWN IMPORTED GLOBAL)
+        set_target_properties(SDL2::_SDL2main_detail PROPERTIES
+          IMPORTED_LOCATION "${SDL2MAIN_LIBRARY}")
+
+        # Ensure that SDL2main comes before SDL2 in the linker order.  CMake
+        # isn't smart enough to keep proper ordering for indirect dependencies
+        # so we have to spell it out here.
+        target_link_libraries(SDL2::_SDL2main_detail INTERFACE SDL2::SDL2)
+
+        add_library(SDL2::SDL2main INTERFACE IMPORTED GLOBAL)
+        set_target_properties(SDL2::SDL2main PROPERTIES
+          IMPORTED_LIBNAME mingw32)
+        target_link_libraries(SDL2::SDL2main INTERFACE SDL2::_SDL2main_detail)
+      else()
+        add_library(SDL2::SDL2main UNKNOWN IMPORTED GLOBAL)
+        set_target_properties(SDL2::SDL2main PROPERTIES
+          IMPORTED_LOCATION "${SDL2MAIN_LIBRARY}")
+      endif()
+    endif()
+  endif()
+
+  ### SDL2_mixer ###
+
+  if(WIN32)
+    if(MSVC)
+      file(DOWNLOAD
+        "https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-devel-2.0.4-VC.zip"
+        "${CMAKE_CURRENT_BINARY_DIR}/SDL2_mixer-VC.zip"
+        EXPECTED_HASH SHA256=258788438b7e0c8abb386de01d1d77efe79287d9967ec92fbb3f89175120f0b0)
+      execute_process(COMMAND "${CMAKE_COMMAND}" -E tar xf
+        "${CMAKE_CURRENT_BINARY_DIR}/SDL2_mixer-VC.zip"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+
+      set(SDL2_MIXER_DIR "${CMAKE_CURRENT_BINARY_DIR}/SDL2_mixer-2.0.4")
+      set(SDL2_MIXER_INCLUDE_DIR "${SDL2_MIXER_DIR}/include" CACHE PATH "")
+      if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        set(SDL2_MIXER_LIBRARY "${SDL2_MIXER_DIR}/lib/x64/SDL2_mixer.lib" CACHE FILEPATH "")
+      else()
+        set(SDL2_MIXER_LIBRARY "${SDL2_MIXER_DIR}/lib/x86/SDL2_mixer.lib" CACHE FILEPATH "")
+      endif()
+    else()
+      file(DOWNLOAD
+        "https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-devel-2.0.4-mingw.tar.gz"
+        "${CMAKE_CURRENT_BINARY_DIR}/SDL2_mixer-mingw.tar.gz"
+        EXPECTED_HASH SHA256=14250b2ade20866c7b17cf1a5a5e2c6f3920c443fa3744f45658c8af405c09f1)
+      execute_process(COMMAND "${CMAKE_COMMAND}" -E tar xf
+        "${CMAKE_CURRENT_BINARY_DIR}/SDL2_mixer-mingw.tar.gz"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+
+      if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        set(SDL2_MIXER_DIR "${CMAKE_CURRENT_BINARY_DIR}/SDL2_mixer-2.0.4/x86_64-w64-mingw32")
+      else()
+        set(SDL2_MIXER_DIR "${CMAKE_CURRENT_BINARY_DIR}/SDL2_mixer-2.0.4/i686-w64-mingw32")
+      endif()
+      set(SDL2_MIXER_INCLUDE_DIR "${SDL2_MIXER_DIR}/include/SDL2" CACHE PATH "")
+      set(SDL2_MIXER_LIBRARY "${SDL2_MIXER_DIR}/lib/libSDL2_mixer.dll.a" CACHE FILEPATH "")
+    endif()
+  endif()
+
+  find_package(SDL2_mixer)
+
+  if(SDL2_MIXER_FOUND)
+    # SDL2_mixer target.
+    add_library(SDL2::mixer UNKNOWN IMPORTED GLOBAL)
+    set_target_properties(SDL2::mixer PROPERTIES
+      INTERFACE_INCLUDE_DIRECTORIES "${SDL2_MIXER_INCLUDE_DIR}"
+      INTERFACE_LINK_LIBRARIES SDL2::SDL2
+      IMPORTED_LOCATION "${SDL2_MIXER_LIBRARY}")
+  endif()
+endif()
 
 # WAD building
 add_subdirectory(wad)
