@@ -10,7 +10,8 @@
             "name": "sdl2-mixer-ext",
             "features": [
                 "libmodplug",
-                "nativemidi"
+                "nativemidi",
+                "libvorbis"
             ]
         },
         "zlib",
