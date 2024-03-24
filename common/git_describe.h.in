@@ -1,4 +1,0 @@
-#cmakedefine GIT_BRANCH "@GIT_BRANCH@"
-#cmakedefine GIT_HASH "@GIT_HASH@"
-#cmakedefine GIT_REV_COUNT "@GIT_REV_COUNT@"
-#cmakedefine GIT_SHORT_HASH "@GIT_SHORT_HASH@"
