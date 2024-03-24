@@ -16,7 +16,9 @@ get_target_property(COMMON_SOURCES engine-common INTERFACE_SOURCES)
 include_directories(./ ./sdl ../common)
 
 add_executable(mud-client WIN32 ${CLIENT_SOURCES} ${CLIENT_SDL_SOURCES} ${COMMON_SOURCES})
+set_target_properties(mud-client PROPERTIES DEBUG_POSTFIX "_DEBUG")
+set_target_properties(mud-client PROPERTIES RELWITHDEBINFO_POSTFIX "_RELWITHDEBINFO")
 
-target_link_libraries(mud-client PRIVATE mudproto Shlwapi ZLIB::ZLIB PNG::PNG CURL::libcurl JsonCpp::JsonCpp protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite 
+target_link_libraries(mud-client PRIVATE mudproto Shlwapi ZLIB::ZLIB PNG::PNG CURL::libcurl JsonCpp::JsonCpp protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite
                       $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main> $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
                       $<IF:$<TARGET_EXISTS:SDL2_mixer_ext::SDL2_mixer_ext>,SDL2_mixer_ext::SDL2_mixer_ext,SDL2_mixer_ext::SDL2_mixer_ext_Static>)
