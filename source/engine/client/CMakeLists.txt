@@ -1,0 +1,22 @@
+
+# Enable default SIMD settings for standard builds.
+option(USE_DEFAULT_SIMD "Use default SIMD optimization settings" ON)
+
+# #define CLIENT_APP for use in the source code
+add_definitions(-DCLIENT_APP)
+
+add_definitions(-DODAMEX_NO_GITVER)
+
+file(GLOB CLIENT_SOURCES *.cpp *.h)
+file(GLOB CLIENT_SDL_SOURCES sdl/*.cpp sdl/*.h)
+
+get_target_property(COMMON_SOURCES engine-common INTERFACE_SOURCES)
+
+# Client includes
+include_directories(./ ./sdl ../common)
+
+add_executable(mud-client WIN32 ${CLIENT_SOURCES} ${CLIENT_SDL_SOURCES} ${COMMON_SOURCES})
+
+target_link_libraries(mud-client PRIVATE mudproto Shlwapi ZLIB::ZLIB PNG::PNG CURL::libcurl JsonCpp::JsonCpp protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite 
+                      $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main> $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
+                      $<IF:$<TARGET_EXISTS:SDL2_mixer_ext::SDL2_mixer_ext>,SDL2_mixer_ext::SDL2_mixer_ext,SDL2_mixer_ext::SDL2_mixer_ext_Static>)

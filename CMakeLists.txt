@@ -1,181 +1,36 @@
-# CMake 3.13 needed for -S and -B params in library compilation.
-#
-# Note that if you are running Linux, there are many ways to get newer
-# versions of CMake.
-# 
-# - Kitware offers binary downloads direct from their website, which you can
-#   extract to /usr/local or ~/.local.
-# - Ubuntu LTS users can install the CMake snap, and Kitware also runs an
-#   official Ubuntu CMake apt repository.
-# - Debian users can get a new version through backports.
-# - CentOS users can get a new version through EPEL.
-# - If you have Python installed, you can install CMake through pip.
-#
+cmake_minimum_required(VERSION 3.15)
 
-cmake_minimum_required(VERSION 3.13)
-
-project(Odamex VERSION 10.4.0)
-
-# CMAKE_INSTALL_BINDIR and CMAKE_INSTALL_DATADIR will be changed if GNUInstallDirs is availible
-set(CMAKE_INSTALL_BINDIR "bin")
-set(CMAKE_INSTALL_DATADIR "share")
-include(GNUInstallDirs OPTIONAL)
-
-add_definitions(-DINSTALL_BINDIR="${CMAKE_INSTALL_BINDIR}")
-add_definitions(-DINSTALL_DATADIR="${CMAKE_INSTALL_DATADIR}")
-
-# options
-option(BUILD_CLIENT "Build client target" 1)
-option(BUILD_SERVER "Build server target" 1)
-option(BUILD_MASTER "Build master server target" 1)
-option(BUILD_OR_FAIL "Must build the BUILD_* targets or else generation will fail" 0)
-option(USE_INTERNAL_DEUTEX "Use internal DeuTex" 1)
-option(USE_LTO "Build Release builds with Link Time Optimization" 1)
-
-set(PROJECT_COPYRIGHT "2006-2023")
-set(PROJECT_RC_VERSION "10,4,0,0")
-set(PROJECT_COMPANY "The Odamex Team")
-
-# Ensure that we can use folders in projects.
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-
-# identify the target CPU
-# adapted from the FindJNI.cmake module included with the CMake distribution
-if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
-  set(ODAMEX_TARGET_ARCH "amd64")
-elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^i[3-9]86$")
-  set(ODAMEX_TARGET_ARCH "i386")
-elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^alpha")
-  set(ODAMEX_TARGET_ARCH "alpha")
-elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^arm")
-  set(ODAMEX_TARGET_ARCH "arm")
-elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(powerpc|ppc)64")
-  set(ODAMEX_TARGET_ARCH "ppc64")
-elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(powerpc|ppc)")
-  set(ODAMEX_TARGET_ARCH "ppc")
-elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^sparc")
-  # Both flavors can run on the same processor
-  set(ODAMEX_TARGET_ARCH "${CMAKE_SYSTEM_PROCESSOR}" "sparc" "sparcv9")
-else()
-  set(ODAMEX_TARGET_ARCH "${CMAKE_SYSTEM_PROCESSOR}")
+if ("${CMAKE_TOOLCHAIN_FILE}" MATCHES "vcpkg.cmake")
+    include ("vcpkg_triplets/vcpkg-triplets.cmake")
 endif()
 
-list(REMOVE_DUPLICATES ODAMEX_TARGET_ARCH)
-message(STATUS "Target architecture: ${ODAMEX_TARGET_ARCH}")
+project(MUD VERSION 0.1)
 
-# Default build type
-if(NOT CMAKE_CONFIGURATION_TYPES)
-  if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE RelWithDebInfo)
-  endif()
-  message(STATUS "Build Type: ${CMAKE_BUILD_TYPE}")
-  set(CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" CACHE STRING
-    "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
-    FORCE)
+find_package(ZLIB REQUIRED)
+find_package(CURL REQUIRED)
+find_package(jsoncpp CONFIG REQUIRED)
+find_package(PNG REQUIRED)
+find_package(protobuf CONFIG REQUIRED)
+find_package(SDL2 CONFIG REQUIRED)
+find_package(SDL2_mixer_ext CONFIG REQUIRED)
+
+if (MSVC)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    if (NOT CLANG)
+        # get the number of logical cores for parallel build
+        cmake_host_system_information(RESULT LOGICAL_CORES QUERY NUMBER_OF_LOGICAL_CORES)
+        math(EXPR COMPILE_CORES "${LOGICAL_CORES} - 1")  
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MP${COMPILE_CORES}")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP${COMPILE_CORES}")
+    endif()
+
+    # Disable some very noisy warnings from the MSVC build
+    # CRT security and POSIX deprecation warnings
+    add_definitions("-D_CRT_SECURE_NO_WARNINGS /wd4996")
+    # Loss of precision/data on assignment, requires lots of explicit casting
+    add_definitions("/wd4244 /wd4267")
+    # Unreferenced formal parameter, and there are many of these
+    add_definitions("/wd4100")
 endif()
 
-if(NOT CMAKE_EXPORT_COMPILE_COMMANDS)
-  # Export compile commands unless we're generating a modern project.
-  if(CMAKE_GENERATOR MATCHES "Make" OR CMAKE_GENERATOR MATCHES "Ninja")
-    set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-  else()
-    set(CMAKE_EXPORT_COMPILE_COMMANDS OFF)
-  endif()
-endif()
-message(STATUS "Export Compile Commands: ${CMAKE_EXPORT_COMPILE_COMMANDS}")
-set(CMAKE_EXPORT_COMPILE_COMMANDS "${CMAKE_EXPORT_COMPILE_COMMANDS}" CACHE BOOL
-  "Export compile commands for use in supported editors."
-  FORCE)
-
-# Global compile options as shown in a GUI.
-if(NOT MSVC)
-  set(USE_COLOR_DIAGNOSTICS ON CACHE BOOL
-    "Force the use of color diagnostics, necessary to get color output with Ninja.")
-  set(USE_STATIC_STDLIB OFF CACHE BOOL
-    "Statically link against the C and C++ Standard Library.")
-  set(USE_SANITIZE_ADDRESS OFF CACHE BOOL
-    "Turn on Address Sanitizer in Debug builds, requires GCC >= 4.8 or Clang >= 3.1")
-endif()
-
-if(${CMAKE_SYSTEM_NAME} MATCHES SunOS )
-  set(SOLARIS 1)
-endif()
-
-if(USE_LTO)
-  include(CheckIPOSupported)
-  check_ipo_supported(RESULT HAS_LTO OUTPUT HAS_LTO_ERROR)
-  if(HAS_LTO)
-    message(STATUS "Link Time Optimization: ON")
-  else()
-    message(STATUS "Link Time Optimization: OFF")
-  endif()
-endif()
-
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)
-
-# git describe
-#
-# Grabs the git hash and branch a few different ways.
-include(GetGitBranch)
-include(GetGitRevisionDescription)
-include(GetGitRevisionNumber)
-get_git_head_revision(HEAD GIT_HASH)
-git_describe(GIT_DESCRIBE --all --long --abbrev=4)
-git_rev_count(HEAD GIT_REV_COUNT)
-git_branch(HEAD GIT_BRANCH)
-string(REGEX REPLACE "^(heads\/|tags\/)(.+)(-0-g)([0-9a-f]+)"
-  "\\4" GIT_SHORT_HASH "${GIT_DESCRIBE}")
-
-# Libraries
-
-### zlib ###
-
-if(BUILD_CLIENT OR BUILD_SERVER)
-  find_package(ZLIB REQUIRED)
-endif()
-
-### libpng (dep: zlib) ###
-
-if(BUILD_CLIENT)
-  find_package(PNG REQUIRED)
-endif()
-
-### libcurl ###
-
-# if(BUILD_CLIENT)
-#  find_package(CURL REQUIRED)
-#  if(TARGET CURL::libcurl)
-#    set_target_properties(CURL::libcurl PROPERTIES IMPORTED_GLOBAL True)
-#    if(WIN32)
-#      target_link_libraries(CURL::libcurl INTERFACE ws2_32 crypt32)
-#    endif()
-#  endif()
-# endif()
-
-
-### JsonCpp ###
-
-if(BUILD_SERVER)
-  find_package(jsoncpp CONFIG REQUIRED)
-endif()
-
-# WAD building
-add_subdirectory(wad)
-
-# Subdirectories for Odamex projects
-if(BUILD_CLIENT OR BUILD_SERVER)
-  add_subdirectory(common)
-  add_subdirectory(odaproto)
-endif()
-if(BUILD_CLIENT)
-  add_subdirectory(client)
-endif()
-if(BUILD_SERVER)
-  add_subdirectory(server)
-endif()
-if(BUILD_MASTER)
-  add_subdirectory(master)
-endif()
-if(NOT BUILD_CLIENT AND NOT BUILD_SERVER AND NOT BUILD_MASTER)
-  message(FATAL_ERROR "No target chosen, doing nothing.")
-endif()
+add_subdirectory(source)

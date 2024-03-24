@@ -1,0 +1,20 @@
+{
+    "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+    "dependencies": [
+        "curl",
+        "jsoncpp",
+        "protobuf",
+        "sdl2",
+        "sdl2-mixer-ext",
+        {
+            "name": "sdl2-mixer-ext",
+            "features": [
+                "libmodplug",
+                "nativemidi",
+                "libvorbis"
+            ]
+        },
+        "zlib",
+        "libpng"
+    ]
+}
