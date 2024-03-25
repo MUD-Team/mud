@@ -84,7 +84,6 @@ extern NetDemo netdemo;
 EXTERN_CVAR(con_notifytime)
 EXTERN_CVAR(con_midtime)
 
-EXTERN_CVAR (i_skipbootwin)
 EXTERN_CVAR (cl_run)
 EXTERN_CVAR (invertmouse)
 EXTERN_CVAR (lookspring)
@@ -299,7 +298,6 @@ static menuitem_t OptionItems[] =
 	{ more,		"Go To Console",		{NULL},					{0.0}, {0.0},	{0.0}, {(value_t *)GoToConsole} },
     { redtext,	" ",					{NULL},					{0.0}, {0.0},	{0.0}, {NULL} },
 	{ discrete,	"Always Run",			{&cl_run},				{2.0}, {0.0},	{0.0}, {OnOff} },
- 	{ discrete, "Skip Boot Window",		{&i_skipbootwin},		{2.0}, {0.0},	{0.0}, {OnOff} },
  	{ redtext,	" ",					{NULL},					{0.0}, {0.0},	{0.0}, {NULL} },
  	{ more,		"Reset to defaults",	{NULL},					{0.0}, {0.0},	{0.0}, {(value_t *)Reset2Defaults} },
  	{ more,		"Reset to last saved",	{NULL},					{0.0}, {0.0},	{0.0}, {(value_t *)Reset2Saved} }
