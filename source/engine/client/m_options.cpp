@@ -761,7 +761,6 @@ EXTERN_CVAR (r_drawplayersprites)
 EXTERN_CVAR (screenblocks)
 EXTERN_CVAR (ui_dimamount)
 EXTERN_CVAR (r_loadicon)
-EXTERN_CVAR (r_showendoom)
 EXTERN_CVAR (r_painintensity)
 EXTERN_CVAR (cl_movebob)
 EXTERN_CVAR (cl_centerbobonfire)
@@ -841,7 +840,6 @@ static menuitem_t VideoItems[] = {
 	{ discrete, "Screen wipe style",	    {&r_wipetype},			{4.0}, {0.0},	{0.0},  {Wipes} },
 	{ discrete, "Multiplayer Intermissions",{&wi_oldintermission},	{2.0}, {0.0},	{0.0},  {DoomOrOdamex} },
 	{ discrete, "Show loading disk icon",	{&r_loadicon},			{2.0}, {0.0},	{0.0},	{OnOff} },
-    { discrete,	"Show DOS ending screen" ,  {&r_showendoom},		{2.0}, {0.0},	{0.0},  {OnOff} },
 
 
 };
