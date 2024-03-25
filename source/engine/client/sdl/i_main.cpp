@@ -188,38 +188,8 @@ int main(int argc, char *argv[])
 			}
 		}
 
-#if defined(SDL12)
-        // [Russell] - No more double-tapping of capslock to enable autorun
-        SDL_putenv((char*)"SDL_DISABLE_LOCK_KEYS=1");
-
-		// Set SDL video centering
-		SDL_putenv((char*)"SDL_VIDEO_WINDOW_POS=center");
-		SDL_putenv((char*)"SDL_VIDEO_CENTERED=1");
-#endif
-
 #if defined _WIN32 && !defined _XBOX
 
-	#if defined(SDL12)
-    	// From the SDL 1.2.10 release notes:
-    	//
-    	// > The "windib" video driver is the default now, to prevent
-    	// > problems with certain laptops, 64-bit Windows, and Windows
-    	// > Vista.
-    	//
-    	// The hell with that.
-
-   		// SoM: the gdi interface is much faster for windowed modes which are more
-   		// commonly used. Thus, GDI is default.
-		//
-		// GDI mouse issues fill many users with great sadness. We are going back
-		// to directx as defulat for now and the people will rejoice. --Hyper_Eye
-     	if (Args.CheckParm ("-gdi"))
-        	putenv((char*)"SDL_VIDEODRIVER=windib");
-    	else
-        	putenv((char*)"SDL_VIDEODRIVER=directx");
-	#endif	// SDL12
-
-	
 	#if defined(SDL20)
         // FIXME: Remove this when SDL gets it shit together, see 
         // https://bugzilla.libsdl.org/show_bug.cgi?id=2089
@@ -249,14 +219,6 @@ int main(int argc, char *argv[])
             }
         }
 #endif	// _WIN32 && !_XBOX
-
-#ifdef X11
-	#if defined(SDL12)
-		// [SL] 2011-12-21 - Ensure we're getting raw DGA mouse input from X11,
-		// bypassing X11's mouse acceleration
-		putenv((char*)"SDL_VIDEO_X11_DGAMOUSE=1");
-	#endif	// SDL12
-#endif	// X11
 
 		unsigned int sdl_flags = SDL_INIT_TIMER;
 
