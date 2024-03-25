@@ -41,10 +41,6 @@
 // For __BIG_ENDIAN__ macro, requires forceinline
 #include "m_swap.h"
 
-#ifdef GEKKO
-	#include <gctypes.h>
-#endif
-
 #ifdef _MSC_VER
 	#define FORMAT_PRINTF(index, first_arg)
 #else
@@ -58,7 +54,7 @@
 #endif
 
 // [RH] Some windows includes already define this
-#if !defined(_WINDEF_) && !defined(__wtypes_h__) && !defined(GEKKO)
+#if !defined(_WINDEF_) && !defined(__wtypes_h__)
 typedef int BOOL;
 #endif
 
@@ -72,7 +68,7 @@ typedef unsigned int uint;
 #endif
 
 // Predefined with some OS.
-#if !defined(UNIX) && !defined(_WIN32) && !defined(GEKKO)
+#if !defined(UNIX) && !defined(_WIN32)
 	#include <limits.h>
 	#include <float.h>
 #endif
@@ -85,7 +81,7 @@ typedef unsigned int uint;
 	#define __int64 long
 #endif
 
-#if (defined _XBOX || defined _MSC_VER)
+#if (defined _MSC_VER)
 	#define DBL_EPSILON 2.2204460492503131e-016
 	#define FLT_EPSILON 1.192092896e-07F
 

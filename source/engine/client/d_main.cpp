@@ -84,14 +84,6 @@
 #include "g_horde.h"
 #include "w_ident.h"
 
-#ifdef GEKKO
-#include "i_wii.h"
-#endif
-
-#ifdef _XBOX
-#include "i_xbox.h"
-#endif
-
 extern size_t got_heapsize;
 
 void D_CheckNetGame (void);
@@ -147,23 +139,6 @@ std::string LOG_FILE;
 
 void M_RestoreVideoMode();
 void M_ModeFlashTestText();
-
-void D_SetPlatform(void)
-{
-#ifdef GCONSOLE
-	#ifdef _XBOX
-		platform = PF_XBOX;
-	#elif GEKKO
-		platform = PF_WII;
-	#elif __SWITCH__
-		platform = PF_SWITCH;
-	#else
-		platform = PF_UNKNOWN;
-	#endif
-#else
-	platform = PF_PC;
-#endif
-}
 
 //
 // D_ProcessEvents
@@ -590,8 +565,6 @@ void D_Init()
 {
 	// only print init messages during startup, not when changing WADs
 	static bool first_time = true;
-
-	D_SetPlatform();
 
 	SetLanguageIDs();
 

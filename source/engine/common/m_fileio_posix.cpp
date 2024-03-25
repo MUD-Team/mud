@@ -53,11 +53,6 @@
 
 std::string M_GetBinaryDir()
 {
-#if defined(GEKKO)
-	ret = "sd:/";
-#elif defined(__SWITCH__)
-	return "./";
-#else
 	std::string ret;
 
 	if (!Args[0])
@@ -102,7 +97,6 @@ std::string M_GetBinaryDir()
 		return "";
 	else
 		return ret.substr(0, slash);
-#endif
 }
 
 std::string M_GetHomeDir(const std::string& user)
@@ -110,7 +104,6 @@ std::string M_GetHomeDir(const std::string& user)
 	const char* envhome = getenv("HOME");
 	std::string home = (envhome != NULL) ? envhome : "";
 
-#ifndef __SWITCH__
 	if (!home.length())
 	{
 		// try the uid way
@@ -130,7 +123,6 @@ std::string M_GetHomeDir(const std::string& user)
 	{
 		home += PATHSEP;
 	}
-#endif
 
 	return home;
 }
@@ -180,9 +172,6 @@ std::string M_GetWriteDir()
 std::string M_GetUserFileName(const std::string& file)
 {
 
-#ifdef __SWITCH__
-		std::string path = file;
-#else
 	// Is absolute path?  If so, stop here.
 	size_t fileLen = file.length();
 	if (fileLen >= 1 && M_IsPathSep(file[0]))
@@ -204,7 +193,6 @@ std::string M_GetUserFileName(const std::string& file)
 	std::string path = M_GetWriteDir();
 	path += PATHSEP;
 	path += file;
-#endif
 	return M_CleanPath(path);
 }
 
@@ -339,12 +327,6 @@ std::vector<std::string> M_PWADFilesScanDir(std::string dir)
 bool M_GetAbsPath(const std::string& path, std::string& out)
 {
 
-#ifdef __SWITCH__
-	std::string res;
-	StrFormat(res, "%s", path.c_str());
-	out = res;
-	return true;
-#else
 	char buffer[PATH_MAX];
 	char* res = realpath(path.c_str(), buffer);
 	if (res == NULL)
@@ -353,7 +335,6 @@ bool M_GetAbsPath(const std::string& path, std::string& out)
 	}
 	out = res;
 	return true;
-#endif
 }
 
 #endif

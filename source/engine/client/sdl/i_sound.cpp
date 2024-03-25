@@ -39,10 +39,6 @@
 #include "m_misc.h"
 #include "w_wad.h"
 
-#ifdef _XBOX
-#include "i_xbox.h"
-#endif
-
 #define NUM_CHANNELS 32
 
 static int mixer_freq;

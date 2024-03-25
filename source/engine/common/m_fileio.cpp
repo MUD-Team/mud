@@ -132,10 +132,6 @@ void M_FixPathSep(std::string& path)
  */
 std::string M_GetCWD()
 {
-#ifdef __SWITCH__
-	return "./";
-#endif
-
 	char tmp[4096] = {0};
 	std::string ret = "./";
 
@@ -413,7 +409,7 @@ bool M_IsPathSep(const char ch)
 		return true;
 	}
 
-#if defined(_WIN32) && !defined(_XBOX)
+#if defined(_WIN32)
 	// This is not the canonical path separator, but it is valid.
 	if (ch == '/')
 	{
