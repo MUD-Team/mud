@@ -445,14 +445,7 @@ void I_InitSound()
 	if (I_IsHeadless() || Args.CheckParm("-nosound"))
 		return;
 		
-    #if defined(SDL12)
-    const char *driver = getenv("SDL_AUDIODRIVER");
-
-	if(!driver)
-		driver = "default";
-		
-    Printf(PRINT_HIGH, "I_InitSound: Initializing SDL's sound subsystem (%s)\n", driver);
-    #elif defined(SDL20)
+    #if defined(SDL20)
     Printf("I_InitSound: Initializing SDL's sound subsystem\n");
     #endif
 
@@ -497,8 +490,6 @@ void I_InitSound()
     // around the problem.
 	if (Mix_OpenAudioDevice((int)snd_samplerate, AUDIO_S16SYS, 2, 1024, NULL,
 	                        SDL_AUDIO_ALLOW_FREQUENCY_CHANGE) < 0)
-#else
-	if (Mix_OpenAudio((int)snd_samplerate, AUDIO_S16SYS, 2, 1024) < 0)
 #endif
 	{
 		Printf(PRINT_ERROR,
