@@ -736,9 +736,6 @@ CVAR_RANGE(		r_wipetype, "1", "",
 				CVARTYPE_BYTE, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE, 0.0f, 3.0f)
 #endif
 
-CVAR(			r_loadicon, "1", "Display the disk icon when loading data from disk",
-				CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
-
 CVAR_RANGE(		r_painintensity, "0.5", "Intensity of red pain effect",
 				CVARTYPE_FLOAT, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE, 0.0f, 1.0f)
 

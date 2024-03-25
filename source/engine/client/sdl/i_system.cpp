@@ -97,8 +97,6 @@
 	#include "i_wii.h"
 #endif
 
-EXTERN_CVAR (r_loadicon)
-
 ticcmd_t emptycmd;
 ticcmd_t *I_BaseTiccmd(void)
 {
@@ -187,8 +185,6 @@ void *I_ZoneBase (size_t *size)
 
 void I_BeginRead()
 {
-	if (r_loadicon)
-		I_DrawLoadingIcon();
 }
 
 void I_EndRead(void)
