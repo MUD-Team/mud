@@ -26,10 +26,9 @@
 #include "i_musicsystem_sdl.h"
 
 #include "i_sdl.h"
-#include <SDL2/SDL_mixer_ext.h>
+#include <SDL2/SDL_mixer.h>
 
 #include "i_music.h"
-#include "mus2midi.h"
 
 EXTERN_CVAR(snd_musicvolume)
 
@@ -70,8 +69,6 @@ void SdlMixerMusicSystem::startSong(byte* data, size_t length, bool loop)
 		Printf(PRINT_WARNING, "Mix_PlayMusic: %s\n", Mix_GetError());
 		return;
 	}
-
-	Mix_HookMusicFinished(I_ResetMidiVolume);
 
 	MusicSystem::startSong(data, length, loop);
 
@@ -174,28 +171,7 @@ void SdlMixerMusicSystem::_RegisterSong(byte* data, size_t length)
 {
 	_UnregisterSong();
 
-	if (S_MusicIsMus(data, length))
-	{
-		MEMFILE* mus = mem_fopen_read(data, length);
-		m_registeredSong.Mem = mem_fopen_write();
-
-		int result = mus2mid(mus, m_registeredSong.Mem);
-		if (result == 0)
-		{
-			m_registeredSong.Data = SDL_RWFromMem(mem_fgetbuf(m_registeredSong.Mem),
-			                                      mem_fsize(m_registeredSong.Mem));
-		}
-		else
-		{
-			Printf(PRINT_WARNING, "MUS is not valid\n");
-		}
-
-		mem_fclose(mus);
-	}
-	else
-	{
-		m_registeredSong.Data = SDL_RWFromMem(data, length);
-	}
+	m_registeredSong.Data = SDL_RWFromMem(data, length);
 
 	if (!m_registeredSong.Data)
 	{

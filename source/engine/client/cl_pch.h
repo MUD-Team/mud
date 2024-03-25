@@ -7,7 +7,6 @@
 #include "i_sound.h"
 #include "i_system.h"
 #include "i_video.h"
-#include "mus2midi.h"
 
 // normal
 #include "am_map.h"

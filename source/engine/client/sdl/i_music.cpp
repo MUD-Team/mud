@@ -33,10 +33,8 @@
 #include "i_system.h"
 
 #include "i_musicsystem.h"
-#ifdef OSX
-#include "i_musicsystem_au.h"
-#endif
 #include "i_musicsystem_sdl.h"
+#include "i_musicsystem_fluidlite.h"
 
 MusicSystem* musicsystem = NULL;
 MusicSystemType current_musicsystem_type = MS_NONE;
@@ -79,84 +77,6 @@ bool S_MusicIsMidi(byte* data, size_t length)
 }
 
 //
-// S_MusicIsOgg()
-//
-// Determines if a music lump is in the OGG format based on its header.
-//
-bool S_MusicIsOgg(byte* data, size_t length)
-{
-	if (length > 4 && data[0] == 'O' && data[1] == 'g' &&
-		data[2] == 'g' && data[3] == 'S')
-		return true;
-
-	return false;
-}
-
-//
-// S_MusicIsMp3()
-//
-// Determines if a music lump is in the MP3 format based on its header.
-//
-bool S_MusicIsMp3(byte* data, size_t length)
-{
-	// ID3 tag starts the file
-	if (length > 4 && data[0] == 'I' && data[1] == 'D' &&
-		data[2] == '3' && data[3] == 0x03)
-		return true;
-
-	// MP3 frame sync starts the file
-	if (length > 2 && data[0] == 0xFF && (data[1] & 0xE0))
-		return true;
-
-	return false;
-}
-
-//
-// S_MusicIsWave()
-//
-// Determines if a music lump is in the WAVE/RIFF format based on its header.
-//
-bool S_MusicIsWave(byte* data, size_t length)
-{
-	if (length > 4 && data[0] == 'R' && data[1] == 'I' &&
-		data[2] == 'F' && data[3] == 'F')
-		return true;
-
-	return false;
-}
-
-//
-// I_ResetMidiVolume()
-//
-// [SL] 2011-12-31 - Set all midi devices' output volume to maximum in the OS.
-// This function is used to work around shortcomings of the SDL_Mixer library
-// on the Windows Vista/7 platform, where PCM and MIDI volumes are linked
-// together in the OS's audio mixer.  Because SDL_Mixer sets the volume of
-// midi output devices to 0 when not playing music, all sound
-// output (PCM & MIDI) becomes muted in Odamex (see Odamex bug 443).
-//
-void I_ResetMidiVolume()
-{
-	#if defined(_WIN32)
-	SDL_LockAudio();
-
-	for (UINT device = MIDI_MAPPER; device != midiOutGetNumDevs(); device++)
-	{
-		MIDIOUTCAPS caps;
-		// Can this midi device change volume?
-		MMRESULT result = midiOutGetDevCaps(device, &caps, sizeof(caps));
-
-		// Set the midi device's volume
-		static const DWORD volume = 0xFFFFFFFF;		// maximum volume
-		if (result == MMSYSERR_NOERROR && (caps.dwSupport & MIDICAPS_VOLUME))
-			midiOutSetVolume((HMIDIOUT)device, volume);
-	}
-
-	SDL_UnlockAudio();
-	#endif	// _WIN32
-}
-
-//
 // I_UpdateMusic()
 //
 // Play the next chunk of music for the current gametic
@@ -177,7 +97,6 @@ void I_SetMusicVolume (float volume)
 void I_InitMusic(MusicSystemType musicsystem_type)
 {
 	I_ShutdownMusic();
-	I_ResetMidiVolume();
 
 	if (I_IsHeadless() || Args.CheckParm("-nosound") || Args.CheckParm("-nomusic") || snd_musicsystem == MS_NONE)
 	{
@@ -189,11 +108,9 @@ void I_InitMusic(MusicSystemType musicsystem_type)
 
 	switch ((int)musicsystem_type)
 	{
-		#ifdef OSX
-		case MS_AUDIOUNIT:
-			musicsystem = new AuMusicSystem();
+		case MS_FLUIDLITE:
+			musicsystem = new FluidLiteMusicSystem();
 			break;
-		#endif	// OSX
 
 		case MS_SDLMIXER:	// fall through
 		default:
@@ -247,7 +164,7 @@ static MusicSystemType I_SelectMusicSystem(byte *data, size_t length)
 	bool ismidi = (S_MusicIsMus(data, length) || S_MusicIsMidi(data, length));
 
 	if (ismidi)
-		return static_cast<MusicSystemType>(snd_musicsystem.asInt());
+		return MS_FLUIDLITE;
 
 	// Non-midi music always uses SDL_Mixer (for now at least)
 	return MS_SDLMIXER;
@@ -270,10 +187,6 @@ void I_PlaySong(byte* data, size_t length, bool loop)
 	}
 
 	musicsystem->startSong(data, length, loop);
-
-	// Hack for problems with Windows Vista/7 & SDL_Mixer
-	// See comment for I_ResetMidiVolume().
-	I_ResetMidiVolume();
 
 	I_SetMusicVolume(snd_musicvolume);
 }

@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: 475fd03b6a0e03c725883d551cdff71186971068 $
+// $Id:
 //
 // Copyright (C) 2006-2020 by The Odamex Team.
 //
@@ -16,60 +16,45 @@
 // GNU General Public License for more details.
 //
 // DESCRIPTION:
-//  Plays music utilizing OSX's Audio Unit system, which is the default for
-//  OSX.
+//  Plays music utilizing the FluidLite music library.
 //
 //-----------------------------------------------------------------------------
 
 #pragma once
 
-#ifdef OSX
-
-#include <AudioToolbox/AudioToolbox.h>
-#include <CoreFoundation/CoreFoundation.h>
-
 #include "i_musicsystem.h"
 
+#include <fluidlite.h>
+
+class MidiRealTimeInterface;
+class MidiSequencer;
+
 /**
- * @brief Plays music utilizing OSX's Audio Unit system, which is the default
- *        for OSX.
- *
- * @detail On non-OSX systems, the AuMusicSystem will not output any sound
- *         and should not be selected.
+ * @brief Plays music utilizing the FluidLite music library.
  */
-class AuMusicSystem : public MusicSystem
+class FluidLiteMusicSystem : public MusicSystem
 {
   public:
-	AuMusicSystem();
-	virtual ~AuMusicSystem();
+	FluidLiteMusicSystem();
+	virtual ~FluidLiteMusicSystem();
 
-	virtual void startSong(byte* data, size_t length, bool loop);
+	virtual void startSong(byte *data, size_t length, bool loop);
 	virtual void stopSong();
 	virtual void pauseSong();
 	virtual void resumeSong();
 	virtual void playChunk() { }
+
 	virtual void setVolume(float volume);
 
 	virtual bool isInitialized() const { return m_isInitialized; }
 
-	// Only plays midi-type music
-	virtual bool isMusCapable() const { return true; }
-	virtual bool isMidiCapable() const { return true; }
+	MidiSequencer *m_sequencer;
 
-  private:
+  private: 
 	bool m_isInitialized;
 
-	MusicPlayer m_player;
-	MusicSequence m_sequence;
-	AUGraph m_graph;
-	AUNode m_synth;
-	AUNode m_output;
-	AudioUnit m_unit;
-	CFDataRef m_cfd;
-
-	void _StopSong();
-	void _RegisterSong(byte* data, size_t length);
-	void _UnregisterSong();
+	fluid_synth_t *m_synth;
+	fluid_settings_t *m_synthSettings;
+	fluid_sfloader_t *m_soundfontLoader;
+	MidiRealTimeInterface *m_interface;
 };
-
-#endif // OSX

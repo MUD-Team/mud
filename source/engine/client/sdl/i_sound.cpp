@@ -27,7 +27,7 @@
 #include "odamex.h"
 
 #include "i_sdl.h" 
-#include <SDL2/SDL_mixer_ext.h>
+#include <SDL2/SDL_mixer.h>
 #include <stdlib.h>
 
 #include "z_zone.h"
