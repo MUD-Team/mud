@@ -533,9 +533,6 @@ static value_t MusSys[] = {
 	#ifdef OSX
 	{ MS_AUDIOUNIT,	"AudioUnit"},
 	#endif	// OSX
-	#ifdef PORTMIDI
-	{ MS_PORTMIDI,	"PortMidi"},
-	#endif	// PORTMIDI
 	{ MS_NONE,		"No Music"}
 };
 
