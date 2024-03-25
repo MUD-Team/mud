@@ -49,7 +49,7 @@
 
 // [Russell] - Just for windows, display the icon in the system menu and
 // alt-tab display
-#if defined(_WIN32) && !defined(_XBOX)
+#if defined(_WIN32)
 	#include "win32inc.h"
     #include "SDL_syswm.h"
     #include "resource.h"

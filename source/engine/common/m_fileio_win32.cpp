@@ -79,9 +79,6 @@ std::string M_GetHomeDir(const std::string& user)
 
 std::string M_GetUserDir()
 {
-#if defined(_XBOX)
-	return "T:" PATHSEP;
-#else
 	// [AM] Use SHGetKnownFolderPath when we don't feel like supporting
 	//      Windows XP anymore.
 	TCHAR folderPath[MAX_PATH];
@@ -93,14 +90,10 @@ std::string M_GetUserDir()
 	std::string path;
 	StrFormat(path, "%s\\My Games\\Odamex", folderPath);
 	return path;
-#endif
 }
 
 std::string M_GetWriteDir()
 {
-#if defined(_XBOX)
-	return "T:" PATHSEP;
-#else
 	// Has Odamex been installed?
 	std::string installed = M_GetBinaryDir() + PATHSEP "odamex-installed.txt";
 	if (M_FileExists(installed))
@@ -122,19 +115,10 @@ std::string M_GetWriteDir()
 	// [AM] Don't change this back to CWD because this means your write dir
 	//      depends on where you launch it from, which is not great.
 	return M_CleanPath(M_GetBinaryDir());
-#endif
 }
 
 std::string M_GetUserFileName(const std::string& file)
 {
-#if defined(_XBOX)
-	std::string path = "T:";
-
-	path += PATHSEP;
-	path += file;
-
-	return M_CleanPath(path);
-#else
 	// Is absolute path?  If so, stop here.
 	if (!PathIsRelative(file.c_str()))
 	{
@@ -161,7 +145,6 @@ std::string M_GetUserFileName(const std::string& file)
 	path += file;
 
 	return path;
-#endif
 }
 
 std::string M_BaseFileSearchDir(std::string dir, const std::string& name,

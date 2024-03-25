@@ -28,7 +28,7 @@
 
 #ifdef __MMX__
 
-// NOTE(jsd): Do not consider MMX deprecated so lightly. The XBOX and other older systems still make use of it.
+// NOTE(jsd): Do not consider MMX deprecated so lightly. Older systems still make use of it.
 
 #include <mmintrin.h>
 

@@ -370,13 +370,8 @@ CVAR(				cl_forcedownload, "0", "Forces the client to download the last WAD file
 // Client Preferences
 // ------------------
 
-#ifdef _XBOX // Because Xbox players may be unable to communicate for now -- Hyper_Eye
-CVAR_FUNC_DECL(		cl_name, "Xbox Player", "",
-					CVARTYPE_STRING, CVAR_USERINFO | CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-#else
 CVAR_FUNC_DECL(		cl_name, "Player", "",
 					CVARTYPE_STRING, CVAR_USERINFO | CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-#endif
 
 CVAR(				cl_color, "40 cf 00", "",
 					CVARTYPE_STRING, CVAR_USERINFO | CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
@@ -572,18 +567,6 @@ CVAR(hud_feedobits, "1", "Show obituaries in the event feed.", CVARTYPE_BOOL,
 
 CVAR(hud_hordeinfo_debug, "0", "Show debugging information for horde.", CVARTYPE_BOOL, CVAR_NULL)
 
-#ifdef _XBOX
-CVAR (chatmacro0, "Hi.", "",	CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)                       // A
-CVAR (chatmacro1, "I'm ready to kick butt!", "",	CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)   // B
-CVAR (chatmacro2, "Help!", "",	CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)                     // X
-CVAR (chatmacro3, "GG", "",	CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)                        // Y
-CVAR (chatmacro4, "No", "",	CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)                       // Black
-CVAR (chatmacro5, "Yes", "",	CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)                        // White
-CVAR (chatmacro6, "I'll take care of it.", "",	CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)     // Left Trigger
-CVAR (chatmacro7, "Come here!", "",	CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)                // Right Trigger
-CVAR (chatmacro8, "Thanks for the game. Bye.", "",	CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE) // Start
-CVAR (chatmacro9, "I am on Xbox and can only use chat macros.", "",	CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE) // Back
-#else
 // GhostlyDeath <November 2, 2008> -- someone had the order wrong (0-9!)
 CVAR (chatmacro1, "I'm ready to kick butt!", "",	CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
 CVAR (chatmacro2, "I'm OK.", "",	CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
@@ -595,7 +578,6 @@ CVAR (chatmacro7, "Come here!", "",	CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_N
 CVAR (chatmacro8, "I'll take care of it.", "",	CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
 CVAR (chatmacro9, "Yes", "",	CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
 CVAR (chatmacro0, "No", "",	CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-#endif
 
 // Sound and music
 // ---------------
@@ -719,13 +701,8 @@ CVAR_FUNC_DECL(	r_forceteamcolor, "0", "Changes the color of all teammates to th
 CVAR_FUNC_DECL(	r_teamcolor, "40 cf 00", "",
 				CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
 
-#ifdef _XBOX // The burn wipe works better in 720p
-CVAR_RANGE(		r_wipetype, "2", "",
-				CVARTYPE_BYTE, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE, 0.0f, 3.0f)
-#else
 CVAR_RANGE(		r_wipetype, "1", "",
 				CVARTYPE_BYTE, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE, 0.0f, 3.0f)
-#endif
 
 CVAR_RANGE(		r_painintensity, "0.5", "Intensity of red pain effect",
 				CVARTYPE_FLOAT, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE, 0.0f, 1.0f)
@@ -761,13 +738,8 @@ CVAR_FUNC_DECL(	vid_maxfps, "60", "Maximum framerate (0 indicates unlimited fram
 CVAR_FUNC_DECL(	vid_vsync, "0", "Enable/Disable vertical refresh sync (vsync)",
 				CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
 
-#ifdef GCONSOLE
-CVAR_FUNC_DECL(	vid_fullscreen, "1", "Full screen video mode",
-				CVARTYPE_BYTE, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-#else
 CVAR_FUNC_DECL(	vid_fullscreen, "0", "Full screen video mode",
 				CVARTYPE_BYTE, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-#endif
 
 CVAR_FUNC_DECL(	vid_32bpp, "0", "Enable 32-bit color rendering",
 				CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
