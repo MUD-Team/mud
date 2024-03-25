@@ -12,6 +12,6 @@
     }
   ],
   "overlay-triplets" : [
-    "./vkpg_triplets"
+    "./vcpkg_triplets"
   ]
 }
