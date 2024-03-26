@@ -29,7 +29,8 @@
 
 #include "win32inc.h"
 #ifdef _WIN32
-    #include "resource.h"
+	//pbdot
+    //#include "resource.h"
 	#include "mmsystem.h"
 #endif
 
@@ -129,6 +130,8 @@ int __cdecl main(int argc, char *argv[])
             throw CDoomError("SetConsoleMode failed!\n");
             
         // Fixes icon not showing in titlebar and alt-tab menu under windows 7
+		// pbdot
+		/*
         HANDLE hIcon;
 
         hIcon = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_ICON1));
@@ -138,6 +141,7 @@ int __cdecl main(int argc, char *argv[])
             SendMessage(GetConsoleWindow(), WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
             SendMessage(GetConsoleWindow(), WM_SETICON, ICON_BIG, (LPARAM)hIcon);
         }
+		*/
 
 		// [ML] 2007/9/3: From Eternity (originally chocolate Doom) Thanks SoM & fraggle!
 		::Args.SetArgs(argc, argv);
