@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: b3cdcf855bba7ea4a8b4c9d1613aac39766b0bd9 $
+// $Id: 0d3d9012a2ab13c7d9dd683ca127d1075cba8bc3 $
 //
 // Copyright (C) 2006-2020 by The Odamex Team.
 //
@@ -139,6 +139,8 @@ public:
 	virtual void flushEvents();
 
 private:
+	int calcAxisValue(int raw_value);
+
 	static const int JOY_DEADZONE = 6000;
 
 	bool			mActive;
