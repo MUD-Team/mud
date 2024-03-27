@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include <SDL2/SDL_mixer_ext.h>
+#include <SDL2/SDL_mixer.h>
 
 #include "m_memio.h"
 
@@ -38,14 +38,11 @@ typedef enum
 {
 	MS_NONE			= 0,
 	MS_SDLMIXER		= 1,
-	MS_AUDIOUNIT	= 2,
+	MS_FLUIDLITE    = 2
 } MusicSystemType;
 
 bool S_MusicIsMus(byte* data, size_t length);
 bool S_MusicIsMidi(byte* data, size_t length);
-bool S_MusicIsOgg(byte* data, size_t length);
-bool S_MusicIsMp3(byte* data, size_t length);
-bool S_MusicIsWave(byte* data, size_t length);
 
 //
 //	MUSIC I/O
@@ -70,4 +67,3 @@ void I_PlaySong(byte* data, size_t length, bool loop);
 // Stops a song over 3 seconds.
 void I_StopSong();
 void I_UpdateMusic();
-void I_ResetMidiVolume();
