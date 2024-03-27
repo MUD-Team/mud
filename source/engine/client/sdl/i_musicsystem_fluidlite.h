@@ -47,11 +47,13 @@ class FluidLiteMusicSystem : public MusicSystem
 	virtual void setVolume(float volume);
 
 	virtual bool isInitialized() const { return m_isInitialized; }
+	virtual bool isLooping() const { return m_loopSong; }
 
 	MidiSequencer *m_sequencer;
 
   private: 
 	bool m_isInitialized;
+	bool m_loopSong;
 
 	fluid_synth_t *m_synth;
 	fluid_settings_t *m_synthSettings;

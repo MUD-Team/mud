@@ -122,12 +122,22 @@ static void fluidPlaybackHook(void *udata, uint8_t *stream, int len)
 {
 	FluidLiteMusicSystem *player = (FluidLiteMusicSystem *)udata;
 	if (player->isPlaying() && !player->isPaused())
+	{
+		if (player->m_sequencer->positionAtEnd())
+		{
+			if (player->isLooping())
+				player->m_sequencer->Rewind();
+			else
+				return;
+		}
 		player->m_sequencer->playStream(stream, len);
+	}
 }
 
 FluidLiteMusicSystem::FluidLiteMusicSystem()
 	: m_synth(NULL), m_synthSettings(NULL), m_soundfontLoader(NULL),
-	  m_isInitialized(false), m_sequencer(NULL), m_interface(NULL)
+	  m_isInitialized(false), m_sequencer(NULL), m_interface(NULL),
+	  m_loopSong(false)
 {
 	// Minimize log spam, but allow Fluidlite panics to bubble up
 	fluid_set_log_function(FLUID_PANIC, fluidError, nullptr);
@@ -246,6 +256,7 @@ void FluidLiteMusicSystem::startSong(byte *data, size_t length, bool loop)
 	if (m_sequencer->loadMidi(data, length))
 	{
 		MusicSystem::startSong(data, length, loop);
+		m_loopSong = loop;
 		Mix_HookMusic(fluidPlaybackHook, this);
 	}
 }
