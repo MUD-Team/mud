@@ -24,57 +24,46 @@
 
 #include "r_defs.h"
 
-namespace hud {
+namespace hud
+{
 
-enum x_align_t {
-	X_LEFT, X_CENTER, X_RIGHT, X_ABSOLUTE
+enum x_align_t
+{
+    X_LEFT,
+    X_CENTER,
+    X_RIGHT,
+    X_ABSOLUTE
 };
 
-enum y_align_t {
-	Y_TOP, Y_MIDDLE, Y_BOTTOM, Y_ABSOLUTE
+enum y_align_t
+{
+    Y_TOP,
+    Y_MIDDLE,
+    Y_BOTTOM,
+    Y_ABSOLUTE
 };
 
-int XSize(const float scale);
-int YSize(const float scale);
-void Clear(int x, int y,
-           const unsigned short w, const unsigned short h,
-           const float scale,
-           const x_align_t x_align, const y_align_t y_align,
-           const x_align_t x_origin, const y_align_t y_origin,
-           const argb_t color);
-void Dim(int x, int y,
-         const unsigned short w, const unsigned short h,
-         const float scale,
-         const x_align_t x_align, const y_align_t y_align,
-         const x_align_t x_origin, const y_align_t y_origin);
-void DrawText(int x, int y, const float scale,
-              const x_align_t x_align, const y_align_t y_align,
-              const x_align_t x_origin, const y_align_t y_origin,
-              const char* str, const int color,
+int  XSize(const float scale);
+int  YSize(const float scale);
+void Clear(int x, int y, const unsigned short w, const unsigned short h, const float scale, const x_align_t x_align,
+           const y_align_t y_align, const x_align_t x_origin, const y_align_t y_origin, const argb_t color);
+void Dim(int x, int y, const unsigned short w, const unsigned short h, const float scale, const x_align_t x_align,
+         const y_align_t y_align, const x_align_t x_origin, const y_align_t y_origin);
+void DrawText(int x, int y, const float scale, const x_align_t x_align, const y_align_t y_align,
+              const x_align_t x_origin, const y_align_t y_origin, const char *str, const int color,
               const bool force_opaque = false);
-void DrawPatch(int x, int y, const float scale,
-               const x_align_t x_align, const y_align_t y_align,
-               const x_align_t x_origin, const y_align_t y_origin,
-               const patch_t* patch, const bool force_opaque = false,
-               const bool use_patch_offsets = false);
-void DrawTranslatedPatch(int x, int y, const float scale,
-                         const x_align_t x_align, const y_align_t y_align,
-                         const x_align_t x_origin, const y_align_t y_origin,
-                         const patch_t* patch, byte* translation,
-                         const bool force_opaque = false,
-                         const bool use_patch_offsets = false);
-void DrawPatchStretched(int x, int y,
-                        const unsigned short w, const unsigned short h,
-                        const float scale,
-                        const x_align_t x_align, const y_align_t y_align,
-                        const x_align_t x_origin, const y_align_t y_origin,
-                        const patch_t* patch, const bool force_opaque = false,
+void DrawPatch(int x, int y, const float scale, const x_align_t x_align, const y_align_t y_align,
+               const x_align_t x_origin, const y_align_t y_origin, const patch_t *patch,
+               const bool force_opaque = false, const bool use_patch_offsets = false);
+void DrawTranslatedPatch(int x, int y, const float scale, const x_align_t x_align, const y_align_t y_align,
+                         const x_align_t x_origin, const y_align_t y_origin, const patch_t *patch, byte *translation,
+                         const bool force_opaque = false, const bool use_patch_offsets = false);
+void DrawPatchStretched(int x, int y, const unsigned short w, const unsigned short h, const float scale,
+                        const x_align_t x_align, const y_align_t y_align, const x_align_t x_origin,
+                        const y_align_t y_origin, const patch_t *patch, const bool force_opaque = false,
                         const bool use_patch_offsets = false);
-void DrawPatchScaled(const int x, const int y,
-                     unsigned short w, unsigned short h,
-                     const float scale,
-                     const x_align_t x_align, const y_align_t y_align,
-                     const x_align_t x_origin, const y_align_t y_origin,
-                     const patch_t* patch, const bool force_opaque = false,
+void DrawPatchScaled(const int x, const int y, unsigned short w, unsigned short h, const float scale,
+                     const x_align_t x_align, const y_align_t y_align, const x_align_t x_origin,
+                     const y_align_t y_origin, const patch_t *patch, const bool force_opaque = false,
                      const bool use_patch_offsets = false);
-}
+} // namespace hud

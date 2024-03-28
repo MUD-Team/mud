@@ -28,11 +28,11 @@
  */
 enum vote_result_t
 {
-	VOTE_UNDEC,
-	VOTE_NO,
-	VOTE_YES,
-	VOTE_INTERRUPT,
-	VOTE_ABANDON
+    VOTE_UNDEC,
+    VOTE_NO,
+    VOTE_YES,
+    VOTE_INTERRUPT,
+    VOTE_ABANDON
 };
 
 #define NUMVOTERESULTS (VOTE_ABANDON + 1)
@@ -42,34 +42,34 @@ enum vote_result_t
  */
 enum vote_type_t
 {
-	VOTE_NONE, // Reserved
-	VOTE_KICK,
-	VOTE_FORCESPEC,
-	VOTE_FORCESTART,
-	VOTE_RANDCAPS,
-	VOTE_RANDPICKUP,
-	VOTE_MAP,
-	VOTE_NEXTMAP,
-	VOTE_RANDMAP,
-	VOTE_RESTART,
-	VOTE_FRAGLIMIT,
-	VOTE_SCORELIMIT,
-	VOTE_TIMELIMIT,
-	VOTE_COINFLIP,
-	VOTE_MAX // Reserved
+    VOTE_NONE, // Reserved
+    VOTE_KICK,
+    VOTE_FORCESPEC,
+    VOTE_FORCESTART,
+    VOTE_RANDCAPS,
+    VOTE_RANDPICKUP,
+    VOTE_MAP,
+    VOTE_NEXTMAP,
+    VOTE_RANDMAP,
+    VOTE_RESTART,
+    VOTE_FRAGLIMIT,
+    VOTE_SCORELIMIT,
+    VOTE_TIMELIMIT,
+    VOTE_COINFLIP,
+    VOTE_MAX // Reserved
 };
 
 // A struct to pass around voting state
 struct vote_state_t
 {
-	vote_result_t result;
-	std::string votestring;
-	short countdown;
-	byte yes;
-	byte yes_needed;
-	byte no;
-	byte no_needed;
-	byte abs;
+    vote_result_t result;
+    std::string   votestring;
+    short         countdown;
+    byte          yes;
+    byte          yes_needed;
+    byte          no;
+    byte          no_needed;
+    byte          abs;
 };
 
-extern const char* vote_type_cmd[];
+extern const char *vote_type_cmd[];

@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id: b9f66be2a84938e8e94714c0cd3c104447c8764c $
@@ -23,7 +23,6 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #pragma once
 
 #include "s_sound.h"
@@ -32,28 +31,22 @@
 void I_InitSound();
 
 // ... shut down and relase at program termination.
-void STACK_ARGS I_ShutdownSound (void);
+void STACK_ARGS I_ShutdownSound(void);
 
-void I_SetSfxVolume (float volume);
+void I_SetSfxVolume(float volume);
 
 //
 //	SFX I/O
 //
 
 // Initialize channels
-void I_SetChannels (int);
+void I_SetChannels(int);
 
 // load a sound from disk
-void I_LoadSound (struct sfxinfo_struct *sfx);
+void I_LoadSound(struct sfxinfo_struct *sfx);
 
 // Starts a sound in a particular sound channel.
-int
-I_StartSound
-(int			id,
- float			vol,
- int			sep,
- int			pitch,
- bool			loop);
+int I_StartSound(int id, float vol, int sep, int pitch, bool loop);
 
 // Stops a sound channel.
 void I_StopSound(int handle);

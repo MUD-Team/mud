@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id: bc51db1f9dde5d01a433f8529ad7e7764bd43dee $
@@ -21,7 +21,6 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #pragma once
 
 //
@@ -32,57 +31,56 @@
 
 struct cheatseq_t
 {
-	unsigned char* Sequence;
-	unsigned char* Pos;
-	unsigned char DontCheck;
-	unsigned char CurrentArg;
-	unsigned char Args[2];
-	bool (*Handler)(cheatseq_t*);
+    unsigned char *Sequence;
+    unsigned char *Pos;
+    unsigned char  DontCheck;
+    unsigned char  CurrentArg;
+    unsigned char  Args[2];
+    bool (*Handler)(cheatseq_t *);
 };
 
 // keycheat handlers
-bool CHEAT_AddKey(cheatseq_t* cheat, unsigned char key, bool* eat);
+bool CHEAT_AddKey(cheatseq_t *cheat, unsigned char key, bool *eat);
 
-bool CHEAT_AutoMap(cheatseq_t* cheat);
-bool CHEAT_ChangeLevel(cheatseq_t* cheat);
-bool CHEAT_IdMyPos(cheatseq_t* cheat);
-bool CHEAT_BeholdMenu(cheatseq_t* cheat);
-bool CHEAT_ChangeMusic(cheatseq_t* cheat);
-bool CHEAT_SetGeneric(cheatseq_t* cheat);
+bool CHEAT_AutoMap(cheatseq_t *cheat);
+bool CHEAT_ChangeLevel(cheatseq_t *cheat);
+bool CHEAT_IdMyPos(cheatseq_t *cheat);
+bool CHEAT_BeholdMenu(cheatseq_t *cheat);
+bool CHEAT_ChangeMusic(cheatseq_t *cheat);
+bool CHEAT_SetGeneric(cheatseq_t *cheat);
 #endif
 
 #define COUNT_CHEATS(l) (sizeof(l) / sizeof(l[0]))
-
 
 //
 // CHEAT TYPES
 //
 enum ECheatFlags
 {
-	CHT_GOD = 0,
-	CHT_NOCLIP,
-	CHT_NOTARGET,
-	CHT_CHAINSAW,
-	CHT_IDKFA,
-	CHT_IDFA,
-	CHT_BEHOLDV,
-	CHT_BEHOLDS,
-	CHT_BEHOLDI,
-	CHT_BEHOLDR,
-	CHT_BEHOLDA,
-	CHT_BEHOLDL,
-	CHT_IDDQD, // Same as CHT_GOD but sets health
-	CHT_MASSACRE,
-	CHT_CHASECAM,
-	CHT_FLY,
-	CHT_BUDDHA,
-	CHT_MDK,	// He has revolver eyes...
+    CHT_GOD = 0,
+    CHT_NOCLIP,
+    CHT_NOTARGET,
+    CHT_CHAINSAW,
+    CHT_IDKFA,
+    CHT_IDFA,
+    CHT_BEHOLDV,
+    CHT_BEHOLDS,
+    CHT_BEHOLDI,
+    CHT_BEHOLDR,
+    CHT_BEHOLDA,
+    CHT_BEHOLDL,
+    CHT_IDDQD, // Same as CHT_GOD but sets health
+    CHT_MASSACRE,
+    CHT_CHASECAM,
+    CHT_FLY,
+    CHT_BUDDHA,
+    CHT_MDK, // He has revolver eyes...
 };
 
 // [RH] Functions that actually perform the cheating
 class player_s;
-void CHEAT_DoCheat (player_s *player, int cheat, bool silentmsg=false);
-void CHEAT_GiveTo (player_s *player, const char *item);
+void CHEAT_DoCheat(player_s *player, int cheat, bool silentmsg = false);
+void CHEAT_GiveTo(player_s *player, const char *item);
 
 // Heretic code (unused)
 #if 0

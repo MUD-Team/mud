@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id: 09a54ffd0ff45cd8d66c972fad1c4a86c8ae6734 $
@@ -23,11 +23,9 @@
 
 #pragma once
 
-
-
 // Called by C_Ticker,
 // can call G_PlayerExited.
 // Carries out all thinking of monsters and players.
-void P_Ticker (void);
+void P_Ticker(void);
 
 bool P_AtInterval(int interval);

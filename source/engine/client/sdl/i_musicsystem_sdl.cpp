@@ -34,47 +34,47 @@ EXTERN_CVAR(snd_musicvolume)
 
 SdlMixerMusicSystem::SdlMixerMusicSystem() : m_isInitialized(false), m_registeredSong()
 {
-	Printf("I_InitMusic: Music playback enabled using SDL_Mixer.\n");
-	m_isInitialized = true;
+    Printf("I_InitMusic: Music playback enabled using SDL_Mixer.\n");
+    m_isInitialized = true;
 }
 
 SdlMixerMusicSystem::~SdlMixerMusicSystem()
 {
-	if (!isInitialized())
-		return;
+    if (!isInitialized())
+        return;
 
-	Mix_HaltMusic();
+    Mix_HaltMusic();
 
-	_StopSong();
-	m_isInitialized = false;
+    _StopSong();
+    m_isInitialized = false;
 }
 
-void SdlMixerMusicSystem::startSong(byte* data, size_t length, bool loop)
+void SdlMixerMusicSystem::startSong(byte *data, size_t length, bool loop)
 {
-	if (!isInitialized())
-		return;
+    if (!isInitialized())
+        return;
 
-	stopSong();
+    stopSong();
 
-	if (!data || !length)
-		return;
+    if (!data || !length)
+        return;
 
-	_RegisterSong(data, length);
+    _RegisterSong(data, length);
 
-	if (!m_registeredSong.Track || !m_registeredSong.Data)
-		return;
+    if (!m_registeredSong.Track || !m_registeredSong.Data)
+        return;
 
-	if (Mix_PlayMusic(m_registeredSong.Track, loop ? -1 : 1) == -1)
-	{
-		Printf(PRINT_WARNING, "Mix_PlayMusic: %s\n", Mix_GetError());
-		return;
-	}
+    if (Mix_PlayMusic(m_registeredSong.Track, loop ? -1 : 1) == -1)
+    {
+        Printf(PRINT_WARNING, "Mix_PlayMusic: %s\n", Mix_GetError());
+        return;
+    }
 
-	MusicSystem::startSong(data, length, loop);
+    MusicSystem::startSong(data, length, loop);
 
-	// [Russell] - Hack for setting the volume on windows vista, since it gets
-	// reset on every music change
-	setVolume(snd_musicvolume);
+    // [Russell] - Hack for setting the volume on windows vista, since it gets
+    // reset on every music change
+    setVolume(snd_musicvolume);
 }
 
 //
@@ -85,15 +85,15 @@ void SdlMixerMusicSystem::startSong(byte* data, size_t length, bool loop)
 //
 void SdlMixerMusicSystem::_StopSong()
 {
-	if (!isInitialized() || !isPlaying())
-		return;
+    if (!isInitialized() || !isPlaying())
+        return;
 
-	if (isPaused())
-		resumeSong();
+    if (isPaused())
+        resumeSong();
 
-	Mix_FadeOutMusic(100);
+    Mix_FadeOutMusic(100);
 
-	_UnregisterSong();
+    _UnregisterSong();
 }
 
 //
@@ -106,24 +106,24 @@ void SdlMixerMusicSystem::_StopSong()
 //
 void SdlMixerMusicSystem::stopSong()
 {
-	_StopSong();
-	MusicSystem::stopSong();
+    _StopSong();
+    MusicSystem::stopSong();
 }
 
 void SdlMixerMusicSystem::pauseSong()
 {
-	MusicSystem::pauseSong();
+    MusicSystem::pauseSong();
 
-	setVolume(0.0f);
-	Mix_PauseMusic();
+    setVolume(0.0f);
+    Mix_PauseMusic();
 }
 
 void SdlMixerMusicSystem::resumeSong()
 {
-	MusicSystem::resumeSong();
+    MusicSystem::resumeSong();
 
-	setVolume(getVolume());
-	Mix_ResumeMusic();
+    setVolume(getVolume());
+    Mix_ResumeMusic();
 }
 
 //
@@ -135,8 +135,8 @@ void SdlMixerMusicSystem::resumeSong()
 // the SFX volume.
 void SdlMixerMusicSystem::setVolume(float volume)
 {
-	MusicSystem::setVolume(volume);
-	Mix_VolumeMusic(int(getVolume() * MIX_MAX_VOLUME));
+    MusicSystem::setVolume(volume);
+    Mix_VolumeMusic(int(getVolume() * MIX_MAX_VOLUME));
 }
 
 //
@@ -146,19 +146,19 @@ void SdlMixerMusicSystem::setVolume(float volume)
 //
 void SdlMixerMusicSystem::_UnregisterSong()
 {
-	if (!isInitialized())
-		return;
+    if (!isInitialized())
+        return;
 
-	if (m_registeredSong.Track)
-		Mix_FreeMusic(m_registeredSong.Track);
+    if (m_registeredSong.Track)
+        Mix_FreeMusic(m_registeredSong.Track);
 
-	m_registeredSong.Track = NULL;
-	m_registeredSong.Data = NULL;
-	if (m_registeredSong.Mem != NULL)
-	{
-		mem_fclose(m_registeredSong.Mem);
-		m_registeredSong.Mem = NULL;
-	}
+    m_registeredSong.Track = NULL;
+    m_registeredSong.Data  = NULL;
+    if (m_registeredSong.Mem != NULL)
+    {
+        mem_fclose(m_registeredSong.Mem);
+        m_registeredSong.Mem = NULL;
+    }
 }
 
 //
@@ -167,26 +167,26 @@ void SdlMixerMusicSystem::_UnregisterSong()
 // Determines the format of music data and allocates the memory for the music
 // data if appropriate.  Note that _UnregisterSong should be called after
 // playing to free the allocated memory.
-void SdlMixerMusicSystem::_RegisterSong(byte* data, size_t length)
+void SdlMixerMusicSystem::_RegisterSong(byte *data, size_t length)
 {
-	_UnregisterSong();
+    _UnregisterSong();
 
-	m_registeredSong.Data = SDL_RWFromMem(data, length);
+    m_registeredSong.Data = SDL_RWFromMem(data, length);
 
-	if (!m_registeredSong.Data)
-	{
-		Printf(PRINT_WARNING, "SDL_RWFromMem: %s\n", SDL_GetError());
-		return;
-	}
+    if (!m_registeredSong.Data)
+    {
+        Printf(PRINT_WARNING, "SDL_RWFromMem: %s\n", SDL_GetError());
+        return;
+    }
 
 // We can read the midi data directly from memory
 #ifdef SDL20
-	m_registeredSong.Track = Mix_LoadMUS_RW(m_registeredSong.Data, 0);
+    m_registeredSong.Track = Mix_LoadMUS_RW(m_registeredSong.Data, 0);
 #endif // SDL20
 
-	if (!m_registeredSong.Track)
-	{
-		Printf(PRINT_WARNING, "Mix_LoadMUS_RW: %s\n", Mix_GetError());
-		return;
-	}
+    if (!m_registeredSong.Track)
+    {
+        Printf(PRINT_WARNING, "Mix_LoadMUS_RW: %s\n", Mix_GetError());
+        return;
+    }
 }

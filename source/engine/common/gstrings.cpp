@@ -21,7 +21,6 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #include "odamex.h"
 
 #include "gstrings.h"
@@ -29,60 +28,59 @@
 #include "c_dispatch.h"
 
 // Localizable strings
-StringTable	GStrings;
+StringTable GStrings;
 
 static void StringinfoHelp()
 {
-	Printf(PRINT_HIGH,
-		"stringinfo - Looks up internal information about strings\n\n"
-		"Usage:\n"
-		"  ] stringinfo name <STRINGNAME>\n"
-		"  Looks up a string by name STRINGNAME.\n\n"
-		"  ] stringinfo index <INDEX>\n"
-		"  Looks up a string by index INDEX.\n\n"
-		"  ] stringinfo size\n"
-		"  Return the size of the internal stringtable.\n\n"
-		"  ] stringinfo dump\n"
-		"  Dumps all strings in the stringtable.  Sometimes a blunt instrument is appropriate.\n");
+    Printf(PRINT_HIGH, "stringinfo - Looks up internal information about strings\n\n"
+                       "Usage:\n"
+                       "  ] stringinfo name <STRINGNAME>\n"
+                       "  Looks up a string by name STRINGNAME.\n\n"
+                       "  ] stringinfo index <INDEX>\n"
+                       "  Looks up a string by index INDEX.\n\n"
+                       "  ] stringinfo size\n"
+                       "  Return the size of the internal stringtable.\n\n"
+                       "  ] stringinfo dump\n"
+                       "  Dumps all strings in the stringtable.  Sometimes a blunt instrument is appropriate.\n");
 }
 
 BEGIN_COMMAND(stringinfo)
 {
-	if (argc < 2)
-	{
-		StringinfoHelp();
-		return;
-	}
+    if (argc < 2)
+    {
+        StringinfoHelp();
+        return;
+    }
 
-	if (stricmp(argv[1], "size") == 0)
-	{
-		Printf("%" PRIuSIZE " strings found\n", GStrings.size());
-		return;
-	}
-	else if (stricmp(argv[1], "dump") == 0)
-	{
-		GStrings.dumpStrings();
-		return;
-	}
+    if (stricmp(argv[1], "size") == 0)
+    {
+        Printf("%" PRIuSIZE " strings found\n", GStrings.size());
+        return;
+    }
+    else if (stricmp(argv[1], "dump") == 0)
+    {
+        GStrings.dumpStrings();
+        return;
+    }
 
-	if (argc < 3)
-	{
-		StringinfoHelp();
-		return;
-	}
+    if (argc < 3)
+    {
+        StringinfoHelp();
+        return;
+    }
 
-	if (stricmp(argv[1], "name") == 0)
-	{
-		Printf(PRINT_HIGH, "%s = \"%s\"\n", argv[2], GStrings(argv[2]));
-		return;
-	}
-	else if (stricmp(argv[1], "index") == 0)
-	{
-		int index = atoi(argv[2]);
-		Printf(PRINT_HIGH, "%s = \"%s\"\n", argv[2], GStrings.getIndex(index));
-		return;
-	}
+    if (stricmp(argv[1], "name") == 0)
+    {
+        Printf(PRINT_HIGH, "%s = \"%s\"\n", argv[2], GStrings(argv[2]));
+        return;
+    }
+    else if (stricmp(argv[1], "index") == 0)
+    {
+        int index = atoi(argv[2]);
+        Printf(PRINT_HIGH, "%s = \"%s\"\n", argv[2], GStrings.getIndex(index));
+        return;
+    }
 
-	StringinfoHelp();
+    StringinfoHelp();
 }
 END_COMMAND(stringinfo)

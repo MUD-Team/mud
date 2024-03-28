@@ -20,9 +20,7 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #pragma once
-
 
 #if defined(CLIENT_APP)
 #define GAMEEXE "odamex"
@@ -40,7 +38,7 @@
  * @param minor Minor version number - must be between 0 and 25.
  * @param patch Patch version number - must be between 0 and 9.
  */
-#define MAKEVER(major, minor, patch) ((major)*256 + ((minor)*10) + (patch))
+#define MAKEVER(major, minor, patch) ((major) * 256 + ((minor) * 10) + (patch))
 
 /**
  * @brief Given a packed version integer, return the major version.
@@ -60,12 +58,12 @@
 /**
  * @brief Break version into three output variables.
  */
-#define BREAKVER(v, outmaj, outmin, outpat) \
-	{                                       \
-		outmaj = VERMAJ(v);                 \
-		outmin = VERMIN(v);                 \
-		outpat = VERPATCH(v);               \
-	}
+#define BREAKVER(v, outmaj, outmin, outpat)                                                                            \
+    {                                                                                                                  \
+        outmaj = VERMAJ(v);                                                                                            \
+        outmin = VERMIN(v);                                                                                            \
+        outpat = VERPATCH(v);                                                                                          \
+    }
 
 // Lots of different representations for the version number
 
@@ -75,7 +73,7 @@
 #define CONFIGVERSIONSTR "010040"
 
 #define DOTVERSIONSTR "10.4.0"
-#define GAMEVER (MAKEVER(10, 4, 0))
+#define GAMEVER       (MAKEVER(10, 4, 0))
 
 #define COPYRIGHTSTR "Copyright (C) 2006-2023 The Odamex Team"
 
@@ -89,27 +87,28 @@
 // SAVESIG is the save game signature. It should be the minimum version
 // whose savegames this version is compatible with, which could be
 // earlier than this version.  Needs to be exactly 16 chars long.
-// 
+//
 // upversion.py will update thie field deterministically and unambiguously.
 #define SAVESIG "ODAMEXSAVE010040"
 
 #define NETDEMOVER 3
 
-int VersionCompat(const int server, const int client);
-std::string VersionMessage(const int server, const int client, const char* email);
+int         VersionCompat(const int server, const int client);
+std::string VersionMessage(const int server, const int client, const char *email);
 
 // denis - per-file svn version stamps
 class file_version
 {
-public:
-	file_version(const char *uid, const char *id, const char *p, int l, const char *t, const char *d);
+  public:
+    file_version(const char *uid, const char *id, const char *p, int l, const char *t, const char *d);
 };
 
-#define VERSION_CONTROL(uid, id) static file_version file_version_unique_##uid(#uid, id, __FILE__, __LINE__, __TIME__, __DATE__);
+#define VERSION_CONTROL(uid, id)                                                                                       \
+    static file_version file_version_unique_##uid(#uid, id, __FILE__, __LINE__, __TIME__, __DATE__);
 
-const char* GitHash();
-const char* GitBranch();
-const char* GitRevCount();
-const char* GitShortHash();
-const char* NiceVersionDetails();
-const char* NiceVersion();
+const char *GitHash();
+const char *GitBranch();
+const char *GitRevCount();
+const char *GitShortHash();
+const char *NiceVersionDetails();
+const char *NiceVersion();

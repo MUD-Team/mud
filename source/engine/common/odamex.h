@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id: 92fa10742b14a0f0e932284735cb31f745e487df $
@@ -24,18 +24,18 @@
 #pragma once
 
 #if defined(_MSC_VER)
-	#if _MSC_VER >= 1600
-		#define USE_STDINT_H
-	#endif
+#if _MSC_VER >= 1600
+#define USE_STDINT_H
+#endif
 #else
-	#define USE_STDINT_H
+#define USE_STDINT_H
 #endif
 
 #if defined(USE_STDINT_H)
-	#include <stdint.h>
-	#undef USE_STDINT_H
+#include <stdint.h>
+#undef USE_STDINT_H
 #else
-	#include "pstdint.h"
+#include "pstdint.h"
 #endif
 
 #include <stddef.h>

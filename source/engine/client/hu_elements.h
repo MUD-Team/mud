@@ -22,8 +22,8 @@
 
 #pragma once
 
-
-namespace hud {
+namespace hud
+{
 
 std::string HelpText();
 std::string SpyPlayerName();
@@ -36,125 +36,82 @@ std::string NetdemoElapsed(void);
 std::string NetdemoMaps(void);
 std::string ClientsSplit(void);
 std::string PlayersSplit(void);
-int CountTeamPlayers(byte team);
-int CountSpectators(void);
-std::string TeamPlayers(int& color, byte team);
-std::string TeamName(int& color, byte team);
-std::string TeamFrags(int& color, byte team);
-std::string TeamPoints(int& color, byte team);
-void TeamLives(std::string& str, int& color, byte team);
-std::string TeamKD(int& color, byte team);
-std::string TeamPing(int& color, byte team);
+int         CountTeamPlayers(byte team);
+int         CountSpectators(void);
+std::string TeamPlayers(int &color, byte team);
+std::string TeamName(int &color, byte team);
+std::string TeamFrags(int &color, byte team);
+std::string TeamPoints(int &color, byte team);
+void        TeamLives(std::string &str, int &color, byte team);
+std::string TeamKD(int &color, byte team);
+std::string TeamPing(int &color, byte team);
 
-void EleBar(const int x, const int y, const int w, const float scale,
-            const x_align_t x_align, const y_align_t y_align, const x_align_t x_origin,
-            const y_align_t y_origin, const float pct, const EColorRange color);
-void EAPlayerColors(int x, int y,
-                    const unsigned short w, const unsigned short h,
-                    const float scale,
-                    const x_align_t x_align, const y_align_t y_align,
-                    const x_align_t x_origin, const y_align_t y_origin,
-                    const short padding, const short limit);
-void EATeamPlayerColors(int x, int y,
-                        const unsigned short w, const unsigned short h,
-                        const float scale,
-                        const x_align_t x_align, const y_align_t y_align,
-                        const x_align_t x_origin, const y_align_t y_origin,
-                        const short padding, const short limit,
-                        const byte team);
-void EAPlayerNames(int x, int y, const float scale,
-                   const x_align_t x_align, const y_align_t y_align,
-                   const x_align_t x_origin, const y_align_t y_origin,
-                   const short padding, const short limit,
+void EleBar(const int x, const int y, const int w, const float scale, const x_align_t x_align, const y_align_t y_align,
+            const x_align_t x_origin, const y_align_t y_origin, const float pct, const EColorRange color);
+void EAPlayerColors(int x, int y, const unsigned short w, const unsigned short h, const float scale,
+                    const x_align_t x_align, const y_align_t y_align, const x_align_t x_origin,
+                    const y_align_t y_origin, const short padding, const short limit);
+void EATeamPlayerColors(int x, int y, const unsigned short w, const unsigned short h, const float scale,
+                        const x_align_t x_align, const y_align_t y_align, const x_align_t x_origin,
+                        const y_align_t y_origin, const short padding, const short limit, const byte team);
+void EAPlayerNames(int x, int y, const float scale, const x_align_t x_align, const y_align_t y_align,
+                   const x_align_t x_origin, const y_align_t y_origin, const short padding, const short limit,
                    const bool force_opaque = false);
-void EATeamPlayerNames(int x, int y, const float scale,
-                       const x_align_t x_align, const y_align_t y_align,
-                       const x_align_t x_origin, const y_align_t y_origin,
-                       const short padding, const short limit,
+void EATeamPlayerNames(int x, int y, const float scale, const x_align_t x_align, const y_align_t y_align,
+                       const x_align_t x_origin, const y_align_t y_origin, const short padding, const short limit,
                        const byte team, const bool force_opaque = false);
-void EASpectatorNames(int x, int y, const float scale,
-                      const x_align_t x_align, const y_align_t y_align,
-                      const x_align_t x_origin, const y_align_t y_origin,
-                      const short padding, short skip, const short limit,
-                      const bool force_opaque = false);
-void EAPlayerRoundWins(int x, int y, const float scale, const x_align_t x_align,
-                       const y_align_t y_align, const x_align_t x_origin,
-                       const y_align_t y_origin, const short padding, const short limit,
+void EASpectatorNames(int x, int y, const float scale, const x_align_t x_align, const y_align_t y_align,
+                      const x_align_t x_origin, const y_align_t y_origin, const short padding, short skip,
+                      const short limit, const bool force_opaque = false);
+void EAPlayerRoundWins(int x, int y, const float scale, const x_align_t x_align, const y_align_t y_align,
+                       const x_align_t x_origin, const y_align_t y_origin, const short padding, const short limit,
                        const bool force_opaque);
-void EAPlayerLives(int x, int y, const float scale, const x_align_t x_align,
-                   const y_align_t y_align, const x_align_t x_origin,
-                   const y_align_t y_origin, const short padding, const short limit,
+void EAPlayerLives(int x, int y, const float scale, const x_align_t x_align, const y_align_t y_align,
+                   const x_align_t x_origin, const y_align_t y_origin, const short padding, const short limit,
                    const bool force_opaque);
-void EATeamPlayerLives(int x, int y, const float scale, const x_align_t x_align,
-                       const y_align_t y_align, const x_align_t x_origin,
-                       const y_align_t y_origin, const short padding, const short limit,
+void EATeamPlayerLives(int x, int y, const float scale, const x_align_t x_align, const y_align_t y_align,
+                       const x_align_t x_origin, const y_align_t y_origin, const short padding, const short limit,
                        const byte team, const bool force_opaque);
-void EAPlayerFrags(int x, int y, const float scale, const x_align_t x_align,
-                   const y_align_t y_align, const x_align_t x_origin,
-                   const y_align_t y_origin, const short padding, const short limit,
+void EAPlayerFrags(int x, int y, const float scale, const x_align_t x_align, const y_align_t y_align,
+                   const x_align_t x_origin, const y_align_t y_origin, const short padding, const short limit,
                    const bool force_opaque = false);
-void EATeamPlayerFrags(int x, int y, const float scale,
-                       const x_align_t x_align, const y_align_t y_align,
-                       const x_align_t x_origin, const y_align_t y_origin,
-                       const short padding, const short limit,
+void EATeamPlayerFrags(int x, int y, const float scale, const x_align_t x_align, const y_align_t y_align,
+                       const x_align_t x_origin, const y_align_t y_origin, const short padding, const short limit,
                        const byte team, const bool force_opaque = false);
-void EAPlayerDamage(int x, int y, const float scale, const x_align_t x_align,
-                    const y_align_t y_align, const x_align_t x_origin,
-                    const y_align_t y_origin, const short padding, const short limit,
+void EAPlayerDamage(int x, int y, const float scale, const x_align_t x_align, const y_align_t y_align,
+                    const x_align_t x_origin, const y_align_t y_origin, const short padding, const short limit,
                     const bool force_opaque);
-void EAPlayerKills(int x, int y, const float scale,
-                   const x_align_t x_align, const y_align_t y_align,
-                   const x_align_t x_origin, const y_align_t y_origin,
-                   const short padding, const short limit,
+void EAPlayerKills(int x, int y, const float scale, const x_align_t x_align, const y_align_t y_align,
+                   const x_align_t x_origin, const y_align_t y_origin, const short padding, const short limit,
                    const bool force_opaque = false);
-void EAPlayerDeaths(int x, int y, const float scale,
-                    const x_align_t x_align, const y_align_t y_align,
-                    const x_align_t x_origin, const y_align_t y_origin,
-                    const short padding, const short limit,
+void EAPlayerDeaths(int x, int y, const float scale, const x_align_t x_align, const y_align_t y_align,
+                    const x_align_t x_origin, const y_align_t y_origin, const short padding, const short limit,
                     const bool force_opaque = false);
-void EATeamPlayerPoints(int x, int y, const float scale,
-                        const x_align_t x_align, const y_align_t y_align,
-                        const x_align_t x_origin, const y_align_t y_origin,
-                        const short padding, const short limit,
+void EATeamPlayerPoints(int x, int y, const float scale, const x_align_t x_align, const y_align_t y_align,
+                        const x_align_t x_origin, const y_align_t y_origin, const short padding, const short limit,
                         const byte team, const bool force_opaque = false);
-void EAPlayerKD(int x, int y, const float scale,
-                const x_align_t x_align, const y_align_t y_align,
-                const x_align_t x_origin, const y_align_t y_origin,
-                const short padding, const short limit,
+void EAPlayerKD(int x, int y, const float scale, const x_align_t x_align, const y_align_t y_align,
+                const x_align_t x_origin, const y_align_t y_origin, const short padding, const short limit,
                 const bool force_opaque = false);
-void EATeamPlayerKD(int x, int y, const float scale,
-                    const x_align_t x_align, const y_align_t y_align,
-                    const x_align_t x_origin, const y_align_t y_origin,
-                    const short padding, const short limit,
+void EATeamPlayerKD(int x, int y, const float scale, const x_align_t x_align, const y_align_t y_align,
+                    const x_align_t x_origin, const y_align_t y_origin, const short padding, const short limit,
                     const byte team, const bool force_opaque = false);
-void EAPlayerTimes(int x, int y, const float scale,
-                   const x_align_t x_align, const y_align_t y_align,
-                   const x_align_t x_origin, const y_align_t y_origin,
-                   const short padding, const short limit,
+void EAPlayerTimes(int x, int y, const float scale, const x_align_t x_align, const y_align_t y_align,
+                   const x_align_t x_origin, const y_align_t y_origin, const short padding, const short limit,
                    const bool force_opaque = false);
-void EATeamPlayerTimes(int x, int y, const float scale,
-                       const x_align_t x_align, const y_align_t y_align,
-                       const x_align_t x_origin, const y_align_t y_origin,
-                       const short padding, const short limit,
+void EATeamPlayerTimes(int x, int y, const float scale, const x_align_t x_align, const y_align_t y_align,
+                       const x_align_t x_origin, const y_align_t y_origin, const short padding, const short limit,
                        const byte team, const bool force_opaque);
-void EAPlayerPings(int x, int y, const float scale,
-                   const x_align_t x_align, const y_align_t y_align,
-                   const x_align_t x_origin, const y_align_t y_origin,
-                   const short padding, const short limit,
+void EAPlayerPings(int x, int y, const float scale, const x_align_t x_align, const y_align_t y_align,
+                   const x_align_t x_origin, const y_align_t y_origin, const short padding, const short limit,
                    const bool force_opaque = false);
-void EATeamPlayerPings(int x, int y, const float scale,
-                       const x_align_t x_align, const y_align_t y_align,
-                       const x_align_t x_origin, const y_align_t y_origin,
-                       const short padding, const short limit,
+void EATeamPlayerPings(int x, int y, const float scale, const x_align_t x_align, const y_align_t y_align,
+                       const x_align_t x_origin, const y_align_t y_origin, const short padding, const short limit,
                        const byte team, const bool force_opaque = false);
-void EASpectatorPings(int x, int y, const float scale,
-                      const x_align_t x_align, const y_align_t y_align,
-                      const x_align_t x_origin, const y_align_t y_origin,
-                      const short padding, short skip, const short limit,
-                      const bool force_opaque = false);
-void EATargets(int x, int y, const float scale,
-               const x_align_t x_align, const y_align_t y_align,
-               const x_align_t x_origin, const y_align_t y_origin,
-               const short padding, const short limit,
+void EASpectatorPings(int x, int y, const float scale, const x_align_t x_align, const y_align_t y_align,
+                      const x_align_t x_origin, const y_align_t y_origin, const short padding, short skip,
+                      const short limit, const bool force_opaque = false);
+void EATargets(int x, int y, const float scale, const x_align_t x_align, const y_align_t y_align,
+               const x_align_t x_origin, const y_align_t y_origin, const short padding, const short limit,
                const bool force_opaque = false);
-}
+} // namespace hud

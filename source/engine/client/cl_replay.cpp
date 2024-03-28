@@ -43,15 +43,15 @@ extern int last_svgametic;
 // Returns a pointer to the only allowable ClientReplay object
 //
 
-ClientReplay& ClientReplay::getInstance()
+ClientReplay &ClientReplay::getInstance()
 {
-	static ClientReplay instance;
-	return instance;
+    static ClientReplay instance;
+    return instance;
 }
 
 ClientReplay::~ClientReplay()
 {
-	ClientReplay::reset();
+    ClientReplay::reset();
 }
 
 //
@@ -62,7 +62,7 @@ ClientReplay::~ClientReplay()
 
 void ClientReplay::reset()
 {
-	itemReplayStack.clear();
+    itemReplayStack.clear();
 }
 
 //
@@ -73,7 +73,7 @@ void ClientReplay::reset()
 
 bool ClientReplay::enabled()
 {
-	return (clientside && multiplayer && connected);
+    return (clientside && multiplayer && connected);
 }
 
 //
@@ -84,7 +84,7 @@ bool ClientReplay::enabled()
 
 bool ClientReplay::wasReplayed()
 {
-	return replayed;
+    return replayed;
 }
 
 //
@@ -95,7 +95,7 @@ bool ClientReplay::wasReplayed()
 //
 void ClientReplay::recordReplayItem(int tic, const uint32_t netId)
 {
-	itemReplayStack.push_back(std::make_pair(tic, netId));
+    itemReplayStack.push_back(std::make_pair(tic, netId));
 }
 
 //
@@ -105,99 +105,99 @@ void ClientReplay::recordReplayItem(int tic, const uint32_t netId)
 //
 void ClientReplay::removeReplayItem(const std::pair<int, uint32_t> replayItem)
 {
-	std::vector<std::pair<int, uint32_t> >::iterator it = itemReplayStack.begin();
-	while (it != itemReplayStack.end())
-	{
-		if (replayItem == *it)
-		{
-			itemReplayStack.erase(it);
-			break;
-		}
-		else
-		{
-				++it;
-		}
-	}
+    std::vector<std::pair<int, uint32_t>>::iterator it = itemReplayStack.begin();
+    while (it != itemReplayStack.end())
+    {
+        if (replayItem == *it)
+        {
+            itemReplayStack.erase(it);
+            break;
+        }
+        else
+        {
+            ++it;
+        }
+    }
 }
 
 //
 // ClientReplay::itemReplayThink
 //
 // Runs logic for the current tic
-// 
+//
 void ClientReplay::itemReplay()
 {
-	if (itemReplayStack.empty() || !consoleplayer().mo || !enabled() ||
-	    consoleplayer_id != displayplayer_id || consoleplayer().spectator)
-		return;
+    if (itemReplayStack.empty() || !consoleplayer().mo || !enabled() || consoleplayer_id != displayplayer_id ||
+        consoleplayer().spectator)
+        return;
 
-	player_t& player = consoleplayer();
+    player_t &player = consoleplayer();
 
-	weaponstate_t state = P_GetWeaponState(&player);
+    weaponstate_t state = P_GetWeaponState(&player);
 
-	if (state == readystate && firstReadyTic <= 0)
-	{
-		firstReadyTic = ::last_svgametic;
-	}
-	else if (state != readystate)
-	{
-		firstReadyTic = 0;
-	}
+    if (state == readystate && firstReadyTic <= 0)
+    {
+        firstReadyTic = ::last_svgametic;
+    }
+    else if (state != readystate)
+    {
+        firstReadyTic = 0;
+    }
 
-	if (replayed && --replayDoneCounter <= 0)
-	{
-		replayDoneCounter = TICRATE * 7;
-		replayed = false;
-	}
+    if (replayed && --replayDoneCounter <= 0)
+    {
+        replayDoneCounter = TICRATE * 7;
+        replayed          = false;
+    }
 
-	std::vector<std::pair<int, uint32_t> >::iterator it = itemReplayStack.begin();
-	while (it != itemReplayStack.end())
-	{
-		if (it->first + MAX_REPLAY_TIC_LENGTH < ::last_svgametic)
-		{
-			it = itemReplayStack.erase(it);
-			continue;
-		}
+    std::vector<std::pair<int, uint32_t>>::iterator it = itemReplayStack.begin();
+    while (it != itemReplayStack.end())
+    {
+        if (it->first + MAX_REPLAY_TIC_LENGTH < ::last_svgametic)
+        {
+            it = itemReplayStack.erase(it);
+            continue;
+        }
 
-		AActor* mo = P_FindThingById(it->second);
+        AActor *mo = P_FindThingById(it->second);
 
-		// Invalid? Try again another day!
-		if (!mo)
-		{
-			++it;
-			continue;
-		}
+        // Invalid? Try again another day!
+        if (!mo)
+        {
+            ++it;
+            continue;
+        }
 
-		// Let's not do dropped weapons for now
-		if (mo->flags & MF_DROPPED)
-		{
-			it = itemReplayStack.erase(it);
-			continue;
-		}
+        // Let's not do dropped weapons for now
+        if (mo->flags & MF_DROPPED)
+        {
+            it = itemReplayStack.erase(it);
+            continue;
+        }
 
-		std::string weaponname = P_MobjToName(mo->type);
-		weapontype_t weapontype = P_NameToWeapon(weaponname);
-		bool weaponSwitch = P_CheckSwitchWeapon(&player, weapontype);
+        std::string  weaponname   = P_MobjToName(mo->type);
+        weapontype_t weapontype   = P_NameToWeapon(weaponname);
+        bool         weaponSwitch = P_CheckSwitchWeapon(&player, weapontype);
 
-		P_GiveSpecial(&player, mo);
+        P_GiveSpecial(&player, mo);
 
-		replayed = true;
+        replayed = true;
 
-		int ticDelta = (::last_svgametic - firstReadyTic);
+        int ticDelta = (::last_svgametic - firstReadyTic);
 
-		firstReadyTic = 0;
+        firstReadyTic = 0;
 
-		// Cycle the raise/lower by the tics elapsed since to get us up to current
-		// But have special logic here to not skip ahead,
-		// and do nothing if it wasn't going to switch our weapon anyway.
-		if (P_SpecialIsWeapon(mo) && state == readystate && weaponSwitch)
-		{
-			for (int i = 0; i < ticDelta; ++i)
-			{
-					P_MovePsprites(&player);
-			}
-		}
+        // Cycle the raise/lower by the tics elapsed since to get us up to current
+        // But have special logic here to not skip ahead,
+        // and do nothing if it wasn't going to switch our weapon anyway.
+        if (P_SpecialIsWeapon(mo) && state == readystate && weaponSwitch)
+        {
+            for (int i = 0; i < ticDelta; ++i)
+            {
+                P_MovePsprites(&player);
+            }
+        }
 
-		it = itemReplayStack.erase(it);
-	}
+        it = itemReplayStack.erase(it);
+    }
 }

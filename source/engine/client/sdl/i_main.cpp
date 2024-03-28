@@ -22,16 +22,15 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #include "odamex.h"
 
 // denis - todo - remove
 #include "win32inc.h"
 #ifdef _WIN32
-	#undef GetMessage
-	typedef BOOL (WINAPI *SetAffinityFunc)(HANDLE hProcess, DWORD mask);
+#undef GetMessage
+typedef BOOL(WINAPI *SetAffinityFunc)(HANDLE hProcess, DWORD mask);
 #else
-    #include <sched.h>
+#include <sched.h>
 #endif // WIN32
 
 #ifdef UNIX
@@ -44,13 +43,12 @@
 #include <stack>
 #include <iostream>
 
-#include "i_sdl.h" 
+#include "i_sdl.h"
 #include "i_crash.h"
 // [Russell] - Don't need SDLmain library
 #ifdef _WIN32
 #undef main
 #endif // WIN32
-
 
 #include "m_argv.h"
 #include "m_fileio.h"
@@ -61,111 +59,111 @@
 
 // Use main() on windows for msvc
 #if defined(_MSC_VER)
-#    pragma comment(linker, "/subsystem:windows /ENTRY:mainCRTStartup")
+#pragma comment(linker, "/subsystem:windows /ENTRY:mainCRTStartup")
 #endif
 
-EXTERN_CVAR (r_centerwindow)
+EXTERN_CVAR(r_centerwindow)
 
 DArgs Args;
 
 // functions to be called at shutdown are stored in this stack
-typedef void (STACK_ARGS *term_func_t)(void);
-std::stack< std::pair<term_func_t, std::string> > TermFuncs;
+typedef void(STACK_ARGS *term_func_t)(void);
+std::stack<std::pair<term_func_t, std::string>> TermFuncs;
 
-void addterm (void (STACK_ARGS *func) (), const char *name)
+void addterm(void(STACK_ARGS *func)(), const char *name)
 {
-	TermFuncs.push(std::pair<term_func_t, std::string>(func, name));
+    TermFuncs.push(std::pair<term_func_t, std::string>(func, name));
 }
 
-void STACK_ARGS call_terms (void)
+void STACK_ARGS call_terms(void)
 {
-	while (!TermFuncs.empty())
-		TermFuncs.top().first(), TermFuncs.pop();
+    while (!TermFuncs.empty())
+        TermFuncs.top().first(), TermFuncs.pop();
 }
 
 int main(int argc, char *argv[])
 {
-	// [AM] Set crash callbacks, so we get something useful from crashes.
+    // [AM] Set crash callbacks, so we get something useful from crashes.
 #ifdef NDEBUG
-	I_SetCrashCallbacks();
+    I_SetCrashCallbacks();
 #endif
 
-	try
-	{
+    try
+    {
 
 #if defined(UNIX)
-		if(!getuid() || !geteuid())
-			I_FatalError("root user detected, quitting odamex immediately");
+        if (!getuid() || !geteuid())
+            I_FatalError("root user detected, quitting odamex immediately");
 #endif
 
-		// [ML] 2007/9/3: From Eternity (originally chocolate Doom) Thanks SoM & fraggle!
-		::Args.SetArgs(argc, argv);
+        // [ML] 2007/9/3: From Eternity (originally chocolate Doom) Thanks SoM & fraggle!
+        ::Args.SetArgs(argc, argv);
 
-		if (::Args.CheckParm("--version"))
-		{
+        if (::Args.CheckParm("--version"))
+        {
 #ifdef _WIN32
-			FILE* fh = fopen("odamex-version.txt", "w");
-			if (!fh)
-				exit(EXIT_FAILURE);
+            FILE *fh = fopen("odamex-version.txt", "w");
+            if (!fh)
+                exit(EXIT_FAILURE);
 
-			const int ok = fprintf(fh, "Odamex %s\n", NiceVersion());
-			if (!ok)
-				exit(EXIT_FAILURE);
+            const int ok = fprintf(fh, "Odamex %s\n", NiceVersion());
+            if (!ok)
+                exit(EXIT_FAILURE);
 
-			fclose(fh);
+            fclose(fh);
 #else
-			printf("Odamex %s\n", NiceVersion());
+            printf("Odamex %s\n", NiceVersion());
 #endif
-			exit(EXIT_SUCCESS);
-		}
+            exit(EXIT_SUCCESS);
+        }
 
-		const char* crashdir = ::Args.CheckValue("-crashdir");
-		if (crashdir)
-		{
-			I_SetCrashDir(crashdir);
-		}
-		else
-		{
-			std::string writedir = M_GetWriteDir();
-			I_SetCrashDir(writedir.c_str());
-		}
+        const char *crashdir = ::Args.CheckValue("-crashdir");
+        if (crashdir)
+        {
+            I_SetCrashDir(crashdir);
+        }
+        else
+        {
+            std::string writedir = M_GetWriteDir();
+            I_SetCrashDir(writedir.c_str());
+        }
 
-		const char* CON_FILE = ::Args.CheckValue("-confile");
-		if (CON_FILE)
-		{
-			CON.open(CON_FILE, std::ios::in);
-		}
+        const char *CON_FILE = ::Args.CheckValue("-confile");
+        if (CON_FILE)
+        {
+            CON.open(CON_FILE, std::ios::in);
+        }
 
-		// denis - if argv[1] starts with "odamex://"
-		if(argc == 2 && argv && argv[1])
-		{
-			const char *protocol = "odamex://";
-			const char *uri = argv[1];
+        // denis - if argv[1] starts with "odamex://"
+        if (argc == 2 && argv && argv[1])
+        {
+            const char *protocol = "odamex://";
+            const char *uri      = argv[1];
 
-			if(strncmp(uri, protocol, strlen(protocol)) == 0)
-			{
-				std::string location = uri + strlen(protocol);
-				size_t term = location.find_first_of('/');
+            if (strncmp(uri, protocol, strlen(protocol)) == 0)
+            {
+                std::string location = uri + strlen(protocol);
+                size_t      term     = location.find_first_of('/');
 
-				if(term == std::string::npos)
-					term = location.length();
+                if (term == std::string::npos)
+                    term = location.length();
 
-				Args.AppendArg("-connect");
-				Args.AppendArg(location.substr(0, term).c_str());
-			}
-		}
+                Args.AppendArg("-connect");
+                Args.AppendArg(location.substr(0, term).c_str());
+            }
+        }
 
 #if defined _WIN32
 
-	#if defined(SDL20)
-        // FIXME: Remove this when SDL gets it shit together, see 
+#if defined(SDL20)
+        // FIXME: Remove this when SDL gets it shit together, see
         // https://bugzilla.libsdl.org/show_bug.cgi?id=2089
         // ...
         // Disable thread naming on windows, with SDL 2.0.5 and GDB > 7.8.1
         // RaiseException will be thrown and will crash under the debugger with symbols
         // loaded or not
         SDL_SetHint(SDL_HINT_WINDOWS_DISABLE_THREAD_NAMING, "1");
-	#endif // SDL20
+#endif // SDL20
 
         // Set the process affinity mask to 1 on Windows, so that all threads
         // run on the same processor.  This is a workaround for a bug in
@@ -185,74 +183,74 @@ int main(int argc, char *argv[])
                     LOG << "Failed to set process affinity mask: " << GetLastError() << std::endl;
             }
         }
-#endif	// _WIN32
+#endif // _WIN32
 
-		unsigned int sdl_flags = SDL_INIT_TIMER;
+        unsigned int sdl_flags = SDL_INIT_TIMER;
 
 #ifdef _MSC_VER
-		// [SL] per the SDL documentation, SDL's parachute, used to cleanup
-		// after a crash, causes the MSVC debugger to be unusable
-		sdl_flags |= SDL_INIT_NOPARACHUTE;
+        // [SL] per the SDL documentation, SDL's parachute, used to cleanup
+        // after a crash, causes the MSVC debugger to be unusable
+        sdl_flags |= SDL_INIT_NOPARACHUTE;
 #endif
 
-		if (SDL_Init(sdl_flags) == -1)
-			I_FatalError("Could not initialize SDL:\n%s\n", SDL_GetError());
+        if (SDL_Init(sdl_flags) == -1)
+            I_FatalError("Could not initialize SDL:\n%s\n", SDL_GetError());
 
-		atterm (SDL_Quit);
+        atterm(SDL_Quit);
 
-		/*
-		killough 1/98:
+        /*
+        killough 1/98:
 
-		  This fixes some problems with exit handling
-		  during abnormal situations.
+          This fixes some problems with exit handling
+          during abnormal situations.
 
-			The old code called I_Quit() to end program,
-			while now I_Quit() is installed as an exit
-			handler and exit() is called to exit, either
-			normally or abnormally.
-		*/
+            The old code called I_Quit() to end program,
+            while now I_Quit() is installed as an exit
+            handler and exit() is called to exit, either
+            normally or abnormally.
+        */
 
         // But avoid calling this on windows!
         // Good on some platforms, useless on others
-//		#ifndef _WIN32
-//		atexit (call_terms);
-//		#endif
+        //		#ifndef _WIN32
+        //		atexit (call_terms);
+        //		#endif
 
-		atterm (I_Quit);
-		atterm (DObject::StaticShutdown);
+        atterm(I_Quit);
+        atterm(DObject::StaticShutdown);
 
-		D_DoomMain(); // Usually does not return
+        D_DoomMain(); // Usually does not return
 
-		// If D_DoomMain does return (as is the case with the +demotest parameter)
-		// proper termination needs to occur -- Hyper_Eye
-		call_terms ();
-	}
-	catch (CDoomError &error)
-	{
-		if (LOG.is_open())
-		{
-			LOG << "=== ERROR: " << error.GetMsg() << " ===\n\n";
-		}
+        // If D_DoomMain does return (as is the case with the +demotest parameter)
+        // proper termination needs to occur -- Hyper_Eye
+        call_terms();
+    }
+    catch (CDoomError &error)
+    {
+        if (LOG.is_open())
+        {
+            LOG << "=== ERROR: " << error.GetMsg() << " ===\n\n";
+        }
 
-		I_ErrorMessageBox(error.GetMsg().c_str());
+        I_ErrorMessageBox(error.GetMsg().c_str());
 
-		call_terms();
-		exit(EXIT_FAILURE);
-	}
+        call_terms();
+        exit(EXIT_FAILURE);
+    }
 #ifndef _DEBUG
-	catch (...)
-	{
-		// If an exception is thrown, be sure to do a proper shutdown.
-		// This is especially important if we are in fullscreen mode,
-		// because the OS will only show the alert box if we are in
-		// windowed mode. Graphics gets shut down first in case something
-		// goes wrong calling the cleanup functions.
-		call_terms ();
-		// Now let somebody who understands the exception deal with it.
-		throw;
-	}
+    catch (...)
+    {
+        // If an exception is thrown, be sure to do a proper shutdown.
+        // This is especially important if we are in fullscreen mode,
+        // because the OS will only show the alert box if we are in
+        // windowed mode. Graphics gets shut down first in case something
+        // goes wrong calling the cleanup functions.
+        call_terms();
+        // Now let somebody who understands the exception deal with it.
+        throw;
+    }
 #endif
-	return 0;
+    return 0;
 }
 
-VERSION_CONTROL (i_main_cpp, "$Id: 267b62faf29499aa138ecca58d833e7613365323 $")
+VERSION_CONTROL(i_main_cpp, "$Id: 267b62faf29499aa138ecca58d833e7613365323 $")

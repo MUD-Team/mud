@@ -21,54 +21,51 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #pragma once
-
 
 #include "hashtable.h"
 #include "d_event.h"
 
 struct OBinding
 {
-	const char* Key;
-	const char* Bind;
+    const char *Key;
+    const char *Bind;
 };
 
 class OKeyBindings
 {
-private:
-	typedef OHashTable<int, std::string> BindingTable;
+  private:
+    typedef OHashTable<int, std::string> BindingTable;
 
-public :
-	BindingTable Binds;
-	std::string command;
+  public:
+    BindingTable Binds;
+    std::string  command;
 
-	void SetBindingType(std::string cmd);
-	void SetBinds(const OBinding* binds);
-	void BindAKey(size_t argc, char** argv, const char* msg);
-	void DoBind(const char* key, const char* bind);
+    void SetBindingType(std::string cmd);
+    void SetBinds(const OBinding *binds);
+    void BindAKey(size_t argc, char **argv, const char *msg);
+    void DoBind(const char *key, const char *bind);
 
-	void UnbindKey(const char* key);
-	void UnbindACommand(const char* str);
-	void UnbindAll();
+    void UnbindKey(const char *key);
+    void UnbindACommand(const char *str);
+    void UnbindAll();
 
-	void ChangeBinding(const char* str, int newone);	// Stuff used by the customize controls menu
+    void ChangeBinding(const char *str, int newone); // Stuff used by the customize controls menu
 
-	const std::string &GetBind(int key);			// Returns string bound to given key (NULL if none)
-	std::string GetNameKeys(int first, int second);
-	int  GetKeysForCommand(const char* cmd, int* first, int* second);
-	std::string GetKeynameFromCommand(const char* cmd, bool bTwoEntries = false);
+    const std::string &GetBind(int key);             // Returns string bound to given key (NULL if none)
+    std::string        GetNameKeys(int first, int second);
+    int                GetKeysForCommand(const char *cmd, int *first, int *second);
+    std::string        GetKeynameFromCommand(const char *cmd, bool bTwoEntries = false);
 
-	void ArchiveBindings(FILE* f);
+    void ArchiveBindings(FILE *f);
 };
 
 void C_BindingsInit();
 void C_BindDefaults();
 
 // DoKey now have a binding responder, used to switch between Binds and Automap binds
-bool C_DoKey(event_t* ev, OKeyBindings* binds, OKeyBindings* doublebinds);
+bool C_DoKey(event_t *ev, OKeyBindings *binds, OKeyBindings *doublebinds);
 
 void C_ReleaseKeys();
-
 
 extern OKeyBindings Bindings, DoubleBindings, AutomapBindings, NetDemoBindings;

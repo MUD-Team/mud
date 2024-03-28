@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: 
+// $Id:
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 2006-2020 by The Odamex Team.
@@ -18,15 +18,14 @@
 //
 // DESCRIPTION:
 //   Episode data for defining new episodes.
-// 
+//
 //-----------------------------------------------------------------------------
-
 
 #include "odamex.h"
 
 #include "g_episode.h"
 
-OLumpName EpisodeMaps[MAX_EPISODES];
+OLumpName   EpisodeMaps[MAX_EPISODES];
 EpisodeInfo EpisodeInfos[MAX_EPISODES];
-byte episodenum = 0;
-bool episodes_modified = false;
+byte        episodenum        = 0;
+bool        episodes_modified = false;

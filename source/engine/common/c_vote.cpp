@@ -20,26 +20,11 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #include "odamex.h"
 
 /**
  * A string array used to associate vote types with command names.
  */
-const char* vote_type_cmd[] = {
-	"???",
-	"kick",
-	"forcespec",
-	"forcestart",
-	"randcaps",
-	"randpickup",
-	"map",
-	"nextmap",
-	"randmap",
-	"restart",
-	"fraglimit",
-	"scorelimit",
-	"timelimit",
-	"coinflip",
-	"???"
-};
+const char *vote_type_cmd[] = {"???",        "kick",       "forcespec", "forcestart", "randcaps",
+                               "randpickup", "map",        "nextmap",   "randmap",    "restart",
+                               "fraglimit",  "scorelimit", "timelimit", "coinflip",   "???"};

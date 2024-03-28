@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id: 4e5dad54c1fb71bbeda0a9d2f833a86f0c51e66f $
@@ -32,176 +32,189 @@
 struct ticcmd_t
 {
   private:
-	static void readByte(std::string::const_iterator it, byte& b)
-	{
-		b = static_cast<uint8_t>(*it);
-	}
+    static void readByte(std::string::const_iterator it, byte &b)
+    {
+        b = static_cast<uint8_t>(*it);
+    }
 
-	static void readShort(std::string::const_iterator it, short& s)
-	{
-		s = static_cast<uint8_t>(*it);
-		s |= static_cast<uint8_t>(*(it + 1)) << 8;
-	}
+    static void readShort(std::string::const_iterator it, short &s)
+    {
+        s = static_cast<uint8_t>(*it);
+        s |= static_cast<uint8_t>(*(it + 1)) << 8;
+    }
 
-	static void writeByte(std::string::iterator it, byte b)
-	{
-		*it = b;
-	}
+    static void writeByte(std::string::iterator it, byte b)
+    {
+        *it = b;
+    }
 
-	static void writeShort(std::string::iterator it, short s)
-	{
-		*it = s & 0xFF;
-		*(it + 1) = s >> 8;
-	}
+    static void writeShort(std::string::iterator it, short s)
+    {
+        *it       = s & 0xFF;
+        *(it + 1) = s >> 8;
+    }
+
   public:
+    static const size_t SERIALIZED_SIZE = 2 + sizeof(short) * 5;
 
-	static const size_t SERIALIZED_SIZE = 2 + sizeof(short) * 5;
+    ticcmd_t()
+    {
+        clear();
+    }
 
-	ticcmd_t()
-	{
-		clear();
-	}
+    void clear()
+    {
+        buttons     = 0;
+        pitch       = 0;
+        yaw         = 0;
+        forwardmove = 0;
+        sidemove    = 0;
+        upmove      = 0;
+        impulse     = 0;
+    }
 
-	void clear()
-	{
-		buttons = 0;
-		pitch = 0;
-		yaw = 0;
-		forwardmove = 0;
-		sidemove = 0;
-		upmove = 0;
-		impulse = 0;
-	}
+    void serialize(std::string &out)
+    {
+        out.resize(SERIALIZED_SIZE);
+        writeByte(out.begin(), buttons);
+        writeShort(out.begin() + 1, pitch);
+        writeShort(out.begin() + 3, yaw);
+        writeShort(out.begin() + 5, forwardmove);
+        writeShort(out.begin() + 7, sidemove);
+        writeShort(out.begin() + 9, upmove);
+        writeByte(out.begin() + 11, impulse);
+    }
 
-	void serialize(std::string& out)
-	{
-		out.resize(SERIALIZED_SIZE);
-		writeByte(out.begin(), buttons);
-		writeShort(out.begin() + 1, pitch);
-		writeShort(out.begin() + 3, yaw);
-		writeShort(out.begin() + 5, forwardmove);
-		writeShort(out.begin() + 7, sidemove);
-		writeShort(out.begin() + 9, upmove);
-		writeByte(out.begin() + 11, impulse);
-	}
+    void unserialize(const std::string &in)
+    {
+        if (in.size() != SERIALIZED_SIZE)
+            return;
+        readByte(in.begin(), buttons);
+        readShort(in.begin() + 1, pitch);
+        readShort(in.begin() + 3, yaw);
+        readShort(in.begin() + 5, forwardmove);
+        readShort(in.begin() + 7, sidemove);
+        readShort(in.begin() + 9, upmove);
+        readByte(in.begin() + 11, impulse);
+    }
 
-	void unserialize(const std::string& in)
-	{
-		if (in.size() != SERIALIZED_SIZE)
-			return;
-		readByte(in.begin(), buttons);
-		readShort(in.begin() + 1, pitch);
-		readShort(in.begin() + 3, yaw);
-		readShort(in.begin() + 5, forwardmove);
-		readShort(in.begin() + 7, sidemove);
-		readShort(in.begin() + 9, upmove);
-		readByte(in.begin() + 11, impulse);
-	}
+    int tic;     // the client's tic when this cmd was sent
 
-	int		tic;	// the client's tic when this cmd was sent
-
-	byte	buttons;
-	short	pitch;			// up/down. currently just a y-sheering amount
-	short	yaw;			// left/right
-	short	forwardmove;
-	short	sidemove;
-	short	upmove;
-	byte	impulse;
+    byte  buttons;
+    short pitch; // up/down. currently just a y-sheering amount
+    short yaw;   // left/right
+    short forwardmove;
+    short sidemove;
+    short upmove;
+    byte  impulse;
 };
 
+#define UCMDF_BUTTONS     0x01
+#define UCMDF_PITCH       0x02
+#define UCMDF_YAW         0x04
+#define UCMDF_FORWARDMOVE 0x08
+#define UCMDF_SIDEMOVE    0x10
+#define UCMDF_UPMOVE      0x20
+#define UCMDF_IMPULSE     0x40
 
-#define UCMDF_BUTTONS		0x01
-#define UCMDF_PITCH			0x02
-#define UCMDF_YAW			0x04
-#define UCMDF_FORWARDMOVE	0x08
-#define UCMDF_SIDEMOVE		0x10
-#define UCMDF_UPMOVE		0x20
-#define UCMDF_IMPULSE		0x40
-
-inline FArchive &operator<< (FArchive &arc, ticcmd_t &cmd)
+inline FArchive &operator<<(FArchive &arc, ticcmd_t &cmd)
 {
-	byte buf[256], *ptr = buf;
+    byte buf[256], *ptr = buf;
 
-	byte flags = 0;
+    byte flags = 0;
 
-	if (cmd.buttons) {
-		flags |= UCMDF_BUTTONS;
-		*ptr++ = cmd.buttons;
-	}
-	if (cmd.pitch) {
-		flags |= UCMDF_PITCH;
-		*ptr++ = cmd.pitch >> 8;
-		*ptr++ = cmd.pitch & 0xFF;
-	}
-	if (cmd.yaw) {
-		flags |= UCMDF_YAW;
-		*ptr++ = cmd.yaw >> 8;
-		*ptr++ = cmd.yaw & 0xFF;
-	}
-	if (cmd.forwardmove) {
-		flags |= UCMDF_FORWARDMOVE;
-		*ptr++ = cmd.forwardmove >> 8;
-		*ptr++ = cmd.forwardmove & 0xFF;
-	}
-	if (cmd.sidemove) {
-		flags |= UCMDF_SIDEMOVE;
-		*ptr++ = cmd.sidemove >> 8;
-		*ptr++ = cmd.sidemove & 0xFF;
-	}
-	if (cmd.upmove) {
-		flags |= UCMDF_UPMOVE;
-		*ptr++ = cmd.upmove >> 8;
-		*ptr++ = cmd.upmove & 0xFF;
-	}
-	if (cmd.impulse) {
-		flags |= UCMDF_IMPULSE;
-		*ptr++ = cmd.impulse;
-	}
+    if (cmd.buttons)
+    {
+        flags |= UCMDF_BUTTONS;
+        *ptr++ = cmd.buttons;
+    }
+    if (cmd.pitch)
+    {
+        flags |= UCMDF_PITCH;
+        *ptr++ = cmd.pitch >> 8;
+        *ptr++ = cmd.pitch & 0xFF;
+    }
+    if (cmd.yaw)
+    {
+        flags |= UCMDF_YAW;
+        *ptr++ = cmd.yaw >> 8;
+        *ptr++ = cmd.yaw & 0xFF;
+    }
+    if (cmd.forwardmove)
+    {
+        flags |= UCMDF_FORWARDMOVE;
+        *ptr++ = cmd.forwardmove >> 8;
+        *ptr++ = cmd.forwardmove & 0xFF;
+    }
+    if (cmd.sidemove)
+    {
+        flags |= UCMDF_SIDEMOVE;
+        *ptr++ = cmd.sidemove >> 8;
+        *ptr++ = cmd.sidemove & 0xFF;
+    }
+    if (cmd.upmove)
+    {
+        flags |= UCMDF_UPMOVE;
+        *ptr++ = cmd.upmove >> 8;
+        *ptr++ = cmd.upmove & 0xFF;
+    }
+    if (cmd.impulse)
+    {
+        flags |= UCMDF_IMPULSE;
+        *ptr++ = cmd.impulse;
+    }
 
-	byte len = ptr - buf;
-	arc << (byte)(len + 1) << flags;
-	arc.Write(buf, len);
+    byte len = ptr - buf;
+    arc << (byte)(len + 1) << flags;
+    arc.Write(buf, len);
 
-	return arc;
+    return arc;
 }
 
-inline FArchive &operator>> (FArchive &arc, ticcmd_t &cmd)
+inline FArchive &operator>>(FArchive &arc, ticcmd_t &cmd)
 {
-	byte buf[256], *ptr = buf;
+    byte buf[256], *ptr = buf;
 
-	byte len, flags;
-	arc >> len >> flags;
-	arc.Read(buf, len - 1);
+    byte len, flags;
+    arc >> len >> flags;
+    arc.Read(buf, len - 1);
 
-	// make sure the ucmd is empty
-	cmd.clear();
+    // make sure the ucmd is empty
+    cmd.clear();
 
-	if (flags & UCMDF_BUTTONS) {
-		cmd.buttons = *ptr++;
-	}
-	if (flags & UCMDF_PITCH) {
-		cmd.pitch = *ptr++ << 8;
-		cmd.pitch |= *ptr++;
-	}
-	if (flags & UCMDF_YAW) {
-		cmd.pitch = *ptr++ << 8;
-		cmd.pitch |= *ptr++;
-	}
-	if (flags & UCMDF_FORWARDMOVE) {
-		cmd.forwardmove = *ptr++ << 8;
-		cmd.forwardmove |= *ptr++;
-	}
-	if (flags & UCMDF_SIDEMOVE) {
-		cmd.sidemove = *ptr++ << 8;
-		cmd.sidemove |= *ptr++;
-	}
-	if (flags & UCMDF_UPMOVE) {
-		cmd.upmove = *ptr++ << 8;
-		cmd.upmove |= *ptr++;
-	}
-	if (flags & UCMDF_IMPULSE) {
-		cmd.impulse = *ptr++;
-	}
+    if (flags & UCMDF_BUTTONS)
+    {
+        cmd.buttons = *ptr++;
+    }
+    if (flags & UCMDF_PITCH)
+    {
+        cmd.pitch = *ptr++ << 8;
+        cmd.pitch |= *ptr++;
+    }
+    if (flags & UCMDF_YAW)
+    {
+        cmd.pitch = *ptr++ << 8;
+        cmd.pitch |= *ptr++;
+    }
+    if (flags & UCMDF_FORWARDMOVE)
+    {
+        cmd.forwardmove = *ptr++ << 8;
+        cmd.forwardmove |= *ptr++;
+    }
+    if (flags & UCMDF_SIDEMOVE)
+    {
+        cmd.sidemove = *ptr++ << 8;
+        cmd.sidemove |= *ptr++;
+    }
+    if (flags & UCMDF_UPMOVE)
+    {
+        cmd.upmove = *ptr++ << 8;
+        cmd.upmove |= *ptr++;
+    }
+    if (flags & UCMDF_IMPULSE)
+    {
+        cmd.impulse = *ptr++;
+    }
 
-	return arc;
+    return arc;
 }

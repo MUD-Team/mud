@@ -277,28 +277,28 @@ class MidiSequencer
             EVENT_UNKNOWN = 0x00,
             //! Note-Off event
             EVENT_NOTE_OFF = 0x08,           // size == 2
-                                       //! Note-On event
+                                             //! Note-On event
             EVENT_NOTE_ON = 0x09,            // size == 2
-                                       //! Note After-Touch event
+                                             //! Note After-Touch event
             EVENT_NOTE_TOUCH = 0x0A,         // size == 2
-                                       //! Controller change event
+                                             //! Controller change event
             EVENT_CONTROL_CHANGE = 0x0B,     // size == 2
-                                       //! Patch change event
+                                             //! Patch change event
             EVENT_PATCH_CHANGE = 0x0C,       // size == 1
-                                       //! Channel After-Touch event
+                                             //! Channel After-Touch event
             EVENT_CHANNEL_AFTERTOUCH = 0x0D, // size == 1
-                                       //! Pitch-bend change event
+                                             //! Pitch-bend change event
             EVENT_PITCH_WHEEL = 0x0E,        // size == 2
 
             //! System Exclusive message, type 1
-            EVENT_SYSEX = 0xF0,                     // size == len
-                                               //! Sys Com Song Position Pntr [LSB, MSB]
+            EVENT_SYSEX = 0xF0,           // size == len
+                                          //! Sys Com Song Position Pntr [LSB, MSB]
             EVENT_SYSCOM_POSITION = 0xF2, // size == 2
-                                               //! Sys Com Song Select(Song #) [0-127]
-            EVENT_SYSCOM_SELECT = 0xF3,          // size == 1
-                                               //! System Exclusive message, type 2
-            EVENT_SYSEX2 = 0xF7,                    // size == len
-                                               //! Special event
+                                          //! Sys Com Song Select(Song #) [0-127]
+            EVENT_SYSCOM_SELECT = 0xF3,   // size == 1
+                                          //! System Exclusive message, type 2
+            EVENT_SYSEX2 = 0xF7,          // size == len
+                                          //! Special event
             EVENT_SPECIAL = 0xFF
         };
         /**
@@ -307,54 +307,54 @@ class MidiSequencer
         enum SubTypes
         {
             //! Sequension number
-            EVENT_SUB_SEQUENSION = 0x00,   // size == 2
-                                        //! Text label
-            EVENT_SUB_TEXT = 0x01,               // size == len
-                                        //! Copyright notice
-            EVENT_SUB_COPYRIGHT = 0x02,          // size == len
-                                        //! Sequence track title
-            EVENT_SUB_TRACK_TITLE = 0x03, // size == len
-                                        //! Instrument title
-            EVENT_SUB_INSTRUMENT_TITLE = 0x04,    // size == len
-                                        //! Lyrics text fragment
-            EVENT_SUB_LYRICS = 0x05,             // size == len
-                                        //! MIDI Marker
-            EVENT_SUB_MARKER = 0x06,             // size == len
-                                        //! Cue Point
-            EVENT_SUB_CUE_POINT = 0x07,           // size == len
-                                        //! [Non-Standard] Device Switch
-            EVENT_SUB_DEVICE_SWITCH = 0x09,       // size == len <CUSTOM>
-                                        //! MIDI Channel prefix
-            EVENT_SUB_CHANNEL_PREFIX = 0x20,  // size == 1
+            EVENT_SUB_SEQUENSION = 0x00,       // size == 2
+                                               //! Text label
+            EVENT_SUB_TEXT = 0x01,             // size == len
+                                               //! Copyright notice
+            EVENT_SUB_COPYRIGHT = 0x02,        // size == len
+                                               //! Sequence track title
+            EVENT_SUB_TRACK_TITLE = 0x03,      // size == len
+                                               //! Instrument title
+            EVENT_SUB_INSTRUMENT_TITLE = 0x04, // size == len
+                                               //! Lyrics text fragment
+            EVENT_SUB_LYRICS = 0x05,           // size == len
+                                               //! MIDI Marker
+            EVENT_SUB_MARKER = 0x06,           // size == len
+                                               //! Cue Point
+            EVENT_SUB_CUE_POINT = 0x07,        // size == len
+                                               //! [Non-Standard] Device Switch
+            EVENT_SUB_DEVICE_SWITCH = 0x09,    // size == len <CUSTOM>
+                                               //! MIDI Channel prefix
+            EVENT_SUB_CHANNEL_PREFIX = 0x20,   // size == 1
 
             //! End of Track event
-            EVENT_SUB_END_TRACK = 0x2F,      // size == 0
-                                   //! Tempo change event
-            EVENT_SUB_TEMPO_CHANGE = 0x51,   // size == 3
-                                   //! SMPTE offset
-            EVENT_SUB_SMPTE_OFFSET = 0x54,   // size == 5
-                                   //! Time signature
-            EVENT_SUB_TIME_SIGNATURE = 0x55, // size == 4
-                                   //! Key signature
-            EVENT_SUB_KEY_SIGNATURE = 0x59,  // size == 2
-                                   //! Sequencer specs
+            EVENT_SUB_END_TRACK = 0x2F,       // size == 0
+                                              //! Tempo change event
+            EVENT_SUB_TEMPO_CHANGE = 0x51,    // size == 3
+                                              //! SMPTE offset
+            EVENT_SUB_SMPTE_OFFSET = 0x54,    // size == 5
+                                              //! Time signature
+            EVENT_SUB_TIME_SIGNATURE = 0x55,  // size == 4
+                                              //! Key signature
+            EVENT_SUB_KEY_SIGNATURE = 0x59,   // size == 2
+                                              //! Sequencer specs
             EVENT_SUB_SEQUENCER_SPECS = 0x7F, // size == len
 
             /* Non-standard, internal ADLMIDI usage only */
             //! [Non-Standard] Loop Start point
             EVENT_SUB_LOOP_START = 0xE1, // size == 0 <CUSTOM>
-                               //! [Non-Standard] Loop End point
+                                         //! [Non-Standard] Loop End point
             EVENT_SUB_LOOP_END = 0xE2,   // size == 0 <CUSTOM>
 
             //! [Non-Standard] Loop Start point with support of multi-loops
-            EVENT_SUB_LOOP_STACK_BEGIN = 0xE4,  // size == 1 <CUSTOM>
-                                     //! [Non-Standard] Loop End point with
-                                     //! support of multi-loops
-            EVENT_SUB_LOOP_STACK_END = 0xE5,    // size == 0 <CUSTOM>
-                                     //! [Non-Standard] Loop End point with
-                                     //! support of multi-loops
-            EVENT_SUB_LOOP_STACK_BREAK = 0xE6,  // size == 0 <CUSTOM>
-                                     //! [Non-Standard] Callback Trigger
+            EVENT_SUB_LOOP_STACK_BEGIN = 0xE4, // size == 1 <CUSTOM>
+                                               //! [Non-Standard] Loop End point with
+                                               //! support of multi-loops
+            EVENT_SUB_LOOP_STACK_END = 0xE5,   // size == 0 <CUSTOM>
+                                               //! [Non-Standard] Loop End point with
+                                               //! support of multi-loops
+            EVENT_SUB_LOOP_STACK_BREAK = 0xE6, // size == 0 <CUSTOM>
+                                               //! [Non-Standard] Callback Trigger
             EVENT_SUB_CALLBACK_TRIGGER = 0xE7, // size == 1 <CUSTOM>
 
             // Built-in hooks
@@ -636,13 +636,13 @@ class MidiSequencer
          */
         void Reset()
         {
-            m_caught_start       = false;
-            m_caught_end         = false;
+            m_caught_start        = false;
+            m_caught_end          = false;
             m_caught_m_stackstart = false;
             m_caught_m_stackend   = false;
             m_caught_m_stackbreak = false;
             m_skip_m_stackstart   = false;
-            m_loops_left         = m_loops_count;
+            m_loops_left          = m_loops_count;
         }
 
         void fullReset()
@@ -1064,17 +1064,21 @@ void MidiSequencer::MidiTrackRow::sortEvents(bool *note_states)
                 sysEx.reserve(m_events.size());
             sysEx.push_back(m_events[i]);
         }
-        else if ((m_events[i].type == MidiEvent::EVENT_CONTROL_CHANGE) || (m_events[i].type == MidiEvent::EVENT_PATCH_CHANGE) ||
-                 (m_events[i].type == MidiEvent::EVENT_PITCH_WHEEL) || (m_events[i].type == MidiEvent::EVENT_CHANNEL_AFTERTOUCH))
+        else if ((m_events[i].type == MidiEvent::EVENT_CONTROL_CHANGE) ||
+                 (m_events[i].type == MidiEvent::EVENT_PATCH_CHANGE) ||
+                 (m_events[i].type == MidiEvent::EVENT_PITCH_WHEEL) ||
+                 (m_events[i].type == MidiEvent::EVENT_CHANNEL_AFTERTOUCH))
         {
             if (controllers.capacity() == 0)
                 controllers.reserve(m_events.size());
             controllers.push_back(m_events[i]);
         }
         else if ((m_events[i].type == MidiEvent::EVENT_SPECIAL) &&
-                 ((m_events[i].sub_type == MidiEvent::EVENT_SUB_MARKER) || (m_events[i].sub_type == MidiEvent::EVENT_SUB_DEVICE_SWITCH) ||
+                 ((m_events[i].sub_type == MidiEvent::EVENT_SUB_MARKER) ||
+                  (m_events[i].sub_type == MidiEvent::EVENT_SUB_DEVICE_SWITCH) ||
                   (m_events[i].sub_type == MidiEvent::EVENT_SUB_SONG_BEGIN_HOOK) ||
-                  (m_events[i].sub_type == MidiEvent::EVENT_SUB_LOOP_START) || (m_events[i].sub_type == MidiEvent::EVENT_SUB_LOOP_END) ||
+                  (m_events[i].sub_type == MidiEvent::EVENT_SUB_LOOP_START) ||
+                  (m_events[i].sub_type == MidiEvent::EVENT_SUB_LOOP_END) ||
                   (m_events[i].sub_type == MidiEvent::EVENT_SUB_LOOP_STACK_BEGIN) ||
                   (m_events[i].sub_type == MidiEvent::EVENT_SUB_LOOP_STACK_END) ||
                   (m_events[i].sub_type == MidiEvent::EVENT_SUB_LOOP_STACK_BREAK)))
@@ -1167,8 +1171,8 @@ MidiSequencer::MidiSequencer()
     : m_midi_output_interface(nullptr), m_midi_smf_format(0), m_midi_loop_format(LOOP_DEFAULT),
       m_midi_loop_enabled(false), m_midi_loop_hooks_only(false), m_midi_full_song_time_length(0.0),
       m_midi_post_song_wait_delay(1.0), m_midi_loop_start_time(-1.0), m_midi_loop_end_time(-1.0),
-      m_midi_tempo_multiplier(1.0), m_midi_at_end(false), m_midi_loop_count(-1),
-      m_midi_track_solo(~(size_t)(0)), m_midi_trigger_handler(nullptr), m_midi_trigger_userdata(nullptr)
+      m_midi_tempo_multiplier(1.0), m_midi_at_end(false), m_midi_loop_count(-1), m_midi_track_solo(~(size_t)(0)),
+      m_midi_trigger_handler(nullptr), m_midi_trigger_userdata(nullptr)
 {
     m_midi_loop.Reset();
     m_midi_loop.m_invalid_loop = false;
@@ -1236,7 +1240,7 @@ int MidiSequencer::playStream(uint8_t *stream, size_t length)
         {
             size_t generateSize = periodSize > left ? (size_t)(left) : (size_t)(periodSize);
             m_midi_output_interface->onPcmRender(m_midi_output_interface->onPcmRender_userdata, stream_pos,
-                                                generateSize * m_midi_time.m_frame_size);
+                                                 generateSize * m_midi_time.m_frame_size);
             stream_pos += generateSize * m_midi_time.m_frame_size;
             count += generateSize;
             left -= generateSize;
@@ -1400,7 +1404,8 @@ bool MidiSequencer::buildSMFTrackData(const std::vector<std::vector<uint8_t>> &t
     const size_t track_count = track_data.size();
     buildSMFSetupReset(track_count);
 
-    bool gotGlobalLoopStart = false, gotGlobalLoopEnd = false, gotStacEVENT_SUB_LOOP_START = false, gotLoopEventInThisRow = false;
+    bool gotGlobalLoopStart = false, gotGlobalLoopEnd = false, gotStacEVENT_SUB_LOOP_START = false,
+         gotLoopEventInThisRow = false;
 
     //! Tick position of loop start tag
     uint64_t loop_start_ticks = 0;
@@ -1553,7 +1558,7 @@ bool MidiSequencer::buildSMFTrackData(const std::vector<std::vector<uint8_t>> &t
                     }
                 }
                 else if (!m_midi_loop.m_invalid_loop && ((event.sub_type == MidiEvent::EVENT_SUB_LOOP_STACK_END) ||
-                                                       (event.sub_type == MidiEvent::EVENT_SUB_LOOP_STACK_BREAK)))
+                                                         (event.sub_type == MidiEvent::EVENT_SUB_LOOP_STACK_BREAK)))
                 {
                     if (m_midi_loop.m_stacklevel <= -1)
                     {
@@ -1561,8 +1566,8 @@ bool MidiSequencer::buildSMFTrackData(const std::vector<std::vector<uint8_t>> &t
                         if (m_midi_output_interface->onDebugMessage)
                         {
                             m_midi_output_interface->onDebugMessage(m_midi_output_interface->onDebugMessage_userdata,
-                                                                   "== Invalid loop detected! [Caught loop end "
-                                                                   "without of loop start] ==");
+                                                                    "== Invalid loop detected! [Caught loop end "
+                                                                    "without of loop start] ==");
                         }
                     }
                     else
@@ -1576,7 +1581,7 @@ bool MidiSequencer::buildSMFTrackData(const std::vector<std::vector<uint8_t>> &t
             }
 
             if (event.sub_type != MidiEvent::EVENT_SUB_END_TRACK) // Don't try to read delta after
-                                                        // EndOfTrack event!
+                                                                  // EndOfTrack event!
             {
                 evtPos.m_delay = readVariableLengthValue(&trackPtr, end, ok);
                 if (!ok)
@@ -1619,8 +1624,8 @@ bool MidiSequencer::buildSMFTrackData(const std::vector<std::vector<uint8_t>> &t
         if (m_midi_output_interface->onDebugMessage && (gotGlobalLoopStart || gotGlobalLoopEnd))
         {
             m_midi_output_interface->onDebugMessage(m_midi_output_interface->onDebugMessage_userdata,
-                                                   "== Invalid loop detected! [loopEnd is "
-                                                   "going before loopStart] ==");
+                                                    "== Invalid loop detected! [loopEnd is "
+                                                    "going before loopStart] ==");
         }
     }
 
@@ -1711,7 +1716,7 @@ void MidiSequencer::buildTimeline(const std::vector<MidiEvent> &tempos, uint64_t
                 }
             }
 
-            MidiFraction t  = pos.m_delay * currentTempo;
+            MidiFraction t   = pos.m_delay * currentTempo;
             pos.m_time_delay = t.Value();
             pos.m_time       = time;
             time += pos.m_time_delay;
@@ -1826,7 +1831,7 @@ void MidiSequencer::buildTimeline(const std::vector<MidiEvent> &tempos, uint64_t
             {
                 m_midi_loop_begin_position                        = rowBeginPosition;
                 m_midi_loop_begin_position.absolute_time_position = m_midi_loop_start_time;
-                scanDone                                         = true;
+                scanDone                                          = true;
             }
 
             if (shortestDelayNotFound)
@@ -1840,9 +1845,9 @@ bool MidiSequencer::processEvents(bool is_seek)
     if (m_midi_current_position.track.size() == 0)
         m_midi_at_end = true; // No MIDI track data to play
     if (m_midi_at_end)
-        return false;        // No more events in the queue
+        return false;         // No more events in the queue
 
-    m_midi_loop.m_caught_end     = false;
+    m_midi_loop.m_caught_end   = false;
     const size_t   track_count = m_midi_current_position.track.size();
     const Position rowBeginPosition(m_midi_current_position);
     bool           doLoopJump             = false;
@@ -1981,19 +1986,19 @@ bool MidiSequencer::processEvents(bool is_seek)
             if (s.infinity)
             {
                 if (m_midi_output_interface->onloopEnd &&
-                    (m_midi_loop_end_time >= caughLoopStackEndsTime))               // Loop End hook
+                    (m_midi_loop_end_time >= caughLoopStackEndsTime))                // Loop End hook
                 {
                     m_midi_output_interface->onloopEnd(m_midi_output_interface->onloopEnd_userdata);
-                    if (m_midi_loop_hooks_only)                                     // Stop song on reaching loop
-                                                                                   // end
+                    if (m_midi_loop_hooks_only)                                      // Stop song on reaching loop
+                                                                                     // end
                     {
-                        m_midi_at_end = true;                                       // Don't handle events anymore
+                        m_midi_at_end = true;                                        // Don't handle events anymore
                         m_midi_current_position.wait += m_midi_post_song_wait_delay; // One second delay
-                                                                                   // until stop playing
+                                                                                     // until stop playing
                     }
                 }
 
-                m_midi_current_position       = s.start_position;
+                m_midi_current_position         = s.start_position;
                 m_midi_loop.m_skip_m_stackstart = true;
 
                 for (uint8_t i = 0; i < 16; i++)
@@ -2006,7 +2011,7 @@ bool MidiSequencer::processEvents(bool is_seek)
                 s.loops--;
                 if (s.loops > 0)
                 {
-                    m_midi_current_position       = s.start_position;
+                    m_midi_current_position         = s.start_position;
                     m_midi_loop.m_skip_m_stackstart = true;
 
                     for (uint8_t i = 0; i < 16; i++)
@@ -2041,21 +2046,21 @@ bool MidiSequencer::processEvents(bool is_seek)
 
         // Loop if song end or loop end point has reached
         m_midi_loop.m_caught_end = false;
-        shortestDelay          = 0;
+        shortestDelay            = 0;
 
         if (!m_midi_loop_enabled ||
             (shortestDelayNotFound && m_midi_loop.m_loops_count >= 0 && m_midi_loop.m_loops_left < 1) ||
             m_midi_loop_hooks_only)
         {
-            m_midi_at_end = true;                                       // Don't handle events anymore
+            m_midi_at_end = true;                                        // Don't handle events anymore
             m_midi_current_position.wait += m_midi_post_song_wait_delay; // One second delay until stop
-                                                                       // playing
-            return true;                                               // We have caugh end here!
+                                                                         // playing
+            return true;                                                 // We have caugh end here!
         }
 
         if (m_midi_loop.m_temporary_broken)
         {
-            m_midi_current_position       = m_midi_track_begin_position;
+            m_midi_current_position        = m_midi_track_begin_position;
             m_midi_loop.m_temporary_broken = false;
         }
         else if (m_midi_loop.m_loops_count < 0 || m_midi_loop.m_loops_left >= 1)
@@ -2092,7 +2097,7 @@ MidiSequencer::MidiEvent MidiSequencer::parseEvent(const uint8_t **pptr, const u
         if (!ok || (ptr + length > end))
         {
             m_midi_parsing_errors_string += "parseEvent: Can't read SysEx event - Unexpected end of track "
-                                           "data.\n";
+                                            "data.\n";
             evt.is_valid = 0;
             return evt;
         }
@@ -2112,7 +2117,7 @@ MidiSequencer::MidiEvent MidiSequencer::parseEvent(const uint8_t **pptr, const u
         if (!ok || (ptr + length > end))
         {
             m_midi_parsing_errors_string += "parseEvent: Can't read Special event - Unexpected end of "
-                                           "track data.\n";
+                                            "track data.\n";
             evt.is_valid = 0;
             return evt;
         }
@@ -2134,14 +2139,14 @@ MidiSequencer::MidiEvent MidiSequencer::parseEvent(const uint8_t **pptr, const u
                 m_midi_music_copyright.push_back('\0'); /* ending fix for UTF16 strings */
                 if (m_midi_output_interface->onDebugMessage)
                     m_midi_output_interface->onDebugMessage(m_midi_output_interface->onDebugMessage_userdata,
-                                                           "Music copyright: %s", m_midi_music_copyright.c_str());
+                                                            "Music copyright: %s", m_midi_music_copyright.c_str());
             }
             else if (m_midi_output_interface->onDebugMessage)
             {
                 std::string str((const char *)evt.data.data(), evt.data.size());
                 str.push_back('\0'); /* ending fix for UTF16 strings */
                 m_midi_output_interface->onDebugMessage(m_midi_output_interface->onDebugMessage_userdata,
-                                                       "Extra copyright event: %s", str.c_str());
+                                                        "Extra copyright event: %s", str.c_str());
             }
         }
         else if (evt.sub_type == MidiEvent::EVENT_SUB_TRACK_TITLE)
@@ -2152,7 +2157,7 @@ MidiSequencer::MidiEvent MidiSequencer::parseEvent(const uint8_t **pptr, const u
                 m_midi_music_title.push_back('\0'); /* ending fix for UTF16 strings */
                 if (m_midi_output_interface->onDebugMessage)
                     m_midi_output_interface->onDebugMessage(m_midi_output_interface->onDebugMessage_userdata,
-                                                           "Music title: %s", m_midi_music_title.c_str());
+                                                            "Music title: %s", m_midi_music_title.c_str());
             }
             else
             {
@@ -2161,7 +2166,7 @@ MidiSequencer::MidiEvent MidiSequencer::parseEvent(const uint8_t **pptr, const u
                 m_midi_music_track_titles.push_back(str);
                 if (m_midi_output_interface->onDebugMessage)
                     m_midi_output_interface->onDebugMessage(m_midi_output_interface->onDebugMessage_userdata,
-                                                           "Track title: %s", str.c_str());
+                                                            "Track title: %s", str.c_str());
             }
         }
         else if (evt.sub_type == MidiEvent::EVENT_SUB_INSTRUMENT_TITLE)
@@ -2171,7 +2176,7 @@ MidiSequencer::MidiEvent MidiSequencer::parseEvent(const uint8_t **pptr, const u
                 std::string str((const char *)evt.data.data(), evt.data.size());
                 str.push_back('\0'); /* ending fix for UTF16 strings */
                 m_midi_output_interface->onDebugMessage(m_midi_output_interface->onDebugMessage_userdata,
-                                                       "Instrument: %s", str.c_str());
+                                                        "Instrument: %s", str.c_str());
             }
         }
         else if (evt.sub_type == MidiEvent::EVENT_SUB_MARKER)
@@ -2210,9 +2215,10 @@ MidiSequencer::MidiEvent MidiSequencer::parseEvent(const uint8_t **pptr, const u
                 if (m_midi_output_interface->onDebugMessage)
                 {
                     m_midi_output_interface->onDebugMessage(m_midi_output_interface->onDebugMessage_userdata,
-                                                           "Stack Marker Loop Start at %d to %d level with %d "
-                                                           "loops",
-                                                           m_midi_loop.m_stacklevel, m_midi_loop.m_stacklevel + 1, loops);
+                                                            "Stack Marker Loop Start at %d to %d level with %d "
+                                                            "loops",
+                                                            m_midi_loop.m_stacklevel, m_midi_loop.m_stacklevel + 1,
+                                                            loops);
                 }
                 return evt;
             }
@@ -2225,10 +2231,10 @@ MidiSequencer::MidiEvent MidiSequencer::parseEvent(const uint8_t **pptr, const u
 
                 if (m_midi_output_interface->onDebugMessage)
                 {
-                    m_midi_output_interface->onDebugMessage(m_midi_output_interface->onDebugMessage_userdata,
-                                                           "Stack Marker Loop %s at %d to %d level",
-                                                           (evt.sub_type == MidiEvent::EVENT_SUB_LOOP_STACK_END ? "End" : "Break"),
-                                                           m_midi_loop.m_stacklevel, m_midi_loop.m_stacklevel - 1);
+                    m_midi_output_interface->onDebugMessage(
+                        m_midi_output_interface->onDebugMessage_userdata, "Stack Marker Loop %s at %d to %d level",
+                        (evt.sub_type == MidiEvent::EVENT_SUB_LOOP_STACK_END ? "End" : "Break"),
+                        m_midi_loop.m_stacklevel, m_midi_loop.m_stacklevel - 1);
                 }
                 return evt;
             }
@@ -2253,7 +2259,7 @@ MidiSequencer::MidiEvent MidiSequencer::parseEvent(const uint8_t **pptr, const u
         if (ptr + 1 > end)
         {
             m_midi_parsing_errors_string += "parseEvent: Can't read System Command Song Select event - "
-                                           "Unexpected end of track data.\n";
+                                            "Unexpected end of track data.\n";
             evt.is_valid = 0;
             return evt;
         }
@@ -2268,7 +2274,7 @@ MidiSequencer::MidiEvent MidiSequencer::parseEvent(const uint8_t **pptr, const u
         if (ptr + 2 > end)
         {
             m_midi_parsing_errors_string += "parseEvent: Can't read System Command Position Pointer event "
-                                           "- Unexpected end of track data.\n";
+                                            "- Unexpected end of track data.\n";
             evt.is_valid = 0;
             return evt;
         }
@@ -2293,7 +2299,7 @@ MidiSequencer::MidiEvent MidiSequencer::parseEvent(const uint8_t **pptr, const u
         if (ptr + 2 > end)
         {
             m_midi_parsing_errors_string += "parseEvent: Can't read regular 2-byte event - Unexpected "
-                                           "end of track data.\n";
+                                            "end of track data.\n";
             evt.is_valid = 0;
             return evt;
         }
@@ -2304,7 +2310,7 @@ MidiSequencer::MidiEvent MidiSequencer::parseEvent(const uint8_t **pptr, const u
         if ((evType == MidiEvent::EVENT_NOTE_ON) && (evt.data[1] == 0))
         {
             evt.type = MidiEvent::EVENT_NOTE_OFF; // Note ON with zero velocity
-                                            // is Note OFF!
+                                                  // is Note OFF!
         }
         else if (evType == MidiEvent::EVENT_CONTROL_CHANGE)
         {
@@ -2365,7 +2371,7 @@ MidiSequencer::MidiEvent MidiSequencer::parseEvent(const uint8_t **pptr, const u
         if (ptr + 1 > end)
         {
             m_midi_parsing_errors_string += "parseEvent: Can't read regular 1-byte event - Unexpected "
-                                           "end of track data.\n";
+                                            "end of track data.\n";
             evt.is_valid = 0;
             return evt;
         }
@@ -2396,13 +2402,13 @@ void MidiSequencer::handleEvent(size_t track, const MidiSequencer::MidiEvent &ev
     if (m_midi_output_interface->onEvent)
     {
         m_midi_output_interface->onEvent(m_midi_output_interface->onEvent_userdata, evt.type, evt.sub_type, evt.channel,
-                                        evt.data.data(), evt.data.size());
+                                         evt.data.data(), evt.data.size());
     }
 
     if (evt.type == MidiEvent::EVENT_SYSEX || evt.type == MidiEvent::EVENT_SYSEX2) // Ignore SysEx
     {
         m_midi_output_interface->rt_systemExclusive(m_midi_output_interface->rtUserData, evt.data.data(),
-                                                   evt.data.size());
+                                                    evt.data.size());
         return;
     }
 
@@ -2415,7 +2421,7 @@ void MidiSequencer::handleEvent(size_t track, const MidiSequencer::MidiEvent &ev
 
         if (m_midi_output_interface->rt_metaEvent) // Meta event hook
             m_midi_output_interface->rt_metaEvent(m_midi_output_interface->rtUserData, evtype, (const uint8_t *)(data),
-                                                 size_t(length));
+                                                  size_t(length));
 
         if (evtype == MidiEvent::EVENT_SUB_END_TRACK) // End Of Track
         {
@@ -2440,10 +2446,10 @@ void MidiSequencer::handleEvent(size_t track, const MidiSequencer::MidiEvent &ev
         {
             if (m_midi_output_interface->onDebugMessage)
                 m_midi_output_interface->onDebugMessage(m_midi_output_interface->onDebugMessage_userdata,
-                                                       "Switching another device: %s", data);
+                                                        "Switching another device: %s", data);
             if (m_midi_output_interface->rt_deviceSwitch)
                 m_midi_output_interface->rt_deviceSwitch(m_midi_output_interface->rtUserData, track, data,
-                                                        size_t(length));
+                                                         size_t(length));
             return;
         }
 
@@ -2451,7 +2457,7 @@ void MidiSequencer::handleEvent(size_t track, const MidiSequencer::MidiEvent &ev
         if (m_midi_loop_enabled && !m_midi_loop.m_invalid_loop)
         {
             if (evtype == MidiEvent::EVENT_SUB_LOOP_START) // Special non-spec MIDI
-                                                 // loop Start point
+                                                           // loop Start point
             {
                 m_midi_loop.m_caught_start = true;
                 return;
@@ -2483,9 +2489,9 @@ void MidiSequencer::handleEvent(size_t track, const MidiSequencer::MidiEvent &ev
                     m_midi_loop.m_stack.push_back(e);
                 }
 
-                LoopStackEntry &s              = m_midi_loop.m_stack[slevel];
-                s.loops                        = (int)(x);
-                s.infinity                     = (x == 0);
+                LoopStackEntry &s                 = m_midi_loop.m_stack[slevel];
+                s.loops                           = (int)(x);
+                s.infinity                        = (x == 0);
                 m_midi_loop.m_caught_m_stackstart = true;
                 return;
             }
@@ -2533,7 +2539,7 @@ void MidiSequencer::handleEvent(size_t track, const MidiSequencer::MidiEvent &ev
     case MidiEvent::EVENT_NOTE_OFF: // Note off
     {
         if (midCh < 16 && m_channeldisable[midCh])
-            break;            // Disabled channel
+            break;                  // Disabled channel
         uint8_t note = evt.data[0];
         uint8_t vol  = evt.data[1];
         if (m_midi_output_interface->rt_noteOff)
@@ -2546,7 +2552,7 @@ void MidiSequencer::handleEvent(size_t track, const MidiSequencer::MidiEvent &ev
     case MidiEvent::EVENT_NOTE_ON: // Note on
     {
         if (midCh < 16 && m_channeldisable[midCh])
-            break;           // Disabled channel
+            break;                 // Disabled channel
         uint8_t note = evt.data[0];
         uint8_t vol  = evt.data[1];
         m_midi_output_interface->rt_noteOn(m_midi_output_interface->rtUserData, (uint8_t)(midCh), note, vol);
@@ -2566,7 +2572,7 @@ void MidiSequencer::handleEvent(size_t track, const MidiSequencer::MidiEvent &ev
         uint8_t ctrlno = evt.data[0];
         uint8_t value  = evt.data[1];
         m_midi_output_interface->rt_controllerChange(m_midi_output_interface->rtUserData, (uint8_t)(midCh), ctrlno,
-                                                    value);
+                                                     value);
         break;
     }
 
@@ -2878,7 +2884,7 @@ bool MidiSequencer::_ParseSmf(MEMFILE *mfr)
         if (fsize < trackLength)
         {
             m_midi_error_string = "MIDI Loader: Unexpected file ending while getting raw track "
-                                 "data!\n";
+                                  "data!\n";
             mem_fclose(mfr);
             mfr = NULL;
             return false;

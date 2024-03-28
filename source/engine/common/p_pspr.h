@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id: ed6594d9cad51747617853dce995e5c44d9215dd $
@@ -28,7 +28,6 @@
 #include "m_fixed.h"
 #include "tables.h"
 
-
 //
 // Needs to include the precompiled
 //	sprite animation tables.
@@ -42,8 +41,8 @@
 // Frame flags:
 // handles maximum brightness (torches, muzzle flare, light sources)
 //
-#define FF_FULLBRIGHT	0x8000	// flag in thing->frame
-#define FF_FRAMEMASK	0x7fff
+#define FF_FULLBRIGHT 0x8000 // flag in thing->frame
+#define FF_FRAMEMASK  0x7fff
 
 //
 // Overlay psprites are scaled shapes
@@ -52,31 +51,34 @@
 //
 typedef enum
 {
-	ps_weapon,
-	ps_flash,
-	NUMPSPRITES
+    ps_weapon,
+    ps_flash,
+    NUMPSPRITES
 
 } psprnum_t;
 
 void A_ForceWeaponFire(AActor *mo, weapontype_t weapon, int tic);
 
-inline FArchive &operator<< (FArchive &arc, psprnum_t i)
+inline FArchive &operator<<(FArchive &arc, psprnum_t i)
 {
-	return arc << (BYTE)i;
+    return arc << (BYTE)i;
 }
-inline FArchive &operator>> (FArchive &arc, psprnum_t &out)
+inline FArchive &operator>>(FArchive &arc, psprnum_t &out)
 {
-	BYTE in; arc >> in; out = (psprnum_t)in; return arc;
+    BYTE in;
+    arc >> in;
+    out = (psprnum_t)in;
+    return arc;
 }
 
 typedef struct pspdef_s
 {
-	state_t*	state;	// a NULL state means not active
-	int 		tics;
+    state_t *state; // a NULL state means not active
+    int      tics;
 
-	fixed_t 	sx;
-	fixed_t 	sy;
+    fixed_t sx;
+    fixed_t sy;
 } pspdef_t;
 
-FArchive &operator<< (FArchive &, pspdef_t &);
-FArchive &operator>> (FArchive &, pspdef_t &);
+FArchive &operator<<(FArchive &, pspdef_t &);
+FArchive &operator>>(FArchive &, pspdef_t &);

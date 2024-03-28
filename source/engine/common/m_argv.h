@@ -21,55 +21,50 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #pragma once
 
 #include "dobject.h"
-
 
 //
 // MISC
 //
 class DArgs : public DObject
 {
-	DECLARE_CLASS (DArgs, DObject)
-public:
-	DArgs ();
-	DArgs (const DArgs &args);
-	DArgs (unsigned int argc, char **argv);
-	DArgs (const char *cmdline);
-	~DArgs ();
+    DECLARE_CLASS(DArgs, DObject)
+  public:
+    DArgs();
+    DArgs(const DArgs &args);
+    DArgs(unsigned int argc, char **argv);
+    DArgs(const char *cmdline);
+    ~DArgs();
 
-	DArgs &operator= (const DArgs &other);
-	const char *operator[] (size_t n);
+    DArgs      &operator=(const DArgs &other);
+    const char *operator[](size_t n);
 
-	void AppendArg (const char *arg);
-	void SetArgs (unsigned int argc, char **argv);
-	void SetArgs(const char *cmdline);
-	DArgs GatherFiles(const char* param) const;
-	void SetArg (unsigned int argnum, const char *arg);
+    void  AppendArg(const char *arg);
+    void  SetArgs(unsigned int argc, char **argv);
+    void  SetArgs(const char *cmdline);
+    DArgs GatherFiles(const char *param) const;
+    void  SetArg(unsigned int argnum, const char *arg);
 
+    // Returns the position of the given parameter
+    // in the arg list (0 if not found).
+    size_t                         CheckParm(const char *check) const;
+    const char                    *CheckValue(const char *check) const;
+    const char                    *GetArg(size_t arg) const;
+    const std::vector<std::string> GetArgList(size_t start) const;
+    size_t                         NumArgs() const;
+    void                           FlushArgs();
 
-	// Returns the position of the given parameter
-	// in the arg list (0 if not found).
-	size_t CheckParm (const char *check) const;
-	const char *CheckValue (const char *check) const;
-	const char *GetArg (size_t arg) const;
-	const std::vector<std::string> GetArgList (size_t start) const;
-	size_t NumArgs () const;
-	void FlushArgs ();
+  private:
+    std::vector<std::string> args;
 
-private:
-
-	std::vector<std::string> args;
-
-	void CopyArgs (unsigned int argc, char **argv);
-
+    void CopyArgs(unsigned int argc, char **argv);
 };
 
 extern DArgs Args;
 
 void M_FindResponseFile(void);
-int M_GetParmValue(const char* name);
+int  M_GetParmValue(const char *name);
 
-extern bool DefaultsLoaded; 
+extern bool DefaultsLoaded;

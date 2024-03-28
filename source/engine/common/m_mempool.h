@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id: e00b3203dfa81296f1dec46f05ef506701858bb4 $
@@ -22,99 +22,95 @@
 //	the intial memory pool is exhausted, additional pools are allocated. These
 //	are consolodated into one large pool the next time clear() is called.
 //
-//    
+//
 //-----------------------------------------------------------------------------
-
 
 #pragma once
 
-
-template <typename T>
-class Pool
+template <typename T> class Pool
 {
-public:
-	Pool(size_t initial_max_count) :
-		num_blocks(0), block_size(NULL), data_block(NULL), free_block(NULL)
-	{
-		resize(initial_max_count);
-	}
+  public:
+    Pool(size_t initial_max_count) : num_blocks(0), block_size(NULL), data_block(NULL), free_block(NULL)
+    {
+        resize(initial_max_count);
+    }
 
-	~Pool()
-	{
-		free_data();
-	}
+    ~Pool()
+    {
+        free_data();
+    }
 
-	void clear()
-	{
-		if (num_blocks <= 1)
-		{
-			free_block = data_block[0];
-			return;
-		}
+    void clear()
+    {
+        if (num_blocks <= 1)
+        {
+            free_block = data_block[0];
+            return;
+        }
 
-		size_t new_size = 0;
-		if (block_size != NULL)
-			new_size = block_size[num_blocks - 1];
-		free_data();
-		resize(new_size);
-	}
+        size_t new_size = 0;
+        if (block_size != NULL)
+            new_size = block_size[num_blocks - 1];
+        free_data();
+        resize(new_size);
+    }
 
-	T* alloc(size_t count = 1)
-	{
-		while (free_block + count * sizeof(T) > data_block[num_blocks - 1] + block_size[num_blocks - 1])
-			resize(2 * block_size[num_blocks - 1]);
+    T *alloc(size_t count = 1)
+    {
+        while (free_block + count * sizeof(T) > data_block[num_blocks - 1] + block_size[num_blocks - 1])
+            resize(2 * block_size[num_blocks - 1]);
 
-		T* ptr = reinterpret_cast<T*>(free_block);
-		free_block += count * sizeof(T);
-		return ptr;
-	}
+        T *ptr = reinterpret_cast<T *>(free_block);
+        free_block += count * sizeof(T);
+        return ptr;
+    }
 
-private:
-	void resize(size_t new_max_count)
-	{
-		uint32_t new_size = new_max_count * sizeof(T);
+  private:
+    void resize(size_t new_max_count)
+    {
+        uint32_t new_size = new_max_count * sizeof(T);
 
-		if (new_size == 0)
-			return;
+        if (new_size == 0)
+            return;
 
-		num_blocks++;
+        num_blocks++;
 
-		size_t* new_block_size = new size_t[num_blocks];
-		if (block_size != NULL)
-		{
-			memcpy(new_block_size, block_size, (num_blocks - 1) * sizeof(size_t));
-			delete [] block_size;
-		}
-		new_block_size[num_blocks - 1] = new_size;
-		block_size = new_block_size;
+        size_t *new_block_size = new size_t[num_blocks];
+        if (block_size != NULL)
+        {
+            memcpy(new_block_size, block_size, (num_blocks - 1) * sizeof(size_t));
+            delete[] block_size;
+        }
+        new_block_size[num_blocks - 1] = new_size;
+        block_size                     = new_block_size;
 
-		byte** new_data_block = new byte*[num_blocks];
-		if (data_block != NULL)
-		{
-			memcpy(new_data_block, data_block, (num_blocks - 1) * sizeof(byte*));
-			delete [] data_block;
-		}
-		new_data_block[num_blocks - 1] = new byte[new_size];
-		data_block = new_data_block;
+        byte **new_data_block = new byte *[num_blocks];
+        if (data_block != NULL)
+        {
+            memcpy(new_data_block, data_block, (num_blocks - 1) * sizeof(byte *));
+            delete[] data_block;
+        }
+        new_data_block[num_blocks - 1] = new byte[new_size];
+        data_block                     = new_data_block;
 
-		free_block = data_block[num_blocks - 1];
-	}
+        free_block = data_block[num_blocks - 1];
+    }
 
-	void free_data()
-	{
-		for (size_t i = 0; i < num_blocks; i++)
-			delete [] data_block[i];	
+    void free_data()
+    {
+        for (size_t i = 0; i < num_blocks; i++)
+            delete[] data_block[i];
 
-		delete [] block_size;
-		delete [] data_block;
-		num_blocks = 0;
-		block_size = NULL;
-		data_block = NULL;
-		free_block = NULL;
-	}
+        delete[] block_size;
+        delete[] data_block;
+        num_blocks = 0;
+        block_size = NULL;
+        data_block = NULL;
+        free_block = NULL;
+    }
 
-	size_t		num_blocks;
-	size_t*		block_size;
-	byte**		data_block;
-	byte*		free_block;
+    size_t  num_blocks;
+    size_t *block_size;
+    byte  **data_block;
+    byte   *free_block;
 };

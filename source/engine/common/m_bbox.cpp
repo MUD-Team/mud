@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id: ebda9fa19025ff1c0a8c61352f69f5bb145141b0 $
@@ -21,38 +21,37 @@
 //		Random number LUT.
 //		Default Config File.
 //		PCX Screenshots.
-//    
+//
 //-----------------------------------------------------------------------------
-
 
 #include "odamex.h"
 
 #include "m_bbox.h"
 
-IMPLEMENT_CLASS (DBoundingBox, DObject)
+IMPLEMENT_CLASS(DBoundingBox, DObject)
 
-DBoundingBox::DBoundingBox ()
+DBoundingBox::DBoundingBox()
 {
-	ClearBox ();
+    ClearBox();
 }
 
-void DBoundingBox::ClearBox ()
+void DBoundingBox::ClearBox()
 {
-	m_Box[BOXTOP] = m_Box[BOXRIGHT] = MININT;
-	m_Box[BOXBOTTOM] = m_Box[BOXLEFT] = MAXINT;
+    m_Box[BOXTOP] = m_Box[BOXRIGHT] = MININT;
+    m_Box[BOXBOTTOM] = m_Box[BOXLEFT] = MAXINT;
 }
 
-void DBoundingBox::AddToBox (fixed_t x, fixed_t y)
+void DBoundingBox::AddToBox(fixed_t x, fixed_t y)
 {
-	if (x < m_Box[BOXLEFT])
-		m_Box[BOXLEFT] = x;
-	else if (x > m_Box[BOXRIGHT])
-		m_Box[BOXRIGHT] = x;
+    if (x < m_Box[BOXLEFT])
+        m_Box[BOXLEFT] = x;
+    else if (x > m_Box[BOXRIGHT])
+        m_Box[BOXRIGHT] = x;
 
-	if (y < m_Box[BOXBOTTOM])
-		m_Box[BOXBOTTOM] = y;
-	else if (y > m_Box[BOXTOP])
-		m_Box[BOXTOP] = y;
+    if (y < m_Box[BOXBOTTOM])
+        m_Box[BOXBOTTOM] = y;
+    else if (y > m_Box[BOXTOP])
+        m_Box[BOXTOP] = y;
 }
 
-VERSION_CONTROL (m_bbox_cpp, "$Id: ebda9fa19025ff1c0a8c61352f69f5bb145141b0 $")
+VERSION_CONTROL(m_bbox_cpp, "$Id: ebda9fa19025ff1c0a8c61352f69f5bb145141b0 $")

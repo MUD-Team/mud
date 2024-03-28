@@ -21,7 +21,6 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #pragma once
 
 #include "stringtable.h"
@@ -30,6 +29,6 @@
 extern StringTable GStrings;
 
 // QuitDOOM messages
-#define NUM_QUITMESSAGES   15
+#define NUM_QUITMESSAGES 15
 
 extern const char *endmsg[];

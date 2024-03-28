@@ -50,133 +50,129 @@
 
 inline static unsigned short LESHORT(unsigned short x)
 {
-	return (unsigned short)((x >> 8) | (x << 8));
+    return (unsigned short)((x >> 8) | (x << 8));
 }
 
 inline static short LESHORT(short x)
 {
-	return (short)((((unsigned short)x) >> 8) | (((unsigned short)x) << 8));
+    return (short)((((unsigned short)x) >> 8) | (((unsigned short)x) << 8));
 }
 
 // Swapping 32bit.
 inline static unsigned int LELONG(unsigned int x)
 {
-	return (unsigned int)((x >> 24) | ((x >> 8) & 0xff00) | ((x << 8) & 0xff0000) |
-	                      (x << 24));
+    return (unsigned int)((x >> 24) | ((x >> 8) & 0xff00) | ((x << 8) & 0xff0000) | (x << 24));
 }
 
 inline static int LELONG(int x)
 {
-	return (int)((((unsigned int)x) >> 24) | ((((unsigned int)x) >> 8) & 0xff00) |
-	             ((((unsigned int)x) << 8) & 0xff0000) | (((unsigned int)x) << 24));
+    return (int)((((unsigned int)x) >> 24) | ((((unsigned int)x) >> 8) & 0xff00) |
+                 ((((unsigned int)x) << 8) & 0xff0000) | (((unsigned int)x) << 24));
 }
 
 inline static unsigned long LELONG(unsigned long x)
 {
-	return (unsigned long)((x >> 24) | ((x >> 8) & 0xff00) | ((x << 8) & 0xff0000) |
-	                       (x << 24));
+    return (unsigned long)((x >> 24) | ((x >> 8) & 0xff00) | ((x << 8) & 0xff0000) | (x << 24));
 }
 
 inline static long LELONG(long x)
 {
-	return (long)((((unsigned int)x) >> 24) | ((((unsigned int)x) >> 8) & 0xff00) |
-	              ((((unsigned int)x) << 8) & 0xff0000) | (((unsigned int)x) << 24));
+    return (long)((((unsigned int)x) >> 24) | ((((unsigned int)x) >> 8) & 0xff00) |
+                  ((((unsigned int)x) << 8) & 0xff0000) | (((unsigned int)x) << 24));
 }
 
 inline static unsigned short BESHORT(unsigned short x)
 {
-	return x;
+    return x;
 }
 
 inline static short BESHORT(short x)
 {
-	return x;
+    return x;
 }
 
 inline static unsigned int BELONG(unsigned int x)
 {
-	return x;
+    return x;
 }
 
 inline static int BELONG(int x)
 {
-	return x;
+    return x;
 }
 
 inline static unsigned long BELONG(unsigned long x)
 {
-	return x;
+    return x;
 }
 
 inline static long BELONG(long x)
 {
-	return x;
+    return x;
 }
 
 #else
 
 inline static unsigned short LESHORT(unsigned short x)
 {
-	return x;
+    return x;
 }
 
 inline static short LESHORT(short x)
 {
-	return x;
+    return x;
 }
 
 inline static unsigned int LELONG(unsigned int x)
 {
-	return x;
+    return x;
 }
 
 inline static int LELONG(int x)
 {
-	return x;
+    return x;
 }
 
 inline static unsigned long LELONG(unsigned long x)
 {
-	return x;
+    return x;
 }
 
 inline static long LELONG(long x)
 {
-	return x;
+    return x;
 }
 
 inline static unsigned short BESHORT(unsigned short x)
 {
-	return (unsigned short)((x >> 8) | (x << 8));
+    return (unsigned short)((x >> 8) | (x << 8));
 }
 
 inline static short BESHORT(short x)
 {
-	return (short)((((unsigned short)x) >> 8) | (((unsigned short)x) << 8));
+    return (short)((((unsigned short)x) >> 8) | (((unsigned short)x) << 8));
 }
 
 inline static unsigned int BELONG(unsigned int x)
 {
-	return (unsigned int)((x >> 24) | ((x >> 8) & 0xff00) | ((x << 8) & 0xff0000) |
-	                      (x << 24));
+    return (unsigned int)((x >> 24) | ((x >> 8) & 0xff00) | ((x << 8) & 0xff0000) | (x << 24));
 }
 
 inline static int BELONG(int x)
 {
-	return (int)((((unsigned int)x) >> 24) | ((((unsigned int)x) >> 8) & 0xff00) |
-	             ((((unsigned int)x) << 8) & 0xff0000) | (((unsigned int)x) << 24));
+    return (int)((((unsigned int)x) >> 24) | ((((unsigned int)x) >> 8) & 0xff00) |
+                 ((((unsigned int)x) << 8) & 0xff0000) | (((unsigned int)x) << 24));
 }
 
 inline static unsigned long BELONG(unsigned long x)
 {
-	return (unsigned long)((x >> 24) | ((x >> 8) & 0xff00) | ((x << 8) & 0xff0000) |
-	                       (x << 24));
+    return (unsigned long)((x >> 24) | ((x >> 8) & 0xff00) | ((x << 8) & 0xff0000) | (x << 24));
 }
 
 inline static long BELONG(long x)
 {
-	return (long)((((unsigned int)x) >> 24) | ((((unsigned int)x) >> 8) & 0xff00) |
-	              ((((unsigned int)x) << 8) & 0xff0000) | (((unsigned int)x) << 24));
+    return (long)((((unsigned int)x) >> 24) | ((((unsigned int)x) >> 8) & 0xff00) |
+                  ((((unsigned int)x) << 8) & 0xff0000) | (((unsigned int)x) << 24));
 }
 
 #endif

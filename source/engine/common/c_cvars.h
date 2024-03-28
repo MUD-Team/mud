@@ -23,9 +23,9 @@
 
 #pragma once
 
-//Uncomment to allow for latency simulation - see sv_latency in sv_cvarlist.cpp
-//Note: When compiling for linux you will have link against pthread manually
-//#define SIMULATE_LATENCY
+// Uncomment to allow for latency simulation - see sv_latency in sv_cvarlist.cpp
+// Note: When compiling for linux you will have link against pthread manually
+// #define SIMULATE_LATENCY
 #include "tarray.h"
 
 #include <cfloat>
@@ -65,7 +65,7 @@ CVARS (console variables)
 #define CVAR_LATCH BIT(4)
 
 /**
- * Can unset this var from console. 
+ * Can unset this var from console.
  */
 #define CVAR_UNSETTABLE BIT(5)
 
@@ -107,163 +107,222 @@ CVARS (console variables)
 // Hints for network code optimization
 typedef enum
 {
-     CVARTYPE_NONE = 0 // Used for no sends
+    CVARTYPE_NONE = 0 // Used for no sends
 
-    ,CVARTYPE_BOOL
-    ,CVARTYPE_BYTE
-    ,CVARTYPE_WORD
-    ,CVARTYPE_INT
-    ,CVARTYPE_FLOAT
-    ,CVARTYPE_STRING
+        ,
+    CVARTYPE_BOOL,
+    CVARTYPE_BYTE,
+    CVARTYPE_WORD,
+    CVARTYPE_INT,
+    CVARTYPE_FLOAT,
+    CVARTYPE_STRING
 
-    ,CVARTYPE_MAX = 255
+        ,
+    CVARTYPE_MAX = 255
 } cvartype_t;
 
 class cvar_t
 {
-public:
-	cvar_t(const char* name, const char* def, const char* help, cvartype_t,
-			DWORD flags, float minval = -FLT_MAX, float maxval = FLT_MAX);
-	cvar_t(const char* name, const char* def, const char* help, cvartype_t,
-			DWORD flags, void (*callback)(cvar_t &), float minval = -FLT_MAX, float maxval = FLT_MAX);
-	virtual ~cvar_t ();
+  public:
+    cvar_t(const char *name, const char *def, const char *help, cvartype_t, DWORD flags, float minval = -FLT_MAX,
+           float maxval = FLT_MAX);
+    cvar_t(const char *name, const char *def, const char *help, cvartype_t, DWORD flags, void (*callback)(cvar_t &),
+           float minval = -FLT_MAX, float maxval = FLT_MAX);
+    virtual ~cvar_t();
 
-	const char *cstring() const {return m_String.c_str(); }
-	const std::string& str() const { return m_String; }
-	const char *name() const { return m_Name.c_str(); }
-	const char *helptext() const {return m_HelpText.c_str(); }
-	const char *latched() const { return m_LatchedString.c_str(); }
-	float value() const { return m_Value; }
-	operator float () const { return m_Value; }
-	operator const std::string& () const { return m_String; }
-	unsigned int flags() const { return m_Flags; }
-    cvartype_t type() const { return m_Type; }
-	const std::string& getDefault() const { return m_Default; }
-	float getMinValue() const { return m_MinValue; }
-	float getMaxValue() const { return m_MaxValue; }
+    const char *cstring() const
+    {
+        return m_String.c_str();
+    }
+    const std::string &str() const
+    {
+        return m_String;
+    }
+    const char *name() const
+    {
+        return m_Name.c_str();
+    }
+    const char *helptext() const
+    {
+        return m_HelpText.c_str();
+    }
+    const char *latched() const
+    {
+        return m_LatchedString.c_str();
+    }
+    float value() const
+    {
+        return m_Value;
+    }
+    operator float() const
+    {
+        return m_Value;
+    }
+    operator const std::string &() const
+    {
+        return m_String;
+    }
+    unsigned int flags() const
+    {
+        return m_Flags;
+    }
+    cvartype_t type() const
+    {
+        return m_Type;
+    }
+    const std::string &getDefault() const
+    {
+        return m_Default;
+    }
+    float getMinValue() const
+    {
+        return m_MinValue;
+    }
+    float getMaxValue() const
+    {
+        return m_MaxValue;
+    }
 
-	// return m_Value as an int, rounded to the nearest integer because
-	// casting truncates instead of rounding
-	int asInt() const { return static_cast<int>(m_Value >= 0.0f ? m_Value + 0.5f : m_Value - 0.5f); }
+    // return m_Value as an int, rounded to the nearest integer because
+    // casting truncates instead of rounding
+    int asInt() const
+    {
+        return static_cast<int>(m_Value >= 0.0f ? m_Value + 0.5f : m_Value - 0.5f);
+    }
 
-	inline void Callback (){ if (m_Callback) m_Callback (*this); }
+    inline void Callback()
+    {
+        if (m_Callback)
+            m_Callback(*this);
+    }
 
-	void SetDefault (const char *value);
-	void RestoreDefault ();
-	void Set (const char *value);
-	void Set (float value);
-	void ForceSet (const char *value);
-	void ForceSet (float value);
+    void SetDefault(const char *value);
+    void RestoreDefault();
+    void Set(const char *value);
+    void Set(float value);
+    void ForceSet(const char *value);
+    void ForceSet(float value);
 
-	static void Transfer(const char *fromname, const char *toname);
+    static void Transfer(const char *fromname, const char *toname);
 
-	static void EnableNoSet ();		// enable the honoring of CVAR_NOSET
-	static void EnableCallbacks ();
+    static void EnableNoSet(); // enable the honoring of CVAR_NOSET
+    static void EnableCallbacks();
 
-	unsigned int m_Flags;
+    unsigned int m_Flags;
 
-	// Writes all cvars that could effect demo sync to *demo_p. These are
-	// cvars that have either CVAR_SERVERINFO or CVAR_DEMOSAVE set.
-	static void C_WriteCVars (byte **demo_p, DWORD filter, bool compact=false);
+    // Writes all cvars that could effect demo sync to *demo_p. These are
+    // cvars that have either CVAR_SERVERINFO or CVAR_DEMOSAVE set.
+    static void C_WriteCVars(byte **demo_p, DWORD filter, bool compact = false);
 
-	// Read all cvars from *demo_p and set them appropriately.
-	static void C_ReadCVars (byte **demo_p);
+    // Read all cvars from *demo_p and set them appropriately.
+    static void C_ReadCVars(byte **demo_p);
 
-	// Backup cvars for restoration later. Called before connecting to a server
-	// or a demo starts playing to save all cvars which could be changed while
-	// by the server or by playing a demo.
-	// [SL] bitflag can be used to filter which cvars are set to default.
-	// The default value for bitflag is 0xFFFFFFFF, which effectively disables
-	// the filtering.
-	static void C_BackupCVars (unsigned int bitflag = 0xFFFFFFFF);
+    // Backup cvars for restoration later. Called before connecting to a server
+    // or a demo starts playing to save all cvars which could be changed while
+    // by the server or by playing a demo.
+    // [SL] bitflag can be used to filter which cvars are set to default.
+    // The default value for bitflag is 0xFFFFFFFF, which effectively disables
+    // the filtering.
+    static void C_BackupCVars(unsigned int bitflag = 0xFFFFFFFF);
 
-	// Restore demo cvars. Called after demo playback to restore all cvars
-	// that might possibly have been changed during the course of demo playback.
-	static void C_RestoreCVars (void);
+    // Restore demo cvars. Called after demo playback to restore all cvars
+    // that might possibly have been changed during the course of demo playback.
+    static void C_RestoreCVars(void);
 
-	// Finds a named cvar
-	static cvar_t *FindCVar (const char *var_name, cvar_t **prev);
+    // Finds a named cvar
+    static cvar_t *FindCVar(const char *var_name, cvar_t **prev);
 
-	// Called from G_InitNew()
-	static void UnlatchCVars (void);
+    // Called from G_InitNew()
+    static void UnlatchCVars(void);
 
-	// archive cvars to FILE f
-	static void C_ArchiveCVars (void *f);
+    // archive cvars to FILE f
+    static void C_ArchiveCVars(void *f);
 
-	// Initialize cvars to default values after they are created.
-	// [SL] bitflag can be used to filter which cvars are set to default.
-	// The default value for bitflag is 0xFFFFFFFF, which effectively disables
-	// the filtering.
-	static void C_SetCVarsToDefaults (unsigned int bitflag = 0xFFFFFFFF);
+    // Initialize cvars to default values after they are created.
+    // [SL] bitflag can be used to filter which cvars are set to default.
+    // The default value for bitflag is 0xFFFFFFFF, which effectively disables
+    // the filtering.
+    static void C_SetCVarsToDefaults(unsigned int bitflag = 0xFFFFFFFF);
 
-	static bool SetServerVar (const char *name, const char *value);
+    static bool SetServerVar(const char *name, const char *value);
 
-	static void FilterCompactCVars (TArray<cvar_t *> &cvars, DWORD filter);
+    static void FilterCompactCVars(TArray<cvar_t *> &cvars, DWORD filter);
 
-	// console variable interaction
-	static cvar_t *cvar_set (const char *var_name, const char *value);
-	static cvar_t *cvar_forceset (const char *var_name, const char *value);
+    // console variable interaction
+    static cvar_t *cvar_set(const char *var_name, const char *value);
+    static cvar_t *cvar_forceset(const char *var_name, const char *value);
 
     // list all console variables
-	static void cvarlist();
+    static void cvarlist();
 
-	cvar_t &operator = (float other) { ForceSet(other); return *this; }
-	cvar_t &operator = (const char *other) { ForceSet(other); return *this; }
+    cvar_t &operator=(float other)
+    {
+        ForceSet(other);
+        return *this;
+    }
+    cvar_t &operator=(const char *other)
+    {
+        ForceSet(other);
+        return *this;
+    }
 
-	cvar_t *GetNext() { return m_Next; }
+    cvar_t *GetNext()
+    {
+        return m_Next;
+    }
 
-private:
+  private:
+    cvar_t(const cvar_t &var)
+    {
+    }
 
-	cvar_t(const cvar_t &var) { }
+    void InitSelf(const char *name, const char *def, const char *help, cvartype_t, DWORD flags,
+                  void (*callback)(cvar_t &), float minval = -FLT_MAX, float maxval = FLT_MAX);
 
-	void InitSelf(const char* name, const char* def, const char* help, cvartype_t,
-				DWORD flags, void (*callback)(cvar_t &), float minval = -FLT_MAX, float maxval = FLT_MAX);
-
-	void (*m_Callback)(cvar_t &);
-	cvar_t *m_Next;
+    void (*m_Callback)(cvar_t &);
+    cvar_t *m_Next;
 
     cvartype_t m_Type;
 
-	std::string m_Name, m_String;
-	std::string m_HelpText;
+    std::string m_Name, m_String;
+    std::string m_HelpText;
 
-	float m_Value;
-	float m_MinValue, m_MaxValue;
+    float m_Value;
+    float m_MinValue, m_MaxValue;
 
-	std::string m_LatchedString, m_Default;
+    std::string m_LatchedString, m_Default;
 
-	static bool m_UseCallback;
-	static bool m_DoNoSet;
+    static bool m_UseCallback;
+    static bool m_DoNoSet;
 
- protected:
-
-	cvar_t () :
-			m_Flags(0), m_Callback(NULL), m_Next(NULL), m_Type(CVARTYPE_NONE), m_Value(0.f),
-			m_MinValue(-FLT_MAX), m_MaxValue(FLT_MAX)
-	 { }
+  protected:
+    cvar_t()
+        : m_Flags(0), m_Callback(NULL), m_Next(NULL), m_Type(CVARTYPE_NONE), m_Value(0.f), m_MinValue(-FLT_MAX),
+          m_MaxValue(FLT_MAX)
+    {
+    }
 };
 
-cvar_t* GetFirstCvar(void);
+cvar_t *GetFirstCvar(void);
 
 // Maximum number of cvars that can be saved.
 #define MAX_BACKUPCVARS 512
 
-#define CVAR(name,def,help,type,flags) \
-	cvar_t name(#name, def, help, type, flags);
+#define CVAR(name, def, help, type, flags) cvar_t name(#name, def, help, type, flags);
 
-#define CVAR_RANGE(name,def,help,type,flags,minval,maxval) \
-	cvar_t name(#name, def, help, type, flags, minval, maxval);
+#define CVAR_RANGE(name, def, help, type, flags, minval, maxval)                                                       \
+    cvar_t name(#name, def, help, type, flags, minval, maxval);
 
 #define EXTERN_CVAR(name) extern cvar_t name;
 
-#define CVAR_FUNC_DECL(name,def,help,type,flags) \
-    extern void cvarfunc_##name(cvar_t &); \
-    cvar_t name (#name, def, help, type, flags, cvarfunc_##name);
+#define CVAR_FUNC_DECL(name, def, help, type, flags)                                                                   \
+    extern void cvarfunc_##name(cvar_t &);                                                                             \
+    cvar_t      name(#name, def, help, type, flags, cvarfunc_##name);
 
-#define CVAR_RANGE_FUNC_DECL(name,def,help,type,flags,minval,maxval) \
-    extern void cvarfunc_##name(cvar_t &); \
-    cvar_t name (#name, def, help, type, flags, cvarfunc_##name, minval, maxval);
+#define CVAR_RANGE_FUNC_DECL(name, def, help, type, flags, minval, maxval)                                             \
+    extern void cvarfunc_##name(cvar_t &);                                                                             \
+    cvar_t      name(#name, def, help, type, flags, cvarfunc_##name, minval, maxval);
 
-#define CVAR_FUNC_IMPL(name) \
-    EXTERN_CVAR(name) \
+#define CVAR_FUNC_IMPL(name)                                                                                           \
+    EXTERN_CVAR(name)                                                                                                  \
     void cvarfunc_##name(cvar_t &var)

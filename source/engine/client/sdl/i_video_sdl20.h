@@ -41,26 +41,31 @@ class ISDL20Window;
 
 class ISDL20VideoCapabilities : public IVideoCapabilities
 {
-public:
-	ISDL20VideoCapabilities();
-	virtual ~ISDL20VideoCapabilities() { }
+  public:
+    ISDL20VideoCapabilities();
+    virtual ~ISDL20VideoCapabilities()
+    {
+    }
 
-	virtual const IVideoModeList* getSupportedVideoModes() const
-	{	return &mModeList;	}
+    virtual const IVideoModeList *getSupportedVideoModes() const
+    {
+        return &mModeList;
+    }
 
-	virtual const EDisplayType getDisplayType() const
-	{
-		return DISPLAY_Both;
-	}
+    virtual const EDisplayType getDisplayType() const
+    {
+        return DISPLAY_Both;
+    }
 
-	virtual const IVideoMode& getNativeMode() const
-	{	return mNativeMode;	}
+    virtual const IVideoMode &getNativeMode() const
+    {
+        return mNativeMode;
+    }
 
-private:
-	IVideoModeList		mModeList;
-	IVideoMode			mNativeMode;
+  private:
+    IVideoModeList mModeList;
+    IVideoMode     mNativeMode;
 };
-
 
 // ============================================================================
 //
@@ -76,43 +81,46 @@ private:
 
 class ISDL20TextureWindowSurfaceManager : public IWindowSurfaceManager
 {
-public:
-	ISDL20TextureWindowSurfaceManager(uint16_t width, uint16_t height, const PixelFormat* format, ISDL20Window* window,
-			bool vsync, const char *render_scale_quality = NULL);
+  public:
+    ISDL20TextureWindowSurfaceManager(uint16_t width, uint16_t height, const PixelFormat *format, ISDL20Window *window,
+                                      bool vsync, const char *render_scale_quality = NULL);
 
-	virtual ~ISDL20TextureWindowSurfaceManager();
+    virtual ~ISDL20TextureWindowSurfaceManager();
 
-	virtual IWindowSurface* getWindowSurface()
-	{	return mSurface;	}
+    virtual IWindowSurface *getWindowSurface()
+    {
+        return mSurface;
+    }
 
-	virtual const IWindowSurface* getWindowSurface() const
-	{	return mSurface;	}
+    virtual const IWindowSurface *getWindowSurface() const
+    {
+        return mSurface;
+    }
 
-	virtual void lockSurface();
-	virtual void unlockSurface();
+    virtual void lockSurface();
+    virtual void unlockSurface();
 
-	virtual void startRefresh();
-	virtual void finishRefresh();
+    virtual void startRefresh();
+    virtual void finishRefresh();
 
-private:
-	ISDL20Window*			mWindow;
-	SDL_Renderer*			mSDLRenderer;
-	SDL_Texture*			mSDLTexture;
+  private:
+    ISDL20Window *mWindow;
+    SDL_Renderer *mSDLRenderer;
+    SDL_Texture  *mSDLTexture;
 
-	IWindowSurface*			mSurface;
-	IWindowSurface*			m8bppTo32BppSurface;
+    IWindowSurface *mSurface;
+    IWindowSurface *m8bppTo32BppSurface;
 
-	uint16_t				mWidth;
-	uint16_t				mHeight;
+    uint16_t mWidth;
+    uint16_t mHeight;
 
-	PixelFormat				mFormat;
+    PixelFormat mFormat;
 
-	bool mDrawLogicalRect;
-	SDL_Rect mLogicalRect;
+    bool     mDrawLogicalRect;
+    SDL_Rect mLogicalRect;
 
-	SDL_Renderer* createRenderer(bool vsync) const;
+    SDL_Renderer *createRenderer(bool vsync) const;
 };
-
 
 // ============================================================================
 //
@@ -122,117 +130,136 @@ private:
 
 class ISDL20Window : public IWindow
 {
-public:
-	ISDL20Window(uint16_t width, uint16_t height, uint8_t bpp, EWindowMode window_mode, bool vsync);
+  public:
+    ISDL20Window(uint16_t width, uint16_t height, uint8_t bpp, EWindowMode window_mode, bool vsync);
 
-	virtual ~ISDL20Window();
+    virtual ~ISDL20Window();
 
-	virtual const IWindowSurface* getPrimarySurface() const
-	{
-		if (mSurfaceManager)
-			return mSurfaceManager->getWindowSurface();
-		return NULL;
-	}
+    virtual const IWindowSurface *getPrimarySurface() const
+    {
+        if (mSurfaceManager)
+            return mSurfaceManager->getWindowSurface();
+        return NULL;
+    }
 
-	virtual IWindowSurface* getPrimarySurface()
-	{
-		return const_cast<IWindowSurface*>(static_cast<const ISDL20Window&>(*this).getPrimarySurface());
-	}
+    virtual IWindowSurface *getPrimarySurface()
+    {
+        return const_cast<IWindowSurface *>(static_cast<const ISDL20Window &>(*this).getPrimarySurface());
+    }
 
-	virtual uint16_t getWidth() const
-	{	return mVideoMode.width;	}
+    virtual uint16_t getWidth() const
+    {
+        return mVideoMode.width;
+    }
 
-	virtual uint16_t getHeight() const
-	{	return mVideoMode.height;	}
+    virtual uint16_t getHeight() const
+    {
+        return mVideoMode.height;
+    }
 
-	virtual uint8_t getBitsPerPixel() const
-	{	return mVideoMode.bpp;	}
+    virtual uint8_t getBitsPerPixel() const
+    {
+        return mVideoMode.bpp;
+    }
 
-	virtual int getBytesPerPixel() const
-	{	return mVideoMode.bpp >> 3;	}
+    virtual int getBytesPerPixel() const
+    {
+        return mVideoMode.bpp >> 3;
+    }
 
-	virtual const IVideoMode& getVideoMode() const
-	{	return mVideoMode;	}
+    virtual const IVideoMode &getVideoMode() const
+    {
+        return mVideoMode;
+    }
 
-	virtual const PixelFormat* getPixelFormat() const
-	{	return &mPixelFormat;	}
+    virtual const PixelFormat *getPixelFormat() const
+    {
+        return &mPixelFormat;
+    }
 
-	virtual bool setMode(const IVideoMode& video_mode);
+    virtual bool setMode(const IVideoMode &video_mode);
 
-	virtual bool isFullScreen() const
-	{	return mVideoMode.isFullScreen();	}
+    virtual bool isFullScreen() const
+    {
+        return mVideoMode.isFullScreen();
+    }
 
-	virtual EWindowMode getWindowMode() const
-	{	return mVideoMode.window_mode;		}
+    virtual EWindowMode getWindowMode() const
+    {
+        return mVideoMode.window_mode;
+    }
 
-	virtual bool isFocused() const;
+    virtual bool isFocused() const;
 
-	virtual void flashWindow() const;
+    virtual void flashWindow() const;
 
-	virtual bool usingVSync() const
-	{	return mVideoMode.vsync;	}
+    virtual bool usingVSync() const
+    {
+        return mVideoMode.vsync;
+    }
 
-	virtual void enableRefresh()
-	{	mBlit = true;		}
+    virtual void enableRefresh()
+    {
+        mBlit = true;
+    }
 
-	virtual void disableRefresh()
-	{
-		mBlit = false;
-		mSurfaceManager->lockSurface();
-		mSurfaceManager->getWindowSurface()->clear();
-		mSurfaceManager->finishRefresh();
-		mSurfaceManager->unlockSurface();
-	}
+    virtual void disableRefresh()
+    {
+        mBlit = false;
+        mSurfaceManager->lockSurface();
+        mSurfaceManager->getWindowSurface()->clear();
+        mSurfaceManager->finishRefresh();
+        mSurfaceManager->unlockSurface();
+    }
 
-	virtual void startRefresh();
-	virtual void finishRefresh();
+    virtual void startRefresh();
+    virtual void finishRefresh();
 
-	virtual void lockSurface();
-	virtual void unlockSurface();
+    virtual void lockSurface();
+    virtual void unlockSurface();
 
-	virtual void setWindowTitle(const std::string& str = "");
-	virtual void setWindowIcon();
+    virtual void setWindowTitle(const std::string &str = "");
+    virtual void setWindowIcon();
 
-	virtual std::string getVideoDriverName() const;
+    virtual std::string getVideoDriverName() const;
 
-	virtual void setPalette(const argb_t* palette);
+    virtual void setPalette(const argb_t *palette);
 
-private:
-	// disable copy constructor and assignment operator
-	ISDL20Window(const ISDL20Window&);
-	ISDL20Window& operator=(const ISDL20Window&);
+  private:
+    // disable copy constructor and assignment operator
+    ISDL20Window(const ISDL20Window &);
+    ISDL20Window &operator=(const ISDL20Window &);
 
-	friend class ISDL20TextureWindowSurfaceManager;
+    friend class ISDL20TextureWindowSurfaceManager;
 
-	void discoverNativePixelFormat();
-	PixelFormat buildSurfacePixelFormat(uint8_t bpp);
-	void setRendererDriver();
-	bool isRendererDriverAvailable(const char* driver) const;
-	const char* getRendererDriver() const;
-	void getEvents();
+    void        discoverNativePixelFormat();
+    PixelFormat buildSurfacePixelFormat(uint8_t bpp);
+    void        setRendererDriver();
+    bool        isRendererDriverAvailable(const char *driver) const;
+    const char *getRendererDriver() const;
+    void        getEvents();
 
-	uint16_t getCurrentWidth() const;
-	uint16_t getCurrentHeight() const;
-	EWindowMode getCurrentWindowMode() const;
+    uint16_t    getCurrentWidth() const;
+    uint16_t    getCurrentHeight() const;
+    EWindowMode getCurrentWindowMode() const;
 
-	SDL_Window*			mSDLWindow;
+    SDL_Window *mSDLWindow;
 
-	IWindowSurfaceManager* mSurfaceManager;
+    IWindowSurfaceManager *mSurfaceManager;
 
-	IVideoMode			mVideoMode;
-	PixelFormat			mPixelFormat;
+    IVideoMode  mVideoMode;
+    PixelFormat mPixelFormat;
 
-	bool				mNeedPaletteRefresh;
-	bool				mBlit;
+    bool mNeedPaletteRefresh;
+    bool mBlit;
 
-	bool				mMouseFocus;
-	bool				mKeyboardFocus;
+    bool mMouseFocus;
+    bool mKeyboardFocus;
 
-	int					mAcceptResizeEventsTime;
+    int mAcceptResizeEventsTime;
 
-	int16_t				mLocks;
+    int16_t mLocks;
 };
-
 
 // ****************************************************************************
 
@@ -248,21 +275,25 @@ private:
 
 class ISDL20VideoSubsystem : public IVideoSubsystem
 {
-public:
-	ISDL20VideoSubsystem();
-	virtual ~ISDL20VideoSubsystem();
+  public:
+    ISDL20VideoSubsystem();
+    virtual ~ISDL20VideoSubsystem();
 
-	virtual const IVideoCapabilities* getVideoCapabilities() const
-	{	return mVideoCapabilities;	}
+    virtual const IVideoCapabilities *getVideoCapabilities() const
+    {
+        return mVideoCapabilities;
+    }
 
-	virtual const IWindow* getWindow() const
-	{	return mWindow;	}
+    virtual const IWindow *getWindow() const
+    {
+        return mWindow;
+    }
 
-	virtual int getMonitorCount() const;
+    virtual int getMonitorCount() const;
 
-private:
-	const IVideoCapabilities*		mVideoCapabilities;
+  private:
+    const IVideoCapabilities *mVideoCapabilities;
 
-	IWindow*						mWindow;
+    IWindow *mWindow;
 };
-#endif	// SDL20
+#endif // SDL20

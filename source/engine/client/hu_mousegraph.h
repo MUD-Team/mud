@@ -24,24 +24,26 @@
 
 #pragma once
 
-class MouseGraph {
-public:
-	static const char TYPE_OFF = 0;
-	static const char TYPE_LINE = 1;
-	static const char TYPE_PLOT = 2;
+class MouseGraph
+{
+  public:
+    static const char TYPE_OFF  = 0;
+    static const char TYPE_LINE = 1;
+    static const char TYPE_PLOT = 2;
 
-	MouseGraph();
-	void append(int x, int y);
-	void draw(int type = 0);
-private:
-	static const int MAX_HISTORY_TICS = 64;
+    MouseGraph();
+    void append(int x, int y);
+    void draw(int type = 0);
 
-	int index;
-	int mousex[MouseGraph::MAX_HISTORY_TICS];
-	int mousey[MouseGraph::MAX_HISTORY_TICS];
+  private:
+    static const int MAX_HISTORY_TICS = 64;
 
-	void drawPlot(int x, int y);
-	void drawLine(int x, int y);
+    int index;
+    int mousex[MouseGraph::MAX_HISTORY_TICS];
+    int mousey[MouseGraph::MAX_HISTORY_TICS];
+
+    void drawPlot(int x, int y);
+    void drawLine(int x, int y);
 };
 
 extern MouseGraph mousegraph;

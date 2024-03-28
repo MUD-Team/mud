@@ -22,7 +22,6 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #include "odamex.h"
 
 #include "doomkeys.h"
@@ -83,22 +82,22 @@ bool Key_IsPageDownKey(int key, bool numlock)
 
 bool Key_IsHomeKey(int key, bool numlock)
 {
-	return (key == OKEY_HOME || (key == OKEYP_7 && !numlock));
+    return (key == OKEY_HOME || (key == OKEYP_7 && !numlock));
 }
 
 bool Key_IsEndKey(int key, bool numlock)
 {
-	return (key == OKEY_END || (key == OKEYP_1 && !numlock));
+    return (key == OKEY_END || (key == OKEYP_1 && !numlock));
 }
 
 bool Key_IsInsKey(int key, bool numlock)
 {
-	return (key == OKEY_INS || (key == OKEYP_0 && !numlock));
+    return (key == OKEY_INS || (key == OKEYP_0 && !numlock));
 }
 
 bool Key_IsDelKey(int key, bool numlock)
 {
-	return (key == OKEY_DEL || (key == OKEYP_PERIOD && !numlock));
+    return (key == OKEY_DEL || (key == OKEYP_PERIOD && !numlock));
 }
 
 //
@@ -175,7 +174,7 @@ bool Key_IsSpyPrevKey(int key)
     bool mouse = (key == OKEY_MWHEELUP);
 
     return (mouse || key == OKEY_JOY14);
-} 
+}
 
 bool Key_IsTabulationKey(int key)
 {

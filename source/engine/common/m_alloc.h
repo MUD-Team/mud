@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id: bd546d60655c51146ca8b0158e97beddf018b697 $
@@ -21,23 +21,22 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #pragma once
 
 #include <stdlib.h>
 
 // don't use these, use the macros below instead!
-void *Malloc (size_t size);
-void *Calloc (size_t num, size_t size);
-void *Realloc (void *memblock, size_t size);
-void M_Free2 (void **memblock);
+void *Malloc(size_t size);
+void *Calloc(size_t num, size_t size);
+void *Realloc(void *memblock, size_t size);
+void  M_Free2(void **memblock);
 
-#define M_Malloc(s) Malloc((size_t)s)
-#define M_Calloc(n,s) Calloc((size_t)n, (size_t)s)
-#define M_Realloc(p,s) Realloc((void *)p, (size_t)s)
+#define M_Malloc(s)     Malloc((size_t)s)
+#define M_Calloc(n, s)  Calloc((size_t)n, (size_t)s)
+#define M_Realloc(p, s) Realloc((void *)p, (size_t)s)
 
-#define M_Free(p) \
-    if (1) \
-        M_Free2((void **)&p); \
-    else \
+#define M_Free(p)                                                                                                      \
+    if (1)                                                                                                             \
+        M_Free2((void **)&p);                                                                                          \
+    else                                                                                                               \
         (void)0

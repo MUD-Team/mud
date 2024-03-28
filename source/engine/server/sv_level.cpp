@@ -22,7 +22,6 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #include "odamex.h"
 
 #include <algorithm>
@@ -61,20 +60,20 @@
 #include "cmdlib.h"
 #include "g_skill.h"
 
-#define lioffset(x)		offsetof(level_pwad_info_t,x)
-#define cioffset(x)		offsetof(cluster_info_t,x)
+#define lioffset(x) offsetof(level_pwad_info_t, x)
+#define cioffset(x) offsetof(cluster_info_t, x)
 
 extern int nextupdate;
 
-EXTERN_CVAR (sv_endmapscript)
-EXTERN_CVAR (sv_startmapscript)
-EXTERN_CVAR (sv_curmap)
-EXTERN_CVAR (sv_nextmap)
-EXTERN_CVAR (sv_loopepisode)
-EXTERN_CVAR (sv_intermissionlimit)
-EXTERN_CVAR (sv_warmup)
-EXTERN_CVAR (sv_timelimit)
-EXTERN_CVAR (sv_teamsinplay)
+EXTERN_CVAR(sv_endmapscript)
+EXTERN_CVAR(sv_startmapscript)
+EXTERN_CVAR(sv_curmap)
+EXTERN_CVAR(sv_nextmap)
+EXTERN_CVAR(sv_loopepisode)
+EXTERN_CVAR(sv_intermissionlimit)
+EXTERN_CVAR(sv_warmup)
+EXTERN_CVAR(sv_timelimit)
+EXTERN_CVAR(sv_teamsinplay)
 EXTERN_CVAR(g_resetinvonexit)
 
 extern int mapchange;
@@ -86,14 +85,13 @@ int ACS_WorldVars[NUM_WORLDVARS];
 int ACS_GlobalVars[NUM_GLOBALVARS];
 
 // [AM] Stores the reset snapshot
-FLZOMemFile	*reset_snapshot = NULL;
+FLZOMemFile *reset_snapshot = NULL;
 
 BOOL firstmapinit = true; // Nes - Avoid drawing same init text during every rebirth in single-player servers.
 
 BOOL savegamerestore;
 
 extern BOOL sendpause;
-
 
 bool isFast = false;
 
@@ -106,234 +104,236 @@ static char d_mapname[9];
 
 std::string G_NextMap();
 
-void G_DeferedInitNew (const char* mapname)
+void G_DeferedInitNew(const char *mapname)
 {
-	std::string mapnamestr = mapname;
+    std::string mapnamestr = mapname;
 
-	if (iequals(mapnamestr.substr(0, 7).c_str(), "EndGame"))
-	{
-		if (mapname[7] == '1' ||
-			mapname[7] == '2' ||
-			mapname[7] == '3' ||
-		    mapname[7] == '4' ||
-			mapname[7] == 'C')
-		{
-			if (!Maplist::instance().empty())
-			{
-				G_ChangeMap();
-			}
-			else
-			{
-				G_NextMap();
-			}
-		}
-	}
-	else
-	{
-		strncpy(d_mapname, mapname, 8);
-	}
+    if (iequals(mapnamestr.substr(0, 7).c_str(), "EndGame"))
+    {
+        if (mapname[7] == '1' || mapname[7] == '2' || mapname[7] == '3' || mapname[7] == '4' || mapname[7] == 'C')
+        {
+            if (!Maplist::instance().empty())
+            {
+                G_ChangeMap();
+            }
+            else
+            {
+                G_NextMap();
+            }
+        }
+    }
+    else
+    {
+        strncpy(d_mapname, mapname, 8);
+    }
 
-	gameaction = ga_newgame;
+    gameaction = ga_newgame;
 
-	// sv_nextmap cvar may be overridden by a script
-	sv_nextmap.ForceSet(d_mapname);
+    // sv_nextmap cvar may be overridden by a script
+    sv_nextmap.ForceSet(d_mapname);
 }
 
 void G_DeferedFullReset()
 {
-	gameaction = ga_fullresetlevel;
+    gameaction = ga_fullresetlevel;
 }
 
 void G_DeferedReset()
 {
-	gameaction = ga_resetlevel;
+    gameaction = ga_resetlevel;
 }
 
-const char* GetBase(const char* in)
+const char *GetBase(const char *in)
 {
-	const char* out = &in[strlen(in) - 1];
+    const char *out = &in[strlen(in) - 1];
 
-	while (out > in && *(out-1) != PATHSEPCHAR)
-		out--;
+    while (out > in && *(out - 1) != PATHSEPCHAR)
+        out--;
 
-	return out;
+    return out;
 }
 
-BEGIN_COMMAND (wad) // denis - changes wads
+BEGIN_COMMAND(wad) // denis - changes wads
 {
-	// [Russell] print out some useful info
-	if (argc == 1)
-	{
-	    Printf(PRINT_HIGH, "Usage: wad pwad [...] [deh/bex [...]]\n");
-	    Printf(PRINT_HIGH, "       wad iwad [pwad [...]] [deh/bex [...]]\n");
-	    Printf(PRINT_HIGH, "\n");
-	    Printf(PRINT_HIGH, "Load a wad file on the fly, pwads/dehs/bexs require extension\n");
-	    Printf(PRINT_HIGH, "eg: wad doom\n");
+    // [Russell] print out some useful info
+    if (argc == 1)
+    {
+        Printf(PRINT_HIGH, "Usage: wad pwad [...] [deh/bex [...]]\n");
+        Printf(PRINT_HIGH, "       wad iwad [pwad [...]] [deh/bex [...]]\n");
+        Printf(PRINT_HIGH, "\n");
+        Printf(PRINT_HIGH, "Load a wad file on the fly, pwads/dehs/bexs require extension\n");
+        Printf(PRINT_HIGH, "eg: wad doom\n");
 
-	    return;
-	}
+        return;
+    }
 
-	std::string str = JoinStrings(VectorArgs(argc, argv), " ");
-	G_LoadWadString(str);
+    std::string str = JoinStrings(VectorArgs(argc, argv), " ");
+    G_LoadWadString(str);
 }
-END_COMMAND (wad)
+END_COMMAND(wad)
 
-BOOL 			secretexit;
+BOOL secretexit;
 
 EXTERN_CVAR(sv_shufflemaplist)
 
 // Returns the next map, assuming there is no maplist.
 std::string G_NextMap()
 {
-	std::string next = level.nextmap.c_str();
+    std::string next = level.nextmap.c_str();
 
-	if (gamestate == GS_STARTUP || sv_gametype != GM_COOP || next.empty())
-	{
-		// if not coop, stay on same level
-		// [ML] 1/25/10: OR if next is empty
-		next = level.mapname.c_str();
-	}
-	else if (secretexit && W_CheckNumForName(level.secretmap.c_str()) != -1)
-	{
-		// if we hit a secret exit switch, go there instead.
-		next = level.secretmap.c_str();
-	}
+    if (gamestate == GS_STARTUP || sv_gametype != GM_COOP || next.empty())
+    {
+        // if not coop, stay on same level
+        // [ML] 1/25/10: OR if next is empty
+        next = level.mapname.c_str();
+    }
+    else if (secretexit && W_CheckNumForName(level.secretmap.c_str()) != -1)
+    {
+        // if we hit a secret exit switch, go there instead.
+        next = level.secretmap.c_str();
+    }
 
-	// NES - exiting a Doom 1 episode moves to the next episode,
-	// rather than always going back to E1M1
-	if (iequals(next.substr(0, 7), "EndGame") ||
-	    (gamemode == retail_chex && iequals(level.nextmap.c_str(), "E1M6")))
-	{
-		if (gameinfo.flags & GI_MAPxx || gamemode == shareware ||
-			(!sv_loopepisode && ((gamemode == registered && level.cluster == 3) ||
-			((gameinfo.flags & GI_MENUHACK_RETAIL) && level.cluster == 4))))
-		{
-			next = CalcMapName(1, 1);
-		}
-		else if (sv_loopepisode)
-		{
-			next = CalcMapName(level.cluster, 1);
-		}
-		else
-		{
-			next = CalcMapName(level.cluster + 1, 1);
-		}
-	}
-	return next;
+    // NES - exiting a Doom 1 episode moves to the next episode,
+    // rather than always going back to E1M1
+    if (iequals(next.substr(0, 7), "EndGame") || (gamemode == retail_chex && iequals(level.nextmap.c_str(), "E1M6")))
+    {
+        if (gameinfo.flags & GI_MAPxx || gamemode == shareware ||
+            (!sv_loopepisode && ((gamemode == registered && level.cluster == 3) ||
+                                 ((gameinfo.flags & GI_MENUHACK_RETAIL) && level.cluster == 4))))
+        {
+            next = CalcMapName(1, 1);
+        }
+        else if (sv_loopepisode)
+        {
+            next = CalcMapName(level.cluster, 1);
+        }
+        else
+        {
+            next = CalcMapName(level.cluster + 1, 1);
+        }
+    }
+    return next;
 }
 
 // Determine the "next map" and change to it.
 void G_ChangeMap()
 {
-	unnatural_level_progression = false;
+    unnatural_level_progression = false;
 
-	// Skip the maplist to go to the desired level in case of a lobby map.
-	if (level.flags & LEVEL_LOBBYSPECIAL && level.nextmap[0])
-	{
-		G_DeferedInitNew(level.nextmap.c_str());
-	}
-	else
-	{
-		maplist_entry_t lobby_entry = Maplist::instance().get_lobbymap();
+    // Skip the maplist to go to the desired level in case of a lobby map.
+    if (level.flags & LEVEL_LOBBYSPECIAL && level.nextmap[0])
+    {
+        G_DeferedInitNew(level.nextmap.c_str());
+    }
+    else
+    {
+        maplist_entry_t lobby_entry = Maplist::instance().get_lobbymap();
 
-		if (!Maplist::instance().lobbyempty())
-		{
-			std::string wadstr;
-			for (size_t i = 0; i < lobby_entry.wads.size(); i++)
-			{
-				if (i != 0)
-				{
-					wadstr += " ";
-				}
-				wadstr += C_QuoteString(lobby_entry.wads.at(i));
-			}
-			G_LoadWadString(wadstr, lobby_entry.map);
-		}
-		else
-		{
-			size_t next_index;
-			if (!Maplist::instance().get_next_index(next_index))
-			{
-				// We don't have a maplist, so grab the next 'natural' map lump.
-				std::string next = G_NextMap();
-				G_DeferedInitNew((char*)next.c_str());
-			}
-			else
-			{
-				maplist_entry_t maplist_entry;
-				Maplist::instance().get_map_by_index(next_index, maplist_entry);
+        if (!Maplist::instance().lobbyempty())
+        {
+            std::string wadstr;
+            for (size_t i = 0; i < lobby_entry.wads.size(); i++)
+            {
+                if (i != 0)
+                {
+                    wadstr += " ";
+                }
+                wadstr += C_QuoteString(lobby_entry.wads.at(i));
+            }
+            G_LoadWadString(wadstr, lobby_entry.map);
+        }
+        else
+        {
+            size_t next_index;
+            if (!Maplist::instance().get_next_index(next_index))
+            {
+                // We don't have a maplist, so grab the next 'natural' map lump.
+                std::string next = G_NextMap();
+                G_DeferedInitNew((char *)next.c_str());
+            }
+            else
+            {
+                maplist_entry_t maplist_entry;
+                Maplist::instance().get_map_by_index(next_index, maplist_entry);
 
-				std::string wadstr;
-				for (size_t i = 0; i < maplist_entry.wads.size(); i++)
-				{
-					if (i != 0)
-					{
-						wadstr += " ";
-					}
-					wadstr += C_QuoteString(maplist_entry.wads.at(i));
-				}
-				G_LoadWadString(wadstr, maplist_entry.map);
+                std::string wadstr;
+                for (size_t i = 0; i < maplist_entry.wads.size(); i++)
+                {
+                    if (i != 0)
+                    {
+                        wadstr += " ";
+                    }
+                    wadstr += C_QuoteString(maplist_entry.wads.at(i));
+                }
+                G_LoadWadString(wadstr, maplist_entry.map);
 
-				// Set the new map as the current map
-				Maplist::instance().set_index(next_index);
-			}
-		}
+                // Set the new map as the current map
+                Maplist::instance().set_index(next_index);
+            }
+        }
 
-		// run script at the end of each map
-		// [ML] 8/22/2010: There are examples in the wiki that outright don't work
-		// when onlcvars (addcommandstring's second param) is true.  Is there a
-		// reason why the mapscripts ahve to be safe mode?
-		if (strlen(sv_endmapscript.cstring()))
-			AddCommandString(sv_endmapscript.cstring());
-	}
+        // run script at the end of each map
+        // [ML] 8/22/2010: There are examples in the wiki that outright don't work
+        // when onlcvars (addcommandstring's second param) is true.  Is there a
+        // reason why the mapscripts ahve to be safe mode?
+        if (strlen(sv_endmapscript.cstring()))
+            AddCommandString(sv_endmapscript.cstring());
+    }
 }
 
 // Change to a map based on a maplist index.
-void G_ChangeMap(size_t index) {
-	maplist_entry_t maplist_entry;
-	if (!Maplist::instance().get_map_by_index(index, maplist_entry)) {
-		// That maplist index doesn't actually exist
-		Printf(PRINT_HIGH, "%s\n", Maplist::instance().get_error().c_str());
-		return;
-	}
+void G_ChangeMap(size_t index)
+{
+    maplist_entry_t maplist_entry;
+    if (!Maplist::instance().get_map_by_index(index, maplist_entry))
+    {
+        // That maplist index doesn't actually exist
+        Printf(PRINT_HIGH, "%s\n", Maplist::instance().get_error().c_str());
+        return;
+    }
 
-	G_LoadWadString(JoinStrings(maplist_entry.wads, " "), maplist_entry.map);
+    G_LoadWadString(JoinStrings(maplist_entry.wads, " "), maplist_entry.map);
 
-	// Set the new map as the current map
-	Maplist::instance().set_index(index);
+    // Set the new map as the current map
+    Maplist::instance().set_index(index);
 
-	// run script at the end of each map
-	// [ML] 8/22/2010: There are examples in the wiki that outright don't work
-	// when onlcvars (addcommandstring's second param) is true.  Is there a
-	// reason why the mapscripts ahve to be safe mode?
-	if(strlen(sv_endmapscript.cstring()))
-		AddCommandString(sv_endmapscript.cstring());
+    // run script at the end of each map
+    // [ML] 8/22/2010: There are examples in the wiki that outright don't work
+    // when onlcvars (addcommandstring's second param) is true.  Is there a
+    // reason why the mapscripts ahve to be safe mode?
+    if (strlen(sv_endmapscript.cstring()))
+        AddCommandString(sv_endmapscript.cstring());
 }
 
 // Restart the current map.
-void G_RestartMap() {
-	// Restart the current map.
-	G_DeferedInitNew(level.mapname.c_str());
+void G_RestartMap()
+{
+    // Restart the current map.
+    G_DeferedInitNew(level.mapname.c_str());
 
-	// run script at the end of each map
-	// [ML] 8/22/2010: There are examples in the wiki that outright don't work
-	// when onlcvars (addcommandstring's second param) is true.  Is there a
-	// reason why the mapscripts ahve to be safe mode?
-	if(strlen(sv_endmapscript.cstring()))
-		AddCommandString(sv_endmapscript.cstring());
+    // run script at the end of each map
+    // [ML] 8/22/2010: There are examples in the wiki that outright don't work
+    // when onlcvars (addcommandstring's second param) is true.  Is there a
+    // reason why the mapscripts ahve to be safe mode?
+    if (strlen(sv_endmapscript.cstring()))
+        AddCommandString(sv_endmapscript.cstring());
 }
 
-BEGIN_COMMAND (nextmap) {
-	G_ExitLevel(0, 1);
-} END_COMMAND (nextmap)
+BEGIN_COMMAND(nextmap)
+{
+    G_ExitLevel(0, 1);
+}
+END_COMMAND(nextmap)
 
-BEGIN_COMMAND (forcenextmap) {
-	G_ChangeMap();
-} END_COMMAND (forcenextmap)
+BEGIN_COMMAND(forcenextmap)
+{
+    G_ChangeMap();
+}
+END_COMMAND(forcenextmap)
 
 BEGIN_COMMAND(restart)
 {
-	::levelstate.restart();
+    ::levelstate.restart();
 }
 END_COMMAND(restart)
 
@@ -347,239 +347,237 @@ void SV_CheckTeam(player_t &pl);
 //
 void G_DoNewGame()
 {
-	for (Players::iterator it = players.begin();it != players.end();++it)
-	{
-		if(!(it->ingame()))
-			continue;
+    for (Players::iterator it = players.begin(); it != players.end(); ++it)
+    {
+        if (!(it->ingame()))
+            continue;
 
-		MSG_WriteSVC(&it->client.reliablebuf,
-		             SVC_LoadMap(::wadfiles, ::patchfiles, d_mapname, 0));
-	}
+        MSG_WriteSVC(&it->client.reliablebuf, SVC_LoadMap(::wadfiles, ::patchfiles, d_mapname, 0));
+    }
 
-	sv_curmap.ForceSet(d_mapname);
+    sv_curmap.ForceSet(d_mapname);
 
-	G_InitNew (d_mapname);
-	gameaction = ga_nothing;
+    G_InitNew(d_mapname);
+    gameaction = ga_nothing;
 
-	// run script at the start of each map
-	// [ML] 8/22/2010: There are examples in the wiki that outright don't work
-	// when onlcvars (addcommandstring's second param) is true.  Is there a
-	// reason why the mapscripts ahve to be safe mode?
-	if (strlen(sv_startmapscript.cstring()))
-		AddCommandString(sv_startmapscript.cstring());
+    // run script at the start of each map
+    // [ML] 8/22/2010: There are examples in the wiki that outright don't work
+    // when onlcvars (addcommandstring's second param) is true.  Is there a
+    // reason why the mapscripts ahve to be safe mode?
+    if (strlen(sv_startmapscript.cstring()))
+        AddCommandString(sv_startmapscript.cstring());
 
-	for (Players::iterator it = players.begin();it != players.end();++it)
-	{
-		if (!(it->ingame()))
-			continue;
+    for (Players::iterator it = players.begin(); it != players.end(); ++it)
+    {
+        if (!(it->ingame()))
+            continue;
 
-		if (G_IsTeamGame())
-			SV_CheckTeam(*it);
-		else
-			memcpy(it->userinfo.color, it->prefcolor, 4);
+        if (G_IsTeamGame())
+            SV_CheckTeam(*it);
+        else
+            memcpy(it->userinfo.color, it->prefcolor, 4);
 
-		SV_ClientFullUpdate(*it);
-	}
+        SV_ClientFullUpdate(*it);
+    }
 }
 
-EXTERN_CVAR (sv_skill)
-EXTERN_CVAR (sv_monstersrespawn)
-EXTERN_CVAR (sv_fastmonsters)
-EXTERN_CVAR (sv_maxplayers)
+EXTERN_CVAR(sv_skill)
+EXTERN_CVAR(sv_monstersrespawn)
+EXTERN_CVAR(sv_fastmonsters)
+EXTERN_CVAR(sv_maxplayers)
 
-void G_PlayerReborn (player_t &player);
+void G_PlayerReborn(player_t &player);
 void SV_ServerSettingChange();
 
-void G_InitNew (const char *mapname)
+void G_InitNew(const char *mapname)
 {
-	size_t i;
+    size_t i;
 
-	DWORD previousLevelFlags = level.flags;
+    DWORD previousLevelFlags = level.flags;
 
-	if (!savegamerestore)
-		G_ClearSnapshots ();
+    if (!savegamerestore)
+        G_ClearSnapshots();
 
-	// [RH] Mark all levels as not visited
-	if (!savegamerestore)
-	{
-		LevelInfos& levels = getLevelInfos();
-		for (size_t i = 0; i < levels.size(); i++)
-		{
-			level_pwad_info_t& level = levels.at(i);
-			level.flags &= ~LEVEL_VISITED;
-		}
-	}
+    // [RH] Mark all levels as not visited
+    if (!savegamerestore)
+    {
+        LevelInfos &levels = getLevelInfos();
+        for (size_t i = 0; i < levels.size(); i++)
+        {
+            level_pwad_info_t &level = levels.at(i);
+            level.flags &= ~LEVEL_VISITED;
+        }
+    }
 
-	const int old_gametype = sv_gametype.asInt();
+    const int old_gametype = sv_gametype.asInt();
 
-	cvar_t::UnlatchCVars ();
+    cvar_t::UnlatchCVars();
 
-	if (old_gametype != sv_gametype || sv_gametype != GM_COOP)
-		unnatural_level_progression = true;
+    if (old_gametype != sv_gametype || sv_gametype != GM_COOP)
+        unnatural_level_progression = true;
 
-	// [SL] 2011-09-01 - Change gamestate here so SV_ServerSettingChange will
-	// send changed cvars
-	gamestate = GS_LEVEL;
-	SV_ServerSettingChange();
+    // [SL] 2011-09-01 - Change gamestate here so SV_ServerSettingChange will
+    // send changed cvars
+    gamestate = GS_LEVEL;
+    SV_ServerSettingChange();
 
-	paused = false;
+    paused = false;
 
-	// [RH] If this map doesn't exist, bomb out
-	if (W_CheckNumForName (mapname) == -1)
-	{
-		I_Error ("Could not find map %s\n", mapname);
-	}
+    // [RH] If this map doesn't exist, bomb out
+    if (W_CheckNumForName(mapname) == -1)
+    {
+        I_Error("Could not find map %s\n", mapname);
+    }
 
-	const bool wantFast = sv_fastmonsters || G_GetCurrentSkill().fast_monsters;
-	if (wantFast != isFast)
-	{
-		if (wantFast)
-		{
-			for (i = 0; i < NUMSTATES; i++)
-			{
-				if (states[i].flags & STATEF_SKILL5FAST &&
-				    (states[i].tics != 1 || demoplayback))
-					states[i].tics >>= 1; // don't change 1->0 since it causes cycles
-			}
+    const bool wantFast = sv_fastmonsters || G_GetCurrentSkill().fast_monsters;
+    if (wantFast != isFast)
+    {
+        if (wantFast)
+        {
+            for (i = 0; i < NUMSTATES; i++)
+            {
+                if (states[i].flags & STATEF_SKILL5FAST && (states[i].tics != 1 || demoplayback))
+                    states[i].tics >>= 1; // don't change 1->0 since it causes cycles
+            }
 
-			for (i = 0; i < NUMMOBJTYPES; ++i)
-			{
-				if (mobjinfo[i].altspeed != NO_ALTSPEED)
-				{
-					int swap = mobjinfo[i].speed;
-					mobjinfo[i].speed = mobjinfo[i].altspeed;
-					mobjinfo[i].altspeed = swap;
-				}
-			}
-		}
-		else
-		{
-			for (i = 0; i < NUMSTATES; i++)
-			{
-				if (states[i].flags & STATEF_SKILL5FAST)
-					states[i].tics <<= 1; // don't change 1->0 since it causes cycles
-			}
+            for (i = 0; i < NUMMOBJTYPES; ++i)
+            {
+                if (mobjinfo[i].altspeed != NO_ALTSPEED)
+                {
+                    int swap             = mobjinfo[i].speed;
+                    mobjinfo[i].speed    = mobjinfo[i].altspeed;
+                    mobjinfo[i].altspeed = swap;
+                }
+            }
+        }
+        else
+        {
+            for (i = 0; i < NUMSTATES; i++)
+            {
+                if (states[i].flags & STATEF_SKILL5FAST)
+                    states[i].tics <<= 1; // don't change 1->0 since it causes cycles
+            }
 
-			for (i = 0; i < NUMMOBJTYPES; ++i)
-			{
-				if (mobjinfo[i].altspeed != NO_ALTSPEED)
-				{
-					int swap = mobjinfo[i].altspeed;
-					mobjinfo[i].altspeed = mobjinfo[i].speed;
-					mobjinfo[i].speed = swap;
-				}
-			}
-		}
-		isFast = wantFast;
-	}
+            for (i = 0; i < NUMMOBJTYPES; ++i)
+            {
+                if (mobjinfo[i].altspeed != NO_ALTSPEED)
+                {
+                    int swap             = mobjinfo[i].altspeed;
+                    mobjinfo[i].altspeed = mobjinfo[i].speed;
+                    mobjinfo[i].speed    = swap;
+                }
+            }
+        }
+        isFast = wantFast;
+    }
 
-	// [SL] 2011-05-11 - Reset all reconciliation system data for unlagging
-	Unlag::getInstance().reset();
+    // [SL] 2011-05-11 - Reset all reconciliation system data for unlagging
+    Unlag::getInstance().reset();
 
-	if (!savegamerestore)
-	{
-		M_ClearRandom ();
-		memset (ACS_WorldVars, 0, sizeof(ACS_WorldVars));
-		memset (ACS_GlobalVars, 0, sizeof(ACS_GlobalVars));
-		level.time = 0;
-		level.inttimeleft = 0;
+    if (!savegamerestore)
+    {
+        M_ClearRandom();
+        memset(ACS_WorldVars, 0, sizeof(ACS_WorldVars));
+        memset(ACS_GlobalVars, 0, sizeof(ACS_GlobalVars));
+        level.time        = 0;
+        level.inttimeleft = 0;
 
-		// force players to be initialized upon first level load
-		for (Players::iterator it = players.begin();it != players.end();++it)
-		{
-			// [SL] 2011-05-11 - Register the players in the reconciliation
-			// system for unlagging
-			Unlag::getInstance().registerPlayer(it->id);
+        // force players to be initialized upon first level load
+        for (Players::iterator it = players.begin(); it != players.end(); ++it)
+        {
+            // [SL] 2011-05-11 - Register the players in the reconciliation
+            // system for unlagging
+            Unlag::getInstance().registerPlayer(it->id);
 
-			if(!(it->ingame()))
-				continue;
+            if (!(it->ingame()))
+                continue;
 
-			// denis - dead players should have their stuff looted, otherwise they'd take their ammo into their afterlife!
-			if (it->playerstate == PST_DEAD)
-				G_PlayerReborn(*it);
+            // denis - dead players should have their stuff looted, otherwise they'd take their ammo into their
+            // afterlife!
+            if (it->playerstate == PST_DEAD)
+                G_PlayerReborn(*it);
 
-			it->playerstate = PST_ENTER; // [BC]
+            it->playerstate = PST_ENTER; // [BC]
 
-			it->suicidedelay = 0;				// Ch0wW : Disallow suicide
-			it->joindelay = 0;
-		}
-	}
+            it->suicidedelay = 0;        // Ch0wW : Disallow suicide
+            it->joindelay    = 0;
+        }
+    }
 
-	// [SL] 2012-12-08 - Multiplayer is always true for servers
-	multiplayer = true;
+    // [SL] 2012-12-08 - Multiplayer is always true for servers
+    multiplayer = true;
 
-	paused = false;
-	demoplayback = false;
-	viewactive = true;
+    paused       = false;
+    demoplayback = false;
+    viewactive   = true;
 
-	// Make a copy of our previous winner so we can service the queue properly
-	// after loading the level.
-	WinInfo info = ::levelstate.getWinInfo();
+    // Make a copy of our previous winner so we can service the queue properly
+    // after loading the level.
+    WinInfo info = ::levelstate.getWinInfo();
 
-	level.mapname = mapname;
+    level.mapname = mapname;
 
-	// [AM] Start the WDL log on new level.
-	M_StartWDLLog(true);
+    // [AM] Start the WDL log on new level.
+    M_StartWDLLog(true);
 
-	G_DoLoadLevel(0);
+    G_DoLoadLevel(0);
 
-	if (::serverside && !(previousLevelFlags & LEVEL_LOBBYSPECIAL))
-		SV_UpdatePlayerQueueLevelChange(info);
+    if (::serverside && !(previousLevelFlags & LEVEL_LOBBYSPECIAL))
+        SV_UpdatePlayerQueueLevelChange(info);
 }
 
 //
 // G_DoCompleted
 //
 
-void G_ExitLevel (int position, int drawscores)
+void G_ExitLevel(int position, int drawscores)
 {
-	SV_ExitLevel();
+    SV_ExitLevel();
 
-	if (drawscores)
+    if (drawscores)
         SV_DrawScores();
-	
-	gamestate = GS_INTERMISSION;
-	mapchange = TICRATE * sv_intermissionlimit;  // wait n seconds, default 10
+
+    gamestate = GS_INTERMISSION;
+    mapchange = TICRATE * sv_intermissionlimit; // wait n seconds, default 10
 
     secretexit = false;
 
     gameaction = ga_completed;
 
-	// denis - this will skip wi_stuff and allow some time for finale text
-	//G_WorldDone();
+    // denis - this will skip wi_stuff and allow some time for finale text
+    // G_WorldDone();
 }
 
 // Here's for the german edition.
-void G_SecretExitLevel (int position, int drawscores)
+void G_SecretExitLevel(int position, int drawscores)
 {
-	SV_ExitLevel();
+    SV_ExitLevel();
 
     if (drawscores)
         SV_DrawScores();
-        
-	gamestate = GS_INTERMISSION;
-	mapchange = TICRATE * sv_intermissionlimit;  // wait n seconds, defaults to 10
 
-	// IF NO WOLF3D LEVELS, NO SECRET EXIT!
-	if ( (gameinfo.flags & GI_MAPxx)
-		 && (W_CheckNumForName("map31")<0))
-		secretexit = false;
-	else
-		secretexit = true;
+    gamestate = GS_INTERMISSION;
+    mapchange = TICRATE * sv_intermissionlimit; // wait n seconds, defaults to 10
+
+    // IF NO WOLF3D LEVELS, NO SECRET EXIT!
+    if ((gameinfo.flags & GI_MAPxx) && (W_CheckNumForName("map31") < 0))
+        secretexit = false;
+    else
+        secretexit = true;
 
     gameaction = ga_completed;
 
-	// denis - this will skip wi_stuff and allow some time for finale text
-	//G_WorldDone();
+    // denis - this will skip wi_stuff and allow some time for finale text
+    // G_WorldDone();
 }
 
 void G_DoCompleted()
 {
-	gameaction = ga_nothing;
+    gameaction = ga_nothing;
 
-	for (Players::iterator it = players.begin();it != players.end();++it)
-		if (it->ingame())
-			G_PlayerFinishLevel(*it);
+    for (Players::iterator it = players.begin(); it != players.end(); ++it)
+        if (it->ingame())
+            G_PlayerFinishLevel(*it);
 }
 
 extern void G_SerializeLevel(FArchive &arc, bool hubLoad);
@@ -587,16 +585,16 @@ extern void G_SerializeLevel(FArchive &arc, bool hubLoad);
 // [AM] - Save the state of the level that can be reset to
 void G_DoSaveResetState()
 {
-	if (reset_snapshot != NULL)
-	{
-		// An existing reset snapshot exists.  Kill it and replace it with
-		// a new one.
-		delete reset_snapshot;
-	}
-	reset_snapshot = new FLZOMemFile;
-	reset_snapshot->Open();
-	FArchive arc(*reset_snapshot, FA_RESET);
-	G_SerializeLevel(arc, false);
+    if (reset_snapshot != NULL)
+    {
+        // An existing reset snapshot exists.  Kill it and replace it with
+        // a new one.
+        delete reset_snapshot;
+    }
+    reset_snapshot = new FLZOMemFile;
+    reset_snapshot->Open();
+    FArchive arc(*reset_snapshot, FA_RESET);
+    G_SerializeLevel(arc, false);
 }
 
 /**
@@ -607,353 +605,360 @@ void G_DoSaveResetState()
  */
 void G_DoResetLevel(bool full_reset)
 {
-	gameaction = ga_nothing;
-	if (reset_snapshot == NULL)
-	{
-		// No saved state to reload to
-		DPrintf("G_DoResetLevel: No saved state to reload.");
-		return;
-	}
+    gameaction = ga_nothing;
+    if (reset_snapshot == NULL)
+    {
+        // No saved state to reload to
+        DPrintf("G_DoResetLevel: No saved state to reload.");
+        return;
+    }
 
-	// Clear teamgame state.
-	TeamInfo_ResetScores(full_reset);
+    // Clear teamgame state.
+    TeamInfo_ResetScores(full_reset);
 
-	// Reset all keys found
-	for (size_t j = 0; j < NUMCARDS; j++)
-		keysfound[j] = false;
+    // Reset all keys found
+    for (size_t j = 0; j < NUMCARDS; j++)
+        keysfound[j] = false;
 
-	// Clear netids of every non-player actor so we don't spam the
-	// destruction message of actors to clients.
-	AActor* mo;
-	TThinkerIterator<AActor> iterator;
-	while ((mo = iterator.Next()))
-	{
-		if (mo->netid && mo->type != MT_PLAYER)
-		{
-			mo->netid = 0;
-		}
-	}
+    // Clear netids of every non-player actor so we don't spam the
+    // destruction message of actors to clients.
+    AActor                  *mo;
+    TThinkerIterator<AActor> iterator;
+    while ((mo = iterator.Next()))
+    {
+        if (mo->netid && mo->type != MT_PLAYER)
+        {
+            mo->netid = 0;
+        }
+    }
 
-	// Tell clients that a map reset is incoming.
-	Players::iterator it;
-	for (it = players.begin(); it != players.end(); ++it)
-	{
-		if (!(it->ingame()))
-			continue;
+    // Tell clients that a map reset is incoming.
+    Players::iterator it;
+    for (it = players.begin(); it != players.end(); ++it)
+    {
+        if (!(it->ingame()))
+            continue;
 
-		client_t* cl = &(it->client);
-		MSG_WriteSVC(&cl->reliablebuf, odaproto::svc::ResetMap());
-	}
+        client_t *cl = &(it->client);
+        MSG_WriteSVC(&cl->reliablebuf, odaproto::svc::ResetMap());
+    }
 
-	// Unserialize saved snapshot
-	reset_snapshot->Reopen();
-	FArchive arc(*reset_snapshot, FA_RESET);
-	G_SerializeLevel(arc, false);
-	reset_snapshot->Seek(0, FFile::ESeekSet);
+    // Unserialize saved snapshot
+    reset_snapshot->Reopen();
+    FArchive arc(*reset_snapshot, FA_RESET);
+    G_SerializeLevel(arc, false);
+    reset_snapshot->Seek(0, FFile::ESeekSet);
 
-	{
-		AActor* mo;
-		TThinkerIterator<AActor> iterator;
-		while ((mo = iterator.Next()))
-		{
-			// In sides-based games, destroy objectives that aren't relevant.
-			if (mo->netid && !CTF_ShouldSpawnHomeFlag(mo->type))
-			{
-				CTF_ReplaceFlagWithWaypoint(mo);
-			}
+    {
+        AActor                  *mo;
+        TThinkerIterator<AActor> iterator;
+        while ((mo = iterator.Next()))
+        {
+            // In sides-based games, destroy objectives that aren't relevant.
+            if (mo->netid && !CTF_ShouldSpawnHomeFlag(mo->type))
+            {
+                CTF_ReplaceFlagWithWaypoint(mo);
+            }
 
-			// Assign new netids to every non-player actor to make sure we don't have
-			// any weird destruction of any items post-reset.
-			if (mo->netid && mo->type != MT_PLAYER)
-			{
-				mo->netid = ::ServerNetID.obtainNetID();
-			}
-		}
-	}
+            // Assign new netids to every non-player actor to make sure we don't have
+            // any weird destruction of any items post-reset.
+            if (mo->netid && mo->type != MT_PLAYER)
+            {
+                mo->netid = ::ServerNetID.obtainNetID();
+            }
+        }
+    }
 
-	// reset switch activation
-	for (int i = 0; i < numlines; i++)
-		lines[i].switchactive = false;
+    // reset switch activation
+    for (int i = 0; i < numlines; i++)
+        lines[i].switchactive = false;
 
-	// Clear the item respawn queue, otherwise all those actors we just
-	// destroyed and replaced with the serialized items will start respawning.
-	iquehead = iquetail = 0;
+    // Clear the item respawn queue, otherwise all those actors we just
+    // destroyed and replaced with the serialized items will start respawning.
+    iquehead = iquetail = 0;
 
-	// Clear player information.
-	for (it = players.begin(); it != players.end(); ++it)
-	{
-		// Don't let players keep cards through a reset.
-		if (G_IsCoopGame())
-			P_ClearPlayerCards(*it);
+    // Clear player information.
+    for (it = players.begin(); it != players.end(); ++it)
+    {
+        // Don't let players keep cards through a reset.
+        if (G_IsCoopGame())
+            P_ClearPlayerCards(*it);
 
-		P_ClearPlayerPowerups(*it);
+        P_ClearPlayerPowerups(*it);
 
-		if (full_reset)
-		{
-			P_ClearPlayerScores(*it, SCORES_CLEAR_ALL);
+        if (full_reset)
+        {
+            P_ClearPlayerScores(*it, SCORES_CLEAR_ALL);
 
-			// [AM] Only touch ready state if warmup mode is enabled.
-			if (sv_warmup)
-				it->ready = false;
-		}
-		else
-		{
-			P_ClearPlayerScores(*it, SCORES_CLEAR_POINTS);
-		}
-	}
+            // [AM] Only touch ready state if warmup mode is enabled.
+            if (sv_warmup)
+                it->ready = false;
+        }
+        else
+        {
+            P_ClearPlayerScores(*it, SCORES_CLEAR_POINTS);
+        }
+    }
 
-	// [SL] always reset the time (for now at least)
-	level.time = 0;
-	level.inttimeleft = mapchange / TICRATE;
+    // [SL] always reset the time (for now at least)
+    level.time        = 0;
+    level.inttimeleft = mapchange / TICRATE;
 
-	// [AM] Clear horde spawns - they will be repopulated later.
-	P_HordeClearSpawns();
+    // [AM] Clear horde spawns - they will be repopulated later.
+    P_HordeClearSpawns();
 
-	// Reset the respawned monster count
-	level.respawned_monsters = 0;	
+    // Reset the respawned monster count
+    level.respawned_monsters = 0;
 
-	// No need to clear the spawn locations because we're not loading a new map.
-	M_StartWDLLog(false);
+    // No need to clear the spawn locations because we're not loading a new map.
+    M_StartWDLLog(false);
 
-	// Get queued players in the game.
-	SV_UpdatePlayerQueuePositions(G_CanJoinGameStart, NULL);
+    // Get queued players in the game.
+    SV_UpdatePlayerQueuePositions(G_CanJoinGameStart, NULL);
 
-	// Force every ingame player to be reborn.
-	for (it = players.begin(); it != players.end(); ++it)
-	{
-		if (!it->ingame())
-			continue;
+    // Force every ingame player to be reborn.
+    for (it = players.begin(); it != players.end(); ++it)
+    {
+        if (!it->ingame())
+            continue;
 
-		// Set the respawning machinery in motion
-		it->playerstate = full_reset ? PST_ENTER : PST_REBORN;
+        // Set the respawning machinery in motion
+        it->playerstate = full_reset ? PST_ENTER : PST_REBORN;
 
-		// Do this here, otherwise players won't be reborn until next tic.
-		// [AM] Also, forgetting to do this will result in ticcmds that rely on
-		//      a players subsector to be valid (like use) to crash the server.
-		G_DoReborn(*it);
-	}
+        // Do this here, otherwise players won't be reborn until next tic.
+        // [AM] Also, forgetting to do this will result in ticcmds that rely on
+        //      a players subsector to be valid (like use) to crash the server.
+        G_DoReborn(*it);
+    }
 
-	// Send information about the newly reset map, but AFTER the reborns.
-	for (it = players.begin(); it != players.end(); ++it)
-	{
-		// Player needs to actually be ingame
-		if (!it->ingame())
-			continue;
+    // Send information about the newly reset map, but AFTER the reborns.
+    for (it = players.begin(); it != players.end(); ++it)
+    {
+        // Player needs to actually be ingame
+        if (!it->ingame())
+            continue;
 
-		SV_ClientFullUpdate(*it);
-	}
+        SV_ClientFullUpdate(*it);
+    }
 }
 
 //
 // G_DoLoadLevel
 //
 extern gamestate_t wipegamestate;
-extern float BaseBlendA;
+extern float       BaseBlendA;
 
-void G_DoLoadLevel (int position)
+void G_DoLoadLevel(int position)
 {
-	static int lastposition = 0;
+    static int lastposition = 0;
 
-	if (position != -1)
-		firstmapinit = true;
+    if (position != -1)
+        firstmapinit = true;
 
-	if (position == -1)
-		position = lastposition;
-	else
-		lastposition = position;
+    if (position == -1)
+        position = lastposition;
+    else
+        lastposition = position;
 
-	G_InitLevelLocals ();
+    G_InitLevelLocals();
 
-	if (firstmapinit) {
-		Printf_Bold ("--- %s: \"%s\" ---\n", level.mapname.c_str(), level.level_name);
-		firstmapinit = false;
-	}
+    if (firstmapinit)
+    {
+        Printf_Bold("--- %s: \"%s\" ---\n", level.mapname.c_str(), level.level_name);
+        firstmapinit = false;
+    }
 
-	if (wipegamestate == GS_LEVEL)
-		wipegamestate = GS_FORCEWIPE;
+    if (wipegamestate == GS_LEVEL)
+        wipegamestate = GS_FORCEWIPE;
 
-	gamestate = GS_LEVEL;
-	
-	// Reset all keys found
-	for (size_t j = 0; j < NUMCARDS; j++)
-		keysfound[j] = false;
+    gamestate = GS_LEVEL;
 
-	// Set the sky map.
-	// First thing, we have a dummy sky texture name,
-	//	a flat. The data is in the WAD only because
-	//	we look for an actual index, instead of simply
-	//	setting one.
-	skyflatnum = R_FlatNumForName ( SKYFLATNAME );
+    // Reset all keys found
+    for (size_t j = 0; j < NUMCARDS; j++)
+        keysfound[j] = false;
 
-	// DOOM determines the sky texture to be used
-	// depending on the current episode, and the game version.
-	// [RH] Fetch sky parameters from level_locals_t.
-	// [ML] 5/11/06 - remove sky2 remenants
-	// [SL] 2012-03-19 - Add sky2 back
-	sky1texture = R_TextureNumForName (level.skypic.c_str());
-	if (!level.skypic2.empty())
-		sky2texture = R_TextureNumForName (level.skypic2.c_str());
-	else
-		sky2texture = 0;
+    // Set the sky map.
+    // First thing, we have a dummy sky texture name,
+    //	a flat. The data is in the WAD only because
+    //	we look for an actual index, instead of simply
+    //	setting one.
+    skyflatnum = R_FlatNumForName(SKYFLATNAME);
 
-	for (Players::iterator it = players.begin();it != players.end();++it)
-	{
-		if (it->ingame() && (::g_resetinvonexit || it->playerstate == PST_DEAD))
-			it->playerstate = PST_REBORN;
+    // DOOM determines the sky texture to be used
+    // depending on the current episode, and the game version.
+    // [RH] Fetch sky parameters from level_locals_t.
+    // [ML] 5/11/06 - remove sky2 remenants
+    // [SL] 2012-03-19 - Add sky2 back
+    sky1texture = R_TextureNumForName(level.skypic.c_str());
+    if (!level.skypic2.empty())
+        sky2texture = R_TextureNumForName(level.skypic2.c_str());
+    else
+        sky2texture = 0;
 
-		// Properly reset Cards, Powerups, and scores.
-		P_ClearPlayerCards(*it);
-		P_ClearPlayerPowerups(*it);
-		P_ClearPlayerScores(*it, SCORES_CLEAR_ALL);
+    for (Players::iterator it = players.begin(); it != players.end(); ++it)
+    {
+        if (it->ingame() && (::g_resetinvonexit || it->playerstate == PST_DEAD))
+            it->playerstate = PST_REBORN;
 
-		// [AM] Only touch ready state if warmup mode is enabled.
-		if (sv_warmup)
-		{
-			it->ready = false;
-			it->timeout_ready = 0;
+        // Properly reset Cards, Powerups, and scores.
+        P_ClearPlayerCards(*it);
+        P_ClearPlayerPowerups(*it);
+        P_ClearPlayerScores(*it, SCORES_CLEAR_ALL);
 
-			// [AM] Make sure the clients are updated on the new ready state
-			for (Players::iterator pit = players.begin();pit != players.end();++pit)
-			{
-				MSG_WriteSVC(&pit->client.reliablebuf,
-				             SVC_PlayerMembers(*it, SVC_PM_READY));
-			}
-		}
-	}
+        // [AM] Only touch ready state if warmup mode is enabled.
+        if (sv_warmup)
+        {
+            it->ready         = false;
+            it->timeout_ready = 0;
 
-	// Reset Team Scores
-	if (G_IsTeamGame())
-		TeamInfo_ResetScores();
+            // [AM] Make sure the clients are updated on the new ready state
+            for (Players::iterator pit = players.begin(); pit != players.end(); ++pit)
+            {
+                MSG_WriteSVC(&pit->client.reliablebuf, SVC_PlayerMembers(*it, SVC_PM_READY));
+            }
+        }
+    }
 
-	// initialize the msecnode_t freelist.					phares 3/25/98
-	// any nodes in the freelist are gone by now, cleared
-	// by Z_FreeTags() when the previous level ended or player
-	// died.
+    // Reset Team Scores
+    if (G_IsTeamGame())
+        TeamInfo_ResetScores();
 
-	{
-		extern msecnode_t *headsecnode; // phares 3/25/98
-		headsecnode = NULL;
+    // initialize the msecnode_t freelist.					phares 3/25/98
+    // any nodes in the freelist are gone by now, cleared
+    // by Z_FreeTags() when the previous level ended or player
+    // died.
 
-		// denis - todo - wtf is this crap?
-		// [RH] Need to prevent the AActor destructor from trying to
-		//		free the nodes
-		AActor *actor;
-		TThinkerIterator<AActor> iterator;
+    {
+        extern msecnode_t *headsecnode; // phares 3/25/98
+        headsecnode = NULL;
 
-		while ( (actor = iterator.Next ()) )
-		{
-			actor->touching_sectorlist = NULL;
+        // denis - todo - wtf is this crap?
+        // [RH] Need to prevent the AActor destructor from trying to
+        //		free the nodes
+        AActor                  *actor;
+        TThinkerIterator<AActor> iterator;
 
-			// denis - clear every actor netid so that they don't announce their destruction to clients
-			actor->netid = 0;
-		}
-	}
+        while ((actor = iterator.Next()))
+        {
+            actor->touching_sectorlist = NULL;
 
-	// For single-player servers.
-	for (Players::iterator it = players.begin();it != players.end();++it)
-		it->joindelay = 0;
+            // denis - clear every actor netid so that they don't announce their destruction to clients
+            actor->netid = 0;
+        }
+    }
 
-	// Nes - CTF Pre flag setup
-	if (sv_gametype == GM_CTF) {
+    // For single-player servers.
+    for (Players::iterator it = players.begin(); it != players.end(); ++it)
+        it->joindelay = 0;
 
-		for (int i = 0; i < NUMTEAMS; i++)
-			GetTeamInfo((team_t)i)->FlagData.flaglocated = false;
-	}
+    // Nes - CTF Pre flag setup
+    if (sv_gametype == GM_CTF)
+    {
 
-	P_SetupLevel (level.mapname.c_str(), position);
+        for (int i = 0; i < NUMTEAMS; i++)
+            GetTeamInfo((team_t)i)->FlagData.flaglocated = false;
+    }
 
-	// Nes - CTF Post flag setup
-	if (sv_gametype == GM_CTF)
-	{
-		for (int i = 0; i < sv_teamsinplay; i++)
-		{
-			TeamInfo* teamInfo = GetTeamInfo((team_t)i);
-			if (!teamInfo->FlagData.flaglocated)
-			{
-				const char* teamColor = teamInfo->ColorString.c_str();
-				SV_BroadcastPrintf(PRINT_WARNING, "WARNING: %s flag pedestal not found! No %s flags in game.\n", teamColor, teamColor);
-			}
-		}
-	}
+    P_SetupLevel(level.mapname.c_str(), position);
 
-	displayplayer_id = consoleplayer_id;				// view the guy you are playing
+    // Nes - CTF Post flag setup
+    if (sv_gametype == GM_CTF)
+    {
+        for (int i = 0; i < sv_teamsinplay; i++)
+        {
+            TeamInfo *teamInfo = GetTeamInfo((team_t)i);
+            if (!teamInfo->FlagData.flaglocated)
+            {
+                const char *teamColor = teamInfo->ColorString.c_str();
+                SV_BroadcastPrintf(PRINT_WARNING, "WARNING: %s flag pedestal not found! No %s flags in game.\n",
+                                   teamColor, teamColor);
+            }
+        }
+    }
 
-	gameaction = ga_nothing;
+    displayplayer_id = consoleplayer_id; // view the guy you are playing
 
-	paused = false;
+    gameaction = ga_nothing;
 
-	level.starttime = I_MSTime() * TICRATE / 1000;
-	// [RH] Restore the state of the level.
-	G_UnSnapshotLevel (!savegamerestore);
-	// [RH] Do script actions that were triggered on another map.
-	P_DoDeferedScripts ();
-	// [AM] Save the state of the level on the first tic.
-	G_DoSaveResetState();
+    paused = false;
 
-	// [AM] Handle levelstate init (before we handle per-round init).
-	::levelstate.reset();
+    level.starttime = I_MSTime() * TICRATE / 1000;
+    // [RH] Restore the state of the level.
+    G_UnSnapshotLevel(!savegamerestore);
+    // [RH] Do script actions that were triggered on another map.
+    P_DoDeferedScripts();
+    // [AM] Save the state of the level on the first tic.
+    G_DoSaveResetState();
 
-	// [AM] In sides-based games, destroy objectives that aren't relevant.
-	//      Must happen after saving state.
-	if (G_IsSidesGame())
-	{
-		AActor* mo;
-		TThinkerIterator<AActor> iterator;
-		while ((mo = iterator.Next()))
-		{
-			if (mo->netid && !CTF_ShouldSpawnHomeFlag(mo->type))
-			{
-				CTF_ReplaceFlagWithWaypoint(mo);
-			}
-		}
-	}
+    // [AM] Handle levelstate init (before we handle per-round init).
+    ::levelstate.reset();
 
-	//	C_FlushDisplay ();
+    // [AM] In sides-based games, destroy objectives that aren't relevant.
+    //      Must happen after saving state.
+    if (G_IsSidesGame())
+    {
+        AActor                  *mo;
+        TThinkerIterator<AActor> iterator;
+        while ((mo = iterator.Next()))
+        {
+            if (mo->netid && !CTF_ShouldSpawnHomeFlag(mo->type))
+            {
+                CTF_ReplaceFlagWithWaypoint(mo);
+            }
+        }
+    }
+
+    //	C_FlushDisplay ();
 }
 
 //
 // G_WorldDone
 //
-void G_WorldDone (void)
+void G_WorldDone(void)
 {
-	LevelInfos& levels = getLevelInfos();
-	ClusterInfos& clusters = getClusterInfos();
+    LevelInfos   &levels   = getLevelInfos();
+    ClusterInfos &clusters = getClusterInfos();
 
-	//gameaction = ga_worlddone;
+    // gameaction = ga_worlddone;
 
-	if (level.flags & LEVEL_CHANGEMAPCHEAT)
-		return;
+    if (level.flags & LEVEL_CHANGEMAPCHEAT)
+        return;
 
-	const char *finaletext = NULL;
-	cluster_info_t& thiscluster = clusters.findByCluster(level.cluster);
-	if (!strnicmp (level.nextmap.c_str(), "EndGame", 7)) {
-//		F_StartFinale (thiscluster->messagemusic, thiscluster->finaleflat, thiscluster->exittext); // denis - fixme - what should happen on the server?
-		finaletext = thiscluster.exittext;
-	} else {
-		cluster_info_t& nextcluster = (secretexit) ?
-			clusters.findByCluster(levels.findByName(::level.secretmap).cluster) :
-			clusters.findByCluster(levels.findByName(::level.nextmap).cluster);
+    const char     *finaletext  = NULL;
+    cluster_info_t &thiscluster = clusters.findByCluster(level.cluster);
+    if (!strnicmp(level.nextmap.c_str(), "EndGame", 7))
+    {
+        //		F_StartFinale (thiscluster->messagemusic, thiscluster->finaleflat, thiscluster->exittext); // denis -
+        //fixme - what should happen on the server?
+        finaletext = thiscluster.exittext;
+    }
+    else
+    {
+        cluster_info_t &nextcluster = (secretexit)
+                                          ? clusters.findByCluster(levels.findByName(::level.secretmap).cluster)
+                                          : clusters.findByCluster(levels.findByName(::level.nextmap).cluster);
 
-		if (nextcluster.cluster != level.cluster && sv_gametype == GM_COOP)
-		{
-			// Only start the finale if the next level's cluster is different
-			// than the current one and we're not in deathmatch.
-			if (nextcluster.entertext)
-			{
-//				F_StartFinale (nextcluster->messagemusic, nextcluster->finaleflat, nextcluster->entertext); // denis - fixme
-				finaletext = nextcluster.entertext;
-			}
-			else if (thiscluster.exittext)
-			{
-//				F_StartFinale (thiscluster->messagemusic, thiscluster->finaleflat, thiscluster->exittext); // denis - fixme
-				finaletext = thiscluster.exittext;
-			}
-		}
-	}
+        if (nextcluster.cluster != level.cluster && sv_gametype == GM_COOP)
+        {
+            // Only start the finale if the next level's cluster is different
+            // than the current one and we're not in deathmatch.
+            if (nextcluster.entertext)
+            {
+                //				F_StartFinale (nextcluster->messagemusic, nextcluster->finaleflat,
+                //nextcluster->entertext); // denis - fixme
+                finaletext = nextcluster.entertext;
+            }
+            else if (thiscluster.exittext)
+            {
+                //				F_StartFinale (thiscluster->messagemusic, thiscluster->finaleflat,
+                //thiscluster->exittext); // denis - fixme
+                finaletext = thiscluster.exittext;
+            }
+        }
+    }
 
-	if(finaletext)
-		mapchange += strlen(finaletext)*2;
+    if (finaletext)
+        mapchange += strlen(finaletext) * 2;
 }
 
-
-VERSION_CONTROL (g_level_cpp, "$Id: b56e5c37ed54d0d475c9b7bab21e138deaf883b2 $")
+VERSION_CONTROL(g_level_cpp, "$Id: b56e5c37ed54d0d475c9b7bab21e138deaf883b2 $")

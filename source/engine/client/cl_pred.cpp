@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id: c2fa8a5587562d8b7ef92ee0812b0d3ae3b801eb $
@@ -21,7 +21,6 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #include "odamex.h"
 
 #include "d_player.h"
@@ -32,22 +31,21 @@
 
 #include "p_snapshot.h"
 
-EXTERN_CVAR (cl_prednudge)
-EXTERN_CVAR (cl_predictsectors)
+EXTERN_CVAR(cl_prednudge)
+EXTERN_CVAR(cl_predictsectors)
 
 extern NetGraph netgraph;
 
-void P_DeathThink (player_t *player);
-void P_MovePlayer (player_t *player);
-void P_CalcHeight (player_t *player);
+void P_DeathThink(player_t *player);
+void P_MovePlayer(player_t *player);
+void P_CalcHeight(player_t *player);
 
-extern NetCommand localcmds[MAXSAVETICS];
+extern NetCommand     localcmds[MAXSAVETICS];
 static PlayerSnapshot cl_savedsnaps[MAXSAVETICS];
 
 bool predicting;
 
 extern std::map<unsigned short, SectorSnapshotManager> sector_snaps;
-
 
 //
 // CL_GetSnapshotManager
@@ -57,24 +55,24 @@ extern std::map<unsigned short, SectorSnapshotManager> sector_snaps;
 //
 static SectorSnapshotManager *CL_GetSectorSnapshotManager(sector_t *sector)
 {
-	unsigned short sectornum = sector - sectors;
-	if (!sector || sectornum >= numsectors)
-		return NULL;
+    unsigned short sectornum = sector - sectors;
+    if (!sector || sectornum >= numsectors)
+        return NULL;
 
-	std::map<unsigned short, SectorSnapshotManager>::iterator mgr_itr;
-	mgr_itr = sector_snaps.find(sectornum);
-	
-	if (mgr_itr != sector_snaps.end())
-		return &(mgr_itr->second);
-	
-	return NULL;
+    std::map<unsigned short, SectorSnapshotManager>::iterator mgr_itr;
+    mgr_itr = sector_snaps.find(sectornum);
+
+    if (mgr_itr != sector_snaps.end())
+        return &(mgr_itr->second);
+
+    return NULL;
 }
 
 static bool CL_SectorHasSnapshots(sector_t *sector)
 {
-	SectorSnapshotManager *mgr = CL_GetSectorSnapshotManager(sector);
-	
-	return (mgr && !mgr->empty());
+    SectorSnapshotManager *mgr = CL_GetSectorSnapshotManager(sector);
+
+    return (mgr && !mgr->empty());
 }
 
 //
@@ -84,15 +82,15 @@ static bool CL_SectorHasSnapshots(sector_t *sector)
 //
 bool CL_SectorIsPredicting(sector_t *sector)
 {
-	if (!sector || !cl_predictsectors)
-		return false;
-		
-	std::list<movingsector_t>::iterator itr = P_FindMovingSector(sector);
-	if (itr != movingsectors.end() && sector == itr->sector)
-		return (itr->moving_ceiling || itr->moving_floor);
+    if (!sector || !cl_predictsectors)
+        return false;
 
-	// sector not found	
-	return false;
+    std::list<movingsector_t>::iterator itr = P_FindMovingSector(sector);
+    if (itr != movingsectors.end() && sector == itr->sector)
+        return (itr->moving_ceiling || itr->moving_floor);
+
+    // sector not found
+    return false;
 }
 
 //
@@ -104,55 +102,53 @@ bool CL_SectorIsPredicting(sector_t *sector)
 //
 static void CL_ResetSectors()
 {
-	std::list<movingsector_t>::iterator itr;
-	itr = movingsectors.begin();
-	
-	// Iterate through all predicted sectors
-	while (itr != movingsectors.end())
-	{
-		sector_t *sector = itr->sector;
-		unsigned short sectornum = sector - sectors;
-		if (sectornum >= numsectors)
-			continue;
-		
-		// Find the most recent snapshot received from the server for this sector
-		SectorSnapshotManager *mgr = CL_GetSectorSnapshotManager(sector);
+    std::list<movingsector_t>::iterator itr;
+    itr = movingsectors.begin();
 
-		bool snapfinished = false;
-		
-		if (mgr && !mgr->empty())
-		{
-			int mostrecent = mgr->getMostRecentTime();
-			SectorSnapshot snap = mgr->getSnapshot(mostrecent);
-			
-			bool ceilingdone = P_CeilingSnapshotDone(&snap);
-			bool floordone = P_FloorSnapshotDone(&snap);
-			
-			if (ceilingdone && floordone)
-				snapfinished = true;
-			else
-			{
-				// snapshots have been received for this sector recently, so
-				// reset this sector to the most recent snapshot from the server
-				snap.toSector(sector);
-			}
-		}
-		else
-			snapfinished = true;
+    // Iterate through all predicted sectors
+    while (itr != movingsectors.end())
+    {
+        sector_t      *sector    = itr->sector;
+        unsigned short sectornum = sector - sectors;
+        if (sectornum >= numsectors)
+            continue;
 
+        // Find the most recent snapshot received from the server for this sector
+        SectorSnapshotManager *mgr = CL_GetSectorSnapshotManager(sector);
 
-		if (snapfinished && P_MovingCeilingCompleted(sector) &&
-			P_MovingFloorCompleted(sector))
-		{
-			// no valid snapshots in the container so remove this sector from the
-			// movingsectors list whenever prediction is done
-			movingsectors.erase(itr++);
-		}
-		else
-		{
-			++itr;
-		}
-	}	
+        bool snapfinished = false;
+
+        if (mgr && !mgr->empty())
+        {
+            int            mostrecent = mgr->getMostRecentTime();
+            SectorSnapshot snap       = mgr->getSnapshot(mostrecent);
+
+            bool ceilingdone = P_CeilingSnapshotDone(&snap);
+            bool floordone   = P_FloorSnapshotDone(&snap);
+
+            if (ceilingdone && floordone)
+                snapfinished = true;
+            else
+            {
+                // snapshots have been received for this sector recently, so
+                // reset this sector to the most recent snapshot from the server
+                snap.toSector(sector);
+            }
+        }
+        else
+            snapfinished = true;
+
+        if (snapfinished && P_MovingCeilingCompleted(sector) && P_MovingFloorCompleted(sector))
+        {
+            // no valid snapshots in the container so remove this sector from the
+            // movingsectors list whenever prediction is done
+            movingsectors.erase(itr++);
+        }
+        else
+        {
+            ++itr;
+        }
+    }
 }
 
 //
@@ -161,22 +157,22 @@ static void CL_ResetSectors()
 //
 static void CL_PredictSectors(int predtic)
 {
-	std::list<movingsector_t>::iterator itr;
-	for (itr = movingsectors.begin(); itr != movingsectors.end(); ++itr)
-	{
-		sector_t *sector = itr->sector;
-		
-		// If we haven't started receiving updates for this sector from the server,
-		// we only need to run the thinker for the current tic, not any past tics
-		// since the sector hasn't been reset to a previous update snapshot
-		if (predtic < gametic && !CL_SectorHasSnapshots(sector))
-			continue;
+    std::list<movingsector_t>::iterator itr;
+    for (itr = movingsectors.begin(); itr != movingsectors.end(); ++itr)
+    {
+        sector_t *sector = itr->sector;
 
-		if (sector && sector->ceilingdata && itr->moving_ceiling)
-			sector->ceilingdata->RunThink();
-		if (sector && sector->floordata && itr->moving_floor)
-			sector->floordata->RunThink();				
-	}
+        // If we haven't started receiving updates for this sector from the server,
+        // we only need to run the thinker for the current tic, not any past tics
+        // since the sector hasn't been reset to a previous update snapshot
+        if (predtic < gametic && !CL_SectorHasSnapshots(sector))
+            continue;
+
+        if (sector && sector->ceilingdata && itr->moving_ceiling)
+            sector->ceilingdata->RunThink();
+        if (sector && sector->floordata && itr->moving_floor)
+            sector->floordata->RunThink();
+    }
 }
 
 //
@@ -186,14 +182,14 @@ static void CL_PredictSectors(int predtic)
 //
 static void CL_PredictSpying()
 {
-	player_t *player = &displayplayer();
-	if (consoleplayer_id == displayplayer_id)
-		return;
+    player_t *player = &displayplayer();
+    if (consoleplayer_id == displayplayer_id)
+        return;
 
-	predicting = false;
-	
-	P_PlayerThink(player);
-	P_CalcHeight(player);
+    predicting = false;
+
+    P_PlayerThink(player);
+    P_CalcHeight(player);
 }
 
 //
@@ -202,137 +198,135 @@ static void CL_PredictSpying()
 //
 static void CL_PredictSpectator()
 {
-	player_t *player = &consoleplayer();
-	if (!player->spectator)
-		return;
-		
-	predicting = true;
-	
-	P_PlayerThink(player);
-	P_CalcHeight(player);
-	
-	predicting = false;
+    player_t *player = &consoleplayer();
+    if (!player->spectator)
+        return;
+
+    predicting = true;
+
+    P_PlayerThink(player);
+    P_CalcHeight(player);
+
+    predicting = false;
 }
 
 //
 // CL_PredictLocalPlayer
 //
-// 
+//
 static void CL_PredictLocalPlayer(int predtic)
 {
-	player_t *player = &consoleplayer();
-	
-	if (!player->ingame() || !player->mo || player->tic >= predtic)
-		return;
+    player_t *player = &consoleplayer();
 
-	// Restore the angle, viewheight, etc for the player
-	P_SetPlayerSnapshotNoPosition(player, cl_savedsnaps[predtic % MAXSAVETICS]);
+    if (!player->ingame() || !player->mo || player->tic >= predtic)
+        return;
 
-	// Copy the player's previous input ticcmd for the tic 'predtic'
-	// to player.cmd so that P_MovePlayer can simulate their movement in
-	// that tic
-	NetCommand *netcmd = &localcmds[predtic % MAXSAVETICS];
-	netcmd->toPlayer(player);
+    // Restore the angle, viewheight, etc for the player
+    P_SetPlayerSnapshotNoPosition(player, cl_savedsnaps[predtic % MAXSAVETICS]);
 
-	if (!predicting)
-		P_PlayerThink(player);
-	else
-		P_MovePlayer(player);
+    // Copy the player's previous input ticcmd for the tic 'predtic'
+    // to player.cmd so that P_MovePlayer can simulate their movement in
+    // that tic
+    NetCommand *netcmd = &localcmds[predtic % MAXSAVETICS];
+    netcmd->toPlayer(player);
 
-	player->mo->RunThink();
+    if (!predicting)
+        P_PlayerThink(player);
+    else
+        P_MovePlayer(player);
+
+    player->mo->RunThink();
 }
 
 //
 // CL_PredictWorld
 //
 // Main function for client-side prediction.
-// 
+//
 void CL_PredictWorld(void)
 {
-	if (gamestate != GS_LEVEL)
-		return;
+    if (gamestate != GS_LEVEL)
+        return;
 
-	player_t *p = &consoleplayer();
+    player_t *p = &consoleplayer();
 
-	if (!validplayer(*p) || !p->mo || noservermsgs || netdemo.isPaused())
-		return;
+    if (!validplayer(*p) || !p->mo || noservermsgs || netdemo.isPaused())
+        return;
 
-	// tenatively tell the netgraph that our prediction was successful
-	netgraph.setMisprediction(false);
+    // tenatively tell the netgraph that our prediction was successful
+    netgraph.setMisprediction(false);
 
-	if (consoleplayer_id != displayplayer_id)
-		CL_PredictSpying();
+    if (consoleplayer_id != displayplayer_id)
+        CL_PredictSpying();
 
-	// [SL] 2012-03-10 - Spectators can predict their position without server
-	// correction.  Handle them as a special case and leave.
-	if (consoleplayer().spectator)
-	{
-		CL_PredictSpectator();
-		return;
-	}
-		
-	if (p->tic <= 0)	// No verified position from the server
-		return;
+    // [SL] 2012-03-10 - Spectators can predict their position without server
+    // correction.  Handle them as a special case and leave.
+    if (consoleplayer().spectator)
+    {
+        CL_PredictSpectator();
+        return;
+    }
 
-	// Disable sounds, etc, during prediction
-	predicting = true;
-	
-	// Figure out where to start predicting from
-	int predtic = consoleplayer().tic > 0 ? consoleplayer().tic: 0;
-	// Last position update from the server is too old!
-	if (predtic < gametic - MAXSAVETICS)
-		predtic = gametic - MAXSAVETICS;
-	
-	// Save a snapshot of the player's state before prediction
-	PlayerSnapshot prevsnap(p->tic, p);
-	cl_savedsnaps[gametic % MAXSAVETICS] = prevsnap;
+    if (p->tic <= 0) // No verified position from the server
+        return;
 
-	// Move sectors to the last position received from the server
-	if (cl_predictsectors)
-		CL_ResetSectors();
+    // Disable sounds, etc, during prediction
+    predicting = true;
 
-	// Move the client to the last position received from the sever
-	int snaptime = p->snapshots.getMostRecentTime();
-	PlayerSnapshot snap = p->snapshots.getSnapshot(snaptime);
-	snap.toPlayer(p);
+    // Figure out where to start predicting from
+    int predtic = consoleplayer().tic > 0 ? consoleplayer().tic : 0;
+    // Last position update from the server is too old!
+    if (predtic < gametic - MAXSAVETICS)
+        predtic = gametic - MAXSAVETICS;
 
-	while (++predtic < gametic)
-	{
-		if (cl_predictsectors)
-			CL_PredictSectors(predtic);
-		CL_PredictLocalPlayer(predtic);  
-	}
+    // Save a snapshot of the player's state before prediction
+    PlayerSnapshot prevsnap(p->tic, p);
+    cl_savedsnaps[gametic % MAXSAVETICS] = prevsnap;
 
-	// If the player didn't just spawn or teleport, nudge the player from
-	// his position last tic to this new corrected position.  This smooths the
-	// view when there's a misprediction.
-	if (snap.isContinuous())
-	{
-		PlayerSnapshot correctedprevsnap(p->tic, p);
+    // Move sectors to the last position received from the server
+    if (cl_predictsectors)
+        CL_ResetSectors();
 
-		// Did we predict correctly?
-		bool correct = (correctedprevsnap.getX() == prevsnap.getX()) &&
-					   (correctedprevsnap.getY() == prevsnap.getY()) &&
-					   (correctedprevsnap.getZ() == prevsnap.getZ());
+    // Move the client to the last position received from the sever
+    int            snaptime = p->snapshots.getMostRecentTime();
+    PlayerSnapshot snap     = p->snapshots.getSnapshot(snaptime);
+    snap.toPlayer(p);
 
-		if (!correct)
-		{
-			// Update the netgraph concerning our prediction's error
-			netgraph.setMisprediction(true);
+    while (++predtic < gametic)
+    {
+        if (cl_predictsectors)
+            CL_PredictSectors(predtic);
+        CL_PredictLocalPlayer(predtic);
+    }
 
-			// Lerp from the our previous position to the correct position
-			PlayerSnapshot lerpedsnap = P_LerpPlayerPosition(prevsnap, correctedprevsnap, cl_prednudge);	
-			lerpedsnap.toPlayer(p);
-		}
-	}
+    // If the player didn't just spawn or teleport, nudge the player from
+    // his position last tic to this new corrected position.  This smooths the
+    // view when there's a misprediction.
+    if (snap.isContinuous())
+    {
+        PlayerSnapshot correctedprevsnap(p->tic, p);
 
-	predicting = false;
+        // Did we predict correctly?
+        bool correct = (correctedprevsnap.getX() == prevsnap.getX()) && (correctedprevsnap.getY() == prevsnap.getY()) &&
+                       (correctedprevsnap.getZ() == prevsnap.getZ());
 
-	// Run thinkers for current gametic
-	if (cl_predictsectors)
-		CL_PredictSectors(gametic);		
-	CL_PredictLocalPlayer(gametic);
+        if (!correct)
+        {
+            // Update the netgraph concerning our prediction's error
+            netgraph.setMisprediction(true);
+
+            // Lerp from the our previous position to the correct position
+            PlayerSnapshot lerpedsnap = P_LerpPlayerPosition(prevsnap, correctedprevsnap, cl_prednudge);
+            lerpedsnap.toPlayer(p);
+        }
+    }
+
+    predicting = false;
+
+    // Run thinkers for current gametic
+    if (cl_predictsectors)
+        CL_PredictSectors(gametic);
+    CL_PredictLocalPlayer(gametic);
 }
 
-
-VERSION_CONTROL (cl_pred_cpp, "$Id: c2fa8a5587562d8b7ef92ee0812b0d3ae3b801eb $")
+VERSION_CONTROL(cl_pred_cpp, "$Id: c2fa8a5587562d8b7ef92ee0812b0d3ae3b801eb $")

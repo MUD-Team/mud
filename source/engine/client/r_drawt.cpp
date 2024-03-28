@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id: d497fdc440bba6e6655cfffadd4712f02f01fa6c $
@@ -20,30 +20,26 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #include "odamex.h"
 
 #include "i_video.h"
 #include "v_video.h"
 
-
 // Functions for v_video.cpp support
 
-void r_dimpatchD_c(IWindowSurface* surface, argb_t color, int alpha, int x1, int y1, int w, int h)
+void r_dimpatchD_c(IWindowSurface *surface, argb_t color, int alpha, int x1, int y1, int w, int h)
 {
-	const int surface_pitch_pixels = surface->getPitchInPixels();
+    const int surface_pitch_pixels = surface->getPitchInPixels();
 
-	argb_t* line = (argb_t*)surface->getBuffer() + y1 * surface_pitch_pixels;
+    argb_t *line = (argb_t *)surface->getBuffer() + y1 * surface_pitch_pixels;
 
-	for (int y = y1; y < y1 + h; y++)
-	{
-		for (int x = x1; x < x1 + w; x++)
-			line[x] = alphablend1a(line[x], color, alpha);
+    for (int y = y1; y < y1 + h; y++)
+    {
+        for (int x = x1; x < x1 + w; x++)
+            line[x] = alphablend1a(line[x], color, alpha);
 
-		line += surface_pitch_pixels;
-	}
+        line += surface_pitch_pixels;
+    }
 }
 
-	
-VERSION_CONTROL (r_drawt_cpp, "$Id: d497fdc440bba6e6655cfffadd4712f02f01fa6c $")
-
+VERSION_CONTROL(r_drawt_cpp, "$Id: d497fdc440bba6e6655cfffadd4712f02f01fa6c $")

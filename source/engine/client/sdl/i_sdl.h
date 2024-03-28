@@ -26,12 +26,12 @@
 #include <SDL.h>
 
 #if (SDL_MAJOR_VERSION == 2)
-	#define SDL20
-	#if (SDL_MINOR_VERSION > 0 || SDL_PATCHLEVEL >= 16)
-		#define SDL2016
-	#endif
+#define SDL20
+#if (SDL_MINOR_VERSION > 0 || SDL_PATCHLEVEL >= 16)
+#define SDL2016
+#endif
 #endif
 
 #if (SDL_VERSION > SDL_VERSIONNUM(1, 2, 7))
-	#include "SDL_cpuinfo.h"
+#include "SDL_cpuinfo.h"
 #endif

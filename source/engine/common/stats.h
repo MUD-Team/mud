@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id: 415ca654317dcb8a011c8d702cf59db6e552f6e4 $
@@ -27,32 +27,35 @@
 
 class FStat
 {
-public:
-	FStat (const char *cname);
+  public:
+    FStat(const char *cname);
 
-	virtual ~FStat ();
+    virtual ~FStat();
 
-	void clock();
-	void unclock();
-	void reset();
+    void clock();
+    void unclock();
+    void reset();
 
-	const char *getname();
+    const char *getname();
 
-	static void dumpstat();
-	static void dumpstat(std::string which);
-	void dump();
+    static void dumpstat();
+    static void dumpstat(std::string which);
+    void        dump();
 
-private:
-
-	QWORD last_clock, last_elapsed;
-	std::string name;
-	static std::vector<FStat*> stats;
+  private:
+    QWORD                       last_clock, last_elapsed;
+    std::string                 name;
+    static std::vector<FStat *> stats;
 };
 
-#define BEGIN_STAT(n) \
-	static class Stat_##n : public FStat { \
-		public: \
-			Stat_##n () : FStat (#n) {} \
-} Stat_var_##n; Stat_var_##n.clock();
+#define BEGIN_STAT(n)                                                                                                  \
+    static class Stat_##n : public FStat                                                                               \
+    {                                                                                                                  \
+      public:                                                                                                          \
+        Stat_##n() : FStat(#n)                                                                                         \
+        {                                                                                                              \
+        }                                                                                                              \
+    } Stat_var_##n;                                                                                                    \
+    Stat_var_##n.clock();
 
 #define END_STAT(n) Stat_var_##n.unclock();

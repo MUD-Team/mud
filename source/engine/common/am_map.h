@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id: 9644fed86d3592adb8e4e05902779da5dd0ad53e $
@@ -21,87 +21,86 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #pragma once
 
 #include "d_event.h"
 
 // Used by ST StatusBar stuff.
-#define AM_MSGHEADER (('a'<<24)+('m'<<16))
-#define AM_MSGENTERED (AM_MSGHEADER | ('e'<<8))
-#define AM_MSGEXITED (AM_MSGHEADER | ('x'<<8))
+#define AM_MSGHEADER  (('a' << 24) + ('m' << 16))
+#define AM_MSGENTERED (AM_MSGHEADER | ('e' << 8))
+#define AM_MSGEXITED  (AM_MSGHEADER | ('x' << 8))
 
 // Group palette index and RGB value together:
 typedef struct am_color_s
 {
-	palindex_t index;
-	argb_t rgb;
+    palindex_t index;
+    argb_t     rgb;
 } am_color_t;
 
 typedef struct am_colors_s
 {
-	am_color_t Background;
-	am_color_t YourColor;
-	am_color_t WallColor;
-	am_color_t TSWallColor;
-	am_color_t FDWallColor;
-	am_color_t CDWallColor;
-	am_color_t ThingColor;
-	am_color_t ThingColor_Item;
-	am_color_t ThingColor_CountItem;
-	am_color_t ThingColor_Monster;
-	am_color_t ThingColor_NoCountMonster;
-	am_color_t ThingColor_Friend;
-	am_color_t ThingColor_Projectile;
-	am_color_t SecretWallColor;
-	am_color_t GridColor;
-	am_color_t XHairColor;
-	am_color_t NotSeenColor;
-	am_color_t LockedColor;
-	am_color_t AlmostBackground;
-	am_color_t TeleportColor;
-	am_color_t ExitColor;
+    am_color_t Background;
+    am_color_t YourColor;
+    am_color_t WallColor;
+    am_color_t TSWallColor;
+    am_color_t FDWallColor;
+    am_color_t CDWallColor;
+    am_color_t ThingColor;
+    am_color_t ThingColor_Item;
+    am_color_t ThingColor_CountItem;
+    am_color_t ThingColor_Monster;
+    am_color_t ThingColor_NoCountMonster;
+    am_color_t ThingColor_Friend;
+    am_color_t ThingColor_Projectile;
+    am_color_t SecretWallColor;
+    am_color_t GridColor;
+    am_color_t XHairColor;
+    am_color_t NotSeenColor;
+    am_color_t LockedColor;
+    am_color_t AlmostBackground;
+    am_color_t TeleportColor;
+    am_color_t ExitColor;
 } am_colors_t;
 
 typedef struct am_default_colors_s
 {
-	std::string Background;
-	std::string YourColor;
-	std::string WallColor;
-	std::string TSWallColor;
-	std::string FDWallColor;
-	std::string CDWallColor;
-	std::string ThingColor;
-	std::string ThingColor_Item;
-	std::string ThingColor_CountItem;
-	std::string ThingColor_Monster;
-	std::string ThingColor_NoCountMonster;
-	std::string ThingColor_Friend;
-	std::string ThingColor_Projectile;
-	std::string SecretWallColor;
-	std::string GridColor;
-	std::string XHairColor;
-	std::string NotSeenColor;
-	std::string LockedColor;
-	std::string AlmostBackground;
-	std::string TeleportColor;
-	std::string ExitColor;
+    std::string Background;
+    std::string YourColor;
+    std::string WallColor;
+    std::string TSWallColor;
+    std::string FDWallColor;
+    std::string CDWallColor;
+    std::string ThingColor;
+    std::string ThingColor_Item;
+    std::string ThingColor_CountItem;
+    std::string ThingColor_Monster;
+    std::string ThingColor_NoCountMonster;
+    std::string ThingColor_Friend;
+    std::string ThingColor_Projectile;
+    std::string SecretWallColor;
+    std::string GridColor;
+    std::string XHairColor;
+    std::string NotSeenColor;
+    std::string LockedColor;
+    std::string AlmostBackground;
+    std::string TeleportColor;
+    std::string ExitColor;
 } am_default_colors_t;
 
 typedef v2fixed_t mpoint_t;
 
 typedef struct
 {
-	mpoint_t a, b;
+    mpoint_t a, b;
 } mline_t;
 
 extern am_default_colors_t AutomapDefaultColors;
-extern am_colors_t AutomapDefaultCurrentColors;
+extern am_colors_t         AutomapDefaultCurrentColors;
 
 extern int am_cheating;
 
 // Called by main loop.
-BOOL AM_Responder(event_t* ev);
+BOOL AM_Responder(event_t *ev);
 
 // Called by main loop.
 void AM_Ticker();

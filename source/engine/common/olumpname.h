@@ -24,48 +24,47 @@
 
 class OLumpName
 {
-	char m_data[9];
+    char m_data[9];
 
-	void MakeDataPresentable();
+    void MakeDataPresentable();
 
   public:
+    // constructors/assignment operators
+    OLumpName();
+    OLumpName(const OLumpName &other);
+    OLumpName(const char *other);
+    OLumpName(const std::string &other);
+    OLumpName &operator=(const OLumpName &other);
+    OLumpName &operator=(const char *other);
+    OLumpName &operator=(const std::string &other);
 
-	// constructors/assignment operators
-	OLumpName();
-	OLumpName(const OLumpName& other);
-	OLumpName(const char* other);
-	OLumpName(const std::string& other);
-	OLumpName& operator=(const OLumpName& other);
-	OLumpName& operator=(const char* other);
-	OLumpName& operator=(const std::string& other);
-	
-	// capacity
-	size_t size() const;
-	size_t length() const;
-	void clear();
-	bool empty() const;
-	
-	// element access
-	//
-	// WARNING: If you use any of the non-const element access functions, the uppercase
-	//			guarantee will no longer apply! You can edit the char's to be whatever you
-	//			want at that point. Be careful!
-	char& at(const size_t pos);
-	const char& at(const size_t pos) const;
-	char& operator[](const size_t pos);
-	const char& operator[](const size_t pos) const;
+    // capacity
+    size_t size() const;
+    size_t length() const;
+    void   clear();
+    bool   empty() const;
 
-	// string operations
-	const char* c_str() const;
-	const char* data() const;
-	// Note: comparison operations are done without regard to case sensitivity.
-	int compare(const OLumpName& other) const;
-	int compare(const char* other) const;
-	int compare(const std::string& other) const;
-	friend bool operator==(const OLumpName& lhs, const OLumpName& rhs);
-	friend bool operator==(const OLumpName& lhs, const char* rhs);
-	friend bool operator==(const OLumpName& lhs, const std::string& rhs);
-	friend bool operator!=(const OLumpName& lhs, const OLumpName& rhs);
-	friend bool operator!=(const OLumpName& lhs, const char* rhs);
-	friend bool operator!=(const OLumpName& lhs, const std::string& rhs);
+    // element access
+    //
+    // WARNING: If you use any of the non-const element access functions, the uppercase
+    //			guarantee will no longer apply! You can edit the char's to be whatever you
+    //			want at that point. Be careful!
+    char       &at(const size_t pos);
+    const char &at(const size_t pos) const;
+    char       &operator[](const size_t pos);
+    const char &operator[](const size_t pos) const;
+
+    // string operations
+    const char *c_str() const;
+    const char *data() const;
+    // Note: comparison operations are done without regard to case sensitivity.
+    int         compare(const OLumpName &other) const;
+    int         compare(const char *other) const;
+    int         compare(const std::string &other) const;
+    friend bool operator==(const OLumpName &lhs, const OLumpName &rhs);
+    friend bool operator==(const OLumpName &lhs, const char *rhs);
+    friend bool operator==(const OLumpName &lhs, const std::string &rhs);
+    friend bool operator!=(const OLumpName &lhs, const OLumpName &rhs);
+    friend bool operator!=(const OLumpName &lhs, const char *rhs);
+    friend bool operator!=(const OLumpName &lhs, const std::string &rhs);
 };

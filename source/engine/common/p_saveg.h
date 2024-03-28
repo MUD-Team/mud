@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id: 249bd22d60e133fc052b8d56b8293072d44e0766 $
@@ -28,10 +28,10 @@
 // Persistent storage/archiving.
 // These are the load / save game routines.
 // Also see farchive.(h|cpp)
-void P_SerializePlayers (FArchive &arc);
-void P_SerializeWorld (FArchive &arc);
-void P_SerializeThinkers (FArchive &arc, bool);
-void P_SerializeRNGState (FArchive &arc);
-void P_SerializeSounds (FArchive &arc);
-void P_SerializeACSDefereds (FArchive &arc);
-void P_SerializePolyobjs (FArchive &arc);
+void P_SerializePlayers(FArchive &arc);
+void P_SerializeWorld(FArchive &arc);
+void P_SerializeThinkers(FArchive &arc, bool);
+void P_SerializeRNGState(FArchive &arc);
+void P_SerializeSounds(FArchive &arc);
+void P_SerializeACSDefereds(FArchive &arc);
+void P_SerializePolyobjs(FArchive &arc);

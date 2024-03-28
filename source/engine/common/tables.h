@@ -33,54 +33,50 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #pragma once
 
 #include "m_fixed.h"
 
-#define PI				3.141592657
+#define PI 3.141592657
 
-#define FINEANGLES		8192
-#define FINEMASK		(FINEANGLES-1)
-
+#define FINEANGLES 8192
+#define FINEMASK   (FINEANGLES - 1)
 
 // 0x100000000 to 0x2000
-#define ANGLETOFINESHIFT		19
+#define ANGLETOFINESHIFT 19
 
 // Effective size is 10240.
-extern	const fixed_t 		finesine[5*FINEANGLES/4];
+extern const fixed_t finesine[5 * FINEANGLES / 4];
 
 // Re-use data, is just PI/2 phase shift.
-extern const fixed_t*		finecosine;
-
+extern const fixed_t *finecosine;
 
 // Effective size is 4096.
-extern const fixed_t		finetangent[FINEANGLES/2];
+extern const fixed_t finetangent[FINEANGLES / 2];
 
 // Binary Angle Measument, BAM.
-#define ANG45			0x20000000
-#define ANG90			0x40000000
-#define ANG135			0x60000000
-#define ANG180			0x80000000
-#define ANG225			0xa0000000
-#define ANG270			0xc0000000
-#define ANG315			0xe0000000
-#define ANG(n)			((ANG45/45)*(n))
+#define ANG45  0x20000000
+#define ANG90  0x40000000
+#define ANG135 0x60000000
+#define ANG180 0x80000000
+#define ANG225 0xa0000000
+#define ANG270 0xc0000000
+#define ANG315 0xe0000000
+#define ANG(n) ((ANG45 / 45) * (n))
 
-#define ANG360  0xffffffff
+#define ANG360 0xffffffff
 
-#define SLOPERANGE		2048
-#define SLOPEBITS		11
-#define DBITS			(FRACBITS-SLOPEBITS)
+#define SLOPERANGE 2048
+#define SLOPEBITS  11
+#define DBITS      (FRACBITS - SLOPEBITS)
 
-typedef DWORD			angle_t;
-
+typedef DWORD angle_t;
 
 // Effective size is 2049;
 // The +1 size is to handle the case when x==y without additional checking.
 // [ML] 2/2/10: Updated with R_PointToAngle2 changes (from EE)
 extern const angle_t tantoangle[2049];
-extern angle_t tantoangle_acc[2049];
+extern angle_t       tantoangle_acc[2049];
 
 extern const angle_t *p_tantoangle;
 
@@ -91,5 +87,5 @@ void Table_SetTanToAngle(int version);
 // These are straight from Eternity so demos stay in sync.
 inline static angle_t FixedToAngle(fixed_t a)
 {
-	return (angle_t)(((uint64_t)a * ANG(1)) >> FRACBITS);
+    return (angle_t)(((uint64_t)a * ANG(1)) >> FRACBITS);
 }

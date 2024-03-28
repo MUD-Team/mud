@@ -24,57 +24,57 @@
 
 #ifdef _WIN32
 
-    // DrawText macros in winuser.h interfere with v_video.h
-    #ifndef NODRAWTEXT
-        #define NODRAWTEXT
-    #endif  // NODRAWTEXT
+// DrawText macros in winuser.h interfere with v_video.h
+#ifndef NODRAWTEXT
+#define NODRAWTEXT
+#endif // NODRAWTEXT
 
-    #ifndef NOMINMAX
-        #define NOMINMAX
-    #endif  // NOMINMAX;
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif // NOMINMAX;
 
-    #define WIN32_LEAN_AND_MEAN
-    // need to make winxp compat for raw mouse input
-    #if (_WIN32_WINNT < 0x0501)
-        #undef _WIN32_WINNT
-        #define _WIN32_WINNT 0x0501
-    #endif
+#define WIN32_LEAN_AND_MEAN
+// need to make winxp compat for raw mouse input
+#if (_WIN32_WINNT < 0x0501)
+#undef _WIN32_WINNT
+#define _WIN32_WINNT 0x0501
+#endif
 
-    #include <windows.h>
+#include <windows.h>
 
-	// avoid a conflict with the winuser.h macro DrawText
-	#ifdef DrawText
-        #undef DrawText
-    #endif
+// avoid a conflict with the winuser.h macro DrawText
+#ifdef DrawText
+#undef DrawText
+#endif
 
-    // Same with PlaySound
-    #ifdef PlaySound
-        #undef PlaySound
-    #endif
+// Same with PlaySound
+#ifdef PlaySound
+#undef PlaySound
+#endif
 
-    // POSIX functions
-	#include <ctime>
-    char * strptime(const char *buf, const char *fmt, struct tm *timeptr);
-    time_t timegm(struct tm *tm);
+// POSIX functions
+#include <ctime>
+char  *strptime(const char *buf, const char *fmt, struct tm *timeptr);
+time_t timegm(struct tm *tm);
 
-    #if (defined _MSC_VER)
-        #define strncasecmp _strnicmp
-    #endif
+#if (defined _MSC_VER)
+#define strncasecmp _strnicmp
+#endif
 
-    // C99 functions
-    //
-    // Missing from MSVC++ older than 2015, implementation in
-    // common/sprintf.cpp.
-    //
-    // We must use this implementation because _snprintf and
-    // _vsnprintf do not have the same behavior as their C99
-    // counterparts, and are thus unsafe to substitute.
-    #if defined(_MSC_VER) && _MSC_VER < 1900
-        int snprintf(char *s, size_t n, const char *fmt, ...);
-        int vsnprintf(char *s, size_t n, const char *fmt, va_list ap);
-    #endif
+// C99 functions
+//
+// Missing from MSVC++ older than 2015, implementation in
+// common/sprintf.cpp.
+//
+// We must use this implementation because _snprintf and
+// _vsnprintf do not have the same behavior as their C99
+// counterparts, and are thus unsafe to substitute.
+#if defined(_MSC_VER) && _MSC_VER < 1900
+int snprintf(char *s, size_t n, const char *fmt, ...);
+int vsnprintf(char *s, size_t n, const char *fmt, va_list ap);
+#endif
 
-    #if defined(_MSC_VER) && _MSC_VER < 1800
-        #define va_copy(d,s)((d) = (s))
-    #endif
+#if defined(_MSC_VER) && _MSC_VER < 1800
+#define va_copy(d, s) ((d) = (s))
+#endif
 #endif // WIN32

@@ -32,24 +32,24 @@ double gDisplaySpeed;
 
 /**
  * @brief Add the given player's speed to the speedometer
- * 
+ *
  * @param id ID of the player to check speed for.
  * @param start Starting position.
  * @param end Ending position.
  */
-void HU_AddPlayerSpeed(const v3double_t& start, const v3double_t& end)
+void HU_AddPlayerSpeed(const v3double_t &start, const v3double_t &end)
 {
-	const v3double_t origin(end.x - start.x, end.y - start.y, end.z - start.z);
-	const double dist = sqrt(pow(origin.x, 2) + pow(origin.y, 2) + pow(origin.z, 2));
-	::gDisplaySpeed = dist * TICRATE;
+    const v3double_t origin(end.x - start.x, end.y - start.y, end.z - start.z);
+    const double     dist = sqrt(pow(origin.x, 2) + pow(origin.y, 2) + pow(origin.z, 2));
+    ::gDisplaySpeed       = dist * TICRATE;
 }
 
 /**
  * @brief Calculate and retrieve the current player speed.
- * 
+ *
  * @return Speed in map units.
  */
 double HU_GetPlayerSpeed()
 {
-	return ::gDisplaySpeed;
+    return ::gDisplaySpeed;
 }

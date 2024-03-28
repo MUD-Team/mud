@@ -28,182 +28,193 @@
 
 class FArchive;
 
-class	DObject;
-class		DArgs;
-class		DBoundingBox;
-class		DCanvas;
-class		DConsoleCommand;
-class			DConsoleAlias;
-class		DSeqNode;
-class			DSeqActorNode;
-class			DSeqSectorNode;
-class		DThinker;
-class			AActor;
-class			DPusher;
-class			DScroller;
-class			DSectorEffect;
-class				DLighting;
-class					DFireFlicker;
-class					DFlicker;
-class					DGlow;
-class					DGlow2;
-class					DLightFlash;
-class					DPhased;
-class					DStrobe;
-class				DMover;
-class					DElevator;
-class					DMovingCeiling;
-class						DCeiling;
-class						DDoor;
-class					DMovingFloor;
-class						DFloor;
-class						DPlat;
-class					DPillar;
+class DObject;
+class DArgs;
+class DBoundingBox;
+class DCanvas;
+class DConsoleCommand;
+class DConsoleAlias;
+class DSeqNode;
+class DSeqActorNode;
+class DSeqSectorNode;
+class DThinker;
+class AActor;
+class DPusher;
+class DScroller;
+class DSectorEffect;
+class DLighting;
+class DFireFlicker;
+class DFlicker;
+class DGlow;
+class DGlow2;
+class DLightFlash;
+class DPhased;
+class DStrobe;
+class DMover;
+class DElevator;
+class DMovingCeiling;
+class DCeiling;
+class DDoor;
+class DMovingFloor;
+class DFloor;
+class DPlat;
+class DPillar;
 
 struct TypeInfo
 {
-	TypeInfo ()
-	{}
+    TypeInfo()
+    {
+    }
 
-	TypeInfo (const char *inName, const TypeInfo *inParentType, unsigned int inSize)
-		: Name (inName),
-		  ParentType (inParentType),
-		  SizeOf (inSize),
-		  TypeIndex(0)
-	{}
-	TypeInfo (const char *inName, const TypeInfo *inParentType, unsigned int inSize, DObject *(*inNew)())
-		: Name (inName),
-		  ParentType (inParentType),
-		  SizeOf (inSize),
-		  CreateNew (inNew),
-		  TypeIndex(0)
-	{}
+    TypeInfo(const char *inName, const TypeInfo *inParentType, unsigned int inSize)
+        : Name(inName), ParentType(inParentType), SizeOf(inSize), TypeIndex(0)
+    {
+    }
+    TypeInfo(const char *inName, const TypeInfo *inParentType, unsigned int inSize, DObject *(*inNew)())
+        : Name(inName), ParentType(inParentType), SizeOf(inSize), CreateNew(inNew), TypeIndex(0)
+    {
+    }
 
-	const char *Name;
-	const TypeInfo *ParentType;
-	unsigned int SizeOf;
-	DObject *(*CreateNew)();
-	unsigned short TypeIndex;
+    const char     *Name;
+    const TypeInfo *ParentType;
+    unsigned int    SizeOf;
+    DObject *(*CreateNew)();
+    unsigned short TypeIndex;
 
-	void RegisterType ();
+    void RegisterType();
 
-	// Returns true if this type is an ansector of (or same as) the passed type.
-	bool IsAncestorOf (const TypeInfo *ti) const
-	{
-		while (ti)
-		{
-			if (this == ti)
-				return true;
-			ti = ti->ParentType;
-		}
-		return false;
-	}
-	inline bool IsDescendantOf (const TypeInfo *ti) const
-	{
-		return ti->IsAncestorOf (this);
-	}
+    // Returns true if this type is an ansector of (or same as) the passed type.
+    bool IsAncestorOf(const TypeInfo *ti) const
+    {
+        while (ti)
+        {
+            if (this == ti)
+                return true;
+            ti = ti->ParentType;
+        }
+        return false;
+    }
+    inline bool IsDescendantOf(const TypeInfo *ti) const
+    {
+        return ti->IsAncestorOf(this);
+    }
 
-	static const TypeInfo *FindType (const char *name);
+    static const TypeInfo *FindType(const char *name);
 
-	static unsigned short m_NumTypes, m_MaxTypes;
-	static TypeInfo **m_Types;
+    static unsigned short m_NumTypes, m_MaxTypes;
+    static TypeInfo     **m_Types;
 };
 
 struct ClassInit
 {
-	ClassInit (TypeInfo *newClass);
+    ClassInit(TypeInfo *newClass);
 };
 
-#define RUNTIME_TYPE(object)	(object->StaticType())
-#define RUNTIME_CLASS(cls)		(&cls::_StaticType)
+#define RUNTIME_TYPE(object) (object->StaticType())
+#define RUNTIME_CLASS(cls)   (&cls::_StaticType)
 
-#define _DECLARE_CLASS(cls,parent) \
-	virtual TypeInfo *StaticType() const { return RUNTIME_CLASS(cls); } \
-private: \
-	typedef parent Super; \
-	typedef cls ThisClass; \
-protected:
+#define _DECLARE_CLASS(cls, parent)                                                                                    \
+    virtual TypeInfo *StaticType() const                                                                               \
+    {                                                                                                                  \
+        return RUNTIME_CLASS(cls);                                                                                     \
+    }                                                                                                                  \
+                                                                                                                       \
+  private:                                                                                                             \
+    typedef parent Super;                                                                                              \
+    typedef cls    ThisClass;                                                                                          \
+                                                                                                                       \
+  protected:
 
-#define DECLARE_CLASS(cls,parent) \
-public: \
-	static TypeInfo _StaticType; \
-	_DECLARE_CLASS(cls,parent)
+#define DECLARE_CLASS(cls, parent)                                                                                     \
+  public:                                                                                                              \
+    static TypeInfo _StaticType;                                                                                       \
+    _DECLARE_CLASS(cls, parent)
 
-#define _DECLARE_SERIAL(cls,parent) \
-	static DObject *CreateObject (); \
-public: \
-	bool CanSerialize() { return true; } \
-	void Serialize (FArchive &); \
-	inline friend FArchive &operator>> (FArchive &arc, cls* &object) \
-	{ \
-		return arc.ReadObject ((DObject* &)object, RUNTIME_CLASS(cls)); \
-	}
+#define _DECLARE_SERIAL(cls, parent)                                                                                   \
+    static DObject *CreateObject();                                                                                    \
+                                                                                                                       \
+  public:                                                                                                              \
+    bool CanSerialize()                                                                                                \
+    {                                                                                                                  \
+        return true;                                                                                                   \
+    }                                                                                                                  \
+    void                    Serialize(FArchive &);                                                                     \
+    inline friend FArchive &operator>>(FArchive &arc, cls *&object)                                                    \
+    {                                                                                                                  \
+        return arc.ReadObject((DObject *&)object, RUNTIME_CLASS(cls));                                                 \
+    }
 
-#define DECLARE_SERIAL(cls,parent) \
-	DECLARE_CLASS(cls,parent) \
-	_DECLARE_SERIAL(cls,parent)
+#define DECLARE_SERIAL(cls, parent)                                                                                    \
+    DECLARE_CLASS(cls, parent)                                                                                         \
+    _DECLARE_SERIAL(cls, parent)
 
-#define _IMPLEMENT_CLASS(cls,parent,new) \
-	TypeInfo cls::_StaticType (#cls, RUNTIME_CLASS(parent), sizeof(cls), new);
+#define _IMPLEMENT_CLASS(cls, parent, new) TypeInfo cls::_StaticType(#cls, RUNTIME_CLASS(parent), sizeof(cls), new);
 
-#define IMPLEMENT_CLASS(cls,parent) \
-	_IMPLEMENT_CLASS(cls,parent,NULL) \
+#define IMPLEMENT_CLASS(cls, parent) _IMPLEMENT_CLASS(cls, parent, NULL)
 
-#define _IMPLEMENT_SERIAL(cls,parent) \
-	_IMPLEMENT_CLASS(cls,parent,cls::CreateObject) \
-	DObject *cls::CreateObject() { return new cls; } \
-	static ClassInit _Init##cls(RUNTIME_CLASS(cls));
+#define _IMPLEMENT_SERIAL(cls, parent)                                                                                 \
+    _IMPLEMENT_CLASS(cls, parent, cls::CreateObject)                                                                   \
+    DObject *cls::CreateObject()                                                                                       \
+    {                                                                                                                  \
+        return new cls;                                                                                                \
+    }                                                                                                                  \
+    static ClassInit _Init##cls(RUNTIME_CLASS(cls));
 
-#define IMPLEMENT_SERIAL(cls,parent) \
-	_IMPLEMENT_SERIAL(cls,parent)
+#define IMPLEMENT_SERIAL(cls, parent) _IMPLEMENT_SERIAL(cls, parent)
 
 enum EObjectFlags
 {
-	OF_MassDestruction	= 0x00000001,	// Object is queued for deletion
-	OF_Cleanup			= 0x00000002	// Object is being deconstructed as a result of a queued deletion
+    OF_MassDestruction = 0x00000001, // Object is queued for deletion
+    OF_Cleanup         = 0x00000002  // Object is being deconstructed as a result of a queued deletion
 };
 
 class DObject
 {
-public: \
-	static TypeInfo _StaticType; \
-	virtual TypeInfo *StaticType() const { return &_StaticType; } \
-private: \
-	typedef DObject ThisClass;
+  public:
+    static TypeInfo   _StaticType;
+    virtual TypeInfo *StaticType() const
+    {
+        return &_StaticType;
+    }
 
-public:
-	DObject ();
-	virtual ~DObject ();
+  private:
+    typedef DObject ThisClass;
 
-	inline bool IsKindOf (const TypeInfo *base) const
-	{
-		return base->IsAncestorOf (StaticType ());
-	}
+  public:
+    DObject();
+    virtual ~DObject();
 
-	inline bool IsA (const TypeInfo *type) const
-	{
-		return (type == StaticType());
-	}
+    inline bool IsKindOf(const TypeInfo *base) const
+    {
+        return base->IsAncestorOf(StaticType());
+    }
 
-	virtual void Serialize (FArchive &arc) {}
-	virtual void Destroy ();
+    inline bool IsA(const TypeInfo *type) const
+    {
+        return (type == StaticType());
+    }
 
-	static void BeginFrame ();
-	static void EndFrame ();
+    virtual void Serialize(FArchive &arc)
+    {
+    }
+    virtual void Destroy();
 
-	DWORD ObjectFlags;
+    static void BeginFrame();
+    static void EndFrame();
 
-	static void STACK_ARGS StaticShutdown ();
+    DWORD ObjectFlags;
 
-private:
-	static TArray<DObject *> Objects;
-	static TArray<size_t> FreeIndices;
-	static TArray<DObject *> ToDestroy;
+    static void STACK_ARGS StaticShutdown();
 
-	void RemoveFromArray ();
+  private:
+    static TArray<DObject *> Objects;
+    static TArray<size_t>    FreeIndices;
+    static TArray<DObject *> ToDestroy;
 
-	static bool Inactive;
-	size_t Index;
+    void RemoveFromArray();
+
+    static bool Inactive;
+    size_t      Index;
 };
 
 #include "farchive.h"

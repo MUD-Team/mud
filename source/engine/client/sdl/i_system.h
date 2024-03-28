@@ -22,7 +22,6 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #pragma once
 
 #ifdef _WIN32
@@ -32,29 +31,27 @@
 #include "d_ticcmd.h"
 #include "d_event.h"
 
-
 // Index values into the LanguageIDs array
 enum
 {
-	LANGIDX_UserPreferred,
-	LANGIDX_UserDefault,
-	LANGIDX_SysPreferred,
-	LANGIDX_SysDefault
+    LANGIDX_UserPreferred,
+    LANGIDX_UserDefault,
+    LANGIDX_SysPreferred,
+    LANGIDX_SysDefault
 };
 extern DWORD LanguageIDs[4];
-extern void SetLanguageIDs ();
+extern void  SetLanguageIDs();
 
-void I_BeginRead (void);
-void I_EndRead (void);
+void I_BeginRead(void);
+void I_EndRead(void);
 
 // Called by DoomMain.
-void I_Init (void);
+void I_Init(void);
 
 // Called by startup code
 // to get the ammount of memory to malloc
 // for the zone management.
-void *I_ZoneBase (size_t *size);
-
+void *I_ZoneBase(size_t *size);
 
 // returns current time in nanoseconds.
 dtime_t I_GetTime();
@@ -72,7 +69,7 @@ void I_Yield();
 // called before processing each tic in a frame.
 // Quick syncronous operations are performed here.
 // Can call D_PostEvent.
-void I_StartTic (void);
+void I_StartTic(void);
 
 // Asynchronous interrupt functions should maintain private queues
 // that are read by the synchronous functions
@@ -82,41 +79,40 @@ void I_StartTic (void);
 // or calls a loadable driver to build it.
 // This ticcmd will then be modified by the gameloop
 // for normal input.
-ticcmd_t *I_BaseTiccmd (void);
-
+ticcmd_t *I_BaseTiccmd(void);
 
 // Called by M_Responder when quit is selected.
 // Clean exit, displays sell blurb.
-void STACK_ARGS I_Quit (void);
+void STACK_ARGS I_Quit(void);
 
-void STACK_ARGS I_Warning(const char *warning, ...);
-void STACK_ARGS I_Error (const char *error, ...);
+void STACK_ARGS          I_Warning(const char *warning, ...);
+void STACK_ARGS          I_Error(const char *error, ...);
 NORETURN void STACK_ARGS I_FatalError(const char *error, ...);
 
-void addterm (void (STACK_ARGS *func)(void), const char *name);
-#define atterm(t) addterm (t, #t)
+void addterm(void(STACK_ARGS *func)(void), const char *name);
+#define atterm(t) addterm(t, #t)
 
 // Repaint the pre-game console
-void I_PaintConsole (void);
+void I_PaintConsole(void);
 
 // Print a console string
-void I_PrintStr (int x, const char *str, int count, BOOL scroll);
+void I_PrintStr(int x, const char *str, int count, BOOL scroll);
 
 // Set the title string of the startup window
-void I_SetTitleString (const char *title);
+void I_SetTitleString(const char *title);
 
-std::string I_ConsoleInput (void);
+std::string I_ConsoleInput(void);
 
 // Returns true if there will be no application window
 bool I_IsHeadless();
 
 // [RH] Returns millisecond-accurate time
-dtime_t I_MSTime (void);
+dtime_t I_MSTime(void);
 
 // [RH] Title string to display at bottom of console during startup
 extern char DoomStartupTitle[256];
 
-void I_FinishClockCalibration ();
+void I_FinishClockCalibration();
 
 std::string I_GetClipboardText();
 
@@ -125,21 +121,21 @@ std::string I_GetClipboardText();
  *
  * @param message Contents of the message box.
  */
-void I_ErrorMessageBox(const char* message);
+void I_ErrorMessageBox(const char *message);
 
 // Directory searching routines
 
 typedef struct _finddata_t findstate_t;
 
-long I_FindFirst (char *filespec, findstate_t *fileinfo);
-int I_FindNext (long handle, findstate_t *fileinfo);
-int I_FindClose (long handle);
+long I_FindFirst(char *filespec, findstate_t *fileinfo);
+int  I_FindNext(long handle, findstate_t *fileinfo);
+int  I_FindClose(long handle);
 
-#define I_FindName(a)	((a)->name)
-#define I_FindAttr(a)	((a)->attrib)
+#define I_FindName(a) ((a)->name)
+#define I_FindAttr(a) ((a)->attrib)
 
-#define FA_RDONLY	_A_RDONLY
-#define FA_HIDDEN	_A_HIDDEN
-#define FA_SYSTEM	_A_SYSTEM
-#define FA_DIREC	_A_SUBDIR
-#define FA_ARCH		_A_ARCH
+#define FA_RDONLY _A_RDONLY
+#define FA_HIDDEN _A_HIDDEN
+#define FA_SYSTEM _A_SYSTEM
+#define FA_DIREC  _A_SUBDIR
+#define FA_ARCH   _A_ARCH

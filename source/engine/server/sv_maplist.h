@@ -28,57 +28,56 @@
 #include <map>
 
 // Serverside maplist structure
-class Maplist {
-private:
-	bool entered_once;
-	std::string error;
-	size_t index;
-	bool in_maplist;
-	std::vector<maplist_entry_t> maplist;
-	bool shuffled;
-	size_t s_index;
-	std::vector<size_t> s_maplist;
-	std::map<int, QWORD> timeout;
-	byte version;
-	void shuffle(void);
-	void update_shuffle_index(void);
+class Maplist
+{
+  private:
+    bool                         entered_once;
+    std::string                  error;
+    size_t                       index;
+    bool                         in_maplist;
+    std::vector<maplist_entry_t> maplist;
+    bool                         shuffled;
+    size_t                       s_index;
+    std::vector<size_t>          s_maplist;
+    std::map<int, QWORD>         timeout;
+    byte                         version;
+    void                         shuffle(void);
+    void                         update_shuffle_index(void);
 
-	maplist_entry_t lobbymap;
+    maplist_entry_t lobbymap;
 
-public:
-	Maplist() : entered_once(false), error(""), index(0),
-				in_maplist(false), shuffled(false), s_index(0), version(0) { };
-	static Maplist& instance(void);
-	// Modifiers
-	bool add(maplist_entry_t &maplist_entry);
-	bool insert(const size_t &position, maplist_entry_t &maplist_entry);
-	bool remove(const size_t &position);
-	bool clear(void);
+  public:
+    Maplist() : entered_once(false), error(""), index(0), in_maplist(false), shuffled(false), s_index(0), version(0){};
+    static Maplist &instance(void);
+    // Modifiers
+    bool add(maplist_entry_t &maplist_entry);
+    bool insert(const size_t &position, maplist_entry_t &maplist_entry);
+    bool remove(const size_t &position);
+    bool clear(void);
 
-	// Elements
-	bool empty(void);
-	std::string get_error(void);
-	bool get_map_by_index(const size_t &index, maplist_entry_t &maplist_entry);
-	bool get_next_index(size_t &index);
-	bool get_this_index(size_t &index);
-	byte get_version(void);
-	bool query(std::vector<std::pair<size_t, maplist_entry_t*> > &result);
-	bool query(const std::vector<std::string> &query,
-			   std::vector<std::pair<size_t, maplist_entry_t*> > &result);
-	// Settings
-	bool set_index(const size_t &index);
-	void set_shuffle(const bool setting);
-	// Timeout
-	bool pid_timeout(const int index);
-	bool pid_cached(const int index);
-	void set_timeout(const int index);
-	void clear_timeout(const int index);
+    // Elements
+    bool        empty(void);
+    std::string get_error(void);
+    bool        get_map_by_index(const size_t &index, maplist_entry_t &maplist_entry);
+    bool        get_next_index(size_t &index);
+    bool        get_this_index(size_t &index);
+    byte        get_version(void);
+    bool        query(std::vector<std::pair<size_t, maplist_entry_t *>> &result);
+    bool        query(const std::vector<std::string> &query, std::vector<std::pair<size_t, maplist_entry_t *>> &result);
+    // Settings
+    bool set_index(const size_t &index);
+    void set_shuffle(const bool setting);
+    // Timeout
+    bool pid_timeout(const int index);
+    bool pid_cached(const int index);
+    void set_timeout(const int index);
+    void clear_timeout(const int index);
 
-	// Lobby
-	void set_lobbymap(maplist_entry_t map);
-	maplist_entry_t get_lobbymap();
-	void clear_lobbymap();
-	bool lobbyempty();
+    // Lobby
+    void            set_lobbymap(maplist_entry_t map);
+    maplist_entry_t get_lobbymap();
+    void            clear_lobbymap();
+    bool            lobbyempty();
 };
 
 void SV_Maplist(player_t &player);

@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id: ede3a8513c411cfa4937430b3c7be22787295262 $
@@ -22,7 +22,6 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #include "odamex.h"
 
 #include "i_system.h"
@@ -36,46 +35,45 @@
 
 extern NetDemo netdemo;
 
-extern byte		*demo_p;		// [RH] Special "ticcmds" get recorded in demos
+extern byte *demo_p; // [RH] Special "ticcmds" get recorded in demos
 
 //
 // NETWORKING
 //
 // gametic is the tic about to (or currently being) run
 
-int 			lastnettic;
-int 			skiptics;
+int lastnettic;
+int skiptics;
 
 bool step_mode = false;
 
-void D_ProcessEvents (void); 
-void G_BuildTiccmd (ticcmd_t *cmd); 
-void D_DoAdvanceDemo (void);
+void D_ProcessEvents(void);
+void G_BuildTiccmd(ticcmd_t *cmd);
+void D_DoAdvanceDemo(void);
 
 //
 // NetUpdate
 // Builds ticcmds for console player,
 // sends out a packet
 //
-void NetUpdate (void)
+void NetUpdate(void)
 {
-	I_StartTic ();
-	D_ProcessEvents ();
-	G_BuildTiccmd (&consoleplayer().netcmds[gametic%BACKUPTICS]);
+    I_StartTic();
+    D_ProcessEvents();
+    G_BuildTiccmd(&consoleplayer().netcmds[gametic % BACKUPTICS]);
 }
 
 //
 // D_CheckNetGame
 // Works out player numbers among the net participants
 //
-void D_CheckNetGame (void)
+void D_CheckNetGame(void)
 {
-    CL_InitNetwork ();
+    CL_InitNetwork();
 
     D_SetupUserInfo();
 
-    step_mode = ((Args.CheckParm ("-stepmode")) != 0);
+    step_mode = ((Args.CheckParm("-stepmode")) != 0);
 }
 
-
-VERSION_CONTROL (d_net_cpp, "$Id: ede3a8513c411cfa4937430b3c7be22787295262 $")
+VERSION_CONTROL(d_net_cpp, "$Id: ede3a8513c411cfa4937430b3c7be22787295262 $")

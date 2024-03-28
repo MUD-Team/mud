@@ -37,102 +37,101 @@
 
 class StringTable
 {
-	// First is if the string "exists", second is the string value.
-	typedef std::pair<bool, OString> OptionalString;
+    // First is if the string "exists", second is the string value.
+    typedef std::pair<bool, OString> OptionalString;
 
-	struct TableEntry
-	{
-		// String value.
-		OptionalString string;
+    struct TableEntry
+    {
+        // String value.
+        OptionalString string;
 
-		// Pass that string was added by.
-		//
-		// In some cases, we need to
-		int pass;
+        // Pass that string was added by.
+        //
+        // In some cases, we need to
+        int pass;
 
-		// Index of string.
-		//
-		// The old strings implementation used an enum to name all of the
-		// strings, and there were (and still are) several places in the
-		// code that used comparison operators on the enum index.  This
-		// index is -1 if it's a custom string.
-		int index;
-	};
-	typedef OHashTable<OString, TableEntry> StringHash;
-	StringHash _stringHash;
+        // Index of string.
+        //
+        // The old strings implementation used an enum to name all of the
+        // strings, and there were (and still are) several places in the
+        // code that used comparison operators on the enum index.  This
+        // index is -1 if it's a custom string.
+        int index;
+    };
+    typedef OHashTable<OString, TableEntry> StringHash;
+    StringHash                              _stringHash;
 
-	bool canSetPassString(int pass, const std::string& name) const;
-	void clearStrings();
-	void loadLanguage(const char* code, bool exactMatch, int pass, char* lump,
-	                  size_t lumpLen);
-	void loadStringsLump(const int lump, const char* lumpname, const bool engOnly);
-	void prepareIndexes();
-	void replaceEscapes(std::string& str);
+    bool canSetPassString(int pass, const std::string &name) const;
+    void clearStrings();
+    void loadLanguage(const char *code, bool exactMatch, int pass, char *lump, size_t lumpLen);
+    void loadStringsLump(const int lump, const char *lumpname, const bool engOnly);
+    void prepareIndexes();
+    void replaceEscapes(std::string &str);
 
   public:
-	StringTable() : _stringHash()
-	{
-	}
+    StringTable() : _stringHash()
+    {
+    }
 
-	//
-	// Obtain a string by name.
-	//
-	const char* operator()(const OString& name) const
-	{
-		StringHash::const_iterator it = _stringHash.find(name);
-		if (it != _stringHash.end())
-		{
-			if ((*it).second.string.first == true)
-				return (*it).second.string.second.c_str();
-		}
+    //
+    // Obtain a string by name.
+    //
+    const char *operator()(const OString &name) const
+    {
+        StringHash::const_iterator it = _stringHash.find(name);
+        if (it != _stringHash.end())
+        {
+            if ((*it).second.string.first == true)
+                return (*it).second.string.second.c_str();
+        }
 
-		// invalid index, return an empty cstring
-		static const char emptystr = 0;
-		return &emptystr;
-	}
+        // invalid index, return an empty cstring
+        static const char emptystr = 0;
+        return &emptystr;
+    }
 
-	//
-	// Obtain a string by index.
-	//
-	const char* getIndex(int index) const
-	{
-		if (index >= 0 && static_cast<size_t>(index) < ARRAY_LENGTH(::stringIndexes))
-		{
-			const OString* name = ::stringIndexes[index];
-			StringHash::const_iterator it = _stringHash.find(*name);
-			if (it != _stringHash.end())
-			{
-				if ((*it).second.string.first == true)
-					return (*it).second.string.second.c_str();
-			}
-		}
+    //
+    // Obtain a string by index.
+    //
+    const char *getIndex(int index) const
+    {
+        if (index >= 0 && static_cast<size_t>(index) < ARRAY_LENGTH(::stringIndexes))
+        {
+            const OString             *name = ::stringIndexes[index];
+            StringHash::const_iterator it   = _stringHash.find(*name);
+            if (it != _stringHash.end())
+            {
+                if ((*it).second.string.first == true)
+                    return (*it).second.string.second.c_str();
+            }
+        }
 
-		// invalid index, return an empty cstring
-		static const char emptystr = 0;
-		return &emptystr;
-	}
+        // invalid index, return an empty cstring
+        static const char emptystr = 0;
+        return &emptystr;
+    }
 
-	//
-	// Obtain an index by name.
-	//
-	int toIndex(const OString& name) const
-	{
-		StringHash::const_iterator it = _stringHash.find(name);
-		if (it != _stringHash.end())
-		{
-			// We don't care if the string exists or not, we just want its index.
-			return (*it).second.index;
-		}
+    //
+    // Obtain an index by name.
+    //
+    int toIndex(const OString &name) const
+    {
+        StringHash::const_iterator it = _stringHash.find(name);
+        if (it != _stringHash.end())
+        {
+            // We don't care if the string exists or not, we just want its index.
+            return (*it).second.index;
+        }
 
-		// Not found.
-		return -1;
-	}
+        // Not found.
+        return -1;
+    }
 
-	void dumpStrings();
-	bool hasString(const OString& name) const;
-	void loadStrings(const bool engOnly);
-	const OString& matchString(const OString& string) const;
-	void setString(const OString& name, const OString& string);
-	void setPassString(int pass, const OString& name, const OString& string);
-	size_t size() const;
+    void           dumpStrings();
+    bool           hasString(const OString &name) const;
+    void           loadStrings(const bool engOnly);
+    const OString &matchString(const OString &string) const;
+    void           setString(const OString &name, const OString &string);
+    void           setPassString(int pass, const OString &name, const OString &string);
+    size_t         size() const;
 };

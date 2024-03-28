@@ -25,52 +25,71 @@
 class OHash
 {
   private:
-	virtual void concrete() = 0; // [AM] Hack to make this class abstract.
+    virtual void concrete() = 0; // [AM] Hack to make this class abstract.
 
   protected:
-	std::string m_hash;
+    std::string m_hash;
 
   public:
-	virtual ~OHash() { }
-	bool operator==(const OHash& other) const { return m_hash == other.m_hash; }
-	bool operator!=(const OHash& other) const { return !(operator==(other)); }
-	const std::string& getHexStr() const { return m_hash; }
-	const char* getHexCStr() const { return m_hash.c_str(); }
-	bool empty() const { return m_hash.empty(); }
+    virtual ~OHash()
+    {
+    }
+    bool operator==(const OHash &other) const
+    {
+        return m_hash == other.m_hash;
+    }
+    bool operator!=(const OHash &other) const
+    {
+        return !(operator==(other));
+    }
+    const std::string &getHexStr() const
+    {
+        return m_hash;
+    }
+    const char *getHexCStr() const
+    {
+        return m_hash.c_str();
+    }
+    bool empty() const
+    {
+        return m_hash.empty();
+    }
 };
 
 class OMD5Hash : public OHash
 {
   protected:
-	void concrete() { }
+    void concrete()
+    {
+    }
 
   public:
-	static bool makeFromHexStr(OMD5Hash& out, const std::string& hash);
+    static bool makeFromHexStr(OMD5Hash &out, const std::string &hash);
 };
 
 class OCRC32Sum : public OHash
 {
   protected:
-	void concrete() { }
+    void concrete()
+    {
+    }
 
   public:
-	static bool makeFromHexStr(OCRC32Sum& out, const std::string& hash);
+    static bool makeFromHexStr(OCRC32Sum &out, const std::string &hash);
 };
 
-template <>
-struct hashfunc<OCRC32Sum>
+template <> struct hashfunc<OCRC32Sum>
 {
-	unsigned int operator()(const OCRC32Sum& str) const
-	{
-		return __hash_cstring(str.getHexCStr());
-	}
+    unsigned int operator()(const OCRC32Sum &str) const
+    {
+        return __hash_cstring(str.getHexCStr());
+    }
 };
 
-template <>
-struct hashfunc<OMD5Hash>
+template <> struct hashfunc<OMD5Hash>
 {
-	unsigned int operator()(const OMD5Hash& str) const
-	{
-		return __hash_cstring(str.getHexCStr());
-	}
+    unsigned int operator()(const OMD5Hash &str) const
+    {
+        return __hash_cstring(str.getHexCStr());
+    }
 };

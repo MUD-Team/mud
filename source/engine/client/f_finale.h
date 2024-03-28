@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id: 031b3f0e215f8b836633dadcec4f9eeef780e532 $
@@ -18,11 +18,10 @@
 //
 // DESCRIPTION:
 //	F_FINALE
-//    
+//
 //-----------------------------------------------------------------------------
 
 #pragma once
-
 
 #include "d_event.h"
 //
@@ -30,21 +29,21 @@
 //
 
 // Called by main loop.
-BOOL F_Responder (event_t* ev);
+BOOL F_Responder(event_t *ev);
 
 // Called by main loop.
-void F_Ticker (void);
+void F_Ticker(void);
 
 // Called by main loop.
-void F_Drawer (void);
+void F_Drawer(void);
 
 struct finale_options_t
 {
-	const char* music;
-	const char* flat;
-	const char* text;
-	const char* pic;
+    const char *music;
+    const char *flat;
+    const char *text;
+    const char *pic;
 };
 
-void F_StartFinale(finale_options_t& options);
+void            F_StartFinale(finale_options_t &options);
 void STACK_ARGS F_ShutdownFinale();

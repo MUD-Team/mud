@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id: 0199a26d4018b9af2e365ca4a4b844ce6e803bb3 $
@@ -26,50 +26,34 @@
 #include "r_data.h"
 
 // Visplane related.
-extern	int*			lastopening;
+extern int *lastopening;
 
-typedef void (*planefunction_t) (int top, int bottom);
+typedef void (*planefunction_t)(int top, int bottom);
 
-extern planefunction_t	floorfunc;
-extern planefunction_t	ceilingfunc_t;
+extern planefunction_t floorfunc;
+extern planefunction_t ceilingfunc_t;
 
-extern int  			*floorclip;
-extern int  			*ceilingclip;
-extern int				*floorclipinitial;
-extern int				*ceilingclipinitial;
+extern int *floorclip;
+extern int *ceilingclip;
+extern int *floorclipinitial;
+extern int *ceilingclipinitial;
 
-extern fixed_t			*yslope;
+extern fixed_t *yslope;
 
-void R_InitPlanes (void);
-void R_ClearPlanes (void);
+void R_InitPlanes(void);
+void R_ClearPlanes(void);
 
-void
-R_MapPlane
-( int		y,
-  int		x1,
-  int		x2 );
+void R_MapPlane(int y, int x1, int x2);
 
-void
-R_MakeSpans
-( int		x,
-  int		t1,
-  int		b1,
-  int		t2,
-  int		b2 );
-  
-void R_DrawPlanes (void);
+void R_MakeSpans(int x, int t1, int b1, int t2, int b2);
 
-visplane_t *R_FindPlane
-( plane_t		secplane,
-  int			picnum,
-  int			lightlevel,
-  fixed_t		xoffs,		// killough 2/28/98: add x-y offsets
-  fixed_t		yoffs,
-  fixed_t		xscale,
-  fixed_t		yscale,
-  angle_t		angle);
+void R_DrawPlanes(void);
 
-visplane_t *R_CheckPlane (visplane_t *pl, int start, int stop);
+visplane_t *R_FindPlane(plane_t secplane, int picnum, int lightlevel,
+                        fixed_t xoffs, // killough 2/28/98: add x-y offsets
+                        fixed_t yoffs, fixed_t xscale, fixed_t yscale, angle_t angle);
+
+visplane_t *R_CheckPlane(visplane_t *pl, int start, int stop);
 
 // [RH] Added for multires support
-bool R_PlaneInitData(IWindowSurface* surface);
+bool R_PlaneInitData(IWindowSurface *surface);

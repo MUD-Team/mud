@@ -26,42 +26,42 @@
 
 class NetGraph
 {
-public:
-	NetGraph(int x, int y);
-		
-	void setMisprediction(bool val);
-	void setWorldIndexSync(int val);
-	void setInterpolation(int val);
-	void addTrafficIn(int val);
-	void addTrafficOut(int val);
-	void addPacketIn();
-	void draw();
+  public:
+    NetGraph(int x, int y);
 
-private:
-	void drawWorldIndexSync(int x, int y);
-	void drawMispredictions(int x, int y);
-	void drawTrafficIn(int x, int y);
-	void drawTrafficOut(int x, int y);
-	void drawPackets(int x, int y);
+    void setMisprediction(bool val);
+    void setWorldIndexSync(int val);
+    void setInterpolation(int val);
+    void addTrafficIn(int val);
+    void addTrafficOut(int val);
+    void addPacketIn();
+    void draw();
 
-	static const int BAR_HEIGHT_WORLD_INDEX = 4;
-	static const int BAR_WIDTH_WORLD_INDEX = 2;
-	
-	static const int BAR_HEIGHT_MISPREDICTION = 2;
-	static const int BAR_WIDTH_MISPREDICTION = 2;
+  private:
+    void drawWorldIndexSync(int x, int y);
+    void drawMispredictions(int x, int y);
+    void drawTrafficIn(int x, int y);
+    void drawTrafficOut(int x, int y);
+    void drawPackets(int x, int y);
 
-	static const int MAX_WORLD_INDEX = 6;
-	static const int MIN_WORLD_INDEX = -6;
-	
-	static const size_t MAX_HISTORY_TICS = 64;
+    static const int BAR_HEIGHT_WORLD_INDEX = 4;
+    static const int BAR_WIDTH_WORLD_INDEX  = 2;
 
-	int		mX;
-	int		mY;
+    static const int BAR_HEIGHT_MISPREDICTION = 2;
+    static const int BAR_WIDTH_MISPREDICTION  = 2;
 
-	bool	mMisprediction[NetGraph::MAX_HISTORY_TICS];
-	int		mWorldIndexSync[NetGraph::MAX_HISTORY_TICS];
-	int		mInterpolation;
-	int		mTrafficIn[NetGraph::MAX_HISTORY_TICS];
-	int		mTrafficOut[NetGraph::MAX_HISTORY_TICS];
-	int		mPacketsIn[NetGraph::MAX_HISTORY_TICS];
+    static const int MAX_WORLD_INDEX = 6;
+    static const int MIN_WORLD_INDEX = -6;
+
+    static const size_t MAX_HISTORY_TICS = 64;
+
+    int mX;
+    int mY;
+
+    bool mMisprediction[NetGraph::MAX_HISTORY_TICS];
+    int  mWorldIndexSync[NetGraph::MAX_HISTORY_TICS];
+    int  mInterpolation;
+    int  mTrafficIn[NetGraph::MAX_HISTORY_TICS];
+    int  mTrafficOut[NetGraph::MAX_HISTORY_TICS];
+    int  mPacketsIn[NetGraph::MAX_HISTORY_TICS];
 };
