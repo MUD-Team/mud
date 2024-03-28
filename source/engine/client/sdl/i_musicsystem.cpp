@@ -30,7 +30,7 @@
 #include "i_sdl.h"
 #include "i_system.h"
 
-extern MusicSystem* musicsystem;
+extern MusicSystem *musicsystem;
 
 // ============================================================================
 //
@@ -38,37 +38,37 @@ extern MusicSystem* musicsystem;
 //
 // ============================================================================
 
-void MusicSystem::startSong(byte* data, size_t length, bool loop)
+void MusicSystem::startSong(byte *data, size_t length, bool loop)
 {
-	m_isPlaying = true;
-	m_isPaused = false;
+    m_isPlaying = true;
+    m_isPaused  = false;
 }
 
 void MusicSystem::stopSong()
 {
-	m_isPlaying = false;
-	m_isPaused = false;
+    m_isPlaying = false;
+    m_isPaused  = false;
 }
 
 void MusicSystem::pauseSong()
 {
-	m_isPaused = m_isPlaying;
+    m_isPaused = m_isPlaying;
 }
 
 void MusicSystem::resumeSong()
 {
-	m_isPaused = false;
+    m_isPaused = false;
 }
 
 void MusicSystem::setTempo(float tempo)
 {
-	if (tempo > 0.0f)
-		m_tempo = tempo;
+    if (tempo > 0.0f)
+        m_tempo = tempo;
 }
 
 void MusicSystem::setVolume(float volume)
 {
-	m_volume = clamp(volume, 0.0f, 1.0f);
+    m_volume = clamp(volume, 0.0f, 1.0f);
 }
 
 VERSION_CONTROL(i_musicsystem_cpp, "$Id: 5b841515c04cc52828b06e466cf3f0fc9cce8fa0 $")

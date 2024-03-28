@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id: f1fc013440803d61151e0373a1c0c68e2e6ab9d8 $
@@ -21,21 +21,19 @@
 //  wall, wrapping around. A 1024 columns equal 360 degrees.
 //  The default sky map is 256 columns and repeats 4 times
 //  on a 320 screen?
-//  
+//
 //-----------------------------------------------------------------------------
-
 
 #include "odamex.h"
 
 #include "r_data.h"
 
 // [ML] 5/11/06 - Remove sky2
-int 		skyflatnum;
-int 		sky1texture, sky2texture;
+int skyflatnum;
+int sky1texture, sky2texture;
 
-fixed_t		sky1pos=0,		sky1speed=0;
+fixed_t sky1pos = 0, sky1speed = 0;
 
 char SKYFLATNAME[8] = "F_SKY1";
 
-VERSION_CONTROL (r_sky_cpp, "$Id: f1fc013440803d61151e0373a1c0c68e2e6ab9d8 $")
-
+VERSION_CONTROL(r_sky_cpp, "$Id: f1fc013440803d61151e0373a1c0c68e2e6ab9d8 $")

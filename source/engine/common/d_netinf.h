@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id: 304151525388c3810025f7b3b09512ee597010aa $
@@ -25,76 +25,74 @@
 
 #include "teaminfo.h"
 
-#define MAXPLAYERNAME	15
+#define MAXPLAYERNAME 15
 
 enum gender_t
 {
-	GENDER_MALE,
-	GENDER_FEMALE,
-	GENDER_NEUTER,
-	
-	NUMGENDER
+    GENDER_MALE,
+    GENDER_FEMALE,
+    GENDER_NEUTER,
+
+    NUMGENDER
 };
 
-enum colorpreset_t	// Acts 19 quiz the order must match m_menu.cpp.
+enum colorpreset_t // Acts 19 quiz the order must match m_menu.cpp.
 {
-	COLOR_CUSTOM,
-	COLOR_BLUE,
-	COLOR_INDIGO,
-	COLOR_GREEN,
-	COLOR_BROWN,
-	COLOR_RED,
-	COLOR_GOLD,
-	COLOR_JUNGLEGREEN,
-	COLOR_PURPLE,
-	COLOR_WHITE,
-	COLOR_BLACK,
+    COLOR_CUSTOM,
+    COLOR_BLUE,
+    COLOR_INDIGO,
+    COLOR_GREEN,
+    COLOR_BROWN,
+    COLOR_RED,
+    COLOR_GOLD,
+    COLOR_JUNGLEGREEN,
+    COLOR_PURPLE,
+    COLOR_WHITE,
+    COLOR_BLACK,
 
-	NUMCOLOR
+    NUMCOLOR
 };
 
 enum weaponswitch_t
 {
-	WPSW_NEVER,
-	WPSW_ALWAYS,
-	WPSW_PWO,
-	WPSW_PWO_ALT,	// PWO but never switch if holding +attack
+    WPSW_NEVER,
+    WPSW_ALWAYS,
+    WPSW_PWO,
+    WPSW_PWO_ALT, // PWO but never switch if holding +attack
 
-	WPSW_NUMTYPES
+    WPSW_NUMTYPES
 };
 
 struct UserInfo
 {
-	std::string		netname;
-	team_t			team; // [Toke - Teams]
-	fixed_t			aimdist;
-	bool			predict_weapons;
-	byte			color[4];
-	gender_t		gender;
-	weaponswitch_t	switchweapon;
-	byte			weapon_prefs[NUMWEAPONS];
+    std::string    netname;
+    team_t         team; // [Toke - Teams]
+    fixed_t        aimdist;
+    bool           predict_weapons;
+    byte           color[4];
+    gender_t       gender;
+    weaponswitch_t switchweapon;
+    byte           weapon_prefs[NUMWEAPONS];
 
-	static const byte weapon_prefs_default[NUMWEAPONS];
+    static const byte weapon_prefs_default[NUMWEAPONS];
 
-	UserInfo() : team(TEAM_NONE), aimdist(0),
-	             predict_weapons(true),
-	             gender(GENDER_MALE), switchweapon(WPSW_ALWAYS)
-	{
-		// default doom weapon ordering when player runs out of ammo
-		memcpy(weapon_prefs, UserInfo::weapon_prefs_default, sizeof(weapon_prefs));
-		memset(color, 0, 4);
-	}
+    UserInfo() : team(TEAM_NONE), aimdist(0), predict_weapons(true), gender(GENDER_MALE), switchweapon(WPSW_ALWAYS)
+    {
+        // default doom weapon ordering when player runs out of ammo
+        memcpy(weapon_prefs, UserInfo::weapon_prefs_default, sizeof(weapon_prefs));
+        memset(color, 0, 4);
+    }
 };
 
-FArchive &operator<< (FArchive &arc, UserInfo &info);
-FArchive &operator>> (FArchive &arc, UserInfo &info);
+FArchive &operator<<(FArchive &arc, UserInfo &info);
+FArchive &operator>>(FArchive &arc, UserInfo &info);
 
-void D_SetupUserInfo (void);
+void D_SetupUserInfo(void);
 
-void D_UserInfoChanged (cvar_t *info);
+void D_UserInfoChanged(cvar_t *info);
 
-void D_SendServerInfoChange (const cvar_t *cvar, const char *value);
-void D_DoServerInfoChange (byte **stream);
+void D_SendServerInfoChange(const cvar_t *cvar, const char *value);
+void D_DoServerInfoChange(byte **stream);
 
-void D_WriteUserInfoStrings (int player, byte **stream, bool compact=false);
-void D_ReadUserInfoStrings (int player, byte **stream, bool update);
+void D_WriteUserInfoStrings(int player, byte **stream, bool compact = false);
+void D_ReadUserInfoStrings(int player, byte **stream, bool update);

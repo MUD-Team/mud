@@ -21,7 +21,6 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #include "odamex.h"
 
 #include <sstream>
@@ -37,12 +36,12 @@
 
 #include "win32inc.h"
 #ifdef _WIN32
-    #include <conio.h>
-    #include <io.h>
-    #include <process.h>
-    #include <mmsystem.h>
-    #include <direct.h> // SoM: I don't know HOW this has been overlooked until now...
-	#include <winsock2.h>
+#include <conio.h>
+#include <io.h>
+#include <process.h>
+#include <mmsystem.h>
+#include <direct.h> // SoM: I don't know HOW this has been overlooked until now...
+#include <winsock2.h>
 #endif
 
 #ifdef UNIX
@@ -52,7 +51,6 @@
 #include <unistd.h>
 #include <limits.h>
 #endif
-
 
 #include "cmdlib.h"
 #include "m_argv.h"
@@ -67,15 +65,15 @@
 UINT TimerPeriod;
 #endif
 
-ticcmd_t emptycmd;
+ticcmd_t  emptycmd;
 ticcmd_t *I_BaseTiccmd(void)
 {
-	return &emptycmd;
+    return &emptycmd;
 }
 
 /* [Russell] - Modified to accomodate a minimal allowable heap size */
 // These values are in megabytes
-size_t def_heapsize = 64;
+size_t       def_heapsize = 64;
 const size_t min_heapsize = 8;
 
 // The size we got back from I_ZoneBase in megabytes
@@ -87,21 +85,21 @@ DWORD LanguageIDs[4];
 // I_MegabytesToBytes
 //
 // Returns the megabyte value of size in bytes
-size_t I_MegabytesToBytes (size_t Megabytes)
+size_t I_MegabytesToBytes(size_t Megabytes)
 {
-	return (Megabytes*1024*1024);
+    return (Megabytes * 1024 * 1024);
 }
 
 //
 // I_BytesToMegabytes
 //
 // Returns the byte value of size in megabytes
-size_t I_BytesToMegabytes (size_t Bytes)
+size_t I_BytesToMegabytes(size_t Bytes)
 {
-	if (!Bytes)
+    if (!Bytes)
         return 0;
 
-    return (Bytes/1024/1024);
+    return (Bytes / 1024 / 1024);
 }
 
 //
@@ -109,44 +107,43 @@ size_t I_BytesToMegabytes (size_t Bytes)
 //
 // Allocates a portion of system memory for the Zone Memory Allocator, returns
 // the 'size' of what it could allocate in its parameter
-void *I_ZoneBase (size_t *size)
+void *I_ZoneBase(size_t *size)
 {
-	void *zone = NULL;
+    void *zone = NULL;
 
-	// User wanted a different default size
-	const char *p = Args.CheckValue ("-heapsize");
+    // User wanted a different default size
+    const char *p = Args.CheckValue("-heapsize");
 
-	if (p)
-		def_heapsize = atoi(p);
+    if (p)
+        def_heapsize = atoi(p);
 
-	if (def_heapsize < min_heapsize)
-		def_heapsize = min_heapsize;
+    if (def_heapsize < min_heapsize)
+        def_heapsize = min_heapsize;
 
-	// Set the size
-	*size = I_MegabytesToBytes(def_heapsize);
+    // Set the size
+    *size = I_MegabytesToBytes(def_heapsize);
 
-	// Allocate the def_heapsize, otherwise try to allocate a smaller amount
-	while ((zone == NULL) && (*size >= I_MegabytesToBytes(min_heapsize)))
-	{
-		zone = malloc (*size);
+    // Allocate the def_heapsize, otherwise try to allocate a smaller amount
+    while ((zone == NULL) && (*size >= I_MegabytesToBytes(min_heapsize)))
+    {
+        zone = malloc(*size);
 
-		if (zone != NULL)
-			break;
+        if (zone != NULL)
+            break;
 
-		*size -= I_MegabytesToBytes(1);
-	}
+        *size -= I_MegabytesToBytes(1);
+    }
 
-	// Our heap size we received
-	got_heapsize = I_BytesToMegabytes(*size);
+    // Our heap size we received
+    got_heapsize = I_BytesToMegabytes(*size);
 
-	// Die if the system has insufficient memory
-	if (got_heapsize < min_heapsize)
-		I_FatalError("I_ZoneBase: Insufficient memory available! Minimum size "
-					 "is %lu MB but got %lu MB instead",
-					 min_heapsize,
-					 got_heapsize);
+    // Die if the system has insufficient memory
+    if (got_heapsize < min_heapsize)
+        I_FatalError("I_ZoneBase: Insufficient memory available! Minimum size "
+                     "is %lu MB but got %lu MB instead",
+                     min_heapsize, got_heapsize);
 
-	return zone;
+    return zone;
 }
 
 void I_BeginRead(void)
@@ -166,73 +163,72 @@ void I_EndRead(void)
 dtime_t I_GetTime()
 {
 #if defined OSX
-	clock_serv_t cclock;
-	mach_timespec_t mts;
+    clock_serv_t    cclock;
+    mach_timespec_t mts;
 
-	host_get_clock_service(mach_host_self(), SYSTEM_CLOCK, &cclock);
-	clock_get_time(cclock, &mts);
-	mach_port_deallocate(mach_task_self(), cclock);
-	return mts.tv_sec * 1000LL * 1000LL * 1000LL + mts.tv_nsec;
+    host_get_clock_service(mach_host_self(), SYSTEM_CLOCK, &cclock);
+    clock_get_time(cclock, &mts);
+    mach_port_deallocate(mach_task_self(), cclock);
+    return mts.tv_sec * 1000LL * 1000LL * 1000LL + mts.tv_nsec;
 
 #elif defined UNIX
-	timespec ts;
-	clock_gettime(CLOCK_MONOTONIC, &ts);
-	return ts.tv_sec * 1000LL * 1000LL * 1000LL + ts.tv_nsec;
+    timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return ts.tv_sec * 1000LL * 1000LL * 1000LL + ts.tv_nsec;
 
 #elif defined WIN32
-	static bool initialized = false;
-	static LARGE_INTEGER initial_count;
-	static double nanoseconds_per_count;
-	static LARGE_INTEGER last_count;
+    static bool          initialized = false;
+    static LARGE_INTEGER initial_count;
+    static double        nanoseconds_per_count;
+    static LARGE_INTEGER last_count;
 
-	if (!initialized)
-	{
-		LARGE_INTEGER freq;
-		QueryPerformanceFrequency(&freq);
-		nanoseconds_per_count = 1000.0 * 1000.0 * 1000.0 / double(freq.QuadPart);
+    if (!initialized)
+    {
+        LARGE_INTEGER freq;
+        QueryPerformanceFrequency(&freq);
+        nanoseconds_per_count = 1000.0 * 1000.0 * 1000.0 / double(freq.QuadPart);
 
         QueryPerformanceCounter(&initial_count);
         last_count = initial_count;
 
-		initialized = true;
-	}
+        initialized = true;
+    }
 
-	LARGE_INTEGER current_count;
-	QueryPerformanceCounter(&current_count);
+    LARGE_INTEGER current_count;
+    QueryPerformanceCounter(&current_count);
 
-	// [SL] ensure current_count is a sane value
-	// AMD dual-core CPUs and buggy BIOSes sometimes cause QPC
-	// to return different values from different CPU cores,
-	// which ruins our timing. We check that the new value is
-	// at least equal to the last value and that the new value
-	// isn't too far past the last value (1 frame at 10fps).
+    // [SL] ensure current_count is a sane value
+    // AMD dual-core CPUs and buggy BIOSes sometimes cause QPC
+    // to return different values from different CPU cores,
+    // which ruins our timing. We check that the new value is
+    // at least equal to the last value and that the new value
+    // isn't too far past the last value (1 frame at 10fps).
 
-	const int64_t min_count = last_count.QuadPart;
-	const int64_t max_count = last_count.QuadPart +
-			nanoseconds_per_count * I_ConvertTimeFromMs(100);
+    const int64_t min_count = last_count.QuadPart;
+    const int64_t max_count = last_count.QuadPart + nanoseconds_per_count * I_ConvertTimeFromMs(100);
 
-	if (current_count.QuadPart < min_count || current_count.QuadPart > max_count)
-		current_count = last_count;
+    if (current_count.QuadPart < min_count || current_count.QuadPart > max_count)
+        current_count = last_count;
 
-	last_count = current_count;
+    last_count = current_count;
 
-	return nanoseconds_per_count * (current_count.QuadPart - initial_count.QuadPart);
+    return nanoseconds_per_count * (current_count.QuadPart - initial_count.QuadPart);
 #endif
 }
 
 dtime_t I_MSTime()
 {
-	return I_ConvertTimeToMs(I_GetTime());
+    return I_ConvertTimeToMs(I_GetTime());
 }
 
 dtime_t I_ConvertTimeToMs(dtime_t value)
 {
-	return value / 1000000LL;
+    return value / 1000000LL;
 }
 
 dtime_t I_ConvertTimeFromMs(dtime_t value)
 {
-	return value * 1000000LL;
+    return value * 1000000LL;
 }
 
 //
@@ -246,17 +242,16 @@ dtime_t I_ConvertTimeFromMs(dtime_t value)
 void I_Sleep(dtime_t sleep_time)
 {
 #if defined UNIX
-	usleep(sleep_time / 1000LL);
+    usleep(sleep_time / 1000LL);
 
 #elif defined(WIN32)
-	Sleep(sleep_time / 1000000LL);
+    Sleep(sleep_time / 1000000LL);
 
 #else
-	SDL_Delay(sleep_time / 1000000LL);
+    SDL_Delay(sleep_time / 1000000LL);
 
 #endif
 }
-
 
 //
 // I_Yield
@@ -265,7 +260,7 @@ void I_Sleep(dtime_t sleep_time)
 //
 void I_Yield()
 {
-	I_Sleep(1000LL * 1000LL);		// sleep for 1ms
+    I_Sleep(1000LL * 1000LL); // sleep for 1ms
 }
 
 //
@@ -276,30 +271,30 @@ void I_Yield()
 //
 void I_WaitVBL(int count)
 {
-	I_Sleep(1000000LL * 1000LL * count / 70);
+    I_Sleep(1000000LL * 1000LL * count / 70);
 }
 
 //
 // SubsetLanguageIDs
 //
 #ifdef _WIN32
-static void SubsetLanguageIDs (LCID id, LCTYPE type, int idx)
+static void SubsetLanguageIDs(LCID id, LCTYPE type, int idx)
 {
-	char buf[8];
-	LCID langid;
-	char *idp;
+    char  buf[8];
+    LCID  langid;
+    char *idp;
 
-	if (!GetLocaleInfo (id, type, buf, 8))
-		return;
-	langid = MAKELCID (strtoul(buf, NULL, 16), SORT_DEFAULT);
-	if (!GetLocaleInfo (langid, LOCALE_SABBREVLANGNAME, buf, 8))
-		return;
-	idp = (char *)(&LanguageIDs[idx]);
-	memset (idp, 0, 4);
-	idp[0] = tolower(buf[0]);
-	idp[1] = tolower(buf[1]);
-	idp[2] = tolower(buf[2]);
-	idp[3] = 0;
+    if (!GetLocaleInfo(id, type, buf, 8))
+        return;
+    langid = MAKELCID(strtoul(buf, NULL, 16), SORT_DEFAULT);
+    if (!GetLocaleInfo(langid, LOCALE_SABBREVLANGNAME, buf, 8))
+        return;
+    idp = (char *)(&LanguageIDs[idx]);
+    memset(idp, 0, 4);
+    idp[0] = tolower(buf[0]);
+    idp[1] = tolower(buf[1]);
+    idp[2] = tolower(buf[2]);
+    idp[3] = 0;
 }
 #endif
 
@@ -308,21 +303,21 @@ EXTERN_CVAR(language)
 // Force the language to English (default)
 void SetLanguageIDs()
 {
-	uint32_t lang = MAKE_ID('*', '*', '\0', '\0');
-	LanguageIDs[0] = lang;
-	LanguageIDs[1] = lang;
-	LanguageIDs[2] = lang;
-	LanguageIDs[3] = lang;
+    uint32_t lang  = MAKE_ID('*', '*', '\0', '\0');
+    LanguageIDs[0] = lang;
+    LanguageIDs[1] = lang;
+    LanguageIDs[2] = lang;
+    LanguageIDs[3] = lang;
 }
 
 //
 // I_Init
 //
-void I_Init (void)
+void I_Init(void)
 {
 }
 
-void I_FinishClockCalibration ()
+void I_FinishClockCalibration()
 {
     ///    Printf (PRINT_HIGH, "CPU Frequency: ~%f MHz\n", CyclesPerSecond / 1e6);
 }
@@ -332,52 +327,51 @@ void I_FinishClockCalibration ()
 //
 static int has_exited;
 
-void STACK_ARGS I_Quit (void)
+void STACK_ARGS I_Quit(void)
 {
-    has_exited = 1;             /* Prevent infinitely recursive exits -- killough */
+    has_exited = 1; /* Prevent infinitely recursive exits -- killough */
 
-    #ifdef _WIN32
-    timeEndPeriod (TimerPeriod);
-    #endif
+#ifdef _WIN32
+    timeEndPeriod(TimerPeriod);
+#endif
 
-    G_ClearSnapshots ();
+    G_ClearSnapshots();
     SV_SendDisconnectSignal();
 
-    CloseNetwork ();
+    CloseNetwork();
 
-	DConsoleAlias::DestroyAll();
+    DConsoleAlias::DestroyAll();
 }
-
 
 //
 // I_Error
 //
 BOOL gameisdead;
 
-#define MAX_ERRORTEXT	1024
+#define MAX_ERRORTEXT 1024
 
-void STACK_ARGS call_terms (void);
+void STACK_ARGS call_terms(void);
 
-void STACK_ARGS I_FatalError (const char *error, ...)
+void STACK_ARGS I_FatalError(const char *error, ...)
 {
     static BOOL alreadyThrown = false;
-    gameisdead = true;
+    gameisdead                = true;
 
-    if (!alreadyThrown)         // ignore all but the first message -- killough
+    if (!alreadyThrown) // ignore all but the first message -- killough
     {
-                alreadyThrown = true;
-                char errortext[MAX_ERRORTEXT];
-                va_list argptr;
-                va_start (argptr, error);
-                #ifdef _WIN32
-                int index = vsprintf (errortext, error, argptr);
-                sprintf (errortext + index, "\nGetLastError = %ld", GetLastError());
-				#else
-                vsprintf (errortext, error, argptr);
-				#endif
-                va_end (argptr);
+        alreadyThrown = true;
+        char    errortext[MAX_ERRORTEXT];
+        va_list argptr;
+        va_start(argptr, error);
+#ifdef _WIN32
+        int index = vsprintf(errortext, error, argptr);
+        sprintf(errortext + index, "\nGetLastError = %ld", GetLastError());
+#else
+        vsprintf(errortext, error, argptr);
+#endif
+        va_end(argptr);
 
-                throw CFatalError (errortext);
+        throw CFatalError(errortext);
     }
 
     if (!has_exited)    // If it hasn't exited yet, exit now -- killough
@@ -390,60 +384,60 @@ void STACK_ARGS I_FatalError (const char *error, ...)
     }
 }
 
-void STACK_ARGS I_Error (const char *error, ...)
+void STACK_ARGS I_Error(const char *error, ...)
 {
     va_list argptr;
-    char errortext[MAX_ERRORTEXT];
+    char    errortext[MAX_ERRORTEXT];
 
-    va_start (argptr, error);
-    vsprintf (errortext, error, argptr);
-    va_end (argptr);
+    va_start(argptr, error);
+    vsprintf(errortext, error, argptr);
+    va_end(argptr);
 
-    throw CRecoverableError (errortext);
+    throw CRecoverableError(errortext);
 }
 
-char DoomStartupTitle[256] = { 0 };
+char DoomStartupTitle[256] = {0};
 
-void I_SetTitleString (const char *title)
+void I_SetTitleString(const char *title)
 {
     int i;
 
     for (i = 0; title[i]; i++)
-                DoomStartupTitle[i] = title[i] | 0x80;
+        DoomStartupTitle[i] = title[i] | 0x80;
 }
 
-void I_PrintStr (int xp, const char *cp, int count, BOOL scroll)
+void I_PrintStr(int xp, const char *cp, int count, BOOL scroll)
 {
-        char string[4096];
+    char string[4096];
 
-        memcpy (string, cp, count);
-        if (scroll)
-                string[count++] = '\n';
-        string[count] = 0;
+    memcpy(string, cp, count);
+    if (scroll)
+        string[count++] = '\n';
+    string[count] = 0;
 
-        fputs (string, stdout);
-        fflush (stdout);
+    fputs(string, stdout);
+    fflush(stdout);
 }
 
-//static const char *pattern; // [DL] todo - remove
-//static findstate_t *findstates[8]; // [DL] todo - remove
+// static const char *pattern; // [DL] todo - remove
+// static findstate_t *findstates[8]; // [DL] todo - remove
 
-long I_FindFirst (char *filespec, findstate_t *fileinfo)
-{
-    return 0;
-}
-
-int I_FindNext (long handle, findstate_t *fileinfo)
+long I_FindFirst(char *filespec, findstate_t *fileinfo)
 {
     return 0;
 }
 
-int I_FindClose (long handle)
+int I_FindNext(long handle, findstate_t *fileinfo)
 {
     return 0;
 }
 
-int I_FindAttr (findstate_t *fileinfo)
+int I_FindClose(long handle)
+{
+    return 0;
+}
+
+int I_FindAttr(findstate_t *fileinfo)
 {
     return 0;
 }
@@ -454,131 +448,130 @@ int I_FindAttr (findstate_t *fileinfo)
 #ifdef _WIN32
 int ShutdownNow();
 
-std::string I_ConsoleInput (void)
+std::string I_ConsoleInput(void)
 {
-	// denis - todo - implement this properly!!!
-    static char     text[1024] = {0};
-    static char     buffer[1024] = {0};
-    unsigned int    len = strlen(buffer);
+    // denis - todo - implement this properly!!!
+    static char  text[1024]   = {0};
+    static char  buffer[1024] = {0};
+    unsigned int len          = strlen(buffer);
 
     if (ShutdownNow())
         return "quit";
 
-	while(kbhit() && len < sizeof(text))
-	{
-		int ch = getch();
+    while (kbhit() && len < sizeof(text))
+    {
+        int ch = getch();
 
-		// Handle special keys
-		switch (ch)
-		{
-            // Function keys (arrows etc)
-            case 0:
-            case 0xE0:
-            {
-                // getch sends a second char
-                // for these keys, skip it
-                ch = getch();
-                continue;
-            }
-            // Ctrl-C (MSDN has incorrect documentation regarding this)
-            case 3:
-            {
-                return "quit";
-            }
-		}
+        // Handle special keys
+        switch (ch)
+        {
+        // Function keys (arrows etc)
+        case 0:
+        case 0xE0: {
+            // getch sends a second char
+            // for these keys, skip it
+            ch = getch();
+            continue;
+        }
+        // Ctrl-C (MSDN has incorrect documentation regarding this)
+        case 3: {
+            return "quit";
+        }
+        }
 
-		if(ch == '\b' && len)
-		{
-			buffer[--len] = 0;
-			// john - backspace hack
-			fwrite(&ch, 1, 1, stdout);
-			ch = ' ';
-			fwrite(&ch, 1, 1, stdout);
-			ch = '\b';
-		}
-		else
-		{
+        if (ch == '\b' && len)
+        {
+            buffer[--len] = 0;
+            // john - backspace hack
+            fwrite(&ch, 1, 1, stdout);
+            ch = ' ';
+            fwrite(&ch, 1, 1, stdout);
+            ch = '\b';
+        }
+        else
+        {
             // Accept return but not unusual characters as input (eg Ctrl-B)
             if ((ch != '\n' && ch != '\r') && (ch < 32 || ch > 126))
                 continue;
-			
-			buffer[len++] = ch;
-		}
 
-		buffer[len] = 0;
+            buffer[len++] = ch;
+        }
 
-		// recalculate length
-		len = strlen(buffer);
+        buffer[len] = 0;
 
-		// echo character back to user
-		fwrite(&ch, 1, 1, stdout);
-		fflush(stdout);
-	}
+        // recalculate length
+        len = strlen(buffer);
 
-	if(len && (buffer[len - 1] == '\n' || buffer[len - 1] == '\r'))
-	{
-		// echo newline back to user
-		char ch = '\n';
-		fwrite(&ch, 1, 1, stdout);
-		fflush(stdout);
+        // echo character back to user
+        fwrite(&ch, 1, 1, stdout);
+        fflush(stdout);
+    }
 
-		strcpy(text, buffer);
-		text[len-1] = 0; // rip off the /n and terminate
-		buffer[0] = 0;
-		len = 0;
+    if (len && (buffer[len - 1] == '\n' || buffer[len - 1] == '\r'))
+    {
+        // echo newline back to user
+        char ch = '\n';
+        fwrite(&ch, 1, 1, stdout);
+        fflush(stdout);
 
-		return text;
-	}
+        strcpy(text, buffer);
+        text[len - 1] = 0; // rip off the /n and terminate
+        buffer[0]     = 0;
+        len           = 0;
 
-	return "";
+        return text;
+    }
+
+    return "";
 }
 
 #else
 
-std::string I_ConsoleInput (void)
+std::string I_ConsoleInput(void)
 {
-	std::string ret;
-	static char	 text[1024] = {0};
-	int			 len;
+    std::string ret;
+    static char text[1024] = {0};
+    int         len;
 
-	fd_set fdr;
-	FD_ZERO(&fdr);
-	FD_SET(0, &fdr);
-	struct timeval tv;
-	tv.tv_sec = 0;
-	tv.tv_usec = 0;
+    fd_set fdr;
+    FD_ZERO(&fdr);
+    FD_SET(0, &fdr);
+    struct timeval tv;
+    tv.tv_sec  = 0;
+    tv.tv_usec = 0;
 
-	if (select(1, &fdr, NULL, NULL, &tv) <= 0)
-		return "";
+    if (select(1, &fdr, NULL, NULL, &tv) <= 0)
+        return "";
 
-	len = read (0, text + strlen(text), sizeof(text) - strlen(text)); // denis - fixme - make it read until the next linebreak instead
+    len = read(0, text + strlen(text),
+               sizeof(text) - strlen(text)); // denis - fixme - make it read until the next linebreak instead
 
-	if (len < 1)
-		return "";
+    if (len < 1)
+        return "";
 
-	len = strlen(text);
+    len = strlen(text);
 
-	if (strlen(text) >= sizeof(text))
-	{
-		if(text[len-1] == '\n' || text[len-1] == '\r')
-			text[len-1] = 0; // rip off the /n and terminate
+    if (strlen(text) >= sizeof(text))
+    {
+        if (text[len - 1] == '\n' || text[len - 1] == '\r')
+            text[len - 1] = 0; // rip off the /n and terminate
 
-		ret = text;
-		memset(text, 0, sizeof(text));
-		return ret;
-	}
+        ret = text;
+        memset(text, 0, sizeof(text));
+        return ret;
+    }
 
-	if(text[len-1] == '\n' || text[len-1] == '\r')
-	{
-		text[len-1] = 0;
+    if (text[len - 1] == '\n' || text[len - 1] == '\r')
+    {
+        text[len - 1] = 0;
 
-		ret = text;
-		memset(text, 0, sizeof(text));
-		return ret;
-	}
+        ret = text;
+        memset(text, 0, sizeof(text));
+        return ret;
+    }
 
-	return "";
+    return "";
 }
 #endif
 
-VERSION_CONTROL (i_system_cpp, "$Id: 9af3253b89cf384e5db00c6794593c2a0e66344c $")
+VERSION_CONTROL(i_system_cpp, "$Id: 9af3253b89cf384e5db00c6794593c2a0e66344c $")

@@ -26,21 +26,23 @@
 
 // A class to actually deal with keeping track of voting state and ensuring
 // that the proper variables are set.
-class VoteState {
-private:
-	bool visible;
-	vote_result_t result;
-	std::string votestring;
-	short countdown;
-	QWORD countdown_ms;
-	byte yes;
-	byte yes_needed;
-	byte no;
-	byte no_needed;
-	byte abs;
-public:
-	VoteState() : visible(false) { };
-	static VoteState& instance(void);
-	void set(const vote_state_t &vote_state);
-	bool get(vote_state_t &vote_state);
+class VoteState
+{
+  private:
+    bool          visible;
+    vote_result_t result;
+    std::string   votestring;
+    short         countdown;
+    QWORD         countdown_ms;
+    byte          yes;
+    byte          yes_needed;
+    byte          no;
+    byte          no_needed;
+    byte          abs;
+
+  public:
+    VoteState() : visible(false){};
+    static VoteState &instance(void);
+    void              set(const vote_state_t &vote_state);
+    bool              get(vote_state_t &vote_state);
 };

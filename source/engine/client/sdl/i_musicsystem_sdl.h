@@ -33,23 +33,28 @@
 class SdlMixerMusicSystem : public MusicSystem
 {
   public:
-	SdlMixerMusicSystem();
-	virtual ~SdlMixerMusicSystem();
+    SdlMixerMusicSystem();
+    virtual ~SdlMixerMusicSystem();
 
-	virtual void startSong(byte* data, size_t length, bool loop);
-	virtual void stopSong();
-	virtual void pauseSong();
-	virtual void resumeSong();
-	virtual void playChunk() { }
-	virtual void setVolume(float volume);
+    virtual void startSong(byte *data, size_t length, bool loop);
+    virtual void stopSong();
+    virtual void pauseSong();
+    virtual void resumeSong();
+    virtual void playChunk()
+    {
+    }
+    virtual void setVolume(float volume);
 
-	virtual bool isInitialized() const { return m_isInitialized; }
+    virtual bool isInitialized() const
+    {
+        return m_isInitialized;
+    }
 
   private:
-	bool m_isInitialized;
-	MusicHandler_t m_registeredSong;
+    bool           m_isInitialized;
+    MusicHandler_t m_registeredSong;
 
-	void _StopSong();
-	void _RegisterSong(byte* data, size_t length);
-	void _UnregisterSong();
+    void _StopSong();
+    void _RegisterSong(byte *data, size_t length);
+    void _UnregisterSong();
 };

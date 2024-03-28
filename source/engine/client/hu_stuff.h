@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id: 6a18f719327703aa6b320d4496517f5ac15932d3 $
@@ -16,50 +16,48 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-// DESCRIPTION:  
+// DESCRIPTION:
 //	Head up display
 //
 //-----------------------------------------------------------------------------
-
 
 #pragma once
 
 #include "d_event.h"
 
-
 //
 // Globally visible constants.
 //
-#define HU_FONTSTART	'!' 	// the first font characters
-#define HU_FONTEND		'_' 	// the last font characters
+#define HU_FONTSTART '!' // the first font characters
+#define HU_FONTEND   '_' // the last font characters
 
 // Calculate # of glyphs in font.
-#define HU_FONTSIZE 	(HU_FONTEND - HU_FONTSTART + 1) 
+#define HU_FONTSIZE (HU_FONTEND - HU_FONTSTART + 1)
 
-void HU_Init();
+void            HU_Init();
 void STACK_ARGS HU_Shutdown();
 
 void HU_Ticker();
-BOOL HU_Responder (event_t* ev);
-void HU_Drawer (void);
+BOOL HU_Responder(event_t *ev);
+void HU_Drawer(void);
 
 enum chatmode_t
 {
-	CHAT_INACTIVE,
-	CHAT_NORMAL,
-	CHAT_TEAM
+    CHAT_INACTIVE,
+    CHAT_NORMAL,
+    CHAT_TEAM
 };
 
 chatmode_t HU_ChatMode();
-void HU_SetChatMode();
-void HU_SetTeamChatMode();
-void HU_UnsetChatMode();
-void HU_ReleaseKeyStates();
+void       HU_SetChatMode();
+void       HU_SetTeamChatMode();
+void       HU_UnsetChatMode();
+void       HU_ReleaseKeyStates();
 
-void OdamexEffect (int xa, int ya, int xb, int yb);
+void OdamexEffect(int xa, int ya, int xb, int yb);
 
 // [RH] Draw deathmatch scores
 
 class player_s;
-void HU_DrawScores (player_s *me);
-void HU_DisplayTimer (int x, int y, bool scale = true);
+void HU_DrawScores(player_s *me);
+void HU_DisplayTimer(int x, int y, bool scale = true);

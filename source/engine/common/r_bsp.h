@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id: acf7c276e8cf0b000a8d1c8298630c0a27968362 $
@@ -25,29 +25,29 @@
 
 extern const fixed_t NEARCLIP;
 
-extern seg_t*		curline;
-extern side_t*		sidedef;
-extern line_t*		linedef;
-extern sector_t*	frontsector;
-extern sector_t*	backsector;
+extern seg_t    *curline;
+extern side_t   *sidedef;
+extern line_t   *linedef;
+extern sector_t *frontsector;
+extern sector_t *backsector;
 
-extern BOOL			skymap;
+extern BOOL skymap;
 
-extern drawseg_t	*drawsegs;
-extern drawseg_t*	ds_p;
+extern drawseg_t *drawsegs;
+extern drawseg_t *ds_p;
 
-extern byte			solidcol[MAXWIDTH];
+extern byte solidcol[MAXWIDTH];
 
-typedef void (*drawfunc_t) (int start, int stop);
+typedef void (*drawfunc_t)(int start, int stop);
 
-EXTERN_CVAR (r_drawflat)		// [RH] Don't texture segs?
+EXTERN_CVAR(r_drawflat) // [RH] Don't texture segs?
 
 // BSP?
-void R_ClearClipSegs (void);
+void R_ClearClipSegs(void);
 void R_ReallocDrawSegs(void);
-void R_ClearDrawSegs (void);
-void R_RenderBSPNode (int bspnum);
-bool R_DoorClosed(void);	// killough 1/17/98
+void R_ClearDrawSegs(void);
+void R_RenderBSPNode(int bspnum);
+bool R_DoorClosed(void); // killough 1/17/98
 
 // killough 4/13/98: fake floors/ceilings for deep water / fake ceilings:
 sector_t *R_FakeFlat(sector_t *, sector_t *, int *, int *, bool);

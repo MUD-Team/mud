@@ -22,64 +22,61 @@
 
 #pragma once
 
-
 struct OScannerConfig
 {
-	const char* lumpName;
-	bool semiComments;
-	bool cComments;
+    const char *lumpName;
+    bool        semiComments;
+    bool        cComments;
 };
 
 class OScanner
 {
-	OScannerConfig m_config;
-	const char* m_scriptStart;
-	const char* m_scriptEnd;
-	const char* m_position;
-	int m_lineNumber;
-	std::string m_token;
-	bool m_unScan;
-	bool m_removeEscapeCharacter;
-	bool m_isQuotedString;
-	bool m_crossed;
+    OScannerConfig m_config;
+    const char    *m_scriptStart;
+    const char    *m_scriptEnd;
+    const char    *m_position;
+    int            m_lineNumber;
+    std::string    m_token;
+    bool           m_unScan;
+    bool           m_removeEscapeCharacter;
+    bool           m_isQuotedString;
+    bool           m_crossed;
 
-	bool checkPair(char a, char b);
-	void skipWhitespace();
-	void skipToNextLine();
-	void skipPastPair(char a, char b);
-	bool munchQuotedString();
-	void munchString();
-	void pushToken(const char* string, size_t length);
-	void pushToken(const std::string& string);
+    bool checkPair(char a, char b);
+    void skipWhitespace();
+    void skipToNextLine();
+    void skipPastPair(char a, char b);
+    bool munchQuotedString();
+    void munchString();
+    void pushToken(const char *string, size_t length);
+    void pushToken(const std::string &string);
 
   public:
-	OScanner(const OScannerConfig& config)
-	    : m_config(config), m_scriptStart(NULL), m_scriptEnd(NULL), m_position(NULL),
-	      m_lineNumber(0), m_token(""), m_unScan(false), m_removeEscapeCharacter(false),
-	      m_isQuotedString(false), m_crossed(false)
-	{
-	}
+    OScanner(const OScannerConfig &config)
+        : m_config(config), m_scriptStart(NULL), m_scriptEnd(NULL), m_position(NULL), m_lineNumber(0), m_token(""),
+          m_unScan(false), m_removeEscapeCharacter(false), m_isQuotedString(false), m_crossed(false)
+    {
+    }
 
-	static OScanner openBuffer(const OScannerConfig& config, const char* start,
-	                           const char* end);
+    static OScanner openBuffer(const OScannerConfig &config, const char *start, const char *end);
 
-	bool scan();
-	void mustScan();
-	void mustScanInt();
-	void mustScanFloat();
-	void mustScanBool();
-	void unScan();
+    bool scan();
+    void mustScan();
+    void mustScanInt();
+    void mustScanFloat();
+    void mustScanBool();
+    void unScan();
 
-	std::string getToken() const;
-	int getTokenInt() const;
-	float getTokenFloat() const;
-	bool getTokenBool() const;
+    std::string getToken() const;
+    int         getTokenInt() const;
+    float       getTokenFloat() const;
+    bool        getTokenBool() const;
 
-	bool &crossed();
-	bool isQuotedString() const;
-	void assertTokenIs(const char* string) const;
-	bool compareToken(const char* string) const;
-	bool compareTokenNoCase(const char* string) const;
-	void STACK_ARGS warning(const char* message, ...) const;
-	void STACK_ARGS error(const char* message, ...) const;
+    bool           &crossed();
+    bool            isQuotedString() const;
+    void            assertTokenIs(const char *string) const;
+    bool            compareToken(const char *string) const;
+    bool            compareTokenNoCase(const char *string) const;
+    void STACK_ARGS warning(const char *message, ...) const;
+    void STACK_ARGS error(const char *message, ...) const;
 };

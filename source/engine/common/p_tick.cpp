@@ -21,7 +21,6 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #include "odamex.h"
 
 #include "p_local.h"
@@ -47,52 +46,50 @@ void P_AnimationTick(AActor *mo);
 //
 // P_Ticker
 //
-void P_Ticker (void)
+void P_Ticker(void)
 {
-	if(paused)
-		return;
+    if (paused)
+        return;
 
 #ifdef CLIENT_APP
-	// Game pauses when in the menu and not online/demo
-	if (!multiplayer
-		&& !demoplayback 
-		&& (menuactive || ConsoleState == c_down || ConsoleState == c_falling)
-		&& players.begin()->viewz != 1)
-		return;
+    // Game pauses when in the menu and not online/demo
+    if (!multiplayer && !demoplayback && (menuactive || ConsoleState == c_down || ConsoleState == c_falling) &&
+        players.begin()->viewz != 1)
+        return;
 #endif
 
-	if (serverside)
-		P_RunHordeTics();
+    if (serverside)
+        P_RunHordeTics();
 
-	if (clientside)
-		P_ThinkParticles ();	// [RH] make the particles think
+    if (clientside)
+        P_ThinkParticles(); // [RH] make the particles think
 
-	if (clientside && serverside)
-	{
-		for (Players::iterator it = players.begin();it != players.end();++it)
-			if (it->ingame())
-				P_PlayerThink(&*(it));
-	}
+    if (clientside && serverside)
+    {
+        for (Players::iterator it = players.begin(); it != players.end(); ++it)
+            if (it->ingame())
+                P_PlayerThink(&*(it));
+    }
 
-	// [SL] 2011-06-05 - Tick player actor animations here since P_Ticker is
-	// called only once per tick.  AActor::RunThink is called whenever the
-	// server receives a cmd from the client, which can happen multiple times
-	// in a single gametic.
-	for (Players::iterator it = players.begin();it != players.end();++it)
-	{
-		P_AnimationTick(it->mo);
-	}
+    // [SL] 2011-06-05 - Tick player actor animations here since P_Ticker is
+    // called only once per tick.  AActor::RunThink is called whenever the
+    // server receives a cmd from the client, which can happen multiple times
+    // in a single gametic.
+    for (Players::iterator it = players.begin(); it != players.end(); ++it)
+    {
+        P_AnimationTick(it->mo);
+    }
 
-	DThinker::RunThinkers ();
-	
-	P_UpdateSpecials ();
-	P_RespawnSpecials ();
+    DThinker::RunThinkers();
 
-	if (clientside)
-		P_RunEffects ();	// [RH] Run particle effects
+    P_UpdateSpecials();
+    P_RespawnSpecials();
 
-	// for par times
-	level.time++;
+    if (clientside)
+        P_RunEffects(); // [RH] Run particle effects
+
+    // for par times
+    level.time++;
 }
 
-VERSION_CONTROL (p_tick_cpp, "$Id: e5a964ece3084c3116a9f341c095514725d86842 $")
+VERSION_CONTROL(p_tick_cpp, "$Id: e5a964ece3084c3116a9f341c095514725d86842 $")

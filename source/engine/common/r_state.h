@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id: e463ead1c94fe0ba096aa0a1f05457dea4683779 $
@@ -21,16 +21,14 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #pragma once
 
 // Need data structure definitions.
 #include "d_player.h"
 #include "r_data.h"
 
-#define WALLFRACBITS	4
-#define WALLFRACUNIT	(1<<WALLFRACBITS)
-
+#define WALLFRACBITS 4
+#define WALLFRACUNIT (1 << WALLFRACBITS)
 
 //
 // Refresh internal data structures,
@@ -38,124 +36,124 @@
 //
 
 // needed for texture pegging
-extern fixed_t* 		textureheight;
+extern fixed_t *textureheight;
 
-extern "C" int			viewwidth;
-extern "C" int			viewheight;
+extern "C" int viewwidth;
+extern "C" int viewheight;
 
-extern int				firstflat;
-extern int				numflats;
+extern int firstflat;
+extern int numflats;
 
 // for global animation
-extern bool*			flatwarp;
-extern byte**			warpedflats;
-extern int*				flatwarpedwhen;
-extern int*				flattranslation;
-		
-extern int* 			texturetranslation; 	
+extern bool  *flatwarp;
+extern byte **warpedflats;
+extern int   *flatwarpedwhen;
+extern int   *flattranslation;
+
+extern int *texturetranslation;
 
 // Sprite....
-extern int				firstspritelump;
-extern int				lastspritelump;
-extern int				numspritelumps;
+extern int firstspritelump;
+extern int lastspritelump;
+extern int numspritelumps;
 
 //
 // Lookup tables for map data.
 //
-extern bool				g_ValidLevel;
+extern bool g_ValidLevel;
 
-extern int				numsprites;
-extern spritedef_t* 	sprites;
+extern int          numsprites;
+extern spritedef_t *sprites;
 
-extern int				numvertexes;
-extern vertex_t*		vertexes;
+extern int       numvertexes;
+extern vertex_t *vertexes;
 
-extern int				numsegs;
-extern seg_t*			segs;
+extern int    numsegs;
+extern seg_t *segs;
 
-extern int				numsectors;
-extern sector_t*		sectors;
+extern int       numsectors;
+extern sector_t *sectors;
 
-extern int				numsubsectors;
-extern subsector_t* 	subsectors;
+extern int          numsubsectors;
+extern subsector_t *subsectors;
 
-extern int				numnodes;
-extern node_t*			nodes;
+extern int     numnodes;
+extern node_t *nodes;
 
-extern int				numlines;
-extern line_t*			lines;
+extern int     numlines;
+extern line_t *lines;
 
-extern int				numsides;
-extern side_t*			sides;
+extern int     numsides;
+extern side_t *sides;
 
 extern std::vector<int> originalLightLevels;
 
-inline FArchive &operator<< (FArchive &arc, sector_t *sec)
+inline FArchive &operator<<(FArchive &arc, sector_t *sec)
 {
-	if (sec)
-		return arc << (WORD)(sec - sectors);
-	else
-		return arc << (WORD)0xffff;
+    if (sec)
+        return arc << (WORD)(sec - sectors);
+    else
+        return arc << (WORD)0xffff;
 }
-inline FArchive &operator>> (FArchive &arc, sector_t *&sec)
+inline FArchive &operator>>(FArchive &arc, sector_t *&sec)
 {
-	WORD ofs;
-	arc >> ofs;
-	if (ofs == 0xffff)
-		sec = NULL;
-	else
-		sec = sectors + ofs;
-	return arc;
+    WORD ofs;
+    arc >> ofs;
+    if (ofs == 0xffff)
+        sec = NULL;
+    else
+        sec = sectors + ofs;
+    return arc;
 }
 
-inline FArchive &operator<< (FArchive &arc, line_t *line)
+inline FArchive &operator<<(FArchive &arc, line_t *line)
 {
-	if (line)
-		return arc << (WORD)(line - lines);
-	else
-		return arc << (WORD)0xffff;
+    if (line)
+        return arc << (WORD)(line - lines);
+    else
+        return arc << (WORD)0xffff;
 }
-inline FArchive &operator>> (FArchive &arc, line_t *&line)
+inline FArchive &operator>>(FArchive &arc, line_t *&line)
 {
-	WORD ofs;
-	arc >> ofs;
-	if (ofs == 0xffff)
-		line = NULL;
-	else
-		line = lines + ofs;
-	return arc;
+    WORD ofs;
+    arc >> ofs;
+    if (ofs == 0xffff)
+        line = NULL;
+    else
+        line = lines + ofs;
+    return arc;
 }
 
 struct LocalView
 {
-	angle_t angle;
-	bool setangle;
-	bool skipangle;
-	int pitch;
-	bool setpitch;
-	bool skippitch;
+    angle_t angle;
+    bool    setangle;
+    bool    skipangle;
+    int     pitch;
+    bool    setpitch;
+    bool    skippitch;
 };
 
 //
 // POV data.
 //
-extern fixed_t			viewx;
-extern fixed_t			viewy;
-extern fixed_t			viewz;
+extern fixed_t viewx;
+extern fixed_t viewy;
+extern fixed_t viewz;
 
-extern angle_t			viewangle;
-extern LocalView		localview;
-extern AActor*			camera;		// [RH] camera instead of viewplayer
+extern angle_t   viewangle;
+extern LocalView localview;
+extern AActor   *camera; // [RH] camera instead of viewplayer
 
-extern angle_t			clipangle;
+extern angle_t clipangle;
 
-//extern fixed_t		finetangent[FINEANGLES/2];
+// extern fixed_t		finetangent[FINEANGLES/2];
 
-extern visplane_t*		floorplane;
-extern visplane_t*		ceilingplane;
-extern visplane_t*		skyplane;
+extern visplane_t *floorplane;
+extern visplane_t *ceilingplane;
+extern visplane_t *skyplane;
 
 // [AM] 4:3 Field of View
-extern int				FieldOfView;
+extern int FieldOfView;
 // [AM] Corrected (for widescreen) Field of View
-extern int				CorrectFieldOfView;
+extern int CorrectFieldOfView;

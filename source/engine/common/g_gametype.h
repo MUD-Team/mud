@@ -22,52 +22,51 @@
 
 #pragma once
 
-
 #include "g_levelstate.h"
 #include "teaminfo.h"
 
 enum JoinResult
 {
-	JOIN_OK,
-	JOIN_ENDGAME,
-	JOIN_GAMEFULL,
-	JOIN_JOINTIMER
+    JOIN_OK,
+    JOIN_ENDGAME,
+    JOIN_GAMEFULL,
+    JOIN_JOINTIMER
 };
 
-typedef JoinResult(*JoinTest)();
+typedef JoinResult (*JoinTest)();
 
 // Query functions
 
-const std::string& G_GametypeName();
-bool G_CanEndGame();
-bool G_CanFireWeapon();
-JoinResult G_CanJoinGame();
-JoinResult G_CanJoinGameStart();
-bool G_CanLivesChange();
-bool G_CanPickupObjective(team_t team);
-bool G_CanReadyToggle();
-bool G_CanScoreChange();
-bool G_CanShowFightMessage();
-bool G_CanShowJoinTimer();
-bool G_CanShowObituary();
-bool G_CanTickGameplay();
-bool G_IsLevelState(LevelState::States state);
-bool G_IsDefendingTeam(team_t team);
-bool G_IsHordeMode();
-bool G_IsCoopGame();
-bool G_IsFFAGame();
-bool G_IsMatchDuelGame();
-bool G_IsDuelGame();
-bool G_IsTeamGame();
-bool G_IsRoundsGame();
-bool G_IsLivesGame();
-bool G_IsSidesGame();
-bool G_UsesCoopSpawns();
-bool G_UsesWinlimit();
-bool G_UsesRoundlimit();
-bool G_UsesScorelimit();
-bool G_UsesFraglimit();
-int G_GetEndingTic();
+const std::string &G_GametypeName();
+bool               G_CanEndGame();
+bool               G_CanFireWeapon();
+JoinResult         G_CanJoinGame();
+JoinResult         G_CanJoinGameStart();
+bool               G_CanLivesChange();
+bool               G_CanPickupObjective(team_t team);
+bool               G_CanReadyToggle();
+bool               G_CanScoreChange();
+bool               G_CanShowFightMessage();
+bool               G_CanShowJoinTimer();
+bool               G_CanShowObituary();
+bool               G_CanTickGameplay();
+bool               G_IsLevelState(LevelState::States state);
+bool               G_IsDefendingTeam(team_t team);
+bool               G_IsHordeMode();
+bool               G_IsCoopGame();
+bool               G_IsFFAGame();
+bool               G_IsMatchDuelGame();
+bool               G_IsDuelGame();
+bool               G_IsTeamGame();
+bool               G_IsRoundsGame();
+bool               G_IsLivesGame();
+bool               G_IsSidesGame();
+bool               G_UsesCoopSpawns();
+bool               G_UsesWinlimit();
+bool               G_UsesRoundlimit();
+bool               G_UsesScorelimit();
+bool               G_UsesFraglimit();
+int                G_GetEndingTic();
 
 // Mutating functions
 

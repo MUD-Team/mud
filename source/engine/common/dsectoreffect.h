@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id: be67bdfc692b11152054ecf4d7cfee31420e235a $
@@ -21,7 +21,6 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #pragma once
 
 #include "dobject.h"
@@ -30,73 +29,90 @@
 
 typedef enum
 {
-	SEC_INVALID,
-	SEC_FLOOR,
-	SEC_PLAT,
-	SEC_CEILING,
-	SEC_DOOR,
-	SEC_ELEVATOR,
-	SEC_PILLAR,
-//	SEC_WAGGLE,	// We don't send sector updates for these
+    SEC_INVALID,
+    SEC_FLOOR,
+    SEC_PLAT,
+    SEC_CEILING,
+    SEC_DOOR,
+    SEC_ELEVATOR,
+    SEC_PILLAR,
+    //	SEC_WAGGLE,	// We don't send sector updates for these
 } movertype_t;
 
 class DSectorEffect : public DThinker
 {
-	DECLARE_SERIAL (DSectorEffect, DThinker)
-public:
-	DSectorEffect (sector_t *sector);
-	~DSectorEffect ();
-	virtual DSectorEffect* Clone(sector_t *sector) const;
-	virtual void Destroy();
-	sector_t* GetSector() const { return m_Sector; }
-protected:
-	DSectorEffect ();
-	sector_t	*m_Sector;
+    DECLARE_SERIAL(DSectorEffect, DThinker)
+  public:
+    DSectorEffect(sector_t *sector);
+    ~DSectorEffect();
+    virtual DSectorEffect *Clone(sector_t *sector) const;
+    virtual void           Destroy();
+    sector_t              *GetSector() const
+    {
+        return m_Sector;
+    }
+
+  protected:
+    DSectorEffect();
+    sector_t *m_Sector;
 };
 
 class DMover : public DSectorEffect
 {
-	DECLARE_SERIAL (DMover, DSectorEffect);
-public:
-	DMover (sector_t *sector);
-protected:
-	enum EResult { ok, crushed, pastdest };
-private:
-	EResult MovePlane (fixed_t speed, fixed_t dest, int crush, int floorOrCeiling, int direction, bool hexencrush);
-protected:
-	DMover ();
-	inline EResult MoveFloor (fixed_t speed, fixed_t dest, int crush, int direction, bool hexencrush)
-	{
-		return MovePlane (speed, dest, crush, 0, direction, hexencrush);
-	}
-	inline EResult MoveFloor (fixed_t speed, fixed_t dest, int direction)
-	{
-		return MovePlane(speed, dest, NO_CRUSH, 0, direction, false);
-	}
-	inline EResult MoveCeiling (fixed_t speed, fixed_t dest, int crush, int direction, bool hexencrush)
-	{
-		return MovePlane (speed, dest, crush, 1, direction, hexencrush);
-	}
-	inline EResult MoveCeiling (fixed_t speed, fixed_t dest, int direction)
-	{
-		return MovePlane(speed, dest, NO_CRUSH, 1, direction, false);
-	}
+    DECLARE_SERIAL(DMover, DSectorEffect);
+
+  public:
+    DMover(sector_t *sector);
+
+  protected:
+    enum EResult
+    {
+        ok,
+        crushed,
+        pastdest
+    };
+
+  private:
+    EResult MovePlane(fixed_t speed, fixed_t dest, int crush, int floorOrCeiling, int direction, bool hexencrush);
+
+  protected:
+    DMover();
+    inline EResult MoveFloor(fixed_t speed, fixed_t dest, int crush, int direction, bool hexencrush)
+    {
+        return MovePlane(speed, dest, crush, 0, direction, hexencrush);
+    }
+    inline EResult MoveFloor(fixed_t speed, fixed_t dest, int direction)
+    {
+        return MovePlane(speed, dest, NO_CRUSH, 0, direction, false);
+    }
+    inline EResult MoveCeiling(fixed_t speed, fixed_t dest, int crush, int direction, bool hexencrush)
+    {
+        return MovePlane(speed, dest, crush, 1, direction, hexencrush);
+    }
+    inline EResult MoveCeiling(fixed_t speed, fixed_t dest, int direction)
+    {
+        return MovePlane(speed, dest, NO_CRUSH, 1, direction, false);
+    }
 };
 
 class DMovingFloor : public DMover
 {
-	DECLARE_SERIAL (DMovingFloor, DMover);
-public:
-	DMovingFloor (sector_t *sector);
-protected:
-	DMovingFloor ();
+    DECLARE_SERIAL(DMovingFloor, DMover);
+
+  public:
+    DMovingFloor(sector_t *sector);
+
+  protected:
+    DMovingFloor();
 };
 
 class DMovingCeiling : public DMover
 {
-	DECLARE_SERIAL (DMovingCeiling, DMover);
-public:
-	DMovingCeiling (sector_t *sector);
-protected:
-	DMovingCeiling ();
+    DECLARE_SERIAL(DMovingCeiling, DMover);
+
+  public:
+    DMovingCeiling(sector_t *sector);
+
+  protected:
+    DMovingCeiling();
 };

@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id: 5f37939998a34e8c576f4e0d6868ea43a3271b32 $
@@ -27,46 +27,46 @@
 
 struct palette_t
 {
-	argb_t			basecolors[256];		// non-gamma corrected colors
-	argb_t			colors[256];			// gamma corrected colors
+    argb_t basecolors[256]; // non-gamma corrected colors
+    argb_t colors[256];     // gamma corrected colors
 
-	shademap_t      maps;
+    shademap_t maps;
 
-	const palette_t& operator=(const palette_t& other)
-	{
-		for (size_t i = 0; i < 256; i++)
-		{
-			colors[i] = other.colors[i];
-			basecolors[i] = other.basecolors[i];
-		}
-		maps = other.maps;
-		return *this;
-	}
+    const palette_t &operator=(const palette_t &other)
+    {
+        for (size_t i = 0; i < 256; i++)
+        {
+            colors[i]     = other.colors[i];
+            basecolors[i] = other.basecolors[i];
+        }
+        maps = other.maps;
+        return *this;
+    }
 };
 
-struct dyncolormap_s {
-	shaderef_t		maps;
-	argb_t			color;
-	argb_t			fade;
-	struct dyncolormap_s *next;
+struct dyncolormap_s
+{
+    shaderef_t            maps;
+    argb_t                color;
+    argb_t                fade;
+    struct dyncolormap_s *next;
 };
 typedef struct dyncolormap_s dyncolormap_t;
 
 extern fargb_t baseblend;
 
 extern byte gammatable[256];
-float V_GetMinimumGammaLevel();
-float V_GetMaximumGammaLevel();
-void V_IncrementGammaLevel();
+float       V_GetMinimumGammaLevel();
+float       V_GetMaximumGammaLevel();
+void        V_IncrementGammaLevel();
 
 static inline argb_t V_GammaCorrect(const argb_t value)
 {
-	extern byte gammatable[256];
-	return argb_t(value.geta(), gammatable[value.getr()], gammatable[value.getg()], gammatable[value.getb()]);
+    extern byte gammatable[256];
+    return argb_t(value.geta(), gammatable[value.getr()], gammatable[value.getg()], gammatable[value.getb()]);
 }
 
-
-palindex_t V_BestColor(const argb_t* palette_colors, int r, int g, int b);
+palindex_t V_BestColor(const argb_t *palette_colors, int r, int g, int b);
 palindex_t V_BestColor(const argb_t *palette_colors, argb_t color);
 
 // Alpha blend between two RGB colors with only dest alpha value
@@ -77,11 +77,10 @@ argb_t alphablend1a(const argb_t from, const argb_t to, const int toa);
 // 0 <=   toa <= 256
 argb_t alphablend2a(const argb_t from, const int froma, const argb_t to, const int toa);
 
-void V_InitPalette(const char* lumpname);
+void V_InitPalette(const char *lumpname);
 
-
-const palette_t* V_GetDefaultPalette();
-const palette_t* V_GetGamePalette();
+const palette_t *V_GetDefaultPalette();
+const palette_t *V_GetGamePalette();
 
 //
 // V_RestoreScreenPalette
@@ -96,9 +95,9 @@ void V_RestoreScreenPalette();
 void V_RefreshColormaps();
 
 // Sets up the default colormaps and shademaps based on the given palette:
-void BuildDefaultColorAndShademap(const palette_t* pal, shademap_t& maps);
+void BuildDefaultColorAndShademap(const palette_t *pal, shademap_t &maps);
 // Sets up the default shademaps (no colormaps) based on the given palette:
-void BuildDefaultShademap(const palette_t* pal, shademap_t& maps);
+void BuildDefaultShademap(const palette_t *pal, shademap_t &maps);
 
 // V_SetBlend()
 //	input: blendr: red component of blend
@@ -123,4 +122,4 @@ void V_ResetPalette();
 fahsv_t V_RGBtoHSV(const fargb_t &color);
 fargb_t V_HSVtoRGB(const fahsv_t &color);
 
-dyncolormap_t *GetSpecialLights (int lr, int lg, int lb, int fr, int fg, int fb);
+dyncolormap_t *GetSpecialLights(int lr, int lg, int lb, int fr, int fg, int fb);

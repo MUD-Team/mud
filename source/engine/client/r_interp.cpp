@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id: 4368c805b7a8592b0bc22825bbcd424167c8d54d $
@@ -22,14 +22,12 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #include "odamex.h"
 
 #include "m_fixed.h"
 #include "r_state.h"
 #include "p_local.h"
 #include "cl_demo.h"
-
 
 typedef std::pair<fixed_t, unsigned int> fixed_uint_pair;
 
@@ -49,21 +47,20 @@ extern NetDemo netdemo;
 //
 void R_InterpolationTicker()
 {
-	prev_ceilingheight.clear();
-	prev_floorheight.clear();
+    prev_ceilingheight.clear();
+    prev_floorheight.clear();
 
-	if (gamestate == GS_LEVEL)
-	{
-		for (int i = 0; i < numsectors; i++)
-		{
-			if (sectors[i].ceilingdata)
-				prev_ceilingheight.push_back(std::make_pair(P_CeilingHeight(&sectors[i]), i));
-			if (sectors[i].floordata)
-				prev_floorheight.push_back(std::make_pair(P_FloorHeight(&sectors[i]), i));
-		}
-	}
+    if (gamestate == GS_LEVEL)
+    {
+        for (int i = 0; i < numsectors; i++)
+        {
+            if (sectors[i].ceilingdata)
+                prev_ceilingheight.push_back(std::make_pair(P_CeilingHeight(&sectors[i]), i));
+            if (sectors[i].floordata)
+                prev_floorheight.push_back(std::make_pair(P_FloorHeight(&sectors[i]), i));
+        }
+    }
 }
-
 
 //
 // R_ResetInterpolation
@@ -73,18 +70,17 @@ void R_InterpolationTicker()
 //
 void R_ResetInterpolation()
 {
-	prev_ceilingheight.clear();
-	prev_floorheight.clear();
-	saved_ceilingheight.clear();
-	saved_floorheight.clear();
-	::localview.angle = 0;
-	::localview.setangle = false;
-	::localview.skipangle = false;
-	::localview.pitch = 0;
-	::localview.setpitch = false;
-	::localview.skippitch = false;
+    prev_ceilingheight.clear();
+    prev_floorheight.clear();
+    saved_ceilingheight.clear();
+    saved_floorheight.clear();
+    ::localview.angle     = 0;
+    ::localview.setangle  = false;
+    ::localview.skipangle = false;
+    ::localview.pitch     = 0;
+    ::localview.setpitch  = false;
+    ::localview.skippitch = false;
 }
-
 
 //
 // R_BeginInterpolation
@@ -96,41 +92,41 @@ void R_ResetInterpolation()
 //
 void R_BeginInterpolation(fixed_t amount)
 {
-	saved_ceilingheight.clear();
-	saved_floorheight.clear();
+    saved_ceilingheight.clear();
+    saved_floorheight.clear();
 
-	if (gamestate == GS_LEVEL)
-	{
-		for (std::vector<fixed_uint_pair>::const_iterator ceiling_it = prev_ceilingheight.begin();
-			 ceiling_it != prev_ceilingheight.end(); ++ceiling_it)
-		{
-			unsigned int secnum = ceiling_it->second;
-			sector_t* sector = &sectors[secnum];
+    if (gamestate == GS_LEVEL)
+    {
+        for (std::vector<fixed_uint_pair>::const_iterator ceiling_it = prev_ceilingheight.begin();
+             ceiling_it != prev_ceilingheight.end(); ++ceiling_it)
+        {
+            unsigned int secnum = ceiling_it->second;
+            sector_t    *sector = &sectors[secnum];
 
-			fixed_t old_value = ceiling_it->first;
-			fixed_t cur_value = P_CeilingHeight(sector);
+            fixed_t old_value = ceiling_it->first;
+            fixed_t cur_value = P_CeilingHeight(sector);
 
-			saved_ceilingheight.push_back(std::make_pair(cur_value, secnum));
-			
-			fixed_t new_value = old_value + FixedMul(cur_value - old_value, amount);
-			P_SetCeilingHeight(sector, new_value);
-		}
+            saved_ceilingheight.push_back(std::make_pair(cur_value, secnum));
 
-		for (std::vector<fixed_uint_pair>::const_iterator floor_it = prev_floorheight.begin();
-			 floor_it != prev_floorheight.end(); ++floor_it)
-		{
-			unsigned int secnum = floor_it->second;
-			sector_t* sector = &sectors[secnum];
+            fixed_t new_value = old_value + FixedMul(cur_value - old_value, amount);
+            P_SetCeilingHeight(sector, new_value);
+        }
 
-			fixed_t old_value = floor_it->first;
-			fixed_t cur_value = P_FloorHeight(sector);
+        for (std::vector<fixed_uint_pair>::const_iterator floor_it = prev_floorheight.begin();
+             floor_it != prev_floorheight.end(); ++floor_it)
+        {
+            unsigned int secnum = floor_it->second;
+            sector_t    *sector = &sectors[secnum];
 
-			saved_floorheight.push_back(std::make_pair(cur_value, secnum));
-			
-			fixed_t new_value = old_value + FixedMul(cur_value - old_value, amount);
-			P_SetFloorHeight(sector, new_value);
-		}
-	}
+            fixed_t old_value = floor_it->first;
+            fixed_t cur_value = P_FloorHeight(sector);
+
+            saved_floorheight.push_back(std::make_pair(cur_value, secnum));
+
+            fixed_t new_value = old_value + FixedMul(cur_value - old_value, amount);
+            P_SetFloorHeight(sector, new_value);
+        }
+    }
 }
 
 //
@@ -141,22 +137,22 @@ void R_BeginInterpolation(fixed_t amount)
 //
 void R_EndInterpolation()
 {
-	if (gamestate == GS_LEVEL)
-	{
-		for (std::vector<fixed_uint_pair>::const_iterator ceiling_it = saved_ceilingheight.begin();
-			 ceiling_it != saved_ceilingheight.end(); ++ceiling_it)
-		{
-			sector_t* sector = &sectors[ceiling_it->second];
-			P_SetCeilingHeight(sector, ceiling_it->first);
-		}
+    if (gamestate == GS_LEVEL)
+    {
+        for (std::vector<fixed_uint_pair>::const_iterator ceiling_it = saved_ceilingheight.begin();
+             ceiling_it != saved_ceilingheight.end(); ++ceiling_it)
+        {
+            sector_t *sector = &sectors[ceiling_it->second];
+            P_SetCeilingHeight(sector, ceiling_it->first);
+        }
 
-		for (std::vector<fixed_uint_pair>::const_iterator floor_it = saved_floorheight.begin();
-			 floor_it != saved_floorheight.end(); ++floor_it)
-		{
-			sector_t* sector = &sectors[floor_it->second];
-			P_SetFloorHeight(sector, floor_it->first);
-		}
-	}
+        for (std::vector<fixed_uint_pair>::const_iterator floor_it = saved_floorheight.begin();
+             floor_it != saved_floorheight.end(); ++floor_it)
+        {
+            sector_t *sector = &sectors[floor_it->second];
+            P_SetFloorHeight(sector, floor_it->first);
+        }
+    }
 }
 
 //
@@ -169,31 +165,30 @@ void R_EndInterpolation()
 
 void R_InterpolateCamera(fixed_t amount)
 {
-	if (gamestate == GS_LEVEL && camera)
-	{
-		player_t& consolePlayer = consoleplayer();
+    if (gamestate == GS_LEVEL && camera)
+    {
+        player_t &consolePlayer = consoleplayer();
 
-		if (!::localview.skipangle && consolePlayer.id == displayplayer().id &&
-		    consolePlayer.health > 0 && !consolePlayer.mo->reactiontime && 
-			(!netdemo.isPlaying() && !demoplayback))
-		{
-			viewangle = camera->angle + ::localview.angle;
-		}
-		else
-		{
-			// Only interpolate if we are spectating
-			// interpolate amount/FRACUNIT percent between previous value and current value
-			viewangle = camera->prevangle + FixedMul(amount, camera->angle - camera->prevangle);
-		}
+        if (!::localview.skipangle && consolePlayer.id == displayplayer().id && consolePlayer.health > 0 &&
+            !consolePlayer.mo->reactiontime && (!netdemo.isPlaying() && !demoplayback))
+        {
+            viewangle = camera->angle + ::localview.angle;
+        }
+        else
+        {
+            // Only interpolate if we are spectating
+            // interpolate amount/FRACUNIT percent between previous value and current value
+            viewangle = camera->prevangle + FixedMul(amount, camera->angle - camera->prevangle);
+        }
 
-		viewx = camera->prevx + FixedMul(amount, camera->x - camera->prevx);
-		viewy = camera->prevy + FixedMul(amount, camera->y - camera->prevy);
+        viewx = camera->prevx + FixedMul(amount, camera->x - camera->prevx);
+        viewy = camera->prevy + FixedMul(amount, camera->y - camera->prevy);
 
-		if (camera->player)
-			viewz = camera->player->prevviewz + FixedMul(amount, camera->player->viewz - camera->player->prevviewz);
-		else
-			viewz = camera->prevz + FixedMul(amount, camera->z - camera->prevz);
-	}
+        if (camera->player)
+            viewz = camera->player->prevviewz + FixedMul(amount, camera->player->viewz - camera->player->prevviewz);
+        else
+            viewz = camera->prevz + FixedMul(amount, camera->z - camera->prevz);
+    }
 }
 
-VERSION_CONTROL (r_interp_cpp, "$Id: 4368c805b7a8592b0bc22825bbcd424167c8d54d $")
+VERSION_CONTROL(r_interp_cpp, "$Id: 4368c805b7a8592b0bc22825bbcd424167c8d54d $")

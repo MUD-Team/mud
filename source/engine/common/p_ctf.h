@@ -28,27 +28,27 @@
 // events
 enum flag_score_t
 {
-	SCORE_NONE,
-	SCORE_REFRESH,
-	SCORE_KILL,
-	SCORE_BETRAYAL,
-	SCORE_GRAB,
-	SCORE_FIRSTGRAB,
-	SCORE_CARRIERKILL,
-	SCORE_RETURN,
-	SCORE_CAPTURE,
-	SCORE_DROP,
-	SCORE_MANUALRETURN,
-	NUM_CTF_SCORE
+    SCORE_NONE,
+    SCORE_REFRESH,
+    SCORE_KILL,
+    SCORE_BETRAYAL,
+    SCORE_GRAB,
+    SCORE_FIRSTGRAB,
+    SCORE_CARRIERKILL,
+    SCORE_RETURN,
+    SCORE_CAPTURE,
+    SCORE_DROP,
+    SCORE_MANUALRETURN,
+    NUM_CTF_SCORE
 };
 
 //	Network Events
 // [CG] I'm aware having CL_* and SV_* functions in common/ is not great, I'll
 //      do more work on CTF and team-related things later.
-void SV_CTFEvent(team_t f, flag_score_t event, player_t &who);
+void         SV_CTFEvent(team_t f, flag_score_t event, player_t &who);
 ItemEquipVal SV_FlagTouch(player_t &player, team_t f, bool firstgrab);
-void SV_SocketTouch(player_t &player, team_t f);
-void CTF_Connect(player_t &player);
+void         SV_SocketTouch(player_t &player, team_t f);
+void         CTF_Connect(player_t &player);
 
 //	Internal Events
 void CTF_DrawHud(void);
@@ -62,7 +62,7 @@ void CTF_CheckFlags(player_t &player);
 void CTF_Sound(team_t f, team_t t, flag_score_t event);
 void CTF_Message(team_t f, team_t t, flag_score_t event);
 bool CTF_ShouldSpawnHomeFlag(mobjtype_t type);
-void CTF_ReplaceFlagWithWaypoint(AActor* mo);
+void CTF_ReplaceFlagWithWaypoint(AActor *mo);
 
-FArchive &operator<< (FArchive &arc, flagdata &flag);
-FArchive &operator>> (FArchive &arc, flagdata &flag);
+FArchive &operator<<(FArchive &arc, flagdata &flag);
+FArchive &operator>>(FArchive &arc, flagdata &flag);

@@ -29,32 +29,46 @@
 class MusicSystem
 {
   public:
-	MusicSystem() : m_isPlaying(false), m_isPaused(false), m_tempo(120.0f), m_volume(1.0f)
-	{
-	}
-	virtual ~MusicSystem() { }
+    MusicSystem() : m_isPlaying(false), m_isPaused(false), m_tempo(120.0f), m_volume(1.0f)
+    {
+    }
+    virtual ~MusicSystem()
+    {
+    }
 
-	virtual void startSong(byte* data, size_t length, bool loop);
-	virtual void stopSong();
-	virtual void pauseSong();
-	virtual void resumeSong();
-	virtual void playChunk() = 0;
+    virtual void startSong(byte *data, size_t length, bool loop);
+    virtual void stopSong();
+    virtual void pauseSong();
+    virtual void resumeSong();
+    virtual void playChunk() = 0;
 
-	virtual void setVolume(float volume);
-	float getVolume() const { return m_volume; }
-	virtual void setTempo(float tempo);
-	float getTempo() const { return m_tempo; }
+    virtual void setVolume(float volume);
+    float        getVolume() const
+    {
+        return m_volume;
+    }
+    virtual void setTempo(float tempo);
+    float        getTempo() const
+    {
+        return m_tempo;
+    }
 
-	virtual bool isInitialized() const = 0;
-	bool isPlaying() const { return m_isPlaying; }
-	bool isPaused() const { return m_isPaused; }
+    virtual bool isInitialized() const = 0;
+    bool         isPlaying() const
+    {
+        return m_isPlaying;
+    }
+    bool isPaused() const
+    {
+        return m_isPaused;
+    }
 
   private:
-	bool m_isPlaying;
-	bool m_isPaused;
+    bool m_isPlaying;
+    bool m_isPaused;
 
-	float m_tempo;
-	float m_volume;
+    float m_tempo;
+    float m_volume;
 };
 
 /**
@@ -64,17 +78,32 @@ class MusicSystem
 class SilentMusicSystem : public MusicSystem
 {
   public:
-	SilentMusicSystem()
-	{
-		Printf(PRINT_WARNING, "I_InitMusic: Music playback disabled.\n");
-	}
+    SilentMusicSystem()
+    {
+        Printf(PRINT_WARNING, "I_InitMusic: Music playback disabled.\n");
+    }
 
-	virtual void startSong(byte* data, size_t length, bool loop) { }
-	virtual void stopSong() { }
-	virtual void pauseSong() { }
-	virtual void resumeSong() { }
-	virtual void playChunk() { }
-	virtual void setVolume(float volume) const { }
+    virtual void startSong(byte *data, size_t length, bool loop)
+    {
+    }
+    virtual void stopSong()
+    {
+    }
+    virtual void pauseSong()
+    {
+    }
+    virtual void resumeSong()
+    {
+    }
+    virtual void playChunk()
+    {
+    }
+    virtual void setVolume(float volume) const
+    {
+    }
 
-	virtual bool isInitialized() const { return true; }
+    virtual bool isInitialized() const
+    {
+        return true;
+    }
 };

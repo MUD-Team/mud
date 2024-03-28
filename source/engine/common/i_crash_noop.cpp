@@ -21,7 +21,6 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #if defined _WIN32 && defined _MSC_VER && !defined _DEBUG
 #elif defined UNIX && defined HAVE_BACKTRACE
 #else
@@ -32,12 +31,12 @@
 
 void I_SetCrashCallbacks()
 {
-	// Not implemented.
+    // Not implemented.
 }
 
-void I_SetCrashDir(const char* crashdir)
+void I_SetCrashDir(const char *crashdir)
 {
-	// Not implemented.
+    // Not implemented.
 }
 
 #endif

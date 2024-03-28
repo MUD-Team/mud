@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id: 43f5b6ea18e789d2dc54c1fe228e8b756a74011a $
@@ -18,149 +18,143 @@
 // DESCRIPTION:
 //
 //  denis - szp<T>, the self zeroing pointer
-//  
-//  Once upon a time, actors held raw pointers to other actors. 
-//  
-//  To destroy an object, one cycled though all the others searching for its 
-//  pointer and resetting every copy to NULL. Then one did the cycling for 
-//  the players, then the sector sound origins, and so on; with hack upon 
-//  hack. Ironically, zero dereferencing is what often crashed the 
+//
+//  Once upon a time, actors held raw pointers to other actors.
+//
+//  To destroy an object, one cycled though all the others searching for its
+//  pointer and resetting every copy to NULL. Then one did the cycling for
+//  the players, then the sector sound origins, and so on; with hack upon
+//  hack. Ironically, zero dereferencing is what often crashed the
 //  program altogether.
-//  
-//  The idea behind szp is that all copies of one szp pointer can be made 
-//  to point to the same object in O(1) time. This means that having a 
-//  single szp of an actor, you can set them all to NULL without iteration. 
-//  And, as a bonus, on every pointer access, a NULL check can throw a 
+//
+//  The idea behind szp is that all copies of one szp pointer can be made
+//  to point to the same object in O(1) time. This means that having a
+//  single szp of an actor, you can set them all to NULL without iteration.
+//  And, as a bonus, on every pointer access, a NULL check can throw a
 //  specific exception. Naturally, you should always be careful with pointers.
 //
 //-----------------------------------------------------------------------------
 
-
 #pragma once
 
-
-
-template <typename T>
-class szp
+template <typename T> class szp
 {
-	// pointer to a common raw pointer
-	T **naive;
+    // pointer to a common raw pointer
+    T **naive;
 
-	// circular linked list
-	szp *prev, *next;
+    // circular linked list
+    szp *prev, *next;
 
-	// this should never be used
-	// spawn from other pointers, or use init()
-	szp &operator =(T *other) {};
+    // this should never be used
+    // spawn from other pointers, or use init()
+    szp &operator=(T *other){};
 
-	// utility function to remove oneself from the linked list
-	void inline unlink()
-	{
-		if(!next)
-			return;
+    // utility function to remove oneself from the linked list
+    void inline unlink()
+    {
+        if (!next)
+            return;
 
-		next->prev = prev;
-		prev->next = next;
-			
-		if(!naive)
-			return;
+        next->prev = prev;
+        prev->next = next;
 
-		// last in ring?
-		if(this == next)
-			delete naive;
-			
-		naive = NULL;
-	}
-	
-public:
+        if (!naive)
+            return;
 
-	// use as pointer, checking validity
-	inline T* operator ->()
-	{
-		if(!naive || !*naive)
-			throw CRecoverableError("szp pointer was NULL");
+        // last in ring?
+        if (this == next)
+            delete naive;
 
-		return *naive;
-	}
-	
-	// use as raw pointer
-	inline operator T*()
-	{
-		if(!naive)
-			return NULL;
-		else
-			return *naive;
-	}
+        naive = NULL;
+    }
 
-	// this function can update or zero all related pointers
-	void update_all(T *target)
-	{
-		if(!naive)
-			throw CRecoverableError("szp pointer was NULL on update_all");
-		
-		// all copies already have naive, so their pointers will update too
-		*naive = target;
-	}
-	
-	// copy a pointer and add self to the "i have this pointer" list
-	inline szp &operator =(szp other)
-	{
-		// itself?
-		if(&other == this)
-			return *this;
+  public:
+    // use as pointer, checking validity
+    inline T *operator->()
+    {
+        if (!naive || !*naive)
+            throw CRecoverableError("szp pointer was NULL");
 
-		unlink();
+        return *naive;
+    }
 
-		if(!other.prev || !other.next || !other.naive)
-		{
-			next = prev = this;
-			return *this;
-		}
-		
-		// link
-		naive = other.naive;
-		prev = other.next->prev;
-		next = other.next;
-		prev->next = next->prev = this;
-		
-		return *this;
-	}
-	
-	// creates the first (original) pointer
-	void init(T *target)
-	{
-		unlink();
-		
-		// first link
-		naive = new T*(target);
-		prev = next = this;
-	}
-	
-	// cheap constructor
-	inline szp()
-		: naive(NULL), prev(NULL), next(NULL)
-	{ }
-	
-	// copy constructor
-	inline szp(const szp &other)
-		: naive(NULL)
-	{
-		if(!other.prev || !other.next || !other.naive)
-		{
-			prev = next = this;
-			return;
-		}
-		
-		// link
-		naive = other.naive;
-		prev = other.next->prev;
-		next = other.next;
-		prev->next = next->prev = this;
-	}
+    // use as raw pointer
+    inline operator T *()
+    {
+        if (!naive)
+            return NULL;
+        else
+            return *naive;
+    }
 
-	// unlink from circular list on destruction
-	inline ~szp()
-	{
-		unlink();
-	}
+    // this function can update or zero all related pointers
+    void update_all(T *target)
+    {
+        if (!naive)
+            throw CRecoverableError("szp pointer was NULL on update_all");
+
+        // all copies already have naive, so their pointers will update too
+        *naive = target;
+    }
+
+    // copy a pointer and add self to the "i have this pointer" list
+    inline szp &operator=(szp other)
+    {
+        // itself?
+        if (&other == this)
+            return *this;
+
+        unlink();
+
+        if (!other.prev || !other.next || !other.naive)
+        {
+            next = prev = this;
+            return *this;
+        }
+
+        // link
+        naive      = other.naive;
+        prev       = other.next->prev;
+        next       = other.next;
+        prev->next = next->prev = this;
+
+        return *this;
+    }
+
+    // creates the first (original) pointer
+    void init(T *target)
+    {
+        unlink();
+
+        // first link
+        naive = new T *(target);
+        prev = next = this;
+    }
+
+    // cheap constructor
+    inline szp() : naive(NULL), prev(NULL), next(NULL)
+    {
+    }
+
+    // copy constructor
+    inline szp(const szp &other) : naive(NULL)
+    {
+        if (!other.prev || !other.next || !other.naive)
+        {
+            prev = next = this;
+            return;
+        }
+
+        // link
+        naive      = other.naive;
+        prev       = other.next->prev;
+        next       = other.next;
+        prev->next = next->prev = this;
+    }
+
+    // unlink from circular list on destruction
+    inline ~szp()
+    {
+        unlink();
+    }
 };

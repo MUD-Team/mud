@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id: f4050b49a60c65dc159d9a02b0d23df737777418 $
@@ -28,11 +28,11 @@
 #include "sv_main.h"
 #include "c_console.h"
 
-bool SV_AddMaster (const char *masterip);
+bool SV_AddMaster(const char *masterip);
 void SV_InitMasters();
 bool SV_AddMaster(const char *masterip);
-void SV_ListMasters ();
-bool SV_RemoveMaster (const char *masterip);
+void SV_ListMasters();
+bool SV_RemoveMaster(const char *masterip);
 void SV_UpdateMasterServers(void);
 void SV_UpdateMaster(void);
 void SV_ArchiveMasters(FILE *fp);

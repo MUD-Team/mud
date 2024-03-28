@@ -1,10 +1,33 @@
----
 BasedOnStyle: Microsoft
-AlignEscapedNewlines: Left
-AllowShortFunctionsOnASingleLine: Inline
-AlwaysBreakTemplateDeclarations: Yes
-ColumnLimit: 90
-IndentWidth: 4
-PointerAlignment: Left
-SpaceInEmptyBlock: true
-UseTab: ForIndentation
+AlignConsecutiveAssignments: Consecutive
+AlignConsecutiveBitFields: Consecutive
+AlignConsecutiveDeclarations: Consecutive
+AlignConsecutiveMacros: Consecutive
+AlignTrailingComments:
+  Kind: Always
+  OverEmptyLines: 2
+SortIncludes: false
+
+# First pass - just update style without touching headers - Dasho
+
+#IncludeBlocks:   Regroup
+#IncludeCategories:
+#  - Regex:           '^<ext/.*\.h>'
+#    Priority:        2
+#    SortPriority:    0
+#    CaseSensitive:   false
+#  - Regex:           '^<.*\.h>'
+#    Priority:        1
+#    SortPriority:    0
+#    CaseSensitive:   false
+#  - Regex:           '^<.*'
+#    Priority:        2
+#    SortPriority:    0
+#    CaseSensitive:   false
+#  - Regex:           '.*'
+#    Priority:        3
+#    SortPriority:    0
+#    CaseSensitive:   false
+#IncludeIsMainRegex: '([-_](test|unittest))?$'
+#IncludeIsMainSourceRegex: ''
+#SortIncludes: CaseSensitive

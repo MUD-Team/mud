@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id: cf8b543b4fed83d1aa5bf301fae3baafa751e95b $
@@ -28,7 +28,6 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #pragma once
 
 #include "tables.h"
@@ -38,73 +37,108 @@ class AActor;
 
 struct v2int_t
 {
-	v2int_t() { }
+    v2int_t()
+    {
+    }
 
-	v2int_t(const int x_, const int y_) : x(x_), y(y_) { }
+    v2int_t(const int x_, const int y_) : x(x_), y(y_)
+    {
+    }
 
-	v2int_t(const v2int_t& other) : x(other.x), y(other.y) { }
+    v2int_t(const v2int_t &other) : x(other.x), y(other.y)
+    {
+    }
 
-	int x, y;
+    int x, y;
 };
 
 struct v2fixed_t
 {
-	v2fixed_t() {}
+    v2fixed_t()
+    {
+    }
 
-	v2fixed_t(fixed_t _x, fixed_t _y) : x(_x), y(_y) { }
+    v2fixed_t(fixed_t _x, fixed_t _y) : x(_x), y(_y)
+    {
+    }
 
-	v2fixed_t(const v2fixed_t& other) : x(other.x), y(other.y) { }
+    v2fixed_t(const v2fixed_t &other) : x(other.x), y(other.y)
+    {
+    }
 
-	fixed_t x, y;
+    fixed_t x, y;
 };
 
 struct v3fixed_t
 {
-	v3fixed_t() {}
+    v3fixed_t()
+    {
+    }
 
-	v3fixed_t(fixed_t _x, fixed_t _y, fixed_t _z) : x(_x), y(_y), z(_z) { }
+    v3fixed_t(fixed_t _x, fixed_t _y, fixed_t _z) : x(_x), y(_y), z(_z)
+    {
+    }
 
-	v3fixed_t(const v3fixed_t& other) : x(other.x), y(other.y), z(other.z) { }
-	
-	fixed_t x, y, z;
+    v3fixed_t(const v3fixed_t &other) : x(other.x), y(other.y), z(other.z)
+    {
+    }
+
+    fixed_t x, y, z;
 };
 
 struct v3float_t
 {
-	v3float_t() {}
+    v3float_t()
+    {
+    }
 
-	v3float_t(float _x, float _y, float _z) : x(_x), y(_y), z(_z) { }
+    v3float_t(float _x, float _y, float _z) : x(_x), y(_y), z(_z)
+    {
+    }
 
-	v3float_t(const v3float_t& other) : x(other.x), y(other.y), z(other.z) { }
-	
-	float x, y, z;
+    v3float_t(const v3float_t &other) : x(other.x), y(other.y), z(other.z)
+    {
+    }
+
+    float x, y, z;
 };
 
 struct v3double_t
 {
-	v3double_t() {}
+    v3double_t()
+    {
+    }
 
-	v3double_t(double _x, double _y, double _z) : x(_x), y(_y), z(_z) { }
+    v3double_t(double _x, double _y, double _z) : x(_x), y(_y), z(_z)
+    {
+    }
 
-	v3double_t(const v3float_t& other) : x(other.x), y(other.y), z(other.z) { }
-	
-	double x, y, z;
+    v3double_t(const v3float_t &other) : x(other.x), y(other.y), z(other.z)
+    {
+    }
+
+    double x, y, z;
 };
 
 struct rectInt_t
 {
-	rectInt_t() : min(0, 0), max(0, 0) { }
+    rectInt_t() : min(0, 0), max(0, 0)
+    {
+    }
 
-	rectInt_t(const v2int_t min, const v2int_t max) : min(min), max(max) { }
+    rectInt_t(const v2int_t min, const v2int_t max) : min(min), max(max)
+    {
+    }
 
-	rectInt_t(const int x1, const int y1, const int x2, const int y2)
-	    : min(x1, y1), max(x2, y2)
-	{
-	}
+    rectInt_t(const int x1, const int y1, const int x2, const int y2) : min(x1, y1), max(x2, y2)
+    {
+    }
 
-	rectInt_t(const rectInt_t& other) : min(other.min), max(other.max) { }
+    rectInt_t(const rectInt_t &other) : min(other.min), max(other.max)
+    {
+    }
 
-	v2int_t min, max;
+    v2int_t min, max;
 };
 
 //
@@ -122,7 +156,7 @@ void M_SetVec3Fixed(v3fixed_t *dest, double x, double y, double z);
 void M_SetVec3Fixed(v3fixed_t *dest, fixed_t x, fixed_t y, fixed_t z);
 
 //
-//M_ConvertVec3FixedToVec3f
+// M_ConvertVec3FixedToVec3f
 //
 // Converts the component values of src to floats and stores
 // in dest
@@ -159,18 +193,18 @@ void M_ZeroVec3Fixed(v3fixed_t *v);
 // [SL] 2012-02-13 - Courtesy of Eternity Engine
 //
 void M_AddVec3f(v3float_t *dest, const v3float_t *v1, const v3float_t *v2);
-void M_AddVec3 (v3double_t *dest, const v3double_t *v1, const v3double_t *v2);
+void M_AddVec3(v3double_t *dest, const v3double_t *v1, const v3double_t *v2);
 void M_AddVec2Fixed(v2fixed_t *dest, const v2fixed_t *v1, const v2fixed_t *v2);
 void M_AddVec3Fixed(v3fixed_t *dest, const v3fixed_t *v1, const v3fixed_t *v2);
 
-// 
+//
 // M_SubVec3
 //
 // Subtracts v2 from v1 stores in dest
 // [SL] 2012-02-13 - Courtesy of Eternity Engine
 //
-void M_SubVec3f(v3float_t *dest,  const v3float_t *v1,  const v3float_t *v2);
-void M_SubVec3 (v3double_t *dest, const v3double_t *v1, const v3double_t *v2);
+void M_SubVec3f(v3float_t *dest, const v3float_t *v1, const v3float_t *v2);
+void M_SubVec3(v3double_t *dest, const v3double_t *v1, const v3double_t *v2);
 void M_SubVec2Fixed(v2fixed_t *dest, const v2fixed_t *v1, const v2fixed_t *v2);
 void M_SubVec3Fixed(v3fixed_t *dest, const v3fixed_t *v1, const v3fixed_t *v2);
 
@@ -181,8 +215,8 @@ void M_SubVec3Fixed(v3fixed_t *dest, const v3fixed_t *v1, const v3fixed_t *v2);
 // Quake 2, added by CG.
 // [SL] 2012-02-13 - Courtesy of Eternity Engine
 //
-float M_LengthVec3f(const v3float_t *v);
-double M_LengthVec3(const v3double_t *v);
+float   M_LengthVec3f(const v3float_t *v);
+double  M_LengthVec3(const v3double_t *v);
 fixed_t M_LengthVec2Fixed(const v2fixed_t *v);
 fixed_t M_LengthVec3Fixed(const v3fixed_t *v);
 
@@ -193,10 +227,9 @@ fixed_t M_LengthVec3Fixed(const v3fixed_t *v);
 // and stores in dest
 //
 void M_ScaleVec3f(v3float_t *dest, const v3float_t *v, float a);
-void M_ScaleVec3 (v3double_t *dest, const v3double_t *v, double a);
+void M_ScaleVec3(v3double_t *dest, const v3double_t *v, double a);
 void M_ScaleVec2Fixed(v2fixed_t *dest, const v2fixed_t *v, fixed_t a);
 void M_ScaleVec3Fixed(v3fixed_t *dest, const v3fixed_t *v, fixed_t a);
-
 
 //
 // M_ScaleVec3fToLength
@@ -204,19 +237,19 @@ void M_ScaleVec3Fixed(v3fixed_t *dest, const v3fixed_t *v, fixed_t a);
 // Scales each element in the vector such that the vector length equals a
 // and stores the resulting vector in dest.
 //
-void M_ScaleVec3fToLength(v3float_t* dest, const v3float_t* v, float a);
-void M_ScaleVec3ToLength (v3double_t* dest, const v3double_t* v, double a);
-void M_ScaleVec2FixedToLength(v2fixed_t * dest, const v2fixed_t* v, fixed_t a);
-void M_ScaleVec3FixedToLength(v3fixed_t * dest, const v3fixed_t* v, fixed_t a);
+void M_ScaleVec3fToLength(v3float_t *dest, const v3float_t *v, float a);
+void M_ScaleVec3ToLength(v3double_t *dest, const v3double_t *v, double a);
+void M_ScaleVec2FixedToLength(v2fixed_t *dest, const v2fixed_t *v, fixed_t a);
+void M_ScaleVec3FixedToLength(v3fixed_t *dest, const v3fixed_t *v, fixed_t a);
 
-// 
+//
 // M_DotVec3
 //
 // Returns the dot product of v1 and v2
 // [SL] 2012-02-13 - Courtesy of Eternity Engine
 //
-float  M_DotProductVec3f(const v3float_t *v1,  const v3float_t *v2);
-double M_DotProductVec3 (const v3double_t *v1, const v3double_t *v2);
+float  M_DotProductVec3f(const v3float_t *v1, const v3float_t *v2);
+double M_DotProductVec3(const v3double_t *v1, const v3double_t *v2);
 
 //
 // M_CrossProduct3f
@@ -224,16 +257,16 @@ double M_DotProductVec3 (const v3double_t *v1, const v3double_t *v2);
 // Gets the cross product of v1 and v2 and stores in dest
 // [SL] 2012-02-13 - Courtesy of Eternity Engine
 //
-void M_CrossProductVec3f(v3float_t *dest,  const v3float_t *v1,  const v3float_t *v2);
-void M_CrossProductVec3 (v3double_t *dest, const v3double_t *v1, const v3double_t *v2);
+void M_CrossProductVec3f(v3float_t *dest, const v3float_t *v1, const v3float_t *v2);
+void M_CrossProductVec3(v3double_t *dest, const v3double_t *v1, const v3double_t *v2);
 
 //
 // M_NormalizeVec3f
 //
-// Scales v so that its length is 1.0 and stores in dest 
+// Scales v so that its length is 1.0 and stores in dest
 //
 void M_NormalizeVec3f(v3float_t *dest, const v3float_t *v);
-void M_NormalizeVec3 (v3double_t *dest, const v3double_t *v);
+void M_NormalizeVec3(v3double_t *dest, const v3double_t *v);
 void M_NormalizeVec2Fixed(v2fixed_t *dest, const v2fixed_t *v);
 void M_NormalizeVec3Fixed(v3fixed_t *dest, const v3fixed_t *v);
 
@@ -243,7 +276,7 @@ void M_NormalizeVec3Fixed(v3fixed_t *dest, const v3fixed_t *v);
 // Stores thing's position in the vector dest
 //
 void M_ActorPositionToVec3f(v3float_t *dest, const AActor *thing);
-void M_ActorPositionToVec3 (v3double_t *dest, const AActor *thing);
+void M_ActorPositionToVec3(v3double_t *dest, const AActor *thing);
 void M_ActorPositionToVec2Fixed(v2fixed_t *dest, const AActor *thing);
 void M_ActorPositionToVec3Fixed(v3fixed_t *dest, const AActor *thing);
 
@@ -253,7 +286,7 @@ void M_ActorPositionToVec3Fixed(v3fixed_t *dest, const AActor *thing);
 // Stores thing's momentum in the vector dest
 //
 void M_ActorMomentumToVec3f(v3float_t *dest, const AActor *thing);
-void M_ActorMomentumToVec3 (v3double_t *dest, const AActor *thing);
+void M_ActorMomentumToVec3(v3double_t *dest, const AActor *thing);
 void M_ActorMomentumToVec2Fixed(v2fixed_t *dest, const AActor *thing);
 void M_ActorMomentumToVec3Fixed(v3fixed_t *dest, const AActor *thing);
 
@@ -269,7 +302,6 @@ void M_ProjectPointOnPlane(v3double_t *dest, const v3double_t *p, const v3double
 void M_PerpendicularVec3(v3double_t *dest, const v3double_t *src);
 void M_RotatePointAroundVector(v3double_t *dest, const v3double_t *dir, const v3double_t *point, float degrees);
 
-
 //
 // M_TranslateVec3f
 //
@@ -278,4 +310,4 @@ void M_RotatePointAroundVector(v3double_t *dest, const v3double_t *dir, const v3
 void M_TranslateVec3f(v3float_t *vec, const v3float_t *origin, angle_t ang);
 void M_TranslateVec3(v3double_t *vec, const v3double_t *origin, angle_t ang);
 
-rectInt_t M_RectFromDimensions(const v2int_t& origin, const v2int_t& dims);
+rectInt_t M_RectFromDimensions(const v2int_t &origin, const v2int_t &dims);

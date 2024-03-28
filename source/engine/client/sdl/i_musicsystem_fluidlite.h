@@ -35,28 +35,36 @@ class MidiSequencer;
 class FluidLiteMusicSystem : public MusicSystem
 {
   public:
-	FluidLiteMusicSystem();
-	virtual ~FluidLiteMusicSystem();
+    FluidLiteMusicSystem();
+    virtual ~FluidLiteMusicSystem();
 
-	virtual void startSong(byte *data, size_t length, bool loop);
-	virtual void stopSong();
-	virtual void pauseSong();
-	virtual void resumeSong();
-	virtual void playChunk() { }
+    virtual void startSong(byte *data, size_t length, bool loop);
+    virtual void stopSong();
+    virtual void pauseSong();
+    virtual void resumeSong();
+    virtual void playChunk()
+    {
+    }
 
-	virtual void setVolume(float volume);
+    virtual void setVolume(float volume);
 
-	virtual bool isInitialized() const { return m_isInitialized; }
-	virtual bool isLooping() const { return m_loopSong; }
+    virtual bool isInitialized() const
+    {
+        return m_isInitialized;
+    }
+    virtual bool isLooping() const
+    {
+        return m_loopSong;
+    }
 
-	MidiSequencer *m_sequencer;
+    MidiSequencer *m_sequencer;
 
-  private: 
-	bool m_isInitialized;
-	bool m_loopSong;
+  private:
+    bool m_isInitialized;
+    bool m_loopSong;
 
-	fluid_synth_t *m_synth;
-	fluid_settings_t *m_synthSettings;
-	fluid_sfloader_t *m_soundfontLoader;
-	MidiRealTimeInterface *m_interface;
+    fluid_synth_t         *m_synth;
+    fluid_settings_t      *m_synthSettings;
+    fluid_sfloader_t      *m_soundfontLoader;
+    MidiRealTimeInterface *m_interface;
 };

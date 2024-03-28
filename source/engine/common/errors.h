@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id: 950c890fc4f20f4eca6bc7bb1b1b93a2c018a6c0 $
@@ -21,28 +21,35 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #pragma once
-
 
 class CDoomError
 {
-public:
-	CDoomError (std::string message) : m_Message(message) {}
-	std::string GetMsg (void) const { return m_Message;	}
+  public:
+    CDoomError(std::string message) : m_Message(message)
+    {
+    }
+    std::string GetMsg(void) const
+    {
+        return m_Message;
+    }
 
-private:
-	std::string m_Message;
+  private:
+    std::string m_Message;
 };
 
 class CRecoverableError : public CDoomError
 {
-public:
-	CRecoverableError(std::string message) : CDoomError(message) {}
+  public:
+    CRecoverableError(std::string message) : CDoomError(message)
+    {
+    }
 };
 
 class CFatalError : public CDoomError
 {
-public:
-	CFatalError(std::string message) : CDoomError(message) {}
+  public:
+    CFatalError(std::string message) : CDoomError(message)
+    {
+    }
 };

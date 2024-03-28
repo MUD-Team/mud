@@ -21,7 +21,6 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #include "odamex.h"
 
 #include "m_strindex.h"
@@ -34,35 +33,35 @@
  */
 OStringIndexer OStringIndexer::maplistFactory()
 {
-	std::string buf;
-	OStringIndexer stridx;
+    std::string    buf;
+    OStringIndexer stridx;
 
-	// The big two IWADs.
-	const char* IWADS[] = {"DOOM.WAD", "DOOM2.WAD"};
-	for (size_t i = 0; i < ARRAY_LENGTH(IWADS); i++)
-	{
-		stridx.getIndex(IWADS[i]);
-	}
+    // The big two IWADs.
+    const char *IWADS[] = {"DOOM.WAD", "DOOM2.WAD"};
+    for (size_t i = 0; i < ARRAY_LENGTH(IWADS); i++)
+    {
+        stridx.getIndex(IWADS[i]);
+    }
 
-	// 36 for Ultimate DOOM.
-	for (int e = 1; e <= 4; e++)
-	{
-		for (int m = 1; m <= 9; m++)
-		{
-			StrFormat(buf, "E%dM%d", e, m);
-			stridx.getIndex(buf);
-		}
-	}
+    // 36 for Ultimate DOOM.
+    for (int e = 1; e <= 4; e++)
+    {
+        for (int m = 1; m <= 9; m++)
+        {
+            StrFormat(buf, "E%dM%d", e, m);
+            stridx.getIndex(buf);
+        }
+    }
 
-	// 32 for DOOM II/Final Doom.
-	for (int i = 1; i <= 32; i++)
-	{
-		StrFormat(buf, "MAP%02d", i);
-		stridx.getIndex(buf);
-	}
+    // 32 for DOOM II/Final Doom.
+    for (int i = 1; i <= 32; i++)
+    {
+        StrFormat(buf, "MAP%02d", i);
+        stridx.getIndex(buf);
+    }
 
-	// Any other string/index combinations are up for grabs.
-	stridx.setTransmit();
+    // Any other string/index combinations are up for grabs.
+    stridx.setTransmit();
 
-	return stridx;
+    return stridx;
 }

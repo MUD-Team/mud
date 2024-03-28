@@ -20,7 +20,6 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #include "odamex.h"
 
 #include "com_misc.h"
@@ -36,37 +35,37 @@
 #include "st_stuff.h"
 #endif
 
-void COM_PushToast(const toast_t& toast)
+void COM_PushToast(const toast_t &toast)
 {
 #if defined(SERVER_APP)
-	for (Players::iterator it = ::players.begin(); it != ::players.end(); ++it)
-	{
-		MSG_WriteSVC(&it->client.reliablebuf, SVC_Toast(toast));
-	}
+    for (Players::iterator it = ::players.begin(); it != ::players.end(); ++it)
+    {
+        MSG_WriteSVC(&it->client.reliablebuf, SVC_Toast(toast));
+    }
 #else
-	hud::PushToast(toast);
+    hud::PushToast(toast);
 #endif
 }
 
 BEGIN_COMMAND(toast)
 {
-	toast_t toast;
+    toast_t toast;
 
-	toast.flags = toast_t::LEFT | toast_t::ICON | toast_t::RIGHT;
+    toast.flags = toast_t::LEFT | toast_t::ICON | toast_t::RIGHT;
 
-	if (M_Random() % 2)
-	{
-		toast.left = std::string(TEXTCOLOR_LIGHTBLUE) + "[BLU]Ralphis";
-		toast.right = std::string(TEXTCOLOR_BRICK) + "[RED]KBlair";
-	}
-	else
-	{
-		toast.left = std::string(TEXTCOLOR_BRICK) + "[RED]KBlair";
-		toast.right = std::string(TEXTCOLOR_LIGHTBLUE) + "[BLU]Ralphis";
-	}
+    if (M_Random() % 2)
+    {
+        toast.left  = std::string(TEXTCOLOR_LIGHTBLUE) + "[BLU]Ralphis";
+        toast.right = std::string(TEXTCOLOR_BRICK) + "[RED]KBlair";
+    }
+    else
+    {
+        toast.left  = std::string(TEXTCOLOR_BRICK) + "[RED]KBlair";
+        toast.right = std::string(TEXTCOLOR_LIGHTBLUE) + "[BLU]Ralphis";
+    }
 
-	toast.icon = M_Random() % NUMMODS;
+    toast.icon = M_Random() % NUMMODS;
 
-	COM_PushToast(toast);
+    COM_PushToast(toast);
 }
 END_COMMAND(toast)

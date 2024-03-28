@@ -29,15 +29,15 @@
  * @param hash Hex string to populate with.
  * @return True if the hash was populated, otherwise false.
  */
-bool OMD5Hash::makeFromHexStr(OMD5Hash& out, const std::string& hash)
+bool OMD5Hash::makeFromHexStr(OMD5Hash &out, const std::string &hash)
 {
-	if (IsHexString(hash, 32))
-	{
-		out.m_hash = StdStringToUpper(hash);
-		return true;
-	}
+    if (IsHexString(hash, 32))
+    {
+        out.m_hash = StdStringToUpper(hash);
+        return true;
+    }
 
-	return false;
+    return false;
 }
 
 /**
@@ -47,13 +47,13 @@ bool OMD5Hash::makeFromHexStr(OMD5Hash& out, const std::string& hash)
  * @param hash Hex string to populate with.
  * @return True if the hash was populated, otherwise false.
  */
-bool OCRC32Sum::makeFromHexStr(OCRC32Sum& out, const std::string& hash)
+bool OCRC32Sum::makeFromHexStr(OCRC32Sum &out, const std::string &hash)
 {
-	if (IsHexString(hash, 8))
-	{
-		out.m_hash = StdStringToUpper(hash);
-		return true;
-	}
+    if (IsHexString(hash, 8))
+    {
+        out.m_hash = StdStringToUpper(hash);
+        return true;
+    }
 
-	return false;
+    return false;
 }

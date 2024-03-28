@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id: 3d43db6bc7262b94cb2b7fb1e646c2c3c8bef13a $
@@ -24,7 +24,6 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #pragma once
 
 #include <map>
@@ -35,88 +34,89 @@
 
 class Unlag
 {
-public:
-	~Unlag();
-	static Unlag& getInstance();  // returns the instantiated Unlag object
-	void reset();	  // called when starting a level
-	void reconcile(byte player_id);
-	void restore(byte player_id);
-	void recordPlayerPositions();
-	void recordSectorPositions();
-	void registerPlayer(byte player_id);
-	void unregisterPlayer(byte player_id);
-	void registerSector(sector_t *sector);
-	void unregisterSector(sector_t *sector);
-	void setRoundtripDelay(byte player_id, byte svgametic);
-	void getReconciliationOffset(	byte target_id,
-									fixed_t &x, fixed_t &y, fixed_t &z);
-	void getCurrentPlayerPosition(	byte player_id,
-									fixed_t &x, fixed_t &y, fixed_t &z);
-	static bool enabled();
-private:
-	static const size_t MAX_HISTORY_TICS = TICRATE;
-		
-	typedef struct {
-		byte		player_id;
+  public:
+    ~Unlag();
+    static Unlag &getInstance(); // returns the instantiated Unlag object
+    void          reset();       // called when starting a level
+    void          reconcile(byte player_id);
+    void          restore(byte player_id);
+    void          recordPlayerPositions();
+    void          recordSectorPositions();
+    void          registerPlayer(byte player_id);
+    void          unregisterPlayer(byte player_id);
+    void          registerSector(sector_t *sector);
+    void          unregisterSector(sector_t *sector);
+    void          setRoundtripDelay(byte player_id, byte svgametic);
+    void          getReconciliationOffset(byte target_id, fixed_t &x, fixed_t &y, fixed_t &z);
+    void          getCurrentPlayerPosition(byte player_id, fixed_t &x, fixed_t &y, fixed_t &z);
+    static bool   enabled();
 
-		// cached pointer to players[n].  Note: this needs to be updated
-		// EVERYTIME a player connects or disconnects.
-		player_t*	player;
-	
-		fixed_t		history_x[Unlag::MAX_HISTORY_TICS];
-		fixed_t		history_y[Unlag::MAX_HISTORY_TICS];
-		fixed_t		history_z[Unlag::MAX_HISTORY_TICS];
-		size_t		history_size;
-		
-		// current position. restore this position after reconciliation.
-		fixed_t		backup_x;
-		fixed_t		backup_y;
-		fixed_t		backup_z;
+  private:
+    static const size_t MAX_HISTORY_TICS = TICRATE;
 
-		fixed_t		offset_x;
-		fixed_t		offset_y;
-		fixed_t		offset_z;
-		
-		// did we change player's MF_SHOOTABLE flag during reconciliation?
-		bool		changed_flags;
-		int			backup_flags; 
+    typedef struct
+    {
+        byte player_id;
 
-		size_t		current_lag;
-	} PlayerHistoryRecord;
-   
-	class SectorHistoryRecord
-	{
-	public:
-		SectorHistoryRecord();
-		SectorHistoryRecord(sector_t *sec);
+        // cached pointer to players[n].  Note: this needs to be updated
+        // EVERYTIME a player connects or disconnects.
+        player_t *player;
 
-		sector_t*	sector;
-		size_t		history_size;
-		fixed_t		history_ceilingheight[Unlag::MAX_HISTORY_TICS];
-		fixed_t		history_floorheight[Unlag::MAX_HISTORY_TICS];
+        fixed_t history_x[Unlag::MAX_HISTORY_TICS];
+        fixed_t history_y[Unlag::MAX_HISTORY_TICS];
+        fixed_t history_z[Unlag::MAX_HISTORY_TICS];
+        size_t  history_size;
 
-		// current position. restore this position after reconciliation.
-		fixed_t		backup_ceilingheight;
-		fixed_t		backup_floorheight;
-	};
+        // current position. restore this position after reconciliation.
+        fixed_t backup_x;
+        fixed_t backup_y;
+        fixed_t backup_z;
 
-	std::vector<PlayerHistoryRecord> player_history;
-	std::vector<SectorHistoryRecord> sector_history;
-	bool reconciled;	
-    
+        fixed_t offset_x;
+        fixed_t offset_y;
+        fixed_t offset_z;
+
+        // did we change player's MF_SHOOTABLE flag during reconciliation?
+        bool changed_flags;
+        int  backup_flags;
+
+        size_t current_lag;
+    } PlayerHistoryRecord;
+
+    class SectorHistoryRecord
+    {
+      public:
+        SectorHistoryRecord();
+        SectorHistoryRecord(sector_t *sec);
+
+        sector_t *sector;
+        size_t    history_size;
+        fixed_t   history_ceilingheight[Unlag::MAX_HISTORY_TICS];
+        fixed_t   history_floorheight[Unlag::MAX_HISTORY_TICS];
+
+        // current position. restore this position after reconciliation.
+        fixed_t backup_ceilingheight;
+        fixed_t backup_floorheight;
+    };
+
+    std::vector<PlayerHistoryRecord> player_history;
+    std::vector<SectorHistoryRecord> sector_history;
+    bool                             reconciled;
+
     // stores an index into the player_history vector, keyed by player_id
-	std::map<byte, size_t> player_id_map;
+    std::map<byte, size_t> player_id_map;
 
-	Unlag() : reconciled(false) {}  // private contsructor (part of Singleton)
-	Unlag(const Unlag &rhs);		// private copy constructor
-	Unlag& operator=(const Unlag &rhs);	//private assignment operator
+    Unlag() : reconciled(false)
+    {
+    }                                   // private contsructor (part of Singleton)
+    Unlag(const Unlag &rhs);            // private copy constructor
+    Unlag &operator=(const Unlag &rhs); // private assignment operator
 
-	void movePlayer(player_t *player, fixed_t x, fixed_t y, fixed_t z);
-	void moveSector(sector_t *sector, 
-					fixed_t ceilingheight, fixed_t floorheight);
-	void reconcilePlayerPositions(byte shooter_id, size_t ticsago);
-	void reconcileSectorPositions(size_t ticsago);
-	void refreshRegisteredPlayers();
+    void movePlayer(player_t *player, fixed_t x, fixed_t y, fixed_t z);
+    void moveSector(sector_t *sector, fixed_t ceilingheight, fixed_t floorheight);
+    void reconcilePlayerPositions(byte shooter_id, size_t ticsago);
+    void reconcileSectorPositions(size_t ticsago);
+    void refreshRegisteredPlayers();
 
-	void debugReconciliation(byte shooter_id);
+    void debugReconciliation(byte shooter_id);
 };

@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id: 87bb04e12e29179139f897b22f1f9efbfad1cf24 $
@@ -18,9 +18,8 @@
 //
 // DESCRIPTION:
 //	Mission start screen wipe/melt, special effects.
-//	
+//
 //-----------------------------------------------------------------------------
-
 
 #pragma once
 

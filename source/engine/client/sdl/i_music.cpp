@@ -20,7 +20,6 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #include "odamex.h"
 
 #include "win32inc.h"
@@ -36,15 +35,14 @@
 #include "i_musicsystem_sdl.h"
 #include "i_musicsystem_fluidlite.h"
 
-MusicSystem* musicsystem = NULL;
+MusicSystem    *musicsystem              = NULL;
 MusicSystemType current_musicsystem_type = MS_NONE;
 
 void S_StopMusic();
-void S_ChangeMusic (std::string musicname, int looping);
+void S_ChangeMusic(std::string musicname, int looping);
 
-EXTERN_CVAR (snd_musicvolume)
-EXTERN_CVAR (snd_musicsystem)
-
+EXTERN_CVAR(snd_musicvolume)
+EXTERN_CVAR(snd_musicsystem)
 
 std::string currentmusic;
 
@@ -53,13 +51,12 @@ std::string currentmusic;
 //
 // Determines if a music lump is in the MUS format based on its header.
 //
-bool S_MusicIsMus(byte* data, size_t length)
+bool S_MusicIsMus(byte *data, size_t length)
 {
-	if (length > 4 && data[0] == 'M' && data[1] == 'U' &&
-		data[2] == 'S' && data[3] == 0x1A)
-		return true;
+    if (length > 4 && data[0] == 'M' && data[1] == 'U' && data[2] == 'S' && data[3] == 0x1A)
+        return true;
 
-	return false;
+    return false;
 }
 
 //
@@ -67,13 +64,12 @@ bool S_MusicIsMus(byte* data, size_t length)
 //
 // Determines if a music lump is in the MIDI format based on its header.
 //
-bool S_MusicIsMidi(byte* data, size_t length)
+bool S_MusicIsMidi(byte *data, size_t length)
 {
-	if (length > 4 && data[0] == 'M' && data[1] == 'T' &&
-		data[2] == 'h' && data[3] == 'd')
-		return true;
+    if (length > 4 && data[0] == 'M' && data[1] == 'T' && data[2] == 'h' && data[3] == 'd')
+        return true;
 
-	return false;
+    return false;
 }
 
 //
@@ -83,69 +79,69 @@ bool S_MusicIsMidi(byte* data, size_t length)
 //
 void I_UpdateMusic()
 {
-	if (musicsystem)
-		musicsystem->playChunk();
+    if (musicsystem)
+        musicsystem->playChunk();
 }
 
 // [Russell] - A better name, since we support multiple formats now
-void I_SetMusicVolume (float volume)
+void I_SetMusicVolume(float volume)
 {
-	if (musicsystem)
-		musicsystem->setVolume(volume);
+    if (musicsystem)
+        musicsystem->setVolume(volume);
 }
 
 void I_InitMusic(MusicSystemType musicsystem_type)
 {
-	I_ShutdownMusic();
+    I_ShutdownMusic();
 
-	if (I_IsHeadless() || Args.CheckParm("-nosound") || Args.CheckParm("-nomusic") || snd_musicsystem == MS_NONE)
-	{
-		// User has chosen to disable music
-		musicsystem = new SilentMusicSystem();
-		current_musicsystem_type = MS_NONE;
-		return;
-	}
+    if (I_IsHeadless() || Args.CheckParm("-nosound") || Args.CheckParm("-nomusic") || snd_musicsystem == MS_NONE)
+    {
+        // User has chosen to disable music
+        musicsystem              = new SilentMusicSystem();
+        current_musicsystem_type = MS_NONE;
+        return;
+    }
 
-	switch ((int)musicsystem_type)
-	{
-		case MS_FLUIDLITE:
-			musicsystem = new FluidLiteMusicSystem();
-			break;
+    switch ((int)musicsystem_type)
+    {
+    case MS_FLUIDLITE:
+        musicsystem = new FluidLiteMusicSystem();
+        break;
 
-		case MS_SDLMIXER:	// fall through
-		default:
-			musicsystem = new SdlMixerMusicSystem();
-			break;
-	}
+    case MS_SDLMIXER: // fall through
+    default:
+        musicsystem = new SdlMixerMusicSystem();
+        break;
+    }
 
-	current_musicsystem_type = musicsystem_type;
+    current_musicsystem_type = musicsystem_type;
 }
 
 void STACK_ARGS I_ShutdownMusic(void)
 {
-	if (musicsystem)
-	{
-		delete musicsystem;
-		musicsystem = NULL;
-	}
+    if (musicsystem)
+    {
+        delete musicsystem;
+        musicsystem = NULL;
+    }
 }
 
-CVAR_FUNC_IMPL (snd_musicsystem)
+CVAR_FUNC_IMPL(snd_musicsystem)
 {
-	if ((int)current_musicsystem_type == snd_musicsystem.asInt())
-		return;
+    if ((int)current_musicsystem_type == snd_musicsystem.asInt())
+        return;
 
-	if (musicsystem)
-	{
-		I_ShutdownMusic();
-		S_StopMusic();
-	}
-	I_InitMusic();
-	
-	if (level.music.empty())
-		S_ChangeMusic(currentmusic.c_str(), true);	
-	else
-		S_ChangeMusic(std::string(level.music.c_str(), 8), true);
+    if (musicsystem)
+    {
+        I_ShutdownMusic();
+        S_StopMusic();
+    }
+    I_InitMusic();
+
+    if (level.music.empty())
+        S_ChangeMusic(currentmusic.c_str(), true);
+    else
+        S_ChangeMusic(std::string(level.music.c_str(), 8), true);
 }
 
 //
@@ -157,64 +153,64 @@ CVAR_FUNC_IMPL (snd_musicsystem)
 //
 static MusicSystemType I_SelectMusicSystem(byte *data, size_t length)
 {
-	// Always honor the no-music preference
-	if (snd_musicsystem == MS_NONE)
-		return MS_NONE;
+    // Always honor the no-music preference
+    if (snd_musicsystem == MS_NONE)
+        return MS_NONE;
 
-	bool ismidi = (S_MusicIsMus(data, length) || S_MusicIsMidi(data, length));
+    bool ismidi = (S_MusicIsMus(data, length) || S_MusicIsMidi(data, length));
 
-	if (ismidi)
-		return MS_FLUIDLITE;
+    if (ismidi)
+        return MS_FLUIDLITE;
 
-	// Non-midi music always uses SDL_Mixer (for now at least)
-	return MS_SDLMIXER;
+    // Non-midi music always uses SDL_Mixer (for now at least)
+    return MS_SDLMIXER;
 }
 
-void I_PlaySong(byte* data, size_t length, bool loop)
+void I_PlaySong(byte *data, size_t length, bool loop)
 {
-	if (!musicsystem)
-		return;
+    if (!musicsystem)
+        return;
 
-	MusicSystemType newtype = I_SelectMusicSystem(data, length);
-	if (newtype != current_musicsystem_type)
-	{
-		if (musicsystem)
-		{
-			I_ShutdownMusic();
-			S_StopMusic();
-		}
-		I_InitMusic(newtype);
-	}
+    MusicSystemType newtype = I_SelectMusicSystem(data, length);
+    if (newtype != current_musicsystem_type)
+    {
+        if (musicsystem)
+        {
+            I_ShutdownMusic();
+            S_StopMusic();
+        }
+        I_InitMusic(newtype);
+    }
 
-	musicsystem->startSong(data, length, loop);
+    musicsystem->startSong(data, length, loop);
 
-	I_SetMusicVolume(snd_musicvolume);
+    I_SetMusicVolume(snd_musicvolume);
 }
 
 void I_PauseSong()
 {
-	if (musicsystem)
-		musicsystem->pauseSong();
+    if (musicsystem)
+        musicsystem->pauseSong();
 }
 
 void I_ResumeSong()
 {
-	if (musicsystem)
-		musicsystem->resumeSong();
+    if (musicsystem)
+        musicsystem->resumeSong();
 }
 
 void I_StopSong()
 {
-	if (musicsystem)
-		musicsystem->stopSong();
+    if (musicsystem)
+        musicsystem->stopSong();
 }
 
-bool I_QrySongPlaying (int handle)
+bool I_QrySongPlaying(int handle)
 {
-	if (musicsystem)
-		return musicsystem->isPlaying();
+    if (musicsystem)
+        return musicsystem->isPlaying();
 
-	return false;
+    return false;
 }
 
-VERSION_CONTROL (i_music_cpp, "$Id: a972ca6fc2ddbc9792920cf2f8aae539843af6d6 $")
+VERSION_CONTROL(i_music_cpp, "$Id: a972ca6fc2ddbc9792920cf2f8aae539843af6d6 $")

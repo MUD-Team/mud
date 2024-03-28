@@ -21,7 +21,6 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #include "odamex.h"
 
 #include "m_random.h"
@@ -40,16 +39,16 @@ void CTF_RememberFlagPos(mapthing2_t *mthing);
 
 void P_SetSpectatorFlags(player_t &player)
 {
-	player.spectator = true;
+    player.spectator = true;
 
-	if (player.mo)
-	{
-		player.mo->oflags |= MFO_SPECTATOR;
-		player.mo->flags &= ~MF_SOLID;
-		player.mo->flags2 |= MF2_FLY;
-	}
+    if (player.mo)
+    {
+        player.mo->oflags |= MFO_SPECTATOR;
+        player.mo->flags &= ~MF_SOLID;
+        player.mo->flags2 |= MF2_FLY;
+    }
 
-	P_ClearPlayerPowerups(player);
+    P_ClearPlayerPowerups(player);
 }
 
 //
@@ -58,118 +57,118 @@ void P_SetSpectatorFlags(player_t &player)
 // Most of the player structure stays unchanged
 //	between levels.
 //
-void P_SpawnPlayer(player_t& player, mapthing2_t* mthing)
+void P_SpawnPlayer(player_t &player, mapthing2_t *mthing)
 {
-	// denis - clients should not control spawning
-	if (!serverside)
-		return;
+    // denis - clients should not control spawning
+    if (!serverside)
+        return;
 
-	// [RH] Things 4001-? are also multiplayer starts. Just like 1-4.
-	//		To make things simpler, figure out which player is being
-	//		spawned here.
+    // [RH] Things 4001-? are also multiplayer starts. Just like 1-4.
+    //		To make things simpler, figure out which player is being
+    //		spawned here.
 
-	// not playing?
-	if (!player.ingame())
-		return;
+    // not playing?
+    if (!player.ingame())
+        return;
 
-	byte playerstate = player.playerstate; //save playerstate to check enter/respawn script execution later...
+    byte playerstate = player.playerstate; // save playerstate to check enter/respawn script execution later...
 
-	if (player.playerstate == PST_REBORN || player.playerstate == PST_ENTER)
-		G_PlayerReborn(player);
+    if (player.playerstate == PST_REBORN || player.playerstate == PST_ENTER)
+        G_PlayerReborn(player);
 
-	AActor* mobj;
-//	if (player.deadspectator && player.mo)
-//		mobj = new AActor(player.mo->x, player.mo->y, ONFLOORZ, MT_PLAYER);
-//	else
-//		mobj = new AActor(mthing->x << FRACBITS, mthing->y << FRACBITS, ONFLOORZ, MT_PLAYER);
+    AActor *mobj;
+    //	if (player.deadspectator && player.mo)
+    //		mobj = new AActor(player.mo->x, player.mo->y, ONFLOORZ, MT_PLAYER);
+    //	else
+    //		mobj = new AActor(mthing->x << FRACBITS, mthing->y << FRACBITS, ONFLOORZ, MT_PLAYER);
 
-	//[RK] If level flag for z-height spawning isn't set then, spawn the player on floor
-	mobj = new AActor(mthing->x << FRACBITS, mthing->y << FRACBITS,
-		(level.flags & LEVEL_USEPLAYERSTARTZ ? mthing->z << FRACBITS : ONFLOORZ), MT_PLAYER);
+    //[RK] If level flag for z-height spawning isn't set then, spawn the player on floor
+    mobj = new AActor(mthing->x << FRACBITS, mthing->y << FRACBITS,
+                      (level.flags & LEVEL_USEPLAYERSTARTZ ? mthing->z << FRACBITS : ONFLOORZ), MT_PLAYER);
 
-	// set color translations for player sprites
-	// [RH] Different now: MF_TRANSLATION is not used.
-	//		  mobj->translation = translationtables + 256*playernum;
+    // set color translations for player sprites
+    // [RH] Different now: MF_TRANSLATION is not used.
+    //		  mobj->translation = translationtables + 256*playernum;
 
-//	if (player.deadspectator && player.mo)
-//	{
-//		mobj->angle = player.mo->angle;
-//		mobj->pitch = player.mo->pitch;
-//	}
-//	else
-//	{
-//		mobj->angle = ANG45 * (mthing->angle/45);
-//		mobj->pitch = 0;
-//	}
-	mobj->angle = ANG45 * (mthing->angle/45);
-	mobj->pitch = 0;
+    //	if (player.deadspectator && player.mo)
+    //	{
+    //		mobj->angle = player.mo->angle;
+    //		mobj->pitch = player.mo->pitch;
+    //	}
+    //	else
+    //	{
+    //		mobj->angle = ANG45 * (mthing->angle/45);
+    //		mobj->pitch = 0;
+    //	}
+    mobj->angle = ANG45 * (mthing->angle / 45);
+    mobj->pitch = 0;
 
+    mobj->pitch  = 0;
+    mobj->player = &player;
+    mobj->health = player.health;
 
-	mobj->pitch = 0;
-	mobj->player = &player;
-	mobj->health = player.health;
+    player.fov = 90.0f;
+    player.mo = player.camera = mobj->ptr();
+    player.playerstate        = PST_LIVE;
+    player.refire             = 0;
+    player.damagecount        = 0;
+    player.bonuscount         = 0;
+    player.extralight         = 0;
+    player.fixedcolormap      = 0;
+    player.viewheight         = VIEWHEIGHT;
+    player.xviewshift         = 0;
+    player.attacker           = AActor::AActorPtr();
 
-	player.fov = 90.0f;
-	player.mo = player.camera = mobj->ptr();
-	player.playerstate = PST_LIVE;
-	player.refire = 0;
-	player.damagecount = 0;
-	player.bonuscount = 0;
-	player.extralight = 0;
-	player.fixedcolormap = 0;
-	player.viewheight = VIEWHEIGHT;
-	player.xviewshift = 0;
-	player.attacker = AActor::AActorPtr();
+    // Set up some special spectator stuff
+    if (player.spectator)
+        P_SetSpectatorFlags(player);
 
-	// Set up some special spectator stuff
-	if (player.spectator)
-		P_SetSpectatorFlags(player);
+    // setup gun psprite
+    P_SetupPsprites(&player);
 
-	// setup gun psprite
-	P_SetupPsprites(&player);
+    // give all cards in death match mode
+    if (!G_IsCoopGame())
+    {
+        for (int i = 0; i < NUMCARDS; i++)
+            player.cards[i] = true;
+    }
 
-	// give all cards in death match mode
-	if (!G_IsCoopGame())
-	{
-		for (int i = 0; i < NUMCARDS; i++)
-			player.cards[i] = true;
-	}
+    // Give any other between-level inventory.
+    if (!player.spectator)
+        G_GiveBetweenInventory(player);
 
-	// Give any other between-level inventory.
-	if (!player.spectator)
-		G_GiveBetweenInventory(player);
+    if (serverside)
+    {
+        // [RH] If someone is in the way, kill them
+        P_TeleportMove(mobj, mobj->x, mobj->y, mobj->z, true);
 
-	if (serverside)
-	{
-		// [RH] If someone is in the way, kill them
-		P_TeleportMove(mobj, mobj->x, mobj->y, mobj->z, true);
+        // [BC] Do script stuff
+        if (level.behavior && !player.spectator)
+        {
+            if (playerstate == PST_ENTER)
+                level.behavior->StartTypedScripts(SCRIPT_Enter, player.mo);
+            else if (playerstate == PST_REBORN)
+                level.behavior->StartTypedScripts(SCRIPT_Respawn, player.mo);
+        }
 
-		// [BC] Do script stuff
-		if (level.behavior && !player.spectator)
-		{
-			if (playerstate == PST_ENTER)
-				level.behavior->StartTypedScripts(SCRIPT_Enter, player.mo);
-			else if (playerstate == PST_REBORN)
-				level.behavior->StartTypedScripts(SCRIPT_Respawn, player.mo);
-		}
+        team_t team = player.userinfo.team;
 
-		team_t team = player.userinfo.team;
-		
-		// Log the spawn
-		if (!player.spectator)
-		{
-			M_LogWDLEvent(WDL_EVENT_SPAWNPLAYER, &player, NULL, team, 0,
-			              M_GetPlayerSpawn(mthing->x, mthing->y), 0);
-		}
+        // Log the spawn
+        if (!player.spectator)
+        {
+            M_LogWDLEvent(WDL_EVENT_SPAWNPLAYER, &player, NULL, team, 0, M_GetPlayerSpawn(mthing->x, mthing->y), 0);
+        }
 
-		// send new objects
-		SV_SpawnMobj(mobj);
-	}
+        // send new objects
+        SV_SpawnMobj(mobj);
+    }
 }
 
 /**
  * Stub
  */
-void P_ShowSpawns(mapthing2_t* mthing) { }
+void P_ShowSpawns(mapthing2_t *mthing)
+{
+}
 
-VERSION_CONTROL (sv_mobj_cpp, "$Id: 928d643254c3f40c54687cd860acffc792dc80d7 $")
+VERSION_CONTROL(sv_mobj_cpp, "$Id: 928d643254c3f40c54687cd860acffc792dc80d7 $")

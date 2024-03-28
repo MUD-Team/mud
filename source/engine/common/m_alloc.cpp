@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id: bc767795d65893c8a5964190c517cc331bb3081e $
@@ -21,7 +21,6 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #include "odamex.h"
 
 #include <stdlib.h>
@@ -29,62 +28,62 @@
 #include "i_system.h"
 #include "m_alloc.h"
 
-void *Malloc (size_t size)
+void *Malloc(size_t size)
 {
-	// We don't want implementation-defined behaviour!
-	if (!size)
+    // We don't want implementation-defined behaviour!
+    if (!size)
         return NULL;
-	
-	void *zone = malloc (size);
 
-	if (!zone)
-		I_FatalError ("Could not malloc %lu bytes", size);
+    void *zone = malloc(size);
 
-	return zone;
+    if (!zone)
+        I_FatalError("Could not malloc %lu bytes", size);
+
+    return zone;
 }
 
-void *Calloc (size_t num, size_t size)
+void *Calloc(size_t num, size_t size)
 {
-	// We don't want implementation-defined behaviour!
-	if (!num || !size)
+    // We don't want implementation-defined behaviour!
+    if (!num || !size)
         return NULL;
-	
-	void *zone = calloc (num, size);
 
-	if (!zone)
-		I_FatalError ("Could not calloc %lu bytes", num * size);
+    void *zone = calloc(num, size);
 
-	return zone;
+    if (!zone)
+        I_FatalError("Could not calloc %lu bytes", num * size);
+
+    return zone;
 }
 
-void *Realloc (void *memblock, size_t size)
+void *Realloc(void *memblock, size_t size)
 {
-	// We don't want implementation-defined behaviour! Especially for this
-	// as realloc() behaves like malloc() (which doesn't use our Malloc())
-	if (!size && memblock == NULL)
+    // We don't want implementation-defined behaviour! Especially for this
+    // as realloc() behaves like malloc() (which doesn't use our Malloc())
+    if (!size && memblock == NULL)
         return NULL;
 
-	void *zone = realloc (memblock, size);
+    void *zone = realloc(memblock, size);
 
-	if (!zone)
-		I_FatalError ("Could not realloc %lu bytes", size);
+    if (!zone)
+        I_FatalError("Could not realloc %lu bytes", size);
 
-	return zone;
+    return zone;
 }
 
 //
 // M_Free
 //
-// Wraps around the standard free() memory function. This variation is slightly 
+// Wraps around the standard free() memory function. This variation is slightly
 // more safer, as it only frees a block if its not NULL and will NULL it on
 // exiting.
-void M_Free2 (void **memblock)
+void M_Free2(void **memblock)
 {
     if (*memblock != NULL)
-    {               
+    {
         free(*memblock);
         *memblock = NULL;
     }
 }
 
-VERSION_CONTROL (m_alloc_cpp, "$Id: bc767795d65893c8a5964190c517cc331bb3081e $")
+VERSION_CONTROL(m_alloc_cpp, "$Id: bc767795d65893c8a5964190c517cc331bb3081e $")

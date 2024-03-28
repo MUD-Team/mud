@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id: 67aa34514c86ae501d091a86b247df83984523ef $
@@ -29,54 +29,60 @@
 #include "cmdlib.h"
 #include "d_player.h"
 
-#define C_BLINKRATE			(TICRATE/2)
-#define MAX_CHATSTR_LEN		128
+#define C_BLINKRATE     (TICRATE / 2)
+#define MAX_CHATSTR_LEN 128
 
-typedef enum cstate_t {
-	c_up=0, c_down, c_falling, c_rising, c_fallfull, c_risefull
+typedef enum cstate_t
+{
+    c_up = 0,
+    c_down,
+    c_falling,
+    c_rising,
+    c_fallfull,
+    c_risefull
 } constate_e;
 
-extern constate_e	ConsoleState;
+extern constate_e ConsoleState;
 
 // Initialize the console
-void C_InitConsole();
+void            C_InitConsole();
 void STACK_ARGS C_ShutdownConsole();
 
-void C_InitConsoleBackground();
+void            C_InitConsoleBackground();
 void STACK_ARGS C_ShutdownConsoleBackground();
 
-void C_InitConCharsFont();
+void            C_InitConCharsFont();
 void STACK_ARGS C_ShutdownConCharsFont();
 
 void C_ClearCommand();
 
 // Adjust the console for a new screen mode
-void C_NewModeAdjust (void);
+void C_NewModeAdjust(void);
 
-void C_Ticker (void);
+void C_Ticker(void);
 
-int PrintString (int printlevel, const char *string);
-int STACK_ARGS Printf_Bold (const char *format, ...);
+int            PrintString(int printlevel, const char *string);
+int STACK_ARGS Printf_Bold(const char *format, ...);
 
-void C_AddNotifyString (int printlevel, const char *s);
-void C_DrawConsole (void);
-void C_ToggleConsole (void);
-void C_FullConsole (void);
-void C_HideConsole (void);
-void C_AdjustBottom (void);
-void C_FlushDisplay (void);
+void C_AddNotifyString(int printlevel, const char *s);
+void C_DrawConsole(void);
+void C_ToggleConsole(void);
+void C_FullConsole(void);
+void C_HideConsole(void);
+void C_AdjustBottom(void);
+void C_FlushDisplay(void);
 
-void C_InitTicker (const char *label, unsigned int max);
-void C_SetTicker (unsigned int at);
+void C_InitTicker(const char *label, unsigned int max);
+void C_SetTicker(unsigned int at);
 
-void C_MidPrint (const char *msg, player_t *p = NULL, int msgtime=0);
-void C_DrawMid (void);
-void C_GMidPrint(const char* msg, int color, int msgtime);
-void C_DrawGMid (void);
+void C_MidPrint(const char *msg, player_t *p = NULL, int msgtime = 0);
+void C_DrawMid(void);
+void C_GMidPrint(const char *msg, int color, int msgtime);
+void C_DrawGMid(void);
 
-BOOL C_Responder (event_t *ev);
+BOOL C_Responder(event_t *ev);
 
-void C_AddTabCommand (const char *name);
-void C_RemoveTabCommand (const char *name);
+void C_AddTabCommand(const char *name);
+void C_RemoveTabCommand(const char *name);
 
-void C_RevealSecret ();
+void C_RevealSecret();

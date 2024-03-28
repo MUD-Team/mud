@@ -22,7 +22,6 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #include "odamex.h"
 
 #include "hashtable.h"
@@ -37,80 +36,80 @@
 
 #include "w_ident.h"
 
-static const uint32_t IDENT_NONE = 0;
+static const uint32_t IDENT_NONE       = 0;
 static const uint32_t IDENT_COMMERCIAL = BIT(0);
-static const uint32_t IDENT_IWAD = BIT(1);
+static const uint32_t IDENT_IWAD       = BIT(1);
 static const uint32_t IDENT_DEPRECATED = BIT(2);
 
 struct identData_t
 {
-	const char* idName;
-	const char* filename;
-	const char* crc32Sum;
-	const char* md5Sum;
-	const char* groupName;
-	uint32_t flags;
-	int weight;
+    const char *idName;
+    const char *filename;
+    const char *crc32Sum;
+    const char *md5Sum;
+    const char *groupName;
+    uint32_t    flags;
+    int         weight;
 };
 
-#define DOOMSW_PREFIX "DOOM Shareware"
-#define DOOM_PREFIX "DOOM"
-#define UDOOM_PREFIX "The Ultimate DOOM"
-#define DOOM2_PREFIX "DOOM II: Hell on Earth"
-#define PLUTONIA_PREFIX "The Plutonia Experiment"
-#define TNT_PREFIX "TNT: Evilution"
+#define DOOMSW_PREFIX    "DOOM Shareware"
+#define DOOM_PREFIX      "DOOM"
+#define UDOOM_PREFIX     "The Ultimate DOOM"
+#define DOOM2_PREFIX     "DOOM II: Hell on Earth"
+#define PLUTONIA_PREFIX  "The Plutonia Experiment"
+#define TNT_PREFIX       "TNT: Evilution"
 #define FREEDOOM1_PREFIX "Freedoom: Phase 1"
 #define FREEDOOM2_PREFIX "Freedoom: Phase 2"
-#define FREEDM_PREFIX "FreeDM"
+#define FREEDM_PREFIX    "FreeDM"
 
 static const identData_t identdata[] = {
     // ------------------------------------------------------------------------
     // DOOM2.WAD
     // ------------------------------------------------------------------------
     {
-        DOOM2_PREFIX " v1.9",               // idName
-        "DOOM2.WAD",                        // filename
-        "EC8725DB",                         // crc32Sum
-        "25E1459CA71D321525F84628F45CA8CD", // md5Sum
-        DOOM2_PREFIX " v1.9",               // groupName
-        IDENT_COMMERCIAL | IDENT_IWAD,      // flags
-        100,                                // weight
+        DOOM2_PREFIX " v1.9",                             // idName
+        "DOOM2.WAD",                                      // filename
+        "EC8725DB",                                       // crc32Sum
+        "25E1459CA71D321525F84628F45CA8CD",               // md5Sum
+        DOOM2_PREFIX " v1.9",                             // groupName
+        IDENT_COMMERCIAL | IDENT_IWAD,                    // flags
+        100,                                              // weight
     },
     {
-        DOOM2_PREFIX " Classic Unity v1.3", // idName
-        "DOOM2.WAD",                        // filename
-        "F1D1AD55",                         // crc32Sum
-        "8AB6D0527A29EFDC1EF200E5687B5CAE", // md5Sum
-        DOOM2_PREFIX " v1.9",               // groupName
-        IDENT_COMMERCIAL | IDENT_IWAD,      // flags
-        145,                                // weight
+        DOOM2_PREFIX " Classic Unity v1.3",               // idName
+        "DOOM2.WAD",                                      // filename
+        "F1D1AD55",                                       // crc32Sum
+        "8AB6D0527A29EFDC1EF200E5687B5CAE",               // md5Sum
+        DOOM2_PREFIX " v1.9",                             // groupName
+        IDENT_COMMERCIAL | IDENT_IWAD,                    // flags
+        145,                                              // weight
     },
     {
-        DOOM2_PREFIX " Classic Unity v1.1", // idName
-        "DOOM2.WAD",                        // filename
-        "22C291C8",                         // crc32Sum
-        "7895D10C281305C45A7E5F01B3F7B1D8", // md5Sum
-        DOOM2_PREFIX " v1.9",               // groupName
-        IDENT_COMMERCIAL | IDENT_IWAD,      // flags
-        145,                                // weight
+        DOOM2_PREFIX " Classic Unity v1.1",               // idName
+        "DOOM2.WAD",                                      // filename
+        "22C291C8",                                       // crc32Sum
+        "7895D10C281305C45A7E5F01B3F7B1D8",               // md5Sum
+        DOOM2_PREFIX " v1.9",                             // groupName
+        IDENT_COMMERCIAL | IDENT_IWAD,                    // flags
+        145,                                              // weight
     },
     {
-        DOOM2_PREFIX " Classic Unity v1.0", // idName
-        "DOOM2.WAD",                        // filename
-        "897339A7",                         // crc32Sum
-        "E7395BD5E838D58627BD028871EFBC14", // md5Sum
-        DOOM2_PREFIX " v1.9",               // groupName
-        IDENT_COMMERCIAL | IDENT_IWAD,      // flags
-        145,                                // weight
+        DOOM2_PREFIX " Classic Unity v1.0",               // idName
+        "DOOM2.WAD",                                      // filename
+        "897339A7",                                       // crc32Sum
+        "E7395BD5E838D58627BD028871EFBC14",               // md5Sum
+        DOOM2_PREFIX " v1.9",                             // groupName
+        IDENT_COMMERCIAL | IDENT_IWAD,                    // flags
+        145,                                              // weight
     },
     {
-        DOOM2_PREFIX " BFG Edition",        // idName
-        "DOOM2BFG.WAD",                     // filename
-        "927A778A",                         // crc32Sum
-        "C3BEA40570C23E511A7ED3EBCD9865F7", // md5Sum
-        DOOM2_PREFIX " v1.9",               // groupName
-        IDENT_COMMERCIAL | IDENT_IWAD,      // flags
-        150,                                // weight
+        DOOM2_PREFIX " BFG Edition",                      // idName
+        "DOOM2BFG.WAD",                                   // filename
+        "927A778A",                                       // crc32Sum
+        "C3BEA40570C23E511A7ED3EBCD9865F7",               // md5Sum
+        DOOM2_PREFIX " v1.9",                             // groupName
+        IDENT_COMMERCIAL | IDENT_IWAD,                    // flags
+        150,                                              // weight
     },
     {
         DOOM2_PREFIX " v1.8",                             // idName
@@ -215,49 +214,49 @@ static const identData_t identdata[] = {
     // DOOM.WAD
     // ------------------------------------------------------------------------
     {
-        UDOOM_PREFIX " v1.9",               // mIdName
-        "DOOMU.WAD",                        // mFilename
-        "BF0EAAC0",                         // mCRC32Sum
-        "C4FE9FD920207691A9F493668E0A2083", // mMd5Sum
-        UDOOM_PREFIX " v1.9",               // mGroupName
-        IDENT_COMMERCIAL | IDENT_IWAD,      // flags
-        200,                                // weight
+        UDOOM_PREFIX " v1.9",                             // mIdName
+        "DOOMU.WAD",                                      // mFilename
+        "BF0EAAC0",                                       // mCRC32Sum
+        "C4FE9FD920207691A9F493668E0A2083",               // mMd5Sum
+        UDOOM_PREFIX " v1.9",                             // mGroupName
+        IDENT_COMMERCIAL | IDENT_IWAD,                    // flags
+        200,                                              // weight
     },
     {
-        UDOOM_PREFIX " Classic Unity v1.3", // mIdName
-        "DOOM.WAD",                         // mFilename
-        "75C3B7BF",                         // mCRC32Sum
-        "8517C4E8F0EEF90B82852667D345EB86", // mMd5Sum
-        UDOOM_PREFIX " v1.9",               // mGroupName
-        IDENT_COMMERCIAL | IDENT_IWAD,      // flags
-        245,                                // weight
+        UDOOM_PREFIX " Classic Unity v1.3",               // mIdName
+        "DOOM.WAD",                                       // mFilename
+        "75C3B7BF",                                       // mCRC32Sum
+        "8517C4E8F0EEF90B82852667D345EB86",               // mMd5Sum
+        UDOOM_PREFIX " v1.9",                             // mGroupName
+        IDENT_COMMERCIAL | IDENT_IWAD,                    // flags
+        245,                                              // weight
     },
     {
-        UDOOM_PREFIX " Classic Unity v1.1", // mIdName
-        "DOOM.WAD",                         // mFilename
-        "346A4BFD",                         // mCRC32Sum
-        "21B200688D0FA7C1B6F63703D2BDD455", // mMd5Sum
-        UDOOM_PREFIX " v1.9",               // mGroupName
-        IDENT_COMMERCIAL | IDENT_IWAD,      // flags
-        245,                                // weight
+        UDOOM_PREFIX " Classic Unity v1.1",               // mIdName
+        "DOOM.WAD",                                       // mFilename
+        "346A4BFD",                                       // mCRC32Sum
+        "21B200688D0FA7C1B6F63703D2BDD455",               // mMd5Sum
+        UDOOM_PREFIX " v1.9",                             // mGroupName
+        IDENT_COMMERCIAL | IDENT_IWAD,                    // flags
+        245,                                              // weight
     },
     {
-        UDOOM_PREFIX " Classic Unity v1.0", // mIdName
-        "DOOM.WAD",                         // mFilename
-        "46359DFB",                         // mCRC32Sum
-        "232A79F7121B22D7401905EE0EE1E487", // mMd5Sum
-        UDOOM_PREFIX " v1.9",               // mGroupName
-        IDENT_COMMERCIAL | IDENT_IWAD,      // flags
-        245,                                // weight
+        UDOOM_PREFIX " Classic Unity v1.0",               // mIdName
+        "DOOM.WAD",                                       // mFilename
+        "46359DFB",                                       // mCRC32Sum
+        "232A79F7121B22D7401905EE0EE1E487",               // mMd5Sum
+        UDOOM_PREFIX " v1.9",                             // mGroupName
+        IDENT_COMMERCIAL | IDENT_IWAD,                    // flags
+        245,                                              // weight
     },
     {
-        UDOOM_PREFIX " BFG Edition",        // mIdName
-        "DOOMBFG.WAD",                      // mFilename
-        "5EFA677E",                         // mCRC32Sum
-        "FB35C4A5A9FD49EC29AB6E900572C524", // mMd5Sum
-        UDOOM_PREFIX " v1.9",               // mGroupName
-        IDENT_COMMERCIAL | IDENT_IWAD,      // flags
-        250,                                // weight
+        UDOOM_PREFIX " BFG Edition",                      // mIdName
+        "DOOMBFG.WAD",                                    // mFilename
+        "5EFA677E",                                       // mCRC32Sum
+        "FB35C4A5A9FD49EC29AB6E900572C524",               // mMd5Sum
+        UDOOM_PREFIX " v1.9",                             // mGroupName
+        IDENT_COMMERCIAL | IDENT_IWAD,                    // flags
+        250,                                              // weight
     },
     {
         DOOM_PREFIX " v1.9",                              // mIdName
@@ -730,7 +729,6 @@ static const identData_t identdata[] = {
     },
 };
 
-
 // ============================================================================
 //
 // WadFileLumpFinder
@@ -741,56 +739,53 @@ static const identData_t identdata[] = {
 
 class WadFileLumpFinder
 {
-public:
-	WadFileLumpFinder(const std::string& filename) :
-		mNumLumps(0), mLumps(NULL)
-	{
-		FILE* fp = fopen(filename.c_str(), "rb");
-		if (fp)
-		{
-			wadinfo_t header;
-			if (fread(&header, sizeof(header), 1, fp) == 1)
-			{
-				header.identification = LELONG(header.identification);
-				header.infotableofs = LELONG(header.infotableofs);
+  public:
+    WadFileLumpFinder(const std::string &filename) : mNumLumps(0), mLumps(NULL)
+    {
+        FILE *fp = fopen(filename.c_str(), "rb");
+        if (fp)
+        {
+            wadinfo_t header;
+            if (fread(&header, sizeof(header), 1, fp) == 1)
+            {
+                header.identification = LELONG(header.identification);
+                header.infotableofs   = LELONG(header.infotableofs);
 
-				if (header.identification == IWAD_ID || header.identification == PWAD_ID)
-				{
-					if (fseek(fp, header.infotableofs, SEEK_SET) == 0)
-					{
-						mNumLumps = LELONG(header.numlumps);
-						mLumps = new filelump_t[mNumLumps];
+                if (header.identification == IWAD_ID || header.identification == PWAD_ID)
+                {
+                    if (fseek(fp, header.infotableofs, SEEK_SET) == 0)
+                    {
+                        mNumLumps = LELONG(header.numlumps);
+                        mLumps    = new filelump_t[mNumLumps];
 
-						if (fread(mLumps, mNumLumps * sizeof(*mLumps), 1, fp) != 1)
-							mNumLumps = 0;
-					}
-				}
-			}
+                        if (fread(mLumps, mNumLumps * sizeof(*mLumps), 1, fp) != 1)
+                            mNumLumps = 0;
+                    }
+                }
+            }
 
-			fclose(fp);
-		}
-	}
+            fclose(fp);
+        }
+    }
 
-	~WadFileLumpFinder()
-	{
-		if (mLumps)
-			delete [] mLumps;
-	}
+    ~WadFileLumpFinder()
+    {
+        if (mLumps)
+            delete[] mLumps;
+    }
 
-	bool exists(const std::string& lumpname)
-	{
-		for (size_t i = 0; i < mNumLumps; i++)
-			if (iequals(lumpname, std::string(mLumps[i].name, 8)))
-				return true;
-		return false;
-	}
+    bool exists(const std::string &lumpname)
+    {
+        for (size_t i = 0; i < mNumLumps; i++)
+            if (iequals(lumpname, std::string(mLumps[i].name, 8)))
+                return true;
+        return false;
+    }
 
-private:
-	size_t		mNumLumps;
-	filelump_t*	mLumps;
+  private:
+    size_t      mNumLumps;
+    filelump_t *mLumps;
 };
-
-
 
 // ============================================================================
 //
@@ -802,276 +797,271 @@ private:
 
 class FileIdentificationManager
 {
-public:
-	FileIdentificationManager() : mIdentifiers(64)
-	{ }
+  public:
+    FileIdentificationManager() : mIdentifiers(64)
+    {
+    }
 
-	//
-	// FileIdentificationManager::addFile
-	//
-	// Adds identification information for a known file.
-	//
-	void addFile(const OString& idname, const OString& filename, const OString& crc32,
-	             const OString& md5, const OString& group, bool commercial,
-	             const bool iwad, const bool deprecated, const int weight)
-	{
-		OCRC32Sum crc32Hash;
-		OCRC32Sum::makeFromHexStr(crc32Hash, crc32);
-		OMD5Hash md5Hash;
-		OMD5Hash::makeFromHexStr(md5Hash, md5);
+    //
+    // FileIdentificationManager::addFile
+    //
+    // Adds identification information for a known file.
+    //
+    void addFile(const OString &idname, const OString &filename, const OString &crc32, const OString &md5,
+                 const OString &group, bool commercial, const bool iwad, const bool deprecated, const int weight)
+    {
+        OCRC32Sum crc32Hash;
+        OCRC32Sum::makeFromHexStr(crc32Hash, crc32);
+        OMD5Hash md5Hash;
+        OMD5Hash::makeFromHexStr(md5Hash, md5);
 
-		IdType id = mIdentifiers.insert();
-		fileIdentifier_t* file = &mIdentifiers.get(id);
-		file->mIdName = OStringToUpper(idname);
-		file->mNiceName = idname;
-		file->mFilename = OStringToUpper(filename);
-		file->mCRC32Sum = crc32Hash;
-		file->mMd5Sum = md5Hash;
-		file->mGroupName = OStringToUpper(group);
-		file->mIsCommercial = commercial;
-		file->mIsIWAD = iwad;
-		file->mIsDeprecated = deprecated;
-		file->weight = weight;
+        IdType            id   = mIdentifiers.insert();
+        fileIdentifier_t *file = &mIdentifiers.get(id);
+        file->mIdName          = OStringToUpper(idname);
+        file->mNiceName        = idname;
+        file->mFilename        = OStringToUpper(filename);
+        file->mCRC32Sum        = crc32Hash;
+        file->mMd5Sum          = md5Hash;
+        file->mGroupName       = OStringToUpper(group);
+        file->mIsCommercial    = commercial;
+        file->mIsIWAD          = iwad;
+        file->mIsDeprecated    = deprecated;
+        file->weight           = weight;
 
-		if (!crc32Hash.empty())
-		{
-			mCRC32SumLookup.insert(std::make_pair(file->mCRC32Sum, id));
-		}
+        if (!crc32Hash.empty())
+        {
+            mCRC32SumLookup.insert(std::make_pair(file->mCRC32Sum, id));
+        }
 
-		if (!md5Hash.empty())
-		{
-			mMd5SumLookup.insert(std::make_pair(file->mMd5Sum, id));
-		}
+        if (!md5Hash.empty())
+        {
+            mMd5SumLookup.insert(std::make_pair(file->mMd5Sum, id));
+        }
 
-		// add the filename to the IWAD search list if it's not already in there
-		if (std::find(mIWADSearchOrder.begin(), mIWADSearchOrder.end(), file->mFilename) == mIWADSearchOrder.end())
-			mIWADSearchOrder.push_back(file->mFilename);
-	}
+        // add the filename to the IWAD search list if it's not already in there
+        if (std::find(mIWADSearchOrder.begin(), mIWADSearchOrder.end(), file->mFilename) == mIWADSearchOrder.end())
+            mIWADSearchOrder.push_back(file->mFilename);
+    }
 
-	std::vector<OString> getFilenames() const
-	{
-		return mIWADSearchOrder;
-	}
+    std::vector<OString> getFilenames() const
+    {
+        return mIWADSearchOrder;
+    }
 
-	bool isCommercialFilename(const std::string& filename) const
-	{
-		OString upper = StdStringToUpper(filename);
-		for (IdentifierTable::const_iterator it = mIdentifiers.begin(); it != mIdentifiers.end(); ++it)
-		{
-			if (it->mIsCommercial && it->mFilename == upper)
-				return true;
-		}
-		return false;
-	}
+    bool isCommercialFilename(const std::string &filename) const
+    {
+        OString upper = StdStringToUpper(filename);
+        for (IdentifierTable::const_iterator it = mIdentifiers.begin(); it != mIdentifiers.end(); ++it)
+        {
+            if (it->mIsCommercial && it->mFilename == upper)
+                return true;
+        }
+        return false;
+    }
 
-	bool isKnownIWADFilename(const std::string& filename) const
-	{
-		OString upper = StdStringToUpper(filename);
-		for (IdentifierTable::const_iterator it = mIdentifiers.begin();
-		     it != mIdentifiers.end(); ++it)
-		{
-			if (it->mIsIWAD && it->mFilename == upper)
-				return true;
-		}
-		return false;
-	}
+    bool isKnownIWADFilename(const std::string &filename) const
+    {
+        OString upper = StdStringToUpper(filename);
+        for (IdentifierTable::const_iterator it = mIdentifiers.begin(); it != mIdentifiers.end(); ++it)
+        {
+            if (it->mIsIWAD && it->mFilename == upper)
+                return true;
+        }
+        return false;
+    }
 
-	bool isCommercial(const OMD5Hash& hash) const
-	{
-		const fileIdentifier_t* file = lookupByMd5Sum(hash);
-		return file && file->mIsCommercial;
-	}
+    bool isCommercial(const OMD5Hash &hash) const
+    {
+        const fileIdentifier_t *file = lookupByMd5Sum(hash);
+        return file && file->mIsCommercial;
+    }
 
-	bool isKnownIWAD(const OMD5Hash& hash) const
-	{
-		const fileIdentifier_t* file = lookupByMd5Sum(hash);
-		return file && file->mIsIWAD;
-	}
+    bool isKnownIWAD(const OMD5Hash &hash) const
+    {
+        const fileIdentifier_t *file = lookupByMd5Sum(hash);
+        return file && file->mIsIWAD;
+    }
 
-	bool isDeprecated(const OMD5Hash& hash) const
-	{
-		const fileIdentifier_t* file = lookupByMd5Sum(hash);
-		return file && file->mIsDeprecated;
-	}
+    bool isDeprecated(const OMD5Hash &hash) const
+    {
+        const fileIdentifier_t *file = lookupByMd5Sum(hash);
+        return file && file->mIsDeprecated;
+    }
 
-	bool isIWAD(const OResFile& file) const
-	{
-		const OMD5Hash& md5sum(file.getMD5());
-		const fileIdentifier_t* ident = lookupByMd5Sum(md5sum);
-		if (ident)
-			return ident->mIsIWAD;
+    bool isIWAD(const OResFile &file) const
+    {
+        const OMD5Hash         &md5sum(file.getMD5());
+        const fileIdentifier_t *ident = lookupByMd5Sum(md5sum);
+        if (ident)
+            return ident->mIsIWAD;
 
-		// [SL] not an offical IWAD.
-		// Check for lumps that are required by vanilla Doom.
-		static const int NUM_CHECKLUMPS = 6;
-		static const char checklumps[NUM_CHECKLUMPS][8] = {
-		    {'P', 'L', 'A', 'Y', 'P', 'A', 'L'},      // 0
-		    {'C', 'O', 'L', 'O', 'R', 'M', 'A', 'P'}, // 1
-		    {'F', '_', 'S', 'T', 'A', 'R', 'T'},      // 2
-		    {'S', '_', 'S', 'T', 'A', 'R', 'T'},      // 3
-		    {'T', 'E', 'X', 'T', 'U', 'R', 'E', '1'}, // 4
-		    {'S', 'T', 'D', 'I', 'S', 'K'}            // 5
-		};
+        // [SL] not an offical IWAD.
+        // Check for lumps that are required by vanilla Doom.
+        static const int  NUM_CHECKLUMPS                = 6;
+        static const char checklumps[NUM_CHECKLUMPS][8] = {
+            {'P', 'L', 'A', 'Y', 'P', 'A', 'L'},      // 0
+            {'C', 'O', 'L', 'O', 'R', 'M', 'A', 'P'}, // 1
+            {'F', '_', 'S', 'T', 'A', 'R', 'T'},      // 2
+            {'S', '_', 'S', 'T', 'A', 'R', 'T'},      // 3
+            {'T', 'E', 'X', 'T', 'U', 'R', 'E', '1'}, // 4
+            {'S', 'T', 'D', 'I', 'S', 'K'}            // 5
+        };
 
-		WadFileLumpFinder lumps(file.getFullpath());
-		for (int i = 0; i < NUM_CHECKLUMPS; i++)
-			if (!lumps.exists(std::string(checklumps[i], 8)))
-				return false;
-		return true;
-	}
+        WadFileLumpFinder lumps(file.getFullpath());
+        for (int i = 0; i < NUM_CHECKLUMPS; i++)
+            if (!lumps.exists(std::string(checklumps[i], 8)))
+                return false;
+        return true;
+    }
 
-	bool areCompatible(const OMD5Hash& hash1, const OMD5Hash& hash2) const
-	{
-		const fileIdentifier_t* file1 = lookupByMd5Sum(hash1);
-		const fileIdentifier_t* file2 = lookupByMd5Sum(hash2);
+    bool areCompatible(const OMD5Hash &hash1, const OMD5Hash &hash2) const
+    {
+        const fileIdentifier_t *file1 = lookupByMd5Sum(hash1);
+        const fileIdentifier_t *file2 = lookupByMd5Sum(hash2);
 
-		if (!file1 || !file2)
-			return false;
+        if (!file1 || !file2)
+            return false;
 
-		return file1->mGroupName == file2->mGroupName;
-	}
+        return file1->mGroupName == file2->mGroupName;
+    }
 
-	const OString identify(const OResFile& file)
-	{
-		const fileIdentifier_t* fileid = lookupByMd5Sum(file.getMD5());
+    const OString identify(const OResFile &file)
+    {
+        const fileIdentifier_t *fileid = lookupByMd5Sum(file.getMD5());
 
-		if (fileid != NULL)
-			return fileid->mIdName;
+        if (fileid != NULL)
+            return fileid->mIdName;
 
-		// Not a registered file.
-		// Try to identify if it's compatible with known IWADs.
+        // Not a registered file.
+        // Try to identify if it's compatible with known IWADs.
 
-		static const int NUM_CHECKLUMPS = 12;
-		static const char checklumps[NUM_CHECKLUMPS][8] = {
-			{ 'E','1','M','1' },					// 0
-			{ 'E','2','M','1' },					// 1
-			{ 'E','4','M','1' },					// 2
-			{ 'M','A','P','0','1' },				// 3
-			{ 'A','N','I','M','D','E','F','S' },	// 4
-			{ 'F','I','N','A','L','2' },			// 5
-			{ 'R','E','D','T','N','T','2' },		// 6
-			{ 'C','A','M','O','1' },				// 7
-			{ 'E','X','T','E','N','D','E','D' },	// 8
-			{ 'D','M','E','N','U','P','I','C' },	// 9
-			{ 'F','R','E','E','D','O','O','M' },	// 10
-			{ 'H','A','C','X','-','R'}				// 11
-		};
+        static const int  NUM_CHECKLUMPS                = 12;
+        static const char checklumps[NUM_CHECKLUMPS][8] = {
+            {'E', '1', 'M', '1'},                     // 0
+            {'E', '2', 'M', '1'},                     // 1
+            {'E', '4', 'M', '1'},                     // 2
+            {'M', 'A', 'P', '0', '1'},                // 3
+            {'A', 'N', 'I', 'M', 'D', 'E', 'F', 'S'}, // 4
+            {'F', 'I', 'N', 'A', 'L', '2'},           // 5
+            {'R', 'E', 'D', 'T', 'N', 'T', '2'},      // 6
+            {'C', 'A', 'M', 'O', '1'},                // 7
+            {'E', 'X', 'T', 'E', 'N', 'D', 'E', 'D'}, // 8
+            {'D', 'M', 'E', 'N', 'U', 'P', 'I', 'C'}, // 9
+            {'F', 'R', 'E', 'E', 'D', 'O', 'O', 'M'}, // 10
+            {'H', 'A', 'C', 'X', '-', 'R'}            // 11
+        };
 
-		bool lumpsfound[NUM_CHECKLUMPS] = { 0 };
+        bool lumpsfound[NUM_CHECKLUMPS] = {0};
 
-		WadFileLumpFinder lumps(file.getFullpath());
-		for (int i = 0; i < NUM_CHECKLUMPS; i++)
-			if (lumps.exists(std::string(checklumps[i], 8)))
-				lumpsfound[i] = true;
-				
-		// [ML] Check for HACX 1.2
-		if (lumpsfound[11])
-		{
-			return "HACX UNKNOWN";
-		}
+        WadFileLumpFinder lumps(file.getFullpath());
+        for (int i = 0; i < NUM_CHECKLUMPS; i++)
+            if (lumps.exists(std::string(checklumps[i], 8)))
+                lumpsfound[i] = true;
 
-		// [SL] Check for FreeDoom / Freedoom: Phase 1
-		if (lumpsfound[10])
-		{
-			if (lumpsfound[0])
-				return OStringToUpper(OString(FREEDOOM1_PREFIX " Unknown"));
-			else
-				return "FREEDOOM UNKNOWN";
-		}
+        // [ML] Check for HACX 1.2
+        if (lumpsfound[11])
+        {
+            return "HACX UNKNOWN";
+        }
 
-		// Check for Doom II: Hell on Earth or TNT / Plutonia
-		if (lumpsfound[3])
-		{
-			if (lumpsfound[6])
-				return OStringToUpper(OString(TNT_PREFIX " Unknown"));
-			if (lumpsfound[7])
-				return OStringToUpper(OString(PLUTONIA_PREFIX " Unknown"));
-			if (lumpsfound[9])
-				return OStringToUpper(OString(DOOM2_PREFIX " BFG Edition Unknown"));
-			else
-				return OStringToUpper(OString(DOOM2_PREFIX " Unknown"));
-		}
+        // [SL] Check for FreeDoom / Freedoom: Phase 1
+        if (lumpsfound[10])
+        {
+            if (lumpsfound[0])
+                return OStringToUpper(OString(FREEDOOM1_PREFIX " Unknown"));
+            else
+                return "FREEDOOM UNKNOWN";
+        }
 
-		// Check for Registered Doom / Ultimate Doom / Chex Quest / Shareware Doom
-		if (lumpsfound[0])
-		{
-			if (lumpsfound[1])
-			{
-				if (lumpsfound[2])
-				{
-					// [ML] 1/7/10: HACK - There's no unique lumps in the chex quest
-					// iwad.  It's ultimate doom with their stuff replacing most things.
-					if (iequals(file.getBasename(), "chex.wad"))
-					{
-						return "CHEX QUEST UNKNOWN";
-					}
-					else
-					{
-						if (lumpsfound[9])
-							return UDOOM_PREFIX " BFG UNKNOWN";
-						else
-							return UDOOM_PREFIX " UNKNOWN";
-					}
-				}
-				else
-				{
-					return DOOM_PREFIX " UNKNOWN";
-				}
-			}
-			else
-			{
-				return DOOMSW_PREFIX " UNKNOWN";
-			}
-		}
+        // Check for Doom II: Hell on Earth or TNT / Plutonia
+        if (lumpsfound[3])
+        {
+            if (lumpsfound[6])
+                return OStringToUpper(OString(TNT_PREFIX " Unknown"));
+            if (lumpsfound[7])
+                return OStringToUpper(OString(PLUTONIA_PREFIX " Unknown"));
+            if (lumpsfound[9])
+                return OStringToUpper(OString(DOOM2_PREFIX " BFG Edition Unknown"));
+            else
+                return OStringToUpper(OString(DOOM2_PREFIX " Unknown"));
+        }
 
-		return "UNKNOWN";
-	}
+        // Check for Registered Doom / Ultimate Doom / Chex Quest / Shareware Doom
+        if (lumpsfound[0])
+        {
+            if (lumpsfound[1])
+            {
+                if (lumpsfound[2])
+                {
+                    // [ML] 1/7/10: HACK - There's no unique lumps in the chex quest
+                    // iwad.  It's ultimate doom with their stuff replacing most things.
+                    if (iequals(file.getBasename(), "chex.wad"))
+                    {
+                        return "CHEX QUEST UNKNOWN";
+                    }
+                    else
+                    {
+                        if (lumpsfound[9])
+                            return UDOOM_PREFIX " BFG UNKNOWN";
+                        else
+                            return UDOOM_PREFIX " UNKNOWN";
+                    }
+                }
+                else
+                {
+                    return DOOM_PREFIX " UNKNOWN";
+                }
+            }
+            else
+            {
+                return DOOMSW_PREFIX " UNKNOWN";
+            }
+        }
 
-	void dump() const
-	{
-		for (IdentifierTable::const_iterator it = mIdentifiers.begin();
-		     it != mIdentifiers.end(); ++it)
-		{
-			Printf(PRINT_HIGH, "%s %s %s\n", it->mGroupName.c_str(),
-			       it->mFilename.c_str(), it->mMd5Sum.getHexCStr());
-		}
-	}
+        return "UNKNOWN";
+    }
 
-	const fileIdentifier_t* lookupByCRC32Sum(const OCRC32Sum& crc32sum) const
-	{
-		CRC32SumLookupTable::const_iterator it = mCRC32SumLookup.find(crc32sum);
-		if (it != mCRC32SumLookup.end())
-			return &mIdentifiers.get(it->second);
-		return NULL;
-	}
+    void dump() const
+    {
+        for (IdentifierTable::const_iterator it = mIdentifiers.begin(); it != mIdentifiers.end(); ++it)
+        {
+            Printf(PRINT_HIGH, "%s %s %s\n", it->mGroupName.c_str(), it->mFilename.c_str(), it->mMd5Sum.getHexCStr());
+        }
+    }
 
-	const fileIdentifier_t* lookupByMd5Sum(const OMD5Hash& md5sum) const
-	{
-		Md5SumLookupTable::const_iterator it = mMd5SumLookup.find(md5sum);
-		if (it != mMd5SumLookup.end())
-			return &mIdentifiers.get(it->second);
-		return NULL;
-	}
+    const fileIdentifier_t *lookupByCRC32Sum(const OCRC32Sum &crc32sum) const
+    {
+        CRC32SumLookupTable::const_iterator it = mCRC32SumLookup.find(crc32sum);
+        if (it != mCRC32SumLookup.end())
+            return &mIdentifiers.get(it->second);
+        return NULL;
+    }
+
+    const fileIdentifier_t *lookupByMd5Sum(const OMD5Hash &md5sum) const
+    {
+        Md5SumLookupTable::const_iterator it = mMd5SumLookup.find(md5sum);
+        if (it != mMd5SumLookup.end())
+            return &mIdentifiers.get(it->second);
+        return NULL;
+    }
 
   private:
-	typedef unsigned int IdType;
+    typedef unsigned int IdType;
 
-	typedef SArray<fileIdentifier_t> IdentifierTable;
-	IdentifierTable			mIdentifiers;
+    typedef SArray<fileIdentifier_t> IdentifierTable;
+    IdentifierTable                  mIdentifiers;
 
-	typedef OHashTable<OCRC32Sum, IdType> CRC32SumLookupTable;
-	CRC32SumLookupTable		mCRC32SumLookup;
+    typedef OHashTable<OCRC32Sum, IdType> CRC32SumLookupTable;
+    CRC32SumLookupTable                   mCRC32SumLookup;
 
-	typedef OHashTable<OMD5Hash, IdType> Md5SumLookupTable;
-	Md5SumLookupTable		mMd5SumLookup;
+    typedef OHashTable<OMD5Hash, IdType> Md5SumLookupTable;
+    Md5SumLookupTable                    mMd5SumLookup;
 
-	typedef std::vector<OString> FilenameArray;
-	FilenameArray			mIWADSearchOrder;
+    typedef std::vector<OString> FilenameArray;
+    FilenameArray                mIWADSearchOrder;
 };
 
-
 static FileIdentificationManager identtab;
-
 
 //
 // W_SetupFileIdentifiers
@@ -1081,30 +1071,29 @@ static FileIdentificationManager identtab;
 //
 void W_SetupFileIdentifiers()
 {
-	for (size_t i = 0; i < ARRAY_LENGTH(::identdata); i++)
-	{
-		const identData_t& data = ::identdata[i];
-		::identtab.addFile(data.idName, data.filename, data.crc32Sum, data.md5Sum,
-		                   data.groupName, data.flags & IDENT_COMMERCIAL,
-		                   data.flags & IDENT_IWAD, data.flags & IDENT_DEPRECATED,
-		                   data.weight);
-	}
+    for (size_t i = 0; i < ARRAY_LENGTH(::identdata); i++)
+    {
+        const identData_t &data = ::identdata[i];
+        ::identtab.addFile(data.idName, data.filename, data.crc32Sum, data.md5Sum, data.groupName,
+                           data.flags & IDENT_COMMERCIAL, data.flags & IDENT_IWAD, data.flags & IDENT_DEPRECATED,
+                           data.weight);
+    }
 }
 
 /**
  * @brief Return the gameinfo associated with the given CRC32.
  */
-const fileIdentifier_t* W_GameInfo(const OCRC32Sum& crc32)
+const fileIdentifier_t *W_GameInfo(const OCRC32Sum &crc32)
 {
-	return ::identtab.lookupByCRC32Sum(crc32);
+    return ::identtab.lookupByCRC32Sum(crc32);
 }
 
 /**
  * @brief Return the gameinfo associated with the given MD5.
  */
-const fileIdentifier_t* W_GameInfo(const OMD5Hash& md5)
+const fileIdentifier_t *W_GameInfo(const OMD5Hash &md5)
 {
-	return ::identtab.lookupByMd5Sum(md5);
+    return ::identtab.lookupByMd5Sum(md5);
 }
 
 //
@@ -1117,193 +1106,186 @@ const fileIdentifier_t* W_GameInfo(const OMD5Hash& md5)
 // gamemode will be set to undetermined if the file is not a valid IWAD.
 //
 //
-void W_ConfigureGameInfo(const OResFile& iwad)
+void W_ConfigureGameInfo(const OResFile &iwad)
 {
-	extern gameinfo_t SharewareGameInfo;
-	extern gameinfo_t RegisteredGameInfo;
-	extern gameinfo_t RetailGameInfo;
-	extern gameinfo_t CommercialGameInfo;
-	extern gameinfo_t RetailBFGGameInfo;
-	extern gameinfo_t CommercialBFGGameInfo;
+    extern gameinfo_t SharewareGameInfo;
+    extern gameinfo_t RegisteredGameInfo;
+    extern gameinfo_t RetailGameInfo;
+    extern gameinfo_t CommercialGameInfo;
+    extern gameinfo_t RetailBFGGameInfo;
+    extern gameinfo_t CommercialBFGGameInfo;
 
-	const OString idname = identtab.identify(iwad);
+    const OString idname = identtab.identify(iwad);
 
-	if (idname.find("REKKR") == 0)
+    if (idname.find("REKKR") == 0)
     {
-		gamemode = retail;
-		gameinfo = RetailGameInfo;
-		gamemission = doom;
-	}
-	else if (idname.find("HACX") == 0)
-	{
-		gameinfo = CommercialGameInfo;
-		gamemode = commercial;
-		gamemission = commercial_hacx;
-	}
-	else if (idname.find(OStringToUpper(OString(PLUTONIA_PREFIX))) == 0)
-	{
-		gameinfo = CommercialGameInfo;
-		gamemode = commercial;
-		gamemission = pack_plut;
-	}
-	else if (idname.find(OStringToUpper(OString(TNT_PREFIX))) == 0)
-	{
-		gameinfo = CommercialGameInfo;
-		gamemode = commercial;
-		gamemission = pack_tnt;
-	}
-	else if (idname.find("CHEX QUEST") == 0)
-	{
-		gamemission = chex;
-		gamemode = retail_chex;
-		gameinfo = RetailGameInfo;
-	}
-	else if (idname.find(OStringToUpper(OString(FREEDOOM1_PREFIX))) == 0)
-	{
-		gamemode = retail;
-		gameinfo = RetailGameInfo;
-		gamemission = retail_freedoom;
-	}
-	else if (idname.find("FREEDOOM") == 0)
-	{
-		gamemode = commercial;
-		gameinfo = CommercialGameInfo;
-		gamemission = commercial_freedoom;
-	}
-	else if (idname.find(OStringToUpper(OString(FREEDOOM2_PREFIX))) == 0)
-	{
-		gamemode = commercial;
-		gameinfo = CommercialGameInfo;
-		gamemission = commercial_freedoom;
-	}
+        gamemode    = retail;
+        gameinfo    = RetailGameInfo;
+        gamemission = doom;
+    }
+    else if (idname.find("HACX") == 0)
+    {
+        gameinfo    = CommercialGameInfo;
+        gamemode    = commercial;
+        gamemission = commercial_hacx;
+    }
+    else if (idname.find(OStringToUpper(OString(PLUTONIA_PREFIX))) == 0)
+    {
+        gameinfo    = CommercialGameInfo;
+        gamemode    = commercial;
+        gamemission = pack_plut;
+    }
+    else if (idname.find(OStringToUpper(OString(TNT_PREFIX))) == 0)
+    {
+        gameinfo    = CommercialGameInfo;
+        gamemode    = commercial;
+        gamemission = pack_tnt;
+    }
+    else if (idname.find("CHEX QUEST") == 0)
+    {
+        gamemission = chex;
+        gamemode    = retail_chex;
+        gameinfo    = RetailGameInfo;
+    }
+    else if (idname.find(OStringToUpper(OString(FREEDOOM1_PREFIX))) == 0)
+    {
+        gamemode    = retail;
+        gameinfo    = RetailGameInfo;
+        gamemission = retail_freedoom;
+    }
+    else if (idname.find("FREEDOOM") == 0)
+    {
+        gamemode    = commercial;
+        gameinfo    = CommercialGameInfo;
+        gamemission = commercial_freedoom;
+    }
+    else if (idname.find(OStringToUpper(OString(FREEDOOM2_PREFIX))) == 0)
+    {
+        gamemode    = commercial;
+        gameinfo    = CommercialGameInfo;
+        gamemission = commercial_freedoom;
+    }
 
-	else if (idname.find(OStringToUpper(OString(FREEDM_PREFIX))) == 0)
-	{
-		gamemode = commercial;
-		gameinfo = CommercialGameInfo;
-		gamemission = commercial_freedoom;
-	}	
-	else if (idname.find(OStringToUpper(OString(DOOMSW_PREFIX))) == 0)
-	{
-		gamemode = shareware;
-		gameinfo = SharewareGameInfo;
-		gamemission = doom;
-	}
-	else if (idname.find(OStringToUpper(OString(UDOOM_PREFIX " BFG"))) == 0)
-	{
-		gamemode = retail_bfg;
-		gameinfo = RetailBFGGameInfo;
-		gamemission = doom;
-	}
-	else if (idname.find(OStringToUpper(OString(UDOOM_PREFIX))) == 0)
-	{
-		gamemode = retail;
-		gameinfo = RetailGameInfo;
-		gamemission = doom;
-	}
-	else if (idname.find(OStringToUpper(OString(DOOM2_PREFIX " BFG"))) == 0)
-	{
-		gameinfo = CommercialBFGGameInfo;
-		gamemode = commercial_bfg;
-		gamemission = doom2;
-	}
-	else if (idname.find(OStringToUpper(OString(DOOM2_PREFIX))) == 0)
-	{
-		gameinfo = CommercialGameInfo;
-		gamemode = commercial;
-		gamemission = doom2;
-	}
-	else if (idname.find(OStringToUpper(OString(DOOM_PREFIX))) == 0)
-	{
-		gamemode = registered;
-		gameinfo = RegisteredGameInfo;
-		gamemission = doom;
-	}
-	else
-	{
-		gamemode = undetermined;
-		gameinfo = SharewareGameInfo;
-		gamemission = doom;
-	}
+    else if (idname.find(OStringToUpper(OString(FREEDM_PREFIX))) == 0)
+    {
+        gamemode    = commercial;
+        gameinfo    = CommercialGameInfo;
+        gamemission = commercial_freedoom;
+    }
+    else if (idname.find(OStringToUpper(OString(DOOMSW_PREFIX))) == 0)
+    {
+        gamemode    = shareware;
+        gameinfo    = SharewareGameInfo;
+        gamemission = doom;
+    }
+    else if (idname.find(OStringToUpper(OString(UDOOM_PREFIX " BFG"))) == 0)
+    {
+        gamemode    = retail_bfg;
+        gameinfo    = RetailBFGGameInfo;
+        gamemission = doom;
+    }
+    else if (idname.find(OStringToUpper(OString(UDOOM_PREFIX))) == 0)
+    {
+        gamemode    = retail;
+        gameinfo    = RetailGameInfo;
+        gamemission = doom;
+    }
+    else if (idname.find(OStringToUpper(OString(DOOM2_PREFIX " BFG"))) == 0)
+    {
+        gameinfo    = CommercialBFGGameInfo;
+        gamemode    = commercial_bfg;
+        gamemission = doom2;
+    }
+    else if (idname.find(OStringToUpper(OString(DOOM2_PREFIX))) == 0)
+    {
+        gameinfo    = CommercialGameInfo;
+        gamemode    = commercial;
+        gamemission = doom2;
+    }
+    else if (idname.find(OStringToUpper(OString(DOOM_PREFIX))) == 0)
+    {
+        gamemode    = registered;
+        gameinfo    = RegisteredGameInfo;
+        gamemission = doom;
+    }
+    else
+    {
+        gamemode    = undetermined;
+        gameinfo    = SharewareGameInfo;
+        gamemission = doom;
+    }
 }
-
 
 //
 // W_IsKnownIWAD
 //
 // Returns true if the given file is a known IWAD file.
 //
-bool W_IsKnownIWAD(const OWantFile& file)
+bool W_IsKnownIWAD(const OWantFile &file)
 {
-	if (::identtab.isKnownIWAD(file.getWantedMD5()))
-		return true;
+    if (::identtab.isKnownIWAD(file.getWantedMD5()))
+        return true;
 
-	if (::identtab.isKnownIWADFilename(file.getBasename()))
-		return true;
+    if (::identtab.isKnownIWADFilename(file.getBasename()))
+        return true;
 
-	return false;
+    return false;
 }
-
 
 //
 // W_IsIWAD
 //
 // Returns true if the given file is an IWAD file.
 //
-bool W_IsIWAD(const OResFile& file)
+bool W_IsIWAD(const OResFile &file)
 {
-	return ::identtab.isIWAD(file);
+    return ::identtab.isIWAD(file);
 }
-
 
 //
 // W_IsFilenameCommercialIWAD
 //
 // Checks to see whether a given filename is an IWAD flagged as "commercial"
 //
-bool W_IsFilenameCommercialIWAD(const std::string& filename)
+bool W_IsFilenameCommercialIWAD(const std::string &filename)
 {
-	return identtab.isCommercialFilename(filename);
+    return identtab.isCommercialFilename(filename);
 }
-
 
 //
 // W_IsFilenameCommercialIWAD
 //
 // Checks to see whether a given hash belongs to an IWAD flagged as "commercial"
 //
-bool W_IsFilehashCommercialIWAD(const OMD5Hash& fileHash)
+bool W_IsFilehashCommercialIWAD(const OMD5Hash &fileHash)
 {
-	return identtab.isCommercial(fileHash);
+    return identtab.isCommercial(fileHash);
 }
-
 
 //
 // W_IsFileCommercialIWAD
 //
 // Checks to see whether a given file on disk is an IWAD flagged as "commercial"
 //
-bool W_IsFileCommercialIWAD(const std::string& filename)
+bool W_IsFileCommercialIWAD(const std::string &filename)
 {
-	const OMD5Hash md5sum = W_MD5(filename);
-	return identtab.isCommercial(md5sum);
+    const OMD5Hash md5sum = W_MD5(filename);
+    return identtab.isCommercial(md5sum);
 }
-
 
 //
 // W_IsIWADDeprecated
 //
 // Checks to see whether a given file is an IWAD flagged as "deprecated"
 //
-bool W_IsIWADDeprecated(const OResFile& file)
+bool W_IsIWADDeprecated(const OResFile &file)
 {
-	return identtab.isDeprecated(file.getMD5());
+    return identtab.isDeprecated(file.getMD5());
 }
-
 
 std::vector<OString> W_GetIWADFilenames()
 {
-	return identtab.getFilenames();
+    return identtab.getFilenames();
 }
 
-VERSION_CONTROL (w_ident_cpp, "$Id: 815671388f73da7998e41dacaf22ab40089c2a94 $")
+VERSION_CONTROL(w_ident_cpp, "$Id: 815671388f73da7998e41dacaf22ab40089c2a94 $")

@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id: 01d07b9f681a202f753b2bff950724f92927e561 $
@@ -54,7 +54,7 @@ extern lumpHandle_t negminus;
 //
 
 // Called by main loop.
-bool ST_Responder(event_t* ev);
+bool ST_Responder(event_t *ev);
 
 // Called by main loop.
 void ST_Ticker();
@@ -70,7 +70,8 @@ void ST_Init();
 
 void STACK_ARGS ST_Shutdown();
 
-namespace hud {
+namespace hud
+{
 
 void drawNetdemo();
 
@@ -84,7 +85,7 @@ void DrawToasts();
 void ToastTicker();
 
 // [AM] Push a toast to the screen.
-void PushToast(const toast_t& toast);
+void PushToast(const toast_t &toast);
 
 // [AM] HUD for showing level state
 void LevelStateHUD();
@@ -95,6 +96,6 @@ void SpectatorHUD();
 // [AM] HUD drawn with the Doom Status Bar.
 void DoomHUD();
 
-}
+} // namespace hud
 
-bool ST_Responder(event_t* ev);
+bool ST_Responder(event_t *ev);

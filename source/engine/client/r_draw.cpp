@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id: f878e66e7201c97021a528e052d53ef9a0811b5e $
@@ -23,7 +23,6 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #include "odamex.h"
 
 #include <assert.h>
@@ -47,7 +46,7 @@
 
 // status bar height at bottom of screen
 // [RH] status bar position at bottom of screen
-extern	int		ST_Y;
+extern int ST_Y;
 
 //
 // All drawing to the view buffer is accomplished in this file.
@@ -58,21 +57,23 @@ extern	int		ST_Y;
 //	and the total size == width*height*depth/8.,
 //
 
-extern "C" {
-drawcolumn_t dcol;
-drawspan_t dspan;
+extern "C"
+{
+    drawcolumn_t dcol;
+    drawspan_t   dspan;
 }
 
-byte*			viewimage;
+byte *viewimage;
 
-extern "C" {
-int 			viewwidth;
-int 			viewheight;
+extern "C"
+{
+    int viewwidth;
+    int viewheight;
 }
 
-int 			scaledviewwidth;
-int 			viewwindowx;
-int 			viewwindowy;
+int scaledviewwidth;
+int viewwindowx;
+int viewwindowy;
 
 // [RH] Pointers to the different column drawers.
 //		These get changed depending on the current
@@ -91,7 +92,7 @@ void (*R_FillTranslucentSpan)(void);
 // Possibly vectorized functions:
 void (*R_DrawSpanD)(void);
 void (*R_DrawSlopeSpanD)(void);
-void (*r_dimpatchD)(IWindowSurface* surface, argb_t color, int alpha, int x1, int y1, int w, int h);
+void (*r_dimpatchD)(IWindowSurface *surface, argb_t color, int alpha, int x1, int y1, int w, int h);
 
 // ============================================================================
 //
@@ -106,48 +107,42 @@ void (*r_dimpatchD)(IWindowSurface* surface, argb_t color, int alpha, int x1, in
 
 class FuzzTable
 {
-public:
-	FuzzTable() : pos(0) { }
+  public:
+    FuzzTable() : pos(0)
+    {
+    }
 
-	forceinline void incrementRow()
-	{
-		pos = (pos + 1) % FuzzTable::size;
-	}
+    forceinline void incrementRow()
+    {
+        pos = (pos + 1) % FuzzTable::size;
+    }
 
-	forceinline void incrementColumn()
-	{
-		pos = (pos + 3) % FuzzTable::size;
-	}
+    forceinline void incrementColumn()
+    {
+        pos = (pos + 3) % FuzzTable::size;
+    }
 
-	forceinline int getValue() const
-	{
-		// [SL] quickly convert the table value (-1 or 1) into (-pitch or pitch).
-		// [AM] Replaced with a multiply that returns accurate results.  Hopefully
-		//      we can find a way to improve upon an imul someday.
-		int pitch = R_GetRenderingSurface()->getPitchInPixels();
-		int value = table[pos];
-		return pitch * value;
-	}
+    forceinline int getValue() const
+    {
+        // [SL] quickly convert the table value (-1 or 1) into (-pitch or pitch).
+        // [AM] Replaced with a multiply that returns accurate results.  Hopefully
+        //      we can find a way to improve upon an imul someday.
+        int pitch = R_GetRenderingSurface()->getPitchInPixels();
+        int value = table[pos];
+        return pitch * value;
+    }
 
-private:
-	static const size_t size = 64;
-	static const int table[FuzzTable::size];
-	int pos;
+  private:
+    static const size_t size = 64;
+    static const int    table[FuzzTable::size];
+    int                 pos;
 };
 
 const int FuzzTable::table[FuzzTable::size] = {
-		1,-1, 1,-1, 1, 1,-1, 1,
-		1,-1, 1, 1, 1,-1, 1, 1,
-		1,-1,-1,-1,-1, 1,-1,-1,
-		1, 1, 1, 1,-1, 1,-1, 1,
-		1,-1,-1, 1, 1,-1,-1,-1,
-	   -1, 1, 1, 1, 1,-1, 1, 1,
-	   -1, 1, 1, 1,-1, 1, 1, 1,
-	   -1, 1, 1,-1, 1, 1,-1, 1 };
-
+    1, -1, 1,  -1, 1, 1,  -1, 1,  1,  -1, 1, 1, 1, -1, 1, 1, 1,  -1, -1, -1, -1, 1, -1, -1, 1,  1, 1, 1,  -1, 1, -1, 1,
+    1, -1, -1, 1,  1, -1, -1, -1, -1, 1,  1, 1, 1, -1, 1, 1, -1, 1,  1,  1,  -1, 1, 1,  1,  -1, 1, 1, -1, 1,  1, -1, 1};
 
 static FuzzTable fuzztable;
-
 
 // ============================================================================
 //
@@ -196,7 +191,6 @@ current value >> 19. When asm-optimised, this should be the fastest
 algorithm that uses RGB tables.
 */
 
-
 // ============================================================================
 //
 // Indexed-color Translation Table
@@ -208,124 +202,124 @@ algorithm that uses RGB tables.
 //
 // ============================================================================
 
-byte* translationtables;
-argb_t translationRGB[MAXPLAYERS+1][16];
-byte *Ranges;
+byte        *translationtables;
+argb_t       translationRGB[MAXPLAYERS + 1][16];
+byte        *Ranges;
 static byte *translationtablesmem = NULL;
-byte bosstable[256];
+byte         bosstable[256];
 
 static void R_BuildFontTranslation(int color_num, argb_t start_color, argb_t end_color)
 {
-	const palindex_t chexstart_index = 0x70;
-	const palindex_t chexend_index = 0x7F;
-	const palindex_t hacxstart_index = 0xC3;
-	const palindex_t hacxmid1_index = 0xCF;
-	const palindex_t hacxmid2_index = 0xF0;
-	const palindex_t hacxend_index = 0xF2;
-	const palindex_t start_index = 0xB0;
-	const palindex_t end_index = 0xBF;
-	const int index_range = end_index - start_index + 1;
+    const palindex_t chexstart_index = 0x70;
+    const palindex_t chexend_index   = 0x7F;
+    const palindex_t hacxstart_index = 0xC3;
+    const palindex_t hacxmid1_index  = 0xCF;
+    const palindex_t hacxmid2_index  = 0xF0;
+    const palindex_t hacxend_index   = 0xF2;
+    const palindex_t start_index     = 0xB0;
+    const palindex_t end_index       = 0xBF;
+    const int        index_range     = end_index - start_index + 1;
 
-	palindex_t* dest = (palindex_t*)Ranges + color_num * 256;
+    palindex_t *dest = (palindex_t *)Ranges + color_num * 256;
 
-	if (gamemode == retail_chex)
-	{
-		for (int index = 0; index < chexstart_index; index++)
-			dest[index] = index;
-		for (int index = chexend_index + 1; index < 256; index++)
-			dest[index] = index;
-	}
-	else if (gamemission == commercial_hacx)
-	{
-		for (int index = 0; index < hacxstart_index; index++)
-			dest[index] = index;
-		for (int index = hacxmid1_index + 1; index < hacxmid2_index; index++)
-			dest[index] = index;
-		for (int index = hacxend_index + 1; index < 256; index++)
-			dest[index] = index;
-	}
-	else
-	{
-		for (int index = 0; index < start_index; index++)
-			dest[index] = index;
-		for (int index = end_index + 1; index < 256; index++)
-			dest[index] = index;
-	}
+    if (gamemode == retail_chex)
+    {
+        for (int index = 0; index < chexstart_index; index++)
+            dest[index] = index;
+        for (int index = chexend_index + 1; index < 256; index++)
+            dest[index] = index;
+    }
+    else if (gamemission == commercial_hacx)
+    {
+        for (int index = 0; index < hacxstart_index; index++)
+            dest[index] = index;
+        for (int index = hacxmid1_index + 1; index < hacxmid2_index; index++)
+            dest[index] = index;
+        for (int index = hacxend_index + 1; index < 256; index++)
+            dest[index] = index;
+    }
+    else
+    {
+        for (int index = 0; index < start_index; index++)
+            dest[index] = index;
+        for (int index = end_index + 1; index < 256; index++)
+            dest[index] = index;
+    }
 
-	int r_diff = end_color.getr() - start_color.getr();
-	int g_diff = end_color.getg() - start_color.getg();
-	int b_diff = end_color.getb() - start_color.getb();
-	int hacxtrack;
+    int r_diff = end_color.getr() - start_color.getr();
+    int g_diff = end_color.getg() - start_color.getg();
+    int b_diff = end_color.getb() - start_color.getb();
+    int hacxtrack;
 
-	if (gamemode == retail_chex)
-	{
-		for (palindex_t index = chexstart_index; index <= chexend_index; index++)
-		{
-			int i = index - chexstart_index;
+    if (gamemode == retail_chex)
+    {
+        for (palindex_t index = chexstart_index; index <= chexend_index; index++)
+        {
+            int i = index - chexstart_index;
 
-			int r = start_color.getr() + i * r_diff / index_range;
-			int g = start_color.getg() + i * g_diff / index_range;
-			int b = start_color.getb() + i * b_diff / index_range;
+            int r = start_color.getr() + i * r_diff / index_range;
+            int g = start_color.getg() + i * g_diff / index_range;
+            int b = start_color.getb() + i * b_diff / index_range;
 
-			dest[index] = V_BestColor(V_GetDefaultPalette()->basecolors, r, g, b);
-		}
+            dest[index] = V_BestColor(V_GetDefaultPalette()->basecolors, r, g, b);
+        }
 
-		dest[0x2C] = dest[0x2D] = dest[0x2F] = dest[chexend_index];
-	}
-	else if (gamemission == commercial_hacx)
-	{
-		for (palindex_t index = hacxstart_index; index <= hacxend_index; index++)
-		{
-			if (index > hacxmid1_index && index < hacxmid2_index)
-				index = hacxmid2_index;
+        dest[0x2C] = dest[0x2D] = dest[0x2F] = dest[chexend_index];
+    }
+    else if (gamemission == commercial_hacx)
+    {
+        for (palindex_t index = hacxstart_index; index <= hacxend_index; index++)
+        {
+            if (index > hacxmid1_index && index < hacxmid2_index)
+                index = hacxmid2_index;
 
-			if (index <= hacxmid1_index)
-				hacxtrack = hacxstart_index;
-			else
-				hacxtrack = hacxmid2_index - (hacxmid1_index - hacxstart_index + 1);
-			int i = index - hacxtrack;
+            if (index <= hacxmid1_index)
+                hacxtrack = hacxstart_index;
+            else
+                hacxtrack = hacxmid2_index - (hacxmid1_index - hacxstart_index + 1);
+            int i = index - hacxtrack;
 
-			int r = start_color.getr() + i * r_diff / index_range;
-			int g = start_color.getg() + i * g_diff / index_range;
-			int b = start_color.getb() + i * b_diff / index_range;
+            int r = start_color.getr() + i * r_diff / index_range;
+            int g = start_color.getg() + i * g_diff / index_range;
+            int b = start_color.getb() + i * b_diff / index_range;
 
-			dest[index] = V_BestColor(V_GetDefaultPalette()->basecolors, r, g, b);
-		}
+            dest[index] = V_BestColor(V_GetDefaultPalette()->basecolors, r, g, b);
+        }
 
-		dest[0x2C] = dest[0x2D] = dest[0x2F] = dest[hacxend_index];
-	}
-	else
-	{
-		for (palindex_t index = start_index; index <= end_index; index++)
-		{
-			int i = index - start_index;
+        dest[0x2C] = dest[0x2D] = dest[0x2F] = dest[hacxend_index];
+    }
+    else
+    {
+        for (palindex_t index = start_index; index <= end_index; index++)
+        {
+            int i = index - start_index;
 
-			int r = start_color.getr() + i * r_diff / index_range;
-			int g = start_color.getg() + i * g_diff / index_range;
-			int b = start_color.getb() + i * b_diff / index_range;
+            int r = start_color.getr() + i * r_diff / index_range;
+            int g = start_color.getg() + i * g_diff / index_range;
+            int b = start_color.getb() + i * b_diff / index_range;
 
-			dest[index] = V_BestColor(V_GetDefaultPalette()->basecolors, r, g, b);
-		}
+            dest[index] = V_BestColor(V_GetDefaultPalette()->basecolors, r, g, b);
+        }
 
-		dest[0x2C] = dest[0x2D] = dest[0x2F] = dest[end_index];
-	}
+        dest[0x2C] = dest[0x2D] = dest[0x2F] = dest[end_index];
+    }
 }
 
 /**
  * @brief Apply a soft light filter using Pegtop's formula.
- * 
+ *
  * @see https://en.wikipedia.org/wiki/Blend_modes#Soft_Light
- * 
+ *
  * @param bot Bottom channel value.
  * @param top Top channel value.
  * @return Filtered value.
-*/
+ */
 static byte SoftLight(const byte bot, const byte top)
 {
-	const float a = bot / 255.f;
-	const float b = top / 255.f;
-	const float res = (1.f - 2.f * b) * pow(a, 2.f) + (2.f * b * a);
-	return res * 255;
+    const float a   = bot / 255.f;
+    const float b   = top / 255.f;
+    const float res = (1.f - 2.f * b) * pow(a, 2.f) + (2.f * b * a);
+    return res * 255;
 }
 
 //
@@ -340,162 +334,161 @@ void R_InitTranslationTables()
 {
     R_FreeTranslationTables();
 
-	// Boss translation is a yellow tint.
-	argb_t top(0xff, 0xff, 0x73);
-	for (size_t i = 0; i < ARRAY_LENGTH(::bosstable); i++)
-	{
-		const argb_t bot = V_GetDefaultPalette()->basecolors[i];
-		const argb_t mul(SoftLight(bot.getr(), top.getr()),
-		                 SoftLight(bot.getg(), top.getg()),
-		                 SoftLight(bot.getb(), top.getb()));
+    // Boss translation is a yellow tint.
+    argb_t top(0xff, 0xff, 0x73);
+    for (size_t i = 0; i < ARRAY_LENGTH(::bosstable); i++)
+    {
+        const argb_t bot = V_GetDefaultPalette()->basecolors[i];
+        const argb_t mul(SoftLight(bot.getr(), top.getr()), SoftLight(bot.getg(), top.getg()),
+                         SoftLight(bot.getb(), top.getb()));
 
-		::bosstable[i] = V_BestColor(V_GetDefaultPalette()->basecolors, mul);
-	}
+        ::bosstable[i] = V_BestColor(V_GetDefaultPalette()->basecolors, mul);
+    }
 
-	translationtablesmem = new byte[256*(MAXPLAYERS+3+22)+255]; // denis - fixme - magic numbers?
+    translationtablesmem = new byte[256 * (MAXPLAYERS + 3 + 22) + 255]; // denis - fixme - magic numbers?
 
-	// [Toke - fix13]
-	// denis - cleaned this up somewhat
-	translationtables = (byte *)(((ptrdiff_t)translationtablesmem + 255) & ~255);
-	
-	// [RH] Each player now gets their own translation table
-	//		(soon to be palettes). These are set up during
-	//		netgame arbitration and as-needed rather than
-	//		in here. We do, however load some text translation
-	//		tables from our PWAD (ala BOOM).
+    // [Toke - fix13]
+    // denis - cleaned this up somewhat
+    translationtables = (byte *)(((ptrdiff_t)translationtablesmem + 255) & ~255);
 
-	for (int i = 0; i < 256; i++)
-		translationtables[i] = i;
+    // [RH] Each player now gets their own translation table
+    //		(soon to be palettes). These are set up during
+    //		netgame arbitration and as-needed rather than
+    //		in here. We do, however load some text translation
+    //		tables from our PWAD (ala BOOM).
 
-	// Set up default translationRGB tables:
-	const palette_t* pal = V_GetDefaultPalette();
-	for (int i = 0; i < MAXPLAYERS; ++i)
-	{
-		for (int j = 0x70; j < 0x80; ++j)
-			translationRGB[i][j - 0x70] = pal->basecolors[j];
-	}
+    for (int i = 0; i < 256; i++)
+        translationtables[i] = i;
 
-	for (int i = 1; i < MAXPLAYERS+3; i++)
-		memcpy (translationtables + i*256, translationtables, 256);
+    // Set up default translationRGB tables:
+    const palette_t *pal = V_GetDefaultPalette();
+    for (int i = 0; i < MAXPLAYERS; ++i)
+    {
+        for (int j = 0x70; j < 0x80; ++j)
+            translationRGB[i][j - 0x70] = pal->basecolors[j];
+    }
 
-	// create translation tables for dehacked patches that expect them
-	for (int i = 0x70; i < 0x80; i++) {
-		// map green ramp to gray, brown, red
-		translationtables[i+(MAXPLAYERS+0)*256] = 0x60 + (i&0xf);
-		translationtables[i+(MAXPLAYERS+1)*256] = 0x40 + (i&0xf);
-		translationtables[i+(MAXPLAYERS+2)*256] = 0x20 + (i&0xf);
-	}
+    for (int i = 1; i < MAXPLAYERS + 3; i++)
+        memcpy(translationtables + i * 256, translationtables, 256);
 
-	Ranges = translationtables + (MAXPLAYERS+3)*256;
+    // create translation tables for dehacked patches that expect them
+    for (int i = 0x70; i < 0x80; i++)
+    {
+        // map green ramp to gray, brown, red
+        translationtables[i + (MAXPLAYERS + 0) * 256] = 0x60 + (i & 0xf);
+        translationtables[i + (MAXPLAYERS + 1) * 256] = 0x40 + (i & 0xf);
+        translationtables[i + (MAXPLAYERS + 2) * 256] = 0x20 + (i & 0xf);
+    }
 
-	R_BuildFontTranslation(CR_BRICK,	argb_t(0xFF, 0xB8, 0xB8), argb_t(0x47, 0x00, 0x00));
-	R_BuildFontTranslation(CR_TAN,		argb_t(0xFF, 0xEB, 0xDF), argb_t(0x33, 0x2B, 0x13));	
-	R_BuildFontTranslation(CR_GRAY,		argb_t(0xEF, 0xEF, 0xEF), argb_t(0x27, 0x27, 0x27));	
-	R_BuildFontTranslation(CR_GREEN,	argb_t(0x77, 0xFF, 0x6F), argb_t(0x0B, 0x17, 0x07));	
-	R_BuildFontTranslation(CR_BROWN,	argb_t(0xBF, 0xA7, 0x8F), argb_t(0x53, 0x3F, 0x2F));	
-	R_BuildFontTranslation(CR_GOLD,		argb_t(0xFF, 0xFF, 0x73), argb_t(0x73, 0x2B, 0x00));	
-	R_BuildFontTranslation(CR_RED,		argb_t(0xFF, 0x00, 0x00), argb_t(0x3F, 0x00, 0x00));
-	R_BuildFontTranslation(CR_BLUE,		argb_t(0x00, 0x00, 0xFF), argb_t(0x00, 0x00, 0x27));	
-	R_BuildFontTranslation(CR_ORANGE,	argb_t(0xFF, 0x80, 0x00), argb_t(0x20, 0x00, 0x00));	
-	R_BuildFontTranslation(CR_WHITE,	argb_t(0xFF, 0xFF, 0xFF), argb_t(0x24, 0x24, 0x24));	
-	R_BuildFontTranslation(CR_YELLOW,	argb_t(0xFC, 0xD0, 0x43), argb_t(0x27, 0x27, 0x27));
-	R_BuildFontTranslation(CR_BLACK,	argb_t(0x50, 0x50, 0x50), argb_t(0x13, 0x13, 0x13));
-	R_BuildFontTranslation(CR_LIGHTBLUE,argb_t(0xB4, 0xB4, 0xFF), argb_t(0x00, 0x00, 0x73));
-	R_BuildFontTranslation(CR_CREAM,	argb_t(0xFF, 0xD7, 0xBB), argb_t(0xCF, 0x83, 0x53));
-	R_BuildFontTranslation(CR_OLIVE,	argb_t(0x7B, 0x7F, 0x50), argb_t(0x2F, 0x37, 0x1F));
-	R_BuildFontTranslation(CR_DARKGREEN,argb_t(0x43, 0x93, 0x37), argb_t(0x0B, 0x17, 0x07));
-	R_BuildFontTranslation(CR_DARKRED,	argb_t(0xAF, 0x2B, 0x2B), argb_t(0x2B, 0x00, 0x00));
-	R_BuildFontTranslation(CR_DARKBROWN,argb_t(0xA3, 0x6B, 0x3F), argb_t(0x1F, 0x17, 0x0B));
-	R_BuildFontTranslation(CR_PURPLE,	argb_t(0xCF, 0x00, 0xCF), argb_t(0x23, 0x00, 0x23));
-	R_BuildFontTranslation(CR_DARKGRAY,	argb_t(0x8B, 0x8B, 0x8B), argb_t(0x23, 0x23, 0x23));
-	R_BuildFontTranslation(CR_CYAN,		argb_t(0x00, 0xF0, 0xF0), argb_t(0x00, 0x1F, 0x1F));
+    Ranges = translationtables + (MAXPLAYERS + 3) * 256;
+
+    R_BuildFontTranslation(CR_BRICK, argb_t(0xFF, 0xB8, 0xB8), argb_t(0x47, 0x00, 0x00));
+    R_BuildFontTranslation(CR_TAN, argb_t(0xFF, 0xEB, 0xDF), argb_t(0x33, 0x2B, 0x13));
+    R_BuildFontTranslation(CR_GRAY, argb_t(0xEF, 0xEF, 0xEF), argb_t(0x27, 0x27, 0x27));
+    R_BuildFontTranslation(CR_GREEN, argb_t(0x77, 0xFF, 0x6F), argb_t(0x0B, 0x17, 0x07));
+    R_BuildFontTranslation(CR_BROWN, argb_t(0xBF, 0xA7, 0x8F), argb_t(0x53, 0x3F, 0x2F));
+    R_BuildFontTranslation(CR_GOLD, argb_t(0xFF, 0xFF, 0x73), argb_t(0x73, 0x2B, 0x00));
+    R_BuildFontTranslation(CR_RED, argb_t(0xFF, 0x00, 0x00), argb_t(0x3F, 0x00, 0x00));
+    R_BuildFontTranslation(CR_BLUE, argb_t(0x00, 0x00, 0xFF), argb_t(0x00, 0x00, 0x27));
+    R_BuildFontTranslation(CR_ORANGE, argb_t(0xFF, 0x80, 0x00), argb_t(0x20, 0x00, 0x00));
+    R_BuildFontTranslation(CR_WHITE, argb_t(0xFF, 0xFF, 0xFF), argb_t(0x24, 0x24, 0x24));
+    R_BuildFontTranslation(CR_YELLOW, argb_t(0xFC, 0xD0, 0x43), argb_t(0x27, 0x27, 0x27));
+    R_BuildFontTranslation(CR_BLACK, argb_t(0x50, 0x50, 0x50), argb_t(0x13, 0x13, 0x13));
+    R_BuildFontTranslation(CR_LIGHTBLUE, argb_t(0xB4, 0xB4, 0xFF), argb_t(0x00, 0x00, 0x73));
+    R_BuildFontTranslation(CR_CREAM, argb_t(0xFF, 0xD7, 0xBB), argb_t(0xCF, 0x83, 0x53));
+    R_BuildFontTranslation(CR_OLIVE, argb_t(0x7B, 0x7F, 0x50), argb_t(0x2F, 0x37, 0x1F));
+    R_BuildFontTranslation(CR_DARKGREEN, argb_t(0x43, 0x93, 0x37), argb_t(0x0B, 0x17, 0x07));
+    R_BuildFontTranslation(CR_DARKRED, argb_t(0xAF, 0x2B, 0x2B), argb_t(0x2B, 0x00, 0x00));
+    R_BuildFontTranslation(CR_DARKBROWN, argb_t(0xA3, 0x6B, 0x3F), argb_t(0x1F, 0x17, 0x0B));
+    R_BuildFontTranslation(CR_PURPLE, argb_t(0xCF, 0x00, 0xCF), argb_t(0x23, 0x00, 0x23));
+    R_BuildFontTranslation(CR_DARKGRAY, argb_t(0x8B, 0x8B, 0x8B), argb_t(0x23, 0x23, 0x23));
+    R_BuildFontTranslation(CR_CYAN, argb_t(0x00, 0xF0, 0xF0), argb_t(0x00, 0x1F, 0x1F));
 }
 
-void R_FreeTranslationTables (void)
+void R_FreeTranslationTables(void)
 {
     delete[] translationtablesmem;
     translationtablesmem = NULL;
 }
 
 // [Nes] Vanilla player translation table.
-void R_BuildClassicPlayerTranslation (int player, int color)
+void R_BuildClassicPlayerTranslation(int player, int color)
 {
-	const palette_t* pal = V_GetDefaultPalette();
-	int i;
-	
-	if (color == 1) // Indigo
-		for (i = 0x70; i < 0x80; i++)
-		{
-			translationtables[i+(player * 256)] = 0x60 + (i&0xf);
-			translationRGB[player][i - 0x70] = pal->basecolors[translationtables[i+(player * 256)]];
-		}
-	else if (color == 2) // Brown
-		for (i = 0x70; i < 0x80; i++)
-		{
-			translationtables[i+(player * 256)] = 0x40 + (i&0xf);	
-			translationRGB[player][i - 0x70] = pal->basecolors[translationtables[i+(player * 256)]];
-		}
-	else if (color == 3) // Red
-		for (i = 0x70; i < 0x80; i++)
-		{
-			translationtables[i+(player * 256)] = 0x20 + (i&0xf);	
-			translationRGB[player][i - 0x70] = pal->basecolors[translationtables[i+(player * 256)]];
-		}
+    const palette_t *pal = V_GetDefaultPalette();
+    int              i;
+
+    if (color == 1) // Indigo
+        for (i = 0x70; i < 0x80; i++)
+        {
+            translationtables[i + (player * 256)] = 0x60 + (i & 0xf);
+            translationRGB[player][i - 0x70]      = pal->basecolors[translationtables[i + (player * 256)]];
+        }
+    else if (color == 2) // Brown
+        for (i = 0x70; i < 0x80; i++)
+        {
+            translationtables[i + (player * 256)] = 0x40 + (i & 0xf);
+            translationRGB[player][i - 0x70]      = pal->basecolors[translationtables[i + (player * 256)]];
+        }
+    else if (color == 3) // Red
+        for (i = 0x70; i < 0x80; i++)
+        {
+            translationtables[i + (player * 256)] = 0x20 + (i & 0xf);
+            translationRGB[player][i - 0x70]      = pal->basecolors[translationtables[i + (player * 256)]];
+        }
 }
 
-void R_CopyTranslationRGB (int fromplayer, int toplayer)
+void R_CopyTranslationRGB(int fromplayer, int toplayer)
 {
-	for (int i = 0x70; i < 0x80; ++i)
-	{
-		translationRGB[toplayer][i - 0x70] = translationRGB[fromplayer][i - 0x70];
-		translationtables[i+(toplayer * 256)] = translationtables[i+(fromplayer * 256)];
-	}
+    for (int i = 0x70; i < 0x80; ++i)
+    {
+        translationRGB[toplayer][i - 0x70]      = translationRGB[fromplayer][i - 0x70];
+        translationtables[i + (toplayer * 256)] = translationtables[i + (fromplayer * 256)];
+    }
 }
 
 // [RH] Create a player's translation table based on
 //		a given mid-range color.
 void R_BuildPlayerTranslation(int player, argb_t dest_color)
 {
-	const palette_t* pal = V_GetDefaultPalette();
-	byte* table = &translationtables[player * 256];
+    const palette_t *pal   = V_GetDefaultPalette();
+    byte            *table = &translationtables[player * 256];
 
-	fahsv_t hsv_temp = V_RGBtoHSV(dest_color);
-	float h = hsv_temp.geth(), s = hsv_temp.gets(), v = hsv_temp.getv();
+    fahsv_t hsv_temp = V_RGBtoHSV(dest_color);
+    float   h = hsv_temp.geth(), s = hsv_temp.gets(), v = hsv_temp.getv();
 
-	s -= 0.23f;
-	if (s < 0.0f)
-		s = 0.0f;
-	float sdelta = 0.014375f;
+    s -= 0.23f;
+    if (s < 0.0f)
+        s = 0.0f;
+    float sdelta = 0.014375f;
 
-	v += 0.1f;
-	if (v > 1.0f)
-		v = 1.0f;
-	float vdelta = -0.05882f;
+    v += 0.1f;
+    if (v > 1.0f)
+        v = 1.0f;
+    float vdelta = -0.05882f;
 
-	for (int i = 0x70; i < 0x80; i++)
-	{
-		argb_t color(V_HSVtoRGB(fahsv_t(h, s, v)));
+    for (int i = 0x70; i < 0x80; i++)
+    {
+        argb_t color(V_HSVtoRGB(fahsv_t(h, s, v)));
 
-		// Set up RGB values for 32bpp translation:
-		translationRGB[player][i - 0x70] = color;
-		table[i] = V_BestColor(pal->basecolors, color);
+        // Set up RGB values for 32bpp translation:
+        translationRGB[player][i - 0x70] = color;
+        table[i]                         = V_BestColor(pal->basecolors, color);
 
-		s += sdelta;
-		if (s > 1.0f)
-		{
-			s = 1.0f;
-			sdelta = 0.0f;
-		}
+        s += sdelta;
+        if (s > 1.0f)
+        {
+            s      = 1.0f;
+            sdelta = 0.0f;
+        }
 
-		v += vdelta;
-		if (v < 0.0f)
-		{
-			v = 0.0f;
-			vdelta = 0.0f;
-		}
-	}
+        v += vdelta;
+        if (v < 0.0f)
+        {
+            v      = 0.0f;
+            vdelta = 0.0f;
+        }
+    }
 }
-
 
 // ============================================================================
 //
@@ -512,7 +505,6 @@ void R_BuildPlayerTranslation(int player, argb_t dest_color)
 // and the inner loop has to step in texture space u and v.
 //
 // ============================================================================
-
 
 // ============================================================================
 //
@@ -545,35 +537,35 @@ void R_BlankSpan()
 //
 // R_FillColumnGeneric
 //
-// Templated version of a function to fill a column with a solid color. 
+// Templated version of a function to fill a column with a solid color.
 // The data type of the destination pixels and a color-remapping functor
 // are passed as template parameters.
 //
-template<typename PIXEL_T, typename COLORFUNC>
-static forceinline void R_FillColumnGeneric(PIXEL_T* dest, const drawcolumn_t& drawcolumn)
+template <typename PIXEL_T, typename COLORFUNC>
+static forceinline void R_FillColumnGeneric(PIXEL_T *dest, const drawcolumn_t &drawcolumn)
 {
-#ifdef RANGECHECK 
-	if (drawcolumn.x < 0 || drawcolumn.x >= viewwidth || drawcolumn.yl < 0 || drawcolumn.yh >= viewheight)
-	{
-		Printf (PRINT_HIGH, "R_FillColumn: %i to %i at %i\n", drawcolumn.yl, drawcolumn.yh, drawcolumn.x);
-		return;
-	}
+#ifdef RANGECHECK
+    if (drawcolumn.x < 0 || drawcolumn.x >= viewwidth || drawcolumn.yl < 0 || drawcolumn.yh >= viewheight)
+    {
+        Printf(PRINT_HIGH, "R_FillColumn: %i to %i at %i\n", drawcolumn.yl, drawcolumn.yh, drawcolumn.x);
+        return;
+    }
 #endif
 
-	int color = drawcolumn.color;
-	int pitch = drawcolumn.pitch_in_pixels;
-	int count = drawcolumn.yh - drawcolumn.yl + 1;
-	if (count <= 0)
-		return;
+    int color = drawcolumn.color;
+    int pitch = drawcolumn.pitch_in_pixels;
+    int count = drawcolumn.yh - drawcolumn.yl + 1;
+    if (count <= 0)
+        return;
 
-	COLORFUNC colorfunc(drawcolumn);
+    COLORFUNC colorfunc(drawcolumn);
 
-	do {
-		colorfunc(color, dest);
-		dest += pitch;
-	} while (--count);
-} 
-
+    do
+    {
+        colorfunc(color, dest);
+        dest += pitch;
+    } while (--count);
+}
 
 //
 // R_DrawColumnGeneric
@@ -588,105 +580,120 @@ static forceinline void R_FillColumnGeneric(PIXEL_T* dest, const drawcolumn_t& d
 // The data type of the destination pixels and a color-remapping functor
 // are passed as template parameters.
 //
-template<typename PIXEL_T, typename COLORFUNC>
-static forceinline void R_DrawColumnGeneric(PIXEL_T* dest, const drawcolumn_t& drawcolumn)
+template <typename PIXEL_T, typename COLORFUNC>
+static forceinline void R_DrawColumnGeneric(PIXEL_T *dest, const drawcolumn_t &drawcolumn)
 {
-#ifdef RANGECHECK 
-	if (drawcolumn.x < 0 || drawcolumn.x >= viewwidth || drawcolumn.yl < 0 || drawcolumn.yh >= viewheight)
-	{
-		Printf (PRINT_HIGH, "R_DrawColumn: %i to %i at %i\n", drawcolumn.yl, drawcolumn.yh, drawcolumn.x);
-		return;
-	}
+#ifdef RANGECHECK
+    if (drawcolumn.x < 0 || drawcolumn.x >= viewwidth || drawcolumn.yl < 0 || drawcolumn.yh >= viewheight)
+    {
+        Printf(PRINT_HIGH, "R_DrawColumn: %i to %i at %i\n", drawcolumn.yl, drawcolumn.yh, drawcolumn.x);
+        return;
+    }
 #endif
 
-	palindex_t* source = drawcolumn.source;
-	int pitch = drawcolumn.pitch_in_pixels;
-	int count = drawcolumn.yh - drawcolumn.yl + 1;
-	if (count <= 0)
-		return;
+    palindex_t *source = drawcolumn.source;
+    int         pitch  = drawcolumn.pitch_in_pixels;
+    int         count  = drawcolumn.yh - drawcolumn.yl + 1;
+    if (count <= 0)
+        return;
 
-	const fixed_t fracstep = drawcolumn.iscale; 
-	fixed_t frac = drawcolumn.texturefrac;
+    const fixed_t fracstep = drawcolumn.iscale;
+    fixed_t       frac     = drawcolumn.texturefrac;
 
-	const int texheight = drawcolumn.textureheight;
-	const int mask = (texheight >> FRACBITS) - 1;
+    const int texheight = drawcolumn.textureheight;
+    const int mask      = (texheight >> FRACBITS) - 1;
 
-	COLORFUNC colorfunc(drawcolumn);
+    COLORFUNC colorfunc(drawcolumn);
 
-	// [SL] Properly tile textures whose heights are not a power-of-2,
-	// avoiding a tutti-frutti effect.  From Eternity Engine.
-	if (texheight & (texheight - 1))
-	{
-		// texture height is NOT a power-of-2
-		// just do a simple blit to the dest buffer (I'm lazy)
+    // [SL] Properly tile textures whose heights are not a power-of-2,
+    // avoiding a tutti-frutti effect.  From Eternity Engine.
+    if (texheight & (texheight - 1))
+    {
+        // texture height is NOT a power-of-2
+        // just do a simple blit to the dest buffer (I'm lazy)
 
-		if (frac < 0)
-			while ((frac += texheight) < 0);
-		else
-			while (frac >= texheight)
-				frac -= texheight;
+        if (frac < 0)
+            while ((frac += texheight) < 0)
+                ;
+        else
+            while (frac >= texheight)
+                frac -= texheight;
 
-		while (count--)
-		{
-			colorfunc(source[frac >> FRACBITS], dest);
-			dest += pitch;
-			if ((frac += fracstep) >= texheight)
-				frac -= texheight;
-		}
-	}
-	else
-	{
-		// texture height is a power-of-2
-		// do some loop unrolling
-		while (count >= 8)
-		{
-			colorfunc(source[(frac >> FRACBITS) & mask], dest);
-			dest += pitch; frac += fracstep;
-			colorfunc(source[(frac >> FRACBITS) & mask], dest);
-			dest += pitch; frac += fracstep;
-			colorfunc(source[(frac >> FRACBITS) & mask], dest);
-			dest += pitch; frac += fracstep;
-			colorfunc(source[(frac >> FRACBITS) & mask], dest);
-			dest += pitch; frac += fracstep;
-			colorfunc(source[(frac >> FRACBITS) & mask], dest);
-			dest += pitch; frac += fracstep;
-			colorfunc(source[(frac >> FRACBITS) & mask], dest);
-			dest += pitch; frac += fracstep;
-			colorfunc(source[(frac >> FRACBITS) & mask], dest);
-			dest += pitch; frac += fracstep;
-			colorfunc(source[(frac >> FRACBITS) & mask], dest);
-			dest += pitch; frac += fracstep;
-			count -= 8;
-		}
+        while (count--)
+        {
+            colorfunc(source[frac >> FRACBITS], dest);
+            dest += pitch;
+            if ((frac += fracstep) >= texheight)
+                frac -= texheight;
+        }
+    }
+    else
+    {
+        // texture height is a power-of-2
+        // do some loop unrolling
+        while (count >= 8)
+        {
+            colorfunc(source[(frac >> FRACBITS) & mask], dest);
+            dest += pitch;
+            frac += fracstep;
+            colorfunc(source[(frac >> FRACBITS) & mask], dest);
+            dest += pitch;
+            frac += fracstep;
+            colorfunc(source[(frac >> FRACBITS) & mask], dest);
+            dest += pitch;
+            frac += fracstep;
+            colorfunc(source[(frac >> FRACBITS) & mask], dest);
+            dest += pitch;
+            frac += fracstep;
+            colorfunc(source[(frac >> FRACBITS) & mask], dest);
+            dest += pitch;
+            frac += fracstep;
+            colorfunc(source[(frac >> FRACBITS) & mask], dest);
+            dest += pitch;
+            frac += fracstep;
+            colorfunc(source[(frac >> FRACBITS) & mask], dest);
+            dest += pitch;
+            frac += fracstep;
+            colorfunc(source[(frac >> FRACBITS) & mask], dest);
+            dest += pitch;
+            frac += fracstep;
+            count -= 8;
+        }
 
-		if (count & 1)
-		{
-			colorfunc(source[(frac >> FRACBITS) & mask], dest);
-			dest += pitch; frac += fracstep;
-		}
+        if (count & 1)
+        {
+            colorfunc(source[(frac >> FRACBITS) & mask], dest);
+            dest += pitch;
+            frac += fracstep;
+        }
 
-		if (count & 2)
-		{
-			colorfunc(source[(frac >> FRACBITS) & mask], dest);
-			dest += pitch; frac += fracstep;
-			colorfunc(source[(frac >> FRACBITS) & mask], dest);
-			dest += pitch; frac += fracstep;
-		}
+        if (count & 2)
+        {
+            colorfunc(source[(frac >> FRACBITS) & mask], dest);
+            dest += pitch;
+            frac += fracstep;
+            colorfunc(source[(frac >> FRACBITS) & mask], dest);
+            dest += pitch;
+            frac += fracstep;
+        }
 
-		if (count & 4)
-		{
-			colorfunc(source[(frac >> FRACBITS) & mask], dest);
-			dest += pitch; frac += fracstep;
-			colorfunc(source[(frac >> FRACBITS) & mask], dest);
-			dest += pitch; frac += fracstep;
-			colorfunc(source[(frac >> FRACBITS) & mask], dest);
-			dest += pitch; frac += fracstep;
-			colorfunc(source[(frac >> FRACBITS) & mask], dest);
-			dest += pitch; frac += fracstep;
-		}
-	}
+        if (count & 4)
+        {
+            colorfunc(source[(frac >> FRACBITS) & mask], dest);
+            dest += pitch;
+            frac += fracstep;
+            colorfunc(source[(frac >> FRACBITS) & mask], dest);
+            dest += pitch;
+            frac += fracstep;
+            colorfunc(source[(frac >> FRACBITS) & mask], dest);
+            dest += pitch;
+            frac += fracstep;
+            colorfunc(source[(frac >> FRACBITS) & mask], dest);
+            dest += pitch;
+            frac += fracstep;
+        }
+    }
 }
-
 
 //
 // R_FillSpanGeneric
@@ -695,31 +702,31 @@ static forceinline void R_DrawColumnGeneric(PIXEL_T* dest, const drawcolumn_t& d
 // The data type of the destination pixels and a color-remapping functor
 // are passed as template parameters.
 //
-template<typename PIXEL_T, typename COLORFUNC>
-static forceinline void R_FillSpanGeneric(PIXEL_T* dest, const drawspan_t& drawspan)
+template <typename PIXEL_T, typename COLORFUNC>
+static forceinline void R_FillSpanGeneric(PIXEL_T *dest, const drawspan_t &drawspan)
 {
 #ifdef RANGECHECK
-	if (drawspan.x2 < drawspan.x1 || drawspan.x1 < 0 || drawspan.x2 >= viewwidth ||
-		drawspan.y >= viewheight || drawspan.y < 0)
-	{
-		Printf(PRINT_HIGH, "R_FillSpan: %i to %i at %i", drawspan.x1, drawspan.x2, drawspan.y);
-		return;
-	}
+    if (drawspan.x2 < drawspan.x1 || drawspan.x1 < 0 || drawspan.x2 >= viewwidth || drawspan.y >= viewheight ||
+        drawspan.y < 0)
+    {
+        Printf(PRINT_HIGH, "R_FillSpan: %i to %i at %i", drawspan.x1, drawspan.x2, drawspan.y);
+        return;
+    }
 #endif
 
-	int color = drawspan.color;
-	int count = drawspan.x2 - drawspan.x1 + 1;
-	if (count <= 0)
-		return;
+    int color = drawspan.color;
+    int count = drawspan.x2 - drawspan.x1 + 1;
+    if (count <= 0)
+        return;
 
-	COLORFUNC colorfunc(drawspan);
+    COLORFUNC colorfunc(drawspan);
 
-	do {
-		colorfunc(color, dest);
-		dest++;
-	} while (--count);
+    do
+    {
+        colorfunc(color, dest);
+        dest++;
+    } while (--count);
 }
-
 
 //
 // R_DrawLevelSpanGeneric
@@ -728,46 +735,46 @@ static forceinline void R_FillSpanGeneric(PIXEL_T* dest, const drawspan_t& draws
 // The data type of the destination pixels and a color-remapping functor
 // are passed as template parameters.
 //
-template<typename PIXEL_T, typename COLORFUNC>
-static forceinline void R_DrawLevelSpanGeneric(PIXEL_T* dest, const drawspan_t& drawspan)
+template <typename PIXEL_T, typename COLORFUNC>
+static forceinline void R_DrawLevelSpanGeneric(PIXEL_T *dest, const drawspan_t &drawspan)
 {
 #ifdef RANGECHECK
-	if (drawspan.x2 < drawspan.x1 || drawspan.x1 < 0 || drawspan.x2 >= viewwidth ||
-		drawspan.y >= viewheight || drawspan.y < 0)
-	{
-		Printf(PRINT_HIGH, "R_DrawLevelSpan: %i to %i at %i", drawspan.x1, drawspan.x2, drawspan.y);
-		return;
-	}
+    if (drawspan.x2 < drawspan.x1 || drawspan.x1 < 0 || drawspan.x2 >= viewwidth || drawspan.y >= viewheight ||
+        drawspan.y < 0)
+    {
+        Printf(PRINT_HIGH, "R_DrawLevelSpan: %i to %i at %i", drawspan.x1, drawspan.x2, drawspan.y);
+        return;
+    }
 #endif
 
-	palindex_t* source = drawspan.source;
-	int count = drawspan.x2 - drawspan.x1 + 1;
-	if (count <= 0)
-		return;
-	
-	dsfixed_t xfrac = drawspan.xfrac;
-	dsfixed_t yfrac = drawspan.yfrac;
-	const dsfixed_t xstep = drawspan.xstep;
-	const dsfixed_t ystep = drawspan.ystep;
+    palindex_t *source = drawspan.source;
+    int         count  = drawspan.x2 - drawspan.x1 + 1;
+    if (count <= 0)
+        return;
 
-	COLORFUNC colorfunc(drawspan);
+    dsfixed_t       xfrac = drawspan.xfrac;
+    dsfixed_t       yfrac = drawspan.yfrac;
+    const dsfixed_t xstep = drawspan.xstep;
+    const dsfixed_t ystep = drawspan.ystep;
 
-	do {
-		// Current texture index in u,v.
-		const int spot = ((yfrac >> (32-6-6)) & (63*64)) + (xfrac >> (32-6));
+    COLORFUNC colorfunc(drawspan);
 
-		// Lookup pixel from flat texture tile,
-		//  re-index using light/colormap.
+    do
+    {
+        // Current texture index in u,v.
+        const int spot = ((yfrac >> (32 - 6 - 6)) & (63 * 64)) + (xfrac >> (32 - 6));
 
-		colorfunc(source[spot], dest);
-		dest++;
+        // Lookup pixel from flat texture tile,
+        //  re-index using light/colormap.
 
-		// Next step in u,v.
-		xfrac += xstep;
-		yfrac += ystep;
-	} while (--count);
+        colorfunc(source[spot], dest);
+        dest++;
+
+        // Next step in u,v.
+        xfrac += xstep;
+        yfrac += ystep;
+    } while (--count);
 }
-
 
 //
 // R_DrawSlopedSpanGeneric
@@ -781,103 +788,102 @@ static forceinline void R_DrawLevelSpanGeneric(PIXEL_T* dest, const drawspan_t& 
 // The data type of the destination pixels and a color-remapping functor
 // are passed as template parameters.
 //
-template<typename PIXEL_T, typename COLORFUNC>
-static forceinline void R_DrawSlopedSpanGeneric(PIXEL_T* dest, const drawspan_t& drawspan)
+template <typename PIXEL_T, typename COLORFUNC>
+static forceinline void R_DrawSlopedSpanGeneric(PIXEL_T *dest, const drawspan_t &drawspan)
 {
 #ifdef RANGECHECK
-	if (drawspan.x2 < drawspan.x1 || drawspan.x1 < 0 || drawspan.x2 >= viewwidth ||
-		drawspan.y >= viewheight || drawspan.y < 0)
-	{
-		Printf(PRINT_HIGH, "R_DrawSlopedSpan: %i to %i at %i", drawspan.x1, drawspan.x2, drawspan.y);
-		return;
-	}
+    if (drawspan.x2 < drawspan.x1 || drawspan.x1 < 0 || drawspan.x2 >= viewwidth || drawspan.y >= viewheight ||
+        drawspan.y < 0)
+    {
+        Printf(PRINT_HIGH, "R_DrawSlopedSpan: %i to %i at %i", drawspan.x1, drawspan.x2, drawspan.y);
+        return;
+    }
 #endif
 
-	palindex_t* source = drawspan.source;
-	int count = drawspan.x2 - drawspan.x1 + 1;
-	if (count <= 0)
-		return;
-	
-	float iu = drawspan.iu, iv = drawspan.iv;
-	const float ius = drawspan.iustep, ivs = drawspan.ivstep;
-	float id = drawspan.id, ids = drawspan.idstep;
-	
-	int ltindex = 0;
+    palindex_t *source = drawspan.source;
+    int         count  = drawspan.x2 - drawspan.x1 + 1;
+    if (count <= 0)
+        return;
 
-	shaderef_t colormap;
-	COLORFUNC colorfunc(drawspan);
+    float       iu = drawspan.iu, iv = drawspan.iv;
+    const float ius = drawspan.iustep, ivs = drawspan.ivstep;
+    float       id = drawspan.id, ids = drawspan.idstep;
 
-	while (count >= SPANJUMP)
-	{
-		const float mulstart = 65536.0f / id;
-		id += ids * SPANJUMP;
-		const float mulend = 65536.0f / id;
+    int ltindex = 0;
 
-		const float ustart = iu * mulstart;
-		const float vstart = iv * mulstart;
+    shaderef_t colormap;
+    COLORFUNC  colorfunc(drawspan);
 
-		fixed_t ufrac = (fixed_t)ustart;
-		fixed_t vfrac = (fixed_t)vstart;
+    while (count >= SPANJUMP)
+    {
+        const float mulstart = 65536.0f / id;
+        id += ids * SPANJUMP;
+        const float mulend = 65536.0f / id;
 
-		iu += ius * SPANJUMP;
-		iv += ivs * SPANJUMP;
+        const float ustart = iu * mulstart;
+        const float vstart = iv * mulstart;
 
-		const float uend = iu * mulend;
-		const float vend = iv * mulend;
+        fixed_t ufrac = (fixed_t)ustart;
+        fixed_t vfrac = (fixed_t)vstart;
 
-		fixed_t ustep = (fixed_t)((uend - ustart) * INTERPSTEP);
-		fixed_t vstep = (fixed_t)((vend - vstart) * INTERPSTEP);
+        iu += ius * SPANJUMP;
+        iv += ivs * SPANJUMP;
 
-		int incount = SPANJUMP;
-		while (incount--)
-		{
-			colormap = drawspan.slopelighting[ltindex++];
+        const float uend = iu * mulend;
+        const float vend = iv * mulend;
 
-			const int spot = ((vfrac >> 10) & 0xFC0) | ((ufrac >> 16) & 63);
-			colorfunc(source[spot], dest);
-			dest++;
-			ufrac += ustep;
-			vfrac += vstep;
-		}
+        fixed_t ustep = (fixed_t)((uend - ustart) * INTERPSTEP);
+        fixed_t vstep = (fixed_t)((vend - vstart) * INTERPSTEP);
 
-		count -= SPANJUMP;
-	}
+        int incount = SPANJUMP;
+        while (incount--)
+        {
+            colormap = drawspan.slopelighting[ltindex++];
 
-	if (count > 0)
-	{
-		const float mulstart = 65536.0f / id;
-		id += ids * count;
-		const float mulend = 65536.0f / id;
+            const int spot = ((vfrac >> 10) & 0xFC0) | ((ufrac >> 16) & 63);
+            colorfunc(source[spot], dest);
+            dest++;
+            ufrac += ustep;
+            vfrac += vstep;
+        }
 
-		const float ustart = iu * mulstart;
-		const float vstart = iv * mulstart;
+        count -= SPANJUMP;
+    }
 
-		fixed_t ufrac = (fixed_t)ustart;
-		fixed_t vfrac = (fixed_t)vstart;
+    if (count > 0)
+    {
+        const float mulstart = 65536.0f / id;
+        id += ids * count;
+        const float mulend = 65536.0f / id;
 
-		iu += ius * count;
-		iv += ivs * count;
+        const float ustart = iu * mulstart;
+        const float vstart = iv * mulstart;
 
-		const float uend = iu * mulend;
-		const float vend = iv * mulend;
+        fixed_t ufrac = (fixed_t)ustart;
+        fixed_t vfrac = (fixed_t)vstart;
 
-		fixed_t ustep = (fixed_t)((uend - ustart) / count);
-		fixed_t vstep = (fixed_t)((vend - vstart) / count);
+        iu += ius * count;
+        iv += ivs * count;
 
-		int incount = count;
-		while (incount--)
-		{
-			colormap = drawspan.slopelighting[ltindex++];
+        const float uend = iu * mulend;
+        const float vend = iv * mulend;
 
-			const int spot = ((vfrac >> 10) & 0xFC0) | ((ufrac >> 16) & 63);
-			colorfunc(source[spot], dest);
-			dest++;
-			ufrac += ustep;
-			vfrac += vstep;
-		}
-	}
+        fixed_t ustep = (fixed_t)((uend - ustart) / count);
+        fixed_t vstep = (fixed_t)((vend - vstart) / count);
+
+        int incount = count;
+        while (incount--)
+        {
+            colormap = drawspan.slopelighting[ltindex++];
+
+            const int spot = ((vfrac >> 10) & 0xFC0) | ((ufrac >> 16) & 63);
+            colorfunc(source[spot], dest);
+            dest++;
+            ufrac += ustep;
+            vfrac += vstep;
+        }
+    }
 }
-
 
 /************************************/
 /*									*/
@@ -900,132 +906,141 @@ static forceinline void R_DrawSlopedSpanGeneric(PIXEL_T* dest, const drawspan_t&
 
 class PaletteFunc
 {
-public:
-	PaletteFunc(const drawcolumn_t& drawcolumn) { }
-	PaletteFunc(const drawspan_t& drawspan) { }
+  public:
+    PaletteFunc(const drawcolumn_t &drawcolumn)
+    {
+    }
+    PaletteFunc(const drawspan_t &drawspan)
+    {
+    }
 
-	forceinline void operator()(byte c, palindex_t* dest) const
-	{
-		*dest = c;
-	}
+    forceinline void operator()(byte c, palindex_t *dest) const
+    {
+        *dest = c;
+    }
 };
 
 class PaletteColormapFunc
 {
-public:
-	PaletteColormapFunc(const drawcolumn_t& drawcolumn) :
-			colormap(drawcolumn.colormap) { }
-	PaletteColormapFunc(const drawspan_t& drawspan) :
-			colormap(drawspan.colormap) { }
+  public:
+    PaletteColormapFunc(const drawcolumn_t &drawcolumn) : colormap(drawcolumn.colormap)
+    {
+    }
+    PaletteColormapFunc(const drawspan_t &drawspan) : colormap(drawspan.colormap)
+    {
+    }
 
-	forceinline void operator()(byte c, palindex_t* dest) const
-	{
-		*dest = colormap.index(c);
-	}
+    forceinline void operator()(byte c, palindex_t *dest) const
+    {
+        *dest = colormap.index(c);
+    }
 
-private:
-	const shaderef_t& colormap;
+  private:
+    const shaderef_t &colormap;
 };
 
 class PaletteFuzzyFunc
 {
-public:
-	PaletteFuzzyFunc(const drawcolumn_t& drawcolum) :
-			colormap(&V_GetDefaultPalette()->maps, 6) { }
+  public:
+    PaletteFuzzyFunc(const drawcolumn_t &drawcolum) : colormap(&V_GetDefaultPalette()->maps, 6)
+    {
+    }
 
-	forceinline void operator()(byte c, palindex_t* dest) const
-	{
-		*dest = colormap.index(dest[fuzztable.getValue()]);
-		fuzztable.incrementRow();
-	}
+    forceinline void operator()(byte c, palindex_t *dest) const
+    {
+        *dest = colormap.index(dest[fuzztable.getValue()]);
+        fuzztable.incrementRow();
+    }
 
-private:
-	shaderef_t colormap;
+  private:
+    shaderef_t colormap;
 };
 
 class PaletteTranslucentColormapFunc
 {
-public:
-	PaletteTranslucentColormapFunc(const drawcolumn_t& drawcolumn) :
-			colormap(drawcolumn.colormap)
-	{
-		calculate_alpha(drawcolumn.translevel);
-	}
+  public:
+    PaletteTranslucentColormapFunc(const drawcolumn_t &drawcolumn) : colormap(drawcolumn.colormap)
+    {
+        calculate_alpha(drawcolumn.translevel);
+    }
 
-	PaletteTranslucentColormapFunc(const drawspan_t& drawspan) :
-			colormap(drawspan.colormap)
-	{
-		calculate_alpha(drawspan.translevel);
-	}
+    PaletteTranslucentColormapFunc(const drawspan_t &drawspan) : colormap(drawspan.colormap)
+    {
+        calculate_alpha(drawspan.translevel);
+    }
 
-	forceinline void operator()(byte c, palindex_t* dest) const
-	{
-		const palindex_t fg = colormap.index(c);
-		const palindex_t bg = *dest;
-				
-		*dest = rt_blend2<palindex_t>(bg, bga, fg, fga);
-	}
+    forceinline void operator()(byte c, palindex_t *dest) const
+    {
+        const palindex_t fg = colormap.index(c);
+        const palindex_t bg = *dest;
 
-private:
-	void calculate_alpha(fixed_t translevel)
-	{
-		fga = (translevel & ~0x03FF) >> 8;
-		fga = fga > 255 ? 255 : fga;
-		bga = 255 - fga;
-	}
+        *dest = rt_blend2<palindex_t>(bg, bga, fg, fga);
+    }
 
-	const shaderef_t& colormap;
-	int fga, bga;
+  private:
+    void calculate_alpha(fixed_t translevel)
+    {
+        fga = (translevel & ~0x03FF) >> 8;
+        fga = fga > 255 ? 255 : fga;
+        bga = 255 - fga;
+    }
+
+    const shaderef_t &colormap;
+    int               fga, bga;
 };
 
 class PaletteTranslatedColormapFunc
 {
-public:
-	PaletteTranslatedColormapFunc(const drawcolumn_t& drawcolumn) : 
-			colormap(drawcolumn.colormap), translation(drawcolumn.translation) { }
+  public:
+    PaletteTranslatedColormapFunc(const drawcolumn_t &drawcolumn)
+        : colormap(drawcolumn.colormap), translation(drawcolumn.translation)
+    {
+    }
 
-	forceinline void operator()(byte c, palindex_t* dest) const
-	{
-		*dest = colormap.index(translation.tlate(c));
-	}
+    forceinline void operator()(byte c, palindex_t *dest) const
+    {
+        *dest = colormap.index(translation.tlate(c));
+    }
 
-private:
-	const shaderef_t& colormap;
-	const translationref_t& translation;
+  private:
+    const shaderef_t       &colormap;
+    const translationref_t &translation;
 };
 
 class PaletteTranslatedTranslucentColormapFunc
 {
-public:
-	PaletteTranslatedTranslucentColormapFunc(const drawcolumn_t& drawcolumn) :
-			tlatefunc(drawcolumn), translation(drawcolumn.translation) { }
+  public:
+    PaletteTranslatedTranslucentColormapFunc(const drawcolumn_t &drawcolumn)
+        : tlatefunc(drawcolumn), translation(drawcolumn.translation)
+    {
+    }
 
-	forceinline void operator()(byte c, palindex_t* dest) const
-	{
-		tlatefunc(translation.tlate(c), dest);
-	}
+    forceinline void operator()(byte c, palindex_t *dest) const
+    {
+        tlatefunc(translation.tlate(c), dest);
+    }
 
-private:
-	PaletteTranslucentColormapFunc tlatefunc;
-	const translationref_t& translation;
+  private:
+    PaletteTranslucentColormapFunc tlatefunc;
+    const translationref_t        &translation;
 };
 
 class PaletteSlopeColormapFunc
 {
-public:
-	PaletteSlopeColormapFunc(const drawspan_t& drawspan) :
-			colormap(drawspan.slopelighting) { }
+  public:
+    PaletteSlopeColormapFunc(const drawspan_t &drawspan) : colormap(drawspan.slopelighting)
+    {
+    }
 
-	forceinline void operator()(byte c, palindex_t* dest)
-	{
-		*dest = colormap->index(c);
-		colormap++;
-	}
+    forceinline void operator()(byte c, palindex_t *dest)
+    {
+        *dest = colormap->index(c);
+        colormap++;
+    }
 
-private:
-	const shaderef_t* colormap;
+  private:
+    const shaderef_t *colormap;
 };
-
 
 // ----------------------------------------------------------------------------
 //
@@ -1033,7 +1048,7 @@ private:
 //
 // ----------------------------------------------------------------------------
 
-#define FB_COLDEST_P ((palindex_t*)dcol.destination + dcol.yl * dcol.pitch_in_pixels + dcol.x)
+#define FB_COLDEST_P ((palindex_t *)dcol.destination + dcol.yl * dcol.pitch_in_pixels + dcol.x)
 
 //
 // R_FillColumnP
@@ -1043,7 +1058,7 @@ private:
 //
 void R_FillColumnP()
 {
-	R_FillColumnGeneric<palindex_t, PaletteFunc>(FB_COLDEST_P, dcol);
+    R_FillColumnGeneric<palindex_t, PaletteFunc>(FB_COLDEST_P, dcol);
 }
 
 //
@@ -1054,7 +1069,7 @@ void R_FillColumnP()
 //
 void R_DrawColumnP()
 {
-	R_DrawColumnGeneric<palindex_t, PaletteColormapFunc>(FB_COLDEST_P, dcol);
+    R_DrawColumnGeneric<palindex_t, PaletteColormapFunc>(FB_COLDEST_P, dcol);
 }
 
 //
@@ -1065,7 +1080,7 @@ void R_DrawColumnP()
 //
 void R_StretchColumnP()
 {
-	R_DrawColumnGeneric<palindex_t, PaletteFunc>(FB_COLDEST_P, dcol);
+    R_DrawColumnGeneric<palindex_t, PaletteFunc>(FB_COLDEST_P, dcol);
 }
 
 //
@@ -1077,14 +1092,14 @@ void R_StretchColumnP()
 //
 void R_DrawFuzzColumnP()
 {
-	// adjust the borders (prevent buffer over/under-reads)
-	if (dcol.yl <= 0)
-		dcol.yl = 1;
-	if (dcol.yh >= viewheight - 1)
-		dcol.yh = viewheight - 2;
+    // adjust the borders (prevent buffer over/under-reads)
+    if (dcol.yl <= 0)
+        dcol.yl = 1;
+    if (dcol.yh >= viewheight - 1)
+        dcol.yh = viewheight - 2;
 
-	R_FillColumnGeneric<palindex_t, PaletteFuzzyFunc>(FB_COLDEST_P, dcol);
-	fuzztable.incrementColumn();
+    R_FillColumnGeneric<palindex_t, PaletteFuzzyFunc>(FB_COLDEST_P, dcol);
+    fuzztable.incrementColumn();
 }
 
 //
@@ -1097,7 +1112,7 @@ void R_DrawFuzzColumnP()
 //
 void R_DrawTranslucentColumnP()
 {
-	R_DrawColumnGeneric<palindex_t, PaletteTranslucentColormapFunc>(FB_COLDEST_P, dcol);
+    R_DrawColumnGeneric<palindex_t, PaletteTranslucentColormapFunc>(FB_COLDEST_P, dcol);
 }
 
 //
@@ -1109,23 +1124,22 @@ void R_DrawTranslucentColumnP()
 //
 void R_DrawTranslatedColumnP()
 {
-	R_DrawColumnGeneric<palindex_t, PaletteTranslatedColormapFunc>(FB_COLDEST_P, dcol);
+    R_DrawColumnGeneric<palindex_t, PaletteTranslatedColormapFunc>(FB_COLDEST_P, dcol);
 }
 
 //
 // R_DrawTlatedLucentColumnP
 //
 // Renders a translucent column to the 8bpp palettized screen buffer with
-// color-remapping from the source buffer dcol.source and scaled by dcol.iscale. 
+// color-remapping from the source buffer dcol.source and scaled by dcol.iscale.
 // The translation table is supplied by dcol.translation and the amount of
 // translucency is controlled by dcol.translevel. Shading is performed using
 // dcol.colormap.
 //
 void R_DrawTlatedLucentColumnP()
 {
-	R_DrawColumnGeneric<palindex_t, PaletteTranslatedTranslucentColormapFunc>(FB_COLDEST_P, dcol);
+    R_DrawColumnGeneric<palindex_t, PaletteTranslatedTranslucentColormapFunc>(FB_COLDEST_P, dcol);
 }
-
 
 // ----------------------------------------------------------------------------
 //
@@ -1133,7 +1147,7 @@ void R_DrawTlatedLucentColumnP()
 //
 // ----------------------------------------------------------------------------
 
-#define FB_SPANDEST_P ((palindex_t*)dspan.destination + dspan.y * dspan.pitch_in_pixels + dspan.x1)
+#define FB_SPANDEST_P ((palindex_t *)dspan.destination + dspan.y * dspan.pitch_in_pixels + dspan.x1)
 
 //
 // R_FillSpanP
@@ -1143,19 +1157,19 @@ void R_DrawTlatedLucentColumnP()
 //
 void R_FillSpanP()
 {
-	R_FillSpanGeneric<palindex_t, PaletteFunc>(FB_SPANDEST_P, dspan);
+    R_FillSpanGeneric<palindex_t, PaletteFunc>(FB_SPANDEST_P, dspan);
 }
 
 //
 // R_FillTranslucentSpanP
 //
 // Fills a span in the 8bpp palettized screen buffer with a solid color,
-// determined by dspan.color using translucency. Shading is performed 
+// determined by dspan.color using translucency. Shading is performed
 // using dspan.colormap.
 //
 void R_FillTranslucentSpanP()
 {
-	R_FillSpanGeneric<palindex_t, PaletteTranslucentColormapFunc>(FB_SPANDEST_P, dspan);
+    R_FillSpanGeneric<palindex_t, PaletteTranslucentColormapFunc>(FB_SPANDEST_P, dspan);
 }
 
 //
@@ -1166,7 +1180,7 @@ void R_FillTranslucentSpanP()
 //
 void R_DrawSpanP()
 {
-	R_DrawLevelSpanGeneric<palindex_t, PaletteColormapFunc>(FB_SPANDEST_P, dspan);
+    R_DrawLevelSpanGeneric<palindex_t, PaletteColormapFunc>(FB_SPANDEST_P, dspan);
 }
 
 //
@@ -1177,9 +1191,8 @@ void R_DrawSpanP()
 //
 void R_DrawSlopeSpanP()
 {
-	R_DrawSlopedSpanGeneric<palindex_t, PaletteSlopeColormapFunc>(FB_SPANDEST_P, dspan);
+    R_DrawSlopedSpanGeneric<palindex_t, PaletteSlopeColormapFunc>(FB_SPANDEST_P, dspan);
 }
-
 
 /****************************************/
 /*										*/
@@ -1202,128 +1215,138 @@ void R_DrawSlopeSpanP()
 
 class DirectFunc
 {
-public:
-	DirectFunc(const drawcolumn_t& drawcolumn) { }
-	DirectFunc(const drawspan_t& drawspan) { }
+  public:
+    DirectFunc(const drawcolumn_t &drawcolumn)
+    {
+    }
+    DirectFunc(const drawspan_t &drawspan)
+    {
+    }
 
-	forceinline void operator()(byte c, argb_t* dest) const
-	{
-		*dest = basecolormap.shade(c);
-	}
+    forceinline void operator()(byte c, argb_t *dest) const
+    {
+        *dest = basecolormap.shade(c);
+    }
 };
 
 class DirectColormapFunc
 {
-public:
-	DirectColormapFunc(const drawcolumn_t& drawcolumn) :
-			colormap(drawcolumn.colormap) { }
-	DirectColormapFunc(const drawspan_t& drawspan) :
-			colormap(drawspan.colormap) { }
+  public:
+    DirectColormapFunc(const drawcolumn_t &drawcolumn) : colormap(drawcolumn.colormap)
+    {
+    }
+    DirectColormapFunc(const drawspan_t &drawspan) : colormap(drawspan.colormap)
+    {
+    }
 
-	forceinline void operator()(byte c, argb_t* dest) const
-	{
-		*dest = colormap.shade(c);
-	}
+    forceinline void operator()(byte c, argb_t *dest) const
+    {
+        *dest = colormap.shade(c);
+    }
 
-private:
-	const shaderef_t& colormap;
+  private:
+    const shaderef_t &colormap;
 };
 
 class DirectFuzzyFunc
 {
-public:
-	DirectFuzzyFunc(const drawcolumn_t& drawcolumn) { }
+  public:
+    DirectFuzzyFunc(const drawcolumn_t &drawcolumn)
+    {
+    }
 
-	forceinline void operator()(byte c, argb_t* dest) const
-	{
-		argb_t work = dest[fuzztable.getValue()];
-		*dest = work - ((work >> 2) & 0x3f3f3f);
-		fuzztable.incrementRow();
-	}
+    forceinline void operator()(byte c, argb_t *dest) const
+    {
+        argb_t work = dest[fuzztable.getValue()];
+        *dest       = work - ((work >> 2) & 0x3f3f3f);
+        fuzztable.incrementRow();
+    }
 };
 
 class DirectTranslucentColormapFunc
 {
-public:
-	DirectTranslucentColormapFunc(const drawcolumn_t& drawcolumn) :
-			colormap(drawcolumn.colormap)
-	{
-		calculate_alpha(drawcolumn.translevel);
-	}
+  public:
+    DirectTranslucentColormapFunc(const drawcolumn_t &drawcolumn) : colormap(drawcolumn.colormap)
+    {
+        calculate_alpha(drawcolumn.translevel);
+    }
 
-	DirectTranslucentColormapFunc(const drawspan_t& drawspan) :
-			colormap(drawspan.colormap)
-	{
-		calculate_alpha(drawspan.translevel);
-	}
+    DirectTranslucentColormapFunc(const drawspan_t &drawspan) : colormap(drawspan.colormap)
+    {
+        calculate_alpha(drawspan.translevel);
+    }
 
-	forceinline void operator()(byte c, argb_t* dest) const
-	{
-		argb_t fg = colormap.shade(c);
-		argb_t bg = *dest;
-		*dest = alphablend2a(bg, bga, fg, fga);	
-	}
+    forceinline void operator()(byte c, argb_t *dest) const
+    {
+        argb_t fg = colormap.shade(c);
+        argb_t bg = *dest;
+        *dest     = alphablend2a(bg, bga, fg, fga);
+    }
 
-private:
-	void calculate_alpha(fixed_t translevel)
-	{
-		fga = (translevel & ~0x03FF) >> 8;
-		fga = fga > 255 ? 255 : fga;
-		bga = 255 - fga;
-	}
+  private:
+    void calculate_alpha(fixed_t translevel)
+    {
+        fga = (translevel & ~0x03FF) >> 8;
+        fga = fga > 255 ? 255 : fga;
+        bga = 255 - fga;
+    }
 
-	const shaderef_t& colormap;
-	int fga, bga;
+    const shaderef_t &colormap;
+    int               fga, bga;
 };
 
 class DirectTranslatedColormapFunc
 {
-public:
-	DirectTranslatedColormapFunc(const drawcolumn_t& drawcolumn) :
-			colormap(drawcolumn.colormap), translation(drawcolumn.translation) { }
+  public:
+    DirectTranslatedColormapFunc(const drawcolumn_t &drawcolumn)
+        : colormap(drawcolumn.colormap), translation(drawcolumn.translation)
+    {
+    }
 
-	forceinline void operator()(byte c, argb_t* dest) const
-	{
-		*dest = colormap.tlate(translation, c);
-	}
+    forceinline void operator()(byte c, argb_t *dest) const
+    {
+        *dest = colormap.tlate(translation, c);
+    }
 
-private:
-	const shaderef_t& colormap;
-	const translationref_t& translation;
+  private:
+    const shaderef_t       &colormap;
+    const translationref_t &translation;
 };
 
 class DirectTranslatedTranslucentColormapFunc
 {
-public:
-	DirectTranslatedTranslucentColormapFunc(const drawcolumn_t& drawcolumn) :
-			tlatefunc(drawcolumn), translation(drawcolumn.translation) { }
+  public:
+    DirectTranslatedTranslucentColormapFunc(const drawcolumn_t &drawcolumn)
+        : tlatefunc(drawcolumn), translation(drawcolumn.translation)
+    {
+    }
 
-	forceinline void operator()(byte c, argb_t* dest) const
-	{
-		tlatefunc(translation.tlate(c), dest);
-	}
+    forceinline void operator()(byte c, argb_t *dest) const
+    {
+        tlatefunc(translation.tlate(c), dest);
+    }
 
-private:
-	DirectTranslucentColormapFunc tlatefunc;
-	const translationref_t& translation;
+  private:
+    DirectTranslucentColormapFunc tlatefunc;
+    const translationref_t       &translation;
 };
 
 class DirectSlopeColormapFunc
 {
-public:
-	DirectSlopeColormapFunc(const drawspan_t& drawspan) :
-			colormap(drawspan.slopelighting) { }
+  public:
+    DirectSlopeColormapFunc(const drawspan_t &drawspan) : colormap(drawspan.slopelighting)
+    {
+    }
 
-	forceinline void operator()(byte c, argb_t* dest)
-	{
-		*dest = colormap->shade(c);
-		colormap++;
-	}
+    forceinline void operator()(byte c, argb_t *dest)
+    {
+        *dest = colormap->shade(c);
+        colormap++;
+    }
 
-private:
-	const shaderef_t* colormap;
+  private:
+    const shaderef_t *colormap;
 };
-
 
 // ----------------------------------------------------------------------------
 //
@@ -1331,7 +1354,7 @@ private:
 //
 // ----------------------------------------------------------------------------
 
-#define FB_COLDEST_D ((argb_t*)dcol.destination + dcol.yl * dcol.pitch_in_pixels + dcol.x)
+#define FB_COLDEST_D ((argb_t *)dcol.destination + dcol.yl * dcol.pitch_in_pixels + dcol.x)
 
 //
 // R_FillColumnD
@@ -1341,7 +1364,7 @@ private:
 //
 void R_FillColumnD()
 {
-	R_FillColumnGeneric<argb_t, DirectFunc>(FB_COLDEST_D, dcol);
+    R_FillColumnGeneric<argb_t, DirectFunc>(FB_COLDEST_D, dcol);
 }
 
 //
@@ -1352,7 +1375,7 @@ void R_FillColumnD()
 //
 void R_DrawColumnD()
 {
-	R_DrawColumnGeneric<argb_t, DirectColormapFunc>(FB_COLDEST_D, dcol);
+    R_DrawColumnGeneric<argb_t, DirectColormapFunc>(FB_COLDEST_D, dcol);
 }
 
 //
@@ -1364,14 +1387,14 @@ void R_DrawColumnD()
 //
 void R_DrawFuzzColumnD()
 {
-	// adjust the borders (prevent buffer over/under-reads)
-	if (dcol.yl <= 0)
-		dcol.yl = 1;
-	if (dcol.yh >= viewheight - 1)
-		dcol.yh = viewheight - 2;
+    // adjust the borders (prevent buffer over/under-reads)
+    if (dcol.yl <= 0)
+        dcol.yl = 1;
+    if (dcol.yh >= viewheight - 1)
+        dcol.yh = viewheight - 2;
 
-	R_FillColumnGeneric<argb_t, DirectFuzzyFunc>(FB_COLDEST_D, dcol);
-	fuzztable.incrementColumn();
+    R_FillColumnGeneric<argb_t, DirectFuzzyFunc>(FB_COLDEST_D, dcol);
+    fuzztable.incrementColumn();
 }
 
 //
@@ -1384,7 +1407,7 @@ void R_DrawFuzzColumnD()
 //
 void R_DrawTranslucentColumnD()
 {
-	R_DrawColumnGeneric<argb_t, DirectTranslucentColormapFunc>(FB_COLDEST_D, dcol);
+    R_DrawColumnGeneric<argb_t, DirectTranslucentColormapFunc>(FB_COLDEST_D, dcol);
 }
 
 //
@@ -1396,23 +1419,22 @@ void R_DrawTranslucentColumnD()
 //
 void R_DrawTranslatedColumnD()
 {
-	R_DrawColumnGeneric<argb_t, DirectTranslatedColormapFunc>(FB_COLDEST_D, dcol);
+    R_DrawColumnGeneric<argb_t, DirectTranslatedColormapFunc>(FB_COLDEST_D, dcol);
 }
 
 //
 // R_DrawTlatedLucentColumnD
 //
 // Renders a translucent column to the 32bpp ARGB8888 screen buffer with
-// color-remapping from the source buffer dcol.source and scaled by dcol.iscale. 
+// color-remapping from the source buffer dcol.source and scaled by dcol.iscale.
 // The translation table is supplied by dcol.translation and the amount of
 // translucency is controlled by dcol.translevel. Shading is performed using
 // dcol.colormap.
 //
 void R_DrawTlatedLucentColumnD()
 {
-	R_DrawColumnGeneric<argb_t, DirectTranslatedTranslucentColormapFunc>(FB_COLDEST_D, dcol);
+    R_DrawColumnGeneric<argb_t, DirectTranslatedTranslucentColormapFunc>(FB_COLDEST_D, dcol);
 }
-
 
 // ----------------------------------------------------------------------------
 //
@@ -1420,7 +1442,7 @@ void R_DrawTlatedLucentColumnD()
 //
 // ----------------------------------------------------------------------------
 
-#define FB_SPANDEST_D ((argb_t*)dspan.destination + dspan.y * dspan.pitch_in_pixels + dspan.x1)
+#define FB_SPANDEST_D ((argb_t *)dspan.destination + dspan.y * dspan.pitch_in_pixels + dspan.x1)
 
 //
 // R_FillSpanD
@@ -1430,19 +1452,19 @@ void R_DrawTlatedLucentColumnD()
 //
 void R_FillSpanD()
 {
-	R_FillSpanGeneric<argb_t, DirectFunc>(FB_SPANDEST_D, dspan);
+    R_FillSpanGeneric<argb_t, DirectFunc>(FB_SPANDEST_D, dspan);
 }
 
 //
 // R_FillTranslucentSpanD
 //
 // Fills a span in the 32bpp ARGB8888 screen buffer with a solid color,
-// determined by dspan.color using translucency. Shading is performed 
+// determined by dspan.color using translucency. Shading is performed
 // using dspan.colormap.
 //
 void R_FillTranslucentSpanD()
 {
-	R_FillSpanGeneric<argb_t, DirectTranslucentColormapFunc>(FB_SPANDEST_D, dspan);
+    R_FillSpanGeneric<argb_t, DirectTranslucentColormapFunc>(FB_SPANDEST_D, dspan);
 }
 
 //
@@ -1453,7 +1475,7 @@ void R_FillTranslucentSpanD()
 //
 void R_DrawSpanD_c()
 {
-	R_DrawLevelSpanGeneric<argb_t, DirectColormapFunc>(FB_SPANDEST_D, dspan);
+    R_DrawLevelSpanGeneric<argb_t, DirectColormapFunc>(FB_SPANDEST_D, dspan);
 }
 
 //
@@ -1464,156 +1486,156 @@ void R_DrawSpanD_c()
 //
 void R_DrawSlopeSpanD_c()
 {
-	R_DrawSlopedSpanGeneric<argb_t, DirectSlopeColormapFunc>(FB_SPANDEST_D, dspan);
+    R_DrawSlopedSpanGeneric<argb_t, DirectSlopeColormapFunc>(FB_SPANDEST_D, dspan);
 }
-
 
 /****************************************************/
 
-
 void R_DrawBorder(int x1, int y1, int x2, int y2)
 {
-	IWindowSurface* surface = R_GetRenderingSurface();
-	DCanvas* canvas = surface->getDefaultCanvas();
+    IWindowSurface *surface = R_GetRenderingSurface();
+    DCanvas        *canvas  = surface->getDefaultCanvas();
 
-	int lumpnum = W_CheckNumForName(gameinfo.borderFlat, ns_flats);
-	if (lumpnum >= 0)
-	{
-		const byte* patch_data = (byte*)W_CacheLumpNum(lumpnum, PU_CACHE);
-		canvas->FlatFill(x1, y1, x2, y2, patch_data);
-	}
-	else
-	{
-		canvas->Clear(x1, y1, x2, y2, argb_t(0, 0, 0));
-	}
+    int lumpnum = W_CheckNumForName(gameinfo.borderFlat, ns_flats);
+    if (lumpnum >= 0)
+    {
+        const byte *patch_data = (byte *)W_CacheLumpNum(lumpnum, PU_CACHE);
+        canvas->FlatFill(x1, y1, x2, y2, patch_data);
+    }
+    else
+    {
+        canvas->Clear(x1, y1, x2, y2, argb_t(0, 0, 0));
+    }
 }
-
 
 //
 // R_DrawViewBorder
 // Draws the border around the view
 //  for different size windows?
 //
-void V_MarkRect (int x, int y, int width, int height);
+void V_MarkRect(int x, int y, int width, int height);
 
 void R_DrawViewBorder()
 {
-	if (!R_BorderVisible())
-		return;
+    if (!R_BorderVisible())
+        return;
 
-	IWindowSurface* surface = R_GetRenderingSurface();
-	DCanvas* canvas = surface->getDefaultCanvas();
-	int surface_width = surface->getWidth();
-	int surface_height = surface->getHeight();
-	int top = 0, bottom = ST_StatusBarY(surface_width, surface_height);
-	int left = 0, right = surface_width;
+    IWindowSurface *surface        = R_GetRenderingSurface();
+    DCanvas        *canvas         = surface->getDefaultCanvas();
+    int             surface_width  = surface->getWidth();
+    int             surface_height = surface->getHeight();
+    int             top = 0, bottom = ST_StatusBarY(surface_width, surface_height);
+    int             left = 0, right = surface_width;
 
-	const gameborder_t* border = gameinfo.border;
-	const int offset = border->offset;
-	const int size = border->size;
+    const gameborder_t *border = gameinfo.border;
+    const int           offset = border->offset;
+    const int           size   = border->size;
 
-	// draw top border
-	R_DrawBorder(left, top, right, viewwindowy);
-	// draw bottom border
-	R_DrawBorder(left, viewwindowy + viewheight, right, bottom);
-	// draw left border
-	R_DrawBorder(left, viewwindowy, viewwindowx, viewwindowy + viewheight);
-	// draw right border
-	R_DrawBorder(viewwindowx + viewwidth, viewwindowy, right, viewwindowy + viewheight);
+    // draw top border
+    R_DrawBorder(left, top, right, viewwindowy);
+    // draw bottom border
+    R_DrawBorder(left, viewwindowy + viewheight, right, bottom);
+    // draw left border
+    R_DrawBorder(left, viewwindowy, viewwindowx, viewwindowy + viewheight);
+    // draw right border
+    R_DrawBorder(viewwindowx + viewwidth, viewwindowy, right, viewwindowy + viewheight);
 
-	// draw beveled edge for the viewing window's top and bottom edges
-	for (int x = viewwindowx; x < viewwindowx + viewwidth; x += size)
-	{
-		canvas->DrawPatch(W_CachePatch(border->t), x, viewwindowy - offset);
-		canvas->DrawPatch(W_CachePatch(border->b), x, viewwindowy + viewheight);
-	}
+    // draw beveled edge for the viewing window's top and bottom edges
+    for (int x = viewwindowx; x < viewwindowx + viewwidth; x += size)
+    {
+        canvas->DrawPatch(W_CachePatch(border->t), x, viewwindowy - offset);
+        canvas->DrawPatch(W_CachePatch(border->b), x, viewwindowy + viewheight);
+    }
 
-	// draw beveled edge for the viewing window's left and right edges
-	for (int y = viewwindowy; y < viewwindowy + viewheight; y += size)
-	{
-		canvas->DrawPatch(W_CachePatch(border->l), viewwindowx - offset, y);
-		canvas->DrawPatch(W_CachePatch(border->r), viewwindowx + viewwidth, y);
-	}
+    // draw beveled edge for the viewing window's left and right edges
+    for (int y = viewwindowy; y < viewwindowy + viewheight; y += size)
+    {
+        canvas->DrawPatch(W_CachePatch(border->l), viewwindowx - offset, y);
+        canvas->DrawPatch(W_CachePatch(border->r), viewwindowx + viewwidth, y);
+    }
 
-	// draw beveled edge for the viewing window's corners
-	canvas->DrawPatch(W_CachePatch(border->tl), viewwindowx - offset, viewwindowy - offset);
-	canvas->DrawPatch(W_CachePatch(border->tr), viewwindowx + viewwidth, viewwindowy - offset);
-	canvas->DrawPatch(W_CachePatch(border->bl), viewwindowx - offset, viewwindowy + viewheight);
-	canvas->DrawPatch(W_CachePatch(border->br), viewwindowx + viewwidth, viewwindowy + viewheight);
+    // draw beveled edge for the viewing window's corners
+    canvas->DrawPatch(W_CachePatch(border->tl), viewwindowx - offset, viewwindowy - offset);
+    canvas->DrawPatch(W_CachePatch(border->tr), viewwindowx + viewwidth, viewwindowy - offset);
+    canvas->DrawPatch(W_CachePatch(border->bl), viewwindowx - offset, viewwindowy + viewheight);
+    canvas->DrawPatch(W_CachePatch(border->br), viewwindowx + viewwidth, viewwindowy + viewheight);
 
-	V_MarkRect(left, top, right, bottom);
+    V_MarkRect(left, top, right, bottom);
 }
 
-
-enum r_optimize_kind {
-	OPTIMIZE_NONE,
-	OPTIMIZE_SSE2,
-	OPTIMIZE_MMX,
-	OPTIMIZE_ALTIVEC
+enum r_optimize_kind
+{
+    OPTIMIZE_NONE,
+    OPTIMIZE_SSE2,
+    OPTIMIZE_MMX,
+    OPTIMIZE_ALTIVEC
 };
 
-static r_optimize_kind optimize_kind = OPTIMIZE_NONE;
+static r_optimize_kind              optimize_kind = OPTIMIZE_NONE;
 static std::vector<r_optimize_kind> optimizations_available;
 
 static const char *get_optimization_name(r_optimize_kind kind)
 {
-	switch (kind)
-	{
-		case OPTIMIZE_SSE2:    return "sse2";
-		case OPTIMIZE_MMX:     return "mmx";
-		case OPTIMIZE_ALTIVEC: return "altivec";
-		case OPTIMIZE_NONE:
-		default:
-			return "none";
-	}
+    switch (kind)
+    {
+    case OPTIMIZE_SSE2:
+        return "sse2";
+    case OPTIMIZE_MMX:
+        return "mmx";
+    case OPTIMIZE_ALTIVEC:
+        return "altivec";
+    case OPTIMIZE_NONE:
+    default:
+        return "none";
+    }
 }
 
 static std::string get_optimization_name_list(const bool includeNone)
 {
-	std::string str;
-	std::vector<r_optimize_kind>::const_iterator it = optimizations_available.begin();
-	if (!includeNone)
-		++it;
+    std::string                                  str;
+    std::vector<r_optimize_kind>::const_iterator it = optimizations_available.begin();
+    if (!includeNone)
+        ++it;
 
-	for (; it != optimizations_available.end(); ++it)
-	{
-		str.append(get_optimization_name(*it));
-		if (it+1 != optimizations_available.end())
-			str.append(", ");
-	}
-	return str;
+    for (; it != optimizations_available.end(); ++it)
+    {
+        str.append(get_optimization_name(*it));
+        if (it + 1 != optimizations_available.end())
+            str.append(", ");
+    }
+    return str;
 }
 
 static void print_optimizations()
 {
-	Printf(PRINT_HIGH, "r_optimize detected \"%s\"\n", get_optimization_name_list(false).c_str());
+    Printf(PRINT_HIGH, "r_optimize detected \"%s\"\n", get_optimization_name_list(false).c_str());
 }
 
 static bool detect_optimizations()
 {
-	if (!optimizations_available.empty())
-		return false;
+    if (!optimizations_available.empty())
+        return false;
 
-	optimizations_available.clear();
+    optimizations_available.clear();
 
-	// Start with default non-optimized:
-	optimizations_available.push_back(OPTIMIZE_NONE);
+    // Start with default non-optimized:
+    optimizations_available.push_back(OPTIMIZE_NONE);
 
-	// Detect CPU features in ascending order of preference:
-	#ifdef __MMX__
-	if (SDL_HasMMX())
-		optimizations_available.push_back(OPTIMIZE_MMX);
-	#endif
-	#ifdef __SSE2__
-	if (SDL_HasSSE2())
-		optimizations_available.push_back(OPTIMIZE_SSE2);
-	#endif
-	#ifdef __ALTIVEC__
-	if (SDL_HasAltiVec())
-		optimizations_available.push_back(OPTIMIZE_ALTIVEC);
-	#endif
+// Detect CPU features in ascending order of preference:
+#ifdef __MMX__
+    if (SDL_HasMMX())
+        optimizations_available.push_back(OPTIMIZE_MMX);
+#endif
+#ifdef __SSE2__
+    if (SDL_HasSSE2())
+        optimizations_available.push_back(OPTIMIZE_SSE2);
+#endif
+#ifdef __ALTIVEC__
+    if (SDL_HasAltiVec())
+        optimizations_available.push_back(OPTIMIZE_ALTIVEC);
+#endif
 
-	return true;
+    return true;
 }
 
 //
@@ -1623,58 +1645,56 @@ static bool detect_optimizations()
 // and the current CPU also supports it.
 //
 static bool R_IsOptimizationAvailable(r_optimize_kind kind)
-{ 
-	return std::find(optimizations_available.begin(), optimizations_available.end(), kind)
-			!= optimizations_available.end();
+{
+    return std::find(optimizations_available.begin(), optimizations_available.end(), kind) !=
+           optimizations_available.end();
 }
-
 
 CVAR_FUNC_IMPL(r_optimize)
 {
-	const char* val = var.cstring();
+    const char *val = var.cstring();
 
-	// Only print the detected list the first time:
-	if (detect_optimizations())
-		print_optimizations();
+    // Only print the detected list the first time:
+    if (detect_optimizations())
+        print_optimizations();
 
-	// Set the optimization based on availability:
-	if (stricmp(val, "none") == 0)
-		optimize_kind = OPTIMIZE_NONE;
-	else if (stricmp(val, "sse2") == 0 && R_IsOptimizationAvailable(OPTIMIZE_SSE2))
-		optimize_kind = OPTIMIZE_SSE2;
-	else if (stricmp(val, "mmx") == 0 && R_IsOptimizationAvailable(OPTIMIZE_MMX))
-		optimize_kind = OPTIMIZE_MMX;
-	else if (stricmp(val, "altivec") == 0 && R_IsOptimizationAvailable(OPTIMIZE_ALTIVEC))
-		optimize_kind = OPTIMIZE_ALTIVEC;
-	else if (stricmp(val, "detect") == 0)
-		// Default to the most preferred:
-		optimize_kind = optimizations_available.back();
-	else
-	{
-		Printf(PRINT_HIGH, "Invalid value for r_optimize. Availible options are \"%s, detect\"\n",
-				get_optimization_name_list(true).c_str());
+    // Set the optimization based on availability:
+    if (stricmp(val, "none") == 0)
+        optimize_kind = OPTIMIZE_NONE;
+    else if (stricmp(val, "sse2") == 0 && R_IsOptimizationAvailable(OPTIMIZE_SSE2))
+        optimize_kind = OPTIMIZE_SSE2;
+    else if (stricmp(val, "mmx") == 0 && R_IsOptimizationAvailable(OPTIMIZE_MMX))
+        optimize_kind = OPTIMIZE_MMX;
+    else if (stricmp(val, "altivec") == 0 && R_IsOptimizationAvailable(OPTIMIZE_ALTIVEC))
+        optimize_kind = OPTIMIZE_ALTIVEC;
+    else if (stricmp(val, "detect") == 0)
+        // Default to the most preferred:
+        optimize_kind = optimizations_available.back();
+    else
+    {
+        Printf(PRINT_HIGH, "Invalid value for r_optimize. Availible options are \"%s, detect\"\n",
+               get_optimization_name_list(true).c_str());
 
-		// Restore the original setting:
-		var.Set(get_optimization_name(optimize_kind));
-		return;
-	}
+        // Restore the original setting:
+        var.Set(get_optimization_name(optimize_kind));
+        return;
+    }
 
-	const char* optimize_name = get_optimization_name(optimize_kind);
-	if (stricmp(val, optimize_name) != 0)
-	{
-		// update the cvar string
-		// this will trigger the callback to run a second time
-		Printf(PRINT_HIGH, "r_optimize set to \"%s\" based on availability\n", optimize_name);
-		var.Set(optimize_name);
-	}
-	else
-	{
-		// cvar string is current, now intialize the drawing function pointers
-		R_InitVectorizedDrawers();
-		R_InitColumnDrawers();
-	}
+    const char *optimize_name = get_optimization_name(optimize_kind);
+    if (stricmp(val, optimize_name) != 0)
+    {
+        // update the cvar string
+        // this will trigger the callback to run a second time
+        Printf(PRINT_HIGH, "r_optimize set to \"%s\" based on availability\n", optimize_name);
+        var.Set(optimize_name);
+    }
+    else
+    {
+        // cvar string is current, now intialize the drawing function pointers
+        R_InitVectorizedDrawers();
+        R_InitColumnDrawers();
+    }
 }
-
 
 //
 // R_InitVectorizedDrawers
@@ -1683,77 +1703,77 @@ CVAR_FUNC_IMPL(r_optimize)
 //
 void R_InitVectorizedDrawers()
 {
-	if (optimize_kind == OPTIMIZE_NONE)
-	{
-		// [SL] set defaults to non-vectorized drawers
-		R_DrawSpanD				= R_DrawSpanD_c;
-		R_DrawSlopeSpanD		= R_DrawSlopeSpanD_c;
-		r_dimpatchD             = r_dimpatchD_c;
-	}
-	#ifdef __SSE2__
-	if (optimize_kind == OPTIMIZE_SSE2)
-	{
-		R_DrawSpanD				= R_DrawSpanD_SSE2;
-		R_DrawSlopeSpanD		= R_DrawSlopeSpanD_SSE2;
-		r_dimpatchD             = r_dimpatchD_SSE2;
-	}
-	#endif
-	#ifdef __MMX__
-	else if (optimize_kind == OPTIMIZE_MMX)
-	{
-		R_DrawSpanD				= R_DrawSpanD_c;		// TODO
-		R_DrawSlopeSpanD		= R_DrawSlopeSpanD_c;	// TODO
-		r_dimpatchD             = r_dimpatchD_MMX;
-	}
-	#endif
-	#ifdef __ALTIVEC__
-	else if (optimize_kind == OPTIMIZE_ALTIVEC)
-	{
-		R_DrawSpanD				= R_DrawSpanD_c;		// TODO
-		R_DrawSlopeSpanD		= R_DrawSlopeSpanD_c;	// TODO
-		r_dimpatchD             = r_dimpatchD_ALTIVEC;
-	}
-	#endif
+    if (optimize_kind == OPTIMIZE_NONE)
+    {
+        // [SL] set defaults to non-vectorized drawers
+        R_DrawSpanD      = R_DrawSpanD_c;
+        R_DrawSlopeSpanD = R_DrawSlopeSpanD_c;
+        r_dimpatchD      = r_dimpatchD_c;
+    }
+#ifdef __SSE2__
+    if (optimize_kind == OPTIMIZE_SSE2)
+    {
+        R_DrawSpanD      = R_DrawSpanD_SSE2;
+        R_DrawSlopeSpanD = R_DrawSlopeSpanD_SSE2;
+        r_dimpatchD      = r_dimpatchD_SSE2;
+    }
+#endif
+#ifdef __MMX__
+    else if (optimize_kind == OPTIMIZE_MMX)
+    {
+        R_DrawSpanD      = R_DrawSpanD_c;      // TODO
+        R_DrawSlopeSpanD = R_DrawSlopeSpanD_c; // TODO
+        r_dimpatchD      = r_dimpatchD_MMX;
+    }
+#endif
+#ifdef __ALTIVEC__
+    else if (optimize_kind == OPTIMIZE_ALTIVEC)
+    {
+        R_DrawSpanD      = R_DrawSpanD_c;      // TODO
+        R_DrawSlopeSpanD = R_DrawSlopeSpanD_c; // TODO
+        r_dimpatchD      = r_dimpatchD_ALTIVEC;
+    }
+#endif
 
-	// Check that all pointers are definitely assigned!
-	assert(R_DrawSpanD != NULL);
-	assert(R_DrawSlopeSpanD != NULL);
-	assert(r_dimpatchD != NULL);
+    // Check that all pointers are definitely assigned!
+    assert(R_DrawSpanD != NULL);
+    assert(R_DrawSlopeSpanD != NULL);
+    assert(r_dimpatchD != NULL);
 }
 
 // [RH] Initialize the column drawer pointers
-void R_InitColumnDrawers ()
+void R_InitColumnDrawers()
 {
-	if (!I_VideoInitialized())
-		return;
+    if (!I_VideoInitialized())
+        return;
 
-	if (I_GetPrimarySurface()->getBitsPerPixel() == 8)
-	{
-		R_DrawColumn			= R_DrawColumnP;
-		R_DrawFuzzColumn		= R_DrawFuzzColumnP;
-		R_DrawTranslucentColumn	= R_DrawTranslucentColumnP;
-		R_DrawTranslatedColumn	= R_DrawTranslatedColumnP;
-		R_DrawTlatedLucentColumn = R_DrawTlatedLucentColumnP;
-		R_DrawSlopeSpan			= R_DrawSlopeSpanP;
-		R_DrawSpan				= R_DrawSpanP;
-		R_FillColumn			= R_FillColumnP;
-		R_FillSpan				= R_FillSpanP;
-		R_FillTranslucentSpan	= R_FillTranslucentSpanP;
-	}
-	else
-	{
-		// 32bpp rendering functions:
-		R_DrawColumn			= R_DrawColumnD;
-		R_DrawFuzzColumn		= R_DrawFuzzColumnD;
-		R_DrawTranslucentColumn	= R_DrawTranslucentColumnD;
-		R_DrawTranslatedColumn	= R_DrawTranslatedColumnD;
-		R_DrawTlatedLucentColumn = R_DrawTlatedLucentColumnD;
-		R_DrawSlopeSpan			= R_DrawSlopeSpanD;
-		R_DrawSpan				= R_DrawSpanD;
-		R_FillColumn			= R_FillColumnD;
-		R_FillSpan				= R_FillSpanD;
-		R_FillTranslucentSpan	= R_FillTranslucentSpanD;
-	}
+    if (I_GetPrimarySurface()->getBitsPerPixel() == 8)
+    {
+        R_DrawColumn             = R_DrawColumnP;
+        R_DrawFuzzColumn         = R_DrawFuzzColumnP;
+        R_DrawTranslucentColumn  = R_DrawTranslucentColumnP;
+        R_DrawTranslatedColumn   = R_DrawTranslatedColumnP;
+        R_DrawTlatedLucentColumn = R_DrawTlatedLucentColumnP;
+        R_DrawSlopeSpan          = R_DrawSlopeSpanP;
+        R_DrawSpan               = R_DrawSpanP;
+        R_FillColumn             = R_FillColumnP;
+        R_FillSpan               = R_FillSpanP;
+        R_FillTranslucentSpan    = R_FillTranslucentSpanP;
+    }
+    else
+    {
+        // 32bpp rendering functions:
+        R_DrawColumn             = R_DrawColumnD;
+        R_DrawFuzzColumn         = R_DrawFuzzColumnD;
+        R_DrawTranslucentColumn  = R_DrawTranslucentColumnD;
+        R_DrawTranslatedColumn   = R_DrawTranslatedColumnD;
+        R_DrawTlatedLucentColumn = R_DrawTlatedLucentColumnD;
+        R_DrawSlopeSpan          = R_DrawSlopeSpanD;
+        R_DrawSpan               = R_DrawSpanD;
+        R_FillColumn             = R_FillColumnD;
+        R_FillSpan               = R_FillSpanD;
+        R_FillTranslucentSpan    = R_FillTranslucentSpanD;
+    }
 }
 
-VERSION_CONTROL (r_draw_cpp, "$Id: f878e66e7201c97021a528e052d53ef9a0811b5e $")
+VERSION_CONTROL(r_draw_cpp, "$Id: f878e66e7201c97021a528e052d53ef9a0811b5e $")

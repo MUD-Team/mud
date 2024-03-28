@@ -16,7 +16,7 @@
 // GNU General Public License for more details.
 //
 // DESCRIPTION:
-//	
+//
 //
 //-----------------------------------------------------------------------------
 
@@ -42,39 +42,40 @@ typedef OHashTable<int, int> KeyTranslationTable;
 
 class ISDL20KeyboardInputDevice : public IKeyboardInputDevice
 {
-public:
-	ISDL20KeyboardInputDevice(int id);
-	virtual ~ISDL20KeyboardInputDevice();
+  public:
+    ISDL20KeyboardInputDevice(int id);
+    virtual ~ISDL20KeyboardInputDevice();
 
-	virtual bool active() const;
+    virtual bool active() const;
 
-	virtual void pause();
-	virtual void resume();
-	virtual void reset();
+    virtual void pause();
+    virtual void resume();
+    virtual void reset();
 
-	virtual void gatherEvents();
+    virtual void gatherEvents();
 
-	virtual bool hasEvent() const
-	{	return !mEvents.empty();	}
+    virtual bool hasEvent() const
+    {
+        return !mEvents.empty();
+    }
 
-	virtual void getEvent(event_t* ev);
+    virtual void getEvent(event_t *ev);
 
-	virtual void flushEvents();
+    virtual void flushEvents();
 
-	virtual void enableTextEntry();
-	virtual void disableTextEntry();
+    virtual void enableTextEntry();
+    virtual void disableTextEntry();
 
-private:
-	int translateKey(SDL_Keysym keysym);
-	int getTextEventValue();
+  private:
+    int translateKey(SDL_Keysym keysym);
+    int getTextEventValue();
 
-	bool					mActive;
-	bool					mTextEntry;
+    bool mActive;
+    bool mTextEntry;
 
-	typedef std::queue<event_t> EventQueue;
-	EventQueue				mEvents;
+    typedef std::queue<event_t> EventQueue;
+    EventQueue                  mEvents;
 };
-
 
 // ============================================================================
 //
@@ -84,32 +85,33 @@ private:
 
 class ISDL20MouseInputDevice : public IInputDevice
 {
-public:
-	ISDL20MouseInputDevice(int id);
-	virtual ~ISDL20MouseInputDevice();
+  public:
+    ISDL20MouseInputDevice(int id);
+    virtual ~ISDL20MouseInputDevice();
 
-	virtual bool active() const;
+    virtual bool active() const;
 
-	virtual void pause();
-	virtual void resume();
-	virtual void reset();
+    virtual void pause();
+    virtual void resume();
+    virtual void reset();
 
-	virtual void gatherEvents();
+    virtual void gatherEvents();
 
-	virtual bool hasEvent() const
-	{	return !mEvents.empty();	}
+    virtual bool hasEvent() const
+    {
+        return !mEvents.empty();
+    }
 
-	virtual void getEvent(event_t* ev);
+    virtual void getEvent(event_t *ev);
 
-	virtual void flushEvents();
+    virtual void flushEvents();
 
-private:
-	bool			mActive;
+  private:
+    bool mActive;
 
-	typedef std::queue<event_t> EventQueue;
-	EventQueue		mEvents;
+    typedef std::queue<event_t> EventQueue;
+    EventQueue                  mEvents;
 };
-
 
 // ============================================================================
 //
@@ -119,39 +121,40 @@ private:
 
 class ISDL20JoystickInputDevice : public IInputDevice
 {
-public:
-	ISDL20JoystickInputDevice(int id);
-	virtual ~ISDL20JoystickInputDevice();
+  public:
+    ISDL20JoystickInputDevice(int id);
+    virtual ~ISDL20JoystickInputDevice();
 
-	virtual bool active() const;
+    virtual bool active() const;
 
-	virtual void pause();
-	virtual void resume();
-	virtual void reset();
+    virtual void pause();
+    virtual void resume();
+    virtual void reset();
 
-	virtual void gatherEvents();
+    virtual void gatherEvents();
 
-	virtual bool hasEvent() const
-	{	return !mEvents.empty();	}
+    virtual bool hasEvent() const
+    {
+        return !mEvents.empty();
+    }
 
-	virtual void getEvent(event_t* ev);
+    virtual void getEvent(event_t *ev);
 
-	virtual void flushEvents();
+    virtual void flushEvents();
 
-private:
-	int calcAxisValue(int raw_value);
+  private:
+    int calcAxisValue(int raw_value);
 
-	static const int JOY_DEADZONE = 6000;
+    static const int JOY_DEADZONE = 6000;
 
-	bool			mActive;
+    bool mActive;
 
-	typedef std::queue<event_t> EventQueue;
-	EventQueue		mEvents;
+    typedef std::queue<event_t> EventQueue;
+    EventQueue                  mEvents;
 
-	int				mJoystickId;
-	SDL_GameController*	mJoystick;
+    int                 mJoystickId;
+    SDL_GameController *mJoystick;
 };
-
 
 // ============================================================================
 //
@@ -161,30 +164,32 @@ private:
 
 class ISDL20InputSubsystem : public IInputSubsystem
 {
-public:
-	ISDL20InputSubsystem();
-	virtual ~ISDL20InputSubsystem();
+  public:
+    ISDL20InputSubsystem();
+    virtual ~ISDL20InputSubsystem();
 
-	virtual void grabInput();
-	virtual void releaseInput();
+    virtual void grabInput();
+    virtual void releaseInput();
 
-	virtual bool isInputGrabbed() const
-	{	return mInputGrabbed;	}
+    virtual bool isInputGrabbed() const
+    {
+        return mInputGrabbed;
+    }
 
-	virtual std::vector<IInputDeviceInfo> getKeyboardDevices() const;
-	virtual void initKeyboard(int id);
-	virtual void shutdownKeyboard(int id);
+    virtual std::vector<IInputDeviceInfo> getKeyboardDevices() const;
+    virtual void                          initKeyboard(int id);
+    virtual void                          shutdownKeyboard(int id);
 
-	virtual std::vector<IInputDeviceInfo> getMouseDevices() const;
-	virtual void initMouse(int id);
-	virtual void shutdownMouse(int id);
+    virtual std::vector<IInputDeviceInfo> getMouseDevices() const;
+    virtual void                          initMouse(int id);
+    virtual void                          shutdownMouse(int id);
 
-	virtual std::vector<IInputDeviceInfo> getJoystickDevices() const;
-	virtual void initJoystick(int id);
-	virtual void shutdownJoystick(int id);
+    virtual std::vector<IInputDeviceInfo> getJoystickDevices() const;
+    virtual void                          initJoystick(int id);
+    virtual void                          shutdownJoystick(int id);
 
-private:
-	bool				mInputGrabbed;
+  private:
+    bool mInputGrabbed;
 };
 
-#endif	// SDL20
+#endif // SDL20

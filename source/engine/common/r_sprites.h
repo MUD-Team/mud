@@ -21,24 +21,23 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #pragma once
 
 extern int MaxVisSprites;
 
 extern vissprite_t *vissprites;
 
-extern spritedef_t* sprites;
-extern int numsprites;
+extern spritedef_t *sprites;
+extern int          numsprites;
 
 #define MAX_SPRITE_FRAMES 29 // [RH] Macro-ized as in BOOM.
 
 // variables used to look up
 //	and range check thing_t sprites patches
 extern spriteframe_t sprtemp[MAX_SPRITE_FRAMES];
-extern int maxframe;
+extern int           maxframe;
 
-extern vissprite_t* lastvissprite;
+extern vissprite_t *lastvissprite;
 
 void R_CacheSprite(spritedef_t *sprite);
-void R_InitSprites(const char** namelist);
+void R_InitSprites(const char **namelist);

@@ -21,7 +21,6 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #include "odamex.h"
 
 #include "gstrings.h"
@@ -31,27 +30,26 @@
 #include "g_mapinfo.h"
 
 // Game Mode - identify IWAD as shareware, retail etc.
-GameMode_t		gamemode = undetermined;
-GameMission_t	gamemission = doom;
+GameMode_t    gamemode    = undetermined;
+GameMission_t gamemission = doom;
 
 // Language.
-CVAR_FUNC_IMPL (language)
+CVAR_FUNC_IMPL(language)
 {
-	SetLanguageIDs();
-	if (level.behavior != NULL)
-	{
-		level.behavior->PrepLocale (LanguageIDs[0], LanguageIDs[1],
-			LanguageIDs[2], LanguageIDs[3]);
-	}
+    SetLanguageIDs();
+    if (level.behavior != NULL)
+    {
+        level.behavior->PrepLocale(LanguageIDs[0], LanguageIDs[1], LanguageIDs[2], LanguageIDs[3]);
+    }
 
-	// Reload LANGUAGE strings.
-	::GStrings.loadStrings(false);
+    // Reload LANGUAGE strings.
+    ::GStrings.loadStrings(false);
 
-	// Reapply DeHackEd patches on top of these strings.
-	D_LoadResolvedPatches();
+    // Reapply DeHackEd patches on top of these strings.
+    D_LoadResolvedPatches();
 }
 
 // Set if homebrew PWAD stuff has been added.
-BOOL			modifiedgame;
+BOOL modifiedgame;
 
-VERSION_CONTROL (doomstat_cpp, "$Id: 686011b85d769015f0aa65907035336a1d6e9867 $")
+VERSION_CONTROL(doomstat_cpp, "$Id: 686011b85d769015f0aa65907035336a1d6e9867 $")

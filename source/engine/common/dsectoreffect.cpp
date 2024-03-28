@@ -21,45 +21,42 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #include "odamex.h"
 
 #include "p_local.h"
 #include "dsectoreffect.h"
 
+EXTERN_CVAR(co_boomphys) // [ML] Roll-up of various compat options
 
+IMPLEMENT_SERIAL(DSectorEffect, DThinker)
 
-EXTERN_CVAR(co_boomphys)			// [ML] Roll-up of various compat options
-
-IMPLEMENT_SERIAL (DSectorEffect, DThinker)
-
-DSectorEffect::DSectorEffect ()
+DSectorEffect::DSectorEffect()
 {
-	m_Sector = NULL;
+    m_Sector = NULL;
 }
 
-DSectorEffect::~DSectorEffect ()
+DSectorEffect::~DSectorEffect()
 {
 }
 
-void DSectorEffect::Destroy ()
+void DSectorEffect::Destroy()
 {
-	if (m_Sector)
-	{
-		if (m_Sector->floordata == this)
-			m_Sector->floordata = NULL;
-		if (m_Sector->ceilingdata == this)
-			m_Sector->ceilingdata = NULL;
-		if (m_Sector->lightingdata == this)
-			m_Sector->lightingdata = NULL;
-	}
+    if (m_Sector)
+    {
+        if (m_Sector->floordata == this)
+            m_Sector->floordata = NULL;
+        if (m_Sector->ceilingdata == this)
+            m_Sector->ceilingdata = NULL;
+        if (m_Sector->lightingdata == this)
+            m_Sector->lightingdata = NULL;
+    }
 
-	Super::Destroy();
+    Super::Destroy();
 }
 
-DSectorEffect::DSectorEffect (sector_t *sector)
+DSectorEffect::DSectorEffect(sector_t *sector)
 {
-	m_Sector = sector;
+    m_Sector = sector;
 }
 
 // Base Clone method, for cloning sector actions.
@@ -68,69 +65,65 @@ DSectorEffect::DSectorEffect (sector_t *sector)
 //
 // All subclasses should allocate a subclass with `new`, orphan it,
 // then set the sector of the subclass to the passed sector.
-DSectorEffect* DSectorEffect::Clone(sector_t *sector) const
+DSectorEffect *DSectorEffect::Clone(sector_t *sector) const
 {
-	throw CFatalError("DSectorEffect::Clone() called as a base class.");
+    throw CFatalError("DSectorEffect::Clone() called as a base class.");
 }
 
-void DSectorEffect::Serialize (FArchive &arc)
+void DSectorEffect::Serialize(FArchive &arc)
 {
-	Super::Serialize (arc);
-	if (arc.IsStoring ())
-		arc << m_Sector;
-	else
-		arc >> m_Sector;
-
+    Super::Serialize(arc);
+    if (arc.IsStoring())
+        arc << m_Sector;
+    else
+        arc >> m_Sector;
 }
 
-IMPLEMENT_SERIAL (DMover, DSectorEffect)
+IMPLEMENT_SERIAL(DMover, DSectorEffect)
 
-DMover::DMover ()
-{
-}
-
-DMover::DMover (sector_t *sector)
-	: DSectorEffect (sector)
+DMover::DMover()
 {
 }
 
-void DMover::Serialize (FArchive &arc)
-{
-	Super::Serialize (arc);
-}
-
-IMPLEMENT_SERIAL (DMovingFloor, DMover)
-
-DMovingFloor::DMovingFloor ()
+DMover::DMover(sector_t *sector) : DSectorEffect(sector)
 {
 }
 
-DMovingFloor::DMovingFloor (sector_t *sector)
-	: DMover (sector)
+void DMover::Serialize(FArchive &arc)
 {
-	sector->floordata = this;
+    Super::Serialize(arc);
 }
 
-void DMovingFloor::Serialize (FArchive &arc)
-{
-	Super::Serialize (arc);
-}
+IMPLEMENT_SERIAL(DMovingFloor, DMover)
 
-IMPLEMENT_SERIAL (DMovingCeiling, DMover)
-
-DMovingCeiling::DMovingCeiling ()
+DMovingFloor::DMovingFloor()
 {
 }
 
-DMovingCeiling::DMovingCeiling (sector_t *sector)
-	: DMover (sector)
+DMovingFloor::DMovingFloor(sector_t *sector) : DMover(sector)
 {
-	sector->ceilingdata = this;
+    sector->floordata = this;
 }
 
-void DMovingCeiling::Serialize (FArchive &arc)
+void DMovingFloor::Serialize(FArchive &arc)
 {
-	Super::Serialize (arc);
+    Super::Serialize(arc);
+}
+
+IMPLEMENT_SERIAL(DMovingCeiling, DMover)
+
+DMovingCeiling::DMovingCeiling()
+{
+}
+
+DMovingCeiling::DMovingCeiling(sector_t *sector) : DMover(sector)
+{
+    sector->ceilingdata = this;
+}
+
+void DMovingCeiling::Serialize(FArchive &arc)
+{
+    Super::Serialize(arc);
 }
 
 //
@@ -138,163 +131,163 @@ void DMovingCeiling::Serialize (FArchive &arc)
 // [RH] Crush specifies the actual amount of crushing damage inflictable.
 //		(Use -1 to prevent it from trying to crush)
 //
-DMover::EResult DMover::MovePlane (fixed_t speed, fixed_t dest, int crush,
-								   int floorOrCeiling, int direction, bool hexencrush)
+DMover::EResult DMover::MovePlane(fixed_t speed, fixed_t dest, int crush, int floorOrCeiling, int direction,
+                                  bool hexencrush)
 {
-	bool	 	flag;
-	fixed_t 	lastpos;
+    bool    flag;
+    fixed_t lastpos;
 
-	switch (floorOrCeiling)
-	{
-	case 0:
-		// FLOOR
-		switch (direction)
-		{
-		case -1:
-			// DOWN
-			lastpos = P_FloorHeight(m_Sector);
-			if (lastpos - speed < dest)
-			{
-				P_ChangeFloorHeight(m_Sector, dest - lastpos);
-				flag = P_ChangeSector (m_Sector, crush);
-				if (flag == true)
-				{
-					P_ChangeFloorHeight(m_Sector, lastpos - dest);
-					P_ChangeSector (m_Sector, crush);
-					//return crushed;
-				}
-				return pastdest;
-			}
-			else
-			{
-				P_ChangeFloorHeight(m_Sector, -speed);
-				flag = P_ChangeSector (m_Sector, crush);
-				// comp_floors: co_boomsectortouch enables Boom behaviour which
-				// allows floor to lower when actors on it are stuck in ceiling
-				// [ML] Now part of co_boomphys
-				if (flag == true && !co_boomphys)
-				{
-					P_ChangeFloorHeight(m_Sector, speed);	// should be lastpos
-					P_ChangeSector (m_Sector, crush);
-					return crushed;
-				}
-			}
-			break;
+    switch (floorOrCeiling)
+    {
+    case 0:
+        // FLOOR
+        switch (direction)
+        {
+        case -1:
+            // DOWN
+            lastpos = P_FloorHeight(m_Sector);
+            if (lastpos - speed < dest)
+            {
+                P_ChangeFloorHeight(m_Sector, dest - lastpos);
+                flag = P_ChangeSector(m_Sector, crush);
+                if (flag == true)
+                {
+                    P_ChangeFloorHeight(m_Sector, lastpos - dest);
+                    P_ChangeSector(m_Sector, crush);
+                    // return crushed;
+                }
+                return pastdest;
+            }
+            else
+            {
+                P_ChangeFloorHeight(m_Sector, -speed);
+                flag = P_ChangeSector(m_Sector, crush);
+                // comp_floors: co_boomsectortouch enables Boom behaviour which
+                // allows floor to lower when actors on it are stuck in ceiling
+                // [ML] Now part of co_boomphys
+                if (flag == true && !co_boomphys)
+                {
+                    P_ChangeFloorHeight(m_Sector, speed); // should be lastpos
+                    P_ChangeSector(m_Sector, crush);
+                    return crushed;
+                }
+            }
+            break;
 
-		case 1:
-			// UP
-			lastpos = P_FloorHeight(m_Sector);
-			// comp_floors: jff 02/04/98 keep floor from moving thru ceilings
-			// co_boomsectortouch enables Boom behaviour where a rising floor
-			// is prevented from moving higher than the ceiling above it
-			// [ML] Now part of co_boomphys
-			if (co_boomphys)
-			{
-				fixed_t h = P_CeilingHeight(m_Sector);
-				if (dest > h) // floor is trying to rise through ceiling
-					dest = h;
-			}
+        case 1:
+            // UP
+            lastpos = P_FloorHeight(m_Sector);
+            // comp_floors: jff 02/04/98 keep floor from moving thru ceilings
+            // co_boomsectortouch enables Boom behaviour where a rising floor
+            // is prevented from moving higher than the ceiling above it
+            // [ML] Now part of co_boomphys
+            if (co_boomphys)
+            {
+                fixed_t h = P_CeilingHeight(m_Sector);
+                if (dest > h) // floor is trying to rise through ceiling
+                    dest = h;
+            }
 
-			if (lastpos + speed > dest)
-			{
-				P_ChangeFloorHeight(m_Sector, dest - lastpos);
-				flag = P_ChangeSector (m_Sector, crush);
-				if (flag == true)
-				{
-					P_ChangeFloorHeight(m_Sector, lastpos - dest);
-					P_ChangeSector (m_Sector, crush);
-				}
-				return pastdest;
-			}
-			else
-			{
-				// COULD GET CRUSHED
-				P_ChangeFloorHeight(m_Sector, speed);
-				flag = P_ChangeSector (m_Sector, crush);
-				if (flag == true)
-				{
-					// comp_floors: jff 1/25/98 fix floor crusher
-					// co_boomsectortouch enables Boom behaviour where rising
-					// floor holds in place until victim moves or is crushed
-					// [ML] Now part of co_boomphys
-					if (!hexencrush && crush > NO_CRUSH && !co_boomphys)
-						return crushed;
-					P_ChangeFloorHeight(m_Sector, -speed);
-					P_ChangeSector (m_Sector, crush);
-					return crushed;
-				}
-			}
-			break;
-		}
-		break;
+            if (lastpos + speed > dest)
+            {
+                P_ChangeFloorHeight(m_Sector, dest - lastpos);
+                flag = P_ChangeSector(m_Sector, crush);
+                if (flag == true)
+                {
+                    P_ChangeFloorHeight(m_Sector, lastpos - dest);
+                    P_ChangeSector(m_Sector, crush);
+                }
+                return pastdest;
+            }
+            else
+            {
+                // COULD GET CRUSHED
+                P_ChangeFloorHeight(m_Sector, speed);
+                flag = P_ChangeSector(m_Sector, crush);
+                if (flag == true)
+                {
+                    // comp_floors: jff 1/25/98 fix floor crusher
+                    // co_boomsectortouch enables Boom behaviour where rising
+                    // floor holds in place until victim moves or is crushed
+                    // [ML] Now part of co_boomphys
+                    if (!hexencrush && crush > NO_CRUSH && !co_boomphys)
+                        return crushed;
+                    P_ChangeFloorHeight(m_Sector, -speed);
+                    P_ChangeSector(m_Sector, crush);
+                    return crushed;
+                }
+            }
+            break;
+        }
+        break;
 
-	  case 1:
-		// CEILING
-		switch(direction)
-		{
-		case -1:
-			// DOWN
-			lastpos = P_CeilingHeight(m_Sector);
-			// comp_floors: jff 02/04/98 keep ceiling from moving thru floors
-			// co_boomsectortouch enables Boom behaviour where a lowering
-			// ceiling is prevented from moving lower than the floor below it
-			// [ML] Now part of co_boomphys
-			if (co_boomphys)
-			{
-				fixed_t h = P_FloorHeight(m_Sector);
-				if (dest < h) // ceiling is trying to lower through floor
-					dest = h;
-			}
+    case 1:
+        // CEILING
+        switch (direction)
+        {
+        case -1:
+            // DOWN
+            lastpos = P_CeilingHeight(m_Sector);
+            // comp_floors: jff 02/04/98 keep ceiling from moving thru floors
+            // co_boomsectortouch enables Boom behaviour where a lowering
+            // ceiling is prevented from moving lower than the floor below it
+            // [ML] Now part of co_boomphys
+            if (co_boomphys)
+            {
+                fixed_t h = P_FloorHeight(m_Sector);
+                if (dest < h) // ceiling is trying to lower through floor
+                    dest = h;
+            }
 
-			if (lastpos - speed < dest)
-			{
-				P_SetCeilingHeight(m_Sector, dest);
-				flag = P_ChangeSector (m_Sector, crush);
+            if (lastpos - speed < dest)
+            {
+                P_SetCeilingHeight(m_Sector, dest);
+                flag = P_ChangeSector(m_Sector, crush);
 
-				if (flag == true)
-				{
-					P_SetCeilingHeight(m_Sector, lastpos);
-					P_ChangeSector (m_Sector, crush);
-				}
-				return pastdest;
-			}
-			else
-			{
-				// COULD GET CRUSHED
-				P_SetCeilingHeight(m_Sector, lastpos - speed);
-				flag = P_ChangeSector (m_Sector, crush);
+                if (flag == true)
+                {
+                    P_SetCeilingHeight(m_Sector, lastpos);
+                    P_ChangeSector(m_Sector, crush);
+                }
+                return pastdest;
+            }
+            else
+            {
+                // COULD GET CRUSHED
+                P_SetCeilingHeight(m_Sector, lastpos - speed);
+                flag = P_ChangeSector(m_Sector, crush);
 
-				if (flag == true)
-				{
-					if (crush > NO_CRUSH)
-						return crushed;
+                if (flag == true)
+                {
+                    if (crush > NO_CRUSH)
+                        return crushed;
 
-					P_SetCeilingHeight(m_Sector, lastpos);
-					P_ChangeSector (m_Sector, crush);
-					return crushed;
-				}
-			}
-			break;
+                    P_SetCeilingHeight(m_Sector, lastpos);
+                    P_ChangeSector(m_Sector, crush);
+                    return crushed;
+                }
+            }
+            break;
 
-		case 1:
-			// UP
-			lastpos = P_CeilingHeight(m_Sector);
+        case 1:
+            // UP
+            lastpos = P_CeilingHeight(m_Sector);
 
-			if (lastpos + speed > dest)
-			{
-				P_SetCeilingHeight(m_Sector, dest);
-				flag = P_ChangeSector (m_Sector, crush);
-				if (flag == true)
-				{
-					P_SetCeilingHeight(m_Sector, lastpos);
-					P_ChangeSector (m_Sector, crush);
-				}
-				return pastdest;
-			}
-			else
-			{
-				P_SetCeilingHeight(m_Sector, lastpos + speed);
-				flag = P_ChangeSector (m_Sector, crush);
+            if (lastpos + speed > dest)
+            {
+                P_SetCeilingHeight(m_Sector, dest);
+                flag = P_ChangeSector(m_Sector, crush);
+                if (flag == true)
+                {
+                    P_SetCeilingHeight(m_Sector, lastpos);
+                    P_ChangeSector(m_Sector, crush);
+                }
+                return pastdest;
+            }
+            else
+            {
+                P_SetCeilingHeight(m_Sector, lastpos + speed);
+                flag = P_ChangeSector(m_Sector, crush);
 // UNUSED
 #if 0
 				if (flag == true)
@@ -304,14 +297,12 @@ DMover::EResult DMover::MovePlane (fixed_t speed, fixed_t dest, int crush,
 					return crushed;
 				}
 #endif
-			}
-			break;
-		}
-		break;
-
-	}
-	return ok;
+            }
+            break;
+        }
+        break;
+    }
+    return ok;
 }
 
-VERSION_CONTROL (dsectoreffect_cpp, "$Id: 0009411bb11bf48870f7609d9dfcd3a7ee627d4d $")
-
+VERSION_CONTROL(dsectoreffect_cpp, "$Id: 0009411bb11bf48870f7609d9dfcd3a7ee627d4d $")

@@ -23,7 +23,7 @@
 
 #pragma once
 
-        // Movement Keys
+// Movement Keys
 bool Key_IsUpKey(int key, bool numlock);
 bool Key_IsDownKey(int key, bool numlock);
 bool Key_IsLeftKey(int key, bool numlock);

@@ -21,7 +21,6 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #include "odamex.h"
 
 // SoM 12-24-05: yeah... I'm programming on christmas eve.
@@ -47,10 +46,10 @@
 #endif
 
 #ifdef _WIN32
-bool tab_keydown = false;	// [ML] Actual status of tab key
+bool tab_keydown = false; // [ML] Actual status of tab key
 #endif
 
-static IInputSubsystem* input_subsystem = NULL;
+static IInputSubsystem *input_subsystem = NULL;
 
 static bool nomouse = false;
 
@@ -63,207 +62,204 @@ KeyNameTable key_names;
 //
 static void I_InitializeKeyNameTable()
 {
-	key_names.clear();
-	key_names[OKEY_BACKSPACE] = "backspace";
-	key_names[OKEY_TAB] = "tab";
-	key_names[OKEY_ENTER] = "enter";
-	key_names[OKEY_PAUSE] = "pause";
-	key_names[OKEY_ESCAPE] = "escape";
-	key_names[OKEY_SPACE] = "space";
-	key_names['!'] = "!";
-	key_names['\"'] = "\"";
-	key_names['#'] = "#";
-	key_names['$'] = "$";
-	key_names['&'] = "&";
-	key_names['\''] = "\'";
-	key_names['('] = "(";
-	key_names[')'] = ")";
-	key_names['*'] = "*";
-	key_names['+'] = "+";
-	key_names[','] = ",";
-	key_names['-'] = "-";
-	key_names['.'] = ".";
-	key_names['/'] = "/";
-	key_names['0'] = "0";
-	key_names['1'] = "1";
-	key_names['2'] = "2";
-	key_names['3'] = "3";
-	key_names['4'] = "4";
-	key_names['5'] = "5";
-	key_names['6'] = "6";
-	key_names['7'] = "7";
-	key_names['8'] = "8";
-	key_names['9'] = "9";
-	key_names[':'] = ":";
-	key_names[';'] = ":";
-	key_names['<'] = "<";
-	key_names['='] = "=";
-	key_names['>'] = ">";
-	key_names['?'] = "?";
-	key_names['@'] = "@";
-	key_names['['] = "[";
-	key_names['\\'] = "\\";
-	key_names[']'] = "]";
-	key_names['^'] = "^";
-	key_names['_'] = "_";
-	key_names['`'] = "grave";
-	key_names[OKEY_TILDE] = "tilde";
-	key_names['a'] = "a";
-	key_names['b'] = "b";
-	key_names['c'] = "c";
-	key_names['d'] = "d";
-	key_names['e'] = "e";
-	key_names['f'] = "f";
-	key_names['g'] = "g";
-	key_names['h'] = "h";
-	key_names['i'] = "i";
-	key_names['j'] = "j";
-	key_names['k'] = "k";
-	key_names['l'] = "l";
-	key_names['m'] = "m";
-	key_names['n'] = "n";
-	key_names['o'] = "o";
-	key_names['p'] = "p";
-	key_names['q'] = "q";
-	key_names['r'] = "r";
-	key_names['s'] = "s";
-	key_names['t'] = "t";
-	key_names['u'] = "u";
-	key_names['v'] = "v";
-	key_names['w'] = "w";
-	key_names['x'] = "x";
-	key_names['y'] = "y";
-	key_names['z'] = "z";
-	key_names[OKEY_DEL] = "del";
-	key_names[OKEYP_0] = "kp0";
-	key_names[OKEYP_1] = "kp1";
-	key_names[OKEYP_2] = "kp2";
-	key_names[OKEYP_3] = "kp3";
-	key_names[OKEYP_4] = "kp4";
-	key_names[OKEYP_5] = "kp5";
-	key_names[OKEYP_6] = "kp6";
-	key_names[OKEYP_7] = "kp7";
-	key_names[OKEYP_8] = "kp8";
-	key_names[OKEYP_9] = "kp9";
-	key_names[OKEYP_PERIOD] = "kp.";
-	key_names[OKEYP_DIVIDE] = "kp/";
-	key_names[OKEYP_MULTIPLY] = "kp*";
-	key_names[OKEYP_MINUS] = "kp-";
-	key_names[OKEYP_PLUS] = "kp+";
-	key_names[OKEYP_ENTER] = "kpenter";
-	key_names[OKEYP_EQUALS] = "kp=";
-	key_names[OKEY_UPARROW] = "uparrow";
-	key_names[OKEY_DOWNARROW] = "downarrow";
-	key_names[OKEY_LEFTARROW] = "leftarrow";
-	key_names[OKEY_RIGHTARROW] = "rightarrow";
-	key_names[OKEY_INS] = "ins";
-	key_names[OKEY_HOME] = "home";
-	key_names[OKEY_END] = "end";
-	key_names[OKEY_PGUP] = "pgup";
-	key_names[OKEY_PGDN] = "pgdn";
-	key_names[OKEY_F1] = "f1";
-	key_names[OKEY_F2] = "f2";
-	key_names[OKEY_F3] = "f3";
-	key_names[OKEY_F4] = "f4";
-	key_names[OKEY_F5] = "f5";
-	key_names[OKEY_F6] = "f6";
-	key_names[OKEY_F7] = "f7";
-	key_names[OKEY_F8] = "f8";
-	key_names[OKEY_F9] = "f9";
-	key_names[OKEY_F10] = "f10";
-	key_names[OKEY_F11] = "f11";
-	key_names[OKEY_F12] = "f12";
-	key_names[OKEY_F13] = "f13";
-	key_names[OKEY_F14] = "f14";
-	key_names[OKEY_F15] = "f15";
-	key_names[OKEY_NUMLOCK] = "numlock";
-	key_names[OKEY_CAPSLOCK] = "capslock";
-	key_names[OKEY_SCRLCK] = "scroll";
-	key_names[OKEY_RSHIFT] = "rightshift";
-	key_names[OKEY_LSHIFT] = "leftshift";
-	key_names[OKEY_RCTRL] = "rightctrl";
-	key_names[OKEY_LCTRL] = "leftctrl";
-	key_names[OKEY_RALT] = "rightalt";
-	key_names[OKEY_LALT] = "leftalt";
-	key_names[OKEY_LWIN] = "lwin";
-	key_names[OKEY_RWIN] = "rwin";
-	key_names[OKEY_HELP] = "help";
-	key_names[OKEY_PRINT] = "print";
-	key_names[OKEY_SYSRQ] = "sysrq";
-	key_names[OKEY_MOUSE1] = "mouse1";
-	key_names[OKEY_MOUSE2] = "mouse2";
-	key_names[OKEY_MOUSE3] = "mouse3";
-	key_names[OKEY_MOUSE4] = "mouse4";
-	key_names[OKEY_MOUSE5] = "mouse5";
-	key_names[OKEY_MWHEELDOWN] = "mwheeldown";
-	key_names[OKEY_MWHEELUP] = "mwheelup";
-	key_names[OKEY_JOY1] = "joy1";
-	key_names[OKEY_JOY2] = "joy2";
-	key_names[OKEY_JOY3] = "joy3";
-	key_names[OKEY_JOY4] = "joy4";
-	key_names[OKEY_JOY5] = "joy5";
-	key_names[OKEY_JOY6] = "joy6";
-	key_names[OKEY_JOY7] = "joy7";
-	key_names[OKEY_JOY8] = "joy8";
-	key_names[OKEY_JOY9] = "joy9";
-	key_names[OKEY_JOY10] = "joy10";
-	key_names[OKEY_JOY11] = "joy11";
-	key_names[OKEY_JOY12] = "joy12";
-	key_names[OKEY_JOY13] = "joy13";
-	key_names[OKEY_JOY14] = "joy14";
-	key_names[OKEY_JOY15] = "joy15";
-	key_names[OKEY_JOY16] = "joy16";
-	key_names[OKEY_JOY17] = "joy17";
-	key_names[OKEY_JOY18] = "joy18";
-	key_names[OKEY_JOY19] = "joy19";
-	key_names[OKEY_JOY20] = "joy20";
-	key_names[OKEY_JOY21] = "joy21";
-	key_names[OKEY_JOY22] = "joy22";
-	key_names[OKEY_JOY23] = "joy23";
-	key_names[OKEY_JOY24] = "joy24";
-	key_names[OKEY_JOY25] = "joy25";
-	key_names[OKEY_JOY26] = "joy26";
-	key_names[OKEY_JOY27] = "joy27";
-	key_names[OKEY_JOY28] = "joy28";
-	key_names[OKEY_JOY29] = "joy29";
-	key_names[OKEY_JOY30] = "joy30";
-	key_names[OKEY_JOY31] = "joy31";
-	key_names[OKEY_JOY32] = "joy32";
-	key_names[OKEY_HAT1] = "hat1up";
-	key_names[OKEY_HAT2] = "hat1right";
-	key_names[OKEY_HAT3] = "hat1down";
-	key_names[OKEY_HAT4] = "hat1left";
-	key_names[OKEY_HAT5] = "hat2up";
-	key_names[OKEY_HAT6] = "hat2right";
-	key_names[OKEY_HAT7] = "hat2down";
-	key_names[OKEY_HAT8] = "hat2left";
-
+    key_names.clear();
+    key_names[OKEY_BACKSPACE]  = "backspace";
+    key_names[OKEY_TAB]        = "tab";
+    key_names[OKEY_ENTER]      = "enter";
+    key_names[OKEY_PAUSE]      = "pause";
+    key_names[OKEY_ESCAPE]     = "escape";
+    key_names[OKEY_SPACE]      = "space";
+    key_names['!']             = "!";
+    key_names['\"']            = "\"";
+    key_names['#']             = "#";
+    key_names['$']             = "$";
+    key_names['&']             = "&";
+    key_names['\'']            = "\'";
+    key_names['(']             = "(";
+    key_names[')']             = ")";
+    key_names['*']             = "*";
+    key_names['+']             = "+";
+    key_names[',']             = ",";
+    key_names['-']             = "-";
+    key_names['.']             = ".";
+    key_names['/']             = "/";
+    key_names['0']             = "0";
+    key_names['1']             = "1";
+    key_names['2']             = "2";
+    key_names['3']             = "3";
+    key_names['4']             = "4";
+    key_names['5']             = "5";
+    key_names['6']             = "6";
+    key_names['7']             = "7";
+    key_names['8']             = "8";
+    key_names['9']             = "9";
+    key_names[':']             = ":";
+    key_names[';']             = ":";
+    key_names['<']             = "<";
+    key_names['=']             = "=";
+    key_names['>']             = ">";
+    key_names['?']             = "?";
+    key_names['@']             = "@";
+    key_names['[']             = "[";
+    key_names['\\']            = "\\";
+    key_names[']']             = "]";
+    key_names['^']             = "^";
+    key_names['_']             = "_";
+    key_names['`']             = "grave";
+    key_names[OKEY_TILDE]      = "tilde";
+    key_names['a']             = "a";
+    key_names['b']             = "b";
+    key_names['c']             = "c";
+    key_names['d']             = "d";
+    key_names['e']             = "e";
+    key_names['f']             = "f";
+    key_names['g']             = "g";
+    key_names['h']             = "h";
+    key_names['i']             = "i";
+    key_names['j']             = "j";
+    key_names['k']             = "k";
+    key_names['l']             = "l";
+    key_names['m']             = "m";
+    key_names['n']             = "n";
+    key_names['o']             = "o";
+    key_names['p']             = "p";
+    key_names['q']             = "q";
+    key_names['r']             = "r";
+    key_names['s']             = "s";
+    key_names['t']             = "t";
+    key_names['u']             = "u";
+    key_names['v']             = "v";
+    key_names['w']             = "w";
+    key_names['x']             = "x";
+    key_names['y']             = "y";
+    key_names['z']             = "z";
+    key_names[OKEY_DEL]        = "del";
+    key_names[OKEYP_0]         = "kp0";
+    key_names[OKEYP_1]         = "kp1";
+    key_names[OKEYP_2]         = "kp2";
+    key_names[OKEYP_3]         = "kp3";
+    key_names[OKEYP_4]         = "kp4";
+    key_names[OKEYP_5]         = "kp5";
+    key_names[OKEYP_6]         = "kp6";
+    key_names[OKEYP_7]         = "kp7";
+    key_names[OKEYP_8]         = "kp8";
+    key_names[OKEYP_9]         = "kp9";
+    key_names[OKEYP_PERIOD]    = "kp.";
+    key_names[OKEYP_DIVIDE]    = "kp/";
+    key_names[OKEYP_MULTIPLY]  = "kp*";
+    key_names[OKEYP_MINUS]     = "kp-";
+    key_names[OKEYP_PLUS]      = "kp+";
+    key_names[OKEYP_ENTER]     = "kpenter";
+    key_names[OKEYP_EQUALS]    = "kp=";
+    key_names[OKEY_UPARROW]    = "uparrow";
+    key_names[OKEY_DOWNARROW]  = "downarrow";
+    key_names[OKEY_LEFTARROW]  = "leftarrow";
+    key_names[OKEY_RIGHTARROW] = "rightarrow";
+    key_names[OKEY_INS]        = "ins";
+    key_names[OKEY_HOME]       = "home";
+    key_names[OKEY_END]        = "end";
+    key_names[OKEY_PGUP]       = "pgup";
+    key_names[OKEY_PGDN]       = "pgdn";
+    key_names[OKEY_F1]         = "f1";
+    key_names[OKEY_F2]         = "f2";
+    key_names[OKEY_F3]         = "f3";
+    key_names[OKEY_F4]         = "f4";
+    key_names[OKEY_F5]         = "f5";
+    key_names[OKEY_F6]         = "f6";
+    key_names[OKEY_F7]         = "f7";
+    key_names[OKEY_F8]         = "f8";
+    key_names[OKEY_F9]         = "f9";
+    key_names[OKEY_F10]        = "f10";
+    key_names[OKEY_F11]        = "f11";
+    key_names[OKEY_F12]        = "f12";
+    key_names[OKEY_F13]        = "f13";
+    key_names[OKEY_F14]        = "f14";
+    key_names[OKEY_F15]        = "f15";
+    key_names[OKEY_NUMLOCK]    = "numlock";
+    key_names[OKEY_CAPSLOCK]   = "capslock";
+    key_names[OKEY_SCRLCK]     = "scroll";
+    key_names[OKEY_RSHIFT]     = "rightshift";
+    key_names[OKEY_LSHIFT]     = "leftshift";
+    key_names[OKEY_RCTRL]      = "rightctrl";
+    key_names[OKEY_LCTRL]      = "leftctrl";
+    key_names[OKEY_RALT]       = "rightalt";
+    key_names[OKEY_LALT]       = "leftalt";
+    key_names[OKEY_LWIN]       = "lwin";
+    key_names[OKEY_RWIN]       = "rwin";
+    key_names[OKEY_HELP]       = "help";
+    key_names[OKEY_PRINT]      = "print";
+    key_names[OKEY_SYSRQ]      = "sysrq";
+    key_names[OKEY_MOUSE1]     = "mouse1";
+    key_names[OKEY_MOUSE2]     = "mouse2";
+    key_names[OKEY_MOUSE3]     = "mouse3";
+    key_names[OKEY_MOUSE4]     = "mouse4";
+    key_names[OKEY_MOUSE5]     = "mouse5";
+    key_names[OKEY_MWHEELDOWN] = "mwheeldown";
+    key_names[OKEY_MWHEELUP]   = "mwheelup";
+    key_names[OKEY_JOY1]       = "joy1";
+    key_names[OKEY_JOY2]       = "joy2";
+    key_names[OKEY_JOY3]       = "joy3";
+    key_names[OKEY_JOY4]       = "joy4";
+    key_names[OKEY_JOY5]       = "joy5";
+    key_names[OKEY_JOY6]       = "joy6";
+    key_names[OKEY_JOY7]       = "joy7";
+    key_names[OKEY_JOY8]       = "joy8";
+    key_names[OKEY_JOY9]       = "joy9";
+    key_names[OKEY_JOY10]      = "joy10";
+    key_names[OKEY_JOY11]      = "joy11";
+    key_names[OKEY_JOY12]      = "joy12";
+    key_names[OKEY_JOY13]      = "joy13";
+    key_names[OKEY_JOY14]      = "joy14";
+    key_names[OKEY_JOY15]      = "joy15";
+    key_names[OKEY_JOY16]      = "joy16";
+    key_names[OKEY_JOY17]      = "joy17";
+    key_names[OKEY_JOY18]      = "joy18";
+    key_names[OKEY_JOY19]      = "joy19";
+    key_names[OKEY_JOY20]      = "joy20";
+    key_names[OKEY_JOY21]      = "joy21";
+    key_names[OKEY_JOY22]      = "joy22";
+    key_names[OKEY_JOY23]      = "joy23";
+    key_names[OKEY_JOY24]      = "joy24";
+    key_names[OKEY_JOY25]      = "joy25";
+    key_names[OKEY_JOY26]      = "joy26";
+    key_names[OKEY_JOY27]      = "joy27";
+    key_names[OKEY_JOY28]      = "joy28";
+    key_names[OKEY_JOY29]      = "joy29";
+    key_names[OKEY_JOY30]      = "joy30";
+    key_names[OKEY_JOY31]      = "joy31";
+    key_names[OKEY_JOY32]      = "joy32";
+    key_names[OKEY_HAT1]       = "hat1up";
+    key_names[OKEY_HAT2]       = "hat1right";
+    key_names[OKEY_HAT3]       = "hat1down";
+    key_names[OKEY_HAT4]       = "hat1left";
+    key_names[OKEY_HAT5]       = "hat2up";
+    key_names[OKEY_HAT6]       = "hat2right";
+    key_names[OKEY_HAT7]       = "hat2down";
+    key_names[OKEY_HAT8]       = "hat2left";
 }
-
 
 //
 // I_GetKeyFromName
 //
 // Returns the key code for the given key name
 //
-int I_GetKeyFromName(const std::string& name)
+int I_GetKeyFromName(const std::string &name)
 {
-	if (key_names.empty())
-		I_InitializeKeyNameTable();
+    if (key_names.empty())
+        I_InitializeKeyNameTable();
 
-	// Names of the form #xxx are translated to key xxx automatically
-	if (name[0] == '#' && name[1] != 0)
-		return atoi(name.c_str() + 1);
+    // Names of the form #xxx are translated to key xxx automatically
+    if (name[0] == '#' && name[1] != 0)
+        return atoi(name.c_str() + 1);
 
-	// Otherwise, we scan the KeyNames[] array for a matching name
-	for (KeyNameTable::const_iterator it = key_names.begin(); it != key_names.end(); ++it)
-	{
-		if (iequals(name, it->second))
-			return it->first;
-	}
-	return 0;
+    // Otherwise, we scan the KeyNames[] array for a matching name
+    for (KeyNameTable::const_iterator it = key_names.begin(); it != key_names.end(); ++it)
+    {
+        if (iequals(name, it->second))
+            return it->first;
+    }
+    return 0;
 }
-
 
 //
 // I_GetKeyName
@@ -272,18 +268,17 @@ int I_GetKeyFromName(const std::string& name)
 //
 std::string I_GetKeyName(int key)
 {
-	if (key_names.empty())
-		I_InitializeKeyNameTable();
+    if (key_names.empty())
+        I_InitializeKeyNameTable();
 
-	KeyNameTable::const_iterator it = key_names.find(key);
-	if (it != key_names.end() && !it->second.empty())
-		return it->second;
+    KeyNameTable::const_iterator it = key_names.find(key);
+    if (it != key_names.end() && !it->second.empty())
+        return it->second;
 
-	static char name[11];
-	sprintf(name, "#%d", key);
-	return std::string(name);
+    static char name[11];
+    sprintf(name, "#%d", key);
+    return std::string(name);
 }
-
 
 //
 // I_FlushInput
@@ -292,11 +287,10 @@ std::string I_GetKeyName(int key)
 //
 void I_FlushInput()
 {
-	C_ReleaseKeys();
+    C_ReleaseKeys();
 
-	input_subsystem->flushInput();
+    input_subsystem->flushInput();
 }
-
 
 //
 // I_EnableKeyRepeat
@@ -305,9 +299,8 @@ void I_FlushInput()
 //
 static void I_EnableKeyRepeat()
 {
-	input_subsystem->enableKeyRepeat();
+    input_subsystem->enableKeyRepeat();
 }
-
 
 //
 // I_DisableKeyRepeat
@@ -316,9 +309,8 @@ static void I_EnableKeyRepeat()
 //
 static void I_DisableKeyRepeat()
 {
-	input_subsystem->disableKeyRepeat();
+    input_subsystem->disableKeyRepeat();
 }
-
 
 //
 // I_CanRepeat
@@ -327,9 +319,8 @@ static void I_DisableKeyRepeat()
 //
 static bool I_CanRepeat()
 {
-	return ConsoleState == c_down || HU_ChatMode() != CHAT_INACTIVE || menuactive;
+    return ConsoleState == c_down || HU_ChatMode() != CHAT_INACTIVE || menuactive;
 }
-
 
 //
 // I_CanGrab
@@ -339,55 +330,52 @@ static bool I_CanRepeat()
 //
 static bool I_CanGrab()
 {
-	extern bool configuring_controls;
-	extern constate_e ConsoleState;
+    extern bool       configuring_controls;
+    extern constate_e ConsoleState;
 
-	assert(I_GetWindow() != NULL);
+    assert(I_GetWindow() != NULL);
 
-	// If the window doesn't have the focus, don't grab
-	if (!I_GetWindow()->isFocused())
-		return false;
+    // If the window doesn't have the focus, don't grab
+    if (!I_GetWindow()->isFocused())
+        return false;
 
-	// If the window is full screen and has only one monitor, always grab
-	if (I_GetWindow()->isFullScreen() && I_GetMonitorCount() <= 1)
-		return true;
+    // If the window is full screen and has only one monitor, always grab
+    if (I_GetWindow()->isFullScreen() && I_GetMonitorCount() <= 1)
+        return true;
 
-	if (nomouse)
-		return false;
+    if (nomouse)
+        return false;
 
-	// Always grab when configuring controllers in the menu
-	if (configuring_controls)
-		return true;
+    // Always grab when configuring controllers in the menu
+    if (configuring_controls)
+        return true;
 
-	// If paused, in the menu or in the console, don't grab
-	if (menuactive || ConsoleState == c_down || paused)
-		return false;
+    // If paused, in the menu or in the console, don't grab
+    if (menuactive || ConsoleState == c_down || paused)
+        return false;
 
-	// If playing the game, always grab
-	if ((gamestate == GS_LEVEL || gamestate == GS_INTERMISSION) && !demoplayback)
-		return true;
+    // If playing the game, always grab
+    if ((gamestate == GS_LEVEL || gamestate == GS_INTERMISSION) && !demoplayback)
+        return true;
 
-	return false;
+    return false;
 }
-
 
 //
 // I_GrabInput
 //
 static void I_GrabInput()
 {
-	input_subsystem->grabInput();
+    input_subsystem->grabInput();
 }
-
 
 //
 // I_UngrabInput
 //
 static void I_UngrabInput()
 {
-	input_subsystem->releaseInput();
+    input_subsystem->releaseInput();
 }
-
 
 //
 // I_ForceUpdateGrab
@@ -399,12 +387,11 @@ static void I_UngrabInput()
 //
 void I_ForceUpdateGrab()
 {
-	if (I_CanGrab())
-		I_GrabInput();
-	else
-		I_UngrabInput();
+    if (I_CanGrab())
+        I_GrabInput();
+    else
+        I_UngrabInput();
 }
-
 
 //
 // I_UpdateGrab
@@ -414,55 +401,52 @@ void I_ForceUpdateGrab()
 //
 static void I_UpdateGrab()
 {
-	// force I_ResumeMouse or I_PauseMouse if toggling between fullscreen/windowed
-	bool fullscreen = I_GetWindow()->isFullScreen();
-	static bool prev_fullscreen = fullscreen;
-	if (fullscreen != prev_fullscreen) 
-		I_ForceUpdateGrab();
-	prev_fullscreen = fullscreen;
+    // force I_ResumeMouse or I_PauseMouse if toggling between fullscreen/windowed
+    bool        fullscreen      = I_GetWindow()->isFullScreen();
+    static bool prev_fullscreen = fullscreen;
+    if (fullscreen != prev_fullscreen)
+        I_ForceUpdateGrab();
+    prev_fullscreen = fullscreen;
 
-	// check if the window focus changed (or menu/console status changed)
-	if (!input_subsystem->isInputGrabbed() && I_CanGrab())
-		I_GrabInput();
-	else if (input_subsystem->isInputGrabbed() && !I_CanGrab())
-		I_UngrabInput();
+    // check if the window focus changed (or menu/console status changed)
+    if (!input_subsystem->isInputGrabbed() && I_CanGrab())
+        I_GrabInput();
+    else if (input_subsystem->isInputGrabbed() && !I_CanGrab())
+        I_UngrabInput();
 }
-
 
 CVAR_FUNC_IMPL(use_joystick)
 {
-	if (var == 0.0f)
-	{
-		I_CloseJoystick();
-	}
-	else
-	{
-		I_OpenJoystick();
-	}
+    if (var == 0.0f)
+    {
+        I_CloseJoystick();
+    }
+    else
+    {
+        I_OpenJoystick();
+    }
 }
-
 
 CVAR_FUNC_IMPL(joy_active)
 {
-	const std::vector<IInputDeviceInfo> devices = input_subsystem->getJoystickDevices();
-	for (std::vector<IInputDeviceInfo>::const_iterator it = devices.begin(); it != devices.end(); ++it)
-	{
-		if (it->mId == (int)var)
-		{
-			I_OpenJoystick();
-			return;
-		}
-	}
+    const std::vector<IInputDeviceInfo> devices = input_subsystem->getJoystickDevices();
+    for (std::vector<IInputDeviceInfo>::const_iterator it = devices.begin(); it != devices.end(); ++it)
+    {
+        if (it->mId == (int)var)
+        {
+            I_OpenJoystick();
+            return;
+        }
+    }
 }
-
 
 //
 // I_GetJoystickCount
 //
 int I_GetJoystickCount()
 {
-	const std::vector<IInputDeviceInfo> devices = input_subsystem->getJoystickDevices();
-	return devices.size();
+    const std::vector<IInputDeviceInfo> devices = input_subsystem->getJoystickDevices();
+    return devices.size();
 }
 
 //
@@ -470,38 +454,37 @@ int I_GetJoystickCount()
 //
 std::string I_GetJoystickNameFromIndex(int index)
 {
-	const std::vector<IInputDeviceInfo> devices = input_subsystem->getJoystickDevices();
-	for (std::vector<IInputDeviceInfo>::const_iterator it = devices.begin(); it != devices.end(); ++it)
-	{
-		if (it->mId == index)
-			return it->mDeviceName;
-	}
-	return "";
+    const std::vector<IInputDeviceInfo> devices = input_subsystem->getJoystickDevices();
+    for (std::vector<IInputDeviceInfo>::const_iterator it = devices.begin(); it != devices.end(); ++it)
+    {
+        if (it->mId == index)
+            return it->mDeviceName;
+    }
+    return "";
 }
-
 
 //
 // I_OpenJoystick
 //
 bool I_OpenJoystick()
 {
-	I_CloseJoystick();		// just in case it was left open...
-	
-	if (use_joystick != 0)
-	{
-		// Verify that the joystick ID indicated by the joy_active CVAR
-		// is valid and if so, initialize that joystick
-		const std::vector<IInputDeviceInfo> devices = input_subsystem->getJoystickDevices();
-		for (std::vector<IInputDeviceInfo>::const_iterator it = devices.begin(); it != devices.end(); ++it)
-		{
-			if (it->mId == joy_active.asInt())
-			{
-				input_subsystem->initJoystick(it->mId);
-				return true;
-			}
-		}
-	}
-	return false;
+    I_CloseJoystick(); // just in case it was left open...
+
+    if (use_joystick != 0)
+    {
+        // Verify that the joystick ID indicated by the joy_active CVAR
+        // is valid and if so, initialize that joystick
+        const std::vector<IInputDeviceInfo> devices = input_subsystem->getJoystickDevices();
+        for (std::vector<IInputDeviceInfo>::const_iterator it = devices.begin(); it != devices.end(); ++it)
+        {
+            if (it->mId == joy_active.asInt())
+            {
+                input_subsystem->initJoystick(it->mId);
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 //
@@ -509,21 +492,19 @@ bool I_OpenJoystick()
 //
 void I_CloseJoystick()
 {
-	// Verify that the joystick ID indicated by the joy_active CVAR
-	// is valid and if so, shutdown that joystick
-	const std::vector<IInputDeviceInfo> devices = input_subsystem->getJoystickDevices();
-	for (std::vector<IInputDeviceInfo>::const_iterator it = devices.begin(); it != devices.end(); ++it)
-	{
-		if (it->mId == joy_active.asInt())
-			input_subsystem->shutdownJoystick(it->mId);
-	}
+    // Verify that the joystick ID indicated by the joy_active CVAR
+    // is valid and if so, shutdown that joystick
+    const std::vector<IInputDeviceInfo> devices = input_subsystem->getJoystickDevices();
+    for (std::vector<IInputDeviceInfo>::const_iterator it = devices.begin(); it != devices.end(); ++it)
+    {
+        if (it->mId == joy_active.asInt())
+            input_subsystem->shutdownJoystick(it->mId);
+    }
 
-	// Reset joy position values. Wouldn't want to get stuck in a turn or something. -- Hyper_Eye
-	extern int joyforward, joystrafe, joyturn, joylook;
-	joyforward = joystrafe = joyturn = joylook = 0;
+    // Reset joy position values. Wouldn't want to get stuck in a turn or something. -- Hyper_Eye
+    extern int joyforward, joystrafe, joyturn, joylook;
+    joyforward = joystrafe = joyturn = joylook = 0;
 }
-
-
 
 // ============================================================================
 //
@@ -536,68 +517,64 @@ void I_CloseJoystick()
 //
 void I_CloseMouse()
 {
-	input_subsystem->shutdownMouse(0);
+    input_subsystem->shutdownMouse(0);
 }
-
 
 //
 // I_OpenMouse
 //
 bool I_OpenMouse()
 {
-	if (!nomouse)
-	{
-		I_CloseMouse();
-		input_subsystem->initMouse(0);
-		return true;
-	}
-	return false;
+    if (!nomouse)
+    {
+        I_CloseMouse();
+        input_subsystem->initMouse(0);
+        return true;
+    }
+    return false;
 }
-
 
 //
 // I_InitInput
 //
 bool I_InitInput()
 {
-	if (Args.CheckParm("-nomouse"))
-		nomouse = true;
+    if (Args.CheckParm("-nomouse"))
+        nomouse = true;
 
-	atterm(I_ShutdownInput);
+    atterm(I_ShutdownInput);
 
-	#if defined(SDL20)
-	input_subsystem = new ISDL20InputSubsystem();
-	#endif
+#if defined(SDL20)
+    input_subsystem = new ISDL20InputSubsystem();
+#endif
 
-	input_subsystem->initKeyboard(0);
+    input_subsystem->initKeyboard(0);
 
-	I_OpenMouse();
+    I_OpenMouse();
 
-	I_OpenJoystick();
+    I_OpenJoystick();
 
-	I_DisableKeyRepeat();
+    I_DisableKeyRepeat();
 
-	I_ForceUpdateGrab();
+    I_ForceUpdateGrab();
 
-	input_subsystem->enableTextEntry();
+    input_subsystem->enableTextEntry();
 
-	return true;
+    return true;
 }
-
 
 //
 // I_ShutdownInput
 //
 void STACK_ARGS I_ShutdownInput()
 {
-	input_subsystem->disableTextEntry();
+    input_subsystem->disableTextEntry();
 
-	I_UngrabInput();
+    I_UngrabInput();
 
-	delete input_subsystem;
-	input_subsystem = NULL;
+    delete input_subsystem;
+    input_subsystem = NULL;
 }
-
 
 //
 // I_GetEvents
@@ -606,47 +583,44 @@ void STACK_ARGS I_ShutdownInput()
 //
 void I_GetEvents(bool mouseOnly)
 {
-	if (mouseOnly)
-	{
-		// D_PostEvent will process mouse events immediately
-		input_subsystem->gatherMouseEvents();
-	}
-	else
-	{
-		static bool previously_focused = false;
-		bool currently_focused = I_GetWindow()->isFocused();
-		if (currently_focused && !previously_focused)
-			I_FlushInput();
-		previously_focused = currently_focused;
+    if (mouseOnly)
+    {
+        // D_PostEvent will process mouse events immediately
+        input_subsystem->gatherMouseEvents();
+    }
+    else
+    {
+        static bool previously_focused = false;
+        bool        currently_focused  = I_GetWindow()->isFocused();
+        if (currently_focused && !previously_focused)
+            I_FlushInput();
+        previously_focused = currently_focused;
 
-		I_UpdateGrab();
-		if (I_CanRepeat())
-			I_EnableKeyRepeat();
-		else
-			I_DisableKeyRepeat();
+        I_UpdateGrab();
+        if (I_CanRepeat())
+            I_EnableKeyRepeat();
+        else
+            I_DisableKeyRepeat();
 
-		// Get all of the events from the keboard, mouse, and joystick
-		input_subsystem->gatherEvents();
-	}
+        // Get all of the events from the keboard, mouse, and joystick
+        input_subsystem->gatherEvents();
+    }
 
-	event_t ev;
-	while (input_subsystem->hasEvent())
-	{
-		input_subsystem->getEvent(&ev);
-		D_PostEvent(&ev);
-	}
+    event_t ev;
+    while (input_subsystem->hasEvent())
+    {
+        input_subsystem->getEvent(&ev);
+        D_PostEvent(&ev);
+    }
 }
-
 
 //
 // I_StartTic
 //
-void I_StartTic (void)
+void I_StartTic(void)
 {
-	I_GetEvents(false);
+    I_GetEvents(false);
 }
-
-
 
 // ============================================================================
 //
@@ -656,93 +630,83 @@ void I_StartTic (void)
 
 // Initialize member constants
 // Key repeat delay and interval times are the default values for SDL 1.2.15
-const uint64_t IInputSubsystem::mRepeatDelay = I_ConvertTimeFromMs(500);
+const uint64_t IInputSubsystem::mRepeatDelay    = I_ConvertTimeFromMs(500);
 const uint64_t IInputSubsystem::mRepeatInterval = I_ConvertTimeFromMs(30);
-
 
 //
 // IInputSubsystem::IInputSubsystem
 //
-IInputSubsystem::IInputSubsystem() :
-	mKeyboardInputDevice(NULL), mMouseInputDevice(NULL), mJoystickInputDevice(NULL)
-{ }
-
+IInputSubsystem::IInputSubsystem() : mKeyboardInputDevice(NULL), mMouseInputDevice(NULL), mJoystickInputDevice(NULL)
+{
+}
 
 //
 // IInputSubsystem::~IInputSubsystem
 //
 IInputSubsystem::~IInputSubsystem()
 {
-
 }
-
 
 //
 // IInputSubsystem::registerInputDevice
 //
-void IInputSubsystem::registerInputDevice(IInputDevice* device)
+void IInputSubsystem::registerInputDevice(IInputDevice *device)
 {
-	assert(device != NULL);
-	InputDeviceList::iterator it = std::find(mInputDevices.begin(), mInputDevices.end(), device);
-	assert(it == mInputDevices.end());
-	if (it == mInputDevices.end())
-		mInputDevices.push_back(device);
+    assert(device != NULL);
+    InputDeviceList::iterator it = std::find(mInputDevices.begin(), mInputDevices.end(), device);
+    assert(it == mInputDevices.end());
+    if (it == mInputDevices.end())
+        mInputDevices.push_back(device);
 }
-
 
 //
 // IInputSubsystem::unregisterInputDevice
 //
-void IInputSubsystem::unregisterInputDevice(IInputDevice* device)
+void IInputSubsystem::unregisterInputDevice(IInputDevice *device)
 {
-	assert(device != NULL);
-	InputDeviceList::iterator it = std::find(mInputDevices.begin(), mInputDevices.end(), device);
-	assert(it != mInputDevices.end());
-	if (it != mInputDevices.end())
-		mInputDevices.erase(it);
+    assert(device != NULL);
+    InputDeviceList::iterator it = std::find(mInputDevices.begin(), mInputDevices.end(), device);
+    assert(it != mInputDevices.end());
+    if (it != mInputDevices.end())
+        mInputDevices.erase(it);
 }
-
 
 //
 // IInputSubsystem::enableKeyRepeat
 //
 void IInputSubsystem::enableKeyRepeat()
 {
-	mRepeating = true;
+    mRepeating = true;
 }
-
 
 //
 // IInputSubsystem::disableKeyRepeat
 //
 void IInputSubsystem::disableKeyRepeat()
 {
-	mRepeating = false;
-	mEventRepeaters.clear();
+    mRepeating = false;
+    mEventRepeaters.clear();
 }
-
 
 //
 // IInputSubsystem::enableTextEntry
 //
 void IInputSubsystem::enableTextEntry()
 {
-	IKeyboardInputDevice* device = static_cast<IKeyboardInputDevice*>(getKeyboardInputDevice());
-	if (device)
-		device->enableTextEntry();
+    IKeyboardInputDevice *device = static_cast<IKeyboardInputDevice *>(getKeyboardInputDevice());
+    if (device)
+        device->enableTextEntry();
 }
-
 
 //
 // IInputSubsystem::disableTextEntry
 //
 void IInputSubsystem::disableTextEntry()
 {
-	IKeyboardInputDevice* device = static_cast<IKeyboardInputDevice*>(getKeyboardInputDevice());
-	if (device)
-		device->disableTextEntry();
+    IKeyboardInputDevice *device = static_cast<IKeyboardInputDevice *>(getKeyboardInputDevice());
+    if (device)
+        device->disableTextEntry();
 }
-
 
 //
 // I_GetEventRepeaterKey
@@ -761,58 +725,55 @@ void IInputSubsystem::disableTextEntry()
 // Joystick hat events also repeat but each directional trigger repeats
 // concurrently as long as they are held down. Thus a unique value is returned
 // for each of them.
-// 
-static int I_GetEventRepeaterKey(const event_t* ev)
+//
+static int I_GetEventRepeaterKey(const event_t *ev)
 {
-	if (ev->type != ev_keydown && ev->type != ev_keyup)
-		return 0;
+    if (ev->type != ev_keydown && ev->type != ev_keyup)
+        return 0;
 
-	int button = ev->data1;
-	if (button == OKEY_CAPSLOCK || button == OKEY_SCRLCK ||
-		button == OKEY_LSHIFT || button == OKEY_LCTRL || button == OKEY_LALT ||
-		button == OKEY_RSHIFT || button == OKEY_RCTRL || button == OKEY_RALT ||
-		button == OKEY_NUMLOCK)
-		return 0;
-	else if (button >= OKEY_HAT1 && button <= OKEY_HAT8)
-		return button;
-	else
-		return 1;
+    int button = ev->data1;
+    if (button == OKEY_CAPSLOCK || button == OKEY_SCRLCK || button == OKEY_LSHIFT || button == OKEY_LCTRL ||
+        button == OKEY_LALT || button == OKEY_RSHIFT || button == OKEY_RCTRL || button == OKEY_RALT ||
+        button == OKEY_NUMLOCK)
+        return 0;
+    else if (button >= OKEY_HAT1 && button <= OKEY_HAT8)
+        return button;
+    else
+        return 1;
 }
-
 
 //
 // IInputSubsystem::addToEventRepeaters
 //
 // NOTE: the caller should check if key-repeating is enabled.
 //
-void IInputSubsystem::addToEventRepeaters(event_t& ev)
+void IInputSubsystem::addToEventRepeaters(event_t &ev)
 {
-	// Check if the event needs to be added/removed from the list of repeatable events
-	int key = I_GetEventRepeaterKey(&ev);
-	if (ev.type == ev_keydown && key)
-	{
-		// If there is an existing repeater event for "key",
-		// remove it and replace it with a new one.
-		EventRepeaterTable::iterator it = mEventRepeaters.find(key);
-		if (it != mEventRepeaters.end())
-			mEventRepeaters.erase(it);
+    // Check if the event needs to be added/removed from the list of repeatable events
+    int key = I_GetEventRepeaterKey(&ev);
+    if (ev.type == ev_keydown && key)
+    {
+        // If there is an existing repeater event for "key",
+        // remove it and replace it with a new one.
+        EventRepeaterTable::iterator it = mEventRepeaters.find(key);
+        if (it != mEventRepeaters.end())
+            mEventRepeaters.erase(it);
 
-		// new repeatable event - add to mEventRepeaters
-		EventRepeater repeater;
-		repeater.event = ev;
-		repeater.repeating = false;		// start off waiting for mRepeatDelay before repeating
-		repeater.last_time = I_GetTime();
-		mEventRepeaters.insert(std::make_pair(key, repeater));
-	}
-	else if (ev.type == ev_keyup && key)
-	{
-		// remove the repeatable event from mEventRepeaters
-		EventRepeaterTable::iterator it = mEventRepeaters.find(key);
-		if (it != mEventRepeaters.end())
-			mEventRepeaters.erase(it);
-	}
+        // new repeatable event - add to mEventRepeaters
+        EventRepeater repeater;
+        repeater.event     = ev;
+        repeater.repeating = false; // start off waiting for mRepeatDelay before repeating
+        repeater.last_time = I_GetTime();
+        mEventRepeaters.insert(std::make_pair(key, repeater));
+    }
+    else if (ev.type == ev_keyup && key)
+    {
+        // remove the repeatable event from mEventRepeaters
+        EventRepeaterTable::iterator it = mEventRepeaters.find(key);
+        if (it != mEventRepeaters.end())
+            mEventRepeaters.erase(it);
+    }
 }
-
 
 //
 // IInputSubsystem::repeatEvents
@@ -821,76 +782,73 @@ void IInputSubsystem::addToEventRepeaters(event_t& ev)
 //
 void IInputSubsystem::repeatEvents()
 {
-	for (EventRepeaterTable::iterator it = mEventRepeaters.begin(); it != mEventRepeaters.end(); ++it)
-	{
-		EventRepeater& repeater = it->second;
-		uint64_t current_time = I_GetTime();
+    for (EventRepeaterTable::iterator it = mEventRepeaters.begin(); it != mEventRepeaters.end(); ++it)
+    {
+        EventRepeater &repeater     = it->second;
+        uint64_t       current_time = I_GetTime();
 
-		if (!repeater.repeating && current_time - repeater.last_time >= mRepeatDelay)
-		{
-			repeater.last_time += mRepeatDelay;
-			repeater.repeating = true;
-		}
+        if (!repeater.repeating && current_time - repeater.last_time >= mRepeatDelay)
+        {
+            repeater.last_time += mRepeatDelay;
+            repeater.repeating = true;
+        }
 
-		while (repeater.repeating && current_time - repeater.last_time >= mRepeatInterval)
-		{
-			// repeat the event by adding it to the queue again
-			mEvents.push(repeater.event);
-			repeater.last_time += mRepeatInterval;
-		}
-	}
+        while (repeater.repeating && current_time - repeater.last_time >= mRepeatInterval)
+        {
+            // repeat the event by adding it to the queue again
+            mEvents.push(repeater.event);
+            repeater.last_time += mRepeatInterval;
+        }
+    }
 }
-
 
 //
 // IInputSubsystem::gatherEvents
 //
 void IInputSubsystem::gatherEvents()
 {
-	event_t ev;
-	for (InputDeviceList::iterator it = mInputDevices.begin(); it != mInputDevices.end(); ++it)
-	{
-		IInputDevice* device = *it;
-		device->gatherEvents();
-		while (device->hasEvent())
-		{
-			device->getEvent(&ev);
+    event_t ev;
+    for (InputDeviceList::iterator it = mInputDevices.begin(); it != mInputDevices.end(); ++it)
+    {
+        IInputDevice *device = *it;
+        device->gatherEvents();
+        while (device->hasEvent())
+        {
+            device->getEvent(&ev);
 
-			if (mRepeating)
-				addToEventRepeaters(ev);
+            if (mRepeating)
+                addToEventRepeaters(ev);
 
-			mEvents.push(ev);
-		}
-	}
+            mEvents.push(ev);
+        }
+    }
 
-	// Handle repeatable events
-	if (mRepeating)
-		repeatEvents();
+    // Handle repeatable events
+    if (mRepeating)
+        repeatEvents();
 }
 
 void IInputSubsystem::gatherMouseEvents()
 {
-	event_t mouseEvent;
-	if (mMouseInputDevice != NULL)
-		mMouseInputDevice->gatherEvents();
+    event_t mouseEvent;
+    if (mMouseInputDevice != NULL)
+        mMouseInputDevice->gatherEvents();
 
-	while (mMouseInputDevice->hasEvent())
-	{
-		mMouseInputDevice->getEvent(&mouseEvent);
-		mEvents.push(mouseEvent);
-	}
+    while (mMouseInputDevice->hasEvent())
+    {
+        mMouseInputDevice->getEvent(&mouseEvent);
+        mEvents.push(mouseEvent);
+    }
 }
-
 
 //
 // IInputSubsystem::getEvent
 //
-void IInputSubsystem::getEvent(event_t* ev)
+void IInputSubsystem::getEvent(event_t *ev)
 {
-	assert(hasEvent());
-	*ev = mEvents.front();
-	mEvents.pop();
+    assert(hasEvent());
+    *ev = mEvents.front();
+    mEvents.pop();
 }
 
-
-VERSION_CONTROL (i_input_cpp, "$Id: 8ac766d983f209e3f8f18e7a5f33bbcefd369546 $")
+VERSION_CONTROL(i_input_cpp, "$Id: 8ac766d983f209e3f8f18e7a5f33bbcefd369546 $")

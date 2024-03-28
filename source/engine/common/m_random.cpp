@@ -27,7 +27,6 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #include "odamex.h"
 
 #include <time.h>
@@ -60,26 +59,18 @@
 //
 
 static const unsigned char rndtable[256] = {
-    0,   8, 109, 220, 222, 241, 149, 107,  75, 248, 254, 140,  16,  66 ,
-    74,  21, 211,  47,  80, 242, 154,  27, 205, 128, 161,  89,  77,  36 ,
-    95, 110,  85,  48, 212, 140, 211, 249,  22,  79, 200,  50,  28, 188 ,
-    52, 140, 202, 120,  68, 145,  62,  70, 184, 190,  91, 197, 152, 224 ,
-    149, 104,  25, 178, 252, 182, 202, 182, 141, 197,   4,  81, 181, 242 ,
-    145,  42,  39, 227, 156, 198, 225, 193, 219,  93, 122, 175, 249,   0 ,
-    175, 143,  70, 239,  46, 246, 163,  53, 163, 109, 168, 135,   2, 235 ,
-    25,  92,  20, 145, 138,  77,  69, 166,  78, 176, 173, 212, 166, 113 ,
-    94, 161,  41,  50, 239,  49, 111, 164,  70,  60,   2,  37, 171,  75 ,
-    136, 156,  11,  56,  42, 146, 138, 229,  73, 146,  77,  61,  98, 196 ,
-    135, 106,  63, 197, 195,  86,  96, 203, 113, 101, 170, 247, 181, 113 ,
-    80, 250, 108,   7, 255, 237, 129, 226,  79, 107, 112, 166, 103, 241 ,
-    24, 223, 239, 120, 198,  58,  60,  82, 128,   3, 184,  66, 143, 224 ,
-    145, 224,  81, 206, 163,  45,  63,  90, 168, 114,  59,  33, 159,  95 ,
-    28, 139, 123,  98, 125, 196,  15,  70, 194, 253,  54,  14, 109, 226 ,
-    71,  17, 161,  93, 186,  87, 244, 138,  20,  52, 123, 251,  26,  36 ,
-    17,  46,  52, 231, 232,  76,  31, 221,  84,  37, 216, 165, 212, 106 ,
-    197, 242,  98,  43,  39, 175, 254, 145, 190,  84, 118, 222, 187, 136 ,
-    120, 163, 236, 249
-};
+    0,   8,   109, 220, 222, 241, 149, 107, 75,  248, 254, 140, 16,  66,  74,  21,  211, 47,  80,  242, 154, 27,
+    205, 128, 161, 89,  77,  36,  95,  110, 85,  48,  212, 140, 211, 249, 22,  79,  200, 50,  28,  188, 52,  140,
+    202, 120, 68,  145, 62,  70,  184, 190, 91,  197, 152, 224, 149, 104, 25,  178, 252, 182, 202, 182, 141, 197,
+    4,   81,  181, 242, 145, 42,  39,  227, 156, 198, 225, 193, 219, 93,  122, 175, 249, 0,   175, 143, 70,  239,
+    46,  246, 163, 53,  163, 109, 168, 135, 2,   235, 25,  92,  20,  145, 138, 77,  69,  166, 78,  176, 173, 212,
+    166, 113, 94,  161, 41,  50,  239, 49,  111, 164, 70,  60,  2,   37,  171, 75,  136, 156, 11,  56,  42,  146,
+    138, 229, 73,  146, 77,  61,  98,  196, 135, 106, 63,  197, 195, 86,  96,  203, 113, 101, 170, 247, 181, 113,
+    80,  250, 108, 7,   255, 237, 129, 226, 79,  107, 112, 166, 103, 241, 24,  223, 239, 120, 198, 58,  60,  82,
+    128, 3,   184, 66,  143, 224, 145, 224, 81,  206, 163, 45,  63,  90,  168, 114, 59,  33,  159, 95,  28,  139,
+    123, 98,  125, 196, 15,  70,  194, 253, 54,  14,  109, 226, 71,  17,  161, 93,  186, 87,  244, 138, 20,  52,
+    123, 251, 26,  36,  17,  46,  52,  231, 232, 76,  31,  221, 84,  37,  216, 165, 212, 106, 197, 242, 98,  43,
+    39,  175, 254, 145, 190, 84,  118, 222, 187, 136, 120, 163, 236, 249};
 
 unsigned char rndindex, prndindex;
 
@@ -89,52 +80,52 @@ extern bool step_mode;
 // denis - Every actor has a random number generator so they can be sync'ed
 // across the network without knowledge of other actors
 //
-int P_Random (AActor *actor)
+int P_Random(AActor *actor)
 {
-	if(!actor || demoplayback || step_mode)
-		return P_Random ();
+    if (!actor || demoplayback || step_mode)
+        return P_Random();
 
-	return (rndtable[++actor->rndindex]);
+    return (rndtable[++actor->rndindex]);
 }
 
-int P_RandomDiff (AActor *actor)
+int P_RandomDiff(AActor *actor)
 {
-	int a = P_Random (actor);
-	int b = P_Random (actor);
+    int a = P_Random(actor);
+    int b = P_Random(actor);
 
-	return a - b;
+    return a - b;
 }
 
-int P_Random ()
+int P_Random()
 {
-	return (rndtable[++prndindex]);
+    return (rndtable[++prndindex]);
 }
 
-int P_RandomDiff ()
+int P_RandomDiff()
 {
-	int a = P_Random ();
-	int b = P_Random ();
+    int a = P_Random();
+    int b = P_Random();
 
-	return a - b;
+    return a - b;
 }
 
 int M_Random()
 {
-	return (rndtable[++rndindex]);
+    return (rndtable[++rndindex]);
 }
 
 //
 // A PRNG commonly known as "Jenkins Small Fast" by Bob Jenkins.
 // Released into the public domain.
 // http://burtleburtle.net/bob/rand/talksmall.html
-// 
+//
 
 struct jsf32ctx_t
 {
-	uint32_t a;
-	uint32_t b;
-	uint32_t c;
-	uint32_t d;
+    uint32_t a;
+    uint32_t b;
+    uint32_t c;
+    uint32_t d;
 };
 
 static jsf32ctx_t g_rngState;
@@ -145,26 +136,26 @@ static jsf32ctx_t g_prngState;
 /**
  * @brief Run one iteration of JSF32.
  */
-static uint32_t JSF32(jsf32ctx_t* x)
+static uint32_t JSF32(jsf32ctx_t *x)
 {
-	const uint32_t e = x->a - ROT32(x->b, 27);
-	x->a = x->b ^ ROT32(x->c, 17);
-	x->b = x->c + x->d;
-	x->c = x->d + e;
-	x->d = e + x->a;
-	return x->d;
+    const uint32_t e = x->a - ROT32(x->b, 27);
+    x->a             = x->b ^ ROT32(x->c, 17);
+    x->b             = x->c + x->d;
+    x->c             = x->d + e;
+    x->d             = e + x->a;
+    return x->d;
 }
 
 /**
  * @brief Seed the JSF state.
  */
-static void JSF32Seed(jsf32ctx_t* x, const uint32_t seed)
+static void JSF32Seed(jsf32ctx_t *x, const uint32_t seed)
 {
-	x->a = 0xf1ea5eed, x->b = x->c = x->d = seed;
-	for (uint32_t i = 0; i < 20; i++)
-	{
-		(void)JSF32(x);
-	}
+    x->a = 0xf1ea5eed, x->b = x->c = x->d = seed;
+    for (uint32_t i = 0; i < 20; i++)
+    {
+        (void)JSF32(x);
+    }
 }
 
 /**
@@ -175,15 +166,15 @@ static void JSF32Seed(jsf32ctx_t* x, const uint32_t seed)
  */
 uint32_t M_RandomInt(const uint32_t range)
 {
-	const uint32_t t = (0U - range) % range;
-	for (;;)
-	{
-		const uint32_t r = JSF32(&::g_rngState);
-		if (r >= t)
-		{
-			return r % range;
-		}
-	}
+    const uint32_t t = (0U - range) % range;
+    for (;;)
+    {
+        const uint32_t r = JSF32(&::g_rngState);
+        if (r >= t)
+        {
+            return r % range;
+        }
+    }
 }
 
 /**
@@ -194,37 +185,37 @@ uint32_t M_RandomInt(const uint32_t range)
  */
 uint32_t P_RandomInt(const uint32_t range)
 {
-	const uint32_t t = (0U - range) % range;
-	for (;;)
-	{
-		const uint32_t r = JSF32(&::g_prngState);
-		if (r >= t)
-		{
-			return r % range;
-		}
-	}
+    const uint32_t t = (0U - range) % range;
+    for (;;)
+    {
+        const uint32_t r = JSF32(&::g_prngState);
+        if (r >= t)
+        {
+            return r % range;
+        }
+    }
 }
 
 /**
  * @brief Return a random floating point number that is not tied to game state.
- * 
+ *
  * @return A random float in the half-open range of [0.0, 1.0).
  */
 float M_RandomFloat()
 {
-	const uint32_t n = JSF32(&::g_rngState);
-	return static_cast<float>(n) / (static_cast<float>(0xFFFFFFFFU) + 1.0f);
+    const uint32_t n = JSF32(&::g_rngState);
+    return static_cast<float>(n) / (static_cast<float>(0xFFFFFFFFU) + 1.0f);
 }
 
 /**
  * @brief Return a random floating point number that is tied to game state.
- * 
+ *
  * @return A random float in the half-open range of [0.0, 1.0).
  */
 float P_RandomFloat()
 {
-	const uint32_t n = JSF32(&::g_prngState);
-	return static_cast<float>(n) / (static_cast<float>(0xFFFFFFFFU) + 1.0f);
+    const uint32_t n = JSF32(&::g_prngState);
+    return static_cast<float>(n) / (static_cast<float>(0xFFFFFFFFU) + 1.0f);
 }
 
 // Initialize all the seeds
@@ -236,37 +227,35 @@ float P_RandomFloat()
 
 void M_ClearRandom()
 {
-	static bool firsttime = true;
+    static bool firsttime = true;
 
-	::prndindex = 0;
+    ::prndindex = 0;
 
-	// Odamex's release date.
-	JSF32Seed(&::g_prngState, 20071801U);
+    // Odamex's release date.
+    JSF32Seed(&::g_prngState, 20071801U);
 
-	// Only init M_Random values once.
-	if (firsttime)
-	{
-		firsttime = false;
-		::rndindex = ::prndindex;
+    // Only init M_Random values once.
+    if (firsttime)
+    {
+        firsttime  = false;
+        ::rndindex = ::prndindex;
 
-		// [AM] Make non-playsim random unpredictable.
-		uint32_t seed = static_cast<uint32_t>(time(NULL));
-		JSF32Seed(&::g_rngState, seed);
-	}
+        // [AM] Make non-playsim random unpredictable.
+        uint32_t seed = static_cast<uint32_t>(time(NULL));
+        JSF32Seed(&::g_rngState, seed);
+    }
 }
 
-void P_SerializeRNGState(FArchive& arc)
+void P_SerializeRNGState(FArchive &arc)
 {
-	if (arc.IsStoring())
-	{
-		arc << ::prndindex << ::g_prngState.a << ::g_prngState.b << ::g_prngState.c
-		    << ::g_prngState.d;
-	}
-	else
-	{
-		arc >> ::prndindex >> ::g_prngState.a >> ::g_prngState.b >> ::g_prngState.c >>
-		    ::g_prngState.d;
-	}
+    if (arc.IsStoring())
+    {
+        arc << ::prndindex << ::g_prngState.a << ::g_prngState.b << ::g_prngState.c << ::g_prngState.d;
+    }
+    else
+    {
+        arc >> ::prndindex >> ::g_prngState.a >> ::g_prngState.b >> ::g_prngState.c >> ::g_prngState.d;
+    }
 }
 
 //
@@ -277,14 +266,14 @@ void P_SerializeRNGState(FArchive& arc)
 //
 int P_RandomHitscanAngle(fixed_t spread)
 {
-	int t;
-	uint64_t spread_bam;
+    int      t;
+    uint64_t spread_bam;
 
-	// FixedToAngle doesn't work for negative numbers,
-	// so for convenience take just the absolute value.
-	spread_bam = (spread < 0 ? FixedToAngle(-spread) : FixedToAngle(spread));
-	t = P_Random();
-	return (int)((spread_bam * (t - P_Random())) / 255);
+    // FixedToAngle doesn't work for negative numbers,
+    // so for convenience take just the absolute value.
+    spread_bam = (spread < 0 ? FixedToAngle(-spread) : FixedToAngle(spread));
+    t          = P_Random();
+    return (int)((spread_bam * (t - P_Random())) / 255);
 }
 
 //
@@ -294,18 +283,17 @@ int P_RandomHitscanAngle(fixed_t spread)
 //
 int P_RandomHitscanSlope(fixed_t spread)
 {
-	int angle;
+    int angle;
 
-	angle = P_RandomHitscanAngle(spread);
+    angle = P_RandomHitscanAngle(spread);
 
-	// clamp it, yo
-	if (angle > ANG90)
-		return finetangent[0];
-	else if (-angle > ANG90)
-		return finetangent[FINEANGLES / 2 - 1];
-	else
-		return finetangent[(ANG90 - angle) >> ANGLETOFINESHIFT];
+    // clamp it, yo
+    if (angle > ANG90)
+        return finetangent[0];
+    else if (-angle > ANG90)
+        return finetangent[FINEANGLES / 2 - 1];
+    else
+        return finetangent[(ANG90 - angle) >> ANGLETOFINESHIFT];
 }
 
-VERSION_CONTROL (m_random_cpp, "$Id: bebe276f1c60d1b3b8640bd91c13528cb45de82e $")
-
+VERSION_CONTROL(m_random_cpp, "$Id: bebe276f1c60d1b3b8640bd91c13528cb45de82e $")

@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id: 001aed4792381e6fc731d141dab79fca36ef59c5 $
@@ -22,7 +22,6 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #include "odamex.h"
 
 #include "d_player.h"
@@ -30,27 +29,51 @@
 
 BOOL menuactive;
 
-void R_ExitLevel() {}
-void D_SetupUserInfo (void) {}
-void D_UserInfoChanged (cvar_t *cvar) {} 
-void D_DoServerInfoChange (byte **stream) {} 
-void D_WriteUserInfoStrings (int i, byte **stream, bool compact) {} 
-void D_ReadUserInfoStrings (int i, byte **stream, bool update) {}
+void R_ExitLevel()
+{
+}
+void D_SetupUserInfo(void)
+{
+}
+void D_UserInfoChanged(cvar_t *cvar)
+{
+}
+void D_DoServerInfoChange(byte **stream)
+{
+}
+void D_WriteUserInfoStrings(int i, byte **stream, bool compact)
+{
+}
+void D_ReadUserInfoStrings(int i, byte **stream, bool update)
+{
+}
 
-argb_t V_GetColorFromString(const std::string& str)
+argb_t V_GetColorFromString(const std::string &str)
 {
     return 0;
 }
 
-void PickupMessage(AActor *toucher, const char *message) {}
-void WeaponPickupMessage(AActor *toucher, weapontype_t &Weapon) {}
+void PickupMessage(AActor *toucher, const char *message)
+{
+}
+void WeaponPickupMessage(AActor *toucher, weapontype_t &Weapon)
+{
+}
 
-void AM_Stop(void) {}
+void AM_Stop(void)
+{
+}
 
-void RefreshPalettes (void) {}
+void RefreshPalettes(void)
+{
+}
 
-void V_RefreshColormaps() {}
+void V_RefreshColormaps()
+{
+}
 
-CVAR_FUNC_IMPL (sv_allowwidescreen) {}
+CVAR_FUNC_IMPL(sv_allowwidescreen)
+{
+}
 
-VERSION_CONTROL (sv_stubs_cpp, "$Id: 001aed4792381e6fc731d141dab79fca36ef59c5 $")
+VERSION_CONTROL(sv_stubs_cpp, "$Id: 001aed4792381e6fc731d141dab79fca36ef59c5 $")

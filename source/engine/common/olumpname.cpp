@@ -20,11 +20,9 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #include "odamex.h"
 
 #include "olumpname.h"
-
 
 #include <stdexcept>
 
@@ -32,95 +30,95 @@
 
 void OLumpName::MakeDataPresentable()
 {
-	// make m_data uppercase
-	for (int i = 0; i < 8; ++i)
-		m_data[i] = static_cast<char>(toupper(m_data[i]));
+    // make m_data uppercase
+    for (int i = 0; i < 8; ++i)
+        m_data[i] = static_cast<char>(toupper(m_data[i]));
 
-	// ensure last char is escape character
-	m_data[8] = '\0';
+    // ensure last char is escape character
+    m_data[8] = '\0';
 }
 
 // constructors/assignment operators
 
 OLumpName::OLumpName()
 {
-	memset(m_data, '\0', 9);
+    memset(m_data, '\0', 9);
 }
 
-OLumpName::OLumpName(const OLumpName& other)
+OLumpName::OLumpName(const OLumpName &other)
 {
-	memcpy(m_data, other.m_data, 8);
-	MakeDataPresentable();
+    memcpy(m_data, other.m_data, 8);
+    MakeDataPresentable();
 }
 
-OLumpName::OLumpName(const char* other)
+OLumpName::OLumpName(const char *other)
 {
-	strncpy(m_data, other, 8);
-	MakeDataPresentable();
+    strncpy(m_data, other, 8);
+    MakeDataPresentable();
 }
 
-OLumpName::OLumpName(const std::string& other)
+OLumpName::OLumpName(const std::string &other)
 {
-	strncpy(m_data, other.data(), 8);
-	MakeDataPresentable();
+    strncpy(m_data, other.data(), 8);
+    MakeDataPresentable();
 }
 
-OLumpName& OLumpName::operator=(const OLumpName& other)
+OLumpName &OLumpName::operator=(const OLumpName &other)
 {
-	if (this != &other)
-	{
-		memcpy(m_data, other.m_data, 8);
-		MakeDataPresentable();
-	}
+    if (this != &other)
+    {
+        memcpy(m_data, other.m_data, 8);
+        MakeDataPresentable();
+    }
 
-	return *this;
+    return *this;
 }
 
-OLumpName& OLumpName::operator=(const char* other)
+OLumpName &OLumpName::operator=(const char *other)
 {
-	strncpy(m_data, other, 8);
-	MakeDataPresentable();
+    strncpy(m_data, other, 8);
+    MakeDataPresentable();
 
-	return *this;
+    return *this;
 }
 
-OLumpName& OLumpName::operator=(const std::string& other)
+OLumpName &OLumpName::operator=(const std::string &other)
 {
-	strncpy(m_data, other.data(), 8);
-	MakeDataPresentable();
+    strncpy(m_data, other.data(), 8);
+    MakeDataPresentable();
 
-	return *this;
+    return *this;
 }
 
 // capacity
 
 size_t OLumpName::size() const
 {
-	size_t i = 0;
-	for (; i < 8; ++i)
-	{
-		if (m_data[i] == '\0')
-		{
-			break;
-		}
-	}
-	
-	return i;
+    size_t i = 0;
+    for (; i < 8; ++i)
+    {
+        if (m_data[i] == '\0')
+        {
+            break;
+        }
+    }
+
+    return i;
 }
 
 size_t OLumpName::length() const
 {
-	return size();
+    return size();
 }
 
 void OLumpName::clear()
 {
-	m_data[0] = '\0';
+    m_data[0] = '\0';
 }
 
 bool OLumpName::empty() const
 {
-	return m_data[0] == '\0';
+    return m_data[0] == '\0';
 }
 
 // element access
@@ -129,103 +127,99 @@ bool OLumpName::empty() const
 //			guarantee will no longer apply! You can edit the char's to be whatever you
 //			want at that point. Be careful!
 
-char& OLumpName::at(const size_t pos)
+char &OLumpName::at(const size_t pos)
 {
-	const size_t s = size();
-	
-	if (pos > 7 || pos > s)
-	{
-		char buffer[80];
-		sprintf(buffer,
-				"Attempted to access OLumpName at position %llu when the size was %llu",
-				pos, s);
-		
-		throw std::out_of_range(buffer);
-	}
+    const size_t s = size();
 
-	return m_data[pos];
+    if (pos > 7 || pos > s)
+    {
+        char buffer[80];
+        sprintf(buffer, "Attempted to access OLumpName at position %llu when the size was %llu", pos, s);
+
+        throw std::out_of_range(buffer);
+    }
+
+    return m_data[pos];
 }
 
-const char& OLumpName::at(const size_t pos) const
+const char &OLumpName::at(const size_t pos) const
 {
-	const size_t s = size();
+    const size_t s = size();
 
-	if (pos > 7 || pos > s)
-	{
-		char buffer[80];
-		sprintf(buffer,
-		        "Attempted to access OLumpName at position %llu when the size was %llu",
-		        pos, s);
+    if (pos > 7 || pos > s)
+    {
+        char buffer[80];
+        sprintf(buffer, "Attempted to access OLumpName at position %llu when the size was %llu", pos, s);
 
-		throw std::out_of_range(buffer);
-	}
+        throw std::out_of_range(buffer);
+    }
 
-	return m_data[pos];
+    return m_data[pos];
 }
 
-char& OLumpName::operator[](const size_t pos)
+char &OLumpName::operator[](const size_t pos)
 {
-	return m_data[pos];
+    return m_data[pos];
 }
 
-const char& OLumpName::operator[](const size_t pos) const
+const char &OLumpName::operator[](const size_t pos) const
 {
-	return m_data[pos];
+    return m_data[pos];
 }
 
 // string operations
 
-const char* OLumpName::c_str() const
+const char *OLumpName::c_str() const
 {
-	return m_data;
+    return m_data;
 }
 
-const char* OLumpName::data() const
+const char *OLumpName::data() const
 {
-	return m_data;
+    return m_data;
 }
 
-int OLumpName::compare(const OLumpName& other) const
+int OLumpName::compare(const OLumpName &other) const
 {
-	return !stricmp(m_data, other.m_data);
+    return !stricmp(m_data, other.m_data);
 }
 
-int OLumpName::compare(const char* other) const
+int OLumpName::compare(const char *other) const
 {
-	return !stricmp(m_data, other);
+    return !stricmp(m_data, other);
 }
 
-int OLumpName::compare(const std::string& other) const
+int OLumpName::compare(const std::string &other) const
 {
-	return !stricmp(m_data, other.data());
+    return !stricmp(m_data, other.data());
 }
 
-bool operator==(const OLumpName& lhs, const OLumpName& rhs)
+bool operator==(const OLumpName &lhs, const OLumpName &rhs)
 {
-	return !stricmp(lhs.m_data, rhs.m_data);
+    return !stricmp(lhs.m_data, rhs.m_data);
 }
 
-bool operator==(const OLumpName& lhs, const char* rhs)
+bool operator==(const OLumpName &lhs, const char *rhs)
 {
-	return !stricmp(lhs.m_data, rhs);
+    return !stricmp(lhs.m_data, rhs);
 }
 
-bool operator==(const OLumpName& lhs, const std::string& rhs)
+bool operator==(const OLumpName &lhs, const std::string &rhs)
 {
-	return !stricmp(lhs.m_data, rhs.data());
+    return !stricmp(lhs.m_data, rhs.data());
 }
 
-bool operator!=(const OLumpName& lhs, const OLumpName& rhs)
+bool operator!=(const OLumpName &lhs, const OLumpName &rhs)
 {
-	return stricmp(lhs.m_data, rhs.m_data);
+    return stricmp(lhs.m_data, rhs.m_data);
 }
 
-bool operator!=(const OLumpName& lhs, const char* rhs)
+bool operator!=(const OLumpName &lhs, const char *rhs)
 {
-	return stricmp(lhs.m_data, rhs);
+    return stricmp(lhs.m_data, rhs);
 }
 
-bool operator!=(const OLumpName& lhs, const std::string& rhs)
+bool operator!=(const OLumpName &lhs, const std::string &rhs)
 {
-	return stricmp(lhs.m_data, rhs.data());
+    return stricmp(lhs.m_data, rhs.data());
 }

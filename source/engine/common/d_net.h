@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id: 18276462ef24770fc9c7c5f30e07df853870fdf5 $
@@ -23,7 +23,7 @@
 
 #pragma once
 
-#define BACKUPTICS		12	// number of tics to remember
+#define BACKUPTICS 12 // number of tics to remember
 
 // Create any new ticcmds and broadcast to other players.
 void NetUpdate();

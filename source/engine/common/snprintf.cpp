@@ -33,13 +33,12 @@
 #endif
 
 #if defined(_MSC_VER) && _MSC_VER < 1800
-#define va_copy(d,s)((d) = (s))
+#define va_copy(d, s) ((d) = (s))
 #endif
 
-int vsnprintf(char *s, size_t n, const char *fmt,
-                     va_list ap)
+int vsnprintf(char *s, size_t n, const char *fmt, va_list ap)
 {
-    int ret;
+    int     ret;
     va_list ap_copy;
 
     if (n == 0)
@@ -66,7 +65,7 @@ int vsnprintf(char *s, size_t n, const char *fmt,
 int snprintf(char *s, size_t n, const char *fmt, ...)
 {
     va_list ap;
-    int ret;
+    int     ret;
 
     va_start(ap, fmt);
     ret = vsnprintf(s, n, fmt, ap);

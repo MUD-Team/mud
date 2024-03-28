@@ -22,7 +22,6 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #pragma once
 
 // GhostlyDeath -- MSVC++ 8+, remove "deprecated" warnings
@@ -45,7 +44,6 @@
 #define PACKEDATTR
 #endif
 
-
 #include "farchive.h"
 
 //
@@ -59,8 +57,8 @@ extern bool clientside, serverside;
 // [Nes] - Determines which program the user is running.
 enum baseapp_t
 {
-	client,		// Odamex.exe
-	server		// Odasrv.exe
+    client, // Odamex.exe
+    server  // Odasrv.exe
 };
 
 extern baseapp_t baseapp;
@@ -100,30 +98,29 @@ extern baseapp_t baseapp;
 //	to handle IWAD dependend animations etc.
 enum GameMode_t
 {
-  shareware,			// DOOM 1 shareware, E1, M9
-  registered,			// DOOM 1 registered, E3, M27
-  commercial,			// DOOM 2 retail, E1 M34
-						// DOOM 2 german edition not handled
-  retail,				// DOOM 1 retail, E4, M36
-  retail_chex,			// Chex Quest
-  retail_bfg,			// Doom 1 BFG Edition
-  commercial_bfg,		// Doom 2 BFG Edition
-  undetermined			// Well, no IWAD found.
+    shareware,  // DOOM 1 shareware, E1, M9
+    registered, // DOOM 1 registered, E3, M27
+    commercial, // DOOM 2 retail, E1 M34
+                // DOOM 2 german edition not handled
+    retail,         // DOOM 1 retail, E4, M36
+    retail_chex,    // Chex Quest
+    retail_bfg,     // Doom 1 BFG Edition
+    commercial_bfg, // Doom 2 BFG Edition
+    undetermined    // Well, no IWAD found.
 };
-
 
 // Mission packs - might be useful for TC stuff?
 enum GameMission_t
 {
-  doom, 				// DOOM 1
-  doom2,				// DOOM 2
-  pack_tnt, 			// TNT mission pack
-  pack_plut,			// Plutonia pack
-  chex,					// Chex Quest
-  retail_freedoom,
-  commercial_freedoom,	// FreeDoom
-  commercial_hacx,		// HACX
-  none
+    doom,                // DOOM 1
+    doom2,               // DOOM 2
+    pack_tnt,            // TNT mission pack
+    pack_plut,           // Plutonia pack
+    chex,                // Chex Quest
+    retail_freedoom,
+    commercial_freedoom, // FreeDoom
+    commercial_hacx,     // HACX
+    none
 };
 
 // If rangecheck is undefined,
@@ -131,186 +128,186 @@ enum GameMission_t
 #define RANGECHECK
 
 // The maximum number of players, multiplayer/networking.
-#define MAXPLAYERS				255
-#define MAXPLAYERS_VANILLA		4
+#define MAXPLAYERS         255
+#define MAXPLAYERS_VANILLA 4
 
 // Margin of error used when calculating percentages against player numbers.
-#define MPEPSILON				(float)1 / (MAXPLAYERS * 2)
+#define MPEPSILON (float)1 / (MAXPLAYERS * 2)
 
 // State updates, number of tics / second.
-#define TICRATE 		35
+#define TICRATE 35
 
-#define SPEED(a) ((a) * (FRACUNIT / 8))
-#define TICS(a) (((a)*TICRATE) / 35)
-#define OCTICS(a) (((a)*TICRATE) / 8)
+#define SPEED(a)     ((a) * (FRACUNIT / 8))
+#define TICS(a)      (((a) * TICRATE) / 35)
+#define OCTICS(a)    (((a) * TICRATE) / 8)
 #define BYTEANGLE(a) ((angle_t)((a) << 24))
 
 // [RH] Equivalents for BOOM's generalized sector types
 
-#define DAMAGE_MASK 0x60
-#define DAMAGE_SHIFT 5
-#define SECRET_MASK 0x80
-#define SECRET_SHIFT 7
-#define FRICTION_MASK 0x100
+#define DAMAGE_MASK    0x60
+#define DAMAGE_SHIFT   5
+#define SECRET_MASK    0x80
+#define SECRET_SHIFT   7
+#define FRICTION_MASK  0x100
 #define FRICTION_SHIFT 8
-#define PUSH_MASK 0x200
-#define PUSH_SHIFT 9
+#define PUSH_MASK      0x200
+#define PUSH_SHIFT     9
 
 // mbf21
-#define DEATH_MASK 0x1000         // bit 12
+#define DEATH_MASK         0x1000 // bit 12
 #define KILL_MONSTERS_MASK 0x2000 // bit 13
 
 // Define masks, shifts, for fields in generalized linedef types
 // (from BOOM's p_psec.h file)
 
-#define GenEnd (0x8000)
-#define GenFloorBase (0x6000)
+#define GenEnd         (0x8000)
+#define GenFloorBase   (0x6000)
 #define GenCeilingBase (0x4000)
-#define GenDoorBase (0x3c00)
-#define GenLockedBase (0x3800)
-#define GenLiftBase (0x3400)
-#define GenStairsBase (0x3000)
+#define GenDoorBase    (0x3c00)
+#define GenLockedBase  (0x3800)
+#define GenLiftBase    (0x3400)
+#define GenStairsBase  (0x3000)
 #define GenCrusherBase (0x2F80)
 
-#define TriggerType 0x0007
+#define TriggerType      0x0007
 #define TriggerTypeShift 0
 
 #define OdamexStaticInits (333)
 
 // define masks and shifts for the floor type fields
 
-#define FloorCrush 0x1000
-#define FloorChange 0x0c00
-#define FloorTarget 0x0380
+#define FloorCrush     0x1000
+#define FloorChange    0x0c00
+#define FloorTarget    0x0380
 #define FloorDirection 0x0040
-#define FloorModel 0x0020
-#define FloorSpeed 0x0018
+#define FloorModel     0x0020
+#define FloorSpeed     0x0018
 
-#define FloorCrushShift 12
-#define FloorChangeShift 10
-#define FloorTargetShift 7
+#define FloorCrushShift     12
+#define FloorChangeShift    10
+#define FloorTargetShift    7
 #define FloorDirectionShift 6
-#define FloorModelShift 5
-#define FloorSpeedShift 3
+#define FloorModelShift     5
+#define FloorSpeedShift     3
 
 // define masks and shifts for the ceiling type fields
 
-#define CeilingCrush 0x1000
-#define CeilingChange 0x0c00
-#define CeilingTarget 0x0380
+#define CeilingCrush     0x1000
+#define CeilingChange    0x0c00
+#define CeilingTarget    0x0380
 #define CeilingDirection 0x0040
-#define CeilingModel 0x0020
-#define CeilingSpeed 0x0018
+#define CeilingModel     0x0020
+#define CeilingSpeed     0x0018
 
-#define CeilingCrushShift 12
-#define CeilingChangeShift 10
-#define CeilingTargetShift 7
+#define CeilingCrushShift     12
+#define CeilingChangeShift    10
+#define CeilingTargetShift    7
 #define CeilingDirectionShift 6
-#define CeilingModelShift 5
-#define CeilingSpeedShift 3
+#define CeilingModelShift     5
+#define CeilingSpeedShift     3
 
 // define masks and shifts for the lift type fields
 
-#define LiftTarget 0x0300
-#define LiftDelay 0x00c0
+#define LiftTarget  0x0300
+#define LiftDelay   0x00c0
 #define LiftMonster 0x0020
-#define LiftSpeed 0x0018
+#define LiftSpeed   0x0018
 
-#define LiftTargetShift 8
-#define LiftDelayShift 6
+#define LiftTargetShift  8
+#define LiftDelayShift   6
 #define LiftMonsterShift 5
-#define LiftSpeedShift 3
+#define LiftSpeedShift   3
 
 // define masks and shifts for the stairs type fields
 
-#define StairIgnore 0x0200
+#define StairIgnore    0x0200
 #define StairDirection 0x0100
-#define StairStep 0x00c0
-#define StairMonster 0x0020
-#define StairSpeed 0x0018
+#define StairStep      0x00c0
+#define StairMonster   0x0020
+#define StairSpeed     0x0018
 
-#define StairIgnoreShift 9
+#define StairIgnoreShift    9
 #define StairDirectionShift 8
-#define StairStepShift 6
-#define StairMonsterShift 5
-#define StairSpeedShift 3
+#define StairStepShift      6
+#define StairMonsterShift   5
+#define StairSpeedShift     3
 
 // define masks and shifts for the crusher type fields
 
-#define CrusherSilent 0x0040
+#define CrusherSilent  0x0040
 #define CrusherMonster 0x0020
-#define CrusherSpeed 0x0018
+#define CrusherSpeed   0x0018
 
-#define CrusherSilentShift 6
+#define CrusherSilentShift  6
 #define CrusherMonsterShift 5
-#define CrusherSpeedShift 3
+#define CrusherSpeedShift   3
 
 // define masks and shifts for the door type fields
 
-#define DoorDelay 0x0300
+#define DoorDelay   0x0300
 #define DoorMonster 0x0080
-#define DoorKind 0x0060
-#define DoorSpeed 0x0018
+#define DoorKind    0x0060
+#define DoorSpeed   0x0018
 
-#define DoorDelayShift 8
+#define DoorDelayShift   8
 #define DoorMonsterShift 7
-#define DoorKindShift 5
-#define DoorSpeedShift 3
+#define DoorKindShift    5
+#define DoorSpeedShift   3
 
 // define masks and shifts for the locked door type fields
 
 #define LockedNKeys 0x0200
-#define LockedKey 0x01c0
-#define LockedKind 0x0020
+#define LockedKey   0x01c0
+#define LockedKind  0x0020
 #define LockedSpeed 0x0018
 
 #define LockedNKeysShift 9
-#define LockedKeyShift 6
-#define LockedKindShift 5
+#define LockedKeyShift   6
+#define LockedKindShift  5
 #define LockedSpeedShift 3
 
-#define ZDOOM_DAMAGE_MASK 0x0300
-#define ZDOOM_SECRET_MASK 0x0400
+#define ZDOOM_DAMAGE_MASK   0x0300
+#define ZDOOM_SECRET_MASK   0x0400
 #define ZDOOM_FRICTION_MASK 0x0800
-#define ZDOOM_PUSH_MASK 0x1000
+#define ZDOOM_PUSH_MASK     0x1000
 
 // Speeds for ceilings/crushers (x/8 units per tic)
 //	(Hexen crushers go up at half the speed that they go down)
-#define C_SLOW 8
+#define C_SLOW   8
 #define C_NORMAL 16
-#define C_FAST 32
-#define C_TURBO 64
+#define C_FAST   32
+#define C_TURBO  64
 
 #define CEILWAIT 150
 
 // Speeds for floors (x/8 units per tic)
-#define F_SLOW 8
+#define F_SLOW   8
 #define F_NORMAL 16
-#define F_FAST 32
-#define F_TURBO 64
+#define F_FAST   32
+#define F_TURBO  64
 
 // Speeds for doors (x/8 units per tic)
-#define D_SLOW 16
+#define D_SLOW   16
 #define D_NORMAL 32
-#define D_FAST 64
-#define D_TURBO 128
+#define D_FAST   64
+#define D_TURBO  128
 
-#define VDOORWAIT 150
+#define VDOORWAIT  150
 #define VDOORSPEED (FRACUNIT * 2)
 
 // Speeds for stairs (x/8 units per tic)
-#define S_SLOW 2
+#define S_SLOW   2
 #define S_NORMAL 4
-#define S_FAST 16
-#define S_TURBO 32
+#define S_FAST   16
+#define S_TURBO  32
 
 // Speeds for plats (Hexen plats stop 8 units above the floor)
-#define P_SLOW 8
+#define P_SLOW   8
 #define P_NORMAL 16
-#define P_FAST 32
-#define P_TURBO 64
+#define P_FAST   32
+#define P_TURBO  64
 
-#define PLATWAIT 105
+#define PLATWAIT  105
 #define PLATSPEED FRACUNIT
 
 #define ELEVATORSPEED 32
@@ -329,17 +326,17 @@ enum GameMission_t
 // the game final animation, or a demo.
 enum gamestate_t
 {
-	GS_LEVEL,
-	GS_INTERMISSION,
-	GS_FINALE,
-	GS_DEMOSCREEN,
-	GS_FULLCONSOLE,		// [RH]	Fullscreen console
-	GS_HIDECONSOLE,		// [RH] The menu just did something that should hide fs console
-	GS_STARTUP,			// [RH] Console is fullscreen, and game is just starting
-	GS_CONNECTING,		// denis - replace the old global "tryingtoconnect"
-	GS_CONNECTED,       // [ML] - For that brief time before GS_LEVEL But after GS_CONNECTING should be done
+    GS_LEVEL,
+    GS_INTERMISSION,
+    GS_FINALE,
+    GS_DEMOSCREEN,
+    GS_FULLCONSOLE, // [RH]	Fullscreen console
+    GS_HIDECONSOLE, // [RH] The menu just did something that should hide fs console
+    GS_STARTUP,     // [RH] Console is fullscreen, and game is just starting
+    GS_CONNECTING,  // denis - replace the old global "tryingtoconnect"
+    GS_CONNECTED,   // [ML] - For that brief time before GS_LEVEL But after GS_CONNECTING should be done
 
-	GS_FORCEWIPE = -1
+    GS_FORCEWIPE = -1
 };
 
 //
@@ -347,16 +344,16 @@ enum gamestate_t
 //
 
 // Gravity
-#define GRAVITY		FRACUNIT
+#define GRAVITY FRACUNIT
 
 enum skill_t
 {
-	sk_ntm = 0, // no things mode
-	sk_baby,
-	sk_easy,
-	sk_medium,
-	sk_hard,
-	sk_nightmare
+    sk_ntm = 0, // no things mode
+    sk_baby,
+    sk_easy,
+    sk_medium,
+    sk_hard,
+    sk_nightmare
 };
 
 //
@@ -364,139 +361,145 @@ enum skill_t
 //
 enum card_t
 {
-	it_bluecard,
-	it_yellowcard,
-	it_redcard,
-	it_blueskull,
-	it_yellowskull,
-	it_redskull,
+    it_bluecard,
+    it_yellowcard,
+    it_redcard,
+    it_blueskull,
+    it_yellowskull,
+    it_redskull,
 
-	NUMCARDS,
+    NUMCARDS,
 
-		// GhostlyDeath <August 31, 2008> -- Before this was not = 0 and when
-		// the map is loaded the value is just bitshifted so that the values
-		// that were here were incorrect, keyed generalized doors work now
-        NoKey = 0,
-        RCard,
-        BCard,
-        YCard,
-        RSkull,
-        BSkull,
-        YSkull,
+    // GhostlyDeath <August 31, 2008> -- Before this was not = 0 and when
+    // the map is loaded the value is just bitshifted so that the values
+    // that were here were incorrect, keyed generalized doors work now
+    NoKey = 0,
+    RCard,
+    BCard,
+    YCard,
+    RSkull,
+    BSkull,
+    YSkull,
 
-        AnyKey = 100,
-        AllKeys = 101,
+    AnyKey  = 100,
+    AllKeys = 101,
 
-        CardIsSkull = 128
+    CardIsSkull = 128
 };
 
 enum ItemEquipVal
 {
-	IEV_NotEquipped, //was not equipped, item should stay
-	IEV_EquipStay, //equipped, item should stay
-	IEV_EquipRemove //equipped, item should be removed
+    IEV_NotEquipped, // was not equipped, item should stay
+    IEV_EquipStay,   // equipped, item should stay
+    IEV_EquipRemove  // equipped, item should be removed
 };
 
-
-inline FArchive &operator<< (FArchive &arc, card_t i)
+inline FArchive &operator<<(FArchive &arc, card_t i)
 {
-	return arc << (BYTE)i;
+    return arc << (BYTE)i;
 }
-inline FArchive &operator>> (FArchive &arc, card_t &i)
+inline FArchive &operator>>(FArchive &arc, card_t &i)
 {
-	BYTE in; arc >> in; i = (card_t)in; return arc;
+    BYTE in;
+    arc >> in;
+    i = (card_t)in;
+    return arc;
 }
-
 
 // The defined weapons,
 //	including a marker indicating
 //	user has not changed weapon.
 enum weapontype_t
 {
-	wp_none = -1,
-	wp_fist,
-	wp_pistol,
-	wp_shotgun,
-	wp_chaingun,
-	wp_missile,
-	wp_plasma,
-	wp_bfg,
-	wp_chainsaw,
-	wp_supershotgun,
+    wp_none = -1,
+    wp_fist,
+    wp_pistol,
+    wp_shotgun,
+    wp_chaingun,
+    wp_missile,
+    wp_plasma,
+    wp_bfg,
+    wp_chainsaw,
+    wp_supershotgun,
 
-	NUMWEAPONS,
+    NUMWEAPONS,
 
-	// No pending weapon change.
-	wp_nochange
+    // No pending weapon change.
+    wp_nochange
 };
 
-inline FArchive &operator<< (FArchive &arc, weapontype_t i)
+inline FArchive &operator<<(FArchive &arc, weapontype_t i)
 {
-	return arc << (BYTE)i;
+    return arc << (BYTE)i;
 }
-inline FArchive &operator>> (FArchive &arc, weapontype_t &i)
+inline FArchive &operator>>(FArchive &arc, weapontype_t &i)
 {
-	BYTE in; arc >> in; i = (weapontype_t)in; return arc;
+    BYTE in;
+    arc >> in;
+    i = (weapontype_t)in;
+    return arc;
 }
-
 
 // Ammunition types defined.
 enum ammotype_t
 {
-	am_clip,	// Pistol / chaingun ammo.
-	am_shell,	// Shotgun / double barreled shotgun.
-	am_cell,	// Plasma rifle, BFG.
-	am_misl,	// Missile launcher.
-	NUMAMMO,
-	am_noammo	// Unlimited for chainsaw / fist.
-
+    am_clip,  // Pistol / chaingun ammo.
+    am_shell, // Shotgun / double barreled shotgun.
+    am_cell,  // Plasma rifle, BFG.
+    am_misl,  // Missile launcher.
+    NUMAMMO,
+    am_noammo // Unlimited for chainsaw / fist.
 };
 
-inline FArchive &operator<< (FArchive &arc, ammotype_t i)
+inline FArchive &operator<<(FArchive &arc, ammotype_t i)
 {
-	return arc << (BYTE)i;
+    return arc << (BYTE)i;
 }
-inline FArchive &operator>> (FArchive &arc, ammotype_t &i)
+inline FArchive &operator>>(FArchive &arc, ammotype_t &i)
 {
-	BYTE in; arc >> in; i = (ammotype_t)in; return arc;
+    BYTE in;
+    arc >> in;
+    i = (ammotype_t)in;
+    return arc;
 }
-
 
 // Power up artifacts.
 enum powertype_t
 {
-	pw_invulnerability,
-	pw_strength,
-	pw_invisibility,
-	pw_ironfeet,
-	pw_allmap,
-	pw_infrared,
-	NUMPOWERS
+    pw_invulnerability,
+    pw_strength,
+    pw_invisibility,
+    pw_ironfeet,
+    pw_allmap,
+    pw_infrared,
+    NUMPOWERS
 };
 
-inline FArchive &operator<< (FArchive &arc, powertype_t i)
+inline FArchive &operator<<(FArchive &arc, powertype_t i)
 {
-	return arc << (BYTE)i;
+    return arc << (BYTE)i;
 }
-inline FArchive &operator>> (FArchive &arc, powertype_t &i)
+inline FArchive &operator>>(FArchive &arc, powertype_t &i)
 {
-	BYTE in; arc >> in; i = (powertype_t)in; return arc;
+    BYTE in;
+    arc >> in;
+    i = (powertype_t)in;
+    return arc;
 }
-
 
 //
 // Power up durations, how many tics till expiration.
 //
-#define INVULNTICS	(30*TICRATE)
-#define INVISTICS	(60*TICRATE)
-#define INFRATICS	(120*TICRATE)
-#define IRONTICS	(60*TICRATE)
+#define INVULNTICS (30 * TICRATE)
+#define INVISTICS  (60 * TICRATE)
+#define INFRATICS  (120 * TICRATE)
+#define IRONTICS   (60 * TICRATE)
 
 // [ML] 1/5/10: Move input defs to doomkeys.h
 #include "doomkeys.h"
 
 // [ML] Default intermission length
-#define DEFINTSECS	10
+#define DEFINTSECS 10
 
 // Amount (dx,dy) vector linedef is shifted right to get scroll amount
 #define SCROLL_SHIFT 5
@@ -507,27 +510,27 @@ inline FArchive &operator>> (FArchive &arc, powertype_t &i)
 // linedefs. More friction can create mud, sludge,
 // magnetized floors, etc. Less friction can create ice.
 
-#define MORE_FRICTION_MOMENTUM	15000	// mud factor based on momentum
-#define ORIG_FRICTION			0xE800	// original value
-#define ORIG_FRICTION_FACTOR	2048	// original value
-#define FRICTION_FLY			0xeb00
+#define MORE_FRICTION_MOMENTUM 15000  // mud factor based on momentum
+#define ORIG_FRICTION          0xE800 // original value
+#define ORIG_FRICTION_FACTOR   2048   // original value
+#define FRICTION_FLY           0xeb00
 
 // Factor to scale scrolling effect into mobj-carrying properties = 3/32.
 // (This is so scrolling floors and objects on them can move at same speed.)
 #define CARRYFACTOR ((fixed_t)(FRACUNIT * .09375))
 
 #ifndef __BIG_ENDIAN__
-#define MAKE_ID(a,b,c,d)	((a)|((b)<<8)|((c)<<16)|((d)<<24))
+#define MAKE_ID(a, b, c, d) ((a) | ((b) << 8) | ((c) << 16) | ((d) << 24))
 #else
-#define MAKE_ID(a,b,c,d)	((d)|((c)<<8)|((b)<<16)|((a)<<24))
+#define MAKE_ID(a, b, c, d) ((d) | ((c) << 8) | ((b) << 16) | ((a) << 24))
 #endif
 
-static inline void UNMAKE_ID(char* out, uint32_t id)
+static inline void UNMAKE_ID(char *out, uint32_t id)
 {
-	out[0] = id & 0xFF;
-	out[1] = (id >> 8) & 0xFF;
-	out[2] = (id >> 16) & 0xFF;
-	out[3] = (id >> 24) & 0xFF;
+    out[0] = id & 0xFF;
+    out[1] = (id >> 8) & 0xFF;
+    out[2] = (id >> 16) & 0xFF;
+    out[3] = (id >> 24) & 0xFF;
 }
 
 //==========================================================================
@@ -551,33 +554,32 @@ static inline void UNMAKE_ID(char* out, uint32_t id)
 //		A pointer to the element with a matching key or NULL if none found.
 //==========================================================================
 
-template<class ClassType, class KeyType>
-inline
-const ClassType *BinarySearch (const ClassType *first, int max,
-	const KeyType ClassType::*keyptr, const KeyType key)
+template <class ClassType, class KeyType>
+inline const ClassType *BinarySearch(const ClassType *first, int max, const KeyType ClassType::*keyptr,
+                                     const KeyType key)
 {
-	int min = 0;
-	--max;
+    int min = 0;
+    --max;
 
-	while (min <= max)
-	{
-		int mid = (min + max) / 2;
-		const ClassType *probe = &first[mid];
-		const KeyType &seekey = probe->*keyptr;
-		if (seekey == key)
-		{
-			return probe;
-		}
-		else if (seekey < key)
-		{
-			min = mid + 1;
-		}
-		else
-		{
-			max = mid - 1;
-		}
-	}
-	return NULL;
+    while (min <= max)
+    {
+        int              mid    = (min + max) / 2;
+        const ClassType *probe  = &first[mid];
+        const KeyType   &seekey = probe->*keyptr;
+        if (seekey == key)
+        {
+            return probe;
+        }
+        else if (seekey < key)
+        {
+            min = mid + 1;
+        }
+        else
+        {
+            max = mid - 1;
+        }
+    }
+    return NULL;
 }
 
 //==========================================================================
@@ -605,29 +607,28 @@ const ClassType *BinarySearch (const ClassType *first, int max,
 //		The index of the matching element or noIndex.
 //==========================================================================
 
-template<class IndexType, class KeyType, class CompType>
-inline
-IndexType BinarySearchFlexible (IndexType max, const KeyType key, IndexType noIndex)
+template <class IndexType, class KeyType, class CompType>
+inline IndexType BinarySearchFlexible(IndexType max, const KeyType key, IndexType noIndex)
 {
-	IndexType min = 0;
-	--max;
+    IndexType min = 0;
+    --max;
 
-	while (min <= max)
-	{
-		IndexType mid = (min + max) / 2;
-		int lexx = CompType::DoCompare (mid, key);
-		if (lexx == 0)
-		{
-			return mid;
-		}
-		else if (lexx < 0)
-		{
-			min = mid + 1;
-		}
-		else
-		{
-			max = mid - 1;
-		}
-	}
-	return noIndex;
+    while (min <= max)
+    {
+        IndexType mid  = (min + max) / 2;
+        int       lexx = CompType::DoCompare(mid, key);
+        if (lexx == 0)
+        {
+            return mid;
+        }
+        else if (lexx < 0)
+        {
+            min = mid + 1;
+        }
+        else
+        {
+            max = mid - 1;
+        }
+    }
+    return noIndex;
 }
