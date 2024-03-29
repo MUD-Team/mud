@@ -34,6 +34,12 @@
 #include "m_random.h"
 #include "farchive.h"
 
+// Initialize the random_shuffler Mersenne Twister, which
+// is used for std::shuffle in several places since std::random_shuffle
+// was removed in C++17 - Dasho
+static std::random_device rando;
+std::mt19937 random_shuffler(rando());
+
 //
 // M_Random
 // Returns a 0-255 number

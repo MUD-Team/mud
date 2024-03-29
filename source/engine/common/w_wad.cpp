@@ -635,7 +635,7 @@ int W_CheckNumForName(const char *name, int namespc)
     // It has been tuned so that the average chain length never exceeds 2.
 
     // proff 2001/09/07 - check numlumps==0, this happens when called before WAD loaded
-    register int i = (numlumps == 0) ? (-1) : (lumpinfo[W_LumpNameHash(name) % numlumps].index);
+    int i = (numlumps == 0) ? (-1) : (lumpinfo[W_LumpNameHash(name) % numlumps].index);
 
     // We search along the chain until end, looking for case-insensitive
     // matches which also match a namespace tag. Separate hash tables are

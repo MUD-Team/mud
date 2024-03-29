@@ -49,8 +49,6 @@
 #include "i_net.h"
 #include "m_fileio.h"
 
-using namespace std;
-
 void AddCommandString(std::string cmd);
 
 DArgs Args;

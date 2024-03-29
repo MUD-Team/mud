@@ -23,6 +23,8 @@
 
 #pragma once
 
+#include <random>
+
 #include "actor.h"
 
 typedef enum
@@ -167,3 +169,6 @@ template <typename T> const T &P_RandomFloatWeighted(const std::vector<T> &data,
 // Used for MBF21 mostly.
 int P_RandomHitscanAngle(fixed_t spread);
 int P_RandomHitscanSlope(fixed_t spread);
+
+// For std::shuffle - Dasho
+extern std::mt19937 random_shuffler;

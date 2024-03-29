@@ -852,7 +852,7 @@ void P_AdjustLine(line_t *ld)
 void P_FinishLoadingLineDefs(void)
 {
     int              i, linenum;
-    register line_t *ld = lines;
+    line_t *ld = lines;
 
     for (i = numlines, linenum = 0; i--; ld++, linenum++)
     {
@@ -1125,9 +1125,9 @@ void P_LoadSideDefs2(int lump)
 
     for (int i = 0; i < numsides; i++)
     {
-        register mapsidedef_t *msd = (mapsidedef_t *)data + i;
-        register side_t       *sd  = sides + i;
-        register sector_t     *sec;
+        mapsidedef_t *msd = (mapsidedef_t *)data + i;
+        side_t       *sd  = sides + i;
+        sector_t     *sec;
 
         sd->textureoffset = LESHORT(msd->textureoffset) << FRACBITS;
         sd->rowoffset     = LESHORT(msd->rowoffset) << FRACBITS;
@@ -1750,7 +1750,7 @@ extern polyblock_t **PolyBlockMap;
 // Hash the sector tags across the sectors and linedefs.
 static void P_InitTagLists(void)
 {
-    register int i;
+    int i;
 
     for (i = numsectors; --i >= 0;)                                            // Initially make all slots empty.
         sectors[i].firsttag = -1;

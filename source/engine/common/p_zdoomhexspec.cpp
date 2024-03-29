@@ -779,7 +779,7 @@ void P_SpawnZDoomScroller(line_t *l, int i)
 
     switch (special)
     {
-        register int s;
+        int s;
 
     case Scroll_Ceiling:
         if (IgnoreSpecial)
@@ -913,7 +913,7 @@ void P_SpawnZDoomFriction(line_t *l)
 
 void P_SpawnZDoomPusher(line_t *l)
 {
-    register int s;
+    int s;
 
     switch (l->special)
     {

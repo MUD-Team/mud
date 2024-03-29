@@ -2933,8 +2933,7 @@ parseError_e CL_ParseCommand()
     }
 
     // Delete pointer on scope exit.
-    // [AM] Should be unique_ptr as of C++11.
-    std::auto_ptr<google::protobuf::Message> autoMSG(msg);
+    std::unique_ptr<google::protobuf::Message> autoMSG(msg);
 
     // Run the proper message function.
     switch (cmd)

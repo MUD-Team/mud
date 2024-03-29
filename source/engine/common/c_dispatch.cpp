@@ -149,7 +149,7 @@ static int ListActionCommands(void)
 
 unsigned int MakeKey(const char *s)
 {
-    register unsigned int v = 0;
+    unsigned int v = 0;
 
     if (*s)
         v = tolower(*s++);

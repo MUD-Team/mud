@@ -644,14 +644,14 @@ static int _isspace(int c)
 // Trim whitespace from the start of a string
 std::string &TrimStringStart(std::string &s)
 {
-    s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(_isspace))));
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::function<int(int)>(_isspace))));
     return s;
 }
 
 // Trim whitespace from the end of a string
 std::string &TrimStringEnd(std::string &s)
 {
-    s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(_isspace))).base(), s.end());
+    s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::function<int(int)>(_isspace))).base(), s.end());
     return s;
 }
 
@@ -823,7 +823,7 @@ uint32_t Log2(uint32_t n)
         -1,    0,     1,     1,     2,     2,     2,     2,     3,     3,     3,     3,     3,     3,     3,    3,
         LT(4), LT(5), LT(5), LT(6), LT(6), LT(6), LT(6), LT(7), LT(7), LT(7), LT(7), LT(7), LT(7), LT(7), LT(7)};
 
-    register unsigned int t, tt; // temporaries
+    unsigned int t, tt; // temporaries
 
     if ((tt = (n >> 16)))
         return (t = (tt >> 8)) ? 24 + LogTable256[t] : 16 + LogTable256[tt];
