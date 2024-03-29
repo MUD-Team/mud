@@ -29,6 +29,7 @@
 #include "c_dispatch.h"
 #include "cmdlib.h"
 #include "m_fixed.h"
+#include "m_random.h"
 #include "d_netinf.h"
 #include "d_player.h"
 #include "m_random.h"
@@ -79,7 +80,7 @@ bool Pickup_DistributePlayers(size_t num_players, std::string &error)
 
     // Jumble up our eligible players and cut the number of
     // eligible players to the passed number.
-    std::random_shuffle(eligible.begin(), eligible.end());
+    std::shuffle(eligible.begin(), eligible.end(), random_shuffler);
     eligible.resize(num_players);
 
     // Rip through our eligible vector, forcing players in the vector

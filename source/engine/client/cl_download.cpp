@@ -33,6 +33,7 @@
 #include "i_system.h"
 #include "m_argv.h"
 #include "m_fileio.h"
+#include "m_random.h"
 #include "w_ident.h"
 
 EXTERN_CVAR(cl_waddownloaddir)
@@ -504,7 +505,7 @@ BEGIN_COMMAND(download)
         Websites clientsites = TokenizeString(cl_downloadsites.str(), " ");
 
         // Shuffle the sites so we evenly distribute our requests.
-        std::random_shuffle(clientsites.begin(), clientsites.end());
+        std::shuffle(clientsites.begin(), clientsites.end(), random_shuffler);
 
         // Attach the website to the file and download it.
         OWantFile file;

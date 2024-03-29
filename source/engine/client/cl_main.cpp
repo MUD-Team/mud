@@ -75,10 +75,6 @@
 
 #include "server.pb.h"
 
-#if _MSC_VER == 1310
-#pragma optimize("",off)
-#endif
-
 // denis - fancy gfx, but no game manipulation
 bool clientside = true, serverside = false;
 baseapp_t baseapp = client;
@@ -1520,8 +1516,8 @@ void CL_QuitAndTryDownload(const OWantFile& missing_file)
 	StringTokens clientsites = TokenizeString(cl_downloadsites.str(), " ");
 
 	// Shuffle the sites so we evenly distribute our requests.
-	std::random_shuffle(serversites.begin(), serversites.end());
-	std::random_shuffle(clientsites.begin(), clientsites.end());
+	std::shuffle(serversites.begin(), serversites.end(), random_shuffler);
+	std::shuffle(clientsites.begin(), clientsites.end(), random_shuffler);
 
 	// Combine them into one big site list.
 	Websites downloadsites;
