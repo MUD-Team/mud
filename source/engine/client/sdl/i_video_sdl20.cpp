@@ -41,6 +41,7 @@
 #include "i_sdl.h"
 #include "i_system.h"
 #include "i_video.h"
+#include "mud_profiling.h"
 #include "odamex.h"
 #include "v_palette.h"
 #include "v_video.h"
@@ -337,6 +338,8 @@ void ISDL20TextureWindowSurfaceManager::finishRefresh()
         SDL_RenderCopy(mSDLRenderer, mSDLTexture, NULL, NULL);
 
     SDL_RenderPresent(mSDLRenderer);
+
+    MUD_FrameMark;
 }
 
 // ============================================================================

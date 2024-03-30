@@ -8,6 +8,6 @@
         "sdl2-mixer",
         "fluidlite",
         "zlib",
-        "libpng"
+        "libpng"        
     ]
 }
