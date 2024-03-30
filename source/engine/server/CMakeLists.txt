@@ -13,10 +13,18 @@ include_directories(./ ../common)
 
 add_executable(mud-server ${COMMON_SOURCES} ${SERVER_SOURCES})
 
-target_link_libraries(mud-server mudproto ZLIB::ZLIB JsonCpp::JsonCpp)
 set_target_properties(mud-server PROPERTIES DEBUG_POSTFIX "_DEBUG")
 set_target_properties(mud-server PROPERTIES RELWITHDEBINFO_POSTFIX "_RELWITHDEBINFO")
 
-if(WIN32)
-  target_link_libraries(mud-server winmm wsock32 shlwapi)
+set (MUD_SERVER_LIBRARIES mudproto ZLIB::ZLIB JsonCpp::JsonCpp)
+
+if (MUD_PROFILING)
+  set (MUD_SERVER_LIBRARIES ${MUD_SERVER_LIBRARIES} tracy)
 endif()
+
+if (WIN32)
+    set (MUD_SERVER_LIBRARIES ${MUD_SERVER_LIBRARIES} winmm wsock32 shlwapi)
+endif()
+
+target_link_libraries(mud-server PRIVATE ${MUD_SERVER_LIBRARIES})
+

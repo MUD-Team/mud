@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.25)
 
 if ("${CMAKE_TOOLCHAIN_FILE}" MATCHES "vcpkg.cmake")
     if (CMAKE_HOST_UNIX)
@@ -24,9 +24,17 @@ set( CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_SOURCE_DIR}/bin )
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/bin )
 
 option(MUD_SANITIZE "Enable code sanitizing" OFF)
+option(MUD_PROFILING "Enable Profiling" OFF)
+
+# Profiling
+if (MUD_PROFILING)
+  add_definitions(-DMUD_PROFILING -DTRACY_ENABLE -DTRACY_CALLSTACK)
+endif()
 
 if (WIN32)
-    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")    
+    set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>")
+    
     if (NOT CLANG)
         # get the number of logical cores for parallel build
         cmake_host_system_information(RESULT LOGICAL_CORES QUERY NUMBER_OF_LOGICAL_CORES)

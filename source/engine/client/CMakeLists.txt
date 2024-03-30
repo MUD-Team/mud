@@ -19,6 +19,11 @@ set_target_properties(mud-client PROPERTIES DEBUG_POSTFIX "_DEBUG")
 set_target_properties(mud-client PROPERTIES RELWITHDEBINFO_POSTFIX "_RELWITHDEBINFO")
 
 set (MUD_CLIENT_LIBRARIES "")
+
+if (MUD_PROFILING)
+  set (MUD_CLIENT_LIBRARIES ${MUD_CLIENT_LIBRARIES} tracy)
+endif()
+
 if (WIN32)
     set (MUD_CLIENT_LIBRARIES "${MUD_CLIENT_LIBRARIES}" Shlwapi)
 endif()

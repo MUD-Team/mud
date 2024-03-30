@@ -1,0 +1,4 @@
+
+if (MUD_PROFILING)
+    add_subdirectory(tracy)
+endif()

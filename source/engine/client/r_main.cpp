@@ -30,6 +30,7 @@
 #include "i_video.h"
 #include "m_random.h"
 #include "m_vectors.h"
+#include "mud_profiling.h"
 #include "odamex.h"
 #include "p_local.h"
 #include "r_local.h"
@@ -751,6 +752,8 @@ argb_t R_GetSectorBlend()
 //
 void R_SetupFrame(player_t *player)
 {
+    MUD_ZoneScoped;
+
     camera = player->camera; // [RH] Use camera instead of viewplayer
 
     if (!camera || !camera->subsector)
@@ -987,6 +990,8 @@ void R_SetTranslatedLucentDrawFuncs()
 //
 void R_RenderPlayerView(player_t *player)
 {
+    MUD_ZoneScoped;
+    
     // Recalculate the viewing window dimensions, if needed.
     if (setsizeneeded)
     {
