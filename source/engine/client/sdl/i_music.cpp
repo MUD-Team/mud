@@ -20,20 +20,14 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-#include "win32inc.h"
-#if defined(_WIN32)
-#include <mmsystem.h>
-#endif
-
-#include "m_argv.h"
 #include "i_music.h"
-#include "i_system.h"
 
 #include "i_musicsystem.h"
-#include "i_musicsystem_sdl.h"
 #include "i_musicsystem_fluidlite.h"
+#include "i_musicsystem_sdl.h"
+#include "i_system.h"
+#include "m_argv.h"
+#include "odamex.h"
 
 MusicSystem    *musicsystem              = NULL;
 MusicSystemType current_musicsystem_type = MS_NONE;

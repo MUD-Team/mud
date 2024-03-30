@@ -55,9 +55,9 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "md5.h"
+
+#include "odamex.h"
 
 // [AM] Handled by odamex.h.
 // #include <cstring>
@@ -383,12 +383,11 @@ void md5_finish(md5_state_t *pms, md5_byte_t digest[16])
 }
 
 // denis lukianov 2006
-#include <sstream>
 #include <algorithm>
 #include <cctype>
-#include <sstream>
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 
 std::string MD5SUM(const void *in, size_t size)
 {

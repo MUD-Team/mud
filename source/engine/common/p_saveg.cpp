@@ -21,16 +21,13 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-#include "i_system.h"
-#include "p_local.h"
-
-// State.
-#include "dobject.h"
 #include "d_player.h"
-#include "r_state.h"
+#include "dobject.h"
+#include "i_system.h"
 #include "m_random.h"
+#include "odamex.h"
+#include "p_local.h"
+#include "r_state.h"
 #include "v_palette.h"
 
 //

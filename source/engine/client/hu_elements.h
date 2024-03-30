@@ -22,6 +22,8 @@
 
 #pragma once
 
+#include "v_textcolors.h"
+
 namespace hud
 {
 

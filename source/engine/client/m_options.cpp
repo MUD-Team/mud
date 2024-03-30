@@ -26,38 +26,29 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-#include "gstrings.h"
-#include "minilzo.h"
-
+#include "c_bind.h"
 #include "c_console.h"
 #include "c_dispatch.h"
-#include "c_bind.h"
+#include "cl_demo.h"
 #include "cl_responderkeys.h"
 #include "cmdlib.h"
-
-#include "i_system.h"
-#include "i_video.h"
-#include "i_input.h"
-#include "z_zone.h"
-#include "v_video.h"
-#include "v_text.h"
-#include "w_wad.h"
-
+#include "gstrings.h"
 #include "hu_stuff.h"
-
-#include "m_memio.h"
-
-#include "s_sound.h"
+#include "i_input.h"
 #include "i_music.h"
 #include "i_musicsystem.h"
-
-#include "m_misc.h"
-#include "cl_demo.h"
-
-// Data.
+#include "i_system.h"
+#include "i_video.h"
+#include "m_memio.h"
 #include "m_menu.h"
+#include "m_misc.h"
+#include "minilzo.h"
+#include "odamex.h"
+#include "s_sound.h"
+#include "v_text.h"
+#include "v_video.h"
+#include "w_wad.h"
+#include "z_zone.h"
 
 #define MENUBOXWIDTH   236
 #define MENUBOXHEIGHT  200

@@ -22,21 +22,26 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include <algorithm>
 
 #include "c_dispatch.h"
+#include "cmdlib.h"
 #include "d_event.h"
 #include "d_main.h"
+#include "g_episode.h"
 #include "g_game.h"
+#include "g_gametype.h"
+#include "g_levelstate.h"
+#include "g_skill.h"
 #include "gi.h"
-
 #include "i_system.h"
-#include "minilzo.h"
 #include "m_random.h"
+#include "m_wdlstats.h"
+#include "minilzo.h"
+#include "odamex.h"
 #include "p_acs.h"
 #include "p_ctf.h"
+#include "p_hordespawn.h"
 #include "p_local.h"
 #include "p_mobj.h"
 #include "p_saveg.h"
@@ -47,18 +52,9 @@
 #include "s_sound.h"
 #include "sv_main.h"
 #include "sv_maplist.h"
+#include "svc_message.h"
 #include "w_wad.h"
 #include "z_zone.h"
-#include "g_levelstate.h"
-#include "m_wdlstats.h"
-#include "svc_message.h"
-#include "g_gametype.h"
-#include "p_hordespawn.h"
-#include "g_episode.h"
-
-// FIXME: Remove this as soon as the JoinString is gone from G_ChangeMap()
-#include "cmdlib.h"
-#include "g_skill.h"
 
 #define lioffset(x) offsetof(level_pwad_info_t, x)
 #define cioffset(x) offsetof(cluster_info_t, x)
@@ -929,7 +925,7 @@ void G_WorldDone(void)
     if (!strnicmp(level.nextmap.c_str(), "EndGame", 7))
     {
         //		F_StartFinale (thiscluster->messagemusic, thiscluster->finaleflat, thiscluster->exittext); // denis -
-        //fixme - what should happen on the server?
+        // fixme - what should happen on the server?
         finaletext = thiscluster.exittext;
     }
     else
@@ -945,13 +941,13 @@ void G_WorldDone(void)
             if (nextcluster.entertext)
             {
                 //				F_StartFinale (nextcluster->messagemusic, nextcluster->finaleflat,
-                //nextcluster->entertext); // denis - fixme
+                // nextcluster->entertext); // denis - fixme
                 finaletext = nextcluster.entertext;
             }
             else if (thiscluster.exittext)
             {
                 //				F_StartFinale (thiscluster->messagemusic, thiscluster->finaleflat,
-                //thiscluster->exittext); // denis - fixme
+                // thiscluster->exittext); // denis - fixme
                 finaletext = thiscluster.exittext;
             }
         }

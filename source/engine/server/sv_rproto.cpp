@@ -21,17 +21,16 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#ifdef SIMULATE_LATENCY
+#include <chrono>
+#include <thread>
+#endif
 
-#include "p_local.h"
-#include "sv_main.h"
 #include "huffman.h"
 #include "i_net.h"
-
-#ifdef SIMULATE_LATENCY
-#include <thread>
-#include <chrono>
-#endif
+#include "odamex.h"
+#include "p_local.h"
+#include "sv_main.h"
 
 QWORD I_MSTime(void);
 

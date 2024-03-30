@@ -23,20 +23,19 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#include "i_sound.h"
 
-#include "i_sdl.h"
 #include <SDL2/SDL_mixer.h>
 #include <stdlib.h>
 
-#include "z_zone.h"
-
-#include "i_system.h"
-#include "i_sound.h"
 #include "i_music.h"
+#include "i_sdl.h"
+#include "i_system.h"
 #include "m_argv.h"
 #include "m_misc.h"
+#include "odamex.h"
 #include "w_wad.h"
+#include "z_zone.h"
 
 #define NUM_CHANNELS 32
 

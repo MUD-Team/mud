@@ -25,8 +25,9 @@
 
 #include <vector>
 
-#include "info.h"
+#include "cmdlib.h"
 #include "d_player.h"
+#include "info.h"
 
 struct hordeRecipe_t
 {

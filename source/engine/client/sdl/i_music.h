@@ -24,6 +24,8 @@
 
 #include <SDL2/SDL_mixer.h>
 
+#include "c_cvars.h"
+#include "doomtype.h"
 #include "m_memio.h"
 
 struct MusicHandler_t

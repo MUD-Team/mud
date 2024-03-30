@@ -21,14 +21,13 @@
 //
 //-----------------------------------------------------------------------------
 
-#include <ctime>
-
-#include "odamex.h"
-
-#include "g_levelstate.h"
 #include "m_wdlstats.h"
 
+#include <ctime>
+
 #include "c_dispatch.h"
+#include "g_levelstate.h"
+#include "odamex.h"
 #include "p_local.h"
 
 #define WDLSTATS_VERSION 6

@@ -21,13 +21,9 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "cl_parse.h"
 
 #include <bitset>
-
-#include "server.pb.h"
 
 #include "c_console.h"
 #include "c_dispatch.h"
@@ -35,6 +31,7 @@
 #include "c_maplist.h"
 #include "cl_main.h"
 #include "cl_maplist.h"
+#include "cl_replay.h"
 #include "cl_vote.h"
 #include "cmdlib.h"
 #include "d_main.h"
@@ -43,25 +40,26 @@
 #include "g_levelstate.h"
 #include "gi.h"
 #include "i_video.h"
+#include "infomap.h"
 #include "m_argv.h"
 #include "m_random.h"
 #include "m_resfile.h"
 #include "m_strindex.h"
+#include "odamex.h"
 #include "p_acs.h"
 #include "p_ctf.h"
 #include "p_horde.h"
 #include "p_inter.h"
 #include "p_lnspec.h"
+#include "p_mapformat.h"
 #include "p_mobj.h"
 #include "r_sky.h"
 #include "r_state.h"
 #include "s_sound.h"
+#include "server.pb.h"
 #include "st_stuff.h"
 #include "svc_map.h"
 #include "v_textcolors.h"
-#include "p_mapformat.h"
-#include "infomap.h"
-#include "cl_replay.h"
 
 // Extern data from other files.
 

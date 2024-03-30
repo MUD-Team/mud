@@ -24,48 +24,45 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#include "d_main.h"
 
-#include <algorithm>
-
+#include <math.h>
+#include <stdlib.h>
 #include "win32inc.h"
 #ifndef _WIN32
 #include <sys/stat.h>
 #endif
-
+#include <time.h>
 #ifdef UNIX
 #include <unistd.h>
 #endif
 
-#include <math.h>
-#include <stdlib.h>
-#include <time.h>
+#include <algorithm>
 
-#include "m_random.h"
-#include "minilzo.h"
+#include "c_dispatch.h"
+#include "d_dehacked.h"
+#include "g_game.h"
+#include "g_horde.h"
+#include "g_mapinfo.h"
+#include "gi.h"
 #include "gstrings.h"
-#include "z_zone.h"
-#include "w_wad.h"
-#include "v_video.h"
+#include "i_system.h"
 #include "m_argv.h"
 #include "m_fileio.h"
 #include "m_misc.h"
-#include "c_dispatch.h"
-#include "i_system.h"
-#include "g_game.h"
+#include "m_random.h"
+#include "minilzo.h"
+#include "odamex.h"
 #include "p_setup.h"
 #include "r_local.h"
 #include "r_sky.h"
-#include "d_main.h"
-#include "d_dehacked.h"
 #include "s_sound.h"
-#include "gi.h"
-#include "g_mapinfo.h"
-#include "sv_main.h"
 #include "sv_banlist.h"
-#include "g_horde.h"
-
+#include "sv_main.h"
+#include "v_video.h"
 #include "w_ident.h"
+#include "w_wad.h"
+#include "z_zone.h"
 
 EXTERN_CVAR(sv_timelimit)
 EXTERN_CVAR(sv_nomonsters)

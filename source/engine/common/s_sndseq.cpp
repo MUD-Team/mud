@@ -21,19 +21,19 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#include "s_sndseq.h"
 
+#include "cmdlib.h"
+#include "g_mapinfo.h"
+#include "i_system.h"
 #include "m_alloc.h"
 #include "m_random.h"
+#include "odamex.h"
+#include "oscanner.h"
+#include "p_local.h"
 #include "s_sound.h"
-#include "s_sndseq.h"
 #include "w_wad.h"
 #include "z_zone.h"
-#include "i_system.h"
-#include "cmdlib.h"
-#include "p_local.h"
-#include "g_mapinfo.h"
-#include "oscanner.h"
 
 // MACROS ------------------------------------------------------------------
 

@@ -21,23 +21,17 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include <math.h>
 
-#include "m_mempool.h"
-
 #include "i_system.h"
-
+#include "m_mempool.h"
+#include "m_vectors.h"
+#include "odamex.h"
+#include "p_lnspec.h"
 #include "p_local.h"
+#include "p_mapformat.h"
 #include "r_local.h"
 #include "v_video.h"
-
-#include "m_vectors.h"
-
-#include "p_mapformat.h"
-
-#include "p_lnspec.h"
 
 // a pool of bytes allocated for sprite clipping arrays
 Pool<tallpost_t *> masked_midposts_pool(4096);

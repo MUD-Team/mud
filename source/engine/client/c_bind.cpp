@@ -21,21 +21,21 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#include "c_bind.h"
 
 #include <stdlib.h>
 
-#include "m_ostring.h"
-#include "cmdlib.h"
 #include "c_dispatch.h"
-#include "c_bind.h"
-#include "hu_stuff.h"
 #include "cl_demo.h"
-#include "d_player.h"
-#include "i_input.h"
-#include "hashtable.h"
-#include "g_gametype.h"
 #include "cl_responderkeys.h"
+#include "cmdlib.h"
+#include "d_player.h"
+#include "g_gametype.h"
+#include "hashtable.h"
+#include "hu_stuff.h"
+#include "i_input.h"
+#include "m_ostring.h"
+#include "odamex.h"
 
 extern NetDemo netdemo;
 

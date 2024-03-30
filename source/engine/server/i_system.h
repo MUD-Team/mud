@@ -27,8 +27,8 @@
 #include <dirent.h>
 #endif
 
-#include "d_ticcmd.h"
 #include "d_event.h"
+#include "d_ticcmd.h"
 
 /*extern "C"
 {

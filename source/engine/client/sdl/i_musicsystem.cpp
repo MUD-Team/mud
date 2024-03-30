@@ -21,14 +21,14 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#include "i_musicsystem.h"
 
 #include <math.h>
 
 #include "i_music.h"
-#include "i_musicsystem.h"
 #include "i_sdl.h"
 #include "i_system.h"
+#include "odamex.h"
 
 extern MusicSystem *musicsystem;
 

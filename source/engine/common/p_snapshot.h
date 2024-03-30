@@ -25,8 +25,8 @@
 
 #pragma once
 
-#include "m_fixed.h"
 #include "dsectoreffect.h"
+#include "m_fixed.h"
 
 class AActor;
 class player_s;

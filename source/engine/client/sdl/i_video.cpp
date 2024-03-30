@@ -21,37 +21,26 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-#include <cstdlib>
-#include <climits>
-#include <algorithm>
-
-#include "i_sdl.h"
-
 #include "i_video.h"
-#include "v_video.h"
 
-#if defined(SDL20)
-#include "i_video_sdl20.h"
-#else
-#error "no video subsystem selected"
-#endif
+#include <algorithm>
+#include <climits>
+#include <cstdlib>
 
-#include "i_system.h"
-#include "m_misc.h"
-#include "i_input.h"
-#include "m_fileio.h"
-
-#include "w_wad.h"
 #include "cmdlib.h"
-
-// [Russell] - Just for windows, display the icon in the system menu and
-// alt-tab display
+#include "i_input.h"
+#include "i_sdl.h"
+#include "i_system.h"
+#include "i_video_sdl20.h"
+#include "m_fileio.h"
+#include "m_misc.h"
+#include "odamex.h"
+#include "v_video.h"
+#include "w_wad.h"
 #if defined(_WIN32)
-#include "win32inc.h"
 #include "SDL_syswm.h"
 #include "resource.h"
+#include "win32inc.h"
 #endif // _WIN32
 
 // Declared in doomtype.h as part of argb_t

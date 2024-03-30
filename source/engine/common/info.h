@@ -25,7 +25,7 @@
 
 #pragma once
 
-// Needed for action function pointer handling.
+#include "doomtype.h"
 #include "dthinker.h"
 #include "farchive.h"
 

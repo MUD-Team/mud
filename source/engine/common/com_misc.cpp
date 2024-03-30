@@ -20,20 +20,18 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "com_misc.h"
 
 #include "c_dispatch.h"
 #include "m_random.h"
+#include "odamex.h"
 #include "p_local.h"
-#include "v_textcolors.h"
-
 #if defined(SERVER_APP)
 #include "svc_message.h"
 #else
 #include "st_stuff.h"
 #endif
+#include "v_textcolors.h"
 
 void COM_PushToast(const toast_t &toast)
 {

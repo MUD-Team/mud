@@ -18,9 +18,9 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "ohash.h"
+
+#include "odamex.h"
 
 /**
  * @brief Populate an OMD5Hash with the passed hex string.

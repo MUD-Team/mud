@@ -22,40 +22,37 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-#include <sstream>
-#include <algorithm>
-
 #include "win32inc.h"
 #ifndef _WIN32
 #include <sys/stat.h>
 #endif
-
 #ifdef UNIX
-#include <unistd.h>
 #include <dirent.h>
+#include <unistd.h>
 #endif
-
 #include <stdlib.h>
 
-#include "m_alloc.h"
-#include "gstrings.h"
-#include "z_zone.h"
-#include "w_wad.h"
-#include "m_argv.h"
-#include "m_fileio.h"
+#include <algorithm>
+#include <sstream>
+
 #include "c_console.h"
-#include "i_system.h"
+#include "d_dehacked.h"
+#include "d_main.h"
 #include "g_game.h"
 #include "g_spawninv.h"
-#include "r_main.h"
-#include "d_main.h"
-#include "d_dehacked.h"
-#include "s_sound.h"
 #include "gi.h"
-#include "w_ident.h"
+#include "gstrings.h"
+#include "i_system.h"
+#include "m_alloc.h"
+#include "m_argv.h"
+#include "m_fileio.h"
 #include "m_resfile.h"
+#include "odamex.h"
+#include "r_main.h"
+#include "s_sound.h"
+#include "w_ident.h"
+#include "w_wad.h"
+#include "z_zone.h"
 
 OResFiles  wadfiles;
 OResFiles  patchfiles;

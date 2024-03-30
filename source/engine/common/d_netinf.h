@@ -23,6 +23,9 @@
 
 #pragma once
 
+#include "c_cvars.h"
+#include "doomdef.h"
+#include "doomtype.h"
 #include "teaminfo.h"
 
 #define MAXPLAYERNAME 15

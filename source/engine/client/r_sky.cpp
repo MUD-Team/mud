@@ -25,13 +25,13 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#include "r_sky.h"
 
 #include "m_fixed.h"
+#include "odamex.h"
 #include "r_data.h"
 #include "r_draw.h"
 #include "r_main.h"
-#include "r_sky.h"
 #include "w_wad.h"
 
 extern int    *texturewidthmask;

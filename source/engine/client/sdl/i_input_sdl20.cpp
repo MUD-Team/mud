@@ -20,18 +20,17 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "i_input_sdl20.h"
 
-#include "i_sdl.h"
-#include "i_input.h"
+#include <cassert>
+#include <queue>
 
-#include "i_video.h"
 #include "d_event.h"
 #include "doomkeys.h"
-#include <queue>
-#include <cassert>
+#include "i_input.h"
+#include "i_sdl.h"
+#include "i_video.h"
+#include "odamex.h"
 
 static const int MAX_SDL_EVENTS_PER_TIC = 8192;
 

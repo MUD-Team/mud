@@ -20,14 +20,12 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "svc_map.h"
-
-#include "server.pb.h"
 
 #include "hashtable.h"
 #include "i_net.h"
+#include "odamex.h"
+#include "server.pb.h"
 
 typedef OHashTable<int, const google::protobuf::Descriptor *> SVCHeaderMap;
 typedef OHashTable<const void *, svc_t>                       SVCDescMap;

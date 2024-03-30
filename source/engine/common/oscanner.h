@@ -22,6 +22,10 @@
 
 #pragma once
 
+#include <string>
+
+#include "doomtype.h"
+
 struct OScannerConfig
 {
     const char *lumpName;

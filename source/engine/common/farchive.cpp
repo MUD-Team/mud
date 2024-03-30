@@ -21,16 +21,16 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#include "farchive.h"
 
 #include <algorithm>
 
-#include "farchive.h"
-#include "m_alloc.h"
-#include "minilzo.h"
-#include "i_system.h"
 #include "d_player.h"
 #include "dobject.h"
+#include "i_system.h"
+#include "m_alloc.h"
+#include "minilzo.h"
+#include "odamex.h"
 
 #ifdef __BIG_ENDIAN__
 #define SWAP_WORD(x)

@@ -22,33 +22,33 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#include "p_setup.h"
 
-#include <stdlib.h>
 #include <math.h>
+#include <stdlib.h>
+
 #include <set>
 
-#include "m_alloc.h"
-#include "m_vectors.h"
-#include "m_argv.h"
-#include "z_zone.h"
-#include "m_bbox.h"
-#include "g_game.h"
-#include "i_system.h"
-#include "w_wad.h"
-#include "p_local.h"
-#include "p_acs.h"
-#include "s_sound.h"
-#include "p_lnspec.h"
-#include "v_palette.h"
 #include "c_console.h"
-#include "p_horde.h"
+#include "g_game.h"
 #include "g_gametype.h"
-
-#include "p_mobj.h"
-#include "p_setup.h"
+#include "i_system.h"
+#include "m_alloc.h"
+#include "m_argv.h"
+#include "m_bbox.h"
+#include "m_vectors.h"
+#include "odamex.h"
+#include "p_acs.h"
+#include "p_horde.h"
 #include "p_hordespawn.h"
+#include "p_lnspec.h"
+#include "p_local.h"
 #include "p_mapformat.h"
+#include "p_mobj.h"
+#include "s_sound.h"
+#include "v_palette.h"
+#include "w_wad.h"
+#include "z_zone.h"
 
 void SV_PreservePlayer(player_t &player);
 void P_SpawnMapThing(mapthing2_t *mthing, int position);
@@ -851,7 +851,7 @@ void P_AdjustLine(line_t *ld)
 // killough 4/4/98: delay using sidedefs until they are loaded
 void P_FinishLoadingLineDefs(void)
 {
-    int              i, linenum;
+    int     i, linenum;
     line_t *ld = lines;
 
     for (i = numlines, linenum = 0; i--; ld++, linenum++)

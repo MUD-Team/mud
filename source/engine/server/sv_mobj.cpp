@@ -21,16 +21,15 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
+#include "g_spawninv.h"
 #include "m_random.h"
+#include "m_vectors.h"
+#include "m_wdlstats.h"
+#include "odamex.h"
+#include "p_acs.h"
 #include "p_local.h"
 #include "s_sound.h"
-#include "m_vectors.h"
 #include "sv_main.h"
-#include "p_acs.h"
-#include "g_spawninv.h"
-#include "m_wdlstats.h"
 
 EXTERN_CVAR(sv_maxplayers)
 

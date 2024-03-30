@@ -25,23 +25,23 @@
 
 #pragma once
 
-#include <stddef.h>
-#include <stdint.h>
 #include <assert.h>
 #include <errno.h>
+#include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
 #include <algorithm> // std::copy
 #include <iterator>  // std::back_inserter
+#include <list>
 #include <memory>
 #include <set>
-#include <list>
 #include <string>
 #include <vector>
 
-#include "mus2midi.hpp"
 #include "m_memio.h"
+#include "mus2midi.hpp"
 
 /*! Raw MIDI event hook */
 typedef void (*RawEventHook)(void *userdata, uint8_t type, uint8_t subtype, uint8_t channel, const uint8_t *data,

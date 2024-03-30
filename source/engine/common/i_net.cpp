@@ -21,34 +21,32 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-/* [Petteri] Check if compiling for Win32:	*/
-// #if defined(__WINDOWS__) || defined(__NT__) || defined(_MSC_VER) || defined(WIN32)
-// #	define WIN32
-// #endif
-/* Follow #ifdef __WIN32__ marks */
-
-#include <stdlib.h>
-
-#include <sstream>
-
-/* [Petteri] Use Winsock for Win32: */
 #include "win32inc.h"
 #ifdef _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #else
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
-#include <netdb.h>
-#include <sys/ioctl.h>
-#include <sys/types.h>
 #include <errno.h>
-#include <unistd.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
 #include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
 #endif // WIN32
+#include <google/protobuf/message.h>
+#include <stdlib.h>
+
+#include <sstream>
+
+#include "d_player.h"
+#include "i_net.h"
+#include "i_system.h"
+#include "minilzo.h"
+#include "odamex.h"
+#include "svc_map.h"
 
 #ifndef _WIN32
 typedef int SOCKET;
@@ -64,15 +62,6 @@ typedef int SOCKET;
 #else
 #define SETSOCKOPTCAST(x) ((const void *)(x))
 #endif
-
-#include <google/protobuf/message.h>
-
-#include "i_system.h"
-#include "i_net.h"
-#include "svc_map.h"
-#include "d_player.h"
-
-#include "minilzo.h"
 
 unsigned int inet_socket;
 int          localport;

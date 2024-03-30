@@ -23,6 +23,8 @@
 
 #pragma once
 
+#include <vector>
+
 #include "dobject.h"
 
 void C_ExecCmdLineParams(bool onlyset, bool onlylogfile);

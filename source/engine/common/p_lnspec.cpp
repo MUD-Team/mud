@@ -22,15 +22,15 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-#include "p_local.h"
 #include "p_lnspec.h"
-#include "v_palette.h"
-#include "tables.h"
+
 #include "i_system.h"
 #include "m_wdlstats.h"
+#include "odamex.h"
+#include "p_local.h"
 #include "p_mapformat.h"
+#include "tables.h"
+#include "v_palette.h"
 
 #define FUNC(a) static BOOL a(line_t *ln, AActor *it, int arg0, int arg1, int arg2, int arg3, int arg4)
 

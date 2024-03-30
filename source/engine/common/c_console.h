@@ -25,8 +25,8 @@
 
 #include <stdarg.h>
 
-#include "d_event.h"
 #include "cmdlib.h"
+#include "d_event.h"
 #include "d_player.h"
 
 #define C_BLINKRATE     (TICRATE / 2)

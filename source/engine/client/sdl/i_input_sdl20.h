@@ -22,13 +22,13 @@
 
 #pragma once
 
-#include "i_sdl.h"
-#include "i_input.h"
+#include <list>
+#include <queue>
 
 #include "d_event.h"
-#include <queue>
-#include <list>
 #include "hashtable.h"
+#include "i_input.h"
+#include "i_sdl.h"
 
 typedef OHashTable<int, int> KeyTranslationTable;
 

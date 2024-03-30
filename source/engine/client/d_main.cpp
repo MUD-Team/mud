@@ -24,62 +24,59 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include <algorithm>
 
 #include "win32inc.h"
 #ifndef _WIN32
 #include <sys/stat.h>
 #endif
-
 #ifdef UNIX
-#include <unistd.h>
 #include <dirent.h>
+#include <unistd.h>
 #endif
-
 #include <math.h>
 
-#include "m_alloc.h"
-#include "m_random.h"
-#include "minilzo.h"
-#include "gstrings.h"
-#include "z_zone.h"
-#include "w_wad.h"
-#include "s_sound.h"
-#include "v_video.h"
+#include "am_map.h"
+#include "c_bind.h"
+#include "c_console.h"
+#include "c_dispatch.h"
+#include "c_effect.h"
+#include "cl_download.h"
+#include "cl_main.h"
+#include "d_dehacked.h"
+#include "d_main.h"
 #include "f_finale.h"
 #include "f_wipe.h"
+#include "g_game.h"
+#include "g_horde.h"
+#include "g_mapinfo.h"
+#include "gi.h"
+#include "gstrings.h"
+#include "hu_stuff.h"
+#include "i_input.h"
+#include "i_music.h"
+#include "i_system.h"
+#include "i_video.h"
+#include "m_alloc.h"
 #include "m_argv.h"
 #include "m_fileio.h"
-#include "m_misc.h"
 #include "m_menu.h"
-#include "c_console.h"
-#include "c_bind.h"
-#include "c_dispatch.h"
-#include "i_system.h"
-#include "i_music.h"
-#include "i_video.h"
-#include "i_input.h"
-#include "g_game.h"
-#include "hu_stuff.h"
-#include "wi_stuff.h"
-#include "st_stuff.h"
-#include "am_map.h"
-#include "c_effect.h"
+#include "m_misc.h"
+#include "m_random.h"
+#include "minilzo.h"
+#include "odamex.h"
+#include "p_ctf.h"
 #include "p_setup.h"
 #include "r_local.h"
 #include "r_sky.h"
-#include "d_main.h"
-#include "d_dehacked.h"
-#include "cl_download.h"
-#include "gi.h"
+#include "s_sound.h"
+#include "st_stuff.h"
 #include "stats.h"
-#include "p_ctf.h"
-#include "cl_main.h"
-#include "g_mapinfo.h"
-#include "g_horde.h"
+#include "v_video.h"
 #include "w_ident.h"
+#include "w_wad.h"
+#include "wi_stuff.h"
+#include "z_zone.h"
 
 extern size_t got_heapsize;
 

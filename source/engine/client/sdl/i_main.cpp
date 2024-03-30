@@ -22,8 +22,6 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 // denis - todo - remove
 #include "win32inc.h"
 #ifdef _WIN32
@@ -32,30 +30,30 @@ typedef BOOL(WINAPI *SetAffinityFunc)(HANDLE hProcess, DWORD mask);
 #else
 #include <sched.h>
 #endif // WIN32
-
 #ifdef UNIX
 // for getuid and geteuid
-#include <unistd.h>
 #include <sys/types.h>
+#include <unistd.h>
 #endif
 
+#include <iostream>
 #include <new>
 #include <stack>
-#include <iostream>
 
-#include "i_sdl.h"
+#include "c_console.h"
+#include "d_main.h"
 #include "i_crash.h"
+#include "i_sdl.h"
+#include "i_system.h"
+#include "m_argv.h"
+#include "m_fileio.h"
+#include "odamex.h"
+#include "z_zone.h"
+
 // [Russell] - Don't need SDLmain library
 #ifdef _WIN32
 #undef main
 #endif // WIN32
-
-#include "m_argv.h"
-#include "m_fileio.h"
-#include "d_main.h"
-#include "i_system.h"
-#include "c_console.h"
-#include "z_zone.h"
 
 // Use main() on windows for msvc
 #if defined(_MSC_VER)

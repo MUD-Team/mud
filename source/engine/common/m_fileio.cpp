@@ -29,20 +29,16 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-#include "m_fileio.h"
-
-#include "z_zone.h"
-
-// unfortunately, we still need you
-#include "cmdlib.h"
-
 #if defined(_WIN32)
 #include <direct.h> // getcwd
 #else
 #include <unistd.h> // getcwd
 #endif
+
+#include "cmdlib.h"
+#include "m_fileio.h"
+#include "odamex.h"
+#include "z_zone.h"
 
 // Simple logging
 std::ofstream LOG;

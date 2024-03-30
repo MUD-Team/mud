@@ -22,11 +22,10 @@
 //-----------------------------------------------------------------------------
 
 #include "odamex.h"
-
 #include "p_local.h"
+#include "p_mapformat.h"
 #include "p_spec.h"
 #include "s_sound.h"
-#include "p_mapformat.h"
 
 extern bool predicting;
 

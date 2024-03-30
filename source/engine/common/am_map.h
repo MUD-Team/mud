@@ -23,7 +23,11 @@
 
 #pragma once
 
+#include <string>
+
 #include "d_event.h"
+#include "doomtype.h"
+#include "m_vectors.h"
 
 // Used by ST StatusBar stuff.
 #define AM_MSGHEADER  (('a' << 24) + ('m' << 16))

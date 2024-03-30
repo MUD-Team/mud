@@ -21,19 +21,17 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#include "v_text.h"
 
 #include <ctype.h>
 
-#include "v_text.h"
-
-#include "i_video.h"
-#include "v_video.h"
-#include "hu_stuff.h"
-#include "w_wad.h"
-
-#include "hashtable.h"
 #include "cmdlib.h"
+#include "hashtable.h"
+#include "hu_stuff.h"
+#include "i_video.h"
+#include "odamex.h"
+#include "v_video.h"
+#include "w_wad.h"
 
 EXTERN_CVAR(msg0color)
 EXTERN_CVAR(msg1color)

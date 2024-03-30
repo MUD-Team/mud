@@ -21,25 +21,24 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "f_finale.h"
 
 #include <ctype.h>
 #include <math.h>
 
-#include "i_music.h"
-#include "z_zone.h"
-#include "i_video.h"
-#include "v_video.h"
-#include "v_text.h"
-#include "w_wad.h"
-#include "s_sound.h"
-#include "gstrings.h"
-#include "r_state.h"
-#include "hu_stuff.h"
-
+#include "doomtype.h"
 #include "gi.h"
+#include "gstrings.h"
+#include "hu_stuff.h"
+#include "i_music.h"
+#include "i_video.h"
+#include "odamex.h"
+#include "r_state.h"
+#include "s_sound.h"
+#include "v_text.h"
+#include "v_video.h"
+#include "w_wad.h"
+#include "z_zone.h"
 
 static IWindowSurface *cast_surface = NULL;
 

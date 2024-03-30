@@ -22,6 +22,9 @@
 
 #pragma once
 
+#include <string>
+#include <vector>
+
 #include "ohash.h"
 
 enum ofile_t

@@ -21,14 +21,13 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
+#include "cl_main.h"
 #include "cmdlib.h"
 #include "d_netinf.h"
-#include "v_video.h"
+#include "odamex.h"
 #include "r_draw.h"
 #include "r_state.h"
-#include "cl_main.h"
+#include "v_video.h"
 
 // The default preference ordering when the player runs out of one type of ammo.
 // Vanilla Doom compatible.

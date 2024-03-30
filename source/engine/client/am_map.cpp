@@ -21,38 +21,28 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#include "am_map.h"
 
 #include "c_bind.h"
-#include "p_lnspec.h"
-#include "p_local.h"
-#include "st_stuff.h"
-#include "v_palette.h"
-#include "w_wad.h"
-#include "z_zone.h"
-
 #include "c_dispatch.h"
 #include "cl_demo.h"
 #include "g_gametype.h"
-#include "m_cheat.h"
-
-// Needs access to LFB.
-#include "i_video.h"
-#include "v_video.h"
-
-#include "v_text.h"
-
-// State.
-#include "r_state.h"
-
-// Data.
-#include "gstrings.h"
-
-#include "am_map.h"
-
-#include "gi.h"
 #include "g_skill.h"
+#include "gi.h"
+#include "gstrings.h"
+#include "i_video.h"
+#include "m_cheat.h"
+#include "odamex.h"
+#include "p_lnspec.h"
+#include "p_local.h"
 #include "p_mapformat.h"
+#include "r_state.h"
+#include "st_stuff.h"
+#include "v_palette.h"
+#include "v_text.h"
+#include "v_video.h"
+#include "w_wad.h"
+#include "z_zone.h"
 
 argb_t CL_GetPlayerColor(player_t *);
 

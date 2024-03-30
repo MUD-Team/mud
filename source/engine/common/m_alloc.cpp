@@ -21,12 +21,12 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#include "m_alloc.h"
 
 #include <stdlib.h>
 
 #include "i_system.h"
-#include "m_alloc.h"
+#include "odamex.h"
 
 void *Malloc(size_t size)
 {

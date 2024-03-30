@@ -23,10 +23,10 @@
 
 #pragma once
 
+#include "c_console.h"
 #include "d_player.h"
 #include "p_local.h"
 #include "sv_main.h"
-#include "c_console.h"
 
 bool SV_AddMaster(const char *masterip);
 void SV_InitMasters();

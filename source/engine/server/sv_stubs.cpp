@@ -22,9 +22,8 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "d_player.h"
+#include "odamex.h"
 #include "v_palette.h"
 
 BOOL menuactive;

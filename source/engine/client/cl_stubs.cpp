@@ -21,14 +21,13 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include <stdarg.h>
 
 #include "actor.h"
 #include "cmdlib.h"
-#include "p_ctf.h"
 #include "d_player.h"
+#include "odamex.h"
+#include "p_ctf.h"
 
 // Unnatural Level Progression.  True if we've used 'map' or another command
 // to switch to a specific map out of order, otherwise false.

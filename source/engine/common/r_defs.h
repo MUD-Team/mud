@@ -25,16 +25,10 @@
 
 // Screenwidth.
 
-// Some more or less basic data types
-// we depend on.
-#include "m_fixed.h"
-
-// We rely on the thinker data struct
-// to handle sound origins in sectors.
-// SECTORS do store MObjs anyway.
 #include "actor.h"
-
+#include "doomtype.h"
 #include "dthinker.h"
+#include "m_fixed.h"
 
 // Silhouette, needed for clipping Segs (mainly)
 // and sprites representing things.

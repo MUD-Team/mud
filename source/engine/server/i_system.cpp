@@ -21,44 +21,40 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-#include <sstream>
-#include <limits>
-
-#include <stdlib.h>
-#include <stdarg.h>
-
-#ifdef OSX
-#include <mach/clock.h>
-#include <mach/mach.h>
-#endif
+#include "i_system.h"
 
 #include "win32inc.h"
 #ifdef _WIN32
 #include <conio.h>
-#include <io.h>
-#include <process.h>
-#include <mmsystem.h>
 #include <direct.h> // SoM: I don't know HOW this has been overlooked until now...
+#include <io.h>
+#include <mmsystem.h>
+#include <process.h>
 #include <winsock2.h>
 #endif
-
+#ifdef OSX
+#include <mach/clock.h>
+#include <mach/mach.h>
+#endif
 #ifdef UNIX
+#include <limits.h>
+#include <pwd.h>
 #include <sys/stat.h>
 #include <sys/time.h>
-#include <pwd.h>
 #include <unistd.h>
-#include <limits.h>
 #endif
+#include <stdarg.h>
+#include <stdlib.h>
 
-#include "cmdlib.h"
-#include "m_argv.h"
+#include <limits>
+#include <sstream>
 
-#include "d_main.h"
-#include "i_system.h"
-#include "i_net.h"
 #include "c_dispatch.h"
+#include "cmdlib.h"
+#include "d_main.h"
+#include "i_net.h"
+#include "m_argv.h"
+#include "odamex.h"
 #include "sv_main.h"
 
 #ifdef _WIN32

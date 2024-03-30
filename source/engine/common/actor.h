@@ -23,27 +23,18 @@
 
 #pragma once
 
-// Basics.
-#include "tables.h"
+#include <map>
+#include <vector>
+
+#include "doomdata.h"
+#include "doomdef.h"
+#include "doomtype.h"
+#include "dthinker.h"
+#include "info.h"
 #include "m_fixed.h"
 #include "m_vectors.h"
-
-// We need the thinker_t stuff.
-#include "dthinker.h"
-
-// We need the WAD data structure for Map things,
-// from the THINGS lump.
-#include "doomdata.h"
-
-// States are tied to finite states are
-//	tied to animation frames.
-// Needs precompiled tables/data structures.
-#include "info.h"
-
 #include "szp.h"
-
-// STL
-#include <map>
+#include "tables.h"
 
 //
 // NOTES: AActor

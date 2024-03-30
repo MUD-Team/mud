@@ -22,11 +22,11 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#include "cl_responderkeys.h"
 
 #include "doomkeys.h"
-#include "cl_responderkeys.h"
 #include "i_input.h"
+#include "odamex.h"
 
 //
 // Key_IsUpKey

@@ -24,9 +24,9 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "m_bbox.h"
+
+#include "odamex.h"
 
 IMPLEMENT_CLASS(DBoundingBox, DObject)
 

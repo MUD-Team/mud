@@ -21,23 +21,22 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include <algorithm>
 #include <sstream>
 
 #include "c_bind.h"
 #include "cl_demo.h"
-#include "m_fixed.h" // This should probably go into d_netinf.h
+#include "cmdlib.h"
 #include "d_netinf.h"
 #include "d_player.h"
 #include "g_gametype.h"
 #include "g_levelstate.h"
 #include "hu_drawers.h"
+#include "i_video.h"
+#include "m_fixed.h" // This should probably go into d_netinf.h
+#include "odamex.h"
 #include "p_ctf.h"
 #include "v_text.h"
-#include "i_video.h"
-#include "cmdlib.h"
 
 size_t P_NumPlayersInGame(void);
 argb_t CL_GetPlayerColor(player_t *);

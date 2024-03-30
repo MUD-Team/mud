@@ -21,8 +21,6 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "p_hordespawn.h"
 
 #include <algorithm>
@@ -30,6 +28,7 @@
 #include "actor.h"
 #include "c_effect.h"
 #include "m_random.h"
+#include "odamex.h"
 #include "p_hordedefine.h"
 #include "p_local.h"
 #include "s_sound.h"

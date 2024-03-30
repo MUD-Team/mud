@@ -21,29 +21,23 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-// SoM 12-24-05: yeah... I'm programming on christmas eve.
-// Removed all the DirectX crap.
+#include "i_input.h"
 
 #include <stdlib.h>
+
 #include <list>
 
-#include "i_sdl.h"
-#include "win32inc.h"
-
-#include "m_argv.h"
-#include "i_input.h"
-#include "i_video.h"
-#include "d_main.h"
 #include "c_bind.h"
 #include "c_console.h"
-#include "i_system.h"
+#include "d_main.h"
 #include "hu_stuff.h"
-
-#if defined(SDL20)
 #include "i_input_sdl20.h"
-#endif
+#include "i_sdl.h"
+#include "i_system.h"
+#include "i_video.h"
+#include "m_argv.h"
+#include "odamex.h"
+#include "win32inc.h"
 
 #ifdef _WIN32
 bool tab_keydown = false; // [ML] Actual status of tab key

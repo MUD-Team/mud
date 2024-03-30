@@ -20,16 +20,15 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "oscanner.h"
 
-#include "cmdlib.h"
-
-#include <algorithm>
 #include <stdlib.h>
 
+#include <algorithm>
+
+#include "cmdlib.h"
 #include "i_system.h"
+#include "odamex.h"
 
 static const char *SINGLE_CHAR_TOKENS = "$(),;=[]{}";
 

@@ -23,6 +23,9 @@
 
 #pragma once
 
+#include <string>
+#include <vector>
+
 #include "dobject.h"
 
 //

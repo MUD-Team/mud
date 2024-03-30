@@ -21,13 +21,12 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "m_random.h"
+#include "odamex.h"
+#include "p_lnspec.h"
 #include "p_local.h"
 #include "r_state.h"
 #include "s_sound.h"
-#include "p_lnspec.h"
 
 // From sv_main.cpp
 void SV_BroadcastSector(int sectornum);

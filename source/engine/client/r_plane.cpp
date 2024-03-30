@@ -30,23 +30,19 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-#include <stdlib.h>
 #include <math.h>
+#include <stdlib.h>
 
-#include "z_zone.h"
-#include "w_wad.h"
-
+#include "i_video.h"
+#include "m_alloc.h"
+#include "m_vectors.h"
+#include "odamex.h"
 #include "p_local.h"
 #include "r_local.h"
 #include "r_sky.h"
-
-#include "m_alloc.h"
-#include "i_video.h"
 #include "v_video.h"
-
-#include "m_vectors.h"
+#include "w_wad.h"
+#include "z_zone.h"
 
 planefunction_t floorfunc;
 planefunction_t ceilingfunc;

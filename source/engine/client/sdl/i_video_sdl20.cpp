@@ -20,33 +20,30 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "i_video_sdl20.h"
 
-#include "i_sdl.h"
 #include <stdlib.h>
-#include <cassert>
-
-#include <algorithm>
-#include <functional>
-
-#include "i_video.h"
-#include "v_video.h"
-
-#include "v_palette.h"
-#include "i_system.h"
-#include "i_input.h"
-#include "i_icon.h"
-
-#include "c_dispatch.h"
-
 // [Russell] - Just for windows, display the icon in the system menu and alt-tab display
 #include "win32inc.h"
 #if defined(_WIN32)
 #include <SDL_syswm.h>
+
 #include "resource.h"
 #endif // WIN32
+
+#include <algorithm>
+#include <cassert>
+#include <functional>
+
+#include "c_dispatch.h"
+#include "i_icon.h"
+#include "i_input.h"
+#include "i_sdl.h"
+#include "i_system.h"
+#include "i_video.h"
+#include "odamex.h"
+#include "v_palette.h"
+#include "v_video.h"
 
 EXTERN_CVAR(vid_fullscreen)
 EXTERN_CVAR(vid_widescreen)

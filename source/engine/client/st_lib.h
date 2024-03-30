@@ -23,6 +23,10 @@
 
 #pragma once
 
+#include "i_video.h"
+#include "r_defs.h"
+#include "w_wad.h"
+
 //
 // Background and foreground screen numbers
 //

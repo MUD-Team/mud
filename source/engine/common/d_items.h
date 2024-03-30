@@ -23,6 +23,8 @@
 
 #pragma once
 
+#include "doomdef.h"
+#include "doomtype.h"
 #include "info.h"
 
 class AActor;

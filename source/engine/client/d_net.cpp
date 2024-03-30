@@ -22,16 +22,15 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-#include "i_system.h"
-#include "g_game.h"
-#include "d_netinf.h"
-#include "p_local.h"
-#include "gi.h"
-#include "cl_main.h"
-#include "m_argv.h"
 #include "cl_demo.h"
+#include "cl_main.h"
+#include "d_netinf.h"
+#include "g_game.h"
+#include "gi.h"
+#include "i_system.h"
+#include "m_argv.h"
+#include "odamex.h"
+#include "p_local.h"
 
 extern NetDemo netdemo;
 

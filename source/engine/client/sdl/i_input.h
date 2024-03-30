@@ -23,12 +23,14 @@
 #pragma once
 
 #include <SDL.h>
-#include "win32inc.h"
+
+#include <list>
+#include <queue>
 
 #include "d_event.h"
+#include "doomtype.h"
 #include "hashtable.h"
-#include <queue>
-#include <list>
+#include "win32inc.h"
 
 #define MOUSE_DOOM     0
 #define MOUSE_ZDOOM_DI 1

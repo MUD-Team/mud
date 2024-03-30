@@ -1,8 +1,8 @@
 #pragma once
 
 #include "actor.h"
-#include "s_sound.h"
 #include "r_defs.h"
+#include "s_sound.h"
 
 typedef enum
 {

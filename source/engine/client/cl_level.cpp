@@ -22,8 +22,6 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include <set>
 
 #include "am_map.h"
@@ -35,26 +33,27 @@
 #include "f_finale.h"
 #include "g_game.h"
 #include "g_levelstate.h"
-#include "gi.h"
 #include "g_skill.h"
-#include "i_system.h"
+#include "gi.h"
 #include "i_music.h"
-#include "minilzo.h"
+#include "i_system.h"
 #include "m_random.h"
+#include "m_wdlstats.h"
+#include "minilzo.h"
+#include "odamex.h"
 #include "p_acs.h"
 #include "p_local.h"
 #include "p_saveg.h"
 #include "p_setup.h"
 #include "r_data.h"
 #include "r_sky.h"
-#include "s_sound.h"
 #include "s_sndseq.h"
+#include "s_sound.h"
 #include "st_stuff.h"
 #include "v_video.h"
 #include "w_wad.h"
 #include "wi_stuff.h"
 #include "z_zone.h"
-#include "m_wdlstats.h"
 
 #define lioffset(x) offsetof(level_pwad_info_t, x)
 #define cioffset(x) offsetof(cluster_info_t, x)

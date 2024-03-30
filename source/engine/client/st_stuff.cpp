@@ -24,22 +24,22 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "st_stuff.h"
-#include "i_video.h"
-#include "m_random.h"
-#include "st_lib.h"
+
 #include "am_map.h"
-#include "m_cheat.h"
-#include "s_sound.h"
-#include "gstrings.h"
+#include "c_console.h"
 #include "c_dispatch.h"
 #include "cl_main.h"
-#include "gi.h"
-#include "c_console.h"
 #include "g_gametype.h"
+#include "gi.h"
+#include "gstrings.h"
+#include "i_video.h"
+#include "m_cheat.h"
+#include "m_random.h"
+#include "odamex.h"
 #include "p_ctf.h"
+#include "s_sound.h"
+#include "st_lib.h"
 
 // States for status bar code.
 enum st_stateenum_t

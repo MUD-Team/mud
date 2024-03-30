@@ -22,9 +22,9 @@
 
 #pragma once
 
-#include "i_musicsystem.h"
-
 #include <fluidlite.h>
+
+#include "i_musicsystem.h"
 
 class MidiRealTimeInterface;
 class MidiSequencer;

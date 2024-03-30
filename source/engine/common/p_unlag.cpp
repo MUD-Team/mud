@@ -33,17 +33,16 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-#include "m_vectors.h"
-#include "p_unlag.h"
-#include "p_local.h"
-
 #ifdef _UNLAG_DEBUG_
 #include <list>
 void SV_SpawnMobj(AActor *mo);
 void SV_SendDestroyActor(AActor *mo);
 #endif // _UNLAG_DEBUG_
+
+#include "m_vectors.h"
+#include "odamex.h"
+#include "p_local.h"
+#include "p_unlag.h"
 
 EXTERN_CVAR(sv_maxunlagtime)
 

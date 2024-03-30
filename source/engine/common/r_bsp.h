@@ -23,6 +23,11 @@
 
 #pragma once
 
+#include "c_cvars.h"
+#include "doomtype.h"
+#include "m_fixed.h"
+#include "r_defs.h"
+
 extern const fixed_t NEARCLIP;
 
 extern seg_t    *curline;

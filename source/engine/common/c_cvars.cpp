@@ -21,19 +21,16 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include <cmath>
 #include <exception>
 
-#include "cmdlib.h"
 #include "c_console.h"
 #include "c_dispatch.h"
-#include "m_alloc.h"
-
+#include "cmdlib.h"
 #include "d_netinf.h"
-
 #include "i_system.h"
+#include "m_alloc.h"
+#include "odamex.h"
 
 bool cvar_t::m_DoNoSet     = false;
 bool cvar_t::m_UseCallback = false;

@@ -20,9 +20,8 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "i_video.h"
+#include "odamex.h"
 #include "v_video.h"
 
 // Functions for v_video.cpp support

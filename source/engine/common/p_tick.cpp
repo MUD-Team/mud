@@ -21,14 +21,13 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-#include "p_local.h"
-#include "c_effect.h"
-#include "p_acs.h"
 #include "c_console.h"
-#include "p_unlag.h"
+#include "c_effect.h"
+#include "odamex.h"
+#include "p_acs.h"
 #include "p_horde.h"
+#include "p_local.h"
+#include "p_unlag.h"
 
 //
 // P_AtInterval

@@ -23,6 +23,10 @@
 
 #pragma once
 
+#include <string>
+
+#include "doomtype.h"
+
 void M_LoadDefaults(void);
 
 void STACK_ARGS M_SaveDefaults(std::string filename = "");

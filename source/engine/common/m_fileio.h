@@ -23,9 +23,9 @@
 
 #pragma once
 
-#include "d_main.h"
-
 #include <fstream>
+
+#include "d_main.h"
 #include "m_ostring.h"
 
 extern std::ofstream LOG;

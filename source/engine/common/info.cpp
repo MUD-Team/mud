@@ -24,12 +24,11 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-// Data.
-#include "m_fixed.h"
 #include "info.h"
+
 #include "actor.h"
+#include "m_fixed.h"
+#include "odamex.h"
 
 const char *sprnames[NUMSPRITES + 1] = {
     "TROO", "SHTG", "PUNG", "PISG", "PISF", "SHTF", "SHT2", "CHGG", "CHGF", "MISG", "MISF", "SAWG", "PLSG", "PLSF",

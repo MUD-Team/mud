@@ -24,6 +24,10 @@
 #pragma once
 
 #include <algorithm>
+#include <string>
+#include <vector>
+
+#include "doomtype.h"
 
 class FStat
 {

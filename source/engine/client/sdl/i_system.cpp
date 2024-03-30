@@ -22,65 +22,57 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-#include <limits>
-
-#include "i_sdl.h"
-#include <stdlib.h>
-
 #ifdef OSX
-#include <mach/clock.h>
-#include <mach/mach.h>
 #include <Carbon/Carbon.h>
 #include <CoreFoundation/CoreFoundation.h>
+#include <mach/clock.h>
+#include <mach/mach.h>
 #endif
-
 #include "win32inc.h"
 #ifdef _WIN32
 #include <direct.h>
 #include <io.h>
+#include <mmsystem.h>
 #include <process.h>
+#include <shlobj.h>
 #include <shlwapi.h>
 #include <winsock2.h>
-#include <mmsystem.h>
-#include <shlobj.h>
 #endif // WIN32
-
 #ifdef UNIX
 // for getuid and geteuid
-#include <unistd.h>
-#include <sys/types.h>
 #include <limits.h>
-#include <time.h>
 #include <pwd.h>
-#endif
-
-#include <sstream>
-
-#include <stdarg.h>
 #include <sys/types.h>
-
+#include <time.h>
+#include <unistd.h>
+#endif
 #ifndef __OpenBSD__
 #include <sys/timeb.h>
 #endif
 
+#include <stdarg.h>
+#include <stdlib.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 
-#include "w_wad.h"
-#include "cmdlib.h"
-#include "m_argv.h"
-#include "m_misc.h"
-#include "i_video.h"
-#include "v_video.h"
-#include "i_sound.h"
+#include <limits>
+#include <sstream>
 
-#include "d_main.h"
-#include "g_game.h"
-#include "i_system.h"
 #include "c_dispatch.h"
 #include "cl_main.h"
+#include "cmdlib.h"
+#include "d_main.h"
+#include "g_game.h"
+#include "i_sdl.h"
+#include "i_sound.h"
+#include "i_system.h"
+#include "i_video.h"
+#include "m_argv.h"
 #include "m_fileio.h"
+#include "m_misc.h"
+#include "odamex.h"
+#include "v_video.h"
+#include "w_wad.h"
 
 ticcmd_t  emptycmd;
 ticcmd_t *I_BaseTiccmd(void)
@@ -517,8 +509,8 @@ void I_SetTitleString(const char *title)
 }
 
 #ifdef X11
-#include <X11/Xlib.h>
 #include <X11/Xatom.h>
+#include <X11/Xlib.h>
 #endif
 
 //

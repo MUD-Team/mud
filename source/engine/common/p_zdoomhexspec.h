@@ -24,6 +24,12 @@
 
 #pragma once
 
+#include "actor.h"
+#include "doomtype.h"
+#include "m_fixed.h"
+#include "p_spec.h"
+#include "r_defs.h"
+
 void OnChangedSwitchTexture(line_t *line, int useAgain);
 void SV_OnActivatedLine(line_t *line, AActor *mo, const int side, const LineActivationType activationType,
                         const bool bossaction);

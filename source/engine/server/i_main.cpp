@@ -21,33 +21,30 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#include <stdlib.h>
+#ifdef UNIX
+#include <signal.h>
+#include <unistd.h>
+#endif
 
-#include <stack>
 #include <iostream>
+#include <stack>
 
+#include "c_console.h"
+#include "d_main.h"
+#include "i_crash.h"
+#include "i_net.h"
+#include "i_system.h"
+#include "m_argv.h"
+#include "m_fileio.h"
 #include "win32inc.h"
 #ifdef _WIN32
 // pbdot
 // #include "resource.h"
 #include "mmsystem.h"
 #endif
-
-#ifdef UNIX
-#include <unistd.h>
-#include <signal.h>
-#endif
-
-#include <stdlib.h>
-
-#include "i_crash.h"
-#include "m_argv.h"
-#include "d_main.h"
-#include "i_system.h"
-#include "c_console.h"
+#include "odamex.h"
 #include "z_zone.h"
-#include "i_net.h"
-#include "m_fileio.h"
 
 void AddCommandString(std::string cmd);
 
@@ -209,8 +206,8 @@ int __cdecl main(int argc, char *argv[])
 //
 void daemon_init(void)
 {
-    int    pid;
-    FILE  *fpid;
+    int         pid;
+    FILE       *fpid;
     std::string pidfile;
 
     Printf(PRINT_HIGH, "Launched into the background\n");

@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include "doomtype.h"
+
 // ============================================================================
 //
 // PixelFormat class definition and implementation

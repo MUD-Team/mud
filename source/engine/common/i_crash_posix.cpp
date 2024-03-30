@@ -23,20 +23,17 @@
 
 #if defined UNIX && defined HAVE_BACKTRACE
 
-#include "odamex.h"
-
 #define CRASH_DIR_LEN 1024
-
-#include "i_crash.h"
-
-#include <signal.h>
 
 #include <execinfo.h>
 #include <fcntl.h>
+#include <signal.h>
 #include <time.h>
 #include <unistd.h>
 
+#include "i_crash.h"
 #include "i_system.h"
+#include "odamex.h"
 
 /**
  * @brief An array containing the directory where crashes are written to.

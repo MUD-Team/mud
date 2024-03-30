@@ -21,26 +21,18 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-#include "m_alloc.h"
-
-#include "m_argv.h"
-
-#include "i_system.h"
-#include "w_wad.h"
-
-#include "r_local.h"
-#include "p_local.h"
-
 #include "c_console.h"
-
-#include "v_video.h"
-
 #include "cmdlib.h"
-#include "s_sound.h"
-
+#include "i_system.h"
+#include "m_alloc.h"
+#include "m_argv.h"
 #include "m_vectors.h"
+#include "odamex.h"
+#include "p_local.h"
+#include "r_local.h"
+#include "s_sound.h"
+#include "v_video.h"
+#include "w_wad.h"
 
 extern fixed_t FocalLengthX, FocalLengthY;
 

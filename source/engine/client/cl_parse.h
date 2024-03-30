@@ -23,6 +23,10 @@
 
 #pragma once
 
+#include <vector>
+
+#include "doomtype.h"
+
 enum parseError_e
 {
     PERR_OK,

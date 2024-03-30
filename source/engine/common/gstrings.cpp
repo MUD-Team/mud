@@ -21,11 +21,10 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "gstrings.h"
 
 #include "c_dispatch.h"
+#include "odamex.h"
 
 // Localizable strings
 StringTable GStrings;

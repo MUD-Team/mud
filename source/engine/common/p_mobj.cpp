@@ -21,34 +21,33 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-#include "m_alloc.h"
-#include "i_system.h"
-#include "z_zone.h"
-#include "m_random.h"
-#include "p_local.h"
-#include "p_lnspec.h"
-#include "c_effect.h"
-#include "s_sound.h"
-#include "v_video.h"
-#include "m_vectors.h"
-#include "g_game.h"
 #include "p_mobj.h"
-#include "p_ctf.h"
-#include "gi.h"
-#include "g_gametype.h"
+
 #include "c_dispatch.h"
-#include "p_horde.h"
-#include "p_hordespawn.h"
+#include "c_effect.h"
+#include "g_game.h"
+#include "g_gametype.h"
 #include "g_mapinfo.h"
 #include "g_skill.h"
-#include "m_wdlstats.h"
-#include "p_mapformat.h"
-
+#include "gi.h"
 #ifdef CLIENT_APP
 #include "hu_speedometer.h"
 #endif
+#include "i_system.h"
+#include "m_alloc.h"
+#include "m_random.h"
+#include "m_vectors.h"
+#include "m_wdlstats.h"
+#include "odamex.h"
+#include "p_ctf.h"
+#include "p_horde.h"
+#include "p_hordespawn.h"
+#include "p_lnspec.h"
+#include "p_local.h"
+#include "p_mapformat.h"
+#include "s_sound.h"
+#include "v_video.h"
+#include "z_zone.h"
 
 void SV_UpdateMobj(AActor *mo);
 void SV_UpdateMobjState(AActor *mo);

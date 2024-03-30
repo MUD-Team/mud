@@ -25,9 +25,8 @@
 #elif defined UNIX && defined HAVE_BACKTRACE
 #else
 
-#include "odamex.h"
-
 #include "i_crash.h"
+#include "odamex.h"
 
 void I_SetCrashCallbacks()
 {

@@ -22,11 +22,10 @@
 //-----------------------------------------------------------------------------
 
 #include "odamex.h"
-
-#include "p_local.h"
 #include "p_lnspec.h"
-#include "s_sound.h"
+#include "p_local.h"
 #include "r_state.h"
+#include "s_sound.h"
 #include "tables.h"
 
 void               P_ResetTransferSpecial(newspecial_s *newspecial);

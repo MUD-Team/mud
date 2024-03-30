@@ -21,11 +21,10 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "m_strindex.h"
 
 #include "cmdlib.h"
+#include "odamex.h"
 
 /**
  * @brief Create indexer with default dictionary containing common maplist

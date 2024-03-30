@@ -26,12 +26,12 @@
 
 #pragma once
 
+#include <cassert>
 #include <iostream>
 #include <memory>
-#include <cassert>
 
-#include "sarray.h"
 #include "hashtable.h"
+#include "sarray.h"
 
 class OString;
 

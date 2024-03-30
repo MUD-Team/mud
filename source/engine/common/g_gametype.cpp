@@ -20,8 +20,6 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "g_gametype.h"
 
 #include "c_dispatch.h"
@@ -29,6 +27,7 @@
 #include "d_event.h"
 #include "g_levelstate.h"
 #include "m_wdlstats.h"
+#include "odamex.h"
 #include "svc_message.h"
 
 EXTERN_CVAR(g_gametypename)

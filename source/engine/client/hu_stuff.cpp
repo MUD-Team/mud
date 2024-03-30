@@ -21,34 +21,31 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#include "hu_stuff.h"
 
 #include <algorithm>
 #include <iterator>
 #include <sstream>
 
-#include "z_zone.h"
-#include "hu_stuff.h"
-#include "w_wad.h"
-#include "s_sound.h"
-#include "st_stuff.h"
+#include "am_map.h"
 #include "c_bind.h"
 #include "c_console.h"
 #include "c_dispatch.h"
-#include "v_text.h"
-#include "g_gametype.h"
-
 #include "cl_main.h"
-#include "p_ctf.h"
-#include "i_video.h"
 #include "cl_netgraph.h"
-#include "hu_mousegraph.h"
-#include "am_map.h"
-
+#include "g_gametype.h"
 #include "hu_drawers.h"
 #include "hu_elements.h"
-
+#include "hu_mousegraph.h"
+#include "i_video.h"
+#include "odamex.h"
+#include "p_ctf.h"
+#include "s_sound.h"
+#include "st_stuff.h"
+#include "v_text.h"
 #include "v_video.h"
+#include "w_wad.h"
+#include "z_zone.h"
 
 #define QUEUESIZE 128
 #define HU_INPUTX 0

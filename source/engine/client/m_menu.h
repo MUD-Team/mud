@@ -23,7 +23,9 @@
 
 #pragma once
 
+#include "c_cvars.h"
 #include "d_event.h"
+#include "olumpname.h"
 
 // Some defines...
 #define LINEHEIGHT 16

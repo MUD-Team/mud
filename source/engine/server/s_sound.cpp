@@ -21,20 +21,20 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-#include "m_alloc.h"
-#include "i_system.h"
 #include "s_sound.h"
-#include "c_dispatch.h"
-#include "z_zone.h"
-#include "m_random.h"
-#include "w_wad.h"
-#include "cmdlib.h"
-#include "oscanner.h"
-#include "v_video.h"
 
 #include <algorithm>
+
+#include "c_dispatch.h"
+#include "cmdlib.h"
+#include "i_system.h"
+#include "m_alloc.h"
+#include "m_random.h"
+#include "odamex.h"
+#include "oscanner.h"
+#include "v_video.h"
+#include "w_wad.h"
+#include "z_zone.h"
 
 #define NORM_PITCH    128
 #define NORM_PRIORITY 64

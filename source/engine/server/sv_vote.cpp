@@ -20,22 +20,21 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "sv_vote.h"
 
 #include <algorithm>
 #include <cmath>
 #include <sstream>
 
-#include "cmdlib.h"
 #include "c_dispatch.h"
+#include "cmdlib.h"
+#include "d_main.h"
 #include "d_player.h"
 #include "g_levelstate.h"
+#include "odamex.h"
 #include "sv_main.h"
 #include "sv_maplist.h"
 #include "sv_pickup.h"
-#include "d_main.h"
 #include "svc_message.h"
 
 EXTERN_CVAR(sv_gametype)

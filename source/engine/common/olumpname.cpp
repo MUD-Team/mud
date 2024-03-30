@@ -20,11 +20,11 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "olumpname.h"
 
 #include <stdexcept>
+
+#include "odamex.h"
 
 // private functions
 

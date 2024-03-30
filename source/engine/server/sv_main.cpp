@@ -21,58 +21,56 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#include "sv_main.h"
 
 #include "win32inc.h"
 #ifdef _WIN32
-#include <winsock.h>
 #include <time.h>
+#include <winsock.h>
 #endif
-
 #ifdef UNIX
-#include <unistd.h>
 #include <sys/time.h>
+#include <unistd.h>
 #endif
-
-#include "gstrings.h"
-#include "d_player.h"
-#include "s_sound.h"
-#include "g_game.h"
-#include "p_tick.h"
-#include "p_local.h"
-#include "p_inter.h"
-#include "sv_main.h"
-#include "sv_sqp.h"
-#include "sv_sqpold.h"
-#include "sv_master.h"
-#include "i_system.h"
-#include "c_console.h"
-#include "c_dispatch.h"
-#include "m_argv.h"
-#include "m_random.h"
-#include "p_ctf.h"
-#include "w_wad.h"
-#include "w_ident.h"
-#include "md5.h"
-#include "p_mobj.h"
-#include "p_unlag.h"
-#include "sv_vote.h"
-#include "sv_maplist.h"
-#include "g_levelstate.h"
-#include "g_gametype.h"
-#include "sv_banlist.h"
-#include "d_main.h"
-#include "m_fileio.h"
-#include "v_textcolors.h"
-#include "p_lnspec.h"
-#include "m_wdlstats.h"
-#include "svc_message.h"
-#include "m_cheat.h"
 
 #include <algorithm>
 #include <sstream>
 
+#include "c_console.h"
+#include "c_dispatch.h"
+#include "d_main.h"
+#include "d_player.h"
+#include "g_game.h"
+#include "g_gametype.h"
+#include "g_levelstate.h"
+#include "gstrings.h"
+#include "i_system.h"
+#include "m_argv.h"
+#include "m_cheat.h"
+#include "m_fileio.h"
+#include "m_random.h"
+#include "m_wdlstats.h"
+#include "md5.h"
+#include "odamex.h"
+#include "p_ctf.h"
+#include "p_inter.h"
+#include "p_lnspec.h"
+#include "p_local.h"
+#include "p_mobj.h"
+#include "p_tick.h"
+#include "p_unlag.h"
+#include "s_sound.h"
 #include "server.pb.h"
+#include "sv_banlist.h"
+#include "sv_maplist.h"
+#include "sv_master.h"
+#include "sv_sqp.h"
+#include "sv_sqpold.h"
+#include "sv_vote.h"
+#include "svc_message.h"
+#include "v_textcolors.h"
+#include "w_ident.h"
+#include "w_wad.h"
 
 extern void           G_DeferedInitNew(const char *mapname);
 extern level_locals_t level;

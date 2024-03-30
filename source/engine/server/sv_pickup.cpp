@@ -21,20 +21,18 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include <algorithm>
 #include <sstream>
 
 #include "c_dispatch.h"
 #include "cmdlib.h"
-#include "m_fixed.h"
-#include "m_random.h"
 #include "d_netinf.h"
 #include "d_player.h"
+#include "m_fixed.h"
 #include "m_random.h"
-#include "sv_main.h"
+#include "odamex.h"
 #include "p_local.h"
+#include "sv_main.h"
 
 EXTERN_CVAR(sv_gametype)
 EXTERN_CVAR(sv_teamsinplay)

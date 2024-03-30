@@ -22,4 +22,6 @@
 
 #pragma once
 
+#include "doomtype.h"
+
 DWORD SV_QryParseEnquiry(const DWORD &Tag);

@@ -23,6 +23,10 @@
 
 #pragma once
 
+#include <string>
+
+#include "doomtype.h"
+
 #define MAX_SKILLS 7
 
 struct SkillInfo

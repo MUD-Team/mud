@@ -20,22 +20,20 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "i_sdl.h"
+#include "odamex.h"
 #include "r_intrin.h"
 
 #ifdef __ALTIVEC__
 
+#include <altivec.h>
 #include <stdlib.h>
 
 #include "i_system.h"
+#include "i_video.h"
 #include "r_defs.h"
 #include "r_draw.h"
 #include "r_main.h"
-#include "i_video.h"
-
-#include <altivec.h>
 
 #define ALTIVEC_ALIGNED(x) x __attribute__((aligned(16)))
 

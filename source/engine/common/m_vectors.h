@@ -30,8 +30,16 @@
 
 #pragma once
 
-#include "tables.h"
 #include "m_fixed.h"
+#include "tables.h"
+
+#ifdef min
+#undef min
+#endif
+
+#ifdef max
+#undef max
+#endif
 
 class AActor;
 

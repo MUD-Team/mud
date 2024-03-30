@@ -23,6 +23,8 @@
 
 #pragma once
 
+#include "r_defs.h"
+
 // NOT called by W_Ticker. Fixme.
 //
 // [RH] The only parameter used is mapname, so I removed playermask and skill.

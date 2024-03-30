@@ -22,20 +22,20 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-#include "cl_main.h"
-#include "p_ctf.h"
-#include "d_player.h"
-#include "m_argv.h"
-#include "c_console.h"
-#include "m_fileio.h"
 #include "cl_demo.h"
+
+#include "c_console.h"
+#include "cl_main.h"
+#include "d_player.h"
+#include "g_gametype.h"
+#include "m_argv.h"
+#include "m_fileio.h"
+#include "odamex.h"
+#include "p_ctf.h"
+#include "p_mobj.h"
 #include "p_saveg.h"
 #include "st_stuff.h"
-#include "p_mobj.h"
 #include "svc_message.h"
-#include "g_gametype.h"
 
 EXTERN_CVAR(sv_maxclients)
 EXTERN_CVAR(sv_maxplayers)

@@ -35,6 +35,7 @@
 
 #pragma once
 
+#include "doomtype.h"
 #include "m_fixed.h"
 
 #define PI 3.141592657

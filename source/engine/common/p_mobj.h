@@ -52,7 +52,13 @@
 // Changed NetID system to not "give back" NetID's.  This was causing issues
 // when resetting the level too many times.
 
+#include <stdint.h>
+
+#include "actor.h"
 #include "i_system.h"
+#include "m_fixed.h"
+#include "tables.h"
+#include "teaminfo.h"
 
 #define MAX_NETID 0xFFFFFFFF
 

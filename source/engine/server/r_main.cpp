@@ -23,12 +23,12 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-#include <math.h>
 #include <limits.h>
-#include "m_random.h"
+#include <math.h>
+
 #include "m_bbox.h"
+#include "m_random.h"
+#include "odamex.h"
 #include "r_local.h"
 #include "v_video.h"
 

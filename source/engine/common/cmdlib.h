@@ -23,7 +23,16 @@
 
 #pragma once
 
+#include <ctype.h>
+#include <errno.h>
+#include <stdarg.h>
+#include <stdlib.h>
+
 #include <algorithm>
+#include <string>
+#include <vector>
+
+#include "doomtype.h"
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4244) // MIPS
@@ -33,11 +42,6 @@
 #pragma warning(disable : 4018) // signed/unsigned mismatch
 #pragma warning(disable : 4305) // truncate from double to float
 #endif
-
-#include <stdlib.h>
-#include <errno.h>
-#include <ctype.h>
-#include <stdarg.h>
 
 struct OTimespan
 {

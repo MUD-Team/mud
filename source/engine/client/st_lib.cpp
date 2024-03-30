@@ -23,12 +23,12 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-#include "st_stuff.h"
-#include "i_video.h" // IWindowSurface
 #include "st_lib.h"
+
+#include "i_video.h" // IWindowSurface
+#include "odamex.h"
 #include "r_local.h" // R_GetRenderingSurface()
+#include "st_stuff.h"
 
 // [RH] Routines to stretch status bar graphics depending on st_scale cvar.
 EXTERN_CVAR(st_scale)

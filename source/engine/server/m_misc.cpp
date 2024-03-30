@@ -22,16 +22,16 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#include "m_misc.h"
 
 #include "c_dispatch.h"
+#include "i_system.h"
 #include "m_argv.h"
 #include "m_fileio.h"
-#include "m_misc.h"
-#include "i_system.h"
-#include "z_zone.h"
+#include "odamex.h"
 #include "sv_main.h"
 #include "sv_master.h"
+#include "z_zone.h"
 
 // Used to identify the version of the game that saved
 // a config file to compensate for new features that get

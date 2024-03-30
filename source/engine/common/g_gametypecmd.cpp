@@ -20,11 +20,10 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "c_dispatch.h"
 #include "cmdlib.h"
 #include "hashtable.h"
+#include "odamex.h"
 
 typedef std::vector<std::string> StringList;
 

@@ -20,8 +20,6 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "m_resfile.h"
 
 #include <algorithm>
@@ -31,6 +29,7 @@
 #include "m_argv.h"
 #include "m_fileio.h"
 #include "md5.h"
+#include "odamex.h"
 #include "w_ident.h"
 #include "w_wad.h"
 

@@ -21,19 +21,18 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include <map>
 
-#include "p_local.h"
-#include "p_lnspec.h"
-#include "s_sound.h"
-#include "r_state.h"
-#include "z_zone.h"
-#include "w_wad.h"
 #include "gi.h"
-#include "svc_message.h"
+#include "odamex.h"
+#include "p_lnspec.h"
+#include "p_local.h"
 #include "p_mapformat.h"
+#include "r_state.h"
+#include "s_sound.h"
+#include "svc_message.h"
+#include "w_wad.h"
+#include "z_zone.h"
 
 EXTERN_CVAR(co_zdoomsound)
 extern int numtextures;

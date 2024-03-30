@@ -22,17 +22,13 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include <stdlib.h>
 
 #include "m_random.h"
-#include "s_sound.h"
-
+#include "odamex.h"
 #include "p_local.h"
-
-// State.
 #include "r_state.h"
+#include "s_sound.h"
 
 extern void P_CalcHeight(player_t *player);
 

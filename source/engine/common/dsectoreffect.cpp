@@ -21,10 +21,10 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-#include "p_local.h"
 #include "dsectoreffect.h"
+
+#include "odamex.h"
+#include "p_local.h"
 
 EXTERN_CVAR(co_boomphys) // [ML] Roll-up of various compat options
 

@@ -21,23 +21,22 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-#include <sstream>
-#include <algorithm>
-
-#include "cmdlib.h"
-#include "c_console.h"
 #include "c_dispatch.h"
+
+#include <algorithm>
+#include <sstream>
+
+#include "c_console.h"
+#include "cmdlib.h"
+#include "d_player.h"
+#include "hashtable.h"
+#include "i_system.h"
+#include "m_alloc.h"
 #include "m_argv.h"
 #include "m_fileio.h"
-#include "m_alloc.h"
-#include "d_player.h"
-#include "r_defs.h"
-#include "i_system.h"
-
-#include "hashtable.h"
 #include "m_ostring.h"
+#include "odamex.h"
+#include "r_defs.h"
 
 IMPLEMENT_CLASS(DConsoleCommand, DObject)
 IMPLEMENT_CLASS(DConsoleAlias, DConsoleCommand)

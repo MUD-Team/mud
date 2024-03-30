@@ -1,7 +1,12 @@
 #pragma once
 
-#include "i_net.h"
 #include <list>
+#include <string>
+#include <vector>
+
+#include "doomdef.h"
+#include "doomtype.h"
+#include "i_net.h"
 
 class NetDemo
 {

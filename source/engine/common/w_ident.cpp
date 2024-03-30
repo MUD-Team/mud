@@ -22,19 +22,16 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-#include "hashtable.h"
-#include "sarray.h"
-#include "m_ostring.h"
-
-#include "w_wad.h"
-#include "m_fileio.h"
-#include "cmdlib.h"
-
-#include "gi.h"
-
 #include "w_ident.h"
+
+#include "cmdlib.h"
+#include "gi.h"
+#include "hashtable.h"
+#include "m_fileio.h"
+#include "m_ostring.h"
+#include "odamex.h"
+#include "sarray.h"
+#include "w_wad.h"
 
 static const uint32_t IDENT_NONE       = 0;
 static const uint32_t IDENT_COMMERCIAL = BIT(0);

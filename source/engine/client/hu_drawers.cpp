@@ -20,12 +20,12 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "hu_drawers.h"
+
 #include "i_video.h"
-#include "v_video.h"
+#include "odamex.h"
 #include "v_text.h"
+#include "v_video.h"
 
 namespace hud
 {

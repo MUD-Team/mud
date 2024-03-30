@@ -26,11 +26,12 @@
 
 #pragma once
 
+#include <map>
+
 #include "actor.h"
 #include "d_player.h"
 #include "m_fixed.h"
 #include "r_defs.h"
-#include <map>
 
 class ClientReplay
 {

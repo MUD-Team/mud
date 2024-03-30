@@ -21,30 +21,27 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-// Data.
-#include "gstrings.h"
-#include "m_random.h"
-#include "i_system.h"
 #include "c_console.h"
-#include "p_local.h"
-#include "s_sound.h"
+#include "com_misc.h"
+#include "g_gametype.h"
+#include "g_skill.h"
+#include "gstrings.h"
+#include "i_system.h"
+#include "m_random.h"
+#include "m_wdlstats.h"
+#include "odamex.h"
+#include "p_acs.h"
+#include "p_ctf.h"
+#include "p_horde.h"
 #include "p_inter.h"
 #include "p_lnspec.h"
-#include "p_ctf.h"
-#include "p_acs.h"
-#include "g_gametype.h"
-#include "m_wdlstats.h"
-#include "svc_message.h"
-#include "p_horde.h"
-#include "com_misc.h"
-#include "g_skill.h"
+#include "p_local.h"
 #include "p_mapformat.h"
-
+#include "s_sound.h"
 #ifdef SERVER_APP
 #include "sv_main.h"
 #endif
+#include "svc_message.h"
 
 extern bool predicting;
 

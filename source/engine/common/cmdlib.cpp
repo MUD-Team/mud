@@ -22,7 +22,7 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#include "cmdlib.h"
 
 #include <math.h>
 #include <stdarg.h>
@@ -33,10 +33,9 @@
 #include <map>
 #include <sstream>
 
-#include "win32inc.h"
-
 #include "i_system.h"
-#include "cmdlib.h"
+#include "odamex.h"
+#include "win32inc.h"
 
 char com_token[8192];
 BOOL com_eof;
