@@ -292,7 +292,7 @@ void OScanner::mustScanInt()
     }
 
     std::string str = m_token;
-    if (IsNum(str.c_str()) == false && str != "MAX_INT")
+    if (IsNum(str.c_str()) == false && str != "MAXINT")
     {
         std::string err;
         StrFormat(err, "Expected integer, got \"%s\".", m_token.c_str());
@@ -369,7 +369,7 @@ int OScanner::getTokenInt() const
     std::string str = m_token;
     char       *stopper;
 
-    if (str == "MAX_INT")
+    if (str == "MAXINT")
     {
         return MAX_INT; // INT32_MAX;
     }
