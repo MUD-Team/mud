@@ -211,7 +211,7 @@ void daemon_init(void)
 {
     int    pid;
     FILE  *fpid;
-    string pidfile;
+    std::string pidfile;
 
     Printf(PRINT_HIGH, "Launched into the background\n");
 
@@ -223,7 +223,7 @@ void daemon_init(void)
 
     const char *forkargs = Args.CheckValue("-fork");
     if (forkargs)
-        pidfile = string(forkargs);
+        pidfile = std::string(forkargs);
 
     if (!pidfile.size() || pidfile[0] == '-')
         pidfile = "doomsv.pid";

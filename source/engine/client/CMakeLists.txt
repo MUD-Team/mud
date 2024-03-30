@@ -18,7 +18,12 @@ add_executable(mud-client WIN32 ${CLIENT_SOURCES} ${CLIENT_SDL_SOURCES} ${COMMON
 set_target_properties(mud-client PROPERTIES DEBUG_POSTFIX "_DEBUG")
 set_target_properties(mud-client PROPERTIES RELWITHDEBINFO_POSTFIX "_RELWITHDEBINFO")
 
-target_link_libraries(mud-client PRIVATE mudproto Shlwapi ZLIB::ZLIB PNG::PNG CURL::libcurl JsonCpp::JsonCpp protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite
+set (MUD_CLIENT_LIBRARIES "")
+if (WIN32)
+    set (MUD_CLIENT_LIBRARIES "${MUD_CLIENT_LIBRARIES}" Shlwapi)
+endif()
+
+target_link_libraries(mud-client PRIVATE mudproto ${MUD_CLIENT_LIBRARIES} ZLIB::ZLIB PNG::PNG CURL::libcurl JsonCpp::JsonCpp protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite
                       $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main> $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
                       $<IF:$<TARGET_EXISTS:SDL2_mixer::SDL2_mixer>,SDL2_mixer::SDL2_mixer,SDL2_mixer::SDL2_mixer-static>
                       $<IF:$<TARGET_EXISTS:fluidlite::fluidlite>,fluidlite::fluidlite,fluidlite::fluidlite-static>)
