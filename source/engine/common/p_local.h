@@ -100,8 +100,8 @@ bool P_CanSpy(player_t &viewer, player_t &other, bool demo = false);
 //
 // P_MOBJ
 //
-#define ONFLOORZ   MININT
-#define ONCEILINGZ MAXINT
+#define ONFLOORZ   MIN_INT
+#define ONCEILINGZ MAX_INT
 
 // Time interval for item respawning.
 #define ITEMQUESIZE 128
@@ -169,7 +169,7 @@ typedef struct
     } d;
 } intercept_t;
 
-#define MAXINTERCEPTS 128
+#define MAX_INTERCEPTS 128
 
 extern TArray<intercept_t> intercepts;
 
@@ -195,7 +195,7 @@ extern fixed_t openbottom;
 extern fixed_t openrange;
 extern fixed_t lowfloor;
 
-void P_LineOpening(const line_t *linedef, fixed_t x, fixed_t y, fixed_t refx = MINFIXED, fixed_t refy = 0);
+void P_LineOpening(const line_t *linedef, fixed_t x, fixed_t y, fixed_t refx = MIN_FIXED, fixed_t refy = 0);
 
 BOOL P_BlockLinesIterator(int x, int y, BOOL (*func)(line_t *));
 BOOL P_BlockThingsIterator(int x, int y, BOOL (*func)(AActor *), AActor *start = NULL);

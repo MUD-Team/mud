@@ -273,39 +273,39 @@ enum GameMission_t
 
 // Speeds for ceilings/crushers (x/8 units per tic)
 //	(Hexen crushers go up at half the speed that they go down)
-#define C_SLOW   8
-#define C_NORMAL 16
-#define C_FAST   32
-#define C_TURBO  64
+#define CEIL_SLOW   8
+#define CEIL_NORMAL 16
+#define CEIL_FAST   32
+#define CEIL_TURBO  64
 
 #define CEILWAIT 150
 
 // Speeds for floors (x/8 units per tic)
-#define F_SLOW   8
-#define F_NORMAL 16
-#define F_FAST   32
-#define F_TURBO  64
+#define FLOOR_SLOW   8
+#define FLOOR_NORMAL 16
+#define FLOOR_FAST   32
+#define FLOOR_TURBO  64
 
 // Speeds for doors (x/8 units per tic)
-#define D_SLOW   16
-#define D_NORMAL 32
-#define D_FAST   64
-#define D_TURBO  128
+#define DOOR_SLOW   16
+#define DOOR_NORMAL 32
+#define DOOR_FAST   64
+#define DOOR_TURBO  128
 
 #define VDOORWAIT  150
 #define VDOORSPEED (FRACUNIT * 2)
 
 // Speeds for stairs (x/8 units per tic)
-#define S_SLOW   2
-#define S_NORMAL 4
-#define S_FAST   16
-#define S_TURBO  32
+#define STAIRS_SLOW   2
+#define STAIRS_NORMAL 4
+#define STAIRS_FAST   16
+#define STAIRS_TURBO  32
 
 // Speeds for plats (Hexen plats stop 8 units above the floor)
-#define P_SLOW   8
-#define P_NORMAL 16
-#define P_FAST   32
-#define P_TURBO  64
+#define PLAT_SLOW   8
+#define PLAT_NORMAL 16
+#define PLAT_FAST   32
+#define PLAT_TURBO  64
 
 #define PLATWAIT  105
 #define PLATSPEED FRACUNIT

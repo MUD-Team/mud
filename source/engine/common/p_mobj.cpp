@@ -687,7 +687,7 @@ void AActor::RunThink()
             fixed_t   height      = P_HighestHeightOfFloor(sec);
             fixed_t   waterheight = sec->heightsec && P_HighestHeightOfFloor(sec->heightsec) > height
                                         ? P_HighestHeightOfFloor(sec->heightsec)
-                                        : MININT;
+                                        : MIN_INT;
 
             if ((subsector->sector - sectors) == scroller->GetAffectee())
             {

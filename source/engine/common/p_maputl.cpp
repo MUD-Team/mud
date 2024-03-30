@@ -466,7 +466,7 @@ void P_LineOpening(const line_t *linedef, fixed_t x, fixed_t y, fixed_t refx, fi
             usefront = true;
         else if (bflevel)
             usefront = false;
-        else if (refx != MINFIXED)
+        else if (refx != MIN_FIXED)
             usefront = !P_PointOnLineSide(refx, refy, linedef);
     }
 
@@ -846,7 +846,7 @@ BOOL P_TraverseIntercepts(traverser_t func, fixed_t maxfrac)
 
     while (count--)
     {
-        dist = MAXINT;
+        dist = MAX_INT;
         for (scan = 0; scan < intercepts.Size(); scan++)
         {
             if (intercepts[scan].frac < dist)
@@ -862,7 +862,7 @@ BOOL P_TraverseIntercepts(traverser_t func, fixed_t maxfrac)
         if (!func(in))
             return false; // don't bother going farther
 
-        in->frac = MAXINT;
+        in->frac = MAX_INT;
     }
 
     return true; // everything was traversed

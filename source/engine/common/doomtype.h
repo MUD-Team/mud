@@ -82,8 +82,10 @@ typedef unsigned int  uint;
 #endif
 
 #if (defined _MSC_VER)
+#if !defined(__clang__)
 #define DBL_EPSILON 2.2204460492503131e-016
 #define FLT_EPSILON 1.192092896e-07F
+#endif
 
 #define PRI_SIZE_PREFIX "I"
 #else
@@ -106,50 +108,26 @@ typedef unsigned int  uint;
 #define strnicmp strncasecmp
 #endif
 
-#ifndef MAXCHAR
-#define MAXCHAR ((char)0x7f)
+#ifndef MIN_SHORT
+#define MIN_SHORT ((short)0x8000)
 #endif
-#ifndef MAXSHORT
-#define MAXSHORT ((short)0x7fff)
-#endif
-
-// Max pos 32-bit int.
-#ifndef MAXINT
-#define MAXINT (0x7fffffff)
-#endif
-#ifndef MAXUINT
-#define MAXUINT (0xffffffff)
+#ifndef MAX_SHORT
+#define MAX_SHORT ((short)0x7fff)
 #endif
 
-#ifndef MAXLONG
-#ifndef ALPHA
-#define MAXLONG ((long)0x7fffffff)
-#else
-#define MAXLONG ((long)0x7fffffffffffffff)
+#ifndef MIN_INT
+#define MIN_INT ((int)0x80000000)
 #endif
-#endif
-
-#ifndef MINCHAR
-#define MINCHAR ((char)0x80)
-#endif
-#ifndef MINSHORT
-#define MINSHORT ((short)0x8000)
+#ifndef MAX_INT
+#define MAX_INT (0x7fffffff)
 #endif
 
-// Max negative 32-bit integer.
-#ifndef MININT
-#define MININT ((int)0x80000000)
-#endif
-#ifndef MINLONG
-#ifndef ALPHA
-#define MINLONG ((long)0x80000000)
-#else
-#define MINLONG ((long)0x8000000000000000)
-#endif
+#ifndef MAX_UINT
+#define MAX_UINT (0xffffffff)
 #endif
 
-#define MINFIXED (signed)(0x80000000)
-#define MAXFIXED (signed)(0x7fffffff)
+#define MIN_FIXED (signed)(0x80000000)
+#define MAX_FIXED (signed)(0x7fffffff)
 
 typedef unsigned char BYTE;
 typedef signed char   SBYTE;
