@@ -82,8 +82,10 @@ typedef unsigned int  uint;
 #endif
 
 #if (defined _MSC_VER)
+#if !defined(__clang__)
 #define DBL_EPSILON 2.2204460492503131e-016
 #define FLT_EPSILON 1.192092896e-07F
+#endif
 
 #define PRI_SIZE_PREFIX "I"
 #else
