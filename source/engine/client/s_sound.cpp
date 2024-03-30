@@ -76,7 +76,7 @@ struct channel_t
         entchannel  = CHAN_VOICE;
         attenuation = 0.0f;
         volume      = 0.0f;
-        priority    = MININT;
+        priority    = MIN_INT;
         loop        = false;
         start_time  = 0;
     }

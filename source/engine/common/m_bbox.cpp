@@ -37,8 +37,8 @@ DBoundingBox::DBoundingBox()
 
 void DBoundingBox::ClearBox()
 {
-    m_Box[BOXTOP] = m_Box[BOXRIGHT] = MININT;
-    m_Box[BOXBOTTOM] = m_Box[BOXLEFT] = MAXINT;
+    m_Box[BOXTOP] = m_Box[BOXRIGHT] = MIN_INT;
+    m_Box[BOXBOTTOM] = m_Box[BOXLEFT] = MAX_INT;
 }
 
 void DBoundingBox::AddToBox(fixed_t x, fixed_t y)

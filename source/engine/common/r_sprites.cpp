@@ -31,7 +31,7 @@
 #include "w_wad.h"
 #include "z_zone.h"
 
-#define SPRITE_NEEDS_INFO MAXINT
+#define SPRITE_NEEDS_INFO MAX_INT
 
 //
 // INITIALIZATION FUNCTIONS

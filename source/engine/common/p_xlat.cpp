@@ -30,176 +30,176 @@
 
 static const xlat_t SpecialTranslation[] = {
     /*   0 */ {0},
-    /*   1 */ {USE | MONST | REP, Door_Raise, {0, D_SLOW, VDOORWAIT}},
-    /*   2 */ {WALK, Door_Open, {TAG, D_SLOW}},
-    /*   3 */ {WALK, Door_Close, {TAG, D_SLOW}},
-    /*   4 */ {WALK | MONST, Door_Raise, {TAG, D_SLOW, VDOORWAIT}},
-    /*   5 */ {WALK, Floor_RaiseToLowestCeiling, {TAG, F_SLOW}},
-    /*	 6 */ {WALK, Ceiling_CrushAndRaiseA, {TAG, C_NORMAL, C_NORMAL, 10}},
-    /*   7 */ {USE, Stairs_BuildUpDoom, {TAG, S_SLOW, 8}},
-    /*   8 */ {WALK, Stairs_BuildUpDoom, {TAG, S_SLOW, 8}},
+    /*   1 */ {USE | MONST | REP, Door_Raise, {0, DOOR_SLOW, VDOORWAIT}},
+    /*   2 */ {WALK, Door_Open, {TAG, DOOR_SLOW}},
+    /*   3 */ {WALK, Door_Close, {TAG, DOOR_SLOW}},
+    /*   4 */ {WALK | MONST, Door_Raise, {TAG, DOOR_SLOW, VDOORWAIT}},
+    /*   5 */ {WALK, Floor_RaiseToLowestCeiling, {TAG, FLOOR_SLOW}},
+    /*	 6 */ {WALK, Ceiling_CrushAndRaiseA, {TAG, CEIL_NORMAL, CEIL_NORMAL, 10}},
+    /*   7 */ {USE, Stairs_BuildUpDoom, {TAG, STAIRS_SLOW, 8}},
+    /*   8 */ {WALK, Stairs_BuildUpDoom, {TAG, STAIRS_SLOW, 8}},
     /*	 9 */ {USE, Floor_Donut, {TAG, DORATE, DORATE}},
-    /*  10 */ {WALK | MONST, Plat_DownWaitUpStayLip, {TAG, P_FAST, PLATWAIT, 0}},
+    /*  10 */ {WALK | MONST, Plat_DownWaitUpStayLip, {TAG, PLAT_FAST, PLATWAIT, 0}},
     /*  11 */ {USE, Exit_Normal, {0}},
     /*  12 */ {WALK, Light_MaxNeighbor, {TAG}},
     /*  13 */ {WALK, Light_ChangeToValue, {TAG, 255}},
-    /*  14 */ {USE, Plat_UpByValueStayTx, {TAG, P_SLOW / 2, 4}},
-    /*  15 */ {USE, Plat_UpByValueStayTx, {TAG, P_SLOW / 2, 3}},
-    /*  16 */ {WALK, Door_CloseWaitOpen, {TAG, D_SLOW, 240}},
+    /*  14 */ {USE, Plat_UpByValueStayTx, {TAG, PLAT_SLOW / 2, 4}},
+    /*  15 */ {USE, Plat_UpByValueStayTx, {TAG, PLAT_SLOW / 2, 3}},
+    /*  16 */ {WALK, Door_CloseWaitOpen, {TAG, DOOR_SLOW, 240}},
     /*  17 */ {WALK, Light_StrobeDoom, {TAG, 5, 35}},
-    /*  18 */ {USE, Floor_RaiseToNearest, {TAG, F_SLOW}},
-    /*  19 */ {WALK, Floor_LowerToHighest, {TAG, F_SLOW, 128}},
-    /*  20 */ {USE, Plat_RaiseAndStayTx0, {TAG, P_SLOW / 2}},
-    /*  21 */ {USE, Plat_DownWaitUpStayLip, {TAG, P_FAST, PLATWAIT}},
-    /*  22 */ {WALK, Plat_RaiseAndStayTx0, {TAG, P_SLOW / 2}},
-    /*  23 */ {USE, Floor_LowerToLowest, {TAG, F_SLOW}},
-    /*  24 */ {SHOOT, Floor_RaiseToLowestCeiling, {TAG, F_SLOW}},
-    /*  25 */ {WALK, Ceiling_CrushAndRaiseA, {TAG, C_SLOW, C_SLOW, 10}},
-    /*  26 */ {USE | REP, Door_LockedRaise, {0, D_SLOW, VDOORWAIT, BCard | CardIsSkull}},
-    /*  27 */ {USE | REP, Door_LockedRaise, {0, D_SLOW, VDOORWAIT, YCard | CardIsSkull}},
-    /*  28 */ {USE | REP, Door_LockedRaise, {0, D_SLOW, VDOORWAIT, RCard | CardIsSkull}},
-    /*  29 */ {USE, Door_Raise, {TAG, D_SLOW, VDOORWAIT}},
-    /*  30 */ {WALK, Floor_RaiseByTexture, {TAG, F_SLOW}},
-    /*  31 */ {USE, Door_Open, {0, D_SLOW}},
-    /*  32 */ {USE | MONST, Door_LockedRaise, {0, D_SLOW, 0, BCard | CardIsSkull}},
-    /*  33 */ {USE | MONST, Door_LockedRaise, {0, D_SLOW, 0, RCard | CardIsSkull}},
-    /*  34 */ {USE | MONST, Door_LockedRaise, {0, D_SLOW, 0, YCard | CardIsSkull}},
+    /*  18 */ {USE, Floor_RaiseToNearest, {TAG, FLOOR_SLOW}},
+    /*  19 */ {WALK, Floor_LowerToHighest, {TAG, FLOOR_SLOW, 128}},
+    /*  20 */ {USE, Plat_RaiseAndStayTx0, {TAG, PLAT_SLOW / 2}},
+    /*  21 */ {USE, Plat_DownWaitUpStayLip, {TAG, PLAT_FAST, PLATWAIT}},
+    /*  22 */ {WALK, Plat_RaiseAndStayTx0, {TAG, PLAT_SLOW / 2}},
+    /*  23 */ {USE, Floor_LowerToLowest, {TAG, FLOOR_SLOW}},
+    /*  24 */ {SHOOT, Floor_RaiseToLowestCeiling, {TAG, FLOOR_SLOW}},
+    /*  25 */ {WALK, Ceiling_CrushAndRaiseA, {TAG, CEIL_SLOW, CEIL_SLOW, 10}},
+    /*  26 */ {USE | REP, Door_LockedRaise, {0, DOOR_SLOW, VDOORWAIT, BCard | CardIsSkull}},
+    /*  27 */ {USE | REP, Door_LockedRaise, {0, DOOR_SLOW, VDOORWAIT, YCard | CardIsSkull}},
+    /*  28 */ {USE | REP, Door_LockedRaise, {0, DOOR_SLOW, VDOORWAIT, RCard | CardIsSkull}},
+    /*  29 */ {USE, Door_Raise, {TAG, DOOR_SLOW, VDOORWAIT}},
+    /*  30 */ {WALK, Floor_RaiseByTexture, {TAG, FLOOR_SLOW}},
+    /*  31 */ {USE, Door_Open, {0, DOOR_SLOW}},
+    /*  32 */ {USE | MONST, Door_LockedRaise, {0, DOOR_SLOW, 0, BCard | CardIsSkull}},
+    /*  33 */ {USE | MONST, Door_LockedRaise, {0, DOOR_SLOW, 0, RCard | CardIsSkull}},
+    /*  34 */ {USE | MONST, Door_LockedRaise, {0, DOOR_SLOW, 0, YCard | CardIsSkull}},
     /*  35 */ {WALK, Light_ChangeToValue, {TAG, 35}},
-    /*  36 */ {WALK, Floor_LowerToHighest, {TAG, F_FAST, 136}},
-    /*  37 */ {WALK, Floor_LowerToLowestTxTy, {TAG, F_SLOW}},
-    /*  38 */ {WALK, Floor_LowerToLowest, {TAG, F_SLOW}},
+    /*  36 */ {WALK, Floor_LowerToHighest, {TAG, FLOOR_FAST, 136}},
+    /*  37 */ {WALK, Floor_LowerToLowestTxTy, {TAG, FLOOR_SLOW}},
+    /*  38 */ {WALK, Floor_LowerToLowest, {TAG, FLOOR_SLOW}},
     /*  39 */ {WALK | MONST, Teleport, {TAG}},
-    /*  40 */ {WALK, Generic_Ceiling, {TAG, C_SLOW, 0, 1, 8}},
-    /*  41 */ {USE, Ceiling_LowerToFloor, {TAG, C_SLOW}},
-    /*  42 */ {USE | REP, Door_Close, {TAG, D_SLOW}},
-    /*  43 */ {USE | REP, Ceiling_LowerToFloor, {TAG, C_SLOW}},
-    /*  44 */ {WALK, Ceiling_LowerAndCrush, {TAG, C_SLOW, 0}},
-    /*  45 */ {USE | REP, Floor_LowerToHighest, {TAG, F_SLOW, 128}},
-    /*  46 */ {SHOOT | REP | MONST, Door_Open, {TAG, D_SLOW}},
-    /*  47 */ {SHOOT, Plat_RaiseAndStayTx0, {TAG, P_SLOW / 2}},
+    /*  40 */ {WALK, Generic_Ceiling, {TAG, CEIL_SLOW, 0, 1, 8}},
+    /*  41 */ {USE, Ceiling_LowerToFloor, {TAG, CEIL_SLOW}},
+    /*  42 */ {USE | REP, Door_Close, {TAG, DOOR_SLOW}},
+    /*  43 */ {USE | REP, Ceiling_LowerToFloor, {TAG, CEIL_SLOW}},
+    /*  44 */ {WALK, Ceiling_LowerAndCrush, {TAG, CEIL_SLOW, 0}},
+    /*  45 */ {USE | REP, Floor_LowerToHighest, {TAG, FLOOR_SLOW, 128}},
+    /*  46 */ {SHOOT | REP | MONST, Door_Open, {TAG, DOOR_SLOW}},
+    /*  47 */ {SHOOT, Plat_RaiseAndStayTx0, {TAG, PLAT_SLOW / 2}},
     /*  48 */ {0, Scroll_Texture_Left, {SCROLL_UNIT}},
-    /*  49 */ {USE, Ceiling_CrushAndRaiseA, {TAG, C_SLOW, C_SLOW, 10}},
-    /*  50 */ {USE, Door_Close, {TAG, D_SLOW}},
+    /*  49 */ {USE, Ceiling_CrushAndRaiseA, {TAG, CEIL_SLOW, CEIL_SLOW, 10}},
+    /*  50 */ {USE, Door_Close, {TAG, DOOR_SLOW}},
     /*  51 */ {USE, Exit_Secret, {0}},
     /*  52 */ {WALK, Exit_Normal, {0}},
-    /*  53 */ {WALK, Plat_PerpetualRaiseLip, {TAG, P_SLOW, PLATWAIT, 0}},
+    /*  53 */ {WALK, Plat_PerpetualRaiseLip, {TAG, PLAT_SLOW, PLATWAIT, 0}},
     /*  54 */ {WALK, Plat_Stop, {TAG}},
-    /*  55 */ {USE, Floor_RaiseAndCrush, {TAG, F_SLOW, 10}},
-    /*  56 */ {WALK, Floor_RaiseAndCrush, {TAG, F_SLOW, 10}},
+    /*  55 */ {USE, Floor_RaiseAndCrush, {TAG, FLOOR_SLOW, 10}},
+    /*  56 */ {WALK, Floor_RaiseAndCrush, {TAG, FLOOR_SLOW, 10}},
     /*  57 */ {WALK, Ceiling_CrushStop, {TAG}},
-    /*  58 */ {WALK, Floor_RaiseByValue, {TAG, F_SLOW, 24}},
-    /*  59 */ {WALK, Floor_RaiseByValueTxTy, {TAG, F_SLOW, 24}},
-    /*  60 */ {USE | REP, Floor_LowerToLowest, {TAG, F_SLOW}},
-    /*  61 */ {USE | REP, Door_Open, {TAG, D_SLOW}},
-    /*  62 */ {USE | REP, Plat_DownWaitUpStayLip, {TAG, P_FAST, PLATWAIT, 0}},
-    /*  63 */ {USE | REP, Door_Raise, {TAG, D_SLOW, VDOORWAIT}},
-    /*  64 */ {USE | REP, Floor_RaiseToLowestCeiling, {TAG, F_SLOW}},
-    /*  65 */ {USE | REP, Floor_RaiseAndCrush, {TAG, F_SLOW, 10}},
-    /*  66 */ {USE | REP, Plat_UpByValueStayTx, {TAG, P_SLOW / 2, 3}},
-    /*  67 */ {USE | REP, Plat_UpByValueStayTx, {TAG, P_SLOW / 2, 4}},
-    /*  68 */ {USE | REP, Plat_RaiseAndStayTx0, {TAG, P_SLOW / 2}},
-    /*  69 */ {USE | REP, Floor_RaiseToNearest, {TAG, F_SLOW}},
-    /*  70 */ {USE | REP, Floor_LowerToHighest, {TAG, F_FAST, 136}},
-    /*  71 */ {USE, Floor_LowerToHighest, {TAG, F_FAST, 136}},
-    /*  72 */ {WALK | REP, Ceiling_LowerAndCrush, {TAG, C_SLOW, 0}},
-    /*  73 */ {WALK | REP, Ceiling_CrushAndRaiseA, {TAG, C_SLOW, C_SLOW, 10}},
+    /*  58 */ {WALK, Floor_RaiseByValue, {TAG, FLOOR_SLOW, 24}},
+    /*  59 */ {WALK, Floor_RaiseByValueTxTy, {TAG, FLOOR_SLOW, 24}},
+    /*  60 */ {USE | REP, Floor_LowerToLowest, {TAG, FLOOR_SLOW}},
+    /*  61 */ {USE | REP, Door_Open, {TAG, DOOR_SLOW}},
+    /*  62 */ {USE | REP, Plat_DownWaitUpStayLip, {TAG, PLAT_FAST, PLATWAIT, 0}},
+    /*  63 */ {USE | REP, Door_Raise, {TAG, DOOR_SLOW, VDOORWAIT}},
+    /*  64 */ {USE | REP, Floor_RaiseToLowestCeiling, {TAG, FLOOR_SLOW}},
+    /*  65 */ {USE | REP, Floor_RaiseAndCrush, {TAG, FLOOR_SLOW, 10}},
+    /*  66 */ {USE | REP, Plat_UpByValueStayTx, {TAG, PLAT_SLOW / 2, 3}},
+    /*  67 */ {USE | REP, Plat_UpByValueStayTx, {TAG, PLAT_SLOW / 2, 4}},
+    /*  68 */ {USE | REP, Plat_RaiseAndStayTx0, {TAG, PLAT_SLOW / 2}},
+    /*  69 */ {USE | REP, Floor_RaiseToNearest, {TAG, FLOOR_SLOW}},
+    /*  70 */ {USE | REP, Floor_LowerToHighest, {TAG, FLOOR_FAST, 136}},
+    /*  71 */ {USE, Floor_LowerToHighest, {TAG, FLOOR_FAST, 136}},
+    /*  72 */ {WALK | REP, Ceiling_LowerAndCrush, {TAG, CEIL_SLOW, 0}},
+    /*  73 */ {WALK | REP, Ceiling_CrushAndRaiseA, {TAG, CEIL_SLOW, CEIL_SLOW, 10}},
     /*  74 */ {WALK | REP, Ceiling_CrushStop, {TAG}},
-    /*  75 */ {WALK | REP, Door_Close, {TAG, D_SLOW}},
-    /*  76 */ {WALK | REP, Door_CloseWaitOpen, {TAG, D_SLOW, 240}},
-    /*  77 */ {WALK | REP, Ceiling_CrushAndRaiseA, {TAG, C_NORMAL, C_NORMAL, 10}},
+    /*  75 */ {WALK | REP, Door_Close, {TAG, DOOR_SLOW}},
+    /*  76 */ {WALK | REP, Door_CloseWaitOpen, {TAG, DOOR_SLOW, 240}},
+    /*  77 */ {WALK | REP, Ceiling_CrushAndRaiseA, {TAG, CEIL_NORMAL, CEIL_NORMAL, 10}},
     /*  78 */ {USE | REP, Floor_TransferNumeric, {TAG}}, // <- BOOM special
     /*  79 */ {WALK | REP, Light_ChangeToValue, {TAG, 35}},
     /*  80 */ {WALK | REP, Light_MaxNeighbor, {TAG}},
     /*  81 */ {WALK | REP, Light_ChangeToValue, {TAG, 255}},
-    /*  82 */ {WALK | REP, Floor_LowerToLowest, {TAG, F_SLOW}},
-    /*  83 */ {WALK | REP, Floor_LowerToHighest, {TAG, F_SLOW, 128}},
-    /*  84 */ {WALK | REP, Floor_LowerToLowestTxTy, {TAG, F_SLOW}},
+    /*  82 */ {WALK | REP, Floor_LowerToLowest, {TAG, FLOOR_SLOW}},
+    /*  83 */ {WALK | REP, Floor_LowerToHighest, {TAG, FLOOR_SLOW, 128}},
+    /*  84 */ {WALK | REP, Floor_LowerToLowestTxTy, {TAG, FLOOR_SLOW}},
     /*  85 */ {0, Scroll_Texture_Right, {SCROLL_UNIT}}, // <- BOOM special
-    /*  86 */ {WALK | REP, Door_Open, {TAG, D_SLOW}},
-    /*  87 */ {WALK | REP, Plat_PerpetualRaiseLip, {TAG, P_SLOW, PLATWAIT, 0}},
-    /*  88 */ {WALK | REP | MONST, Plat_DownWaitUpStayLip, {TAG, P_FAST, PLATWAIT, 0}},
+    /*  86 */ {WALK | REP, Door_Open, {TAG, DOOR_SLOW}},
+    /*  87 */ {WALK | REP, Plat_PerpetualRaiseLip, {TAG, PLAT_SLOW, PLATWAIT, 0}},
+    /*  88 */ {WALK | REP | MONST, Plat_DownWaitUpStayLip, {TAG, PLAT_FAST, PLATWAIT, 0}},
     /*  89 */ {WALK | REP, Plat_Stop, {TAG}},
-    /*  90 */ {WALK | REP, Door_Raise, {TAG, D_SLOW, VDOORWAIT}},
-    /*  91 */ {WALK | REP, Floor_RaiseToLowestCeiling, {TAG, F_SLOW}},
-    /*  92 */ {WALK | REP, Floor_RaiseByValue, {TAG, F_SLOW, 24}},
-    /*  93 */ {WALK | REP, Floor_RaiseByValueTxTy, {TAG, F_SLOW, 24}},
-    /*  94 */ {WALK | REP, Floor_RaiseAndCrush, {TAG, F_SLOW, 10}},
-    /*  95 */ {WALK | REP, Plat_RaiseAndStayTx0, {TAG, P_SLOW / 2}},
-    /*  96 */ {WALK | REP, Floor_RaiseByTexture, {TAG, F_SLOW}},
+    /*  90 */ {WALK | REP, Door_Raise, {TAG, DOOR_SLOW, VDOORWAIT}},
+    /*  91 */ {WALK | REP, Floor_RaiseToLowestCeiling, {TAG, FLOOR_SLOW}},
+    /*  92 */ {WALK | REP, Floor_RaiseByValue, {TAG, FLOOR_SLOW, 24}},
+    /*  93 */ {WALK | REP, Floor_RaiseByValueTxTy, {TAG, FLOOR_SLOW, 24}},
+    /*  94 */ {WALK | REP, Floor_RaiseAndCrush, {TAG, FLOOR_SLOW, 10}},
+    /*  95 */ {WALK | REP, Plat_RaiseAndStayTx0, {TAG, PLAT_SLOW / 2}},
+    /*  96 */ {WALK | REP, Floor_RaiseByTexture, {TAG, FLOOR_SLOW}},
     /*  97 */ {WALK | REP | MONST, Teleport, {TAG}},
-    /*  98 */ {WALK | REP, Floor_LowerToHighest, {TAG, F_FAST, 136}},
-    /*  99 */ {USE | REP, Door_LockedRaise, {TAG, D_FAST, 0, BCard | CardIsSkull}},
-    /* 100 */ {WALK, Stairs_BuildUpDoom, {TAG, S_TURBO, 16, 0, 0}},
-    /* 101 */ {USE, Floor_RaiseToLowestCeiling, {TAG, F_SLOW}},
-    /* 102 */ {USE, Floor_LowerToHighest, {TAG, F_SLOW, 128}},
-    /* 103 */ {USE, Door_Open, {TAG, D_SLOW}},
+    /*  98 */ {WALK | REP, Floor_LowerToHighest, {TAG, FLOOR_FAST, 136}},
+    /*  99 */ {USE | REP, Door_LockedRaise, {TAG, DOOR_FAST, 0, BCard | CardIsSkull}},
+    /* 100 */ {WALK, Stairs_BuildUpDoom, {TAG, STAIRS_TURBO, 16, 0, 0}},
+    /* 101 */ {USE, Floor_RaiseToLowestCeiling, {TAG, FLOOR_SLOW}},
+    /* 102 */ {USE, Floor_LowerToHighest, {TAG, FLOOR_SLOW, 128}},
+    /* 103 */ {USE, Door_Open, {TAG, DOOR_SLOW}},
     /* 104 */ {WALK, Light_MinNeighbor, {TAG}},
-    /* 105 */ {WALK | REP, Door_Raise, {TAG, D_FAST, VDOORWAIT}},
-    /* 106 */ {WALK | REP, Door_Open, {TAG, D_FAST}},
-    /* 107 */ {WALK | REP, Door_Close, {TAG, D_FAST}},
-    /* 108 */ {WALK, Door_Raise, {TAG, D_FAST, VDOORWAIT}},
-    /* 109 */ {WALK, Door_Open, {TAG, D_FAST}},
-    /* 110 */ {WALK, Door_Close, {TAG, D_FAST}},
-    /* 111 */ {USE, Door_Raise, {TAG, D_FAST, VDOORWAIT}},
-    /* 112 */ {USE, Door_Open, {TAG, D_FAST}},
-    /* 113 */ {USE, Door_Close, {TAG, D_FAST}},
-    /* 114 */ {USE | REP, Door_Raise, {TAG, D_FAST, VDOORWAIT}},
-    /* 115 */ {USE | REP, Door_Open, {TAG, D_FAST}},
-    /* 116 */ {USE | REP, Door_Close, {TAG, D_FAST}},
-    /* 117 */ {USE | REP, Door_Raise, {0, D_FAST, VDOORWAIT}},
-    /* 118 */ {USE, Door_Open, {0, D_FAST}},
-    /* 119 */ {WALK, Floor_RaiseToNearest, {TAG, F_SLOW}},
-    /* 120 */ {WALK | REP, Plat_DownWaitUpStayLip, {TAG, P_TURBO, PLATWAIT, 0}},
-    /* 121 */ {WALK, Plat_DownWaitUpStayLip, {TAG, P_TURBO, PLATWAIT, 0}},
-    /* 122 */ {USE, Plat_DownWaitUpStayLip, {TAG, P_TURBO, PLATWAIT, 0}},
-    /* 123 */ {USE | REP, Plat_DownWaitUpStayLip, {TAG, P_TURBO, PLATWAIT, 0}},
+    /* 105 */ {WALK | REP, Door_Raise, {TAG, DOOR_FAST, VDOORWAIT}},
+    /* 106 */ {WALK | REP, Door_Open, {TAG, DOOR_FAST}},
+    /* 107 */ {WALK | REP, Door_Close, {TAG, DOOR_FAST}},
+    /* 108 */ {WALK, Door_Raise, {TAG, DOOR_FAST, VDOORWAIT}},
+    /* 109 */ {WALK, Door_Open, {TAG, DOOR_FAST}},
+    /* 110 */ {WALK, Door_Close, {TAG, DOOR_FAST}},
+    /* 111 */ {USE, Door_Raise, {TAG, DOOR_FAST, VDOORWAIT}},
+    /* 112 */ {USE, Door_Open, {TAG, DOOR_FAST}},
+    /* 113 */ {USE, Door_Close, {TAG, DOOR_FAST}},
+    /* 114 */ {USE | REP, Door_Raise, {TAG, DOOR_FAST, VDOORWAIT}},
+    /* 115 */ {USE | REP, Door_Open, {TAG, DOOR_FAST}},
+    /* 116 */ {USE | REP, Door_Close, {TAG, DOOR_FAST}},
+    /* 117 */ {USE | REP, Door_Raise, {0, DOOR_FAST, VDOORWAIT}},
+    /* 118 */ {USE, Door_Open, {0, DOOR_FAST}},
+    /* 119 */ {WALK, Floor_RaiseToNearest, {TAG, FLOOR_SLOW}},
+    /* 120 */ {WALK | REP, Plat_DownWaitUpStayLip, {TAG, PLAT_TURBO, PLATWAIT, 0}},
+    /* 121 */ {WALK, Plat_DownWaitUpStayLip, {TAG, PLAT_TURBO, PLATWAIT, 0}},
+    /* 122 */ {USE, Plat_DownWaitUpStayLip, {TAG, PLAT_TURBO, PLATWAIT, 0}},
+    /* 123 */ {USE | REP, Plat_DownWaitUpStayLip, {TAG, PLAT_TURBO, PLATWAIT, 0}},
     /* 124 */ {WALK, Exit_Secret, {0}},
     /* 125 */ {MONWALK, Teleport, {TAG}},
     /* 126 */ {MONWALK | REP, Teleport, {TAG}},
-    /* 127 */ {USE, Stairs_BuildUpDoom, {TAG, S_TURBO, 16, 0, 0}},
-    /* 128 */ {WALK | REP, Floor_RaiseToNearest, {TAG, F_SLOW}},
-    /* 129 */ {WALK | REP, Floor_RaiseToNearest, {TAG, F_FAST}},
-    /* 130 */ {WALK, Floor_RaiseToNearest, {TAG, F_FAST}},
-    /* 131 */ {USE, Floor_RaiseToNearest, {TAG, F_FAST}},
-    /* 132 */ {USE | REP, Floor_RaiseToNearest, {TAG, F_FAST}},
-    /* 133 */ {USE, Door_LockedRaise, {TAG, D_FAST, 0, BCard | CardIsSkull}},
-    /* 134 */ {USE | REP, Door_LockedRaise, {TAG, D_FAST, 0, RCard | CardIsSkull}},
-    /* 135 */ {USE, Door_LockedRaise, {TAG, D_FAST, 0, RCard | CardIsSkull}},
-    /* 136 */ {USE | REP, Door_LockedRaise, {TAG, D_FAST, 0, YCard | CardIsSkull}},
-    /* 137 */ {USE, Door_LockedRaise, {TAG, D_FAST, 0, YCard | CardIsSkull}},
+    /* 127 */ {USE, Stairs_BuildUpDoom, {TAG, STAIRS_TURBO, 16, 0, 0}},
+    /* 128 */ {WALK | REP, Floor_RaiseToNearest, {TAG, FLOOR_SLOW}},
+    /* 129 */ {WALK | REP, Floor_RaiseToNearest, {TAG, FLOOR_FAST}},
+    /* 130 */ {WALK, Floor_RaiseToNearest, {TAG, FLOOR_FAST}},
+    /* 131 */ {USE, Floor_RaiseToNearest, {TAG, FLOOR_FAST}},
+    /* 132 */ {USE | REP, Floor_RaiseToNearest, {TAG, FLOOR_FAST}},
+    /* 133 */ {USE, Door_LockedRaise, {TAG, DOOR_FAST, 0, BCard | CardIsSkull}},
+    /* 134 */ {USE | REP, Door_LockedRaise, {TAG, DOOR_FAST, 0, RCard | CardIsSkull}},
+    /* 135 */ {USE, Door_LockedRaise, {TAG, DOOR_FAST, 0, RCard | CardIsSkull}},
+    /* 136 */ {USE | REP, Door_LockedRaise, {TAG, DOOR_FAST, 0, YCard | CardIsSkull}},
+    /* 137 */ {USE, Door_LockedRaise, {TAG, DOOR_FAST, 0, YCard | CardIsSkull}},
     /* 138 */ {USE | REP, Light_ChangeToValue, {TAG, 255}},
     /* 139 */ {USE | REP, Light_ChangeToValue, {TAG, 35}},
-    /* 140 */ {USE, Floor_RaiseByValueTimes8, {TAG, F_SLOW, 64}},
-    /* 141 */ {WALK, Ceiling_CrushAndRaiseSilentA, {TAG, C_SLOW, C_SLOW, 10}},
+    /* 140 */ {USE, Floor_RaiseByValueTimes8, {TAG, FLOOR_SLOW, 64}},
+    /* 141 */ {WALK, Ceiling_CrushAndRaiseSilentA, {TAG, CEIL_SLOW, CEIL_SLOW, 10}},
 
     /****** The following are all new to BOOM ******/
 
-    /* 142 */ {WALK, Floor_RaiseByValueTimes8, {TAG, F_SLOW, 64}},
-    /* 143 */ {WALK, Plat_UpByValueStayTx, {TAG, P_SLOW / 2, 3}},
-    /* 144 */ {WALK, Plat_UpByValueStayTx, {TAG, P_SLOW / 2, 4}},
-    /* 145 */ {WALK, Ceiling_LowerToFloor, {TAG, C_SLOW}},
+    /* 142 */ {WALK, Floor_RaiseByValueTimes8, {TAG, FLOOR_SLOW, 64}},
+    /* 143 */ {WALK, Plat_UpByValueStayTx, {TAG, PLAT_SLOW / 2, 3}},
+    /* 144 */ {WALK, Plat_UpByValueStayTx, {TAG, PLAT_SLOW / 2, 4}},
+    /* 145 */ {WALK, Ceiling_LowerToFloor, {TAG, CEIL_SLOW}},
     /* 146 */ {WALK, Floor_Donut, {TAG, DORATE, DORATE}},
-    /* 147 */ {WALK | REP, Floor_RaiseByValueTimes8, {TAG, F_SLOW, 64}},
-    /* 148 */ {WALK | REP, Plat_UpByValueStayTx, {TAG, P_SLOW / 2, 3}},
-    /* 149 */ {WALK | REP, Plat_UpByValueStayTx, {TAG, P_SLOW / 2, 4}},
-    /* 150 */ {WALK | REP, Ceiling_CrushAndRaiseSilentA, {TAG, C_SLOW, C_SLOW, 10}},
-    /* 151 */ {WALK | REP, FloorAndCeiling_LowerRaise, {TAG, F_SLOW, C_SLOW}},
-    /* 152 */ {WALK | REP, Ceiling_LowerToFloor, {TAG, C_SLOW}},
+    /* 147 */ {WALK | REP, Floor_RaiseByValueTimes8, {TAG, FLOOR_SLOW, 64}},
+    /* 148 */ {WALK | REP, Plat_UpByValueStayTx, {TAG, PLAT_SLOW / 2, 3}},
+    /* 149 */ {WALK | REP, Plat_UpByValueStayTx, {TAG, PLAT_SLOW / 2, 4}},
+    /* 150 */ {WALK | REP, Ceiling_CrushAndRaiseSilentA, {TAG, CEIL_SLOW, CEIL_SLOW, 10}},
+    /* 151 */ {WALK | REP, FloorAndCeiling_LowerRaise, {TAG, FLOOR_SLOW, CEIL_SLOW}},
+    /* 152 */ {WALK | REP, Ceiling_LowerToFloor, {TAG, CEIL_SLOW}},
     /* 153 */ {WALK, Floor_TransferTrigger, {TAG}},
     /* 154 */ {WALK | REP, Floor_TransferTrigger, {TAG}},
     /* 155 */ {WALK | REP, Floor_Donut, {TAG, DORATE, DORATE}},
     /* 156 */ {WALK | REP, Light_StrobeDoom, {TAG, 5, 35}},
     /* 157 */ {WALK | REP, Light_MinNeighbor, {TAG}},
-    /* 158 */ {USE, Floor_RaiseByTexture, {TAG, F_SLOW}},
-    /* 159 */ {USE, Floor_LowerToLowestTxTy, {TAG, F_SLOW}},
-    /* 160 */ {USE, Floor_RaiseByValueTxTy, {TAG, F_SLOW, 24}},
-    /* 161 */ {USE, Floor_RaiseByValue, {TAG, F_SLOW, 24}},
-    /* 162 */ {USE, Plat_PerpetualRaiseLip, {TAG, P_SLOW, PLATWAIT, 0}},
+    /* 158 */ {USE, Floor_RaiseByTexture, {TAG, FLOOR_SLOW}},
+    /* 159 */ {USE, Floor_LowerToLowestTxTy, {TAG, FLOOR_SLOW}},
+    /* 160 */ {USE, Floor_RaiseByValueTxTy, {TAG, FLOOR_SLOW, 24}},
+    /* 161 */ {USE, Floor_RaiseByValue, {TAG, FLOOR_SLOW, 24}},
+    /* 162 */ {USE, Plat_PerpetualRaiseLip, {TAG, PLAT_SLOW, PLATWAIT, 0}},
     /* 163 */ {USE, Plat_Stop, {TAG}},
-    /* 164 */ {USE, Ceiling_CrushAndRaiseA, {TAG, C_NORMAL, C_NORMAL, 10}},
-    /* 165 */ {USE, Ceiling_CrushAndRaiseSilentA, {TAG, C_SLOW, C_SLOW, 10}},
-    /* 166 */ {USE, FloorAndCeiling_LowerRaise, {TAG, F_SLOW, C_SLOW}},
-    /* 167 */ {USE, Ceiling_LowerAndCrush, {TAG, C_SLOW, 0}},
+    /* 164 */ {USE, Ceiling_CrushAndRaiseA, {TAG, CEIL_NORMAL, CEIL_NORMAL, 10}},
+    /* 165 */ {USE, Ceiling_CrushAndRaiseSilentA, {TAG, CEIL_SLOW, CEIL_SLOW, 10}},
+    /* 166 */ {USE, FloorAndCeiling_LowerRaise, {TAG, FLOOR_SLOW, CEIL_SLOW}},
+    /* 167 */ {USE, Ceiling_LowerAndCrush, {TAG, CEIL_SLOW, 0}},
     /* 168 */ {USE, Ceiling_CrushStop, {TAG}},
     /* 169 */ {USE, Light_MaxNeighbor, {TAG}},
     /* 170 */ {USE, Light_ChangeToValue, {TAG, 35}},
@@ -207,19 +207,19 @@ static const xlat_t SpecialTranslation[] = {
     /* 172 */ {USE, Light_StrobeDoom, {TAG, 5, 35}},
     /* 173 */ {USE, Light_MinNeighbor, {TAG}},
     /* 174 */ {USE | MONST, Teleport, {TAG}},
-    /* 175 */ {USE, Door_CloseWaitOpen, {TAG, F_SLOW, 240}},
-    /* 176 */ {USE | REP, Floor_RaiseByTexture, {TAG, F_SLOW}},
-    /* 177 */ {USE | REP, Floor_LowerToLowestTxTy, {TAG, F_SLOW}},
-    /* 178 */ {USE | REP, Floor_RaiseByValueTimes8, {TAG, F_SLOW, 64}},
-    /* 179 */ {USE | REP, Floor_RaiseByValueTxTy, {TAG, F_SLOW, 24}},
-    /* 180 */ {USE | REP, Floor_RaiseByValue, {TAG, F_SLOW, 24}},
-    /* 181 */ {USE | REP, Plat_PerpetualRaiseLip, {TAG, P_SLOW, PLATWAIT, 0}},
+    /* 175 */ {USE, Door_CloseWaitOpen, {TAG, FLOOR_SLOW, 240}},
+    /* 176 */ {USE | REP, Floor_RaiseByTexture, {TAG, FLOOR_SLOW}},
+    /* 177 */ {USE | REP, Floor_LowerToLowestTxTy, {TAG, FLOOR_SLOW}},
+    /* 178 */ {USE | REP, Floor_RaiseByValueTimes8, {TAG, FLOOR_SLOW, 64}},
+    /* 179 */ {USE | REP, Floor_RaiseByValueTxTy, {TAG, FLOOR_SLOW, 24}},
+    /* 180 */ {USE | REP, Floor_RaiseByValue, {TAG, FLOOR_SLOW, 24}},
+    /* 181 */ {USE | REP, Plat_PerpetualRaiseLip, {TAG, PLAT_SLOW, PLATWAIT, 0}},
     /* 182 */ {USE | REP, Plat_Stop, {TAG}},
-    /* 183 */ {USE | REP, Ceiling_CrushAndRaiseA, {TAG, C_NORMAL, C_NORMAL, 10}},
-    /* 184 */ {USE | REP, Ceiling_CrushAndRaiseA, {TAG, C_SLOW, C_SLOW, 10}},
-    /* 185 */ {USE | REP, Ceiling_CrushAndRaiseSilentA, {TAG, C_SLOW, C_SLOW, 10}},
-    /* 186 */ {USE | REP, FloorAndCeiling_LowerRaise, {TAG, F_SLOW, C_SLOW}},
-    /* 187 */ {USE | REP, Ceiling_LowerAndCrush, {TAG, C_SLOW, 0}},
+    /* 183 */ {USE | REP, Ceiling_CrushAndRaiseA, {TAG, CEIL_NORMAL, CEIL_NORMAL, 10}},
+    /* 184 */ {USE | REP, Ceiling_CrushAndRaiseA, {TAG, CEIL_SLOW, CEIL_SLOW, 10}},
+    /* 185 */ {USE | REP, Ceiling_CrushAndRaiseSilentA, {TAG, CEIL_SLOW, CEIL_SLOW, 10}},
+    /* 186 */ {USE | REP, FloorAndCeiling_LowerRaise, {TAG, FLOOR_SLOW, CEIL_SLOW}},
+    /* 187 */ {USE | REP, Ceiling_LowerAndCrush, {TAG, CEIL_SLOW, 0}},
     /* 188 */ {USE | REP, Ceiling_CrushStop, {TAG}},
     /* 189 */ {USE, Floor_TransferTrigger, {TAG}},
     /* 190 */ {USE | REP, Floor_TransferTrigger, {TAG}},
@@ -228,17 +228,17 @@ static const xlat_t SpecialTranslation[] = {
     /* 193 */ {USE | REP, Light_StrobeDoom, {TAG, 5, 35}},
     /* 194 */ {USE | REP, Light_MinNeighbor, {TAG}},
     /* 195 */ {USE | REP | MONST, Teleport, {TAG}},
-    /* 196 */ {USE | REP, Door_CloseWaitOpen, {TAG, D_SLOW, 240}},
+    /* 196 */ {USE | REP, Door_CloseWaitOpen, {TAG, DOOR_SLOW, 240}},
     /* 197 */ {SHOOT, Exit_Normal, {0}},
     /* 198 */ {SHOOT, Exit_Secret, {0}},
-    /* 199 */ {WALK, Ceiling_LowerToLowest, {TAG, C_SLOW}},
-    /* 200 */ {WALK, Ceiling_LowerToHighestFloor, {TAG, C_SLOW}},
-    /* 201 */ {WALK | REP, Ceiling_LowerToLowest, {TAG, C_SLOW}},
-    /* 202 */ {WALK | REP, Ceiling_LowerToHighestFloor, {TAG, C_SLOW}},
-    /* 203 */ {USE, Ceiling_LowerToLowest, {TAG, C_SLOW}},
-    /* 204 */ {USE, Ceiling_LowerToHighestFloor, {TAG, C_SLOW}},
-    /* 205 */ {USE | REP, Ceiling_LowerToLowest, {TAG, C_SLOW}},
-    /* 206 */ {USE | REP, Ceiling_LowerToHighestFloor, {TAG, C_SLOW}},
+    /* 199 */ {WALK, Ceiling_LowerToLowest, {TAG, CEIL_SLOW}},
+    /* 200 */ {WALK, Ceiling_LowerToHighestFloor, {TAG, CEIL_SLOW}},
+    /* 201 */ {WALK | REP, Ceiling_LowerToLowest, {TAG, CEIL_SLOW}},
+    /* 202 */ {WALK | REP, Ceiling_LowerToHighestFloor, {TAG, CEIL_SLOW}},
+    /* 203 */ {USE, Ceiling_LowerToLowest, {TAG, CEIL_SLOW}},
+    /* 204 */ {USE, Ceiling_LowerToHighestFloor, {TAG, CEIL_SLOW}},
+    /* 205 */ {USE | REP, Ceiling_LowerToLowest, {TAG, CEIL_SLOW}},
+    /* 206 */ {USE | REP, Ceiling_LowerToHighestFloor, {TAG, CEIL_SLOW}},
     /* 207 */ {WALK | MONST, Teleport_NoFog, {TAG}},
     /* 208 */ {WALK | REP | MONST, Teleport_NoFog, {TAG}},
     /* 209 */ {USE | MONST, Teleport_NoFog, {TAG}},
@@ -251,10 +251,10 @@ static const xlat_t SpecialTranslation[] = {
     /* 216 */ {0, Scroll_Floor, {TAG, 6, 1, 0, 0}},
     /* 217 */ {0, Scroll_Floor, {TAG, 6, 2, 0, 0}},
     /* 218 */ {0, Scroll_Texture_Model, {TAG, 2}},
-    /* 219 */ {WALK, Floor_LowerToNearest, {TAG, F_SLOW}},
-    /* 220 */ {WALK | REP, Floor_LowerToNearest, {TAG, F_SLOW}},
-    /* 221 */ {USE, Floor_LowerToNearest, {TAG, F_SLOW}},
-    /* 222 */ {USE | REP, Floor_LowerToNearest, {TAG, F_SLOW}},
+    /* 219 */ {WALK, Floor_LowerToNearest, {TAG, FLOOR_SLOW}},
+    /* 220 */ {WALK | REP, Floor_LowerToNearest, {TAG, FLOOR_SLOW}},
+    /* 221 */ {USE, Floor_LowerToNearest, {TAG, FLOOR_SLOW}},
+    /* 222 */ {USE | REP, Floor_LowerToNearest, {TAG, FLOOR_SLOW}},
     /* 223 */ {0, Sector_SetFriction, {TAG, 0}},
     /* 224 */ {0, Sector_SetWind, {TAG, 0, 0, 1}},
     /* 225 */ {0, Sector_SetCurrent, {TAG, 0, 0, 1}},
@@ -288,10 +288,10 @@ static const xlat_t SpecialTranslation[] = {
     /* 253 */ {0, Scroll_Floor, {TAG, 4, 2, 0, 0}},
     /* 254 */ {0, Scroll_Texture_Model, {TAG, 0}},
     /* 255 */ {0, Scroll_Texture_Offsets},
-    /* 256 */ {WALK | REP, Stairs_BuildUpDoom, {TAG, S_SLOW, 8, 0, 0}},
-    /* 257 */ {WALK | REP, Stairs_BuildUpDoom, {TAG, S_TURBO, 16, 0, 0}},
-    /* 258 */ {USE | REP, Stairs_BuildUpDoom, {TAG, S_SLOW, 8, 0, 0}},
-    /* 259 */ {USE | REP, Stairs_BuildUpDoom, {TAG, S_TURBO, 16, 0, 0}},
+    /* 256 */ {WALK | REP, Stairs_BuildUpDoom, {TAG, STAIRS_SLOW, 8, 0, 0}},
+    /* 257 */ {WALK | REP, Stairs_BuildUpDoom, {TAG, STAIRS_TURBO, 16, 0, 0}},
+    /* 258 */ {USE | REP, Stairs_BuildUpDoom, {TAG, STAIRS_SLOW, 8, 0, 0}},
+    /* 259 */ {USE | REP, Stairs_BuildUpDoom, {TAG, STAIRS_TURBO, 16, 0, 0}},
     /* 260 */ {0, TranslucentLine, {TAG, 128}},
     /* 261 */ {0, Transfer_CeilingLight, {TAG}},
     /* 262 */ {WALK | MONST, Teleport_Line, {TAG, TAG, 1}},
@@ -454,16 +454,16 @@ void P_TranslateLineDef(line_t *ld, maplinedef_t *mld)
             switch (special & 0x0018)
             {
             case 0x0000:
-                ld->args[1] = C_SLOW;
+                ld->args[1] = CEIL_SLOW;
                 break;
             case 0x0008:
-                ld->args[1] = C_NORMAL;
+                ld->args[1] = CEIL_NORMAL;
                 break;
             case 0x0010:
-                ld->args[1] = C_FAST;
+                ld->args[1] = CEIL_FAST;
                 break;
             case 0x0018:
-                ld->args[1] = C_TURBO;
+                ld->args[1] = CEIL_TURBO;
                 break;
             }
             ld->args[2] = ld->args[1];
@@ -479,16 +479,16 @@ void P_TranslateLineDef(line_t *ld, maplinedef_t *mld)
             switch (special & 0x0018)
             {
             case 0x0000:
-                ld->args[1] = S_SLOW;
+                ld->args[1] = STAIRS_SLOW;
                 break;
             case 0x0008:
-                ld->args[1] = S_NORMAL;
+                ld->args[1] = STAIRS_NORMAL;
                 break;
             case 0x0010:
-                ld->args[1] = S_FAST;
+                ld->args[1] = STAIRS_FAST;
                 break;
             case 0x0018:
-                ld->args[1] = S_TURBO;
+                ld->args[1] = STAIRS_TURBO;
                 break;
             }
             switch (special & 0x00c0)
@@ -518,16 +518,16 @@ void P_TranslateLineDef(line_t *ld, maplinedef_t *mld)
             switch (special & 0x0018)
             {
             case 0x0000:
-                ld->args[1] = P_SLOW * 2;
+                ld->args[1] = PLAT_SLOW * 2;
                 break;
             case 0x0008:
-                ld->args[1] = P_NORMAL * 2;
+                ld->args[1] = PLAT_NORMAL * 2;
                 break;
             case 0x0010:
-                ld->args[1] = P_FAST * 2;
+                ld->args[1] = PLAT_FAST * 2;
                 break;
             case 0x0018:
-                ld->args[1] = P_TURBO * 2;
+                ld->args[1] = PLAT_TURBO * 2;
                 break;
             }
             switch (special & 0x00c0)
@@ -557,16 +557,16 @@ void P_TranslateLineDef(line_t *ld, maplinedef_t *mld)
             switch (special & 0x0018)
             {
             case 0x0000:
-                ld->args[1] = D_SLOW;
+                ld->args[1] = DOOR_SLOW;
                 break;
             case 0x0008:
-                ld->args[1] = D_NORMAL;
+                ld->args[1] = DOOR_NORMAL;
                 break;
             case 0x0010:
-                ld->args[1] = D_FAST;
+                ld->args[1] = DOOR_FAST;
                 break;
             case 0x0018:
-                ld->args[1] = D_TURBO;
+                ld->args[1] = DOOR_TURBO;
                 break;
             }
             ld->args[2] = (special & 0x0020) >> 5;
@@ -585,16 +585,16 @@ void P_TranslateLineDef(line_t *ld, maplinedef_t *mld)
             switch (special & 0x0018)
             {
             case 0x0000:
-                ld->args[1] = D_SLOW;
+                ld->args[1] = DOOR_SLOW;
                 break;
             case 0x0008:
-                ld->args[1] = D_NORMAL;
+                ld->args[1] = DOOR_NORMAL;
                 break;
             case 0x0010:
-                ld->args[1] = D_FAST;
+                ld->args[1] = DOOR_FAST;
                 break;
             case 0x0018:
-                ld->args[1] = D_TURBO;
+                ld->args[1] = DOOR_TURBO;
                 break;
             }
             ld->args[2] = (special & 0x0060) >> 5;
@@ -635,16 +635,16 @@ void P_TranslateLineDef(line_t *ld, maplinedef_t *mld)
             switch (special & 0x0018)
             {
             case 0x0000:
-                ld->args[1] = F_SLOW;
+                ld->args[1] = FLOOR_SLOW;
                 break;
             case 0x0008:
-                ld->args[1] = F_NORMAL;
+                ld->args[1] = FLOOR_NORMAL;
                 break;
             case 0x0010:
-                ld->args[1] = F_FAST;
+                ld->args[1] = FLOOR_FAST;
                 break;
             case 0x0018:
-                ld->args[1] = F_TURBO;
+                ld->args[1] = FLOOR_TURBO;
                 break;
             }
             ld->args[3] = ((special & 0x0380) >> 7) + 1;
