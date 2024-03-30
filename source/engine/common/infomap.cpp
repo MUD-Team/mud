@@ -20,11 +20,10 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "infomap.h"
 
 #include "hashtable.h"
+#include "odamex.h"
 
 typedef OHashTable<std::string, mobjtype_t> MobjMap;
 

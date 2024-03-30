@@ -23,6 +23,7 @@
 
 #pragma once
 
+#include "doomtype.h"
 #include "huffman.h"
 
 // Default buffer size for a UDP packet.

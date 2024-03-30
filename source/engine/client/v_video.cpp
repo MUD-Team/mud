@@ -22,33 +22,26 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#include "v_video.h"
 
 #include <assert.h>
 
-#include "i_system.h"
-#include "i_video.h"
-#include "r_local.h"
-#include "r_draw.h"
-#include "r_state.h"
-
-#include "d_main.h"
-
 #include "c_console.h"
-
-#include "m_argv.h"
-#include "m_bbox.h"
-
-#include "v_video.h"
-#include "v_text.h"
-
-#include "w_wad.h"
-#include "z_zone.h"
-
 #include "c_dispatch.h"
 #include "cmdlib.h"
-
+#include "d_main.h"
 #include "f_wipe.h"
+#include "i_system.h"
+#include "i_video.h"
+#include "m_argv.h"
+#include "m_bbox.h"
+#include "odamex.h"
+#include "r_draw.h"
+#include "r_local.h"
+#include "r_state.h"
+#include "v_text.h"
+#include "w_wad.h"
+#include "z_zone.h"
 
 IMPLEMENT_CLASS(DCanvas, DObject)
 

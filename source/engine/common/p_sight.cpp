@@ -23,15 +23,12 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "i_system.h"
-#include "p_local.h"
 #include "m_random.h"
 #include "m_vectors.h"
+#include "odamex.h"
+#include "p_local.h"
 #include "p_mapformat.h"
-
-// State.
 #include "r_state.h"
 
 //

@@ -22,6 +22,8 @@
 
 #pragma once
 
+#include "doomtype.h"
+
 /**
  * @brief Abstract base class that provides an interface for inheriting
  *        classes as well as default implementations for several functions.

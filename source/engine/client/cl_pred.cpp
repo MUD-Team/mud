@@ -21,14 +21,12 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-#include "d_player.h"
-#include "p_local.h"
-#include "cl_main.h"
 #include "cl_demo.h"
+#include "cl_main.h"
 #include "cl_netgraph.h"
-
+#include "d_player.h"
+#include "odamex.h"
+#include "p_local.h"
 #include "p_snapshot.h"
 
 EXTERN_CVAR(cl_prednudge)

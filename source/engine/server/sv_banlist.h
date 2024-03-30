@@ -25,10 +25,9 @@
 
 #include <sstream>
 
-#include "json/json.h"
-
 #include "d_player.h"
 #include "i_net.h"
+#include "json/json.h"
 
 class IPRange
 {

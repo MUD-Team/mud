@@ -21,22 +21,22 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#include "v_palette.h"
 
 #include <math.h>
+
 #include <cassert>
 
-#include "i_system.h"
-#include "v_video.h"
-#include "m_alloc.h"
-#include "r_main.h" // For lighting constants
-#include "w_wad.h"
-#include "z_zone.h"
-#include "i_video.h"
 #include "c_dispatch.h"
 #include "cmdlib.h"
-
-#include "v_palette.h"
+#include "i_system.h"
+#include "i_video.h"
+#include "m_alloc.h"
+#include "odamex.h"
+#include "r_main.h" // For lighting constants
+#include "v_video.h"
+#include "w_wad.h"
+#include "z_zone.h"
 
 static palette_t default_palette;
 static palette_t game_palette;

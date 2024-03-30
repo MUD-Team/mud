@@ -21,14 +21,15 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#include "teaminfo.h"
 
 #include <algorithm>
 #include <sstream>
+
 #include "cmdlib.h"
-#include "teaminfo.h"
-#include "v_textcolors.h"
 #include "d_player.h"
+#include "odamex.h"
+#include "v_textcolors.h"
 
 EXTERN_CVAR(sv_teamsinplay)
 

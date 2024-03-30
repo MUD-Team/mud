@@ -21,12 +21,11 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#include "d_dehacked.h"
 
 #include <stdlib.h>
 
 #include "cmdlib.h"
-#include "d_dehacked.h"
 #include "d_items.h"
 #include "gstrings.h"
 #include "i_system.h"
@@ -34,6 +33,7 @@
 #include "m_alloc.h"
 #include "m_cheat.h"
 #include "m_fileio.h"
+#include "odamex.h"
 #include "p_local.h"
 #include "s_sound.h"
 #include "w_wad.h"

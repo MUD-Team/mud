@@ -21,12 +21,12 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-#include "v_video.h"
-#include "c_dispatch.h"
 #include "stats.h"
+
+#include "c_dispatch.h"
 #include "i_system.h"
+#include "odamex.h"
+#include "v_video.h"
 
 std::vector<FStat *> FStat::stats;
 

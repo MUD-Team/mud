@@ -26,10 +26,6 @@
 
 #pragma once
 
-#include "server.pb.h"
-
-#include "r_state.h"
-
 #include "actor.h"
 #include "c_maplist.h"
 #include "c_vote.h"
@@ -40,6 +36,8 @@
 #include "p_ctf.h"
 #include "p_horde.h"
 #include "p_spec.h"
+#include "r_state.h"
+#include "server.pb.h"
 
 /**
  * @brief Call the constructor according to the PlaySound invocation you

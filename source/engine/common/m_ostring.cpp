@@ -24,9 +24,9 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "m_ostring.h"
+
+#include "odamex.h"
 
 // initialize static member variables
 bool                        OString::mInitialized  = false;

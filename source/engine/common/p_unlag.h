@@ -27,9 +27,10 @@
 #pragma once
 
 #include <map>
-#include "m_fixed.h"
+
 #include "actor.h"
 #include "d_player.h"
+#include "m_fixed.h"
 #include "r_defs.h"
 
 class Unlag

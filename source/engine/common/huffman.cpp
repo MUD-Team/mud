@@ -79,9 +79,9 @@
  * marcus.geelnard at home.se
  *************************************************************************/
 
-#include "odamex.h"
-
 #include "huffman.h"
+
+#include "odamex.h"
 
 /*************************************************************************
  *                           INTERNAL FUNCTIONS                           *

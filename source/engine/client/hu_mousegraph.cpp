@@ -22,13 +22,12 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "hu_mousegraph.h"
 
+#include "i_video.h"
+#include "odamex.h"
 #include "v_text.h"
 #include "v_video.h"
-#include "i_video.h"
 
 MouseGraph mousegraph;
 

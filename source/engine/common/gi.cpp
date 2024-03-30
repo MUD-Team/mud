@@ -21,9 +21,9 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "gi.h"
+
+#include "odamex.h"
 
 gameinfo_t gameinfo;
 

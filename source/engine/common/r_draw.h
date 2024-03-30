@@ -23,8 +23,9 @@
 
 #pragma once
 
-#include "r_intrin.h"
+#include "doomtype.h"
 #include "r_defs.h"
+#include "r_intrin.h"
 
 typedef struct
 {

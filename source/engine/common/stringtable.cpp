@@ -21,12 +21,11 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "stringtable.h"
 
 #include "cmdlib.h"
 #include "i_system.h"
+#include "odamex.h"
 #include "oscanner.h"
 #include "stringenums.h"
 #include "w_wad.h"

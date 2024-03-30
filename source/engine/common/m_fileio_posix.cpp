@@ -27,27 +27,25 @@
 #error "UNIX is mutually exclusive with _WIN32"
 #endif
 
-#include "odamex.h"
-
-#include "m_fileio.h"
-
-#include <sstream>
-
-#include <errno.h>
-#include <pwd.h>
-#include <sys/stat.h>
-#include <unistd.h>
 #if defined(__linux__)
 #include <linux/limits.h>
 #else
 #include <sys/syslimits.h>
 #endif
 #include <dirent.h>
+#include <errno.h>
+#include <pwd.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+#include <sstream>
 
 #include "cmdlib.h"
 #include "i_system.h"
 #include "m_argv.h"
+#include "m_fileio.h"
 #include "m_ostring.h"
+#include "odamex.h"
 #include "w_wad.h"
 
 std::string M_GetBinaryDir()

@@ -21,14 +21,13 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "i_musicsystem_sdl.h"
 
-#include "i_sdl.h"
 #include <SDL2/SDL_mixer.h>
 
 #include "i_music.h"
+#include "i_sdl.h"
+#include "odamex.h"
 
 EXTERN_CVAR(snd_musicvolume)
 

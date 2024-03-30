@@ -23,8 +23,8 @@
 
 #pragma once
 
-#include "stringtable.h"
 #include "stringenums.h"
+#include "stringtable.h"
 
 extern StringTable GStrings;
 

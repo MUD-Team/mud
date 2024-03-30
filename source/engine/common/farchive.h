@@ -23,7 +23,11 @@
 
 #pragma once
 
+#include <stdio.h>
+#include <stdint.h>
+
 #include "dobject.h"
+#include "doomtype.h"
 
 #define FA_RESET (1 << 0)
 

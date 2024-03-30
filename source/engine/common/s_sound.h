@@ -23,6 +23,10 @@
 
 #pragma once
 
+#include <map>
+#include <vector>
+
+#include "doomtype.h"
 #include "m_fixed.h"
 
 #define MAX_SNDNAME 63

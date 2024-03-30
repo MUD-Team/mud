@@ -21,8 +21,6 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "p_hordedefine.h"
 
 #include "c_cvars.h"
@@ -31,9 +29,10 @@
 #include "i_system.h"
 #include "infomap.h"
 #include "m_random.h"
+#include "odamex.h"
 #include "oscanner.h"
-#include "w_wad.h"
 #include "v_textcolors.h"
+#include "w_wad.h"
 
 EXTERN_CVAR(g_horde_mintotalhp)
 EXTERN_CVAR(g_horde_maxtotalhp)

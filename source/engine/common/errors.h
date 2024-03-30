@@ -23,6 +23,8 @@
 
 #pragma once
 
+#include <string>
+
 class CDoomError
 {
   public:

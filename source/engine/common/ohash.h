@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include <string>
+
 #include "hashtable.h"
 
 class OHash

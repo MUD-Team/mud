@@ -21,12 +21,11 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-#include "p_local.h"
 #include "actor.h"
 #include "m_bbox.h"
 #include "m_random.h"
+#include "odamex.h"
+#include "p_local.h"
 #include "s_sound.h"
 
 class DEarthquake : public DThinker

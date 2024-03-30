@@ -23,27 +23,21 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-#include "i_system.h"
-#include "z_zone.h"
-
-#include "w_wad.h"
-
-#include "r_local.h"
-
-#include "r_sky.h"
-
-#include "cmdlib.h"
-
 #include "r_data.h"
-
-#include "v_palette.h"
-#include "v_video.h"
 
 #include <ctype.h>
 
 #include <algorithm>
+
+#include "cmdlib.h"
+#include "i_system.h"
+#include "odamex.h"
+#include "r_local.h"
+#include "r_sky.h"
+#include "v_palette.h"
+#include "v_video.h"
+#include "w_wad.h"
+#include "z_zone.h"
 
 //
 // Graphics.

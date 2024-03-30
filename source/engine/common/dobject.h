@@ -24,6 +24,8 @@
 #pragma once
 
 #include <stdlib.h>
+
+#include "doomtype.h"
 #include "tarray.h"
 
 class FArchive;

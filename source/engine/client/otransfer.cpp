@@ -20,13 +20,12 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "otransfer.h"
 
 #include "cmdlib.h"
 #include "i_system.h"
 #include "m_fileio.h"
+#include "odamex.h"
 #include "w_ident.h"
 #include "w_wad.h"
 

@@ -23,12 +23,12 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "dthinker.h"
-#include "z_zone.h"
-#include "stats.h"
+
+#include "odamex.h"
 #include "p_local.h"
+#include "stats.h"
+#include "z_zone.h"
 
 IMPLEMENT_SERIAL(DThinker, DObject)
 

@@ -20,18 +20,18 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#include "cl_maplist.h"
 
 #include <map>
 #include <sstream>
 
+#include "c_dispatch.h"
 #include "c_maplist.h"
-#include "cl_maplist.h"
 #include "cl_main.h"
 #include "cmdlib.h"
-#include "c_dispatch.h"
 #include "i_net.h"
 #include "i_system.h"
+#include "odamex.h"
 
 //////// MAPLIST CACHE METHODS (Private) ////////
 

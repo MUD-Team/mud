@@ -23,16 +23,13 @@
 //-----------------------------------------------------------------------------
 
 #include "odamex.h"
-
-#include "p_local.h"
-#include "s_sound.h"
-#include "s_sndseq.h"
-#include "r_state.h"
 #include "p_lnspec.h"
-
-#include "p_spec.h"
-
+#include "p_local.h"
 #include "p_mapformat.h"
+#include "p_spec.h"
+#include "r_state.h"
+#include "s_sndseq.h"
+#include "s_sound.h"
 
 EXTERN_CVAR(co_zdoomsound)
 

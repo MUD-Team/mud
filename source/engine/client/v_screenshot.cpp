@@ -21,26 +21,21 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include <SDL.h>
-
+#define PNG_SKIP_SETJMP_CHECK
+#include <png.h>
+#include <setjmp.h> // used for error handling by libpng
 #include <stdlib.h>
-
-#include "cmdlib.h"
-#include "i_system.h"
-#include "i_video.h"
+#include <zlib.h>
 
 #include "c_dispatch.h"
-#include "m_misc.h"
-#include "m_fileio.h"
+#include "cmdlib.h"
 #include "g_game.h"
-
-#define PNG_SKIP_SETJMP_CHECK
-#include <setjmp.h> // used for error handling by libpng
-
-#include <zlib.h>
-#include <png.h>
+#include "i_system.h"
+#include "i_video.h"
+#include "m_fileio.h"
+#include "m_misc.h"
+#include "odamex.h"
 
 #if (PNG_LIBPNG_VER < 10400)
 // [SL] add data types to support versions of libpng prior to 1.4.0

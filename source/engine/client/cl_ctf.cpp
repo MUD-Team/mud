@@ -20,22 +20,21 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "c_console.h"
 #include "c_dispatch.h"
 #include "cl_main.h"
+#include "g_gametype.h"
+#include "i_video.h"
+#include "odamex.h"
+#include "p_ctf.h"
+#include "p_inter.h"
+#include "p_local.h"
+#include "s_sound.h"
+#include "st_stuff.h"
+#include "v_text.h"
+#include "v_video.h"
 #include "w_wad.h"
 #include "z_zone.h"
-#include "i_video.h"
-#include "v_video.h"
-#include "p_local.h"
-#include "p_inter.h"
-#include "p_ctf.h"
-#include "st_stuff.h"
-#include "s_sound.h"
-#include "v_text.h"
-#include "g_gametype.h"
 
 static int tintglow = 0;
 

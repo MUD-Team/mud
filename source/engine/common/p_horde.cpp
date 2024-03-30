@@ -21,11 +21,9 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#include "p_horde.h"
 
 #include <math.h>
-
-#include "p_horde.h"
 
 #include "c_dispatch.h"
 #include "d_player.h"
@@ -34,15 +32,16 @@
 #include "g_horde.h"
 #include "i_net.h"
 #include "m_random.h"
+#include "odamex.h"
 #include "p_hordespawn.h"
 #include "p_local.h"
 #include "p_tick.h"
 #include "s_sound.h"
-#include "svc_message.h"
-
 #if defined(SERVER_APP)
 #include "sv_main.h"
 #endif
+#include "svc_message.h"
+
 
 EXTERN_CVAR(g_horde_waves)
 EXTERN_CVAR(g_lives)

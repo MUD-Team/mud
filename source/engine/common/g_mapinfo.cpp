@@ -18,20 +18,19 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "g_episode.h"
+#include "g_skill.h"
 #include "gi.h"
 #include "gstrings.h"
-#include "g_skill.h"
 #include "i_system.h"
+#include "infomap.h"
+#include "odamex.h"
 #include "oscanner.h"
+#include "p_mapformat.h"
 #include "p_setup.h"
 #include "r_sky.h"
 #include "v_video.h"
 #include "w_wad.h"
-#include "infomap.h"
-#include "p_mapformat.h"
 
 /// Globals
 BOOL HexenHack;

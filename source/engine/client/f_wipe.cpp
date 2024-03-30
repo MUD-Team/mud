@@ -21,12 +21,11 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "i_video.h"
-#include "v_video.h"
 #include "m_random.h"
+#include "odamex.h"
 #include "st_stuff.h"
+#include "v_video.h"
 
 //
 //		SCREEN WIPE PACKAGE

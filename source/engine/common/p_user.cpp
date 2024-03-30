@@ -23,24 +23,21 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include <limits.h>
 
-#include "cmdlib.h"
 #include "c_dispatch.h"
+#include "cmdlib.h"
 #include "d_event.h"
-#include "p_local.h"
-#include "s_sound.h"
-#include "i_system.h"
-#include "p_tick.h"
-#include "gi.h"
-#include "m_wdlstats.h"
-
-#include "p_snapshot.h"
 #include "g_gametype.h"
-
+#include "gi.h"
+#include "i_system.h"
+#include "m_wdlstats.h"
+#include "odamex.h"
+#include "p_local.h"
 #include "p_mapformat.h"
+#include "p_snapshot.h"
+#include "p_tick.h"
+#include "s_sound.h"
 
 //
 // Movement.

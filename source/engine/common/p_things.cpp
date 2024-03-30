@@ -20,16 +20,15 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-#include "p_local.h"
+#include "c_console.h"
 #include "c_effect.h"
-#include "p_mobj.h"
 #include "info.h"
+#include "m_random.h"
+#include "odamex.h"
+#include "p_local.h"
+#include "p_mobj.h"
 #include "s_sound.h"
 #include "tables.h"
-#include "m_random.h"
-#include "c_console.h"
 
 EXTERN_CVAR(sv_nomonsters)
 

@@ -21,19 +21,15 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "r_sprites.h"
 
-#include "m_alloc.h"
-
 #include "i_system.h"
-#include "z_zone.h"
-#include "w_wad.h"
-
-#include "v_video.h"
-
+#include "m_alloc.h"
+#include "odamex.h"
 #include "s_sound.h"
+#include "v_video.h"
+#include "w_wad.h"
+#include "z_zone.h"
 
 #define SPRITE_NEEDS_INFO MAXINT
 

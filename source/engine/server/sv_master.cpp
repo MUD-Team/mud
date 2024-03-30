@@ -21,13 +21,13 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-#include "d_player.h"
 #include "sv_master.h"
+
 #include "c_dispatch.h"
+#include "d_player.h"
 #include "i_system.h"
 #include "md5.h"
+#include "odamex.h"
 
 #define MASTERPORT 15000
 

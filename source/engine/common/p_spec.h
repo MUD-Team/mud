@@ -27,7 +27,10 @@
 #pragma once
 
 #include <list>
+
+#include "d_player.h"
 #include "dsectoreffect.h"
+#include "r_state.h"
 
 typedef struct movingsector_s
 {

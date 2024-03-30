@@ -25,6 +25,9 @@
 
 #pragma once
 
+#include "doomtype.h"
+#include "farchive.h"
+
 //
 // Map level types.
 // The following data structures define the persistent format

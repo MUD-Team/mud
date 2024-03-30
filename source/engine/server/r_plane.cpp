@@ -22,7 +22,6 @@
 //-----------------------------------------------------------------------------
 
 #include "odamex.h"
-
 #include "r_local.h"
 
 BOOL R_AlignFlat(int linenum, int side, int fc)

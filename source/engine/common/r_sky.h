@@ -23,6 +23,10 @@
 
 #pragma once
 
+#include "c_cvars.h"
+#include "m_fixed.h"
+#include "r_defs.h"
+
 // SKY, store the number for name.
 extern char SKYFLATNAME[8];
 

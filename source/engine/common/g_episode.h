@@ -25,6 +25,9 @@
 
 #define MAX_EPISODES 8
 
+#include "doomtype.h"
+#include "olumpname.h"
+
 struct EpisodeInfo
 {
     std::string name;

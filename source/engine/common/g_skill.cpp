@@ -21,9 +21,9 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "g_skill.h"
+
+#include "odamex.h"
 
 SkillInfo SkillInfos[MAX_SKILLS];
 byte      skillnum         = 0;

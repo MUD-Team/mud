@@ -20,20 +20,22 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "cl_download.h"
 
-#define CURL_STATICLIB
-#include "curl/curl.h"
+#include <string>
 
 #include "c_dispatch.h"
 #include "cl_main.h"
 #include "cmdlib.h"
+#ifndef CURL_STATICLIB
+#define CURL_STATICLIB
+#endif
+#include "curl/curl.h"
 #include "i_system.h"
 #include "m_argv.h"
 #include "m_fileio.h"
 #include "m_random.h"
+#include "odamex.h"
 #include "w_ident.h"
 
 EXTERN_CVAR(cl_waddownloaddir)

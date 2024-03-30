@@ -23,6 +23,7 @@
 
 #pragma once
 
+#include "doomtype.h"
 #include "i_music.h"
 #include "i_musicsystem.h"
 

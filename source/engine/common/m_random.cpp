@@ -27,18 +27,18 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#include "m_random.h"
 
 #include <time.h>
 
-#include "m_random.h"
 #include "farchive.h"
+#include "odamex.h"
 
 // Initialize the random_shuffler Mersenne Twister, which
 // is used for std::shuffle in several places since std::random_shuffle
 // was removed in C++17 - Dasho
 static std::random_device rando;
-std::mt19937 random_shuffler(rando());
+std::mt19937              random_shuffler(rando());
 
 //
 // M_Random

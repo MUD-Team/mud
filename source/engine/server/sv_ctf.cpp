@@ -21,16 +21,14 @@
 //
 // ----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-#include "p_ctf.h"
-
 #include <sstream>
 
 #include "g_gametype.h"
 #include "i_system.h"
 #include "m_random.h"
 #include "m_wdlstats.h"
+#include "odamex.h"
+#include "p_ctf.h"
 #include "p_inter.h"
 #include "p_unlag.h"
 #include "sv_main.h"

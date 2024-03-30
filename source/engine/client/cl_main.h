@@ -24,11 +24,11 @@
 
 #pragma once
 
-#include "i_net.h"
+#include "cl_demo.h"
 #include "d_player.h"
 #include "d_ticcmd.h"
+#include "i_net.h"
 #include "r_defs.h"
-#include "cl_demo.h"
 
 extern netadr_t serveraddr;
 extern BOOL     connected;

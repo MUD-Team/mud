@@ -24,14 +24,13 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "cl_replay.h"
-#include "cl_main.h"
 
-#include "p_mobj.h"
-#include "p_local.h"
+#include "cl_main.h"
 #include "infomap.h"
+#include "odamex.h"
+#include "p_local.h"
+#include "p_mobj.h"
 
 extern int world_index;
 extern int last_svgametic;

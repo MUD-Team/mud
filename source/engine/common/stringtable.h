@@ -29,8 +29,10 @@
 #pragma once
 
 #include <stdlib.h>
+
 #include <utility>
 
+#include "doomtype.h"
 #include "hashtable.h"
 #include "m_ostring.h"
 #include "stringenums.h"

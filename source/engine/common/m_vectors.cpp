@@ -27,14 +27,14 @@
 // to using a struct.
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-#include "m_fixed.h"
 #include "m_vectors.h"
-#include "actor.h"
-#include "tables.h"
 
 #include <cmath>
+
+#include "actor.h"
+#include "m_fixed.h"
+#include "odamex.h"
+#include "tables.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846 // matches value in gcc v2 math.h

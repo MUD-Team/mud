@@ -22,13 +22,12 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "d_main.h"
 #include "d_player.h"
-#include "i_system.h"
-#include "p_ctf.h"
 #include "g_gametype.h"
+#include "i_system.h"
+#include "odamex.h"
+#include "p_ctf.h"
 
 static buf_t ml_message(MAX_UDP_PACKET);
 

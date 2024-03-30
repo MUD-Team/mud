@@ -22,29 +22,28 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#include "res_texture.h"
 
-#include "i_system.h"
-#include "tables.h"
-#include "r_state.h"
-#include "m_random.h"
-#include "w_wad.h"
-#include "m_memio.h"
-#include "cmdlib.h"
-#include "oscanner.h"
-
-#include <algorithm>
 #include <math.h>
 
-#include "res_texture.h"
+#include <algorithm>
+
+#include "cmdlib.h"
+#include "i_system.h"
+#include "m_memio.h"
+#include "m_random.h"
+#include "odamex.h"
+#include "oscanner.h"
+#include "r_state.h"
+#include "tables.h"
 #include "v_video.h"
+#include "w_wad.h"
 
 #ifdef CLIENT_APP
 #define PNG_SKIP_SETJMP_CHECK
-#include <setjmp.h> // used for error handling by libpng
-
-#include <zlib.h>
 #include <png.h>
+#include <setjmp.h> // used for error handling by libpng
+#include <zlib.h>
 
 #if (PNG_LIBPNG_VER < 10400)
 // [SL] add data types to support versions of libpng prior to 1.4.0

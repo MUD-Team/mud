@@ -21,18 +21,16 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#include <map>
+#include <memory>
+#include <sstream>
 
+#include "c_dispatch.h"
+#include "cmdlib.h"
 #ifndef ODAMEX_NO_GITVER
 #include "git_describe.h"
 #endif
-
-#include <map>
-#include <sstream>
-#include <memory>
-
-#include "cmdlib.h"
-#include "c_dispatch.h"
+#include "odamex.h"
 
 /**
  * @brief Compare two "packed" versions of Odamex to see if they are expected

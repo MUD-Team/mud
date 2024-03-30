@@ -24,10 +24,11 @@
 
 #pragma once
 
-#include "m_fixed.h"
+#include <vector>
 
-#include "m_ostring.h"
 #include "hashtable.h"
+#include "m_fixed.h"
+#include "m_ostring.h"
 
 typedef unsigned int texhandle_t;
 

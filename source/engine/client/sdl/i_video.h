@@ -24,10 +24,12 @@
 
 #pragma once
 
-#include "v_pixelformat.h"
-
 #include <cassert>
 #include <cstdlib>
+#include <vector>
+
+#include "doomtype.h"
+#include "v_pixelformat.h"
 
 enum EDisplayType
 {

@@ -22,12 +22,11 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-#include "m_fixed.h"
-#include "r_state.h"
-#include "p_local.h"
 #include "cl_demo.h"
+#include "m_fixed.h"
+#include "odamex.h"
+#include "p_local.h"
+#include "r_state.h"
 
 typedef std::pair<fixed_t, unsigned int> fixed_uint_pair;
 

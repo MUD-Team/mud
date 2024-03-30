@@ -22,25 +22,20 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#include "p_pspr.h"
 
 #include <stdlib.h>
 
 #include "d_dehacked.h"
 #include "d_event.h"
-
-#include "m_random.h"
-#include "p_local.h"
-#include "s_sound.h"
-
 #include "g_gametype.h"
-#include "svc_message.h"
-
-// State.
-#include "p_pspr.h"
-
-#include "p_unlag.h"
+#include "m_random.h"
 #include "m_wdlstats.h"
+#include "odamex.h"
+#include "p_local.h"
+#include "p_unlag.h"
+#include "s_sound.h"
+#include "svc_message.h"
 
 #define LOWERSPEED   FRACUNIT * 6
 #define RAISESPEED   FRACUNIT * 6

@@ -28,13 +28,12 @@
 
 #pragma once
 
-#include "doomdata.h"
-#include "d_net.h"
-#include "g_level.h"
-
-// We also need the definition of a cvar
 #include "c_cvars.h"
+#include "d_net.h"
 #include "d_netinf.h"
+#include "doomdata.h"
+#include "doomtype.h"
+#include "g_level.h"
 
 // ------------------------
 // Command line parameters.

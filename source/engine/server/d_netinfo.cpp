@@ -22,9 +22,8 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "d_netinf.h"
+#include "odamex.h"
 #include "sv_main.h"
 #include "v_textcolors.h"
 

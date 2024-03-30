@@ -22,8 +22,13 @@
 
 #pragma once
 
+#include <string>
+
+#ifndef CURL_STATICLIB
 #define CURL_STATICLIB
+#endif
 #include "curl/curl.h"
+#include "ohash.h"
 
 struct OTransferProgress
 {

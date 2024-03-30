@@ -21,8 +21,8 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "sv_stats.h"
+
+#include "odamex.h"
 
 VERSION_CONTROL(sv_stats_cpp, "$Id: c0ec5fdfba079b073bb4d977f0927a555776fc65 $")

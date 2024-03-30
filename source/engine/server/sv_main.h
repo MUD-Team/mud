@@ -23,12 +23,12 @@
 
 #pragma once
 
+#include <json/json.h>
+
 #include "actor.h"
 #include "d_player.h"
-#include "i_net.h"
 #include "g_gametype.h"
-
-#include <json/json.h>
+#include "i_net.h"
 
 extern bool keysfound[NUMCARDS];
 

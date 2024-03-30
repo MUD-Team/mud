@@ -22,11 +22,11 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "hu_speedometer.h"
 
 #include <math.h>
+
+#include "odamex.h"
 
 double gDisplaySpeed;
 

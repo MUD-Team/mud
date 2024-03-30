@@ -23,7 +23,11 @@
 
 #pragma once
 
+#include <string>
+#include <vector>
+
 #include "d_event.h"
+#include "doomtype.h"
 #include "m_resfile.h"
 
 extern std::string LOG_FILE;

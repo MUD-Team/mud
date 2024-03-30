@@ -21,39 +21,33 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #ifdef UNIX
 #include <ctype.h>
 #ifndef O_BINARY
 #define O_BINARY 0
 #endif
 #endif
-
+#include <fcntl.h>
 #ifdef _WIN32
 #include <io.h>
 #else
 #define strcmpi strcasecmp
 #endif
 
-#include <fcntl.h>
-
-#include "crc32.h"
-
-#include "m_fileio.h"
-#include "i_system.h"
-#include "z_zone.h"
-#include "cmdlib.h"
-#include "m_argv.h"
-#include "md5.h"
-
-#include "farmhash.h"
-
-#include "w_wad.h"
-
-#include <sstream>
 #include <algorithm>
 #include <iomanip>
+#include <sstream>
+
+#include "cmdlib.h"
+#include "crc32.h"
+#include "farmhash.h"
+#include "i_system.h"
+#include "m_argv.h"
+#include "m_fileio.h"
+#include "md5.h"
+#include "odamex.h"
+#include "w_wad.h"
+#include "z_zone.h"
 
 //
 // GLOBALS

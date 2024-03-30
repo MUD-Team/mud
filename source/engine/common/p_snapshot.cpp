@@ -23,16 +23,16 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#include "p_snapshot.h"
 
 #include <math.h>
+
 #include "actor.h"
 #include "d_player.h"
+#include "m_vectors.h"
+#include "odamex.h"
 #include "p_local.h"
 #include "p_spec.h"
-#include "m_vectors.h"
-
-#include "p_snapshot.h"
 
 static const int MAX_EXTRAPOLATION = 4;
 

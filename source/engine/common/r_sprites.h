@@ -23,6 +23,8 @@
 
 #pragma once
 
+#include "r_defs.h"
+
 extern int MaxVisSprites;
 
 extern vissprite_t *vissprites;

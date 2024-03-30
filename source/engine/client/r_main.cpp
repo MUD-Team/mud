@@ -23,21 +23,21 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-#include <stdlib.h>
 #include <math.h>
+#include <stdlib.h>
+
+#include "am_map.h"
+#include "i_video.h"
 #include "m_random.h"
+#include "m_vectors.h"
+#include "odamex.h"
 #include "p_local.h"
 #include "r_local.h"
 #include "r_sky.h"
 #include "st_stuff.h"
-#include "v_video.h"
 #include "stats.h"
+#include "v_video.h"
 #include "z_zone.h"
-#include "i_video.h"
-#include "m_vectors.h"
-#include "am_map.h"
 
 void R_BeginInterpolation(fixed_t amount);
 void R_EndInterpolation();

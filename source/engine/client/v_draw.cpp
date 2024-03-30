@@ -21,13 +21,11 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-#include "v_video.h"
-#include "i_video.h"
-#include "r_main.h"
-
 #include "i_system.h"
+#include "i_video.h"
+#include "odamex.h"
+#include "r_main.h"
+#include "v_video.h"
 
 // [RH] Stretch values for V_DrawPatchClean()
 int CleanXfac, CleanYfac;

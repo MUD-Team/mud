@@ -21,20 +21,19 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-#include "m_random.h"
-#include "p_local.h"
-#include "s_sound.h"
-#include "v_video.h"
 #include "c_effect.h"
-#include "m_vectors.h"
-#include "p_mobj.h"
-#include "st_stuff.h"
-#include "p_acs.h"
-#include "p_ctf.h"
 #include "g_gametype.h"
 #include "g_spawninv.h"
+#include "m_random.h"
+#include "m_vectors.h"
+#include "odamex.h"
+#include "p_acs.h"
+#include "p_ctf.h"
+#include "p_local.h"
+#include "p_mobj.h"
+#include "s_sound.h"
+#include "st_stuff.h"
+#include "v_video.h"
 
 EXTERN_CVAR(sv_nomonsters)
 EXTERN_CVAR(cl_showspawns)

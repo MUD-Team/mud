@@ -21,15 +21,10 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "m_random.h"
-
-#include "p_local.h"
-
+#include "odamex.h"
 #include "p_lnspec.h"
-
-// State.
+#include "p_local.h"
 #include "r_state.h"
 
 // [RH] Make sure the light level is in bounds.

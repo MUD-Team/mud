@@ -20,19 +20,18 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#include "sv_maplist.h"
 
 #include <algorithm>
 #include <sstream>
 
-#include "c_maplist.h"
-#include "sv_maplist.h"
-
 #include "c_dispatch.h"
+#include "c_maplist.h"
 #include "cmdlib.h"
 #include "i_system.h"
 #include "m_fileio.h"
 #include "m_random.h"
+#include "odamex.h"
 #include "sv_main.h"
 #include "svc_message.h"
 #include "w_wad.h"

@@ -21,9 +21,9 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "g_episode.h"
+
+#include "odamex.h"
 
 OLumpName   EpisodeMaps[MAX_EPISODES];
 EpisodeInfo EpisodeInfos[MAX_EPISODES];

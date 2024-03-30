@@ -1,8 +1,10 @@
 #pragma once
 
+#include <vector>
+
+#include "actor.h"
 #include "doomdata.h"
 #include "info.h"
-#include "actor.h"
 
 enum team_t
 {

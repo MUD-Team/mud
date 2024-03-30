@@ -21,33 +21,33 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#include "c_console.h"
 
 #include <stdarg.h>
 
-#include "m_alloc.h"
-#include "m_memio.h"
-#include "g_game.h"
-#include "c_console.h"
-#include "c_dispatch.h"
+#include <algorithm>
+#include <list>
+
 #include "c_bind.h"
+#include "c_dispatch.h"
+#include "cl_download.h"
+#include "cl_responderkeys.h"
+#include "g_game.h"
+#include "g_gametype.h"
 #include "i_system.h"
 #include "i_video.h"
+#include "m_alloc.h"
+#include "m_fileio.h"
+#include "m_memio.h"
+#include "odamex.h"
+#include "r_main.h"
+#include "s_sound.h"
+#include "st_stuff.h"
 #include "v_palette.h"
-#include "v_video.h"
 #include "v_text.h"
+#include "v_video.h"
 #include "w_wad.h"
 #include "z_zone.h"
-#include "r_main.h"
-#include "st_stuff.h"
-#include "s_sound.h"
-#include "cl_responderkeys.h"
-#include "cl_download.h"
-#include "g_gametype.h"
-#include "m_fileio.h"
-
-#include <list>
-#include <algorithm>
 
 // These functions are standardized in C++11, POSIX standard otherwise
 #if defined(_WIN32) && (__cplusplus <= 199711L)

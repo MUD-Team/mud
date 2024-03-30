@@ -22,6 +22,12 @@
 
 #pragma once
 
+#include <stdint.h>
+
+#include <string>
+
+#include "doomtype.h"
+
 /**
  * @brief Toast for infofeed - these can be constructed from anywhere.
  */

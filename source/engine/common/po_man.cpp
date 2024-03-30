@@ -23,16 +23,15 @@
 
 // HEADER FILES ------------------------------------------------------------
 
+#include "i_system.h"
+#include "m_bbox.h"
 #include "odamex.h"
-
 #include "p_local.h"
 #include "r_local.h"
-#include "i_system.h"
-#include "z_zone.h"
-#include "w_wad.h"
-#include "m_bbox.h"
-#include "tables.h"
 #include "s_sndseq.h"
+#include "tables.h"
+#include "w_wad.h"
+#include "z_zone.h"
 
 // MACROS ------------------------------------------------------------------
 

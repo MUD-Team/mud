@@ -23,9 +23,10 @@
 
 #pragma once
 
-#include "z_zone.h"
-#include "r_defs.h"
+#include "g_level.h"
 #include "m_resfile.h"
+#include "r_defs.h"
+#include "z_zone.h"
 
 // [RH] Compare wad header as ints instead of chars
 #define IWAD_ID (('I') | ('W' << 8) | ('A' << 16) | ('D' << 24))

@@ -21,27 +21,26 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-#include "z_zone.h"
-#include "p_local.h"
-#include "p_spec.h"
-#include "s_sound.h"
 #include "p_acs.h"
-#include "p_saveg.h"
-#include "p_lnspec.h"
-#include "m_random.h"
+
 #include "c_console.h"
 #include "c_dispatch.h"
-#include "s_sndseq.h"
-#include "i_system.h"
-#include "m_vectors.h"
-#include "p_inter.h"
 #include "gi.h"
-
+#include "i_system.h"
+#include "m_random.h"
+#include "m_vectors.h"
+#include "odamex.h"
+#include "p_inter.h"
+#include "p_lnspec.h"
+#include "p_local.h"
+#include "p_saveg.h"
+#include "p_spec.h"
+#include "s_sndseq.h"
+#include "s_sound.h"
 #if defined(SERVER_APP)
 #include "sv_main.h"
 #endif
+#include "z_zone.h"
 
 #define CLAMPCOLOR(c)  (EColorRange)((unsigned)(c) > CR_UNTRANSLATED ? CR_UNTRANSLATED : (c))
 #define LANGREGIONMASK MAKE_ID(0, 0, 0xff, 0xff)

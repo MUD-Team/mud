@@ -20,8 +20,6 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "g_horde.h"
 
 #include <set>
@@ -30,6 +28,7 @@
 #include "d_items.h"
 #include "hashtable.h"
 #include "infomap.h"
+#include "odamex.h"
 #include "oscanner.h"
 #include "w_wad.h"
 

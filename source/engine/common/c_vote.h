@@ -22,6 +22,10 @@
 
 #pragma once
 
+#include <string>
+
+#include "doomtype.h"
+
 /**
  * An enum used for keeping track of the state of the vote as well as
  * internally keeping track of individual player votes.

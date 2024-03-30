@@ -20,18 +20,16 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#include "i_musicsystem_fluidlite.h"
 
+#include <SDL_mixer.h>
+#include <fluidlite.h>
 #include <math.h>
 
-#include "i_musicsystem_fluidlite.h"
 #include "i_midi.h"
-
-#include <fluidlite.h>
-#include <SDL_mixer.h>
-
 #include "i_system.h"
 #include "m_fileio.h"
+#include "odamex.h"
 
 EXTERN_CVAR(snd_samplerate)
 EXTERN_CVAR(snd_soundfont)

@@ -20,19 +20,18 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#include "cl_vote.h"
 
 #include <sstream>
 
-#include "c_vote.h"
-#include "cl_vote.h"
-
 #include "c_dispatch.h"
+#include "c_vote.h"
 #include "cl_main.h"
 #include "cl_maplist.h"
 #include "cmdlib.h"
 #include "i_net.h"
 #include "i_system.h"
+#include "odamex.h"
 
 //////// VOTING STATE ////////
 

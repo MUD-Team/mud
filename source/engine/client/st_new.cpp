@@ -22,36 +22,35 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-#include <stdlib.h>
 #include <math.h>
+#include <stdlib.h>
 
 #include <algorithm>
 #include <sstream>
 
-#include "cmdlib.h"
+#include "c_bind.h"
+#include "c_dispatch.h"
 #include "cl_demo.h"
 #include "cl_main.h"
-#include "d_items.h"
-#include "i_video.h"
-#include "v_video.h"
-#include "v_text.h"
-#include "w_wad.h"
-#include "z_zone.h"
-#include "i_system.h"
-#include "st_stuff.h"
-#include "hu_drawers.h"
-#include "hu_elements.h"
-#include "p_ctf.h"
 #include "cl_parse.h"
 #include "cl_vote.h"
-#include "g_levelstate.h"
+#include "cmdlib.h"
+#include "d_items.h"
 #include "g_gametype.h"
-#include "c_bind.h"
-#include "p_horde.h"
-#include "c_dispatch.h"
+#include "g_levelstate.h"
+#include "hu_drawers.h"
+#include "hu_elements.h"
 #include "hu_speedometer.h"
+#include "i_system.h"
+#include "i_video.h"
+#include "odamex.h"
+#include "p_ctf.h"
+#include "p_horde.h"
+#include "st_stuff.h"
+#include "v_text.h"
+#include "v_video.h"
+#include "w_wad.h"
+#include "z_zone.h"
 
 static const char *medipatches[]               = {"MEDIA0", "PSTRA0"};
 static const char *armorpatches[]              = {"ARM1A0", "ARM2A0"};

@@ -20,9 +20,8 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "i_sdl.h"
+#include "odamex.h"
 #include "r_intrin.h"
 
 #ifdef __MMX__
@@ -37,8 +36,8 @@
 #define MMX_ALIGNED(x) x __attribute__((aligned(8)))
 #endif
 
-#include "r_main.h"
 #include "i_video.h"
+#include "r_main.h"
 
 // Direct rendering (32-bit) functions for MMX optimization:
 

@@ -24,11 +24,9 @@
 
 #pragma once
 
-#include "v_palette.h"
 #include "m_vectors.h"
-
-// Needed because we are refering to patches.
 #include "r_data.h"
+#include "v_palette.h"
 
 class IWindowSurface;
 

@@ -21,29 +21,28 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-#include <stdlib.h>
-#include <math.h>
-
-#include "g_gametype.h"
 #include "m_cheat.h"
-#include "d_player.h"
-#include "gstrings.h"
-#include "p_inter.h"
+
+#include <math.h>
+#include <stdlib.h>
+
+#ifdef CLIENT_APP
+#include "am_map.h"
+#include "c_dispatch.h"
+#include "cl_main.h"
+extern bool automapactive;
+#endif
 #include "d_items.h"
+#include "d_player.h"
+#include "g_gametype.h"
 #include "g_skill.h"
+#include "gstrings.h"
+#include "odamex.h"
+#include "p_inter.h"
 #include "p_local.h"
 
 extern bool simulated_connection;
 EXTERN_CVAR(sv_allowcheats)
-
-#ifdef CLIENT_APP
-#include "am_map.h"
-#include "cl_main.h"
-#include "c_dispatch.h"
-extern bool automapactive;
-#endif
 
 void C_DoCommand(const char *cmd, uint32_t key = 0);
 

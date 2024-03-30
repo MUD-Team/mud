@@ -23,8 +23,8 @@
 
 #pragma once
 
-#include "hashtable.h"
 #include "d_event.h"
+#include "hashtable.h"
 
 struct OBinding
 {

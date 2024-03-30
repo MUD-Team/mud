@@ -22,6 +22,8 @@
 
 #pragma once
 
+#include <string>
+
 #if defined(CLIENT_APP)
 #define GAMEEXE "odamex"
 #elif defined(SERVER_APP)

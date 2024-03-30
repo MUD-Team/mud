@@ -29,23 +29,19 @@
 
 #if defined _WIN32 && defined _MSC_VER && !defined _DEBUG
 
-#include "odamex.h"
-
 #define CRASH_DIR_LEN 1024
-
-#include "i_crash.h"
-
-#include <exception>
-#include <new.h>
-#include <signal.h>
 
 #include "win32inc.h"
 #include <DbgHelp.h>
+#include <new.h>
+#include <signal.h>
 
-// Must be loaded last or else we're missing functions.
+#include <exception>
 
+#include "i_crash.h"
 #include "i_system.h"
 #include "m_fileio.h"
+#include "odamex.h"
 
 /**
  * @brief An array containing the directory where crashes are written to.

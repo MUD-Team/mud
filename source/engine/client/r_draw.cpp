@@ -23,24 +23,22 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include <assert.h>
 #include <math.h>
+
 #include <algorithm>
 
-#include "i_sdl.h"
-#include "r_intrin.h"
-
-#include "z_zone.h"
-#include "w_wad.h"
-#include "r_local.h"
-#include "i_video.h"
-#include "v_video.h"
-
 #include "gi.h"
-#include "v_text.h"
+#include "i_sdl.h"
+#include "i_video.h"
+#include "odamex.h"
+#include "r_intrin.h"
+#include "r_local.h"
 #include "st_stuff.h"
+#include "v_text.h"
+#include "v_video.h"
+#include "w_wad.h"
+#include "z_zone.h"
 
 #undef RANGECHECK
 

@@ -21,9 +21,9 @@
 //  (Props to DSDA-Doom for the inspiration.)
 //
 //-----------------------------------------------------------------------------
-#include "odamex.h"
-
 #include "p_mapformat.h"
+
+#include "odamex.h"
 
 MapFormat map_format;
 

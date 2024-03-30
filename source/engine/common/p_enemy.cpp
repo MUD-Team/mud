@@ -23,24 +23,23 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include <math.h>
-#include "m_random.h"
-#include "m_alloc.h"
-#include "i_system.h"
-#include "p_local.h"
-#include "p_lnspec.h"
-#include "s_sound.h"
-#include "r_state.h"
-#include "gi.h"
-#include "p_mobj.h"
 
-#include "d_player.h"
-#include "p_setup.h"
 #include "d_dehacked.h"
+#include "d_player.h"
 #include "g_skill.h"
+#include "gi.h"
+#include "i_system.h"
+#include "m_alloc.h"
+#include "m_random.h"
+#include "odamex.h"
+#include "p_lnspec.h"
+#include "p_local.h"
 #include "p_mapformat.h"
+#include "p_mobj.h"
+#include "p_setup.h"
+#include "r_state.h"
+#include "s_sound.h"
 
 EXTERN_CVAR(sv_allowexit)
 EXTERN_CVAR(sv_fastmonsters)

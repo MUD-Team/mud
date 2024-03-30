@@ -31,42 +31,31 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
-#include "m_alloc.h"
-#include "gstrings.h"
-
-#include "z_zone.h"
-#include "m_random.h"
-#include "m_bbox.h"
-#include "w_wad.h"
-
-#include "r_local.h"
-#include "p_local.h"
-#include "p_lnspec.h"
 #include "p_spec.h"
-#include "p_acs.h"
 
-#include "g_game.h"
-#include "p_unlag.h"
-
-#include "s_sound.h"
-#include "oscanner.h"
-
-// State.
-#include "r_state.h"
-
-#include "c_console.h"
-
-// [RH] Needed for sky scrolling
-#include "r_sky.h"
 #include <g_gametype.h>
 
-// [Blair] Map format
-#include "p_mapformat.h"
-
+#include "c_console.h"
+#include "g_game.h"
+#include "gstrings.h"
+#include "m_alloc.h"
+#include "m_bbox.h"
+#include "m_random.h"
+#include "odamex.h"
+#include "oscanner.h"
+#include "p_acs.h"
 #include "p_boomfspec.h"
+#include "p_lnspec.h"
+#include "p_local.h"
+#include "p_mapformat.h"
+#include "p_unlag.h"
 #include "p_zdoomhexspec.h"
+#include "r_local.h"
+#include "r_sky.h"
+#include "r_state.h"
+#include "s_sound.h"
+#include "w_wad.h"
+#include "z_zone.h"
 
 EXTERN_CVAR(sv_allowexit)
 EXTERN_CVAR(sv_fragexitswitch)

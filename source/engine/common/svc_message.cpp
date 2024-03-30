@@ -24,17 +24,16 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#include "svc_message.h"
 
 #include <bitset>
-
-#include "svc_message.h"
 
 #include "common.pb.h"
 #include "d_main.h"
 #include "g_gametype.h"
 #include "i_system.h"
 #include "m_strindex.h"
+#include "odamex.h"
 #include "p_lnspec.h"
 #include "p_local.h"
 #include "p_mobj.h"

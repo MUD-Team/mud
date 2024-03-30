@@ -21,22 +21,19 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#include "sv_banlist.h"
 
 #include <sstream>
-
-#include "win32inc.h"
-
-#include "i_system.h"
-
-#include "json/json.h"
 
 #include "c_dispatch.h"
 #include "cmdlib.h"
 #include "d_player.h"
+#include "i_system.h"
+#include "json/json.h"
 #include "m_fileio.h"
-#include "sv_banlist.h"
+#include "odamex.h"
 #include "sv_main.h"
+#include "win32inc.h"
 
 EXTERN_CVAR(sv_email)
 EXTERN_CVAR(sv_banfile)

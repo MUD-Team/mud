@@ -24,6 +24,8 @@
 #pragma once
 
 #include "d_event.h"
+#include "doomtype.h"
+
 //
 // FINALE
 //

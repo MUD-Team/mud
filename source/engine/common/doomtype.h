@@ -25,6 +25,7 @@
 #pragma once
 
 // Standard libc/STL includes we use in countless places
+#include <stdint.h>
 
 #include "version.h"
 #include "errors.h"

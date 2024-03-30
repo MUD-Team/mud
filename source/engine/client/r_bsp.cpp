@@ -21,21 +21,19 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include <math.h>
+
+#include "i_system.h"
 #include "m_alloc.h"
 #include "m_bbox.h"
-#include "i_system.h"
+#include "m_vectors.h"
+#include "odamex.h"
+#include "p_local.h"
+#include "r_draw.h"
 #include "r_main.h"
 #include "r_plane.h"
-#include "r_draw.h"
-#include "r_things.h"
-#include "p_local.h"
-#include "m_vectors.h"
-
-// State.
 #include "r_state.h"
+#include "r_things.h"
 #include "v_palette.h"
 
 EXTERN_CVAR(r_particles)

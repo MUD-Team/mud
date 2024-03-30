@@ -21,18 +21,18 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#include "c_console.h"
 
 #include <stdarg.h>
 
-#include "m_memio.h"
-#include "c_console.h"
 #include "c_dispatch.h"
-#include "v_palette.h"
-#include "sv_main.h"
 #include "gi.h"
-#include "v_textcolors.h"
+#include "m_memio.h"
+#include "odamex.h"
+#include "sv_main.h"
 #include "svc_message.h"
+#include "v_palette.h"
+#include "v_textcolors.h"
 
 static const int MAX_LINE_LENGTH = 8192;
 

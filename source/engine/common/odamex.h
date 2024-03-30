@@ -23,14 +23,14 @@
 
 #pragma once
 
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
 #include <string>
 #include <vector>
 
-#include "doomtype.h"
 #include "doomdef.h"
 #include "doomstat.h"
+#include "doomtype.h"

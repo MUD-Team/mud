@@ -21,13 +21,13 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#include "m_argv.h"
 
 #include <algorithm>
 
 #include "cmdlib.h"
 #include "m_fileio.h"
-#include "m_argv.h"
+#include "odamex.h"
 
 IMPLEMENT_CLASS(DArgs, DObject)
 

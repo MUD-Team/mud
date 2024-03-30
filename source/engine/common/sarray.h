@@ -24,11 +24,10 @@
 #pragma once
 
 #include <algorithm>
-#include <iterator>
 #include <cassert>
-
 #include <cstdlib>
 #include <ctime>
+#include <iterator>
 
 // ============================================================================
 //

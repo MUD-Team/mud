@@ -25,6 +25,7 @@
 #include <map>
 
 #include "c_maplist.h"
+#include "doomtype.h"
 
 // Callbacks for deffered queries
 typedef void (*query_callback_t)(const maplist_qrows_t &);

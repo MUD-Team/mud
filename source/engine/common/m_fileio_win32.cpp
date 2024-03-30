@@ -27,18 +27,16 @@
 #error "_WIN32 is mutually exclusive with UNIX"
 #endif
 
-#include "odamex.h"
-
-#include "m_fileio.h"
-
-#include "win32inc.h"
 #include <shlobj.h>
 #include <shlwapi.h>
 
 #include "cmdlib.h"
 #include "i_system.h"
+#include "m_fileio.h"
 #include "m_ostring.h"
+#include "odamex.h"
 #include "w_wad.h"
+#include "win32inc.h"
 
 std::string M_GetBinaryDir()
 {

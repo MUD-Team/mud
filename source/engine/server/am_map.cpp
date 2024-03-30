@@ -21,8 +21,9 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
 #include "am_map.h"
+
+#include "odamex.h"
 
 am_default_colors_t AutomapDefaultColors;
 am_colors_t         AutomapDefaultCurrentColors;

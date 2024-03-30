@@ -21,27 +21,27 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#include "wi_stuff.h"
 
 #include <ctype.h>
 
-#include "z_zone.h"
-#include "m_random.h"
-#include "i_video.h"
-#include "w_wad.h"
-#include "g_game.h"
-#include "r_local.h"
-#include "s_sound.h"
-#include "s_sndseq.h"
-#include "v_video.h"
-#include "wi_stuff.h"
 #include "c_console.h"
-#include "hu_stuff.h"
-#include "v_palette.h"
 #include "c_dispatch.h"
-#include "v_text.h"
+#include "g_game.h"
 #include "gi.h"
+#include "hu_stuff.h"
+#include "i_video.h"
+#include "m_random.h"
+#include "odamex.h"
+#include "r_local.h"
+#include "s_sndseq.h"
+#include "s_sound.h"
+#include "v_palette.h"
+#include "v_text.h"
 #include "v_textcolors.h"
+#include "v_video.h"
+#include "w_wad.h"
+#include "z_zone.h"
 
 extern byte *Ranges;
 

@@ -21,15 +21,15 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#include "c_effect.h"
 
 #include "actor.h"
-#include "c_effect.h"
-#include "p_local.h"
-#include "v_video.h"
 #include "m_random.h"
+#include "odamex.h"
+#include "p_local.h"
 #include "r_things.h"
 #include "s_sound.h"
+#include "v_video.h"
 
 // [RH] particle globals
 int         NumParticles;
