@@ -2364,6 +2364,12 @@ bool D_DoDehPatch(const OResFile *patchfile, const int lump)
         DPrintf("DeHackEd patch version is %d.\nUnexpected results may occur.\n", ::pversion);
     }
 
+    // Dasho - Quit and show dialog instead of attempt to load DSDHacked
+    if (::dversion == 2021)
+    {
+        I_FatalError("A file in the load order uses DSDHacked indices, which are currently not supported.\n");  
+    }
+
     if (::dversion == 16)
     {
         ::dversion = 0;
