@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 3.15)
 
 if ("${CMAKE_TOOLCHAIN_FILE}" MATCHES "vcpkg.cmake")
-    include ("vcpkg_triplets/vcpkg-triplets.cmake")
+    if (CMAKE_HOST_UNIX)
+        include ("vcpkg_triplets/vcpkg-triplets-linux.cmake")
+    else()
+        include ("vcpkg_triplets/vcpkg-triplets-windows.cmake")
+    endif()
 endif()
 
 project(MUD VERSION 0.1)
@@ -19,7 +23,9 @@ set( CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/bin )
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_SOURCE_DIR}/bin )
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/bin )
 
-if (MSVC)
+option(EDGE_SANITIZE "Enable code sanitizing" OFF)
+
+if (WIN32)
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
     if (NOT CLANG)
         # get the number of logical cores for parallel build
@@ -36,6 +42,16 @@ if (MSVC)
     add_definitions("/wd4244 /wd4267")
     # Unreferenced formal parameter, and there are many of these
     add_definitions("/wd4100")
+else()
+
+    add_definitions(-DUNIX)
+    
+    if (EDGE_SANITIZE)
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
+        set(CMAKE_EXE_LINKER_FLAGS "-fsanitize=address -static-libasan")
+    endif()
+    
 endif()
 
 add_subdirectory(source)
