@@ -27,6 +27,7 @@
 #include "m_mempool.h"
 #include "m_vectors.h"
 #include "odamex.h"
+#include "mud_profiling.h"
 #include "p_lnspec.h"
 #include "p_local.h"
 #include "p_mapformat.h"
@@ -303,10 +304,12 @@ static inline int R_ColumnRangeMaximumHeight(int start, int stop, int *bottom)
 //
 void R_RenderColumnRange(int start, int stop, int *top, int *bottom, tallpost_t **posts, void (*colblast)(),
                          bool calc_light, int columnmethod)
-{
+{    
     if (start > stop)
         return;
 
+    MUD_ZoneScoped;
+    
     if (calc_light)
     {
         if (fixedlightlev)
@@ -396,6 +399,9 @@ void R_RenderColumnRange(int start, int stop, int *top, int *bottom, tallpost_t 
 //
 void R_RenderSolidSegRange(int start, int stop)
 {
+
+    MUD_ZoneScoped;    
+
     static int lower[MAXWIDTH];
     int        count         = stop - start + 1;
     int        initial_light = rw_light;
@@ -541,6 +547,8 @@ void R_RenderSolidSegRange(int start, int stop)
 //
 void R_RenderMaskedSegRange(drawseg_t *ds, int x1, int x2)
 {
+    MUD_ZoneScoped;    
+
     int      lightnum;
     sector_t tempsec;                     // killough 4/13/98
 
@@ -643,6 +651,8 @@ static fixed_t R_LineLength(fixed_t px1, fixed_t py1, fixed_t px2, fixed_t py2)
 //
 void R_PrepWall(fixed_t px1, fixed_t py1, fixed_t px2, fixed_t py2, fixed_t dist1, fixed_t dist2, int start, int stop)
 {
+    MUD_ZoneScoped;
+
     int width = stop - start + 1;
     if (width <= 0)
         return;
@@ -767,6 +777,8 @@ void R_PrepWall(fixed_t px1, fixed_t py1, fixed_t px2, fixed_t py2, fixed_t dist
 //
 void R_StoreWallRange(int start, int stop)
 {
+    MUD_ZoneScoped;    
+
 #ifdef RANGECHECK
     if (start >= viewwidth || start > stop)
         I_FatalError("Bad R_StoreWallRange: %i to %i", start, stop);

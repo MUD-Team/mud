@@ -64,6 +64,7 @@
 #include "m_misc.h"
 #include "m_random.h"
 #include "minilzo.h"
+#include "mud_profiling.h"
 #include "odamex.h"
 #include "p_ctf.h"
 #include "p_setup.h"
@@ -203,6 +204,8 @@ void D_Display()
 {
     if (nodrawers || I_IsHeadless())
         return; // for comparative timing / profiling
+
+    MUD_ZoneScoped;    
 
     BEGIN_STAT(D_Display);
 

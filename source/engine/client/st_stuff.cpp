@@ -36,6 +36,7 @@
 #include "i_video.h"
 #include "m_cheat.h"
 #include "m_random.h"
+#include "mud_profiling.h"
 #include "odamex.h"
 #include "p_ctf.h"
 #include "s_sound.h"
@@ -1022,6 +1023,9 @@ static void ST_refreshBackground()
 //
 void ST_Drawer()
 {
+
+    MUD_ZoneScoped;
+
     if (st_needrefresh)
         st_statusbaron = R_StatusBarVisible();
 

@@ -29,6 +29,7 @@
 
 #include "m_fixed.h"
 #include "odamex.h"
+#include "mud_profiling.h"
 #include "r_data.h"
 #include "r_draw.h"
 #include "r_main.h"
@@ -205,6 +206,8 @@ void R_RenderSkyRange(visplane_t *pl)
 {
     if (pl->minx > pl->maxx)
         return;
+
+    MUD_ZoneScoped;
 
     int     columnmethod = 2;
     int     skytex;

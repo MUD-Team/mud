@@ -39,6 +39,7 @@
 #include "hu_mousegraph.h"
 #include "i_video.h"
 #include "odamex.h"
+#include "mud_profiling.h"
 #include "p_ctf.h"
 #include "s_sound.h"
 #include "st_stuff.h"
@@ -492,6 +493,8 @@ static void HU_DrawChatPrompt()
 //
 void HU_Drawer()
 {
+    MUD_ZoneScoped;
+
     if (noisedebug)
         S_NoiseDebug();
 

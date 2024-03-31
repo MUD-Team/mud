@@ -36,6 +36,7 @@
 #include "i_video.h"
 #include "m_alloc.h"
 #include "m_vectors.h"
+#include "mud_profiling.h"
 #include "odamex.h"
 #include "p_local.h"
 #include "r_local.h"
@@ -415,6 +416,8 @@ void R_MakeSpans(visplane_t *pl, void (*spanfunc)(int, int, int))
 //
 void R_DrawSlopedPlane(visplane_t *pl)
 {
+    MUD_ZoneScoped;
+    
     const float xoffsf           = FIXED2FLOAT(pl->xoffs);
     const float yoffsf           = FIXED2FLOAT(pl->yoffs);
     const float scaledflatwidth  = flatwidth * FIXED2FLOAT(pl->xscale);
@@ -514,6 +517,8 @@ void R_DrawSlopedPlane(visplane_t *pl)
 
 void R_DrawLevelPlane(visplane_t *pl)
 {
+    MUD_ZoneScoped;
+    
     // viewx/viewy rotated by the texture rotation angle
     fixed_t pl_viewx, pl_viewy;
 
@@ -569,6 +574,8 @@ void R_DrawLevelPlane(visplane_t *pl)
 //
 void R_DrawPlanes(void)
 {
+    MUD_ZoneScoped;    
+
     visplane_t *pl;
     int         i;
 

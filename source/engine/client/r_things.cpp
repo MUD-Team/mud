@@ -27,6 +27,7 @@
 #include "m_alloc.h"
 #include "m_argv.h"
 #include "m_vectors.h"
+#include "mud_profiling.h"
 #include "odamex.h"
 #include "p_local.h"
 #include "r_local.h"
@@ -783,6 +784,8 @@ void R_DrawPSprite(pspdef_t *psp, unsigned flags)
 //
 void R_DrawPlayerSprites()
 {
+    MUD_ZoneScoped;    
+    
     static sector_t tempsec;
     int             floorlight, ceilinglight;
 
@@ -859,6 +862,8 @@ static int STACK_ARGS sv_compare(const void *arg1, const void *arg2)
 
 void R_SortVisSprites()
 {
+    MUD_ZoneScoped;
+
     vsprcount = vissprite_p - vissprites;
 
     if (!vsprcount)
@@ -882,6 +887,8 @@ void R_SortVisSprites()
 //
 void R_DrawSprite(vissprite_t *spr)
 {
+    MUD_ZoneScoped;
+
     static int cliptop[MAXWIDTH];
     static int clipbot[MAXWIDTH];
 
@@ -1009,6 +1016,8 @@ void R_DrawSprite(vissprite_t *spr)
 //
 void R_DrawMasked(void)
 {
+    MUD_ZoneScoped;
+    
     drawseg_t *ds;
 
     R_SortVisSprites();

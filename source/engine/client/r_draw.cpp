@@ -32,6 +32,7 @@
 #include "i_sdl.h"
 #include "i_video.h"
 #include "odamex.h"
+#include "mud_profiling.h"
 #include "r_intrin.h"
 #include "r_local.h"
 #include "st_stuff.h"
@@ -1514,9 +1515,11 @@ void R_DrawBorder(int x1, int y1, int x2, int y2)
 void V_MarkRect(int x, int y, int width, int height);
 
 void R_DrawViewBorder()
-{
+{    
     if (!R_BorderVisible())
         return;
+
+    MUD_ZoneScoped;    
 
     IWindowSurface *surface        = R_GetRenderingSurface();
     DCanvas        *canvas         = surface->getDefaultCanvas();

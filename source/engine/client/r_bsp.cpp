@@ -28,6 +28,7 @@
 #include "m_bbox.h"
 #include "m_vectors.h"
 #include "odamex.h"
+#include "mud_profiling.h"
 #include "p_local.h"
 #include "r_draw.h"
 #include "r_main.h"
@@ -428,6 +429,8 @@ sector_t *R_FakeFlat(sector_t *sec, sector_t *tempsec, int *floorlightlevel, int
 //
 void R_AddLine(seg_t *line)
 {
+    MUD_ZoneScoped;    
+
     curline = line;
 
     // skip this line if it's not facing the camera

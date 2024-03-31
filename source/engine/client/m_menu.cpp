@@ -40,6 +40,7 @@
 #include "i_video.h"
 #include "m_fileio.h"
 #include "m_random.h"
+#include "mud_profiling.h"
 #include "odamex.h"
 #include "p_ctf.h"
 #include "r_local.h"
@@ -1978,6 +1979,8 @@ void M_StartControlPanel(void)
 //
 void M_Drawer()
 {
+    MUD_ZoneScoped;    
+
     if (messageToPrint && !::hu_font[0].empty())
     {
         // Horiz. & Vertically center string and print it.
