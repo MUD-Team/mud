@@ -12,7 +12,7 @@ file(GLOB CLIENT_SDL_SOURCES sdl/*.cpp sdl/*.h)
 get_target_property(COMMON_SOURCES engine-common INTERFACE_SOURCES)
 
 # Client includes
-include_directories(./ ./sdl ../common)
+include_directories(./ ./sdl ../common ../../libraries/stb)
 
 add_executable(mud-client WIN32 ${CLIENT_SOURCES} ${CLIENT_SDL_SOURCES} ${COMMON_SOURCES})
 set_target_properties(mud-client PROPERTIES DEBUG_POSTFIX "_DEBUG")
