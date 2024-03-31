@@ -16,7 +16,7 @@ add_executable(mud-server ${COMMON_SOURCES} ${SERVER_SOURCES})
 set_target_properties(mud-server PROPERTIES DEBUG_POSTFIX "_DEBUG")
 set_target_properties(mud-server PROPERTIES RELWITHDEBINFO_POSTFIX "_RELWITHDEBINFO")
 
-set (MUD_SERVER_LIBRARIES mudproto ZLIB::ZLIB JsonCpp::JsonCpp)
+set (MUD_SERVER_LIBRARIES mudproto minilzo ZLIB::ZLIB JsonCpp::JsonCpp)
 
 if (MUD_PROFILING)
   set (MUD_SERVER_LIBRARIES ${MUD_SERVER_LIBRARIES} tracy)

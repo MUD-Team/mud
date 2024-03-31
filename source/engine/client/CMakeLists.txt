@@ -18,7 +18,7 @@ add_executable(mud-client WIN32 ${CLIENT_SOURCES} ${CLIENT_SDL_SOURCES} ${COMMON
 set_target_properties(mud-client PROPERTIES DEBUG_POSTFIX "_DEBUG")
 set_target_properties(mud-client PROPERTIES RELWITHDEBINFO_POSTFIX "_RELWITHDEBINFO")
 
-set (MUD_CLIENT_LIBRARIES "")
+set (MUD_CLIENT_LIBRARIES minilzo)
 
 if (MUD_PROFILING)
   set (MUD_CLIENT_LIBRARIES ${MUD_CLIENT_LIBRARIES} tracy)

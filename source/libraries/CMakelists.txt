@@ -1,4 +1,6 @@
 
+add_subdirectory(minilzo)
+
 if (MUD_PROFILING)
     add_subdirectory(tracy)
 endif()
