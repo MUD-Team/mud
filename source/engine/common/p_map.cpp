@@ -3625,7 +3625,7 @@ v3fixed_t P_LinePlaneIntersection(const plane_t *plane, const v3fixed_t &lineorg
     v3fixed_t pt;
     M_SetVec3Fixed(&pt, MAX_INT, MAX_INT, MAX_INT); // marks as invalid
 
-    if (!plane)                                  // sanity check
+    if (!plane)                                     // sanity check
         return pt;
 
     fixed_t numer =

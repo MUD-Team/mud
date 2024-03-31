@@ -21,10 +21,10 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
-
 #include "d_netcmd.h"
+
 #include "d_player.h"
+#include "odamex.h"
 
 NetCommand::NetCommand()
 {

@@ -27,8 +27,8 @@
 // Standard libc/STL includes we use in countless places
 #include <stdint.h>
 
-#include "version.h"
 #include "errors.h"
+#include "version.h"
 
 #if defined(_MSC_VER)
 #define forceinline __forceinline
@@ -69,8 +69,8 @@ typedef unsigned int  uint;
 
 // Predefined with some OS.
 #if !defined(UNIX) && !defined(_WIN32)
-#include <limits.h>
 #include <float.h>
+#include <limits.h>
 #endif
 
 #if defined(__GNUC__) && !defined(OSF1)

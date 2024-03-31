@@ -1191,13 +1191,13 @@ static void AddBlockLine(linelist_t **lists, int *count, int *done, int blockno,
 
 void P_CreateBlockMap()
 {
-    int          xorg, yorg;        // blockmap origin (lower left)
-    int          nrows, ncols;      // blockmap dimensions
-    linelist_t **blocklists = NULL; // array of pointers to lists of lines
-    int         *blockcount = NULL; // array of counters of line lists
-    int         *blockdone  = NULL; // array keeping track of blocks/line
-    int          NBlocks;           // number of cells = nrows*ncols
-    DWORD        linetotal = 0;     // total length of all blocklists
+    int          xorg, yorg;         // blockmap origin (lower left)
+    int          nrows, ncols;       // blockmap dimensions
+    linelist_t **blocklists = NULL;  // array of pointers to lists of lines
+    int         *blockcount = NULL;  // array of counters of line lists
+    int         *blockdone  = NULL;  // array keeping track of blocks/line
+    int          NBlocks;            // number of cells = nrows*ncols
+    DWORD        linetotal = 0;      // total length of all blocklists
     int          i, j;
     int          map_minx = MAX_INT; // init for map limits search
     int          map_miny = MAX_INT;

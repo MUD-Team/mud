@@ -295,7 +295,8 @@ bool P_CrossCompatibleSpecialLine(line_t *line, int side, AActor *thing, bool bo
 
     case 6:
         // Fast Ceiling Crush & Raise
-        if (EV_DoCeiling(DCeiling::fastCrushAndRaise, line, line->id, SPEED(CEIL_NORMAL), SPEED(CEIL_NORMAL), 0, true, 0, 0))
+        if (EV_DoCeiling(DCeiling::fastCrushAndRaise, line, line->id, SPEED(CEIL_NORMAL), SPEED(CEIL_NORMAL), 0, true,
+                         0, 0))
         {
             return true;
             // line->special = 0;
@@ -441,7 +442,8 @@ bool P_CrossCompatibleSpecialLine(line_t *line, int side, AActor *thing, bool bo
 
     case 44:
         // Ceiling Crush
-        if (EV_DoCeiling(DCeiling::lowerAndCrush, line, line->id, SPEED(CEIL_SLOW), SPEED(CEIL_SLOW) / 2, 0, true, 0, 0))
+        if (EV_DoCeiling(DCeiling::lowerAndCrush, line, line->id, SPEED(CEIL_SLOW), SPEED(CEIL_SLOW) / 2, 0, true, 0,
+                         0))
         {
             return true;
             // line->special = 0;
@@ -602,7 +604,8 @@ bool P_CrossCompatibleSpecialLine(line_t *line, int side, AActor *thing, bool bo
 
     case 141:
         // Silent Ceiling Crush & Raise
-        if (EV_DoCeiling(DCeiling::silentCrushAndRaise, line, line->id, SPEED(CEIL_SLOW), SPEED(CEIL_SLOW), 0, true, 1, 0))
+        if (EV_DoCeiling(DCeiling::silentCrushAndRaise, line, line->id, SPEED(CEIL_SLOW), SPEED(CEIL_SLOW), 0, true, 1,
+                         0))
         {
             return true;
             // line->special = 0;
@@ -638,7 +641,8 @@ bool P_CrossCompatibleSpecialLine(line_t *line, int side, AActor *thing, bool bo
 
     case 77:
         // Fast Ceiling Crush & Raise
-        EV_DoCeiling(DCeiling::fastCrushAndRaise, line, line->id, SPEED(CEIL_NORMAL), SPEED(CEIL_NORMAL), 0, true, 0, 0);
+        EV_DoCeiling(DCeiling::fastCrushAndRaise, line, line->id, SPEED(CEIL_NORMAL), SPEED(CEIL_NORMAL), 0, true, 0,
+                     0);
         return true;
 
     case 79:
@@ -1002,7 +1006,8 @@ bool P_CrossCompatibleSpecialLine(line_t *line, int side, AActor *thing, bool bo
         case 150:
             // Start slow silent crusher
             // 150 WR  EV_DoCeiling(silentCrushAndRaise)
-            EV_DoCeiling(DCeiling::silentCrushAndRaise, line, line->id, SPEED(CEIL_SLOW), SPEED(CEIL_SLOW), 0, true, 1, 0);
+            EV_DoCeiling(DCeiling::silentCrushAndRaise, line, line->id, SPEED(CEIL_SLOW), SPEED(CEIL_SLOW), 0, true, 1,
+                         0);
             return true;
 
         case 151:
@@ -1914,21 +1919,24 @@ bool P_UseCompatibleSpecialLine(AActor *thing, line_t *line, int side, bool boss
         }
         break;
     case 26: // Blue Door/Locked
-        if (EV_DoDoor(DDoor::doorRaise, line, thing, 0, SPEED(DOOR_SLOW), TICS(VDOORWAIT), (card_t)(BCard | CardIsSkull)))
+        if (EV_DoDoor(DDoor::doorRaise, line, thing, 0, SPEED(DOOR_SLOW), TICS(VDOORWAIT),
+                      (card_t)(BCard | CardIsSkull)))
         {
             reuse   = true;
             trigger = true;
         }
         break;
     case 27: // Yellow Door /Locked
-        if (EV_DoDoor(DDoor::doorRaise, line, thing, 0, SPEED(DOOR_SLOW), TICS(VDOORWAIT), (card_t)(YCard | CardIsSkull)))
+        if (EV_DoDoor(DDoor::doorRaise, line, thing, 0, SPEED(DOOR_SLOW), TICS(VDOORWAIT),
+                      (card_t)(YCard | CardIsSkull)))
         {
             reuse   = true;
             trigger = true;
         }
         break;
     case 28: // Red Door /Locked
-        if (EV_DoDoor(DDoor::doorRaise, line, thing, 0, SPEED(DOOR_SLOW), TICS(VDOORWAIT), (card_t)(RCard | CardIsSkull)))
+        if (EV_DoDoor(DDoor::doorRaise, line, thing, 0, SPEED(DOOR_SLOW), TICS(VDOORWAIT),
+                      (card_t)(RCard | CardIsSkull)))
         {
             reuse   = true;
             trigger = true;
@@ -2306,7 +2314,8 @@ bool P_UseCompatibleSpecialLine(AActor *thing, line_t *line, int side, bool boss
         case 162:
             // Moving floor min n to max n
             // 162 S1  EV_DoPlat(perpetualRaise,0)
-            if (EV_DoPlat(line->id, line, DPlat::platPerpetualRaise, 0, SPEED(FLOOR_SLOW), TICS(PLATWAIT), 0 * FRACUNIT, 0))
+            if (EV_DoPlat(line->id, line, DPlat::platPerpetualRaise, 0, SPEED(FLOOR_SLOW), TICS(PLATWAIT), 0 * FRACUNIT,
+                          0))
             {
                 reuse   = false;
                 trigger = true;
@@ -2325,8 +2334,8 @@ bool P_UseCompatibleSpecialLine(AActor *thing, line_t *line, int side, bool boss
         case 164:
             // Start fast crusher
             // 164 S1  EV_DoCeiling(fastCrushAndRaise)
-            if (EV_DoCeiling(DCeiling::fastCrushAndRaise, line, line->id, SPEED(CEIL_NORMAL), SPEED(CEIL_NORMAL), 0, true, 0,
-                             0))
+            if (EV_DoCeiling(DCeiling::fastCrushAndRaise, line, line->id, SPEED(CEIL_NORMAL), SPEED(CEIL_NORMAL), 0,
+                             true, 0, 0))
             {
                 reuse   = false;
                 trigger = true;
@@ -2336,8 +2345,8 @@ bool P_UseCompatibleSpecialLine(AActor *thing, line_t *line, int side, bool boss
         case 165:
             // Start slow silent crusher
             // 165 S1  EV_DoCeiling(silentCrushAndRaise)
-            if (EV_DoCeiling(DCeiling::silentCrushAndRaise, line, line->id, SPEED(CEIL_SLOW), SPEED(CEIL_SLOW), 0, true, 1,
-                             0))
+            if (EV_DoCeiling(DCeiling::silentCrushAndRaise, line, line->id, SPEED(CEIL_SLOW), SPEED(CEIL_SLOW), 0, true,
+                             1, 0))
             {
                 reuse   = false;
                 trigger = true;
@@ -2358,7 +2367,8 @@ bool P_UseCompatibleSpecialLine(AActor *thing, line_t *line, int side, bool boss
         case 167:
             // Lower ceiling and Crush
             // 167 S1 EV_DoCeiling(lowerAndCrush)
-            if (EV_DoCeiling(DCeiling::lowerAndCrush, line, line->id, SPEED(CEIL_SLOW), SPEED(CEIL_SLOW) / 2, 0, true, 0, 0))
+            if (EV_DoCeiling(DCeiling::lowerAndCrush, line, line->id, SPEED(CEIL_SLOW), SPEED(CEIL_SLOW) / 2, 0, true,
+                             0, 0))
             {
                 reuse   = false;
                 trigger = true;
@@ -2617,8 +2627,8 @@ bool P_UseCompatibleSpecialLine(AActor *thing, line_t *line, int side, bool boss
         case 183:
             // Start fast crusher
             // 183 SR  EV_DoCeiling(fastCrushAndRaise)
-            if (EV_DoCeiling(DCeiling::fastCrushAndRaise, line, line->id, SPEED(CEIL_NORMAL), SPEED(CEIL_NORMAL), 0, true, 0,
-                             0))
+            if (EV_DoCeiling(DCeiling::fastCrushAndRaise, line, line->id, SPEED(CEIL_NORMAL), SPEED(CEIL_NORMAL), 0,
+                             true, 0, 0))
             {
                 reuse   = true;
                 trigger = true;
@@ -2628,7 +2638,8 @@ bool P_UseCompatibleSpecialLine(AActor *thing, line_t *line, int side, bool boss
         case 184:
             // Start slow crusher
             // 184 SR  EV_DoCeiling(crushAndRaise)
-            if (EV_DoCeiling(DCeiling::crushAndRaise, line, line->id, SPEED(CEIL_SLOW), SPEED(CEIL_SLOW), 0, true, 0, 0))
+            if (EV_DoCeiling(DCeiling::crushAndRaise, line, line->id, SPEED(CEIL_SLOW), SPEED(CEIL_SLOW), 0, true, 0,
+                             0))
             {
                 reuse   = true;
                 trigger = true;
@@ -2638,8 +2649,8 @@ bool P_UseCompatibleSpecialLine(AActor *thing, line_t *line, int side, bool boss
         case 185:
             // Start slow silent crusher
             // 185 SR  EV_DoCeiling(silentCrushAndRaise)
-            if (EV_DoCeiling(DCeiling::silentCrushAndRaise, line, line->id, SPEED(CEIL_SLOW), SPEED(CEIL_SLOW), 0, true, 0,
-                             0))
+            if (EV_DoCeiling(DCeiling::silentCrushAndRaise, line, line->id, SPEED(CEIL_SLOW), SPEED(CEIL_SLOW), 0, true,
+                             0, 0))
             {
                 reuse   = true;
                 trigger = true;
@@ -2660,7 +2671,8 @@ bool P_UseCompatibleSpecialLine(AActor *thing, line_t *line, int side, bool boss
         case 187:
             // Lower ceiling and Crush
             // 187 SR EV_DoCeiling(lowerAndCrush)
-            if (EV_DoCeiling(DCeiling::lowerAndCrush, line, line->id, SPEED(CEIL_SLOW), SPEED(CEIL_SLOW) / 2, 0, true, 0, 0))
+            if (EV_DoCeiling(DCeiling::lowerAndCrush, line, line->id, SPEED(CEIL_SLOW), SPEED(CEIL_SLOW) / 2, 0, true,
+                             0, 0))
             {
                 reuse   = true;
                 trigger = true;

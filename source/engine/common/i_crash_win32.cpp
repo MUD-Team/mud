@@ -31,7 +31,6 @@
 
 #define CRASH_DIR_LEN 1024
 
-#include "win32inc.h"
 #include <DbgHelp.h>
 #include <new.h>
 #include <signal.h>
@@ -42,6 +41,7 @@
 #include "i_system.h"
 #include "m_fileio.h"
 #include "odamex.h"
+#include "win32inc.h"
 
 /**
  * @brief An array containing the directory where crashes are written to.

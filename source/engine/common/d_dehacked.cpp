@@ -2367,7 +2367,7 @@ bool D_DoDehPatch(const OResFile *patchfile, const int lump)
     // Dasho - Quit and show dialog instead of attempt to load DSDHacked
     if (::dversion == 2021)
     {
-        I_FatalError("A file in the load order uses DSDHacked indices, which are currently not supported.\n");  
+        I_FatalError("A file in the load order uses DSDHacked indices, which are currently not supported.\n");
     }
 
     if (::dversion == 16)

@@ -163,8 +163,8 @@
 
 #elif defined(__NetBSD__)
 
-#include <sys/types.h>
 #include <machine/bswap.h>
+#include <sys/types.h>
 #if defined(__BSWAP_RENAME) && !defined(__bswap_32)
 #undef bswap_32
 #undef bswap_64
@@ -522,7 +522,7 @@ STATIC_INLINE uint64_t HashLen17to32(const char *s, size_t len)
 // Return a 16-byte hash for 48 bytes.  Quick and dirty.
 // Callers do best to use "random-looking" values for a and b.
 STATIC_INLINE std::pair<uint64_t, uint64_t> WeakHashLen32WithSeeds(uint64_t w, uint64_t x, uint64_t y, uint64_t z,
-                                                              uint64_t a, uint64_t b)
+                                                                   uint64_t a, uint64_t b)
 {
     a += w;
     b          = Rotate(b + a + z, 21);
@@ -577,12 +577,12 @@ uint64_t Hash64(const char *s, size_t len)
 
     // For strings over 64 bytes we loop.  Internal state consists of
     // 56 bytes: v, w, x, y, and z.
-    uint64_t                 x = seed;
-    uint64_t                 y = seed * k1 + 113;
-    uint64_t                 z = ShiftMix(y * k2 + 113) * k2;
+    uint64_t                      x = seed;
+    uint64_t                      y = seed * k1 + 113;
+    uint64_t                      z = ShiftMix(y * k2 + 113) * k2;
     std::pair<uint64_t, uint64_t> v = std::make_pair(0, 0);
     std::pair<uint64_t, uint64_t> w = std::make_pair(0, 0);
-    x                          = x * k2 + Fetch(s);
+    x                               = x * k2 + Fetch(s);
 
     // Set end so that after the loop we have 1 to 64 bytes left to process.
     const char *end    = s + ((len - 1) / 64) * 64;
@@ -655,12 +655,12 @@ uint64_t Hash64WithSeeds(const char *s, size_t len, uint64_t seed0, uint64_t see
 
     // For strings over 64 bytes we loop.  Internal state consists of
     // 64 bytes: u, v, w, x, y, and z.
-    uint64_t                 x = seed0;
-    uint64_t                 y = seed1 * k2 + 113;
-    uint64_t                 z = farmhashna::ShiftMix(y * k2) * k2;
+    uint64_t                      x = seed0;
+    uint64_t                      y = seed1 * k2 + 113;
+    uint64_t                      z = farmhashna::ShiftMix(y * k2) * k2;
     std::pair<uint64_t, uint64_t> v = std::make_pair(seed0, seed1);
     std::pair<uint64_t, uint64_t> w = std::make_pair(0, 0);
-    uint64_t                 u = x - z;
+    uint64_t                      u = x - z;
     x *= k2;
     uint64_t mul = k2 + (u & 0x82);
 
@@ -1918,7 +1918,7 @@ STATIC_INLINE uint64_t HashLen0to16(const char *s, size_t len)
 // Return a 16-byte hash for 48 bytes.  Quick and dirty.
 // Callers do best to use "random-looking" values for a and b.
 STATIC_INLINE std::pair<uint64_t, uint64_t> WeakHashLen32WithSeeds(uint64_t w, uint64_t x, uint64_t y, uint64_t z,
-                                                              uint64_t a, uint64_t b)
+                                                                   uint64_t a, uint64_t b)
 {
     a += w;
     b          = Rotate(b + a + z, 21);
@@ -1982,13 +1982,13 @@ uint128_t CityHash128WithSeed(const char *s, size_t len, uint128_t seed)
     // We expect len >= 128 to be the common case.  Keep 56 bytes of state:
     // v, w, x, y, and z.
     std::pair<uint64_t, uint64_t> v, w;
-    uint64_t                 x = Uint128Low64(seed);
-    uint64_t                 y = Uint128High64(seed);
-    uint64_t                 z = len * k1;
-    v.first                    = Rotate(y ^ k1, 49) * k1 + Fetch(s);
-    v.second                   = Rotate(v.first, 42) * k1 + Fetch(s + 8);
-    w.first                    = Rotate(y + z, 35) * k1 + x;
-    w.second                   = Rotate(x + Fetch(s + 88), 53) * k1;
+    uint64_t                      x = Uint128Low64(seed);
+    uint64_t                      y = Uint128High64(seed);
+    uint64_t                      z = len * k1;
+    v.first                         = Rotate(y ^ k1, 49) * k1 + Fetch(s);
+    v.second                        = Rotate(v.first, 42) * k1 + Fetch(s + 8);
+    w.first                         = Rotate(y + z, 35) * k1 + x;
+    w.second                        = Rotate(x + Fetch(s + 88), 53) * k1;
 
     // This is the same inner loop as CityHash64(), manually unrolled.
     do
@@ -2160,9 +2160,10 @@ uint128_t Fingerprint128(const char *s, size_t len)
 
 #ifndef FARMHASH_SELF_TEST_GUARD
 #define FARMHASH_SELF_TEST_GUARD
+#include <string.h>
+
 #include <cstdio>
 #include <iostream>
-#include <string.h>
 
 using std::cerr;
 using std::cout;
@@ -2803,9 +2804,10 @@ int main(int argc, char **argv)
 #endif
 #ifndef FARMHASH_SELF_TEST_GUARD
 #define FARMHASH_SELF_TEST_GUARD
+#include <string.h>
+
 #include <cstdio>
 #include <iostream>
-#include <string.h>
 
 using std::cerr;
 using std::cout;
@@ -3084,9 +3086,10 @@ int main(int argc, char **argv)
 #endif
 #ifndef FARMHASH_SELF_TEST_GUARD
 #define FARMHASH_SELF_TEST_GUARD
+#include <string.h>
+
 #include <cstdio>
 #include <iostream>
-#include <string.h>
 
 using std::cerr;
 using std::cout;
@@ -3561,9 +3564,10 @@ int main(int argc, char **argv)
 #endif
 #ifndef FARMHASH_SELF_TEST_GUARD
 #define FARMHASH_SELF_TEST_GUARD
+#include <string.h>
+
 #include <cstdio>
 #include <iostream>
-#include <string.h>
 
 using std::cerr;
 using std::cout;
@@ -3842,9 +3846,10 @@ int main(int argc, char **argv)
 #endif
 #ifndef FARMHASH_SELF_TEST_GUARD
 #define FARMHASH_SELF_TEST_GUARD
+#include <string.h>
+
 #include <cstdio>
 #include <iostream>
-#include <string.h>
 
 using std::cerr;
 using std::cout;
@@ -4123,9 +4128,10 @@ int main(int argc, char **argv)
 #endif
 #ifndef FARMHASH_SELF_TEST_GUARD
 #define FARMHASH_SELF_TEST_GUARD
+#include <string.h>
+
 #include <cstdio>
 #include <iostream>
-#include <string.h>
 
 using std::cerr;
 using std::cout;
@@ -4404,9 +4410,10 @@ int main(int argc, char **argv)
 #endif
 #ifndef FARMHASH_SELF_TEST_GUARD
 #define FARMHASH_SELF_TEST_GUARD
+#include <string.h>
+
 #include <cstdio>
 #include <iostream>
-#include <string.h>
 
 using std::cerr;
 using std::cout;
@@ -4881,9 +4888,10 @@ int main(int argc, char **argv)
 #endif
 #ifndef FARMHASH_SELF_TEST_GUARD
 #define FARMHASH_SELF_TEST_GUARD
+#include <string.h>
+
 #include <cstdio>
 #include <iostream>
-#include <string.h>
 
 using std::cerr;
 using std::cout;
@@ -5268,9 +5276,10 @@ int main(int argc, char **argv)
 #endif
 #ifndef FARMHASH_SELF_TEST_GUARD
 #define FARMHASH_SELF_TEST_GUARD
+#include <string.h>
+
 #include <cstdio>
 #include <iostream>
-#include <string.h>
 
 using std::cerr;
 using std::cout;

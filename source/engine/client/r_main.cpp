@@ -991,7 +991,7 @@ void R_SetTranslatedLucentDrawFuncs()
 void R_RenderPlayerView(player_t *player)
 {
     MUD_ZoneScoped;
-    
+
     // Recalculate the viewing window dimensions, if needed.
     if (setsizeneeded)
     {

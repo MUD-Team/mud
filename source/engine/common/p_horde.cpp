@@ -42,7 +42,6 @@
 #endif
 #include "svc_message.h"
 
-
 EXTERN_CVAR(g_horde_waves)
 EXTERN_CVAR(g_lives)
 EXTERN_CVAR(g_horde_spawnempty_min)
