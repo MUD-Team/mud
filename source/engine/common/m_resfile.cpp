@@ -291,7 +291,8 @@ bool M_ResolveWantedFile(OResFile &out, const OWantFile &wanted)
         const std::vector<std::string> &ftexts = M_FileTypeExts(wanted.getWantedType());
         exts.insert(exts.end(), ftexts.begin(), ftexts.end());
     }
-    std::unique(exts.begin(), exts.end());
+
+    exts.erase(std::unique(exts.begin(), exts.end()), exts.end());
 
     // And now...we resolve.
     const std::vector<std::string> dirs = M_FileSearchDirs();
