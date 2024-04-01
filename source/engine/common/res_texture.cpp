@@ -35,48 +35,15 @@
 #include "odamex.h"
 #include "oscanner.h"
 #include "r_state.h"
+#ifdef CLIENT_APP
+#define STBI_ONLY_PNG
+#define STBI_NO_STDIO
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+#endif
 #include "tables.h"
 #include "v_video.h"
 #include "w_wad.h"
-
-#ifdef CLIENT_APP
-#define PNG_SKIP_SETJMP_CHECK
-#include <png.h>
-#include <setjmp.h> // used for error handling by libpng
-#include <zlib.h>
-
-#if (PNG_LIBPNG_VER < 10400)
-// [SL] add data types to support versions of libpng prior to 1.4.0
-
-/* png_alloc_size_t is guaranteed to be no smaller than png_size_t,
- * and no smaller than png_uint_32.  Casts from png_size_t or png_uint_32
- * to png_alloc_size_t are not necessary; in fact, it is recommended
- * not to use them at all so that the compiler can complain when something
- * turns out to be problematic.
- * Casts in the other direction (from png_alloc_size_t to png_size_t or
- * png_uint_32) should be explicitly applied; however, we do not expect
- * to encounter practical situations that require such conversions.
- */
-
-#if defined(__TURBOC__) && !defined(__FLAT__)
-typedef unsigned long png_alloc_size_t;
-#else
-#if defined(_MSC_VER) && defined(MAXSEG_64K)
-typedef unsigned long png_alloc_size_t;
-#else
-/* This is an attempt to detect an old Windows system where (int) is
- * actually 16 bits, in that case png_malloc must have an argument with a
- * bigger size to accomodate the requirements of the library.
- */
-#if (defined(_Windows) || defined(_WINDOWS) || defined(_WINDOWS_)) && (!defined(INT_MAX) || INT_MAX <= 0x7ffffffeL)
-typedef DWORD png_alloc_size_t;
-#else
-typedef png_size_t png_alloc_size_t;
-#endif
-#endif
-#endif
-#endif // PNG_LIBPNG_VER < 10400
-#endif // CLIENT_APP
 
 TextureManager texturemanager;
 
@@ -1283,46 +1250,6 @@ texhandle_t TextureManager::getPNGTextureHandle(const OString &name)
 }
 
 //
-// Res_ReadPNGCallback
-//
-// Callback function required for reading PNG format images stored in
-// a memory buffer.
-//
-#ifdef CLIENT_APP
-static void Res_ReadPNGCallback(png_struct *png_ptr, png_byte *dest, png_size_t length)
-{
-    MEMFILE *mfp = (MEMFILE *)png_get_io_ptr(png_ptr);
-    mem_fread(dest, sizeof(byte), length, mfp);
-}
-#endif
-
-//
-// Res_PNGCleanup
-//
-// Helper function for TextureManager::cachePNGTexture which takes care of
-// freeing the memory allocated for reading a PNG image using libpng. This
-// can be called in the event of success or failure when reading the image.
-//
-#ifdef CLIENT_APP
-static void Res_PNGCleanup(png_struct **png_ptr, png_info **info_ptr, byte **lumpdata, png_byte **row_data,
-                           MEMFILE **mfp)
-{
-    png_destroy_read_struct(png_ptr, info_ptr, NULL);
-    *png_ptr  = NULL;
-    *info_ptr = NULL;
-
-    delete[] *lumpdata;
-    *lumpdata = NULL;
-    delete[] *row_data;
-    *row_data = NULL;
-
-    if (*mfp)
-        mem_fclose(*mfp);
-    *mfp = NULL;
-}
-#endif
-
-//
 // TextureManager::cachePNGTexture
 //
 // Converts a linear PNG format image into a Texture.
@@ -1330,11 +1257,7 @@ static void Res_PNGCleanup(png_struct **png_ptr, png_info **info_ptr, byte **lum
 void TextureManager::cachePNGTexture(texhandle_t handle)
 {
 #ifdef CLIENT_APP
-    png_struct *png_ptr  = NULL;
-    png_info   *info_ptr = NULL;
     byte       *lumpdata = NULL;
-    png_byte   *row_data = NULL;
-    MEMFILE    *mfp      = NULL;
 
     unsigned int lumpnum = (handle & ~PNG_HANDLE_MASK);
     unsigned int lumplen = W_LumpLength(lumpnum);
@@ -1345,89 +1268,45 @@ void TextureManager::cachePNGTexture(texhandle_t handle)
     lumpdata = new byte[lumplen];
     W_ReadLump(lumpnum, lumpdata);
 
-    if (!png_check_sig(lumpdata, 8))
+    int height = 0;
+    int width = 0;
+    int bpp = 0;
+
+    uint8_t *decoded_img = stbi_load_from_memory(lumpdata, lumplen, &width, &height, &bpp, 0);
+
+    if (!decoded_img)
     {
-        Printf(PRINT_WARNING, "Bad PNG header in %s.\n", lumpname);
-        Res_PNGCleanup(&png_ptr, &info_ptr, &lumpdata, &row_data, &mfp);
+        delete[] lumpdata;
         return;
     }
 
-    png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-    if (!png_ptr)
+    // if grayscale, convert to RGB/RGBA
+    if (decoded_img != nullptr && (bpp == 1 || bpp == 2))
     {
-        Printf(PRINT_WARNING, "PNG out of memory reading %s.\n", lumpname);
-        Res_PNGCleanup(&png_ptr, &info_ptr, &lumpdata, &row_data, &mfp);
-        return;
-    }
+        stbi_image_free(decoded_img);
 
-    info_ptr = png_create_info_struct(png_ptr);
-    if (!info_ptr)
-    {
-        Printf(PRINT_WARNING, "PNG out of memory reading %s.\n", lumpname);
-        Res_PNGCleanup(&png_ptr, &info_ptr, &lumpdata, &row_data, &mfp);
-        return;
-    }
+        // bpp 1 = grayscale, so force RGB
+        // bpp 2 = grayscale + alpha, so force RGBA
+        int new_bpp = bpp + 2;
 
-    // tell libpng to retrieve image data from memory buffer instead of a disk file
-    mfp = mem_fopen_read(lumpdata, lumplen);
-    png_set_read_fn(png_ptr, mfp, Res_ReadPNGCallback);
+        decoded_img = stbi_load_from_memory(lumpdata, lumplen, &width, &height, &bpp, new_bpp);
 
-    png_read_info(png_ptr, info_ptr);
-
-    // read the png header
-    png_uint_32 width = 0, height = 0;
-    int         bitsperpixel = 0, colortype = -1;
-    png_uint_32 ret = png_get_IHDR(png_ptr, info_ptr, &width, &height, &bitsperpixel, &colortype, NULL, NULL, NULL);
-
-    if (ret != 1)
-    {
-        Printf(PRINT_WARNING, "Bad PNG header in %s.\n", lumpname);
-        Res_PNGCleanup(&png_ptr, &info_ptr, &lumpdata, &row_data, &mfp);
-        return;
+        bpp = new_bpp;
     }
 
     Texture *texture = createTexture(handle, width, height);
     memset(texture->mData, 0, width * height);
     memset(texture->mMask, 0, width * height);
 
-    // convert the PNG image to a convenient format
-
-    // convert transparency to full alpha
-    if (png_get_valid(png_ptr, info_ptr, PNG_INFO_tRNS))
-        png_set_tRNS_to_alpha(png_ptr);
-
-    // convert grayscale, if needed.
-    if (colortype == PNG_COLOR_TYPE_GRAY && bitsperpixel < 8)
-        png_set_expand_gray_1_2_4_to_8(png_ptr);
-
-    // convert paletted images to RGB
-    if (colortype == PNG_COLOR_TYPE_PALETTE)
-        png_set_palette_to_rgb(png_ptr);
-
-    // convert from RGB to ARGB
-    if (colortype == PNG_COLOR_TYPE_PALETTE || colortype == PNG_COLOR_TYPE_RGB)
-        png_set_add_alpha(png_ptr, 0xFF, PNG_FILLER_AFTER);
-
-    // process the above transformations
-    png_read_update_info(png_ptr, info_ptr);
-
-    // Read the new color type after updates have been made.
-    colortype = png_get_color_type(png_ptr, info_ptr);
-
-    // read the image and store in temp_image
-    const png_size_t row_size = png_get_rowbytes(png_ptr, info_ptr);
-
-    row_data = new png_byte[row_size];
     for (unsigned int y = 0; y < height; y++)
     {
-        png_read_row(png_ptr, row_data, NULL);
         byte *dest = texture->mData + y;
         byte *mask = texture->mMask + y;
+        uint8_t *pixel = decoded_img+(y*width*bpp);
 
         for (unsigned int x = 0; x < width; x++)
         {
-            argb_t color(row_data[(x << 2) + 3], row_data[(x << 2) + 0], row_data[(x << 2) + 1],
-                         row_data[(x << 2) + 2]);
+            argb_t color(*pixel, *(pixel+1), *(pixel+2), bpp == 4 ? *(pixel+3) : 0);
 
             *mask = color.geta() != 0;
             if (*mask)
@@ -1435,13 +1314,15 @@ void TextureManager::cachePNGTexture(texhandle_t handle)
 
             dest += height;
             mask += height;
+
+            pixel += bpp;
         }
     }
 
     texture->mHasMask = (memchr(texture->mMask, 0, width * height) != NULL);
 
-    Res_PNGCleanup(&png_ptr, &info_ptr, &lumpdata, &row_data, &mfp);
-
+    delete[] lumpdata;
+    stbi_image_free(decoded_img);
 #endif // CLIENT_APP
 }
 

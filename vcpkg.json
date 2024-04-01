@@ -6,8 +6,6 @@
         "protobuf",
         "sdl2",
         "sdl2-mixer",
-        "fluidlite",
-        "zlib",
-        "libpng"        
+        "fluidlite"    
     ]
 }

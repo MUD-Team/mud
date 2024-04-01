@@ -126,7 +126,7 @@ static bool V_SavePNG(const std::string &filename, IWindowSurface *surface)
 
     int result = stbi_write_png(filename.c_str(), width, height, 3, pixels, 0);
 
-    delete pixels;
+    delete[] pixels;
 
     return result != 0;
 }
