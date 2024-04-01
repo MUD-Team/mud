@@ -12,7 +12,7 @@ file(GLOB CLIENT_SDL_SOURCES sdl/*.cpp sdl/*.h)
 get_target_property(COMMON_SOURCES engine-common INTERFACE_SOURCES)
 
 # Client includes
-include_directories(./ ./sdl ../common)
+include_directories(./ ./sdl ../common ../../libraries/stb)
 
 add_executable(mud-client WIN32 ${CLIENT_SOURCES} ${CLIENT_SDL_SOURCES} ${COMMON_SOURCES})
 set_target_properties(mud-client PROPERTIES DEBUG_POSTFIX "_DEBUG")
@@ -28,7 +28,7 @@ if (WIN32)
     set (MUD_CLIENT_LIBRARIES "${MUD_CLIENT_LIBRARIES}" Shlwapi)
 endif()
 
-target_link_libraries(mud-client PRIVATE mudproto ${MUD_CLIENT_LIBRARIES} ZLIB::ZLIB PNG::PNG CURL::libcurl JsonCpp::JsonCpp protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite
+target_link_libraries(mud-client PRIVATE mudproto ${MUD_CLIENT_LIBRARIES} CURL::libcurl JsonCpp::JsonCpp protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite
                       $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main> $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
                       $<IF:$<TARGET_EXISTS:SDL2_mixer::SDL2_mixer>,SDL2_mixer::SDL2_mixer,SDL2_mixer::SDL2_mixer-static>
                       $<IF:$<TARGET_EXISTS:fluidlite::fluidlite>,fluidlite::fluidlite,fluidlite::fluidlite-static>)
