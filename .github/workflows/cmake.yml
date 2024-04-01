@@ -16,6 +16,8 @@ jobs:
   build-msvc:
     runs-on: windows-latest
     steps:
+      - name: Check ENV
+        run: env
       - uses: actions/checkout@v4
       - name: Configure CMake MSVC
         run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_TOOLCHAIN_FILE="C:\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake"
