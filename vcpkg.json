@@ -1,11 +1,20 @@
 {
     "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
     "dependencies": [
-        "curl",
+        {
+            "name": "curl",
+            "default-features": false
+        },
         "jsoncpp",
         "protobuf",
         "sdl2",
-        "sdl2-mixer",
-        "fluidlite"    
+        {
+            "name": "sdl2-mixer",
+            "default-features": false
+        },
+        {
+            "name": "fluidlite",
+            "default-features": false
+        } 
     ]
 }
