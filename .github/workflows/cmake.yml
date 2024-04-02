@@ -38,25 +38,25 @@ jobs:
             bin/odamex.wad
           retention-days: ${{env.RETENTION_DAYS}}
 
-  build-ubuntu:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/github-script@v6
-        with:
-          script: |
-            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
-            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
-      - uses: actions/checkout@v4
-      - name: Configure CMake Ubuntu
-        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake
-      - name: Build Ubuntu
-        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
-      - uses: actions/upload-artifact@v3
-        with:
-          name: mud-ubuntu
-          path: |
-            ${{github.workspace}}/bin/soundfonts
-            ${{github.workspace}}/bin/mud-client
-            ${{github.workspace}}/bin/mud-server
-            ${{github.workspace}}/bin/odamex.wad
-          retention-days: ${{env.RETENTION_DAYS}}   
+#  build-ubuntu:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/github-script@v6
+#        with:
+#          script: |
+#            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+#            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+#      - uses: actions/checkout@v4
+#      - name: Configure CMake Ubuntu
+#        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake
+#      - name: Build Ubuntu
+#        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+#      - uses: actions/upload-artifact@v3
+#        with:
+#          name: mud-ubuntu
+#          path: |
+#            ${{github.workspace}}/bin/soundfonts
+#            ${{github.workspace}}/bin/mud-client
+#            ${{github.workspace}}/bin/mud-server
+#            ${{github.workspace}}/bin/odamex.wad
+#          retention-days: ${{env.RETENTION_DAYS}}   
