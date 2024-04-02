@@ -21,11 +21,11 @@ jobs:
           script: |
             core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
             core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
-      - name: Install dependencies via vcpkg
-        run: vcpkg install --triplet=x64-windows-static curl jsoncpp protobuf sdl2 sdl2-mixer[core] fluidlite[core] --binarysource="clear;x-gha,readwrite"
+      #- name: Install dependencies via vcpkg
+        #run: vcpkg install --triplet=x64-windows-static curl jsoncpp protobuf sdl2 sdl2-mixer[core] fluidlite[core] --binarysource="clear;x-gha,readwrite"
       - uses: actions/checkout@v4
       - name: Configure CMake MSVC
-        run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_TOOLCHAIN_FILE=C:\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake
+        run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_TOOLCHAIN_FILE=C:\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake -DVCPKG_INSTALL_OPTIONS="--binarysource=\"clear;x-gha,readwrite\""
       - name: Build MSVC
         run: cmake --build build --config ${{env.BUILD_TYPE}}
       - uses: actions/upload-artifact@v3
