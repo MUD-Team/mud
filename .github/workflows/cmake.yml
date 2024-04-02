@@ -11,6 +11,8 @@ env:
   BUILD_TYPE: Release
   # The number of days to retain artifacts
   RETENTION_DAYS: 30
+  # use the binary cache for vcpkg deps
+  VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
 
 jobs:
   build-msvc:
@@ -25,7 +27,7 @@ jobs:
         #run: vcpkg install --triplet=x64-windows-static curl jsoncpp protobuf sdl2 sdl2-mixer[core] fluidlite[core] --binarysource="clear;x-gha,readwrite"
       - uses: actions/checkout@v4
       - name: Configure CMake MSVC
-        run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_TOOLCHAIN_FILE=C:\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake -DVCPKG_INSTALL_OPTIONS=--binarysource="clear;x-gha,readwrite"
+        run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_TOOLCHAIN_FILE=C:\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake
       - name: Build MSVC
         run: cmake --build build --config ${{env.BUILD_TYPE}}
       - uses: actions/upload-artifact@v3
