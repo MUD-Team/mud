@@ -48,147 +48,25 @@
 #include "odamex.h"
 #include "w_wad.h"
 
-std::string M_GetBinaryDir()
-{
-    std::string ret;
-
-    if (!Args[0])
-        return "./";
-
-    char realp[PATH_MAX];
-    if (realpath(Args[0], realp))
-        ret = realp;
-    else
-    {
-        // search through $PATH
-        const char *path = getenv("PATH");
-        if (path)
-        {
-            std::stringstream ss(path);
-            std::string       segment;
-
-            while (ss)
-            {
-                std::getline(ss, segment, ':');
-
-                if (!segment.length())
-                    continue;
-
-                if (segment[segment.length() - 1] != PATHSEPCHAR)
-                    segment += PATHSEP;
-                segment += Args[0];
-
-                if (realpath(segment.c_str(), realp))
-                {
-                    ret = realp;
-                    break;
-                }
-            }
-        }
-    }
-
-    M_FixPathSep(ret);
-
-    size_t slash = ret.find_last_of(PATHSEPCHAR);
-    if (slash == std::string::npos)
-        return "";
-    else
-        return ret.substr(0, slash);
-}
-
-std::string M_GetHomeDir(const std::string &user)
-{
-    const char *envhome = getenv("HOME");
-    std::string home    = (envhome != NULL) ? envhome : "";
-
-    if (!home.length())
-    {
-        // try the uid way
-        passwd *p = user.length() ? getpwnam(user.c_str()) : getpwuid(getuid());
-        if (p && p->pw_dir)
-        {
-            home = p->pw_dir;
-        }
-
-        if (!home.length())
-        {
-            I_FatalError("Please set your HOME variable");
-        }
-    }
-
-    if (home[home.length() - 1] != PATHSEPCHAR)
-    {
-        home += PATHSEP;
-    }
-
-    return home;
-}
-
-std::string M_GetUserDir()
-{
-    std::string path = M_GetHomeDir();
-
-    if (path[path.length() - 1] != PATHSEPCHAR)
-        path += PATHSEP;
-
-    path += ".odamex";
-    return path;
-}
-
-std::string M_GetWriteDir()
-{
-    // Our path is relative to the home directory.
-    std::string path = M_GetHomeDir();
-    if (!M_IsPathSep(*(path.end() - 1)))
-    {
-        path += PATHSEP;
-    }
-    path += ".odamex";
-
-    // Create the directory.
-    struct stat info;
-    if (stat(path.c_str(), &info) == -1)
-    {
-        if (mkdir(path.c_str(), S_IRUSR | S_IWUSR | S_IXUSR) == -1)
-        {
-            I_FatalError("Failed to create %s directory:\n%s", path.c_str(), strerror(errno));
-        }
-    }
-    else
-    {
-        if (!S_ISDIR(info.st_mode))
-        {
-            I_FatalError("%s must be a directory", path.c_str());
-        }
-    }
-
-    return path;
-}
-
 std::string M_GetUserFileName(const std::string &file)
 {
-
-    // Is absolute path?  If so, stop here.
-    size_t fileLen = file.length();
-    if (fileLen >= 1 && M_IsPathSep(file[0]))
+    std::string path = file;
+    // If an absolute path that contains our write directory,
+    // make it relative.
+    std::string::size_type pos = file.find(M_GetWriteDir());
+    if (pos != std::string::npos)
     {
-        return file;
+        path = file.substr(pos+M_GetWriteDir().size());
+    }
+    // Still an absolute path?  If so, stop here.
+    size_t fileLen = path.length();
+    if (fileLen >= 1 && M_IsPathSep(path[0]))
+    {
+        I_FatalError("Attempting to write to %s, which is outside of the write directory at %s\n", file.c_str(), M_GetWriteDir().c_str());
     }
 
-    // Is this an explicitly relative path?  If so, stop here.
-    if (fileLen >= 2 && file[0] == '.' && M_IsPathSep(file[1]))
-    {
-        return file;
-    }
-    else if (fileLen >= 3 && file[0] == '.' && file[1] == '.' && M_IsPathSep(file[2]))
-    {
-        return file;
-    }
-
-    // Our path is relative to the write directory.
-    std::string path = M_GetWriteDir();
-    path += PATHSEP;
-    path += file;
+    // If we get here, it should just be writing somewhere in
+    // our PHYSFS write path
     return M_CleanPath(path);
 }
 

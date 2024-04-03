@@ -30,6 +30,7 @@
 #include "i_system.h"
 #include "m_fileio.h"
 #include "odamex.h"
+#include "physfs.h"
 
 EXTERN_CVAR(snd_samplerate)
 EXTERN_CVAR(snd_soundfont)
@@ -45,15 +46,57 @@ static void fluidError(int level, char *message, void *data)
     I_FatalError("Fluidlite: %s\n", message);
 }
 
-// The default fluid fileapi already uses fopen, but I'm keeping this here
-// in case we need to do a custom function with _wfopen or another function
-// that produces a FILE* - Dasho
-static void *fluidOpenFile(fluid_fileapi_t *fileapi, const char *filename)
+static void *fluidFileOpen(fluid_fileapi_t *fileapi, const char *filename)
 {
-    FILE *fp = fopen(filename, "rb");
+    PHYSFS_File *fp = PHYSFS_openRead(filename);
     if (!fp)
         return nullptr;
     return fp;
+}
+
+static int fluidFileClose(void *handle)
+{
+    int res = PHYSFS_close((PHYSFS_File *)handle);
+    if (res == 0)
+        return -1; // FLUID_FAILED
+    else
+        return 0; // FLUID_OK
+}
+
+static int fluidFileSeek(void* handle, long offset, int origin)
+{
+    long real_offset = offset;
+    if (origin == SEEK_CUR)
+    {
+        real_offset = PHYSFS_tell((PHYSFS_File *)handle) + offset;
+    }
+    if (origin == SEEK_END)
+    {
+        real_offset = PHYSFS_fileLength((PHYSFS_File *)handle) - offset;
+    }
+    int res = PHYSFS_seek((PHYSFS_File *)handle, real_offset);
+    if (res == 0)
+        return -1; // FLUID_FAILED
+    else
+        return 0; // FLUID_OK
+}
+
+static long fluidFileTell(void* handle)
+{
+    long res = PHYSFS_tell((PHYSFS_File *)handle);
+    if (res == -1)
+        return -1; // FLUID_FAILED
+    else
+        return res;
+}
+
+static int fluidFileRead(void *buf, int count, void* handle)
+{
+    int res = PHYSFS_readBytes((PHYSFS_File *)handle, buf, (PHYSFS_uint64)count);
+    if (res == count)
+        return 0; // FLUID_OK
+    else
+        return -1; // FLUID_FAILED
 }
 
 static void rtNoteOn(void *userdata, uint8_t channel, uint8_t note, uint8_t velocity)
@@ -154,10 +197,14 @@ FluidLiteMusicSystem::FluidLiteMusicSystem()
     m_soundfontLoader          = new_fluid_defsfloader();
     m_soundfontLoader->fileapi = (fluid_fileapi_t *)calloc(1, sizeof(fluid_fileapi_t));
     fluid_init_default_fileapi(m_soundfontLoader->fileapi);
-    m_soundfontLoader->fileapi->fopen = fluidOpenFile;
+    m_soundfontLoader->fileapi->fopen = fluidFileOpen;
+    m_soundfontLoader->fileapi->fclose = fluidFileClose;
+    m_soundfontLoader->fileapi->fseek = fluidFileSeek;
+    m_soundfontLoader->fileapi->fread = fluidFileRead;
+    m_soundfontLoader->fileapi->ftell = fluidFileTell;
     fluid_synth_add_sfloader(m_synth, m_soundfontLoader);
 
-    if (fluid_synth_sfload(m_synth, M_GetBinaryDir().append("/soundfonts/").append(snd_soundfont.cstring()).c_str(),
+    if (fluid_synth_sfload(m_synth, std::string("soundfonts/").append(snd_soundfont.cstring()).c_str(),
                            1) == -1)
     {
         Printf(PRINT_WARNING, "I_InitMusic: FluidLite Initialization failure.\n");

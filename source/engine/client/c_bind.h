@@ -25,6 +25,7 @@
 
 #include "d_event.h"
 #include "hashtable.h"
+#include "physfs.h"
 
 struct OBinding
 {
@@ -57,7 +58,7 @@ class OKeyBindings
     int                GetKeysForCommand(const char *cmd, int *first, int *second);
     std::string        GetKeynameFromCommand(const char *cmd, bool bTwoEntries = false);
 
-    void ArchiveBindings(FILE *f);
+    void ArchiveBindings(PHYSFS_File *f);
 };
 
 void C_BindingsInit();

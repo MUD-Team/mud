@@ -501,7 +501,7 @@ void M_LoadGame (int choice)
 //
 void M_ReadSaveStrings(void)
 {
-    FILE *handle;
+    PHYSFS_File *handle;
     int   i;
 
     for (i = 0; i < load_end; i++)
@@ -510,7 +510,7 @@ void M_ReadSaveStrings(void)
 
         G_BuildSaveName(name, i);
 
-        handle = fopen(name.c_str(), "rb");
+        handle = PHYSFS_openRead(name.c_str());
         if (handle == NULL)
         {
             strcpy(&savegamestrings[i][0], GStrings(EMPTYSTRING));
@@ -518,14 +518,14 @@ void M_ReadSaveStrings(void)
         }
         else
         {
-            const size_t readlen = fread(&savegamestrings[i], SAVESTRINGSIZE, 1, handle);
-            if (readlen < 1)
+            const size_t readlen = PHYSFS_readBytes(handle, &savegamestrings[i], SAVESTRINGSIZE);
+            if (readlen < SAVESTRINGSIZE)
             {
                 printf("M_Read_SaveStrings(): Failed to read handle.\n");
-                fclose(handle);
+                PHYSFS_close(handle);
                 return;
             }
-            fclose(handle);
+            PHYSFS_close(handle);
             LoadSavegameMenu[i].status = 1;
         }
     }

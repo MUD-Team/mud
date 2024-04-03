@@ -39,6 +39,7 @@
 #include "odamex.h"
 #include "oscanner.h"
 #include "p_local.h"
+#include "physfs.h"
 #include "s_sndseq.h"
 #include "v_text.h"
 #include "v_video.h"
@@ -1075,9 +1076,9 @@ void S_ChangeMusic(std::string musicname, int looping)
 
     byte  *data   = NULL;
     size_t length = 0;
-    FILE  *f;
+    PHYSFS_File  *f;
 
-    if (!(f = fopen(musicname.c_str(), "rb")))
+    if (!(f = PHYSFS_openRead(musicname.c_str())))
     {
         int lumpnum;
         if ((lumpnum = W_CheckNumForName(musicname.c_str())) == -1)
@@ -1094,10 +1095,10 @@ void S_ChangeMusic(std::string musicname, int looping)
     {
         length              = M_FileLength(f);
         data                = static_cast<byte *>(Malloc(length));
-        const size_t result = fread(data, length, 1, f);
-        fclose(f);
+        const size_t result = PHYSFS_readBytes(f, data, length);
+        PHYSFS_close(f);
 
-        if (result == 1)
+        if (result == length)
             I_PlaySong(data, length, (looping != 0));
         M_Free(data);
     }

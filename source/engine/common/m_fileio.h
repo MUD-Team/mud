@@ -27,6 +27,7 @@
 
 #include "d_main.h"
 #include "m_ostring.h"
+#include "physfs.h"
 
 extern std::ofstream LOG;
 extern std::ifstream CON;
@@ -36,7 +37,7 @@ std::string M_FindUserFileName(const std::string &file, const char *ext);
 void        M_FixPathSep(std::string &path);
 std::string M_GetCWD();
 
-SDWORD M_FileLength(FILE *f);
+SDWORD M_FileLength(PHYSFS_File *f);
 bool   M_FileExists(const std::string &filename);
 bool   M_FileExistsExt(const std::string &filename, const char *ext);
 
@@ -67,13 +68,7 @@ std::string M_GetBinaryDir();
  * @param user Name of the user to look up, or blank if no user.
  * @return
  */
-std::string M_GetHomeDir(const std::string &user = "");
-
-/**
- * @brief Obtain a user-specific path under their home directory that might
- *        or might not be used as a path to write files into.
- */
-std::string M_GetUserDir();
+std::string M_GetHomeDir();
 
 /**
  * @brief Get the directory that files such as game config and screenshots

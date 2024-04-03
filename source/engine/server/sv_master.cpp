@@ -161,10 +161,15 @@ bool SV_AddMaster(const char *masterip)
 //
 // SV_ArchiveMasters
 //
-void SV_ArchiveMasters(FILE *fp)
+void SV_ArchiveMasters(PHYSFS_File *fp)
 {
+    std::string str;
     for (size_t i = 0; i < masters.size(); i++)
-        fprintf(fp, "addmaster %s\n", masters[i].masterip.c_str());
+    {
+        str.append(StrFormat("addmaster %s\n", masters[i].masterip.c_str()));
+    }
+    if (!str.empty())
+        PHYSFS_writeBytes(fp, str.data(), str.size());
 }
 
 //

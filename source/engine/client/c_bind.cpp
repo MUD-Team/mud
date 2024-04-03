@@ -36,6 +36,7 @@
 #include "i_input.h"
 #include "m_ostring.h"
 #include "odamex.h"
+#include "physfs.h"
 
 extern NetDemo netdemo;
 
@@ -359,16 +360,21 @@ void C_ReleaseKeys()
     HU_ReleaseKeyStates();
 }
 
-void OKeyBindings::ArchiveBindings(FILE *f)
+void OKeyBindings::ArchiveBindings(PHYSFS_File *f)
 {
+    std::string str;
     for (BindingTable::const_iterator it = Binds.begin(); it != Binds.end(); ++it)
     {
         const int          key     = it->first;
         const std::string &binding = it->second;
         if (!binding.empty())
-            fprintf(f, "%s %s %s\n", command.c_str(), C_QuoteString(I_GetKeyName(key)).c_str(),
-                    C_QuoteString(binding).c_str());
+        {
+            str.append(StrFormat("%s %s %s\n", command.c_str(), C_QuoteString(I_GetKeyName(key)).c_str(),
+                    C_QuoteString(binding).c_str()));
+        }
     }
+    if (!str.empty())
+        PHYSFS_writeBytes(f, str.data(), str.size());
 }
 
 int OKeyBindings::GetKeysForCommand(const char *cmd, int *first, int *second)

@@ -57,64 +57,6 @@ CVAR_FUNC_IMPL(snd_samplerate)
     S_Init(snd_sfxvolume, snd_musicvolume);
 }
 
-#if 0
-
-/**
- * @brief Write out a WAV file containing sound data.
- * 
- * @detail This is an internal debugging function that should be ifdef'ed out
- *         when not in use.
- * 
- * @param filename Output filename.
- * @param data Data to write.
- * @param length Total length of data to write. 
- * @param samplerate Samplerate to put in the header.
- */
-static void WriteWAV(char* filename, byte* data, uint32_t length, int samplerate)
-{
-	FILE* wav;
-	unsigned int i;
-	unsigned short s;
-
-	wav = fopen(filename, "wb");
-
-	// Header
-
-	fwrite("RIFF", 1, 4, wav);
-	i = LELONG(36 + samplerate);
-	fwrite(&i, 4, 1, wav);
-	fwrite("WAVE", 1, 4, wav);
-
-	// Subchunk 1
-
-	fwrite("fmt ", 1, 4, wav);
-	i = LELONG(16);
-	fwrite(&i, 4, 1, wav); // Length
-	s = LESHORT((short)1);
-	fwrite(&s, 2, 1, wav); // Format (PCM)
-	s = LESHORT((short)2);
-	fwrite(&s, 2, 1, wav); // Channels (2=stereo)
-	i = LELONG(snd_samplerate.asInt());
-	fwrite(&i, 4, 1, wav); // Sample rate
-	i = LELONG(snd_samplerate.asInt() * 2 * 2);
-	fwrite(&i, 4, 1, wav); // Byte rate (samplerate * stereo * 16 bit)
-	s = LESHORT((short)(2 * 2));
-	fwrite(&s, 2, 1, wav); // Block align (stereo * 16 bit)
-	s = LESHORT((short)16);
-	fwrite(&s, 2, 1, wav); // Bits per sample (16 bit)
-
-	// Data subchunk
-
-	fwrite("data", 1, 4, wav);
-	i = LELONG(length);
-	fwrite(&i, 4, 1, wav);        // Data length
-	fwrite(data, 1, length, wav); // Data
-
-	fclose(wav);
-}
-
-#endif
-
 // [Russell] - Chocolate Doom's sound converter code, how awesome!
 static bool ConvertibleRatio(int freq1, int freq2)
 {

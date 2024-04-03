@@ -46,6 +46,7 @@
 #include "m_fileio.h"
 #include "md5.h"
 #include "odamex.h"
+#include "physfs.h"
 #include "w_wad.h"
 #include "z_zone.h"
 
@@ -139,7 +140,7 @@ OCRC32Sum W_CRC32(const std::string &filename)
     OCRC32Sum rvo;
 
     const int file_chunk_size = 8192;
-    FILE     *fp              = fopen(filename.c_str(), "rb");
+    PHYSFS_File     *fp       = PHYSFS_openRead(filename.c_str());
 
     if (!fp)
         return rvo;
@@ -148,10 +149,12 @@ OCRC32Sum W_CRC32(const std::string &filename)
     unsigned char buf[file_chunk_size];
     uint32_t      crc = 0;
 
-    while ((n = fread(buf, 1, sizeof(buf), fp)))
+    while ((n = PHYSFS_readBytes(fp, buf, sizeof(buf))))
     {
         crc = crc32_fast(buf, n, crc);
     }
+
+    PHYSFS_close(fp);
 
     std::string hashStr;
 
@@ -167,7 +170,7 @@ OMD5Hash W_MD5(const std::string &filename)
     OMD5Hash rvo;
 
     const int file_chunk_size = 8192;
-    FILE     *fp              = fopen(filename.c_str(), "rb");
+    PHYSFS_File     *fp       = PHYSFS_openRead(filename.c_str());
 
     if (!fp)
         return rvo;
@@ -178,13 +181,13 @@ OMD5Hash W_MD5(const std::string &filename)
     unsigned      n = 0;
     unsigned char buf[file_chunk_size];
 
-    while ((n = fread(buf, 1, sizeof(buf), fp)))
+    while ((n = PHYSFS_readBytes(fp, buf, sizeof(buf))))
         md5_append(&state, (unsigned char *)buf, n);
 
     md5_byte_t digest[16];
     md5_finish(&state, digest);
 
-    fclose(fp);
+    PHYSFS_close(fp);
 
     std::stringstream hashStr;
 
@@ -245,7 +248,7 @@ fhfprint_s W_FarmHash128(const byte *lumpdata, int length)
 // Adds lumps from the array of filelump_t. If clientonly is true,
 // only certain lumps will be added.
 //
-void W_AddLumps(FILE *handle, filelump_t *fileinfo, size_t newlumps, bool clientonly)
+void W_AddLumps(PHYSFS_File *handle, filelump_t *fileinfo, size_t newlumps, bool clientonly)
 {
     lumpinfo = (lumpinfo_t *)Realloc(lumpinfo, (numlumps + newlumps) * sizeof(lumpinfo_t));
     if (!lumpinfo)
@@ -279,12 +282,12 @@ void W_AddLumps(FILE *handle, filelump_t *fileinfo, size_t newlumps, bool client
 //
 void AddFile(const OResFile &file)
 {
-    FILE       *handle;
+    PHYSFS_File       *handle;
     filelump_t *fileinfo;
 
-    const std::string filename = file.getFullpath();
+    const std::string filename = file.getBasename();
 
-    if ((handle = fopen(filename.c_str(), "rb")) == NULL)
+    if ((handle = PHYSFS_openRead(filename.c_str())) == NULL)
     {
         Printf(PRINT_WARNING, "couldn't open %s\n", filename.c_str());
         return;
@@ -295,11 +298,11 @@ void AddFile(const OResFile &file)
     size_t newlumps;
 
     wadinfo_t header;
-    size_t    readlen = fread(&header, sizeof(header), 1, handle);
-    if (readlen < 1)
+    size_t    readlen = PHYSFS_readBytes(handle, &header, sizeof(header));
+    if (readlen < sizeof(header))
     {
         Printf(PRINT_HIGH, "failed to read %s.\n", filename.c_str());
-        fclose(handle);
+        PHYSFS_close(handle);
         return;
     }
     header.identification = LELONG(header.identification);
@@ -328,17 +331,17 @@ void AddFile(const OResFile &file)
         if (length > (unsigned)M_FileLength(handle))
         {
             Printf(PRINT_WARNING, "\nbad number of lumps for %s\n", filename.c_str());
-            fclose(handle);
+            PHYSFS_close(handle);
             return;
         }
 
         fileinfo = new filelump_t[header.numlumps];
-        fseek(handle, header.infotableofs, SEEK_SET);
-        readlen = fread(fileinfo, length, 1, handle);
-        if (readlen < 1)
+        PHYSFS_seek(handle, header.infotableofs);
+        readlen = PHYSFS_readBytes(handle, fileinfo, length);
+        if (readlen < length)
         {
             Printf(PRINT_HIGH, "failed to read file info in %s\n", filename.c_str());
-            fclose(handle);
+            PHYSFS_close(handle);
             return;
         }
 
@@ -704,10 +707,10 @@ void W_ReadLump(unsigned int lump, void *dest)
     if (lump != stdisk_lumpnum)
         I_BeginRead();
 
-    fseek(l->handle, l->position, SEEK_SET);
-    c = fread(dest, l->size, 1, l->handle);
+    PHYSFS_seek(l->handle, l->position);
+    c = PHYSFS_readBytes(l->handle, dest, l->size);
 
-    if (feof(l->handle))
+    if (PHYSFS_eof(l->handle))
         I_Error("W_ReadLump: only read %i of %i on lump %i", c, l->size, lump);
 
     if (lump != stdisk_lumpnum)
@@ -721,16 +724,16 @@ void W_ReadLump(unsigned int lump, void *dest)
 //
 unsigned W_ReadChunk(const char *file, unsigned offs, unsigned len, void *dest, unsigned &filelen)
 {
-    FILE    *fp   = fopen(file, "rb");
+    PHYSFS_File    *fp   = PHYSFS_openRead(file);
     unsigned read = 0;
 
     if (fp)
     {
         filelen = M_FileLength(fp);
 
-        fseek(fp, offs, SEEK_SET);
-        read = fread(dest, 1, len, fp);
-        fclose(fp);
+        PHYSFS_seek(fp, offs);
+        read = PHYSFS_readBytes(fp, dest, len);
+        PHYSFS_close(fp);
     }
     else
         filelen = 0;
@@ -930,7 +933,7 @@ void W_Close()
 {
     // store closed handles, so that fclose isn't called multiple times
     // for the same handle
-    std::vector<FILE *> handles;
+    std::vector<PHYSFS_File *> handles;
 
     lumpinfo_t *lump_p = lumpinfo;
     while (lump_p < lumpinfo + numlumps)
@@ -938,7 +941,7 @@ void W_Close()
         // if file not previously closed, close it now
         if (lump_p->handle && std::find(handles.begin(), handles.end(), lump_p->handle) == handles.end())
         {
-            fclose(lump_p->handle);
+            PHYSFS_close(lump_p->handle);
             handles.push_back(lump_p->handle);
         }
         lump_p++;

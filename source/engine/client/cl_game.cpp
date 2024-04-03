@@ -191,7 +191,7 @@ byte *demobuffer;
 byte *demo_p, *demo_e;
 BOOL  singledemo; // quit after playing a demo from cmdline
 int   demostartgametic;
-FILE *recorddemo_fp;
+PHYSFS_File *recorddemo_fp;
 
 BOOL precache = true;   // if true, load all graphics at start
 
@@ -1475,34 +1475,34 @@ void G_DoLoadGame(void)
 
     gameaction = ga_nothing;
 
-    FILE *stdfile = fopen(savename, "rb");
+    PHYSFS_File *stdfile = PHYSFS_openRead(savename);
     if (stdfile == NULL)
     {
         Printf(PRINT_HIGH, "Could not read savegame '%s'\n", savename);
         return;
     }
 
-    fseek(stdfile, SAVESTRINGSIZE, SEEK_SET); // skip the description field
-    size_t readlen = fread(text, 16, 1, stdfile);
-    if (readlen < 1)
+    PHYSFS_seek(stdfile, SAVESTRINGSIZE); // skip the description field
+    size_t readlen = PHYSFS_readBytes(stdfile, text, 16);
+    if (readlen < 16)
     {
         Printf(PRINT_HIGH, "Failed to read savegame '%s'\n", savename);
-        fclose(stdfile);
+        PHYSFS_close(stdfile);
         return;
     }
     if (strncmp(text, SAVESIG, 16))
     {
         Printf(PRINT_HIGH, "Savegame '%s' is from a different version\n", savename);
 
-        fclose(stdfile);
+        PHYSFS_close(stdfile);
 
         return;
     }
-    readlen = fread(text, 8, 1, stdfile);
-    if (readlen < 1)
+    readlen = PHYSFS_readBytes(stdfile, text, 8);
+    if (readlen < 8)
     {
         Printf(PRINT_HIGH, "Failed to read savegame '%s'\n", savename);
-        fclose(stdfile);
+        PHYSFS_close(stdfile);
         return;
     }
     text[8] = 0;
@@ -1582,8 +1582,7 @@ void G_SaveGame(int slot, char *description)
  */
 void G_BuildSaveName(std::string &name, int slot)
 {
-    std::string path = M_GetUserFileName(name.c_str());
-    StrFormat(name, "%s" PATHSEP "odasv%d.ods", path.c_str(), slot);
+    StrFormat(name, "saves/odasv%d.ods", slot);
 }
 
 void G_DoSaveGame()
@@ -1597,7 +1596,7 @@ void G_DoSaveGame()
     G_BuildSaveName(name, savegameslot);
     description = savedescription;
 
-    FILE *stdfile = fopen(name.c_str(), "wb");
+    PHYSFS_File *stdfile = PHYSFS_openWrite(name.c_str());
 
     if (stdfile == NULL)
     {
@@ -1606,9 +1605,9 @@ void G_DoSaveGame()
 
     Printf(PRINT_HIGH, "Saving game to '%s'...\n", name.c_str());
 
-    fwrite(description, SAVESTRINGSIZE, 1, stdfile);
-    fwrite(SAVESIG, 16, 1, stdfile);
-    fwrite(level.mapname.c_str(), 8, 1, stdfile);
+    PHYSFS_writeBytes(stdfile, description, SAVESTRINGSIZE);
+    PHYSFS_writeBytes(stdfile, SAVESIG, 16);
+    PHYSFS_writeBytes(stdfile, level.mapname.c_str(), 8);
 
     FLZOFile savefile(stdfile, FFile::EWriting, true);
     FArchive arc(savefile);

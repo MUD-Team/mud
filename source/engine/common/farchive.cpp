@@ -31,6 +31,7 @@
 #include "m_alloc.h"
 #include "minilzo.h"
 #include "odamex.h"
+#include "physfs.h"
 
 #ifdef __BIG_ENDIAN__
 #define SWAP_WORD(x)
@@ -104,7 +105,7 @@ FLZOFile::FLZOFile(const char *name, EOpenMode mode, bool dontCompress)
     Open(name, mode);
 }
 
-FLZOFile::FLZOFile(FILE *file, EOpenMode mode, bool dontCompress)
+FLZOFile::FLZOFile(PHYSFS_File *file, EOpenMode mode, bool dontCompress)
 {
     clear();
     m_Mode       = mode;
@@ -125,7 +126,10 @@ bool FLZOFile::Open(const char *name, EOpenMode mode)
     if (name == NULL)
         return false;
     m_Mode = mode;
-    m_File = fopen(name, mode == EReading ? "rb" : "wb");
+    if (mode == EReading)
+        m_File = PHYSFS_openRead(name);
+    else
+        m_File = PHYSFS_openWrite(name);
     PostOpen();
     return !!m_File;
 }
@@ -135,21 +139,21 @@ void FLZOFile::PostOpen()
     if (m_File && m_Mode == EReading)
     {
         char   sig[4];
-        size_t readlen = fread(sig, 4, 1, m_File);
-        if (readlen < 1)
+        size_t readlen = PHYSFS_readBytes(m_File, sig, 4);
+        if (readlen < 4)
         {
             printf("FLZOFile::PostOpen(): failed to read m_File\n");
         }
         if (sig[0] != LZOSig[0] || sig[1] != LZOSig[1] || sig[2] != LZOSig[2] || sig[3] != LZOSig[3])
         {
-            fclose(m_File);
+            PHYSFS_close(m_File);
             m_File = NULL;
         }
         else
         {
             DWORD sizes[2];
-            readlen = fread(sizes, sizeof(DWORD), 2, m_File);
-            if (readlen < 1)
+            readlen = PHYSFS_readBytes(m_File, sizes, sizeof(DWORD) * 2);
+            if (readlen < sizeof(DWORD) * 2)
             {
                 printf("FLZOFile::PostOpen(): failed to read m_File\n");
             }
@@ -159,8 +163,8 @@ void FLZOFile::PostOpen()
             unsigned int len = sizes[0] == 0 ? sizes[1] : sizes[0];
             m_Buffer         = (byte *)Malloc(len + 8);
 
-            readlen = fread(m_Buffer + 8, len, 1, m_File);
-            if (readlen < 1)
+            readlen = PHYSFS_readBytes(m_File, m_Buffer + 8, len);
+            if (readlen < len)
             {
                 printf("FLZOFile::PostOpen(): failed to read m_File\n");
             }
@@ -182,10 +186,10 @@ void FLZOFile::Close()
         if (m_Mode == EWriting)
         {
             Implode();
-            fwrite(LZOSig, 4, 1, m_File);
-            fwrite(m_Buffer, m_BufferSize + 8, 1, m_File);
+            PHYSFS_writeBytes(m_File, LZOSig, 4);
+            PHYSFS_writeBytes(m_File, m_Buffer, m_BufferSize + 8);
         }
-        fclose(m_File);
+        PHYSFS_close(m_File);
         m_File = NULL;
     }
 
@@ -394,7 +398,7 @@ bool FLZOMemFile::Open(const char *name, EOpenMode mode)
         bool res = FLZOFile::Open(name, EReading);
         if (res)
         {
-            fclose(m_File);
+            PHYSFS_close(m_File);
             m_File = NULL;
         }
         return res;

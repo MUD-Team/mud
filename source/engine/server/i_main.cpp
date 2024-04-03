@@ -140,6 +140,13 @@ int __cdecl main(int argc, char *argv[])
         // [ML] 2007/9/3: From Eternity (originally chocolate Doom) Thanks SoM & fraggle!
         ::Args.SetArgs(argc, argv);
 
+        if (PHYSFS_init(::Args.GetArg(0)) == 0)
+            I_FatalError("Could not initialize PHYSFS:\n%s\n", PHYSFS_getLastError());
+
+        PHYSFS_setWriteDir(M_GetWriteDir().c_str());
+        PHYSFS_mount(M_GetBinaryDir().c_str(), NULL, 0);
+        PHYSFS_mount(M_GetWriteDir().c_str(), NULL, 0);
+
         if (::Args.CheckParm("--version"))
         {
             printf("Odamex %s\n", NiceVersion());
@@ -190,11 +197,13 @@ int __cdecl main(int argc, char *argv[])
         fprintf(stderr, "=== ERROR: %s ===\n\n", error.GetMsg().c_str());
 
         call_terms();
+        PHYSFS_deinit();
         exit(EXIT_FAILURE);
     }
     catch (...)
     {
         call_terms();
+        PHYSFS_deinit();
         throw;
     }
     return 0;
@@ -207,7 +216,7 @@ int __cdecl main(int argc, char *argv[])
 void daemon_init(void)
 {
     int         pid;
-    FILE       *fpid;
+    PHYSFS_File *fpid;
     std::string pidfile;
 
     Printf(PRINT_HIGH, "Launched into the background\n");
@@ -226,9 +235,13 @@ void daemon_init(void)
         pidfile = "doomsv.pid";
 
     pid  = getpid();
-    fpid = fopen(pidfile.c_str(), "w");
-    fprintf(fpid, "%d\n", pid);
-    fclose(fpid);
+    fpid = PHYSFS_openWrite(pidfile.c_str(), "w");
+    if (fpid)
+    {
+        std::string str = StrFormat("%d\n", pid);
+        PHYSFS_writeBytes(fpid, str.data(), str.size());
+        PHYSFS_close(fpid);
+    }
 }
 
 int main(int argc, char **argv)
@@ -249,6 +262,13 @@ int main(int argc, char **argv)
             perror(NULL);
 
         ::Args.SetArgs(argc, argv);
+
+        if (PHYSFS_init(::Args.GetArg(0)) == 0)
+            I_FatalError("Could not initialize PHYSFS:\n%s\n", PHYSFS_getLastError());
+
+        PHYSFS_setWriteDir(M_GetWriteDir().c_str());
+        PHYSFS_mount(M_GetBinaryDir().c_str(), NULL, 0);
+        PHYSFS_mount(M_GetWriteDir().c_str(), NULL, 0);
 
         if (::Args.CheckParm("--version"))
         {
@@ -311,11 +331,13 @@ int main(int argc, char **argv)
         fprintf(stderr, "=== ERROR: %s ===\n\n", error.GetMsg().c_str());
 
         call_terms();
+        PHYSFS_deinit();
         exit(EXIT_FAILURE);
     }
     catch (...)
     {
         call_terms();
+        PHYSFS_deinit();
         throw;
     }
     return 0;

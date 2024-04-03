@@ -35,6 +35,7 @@
 #include "m_fileio.h"
 #include "odamex.h"
 #include "p_local.h"
+#include "physfs.h"
 #include "s_sound.h"
 #include "w_wad.h"
 
@@ -2294,7 +2295,7 @@ bool D_DoDehPatch(const OResFile *patchfile, const int lump)
     else if (patchfile)
     {
         // Try to use patchfile as a patch.
-        FILE *fh = fopen(patchfile->getFullpath().c_str(), "rb+");
+        PHYSFS_File *fh = PHYSFS_openRead(patchfile->getBasename().c_str());
         if (fh == NULL)
         {
             Printf(PRINT_WARNING, "Could not open DeHackEd patch \"%s\"\n", patchfile->getBasename().c_str());
@@ -2304,7 +2305,8 @@ bool D_DoDehPatch(const OResFile *patchfile, const int lump)
         ::filelen   = M_FileLength(fh);
         ::PatchFile = new char[::filelen + 1];
 
-        size_t read = fread(::PatchFile, 1, filelen, fh);
+        size_t read = PHYSFS_readBytes(fh, ::PatchFile, filelen);
+        PHYSFS_close(fh);
         if (read < filelen)
         {
             DPrintf("Could not read file\n");

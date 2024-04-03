@@ -38,108 +38,26 @@
 #include "w_wad.h"
 #include "win32inc.h"
 
-std::string M_GetBinaryDir()
-{
-    std::string ret;
-
-    char tmp[MAX_PATH]; // denis - todo - make separate function
-    GetModuleFileName(NULL, tmp, sizeof(tmp));
-    ret = tmp;
-
-    M_FixPathSep(ret);
-
-    size_t slash = ret.find_last_of(PATHSEPCHAR);
-    if (slash == std::string::npos)
-    {
-        return "";
-    }
-
-    return ret.substr(0, slash);
-}
-
-std::string M_GetHomeDir(const std::string &user)
-{
-    // [AM] Use SHGetKnownFolderPath when we don't feel like supporting
-    //      Windows XP anymore.
-    TCHAR folderPath[MAX_PATH];
-    if (!SUCCEEDED(SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, 0, folderPath)))
-    {
-        I_FatalError("Could not get user's personal folder.\n");
-    }
-
-    // Now that we have the Documents folder, just go up one.
-    std::string path;
-    StrFormat(path, "%s\\..", folderPath);
-    return M_CleanPath(path);
-}
-
-std::string M_GetUserDir()
-{
-    // [AM] Use SHGetKnownFolderPath when we don't feel like supporting
-    //      Windows XP anymore.
-    TCHAR folderPath[MAX_PATH];
-    if (!SUCCEEDED(SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, 0, folderPath)))
-    {
-        I_FatalError("Could not get user's personal folder.\n");
-    }
-
-    std::string path;
-    StrFormat(path, "%s\\My Games\\Odamex", folderPath);
-    return path;
-}
-
-std::string M_GetWriteDir()
-{
-    // Has Odamex been installed?
-    std::string installed = M_GetBinaryDir() + PATHSEP "odamex-installed.txt";
-    if (M_FileExists(installed))
-    {
-        // Does the user folder exist?
-        std::string userPath = M_GetUserDir();
-        int         ok       = SHCreateDirectoryEx(NULL, userPath.c_str(), NULL);
-        if (ok == ERROR_SUCCESS || ok == ERROR_ALREADY_EXISTS)
-        {
-            return M_CleanPath(userPath);
-        }
-        else
-        {
-            I_FatalError("Failed to create %s directory.\n", userPath.c_str());
-        }
-    }
-
-    // Our path is relative to the binary directory.
-    // [AM] Don't change this back to CWD because this means your write dir
-    //      depends on where you launch it from, which is not great.
-    return M_CleanPath(M_GetBinaryDir());
-}
-
 std::string M_GetUserFileName(const std::string &file)
 {
-    // Is absolute path?  If so, stop here.
-    if (!PathIsRelative(file.c_str()))
+    std::string path = file;
+    // If an absolute path that contains our write directory,
+    // make it relative
+    // Todo: Should we do case insensitive compare on Windows? - Dasho
+    std::string::size_type pos = file.find(M_GetWriteDir());
+    if (pos != std::string::npos)
     {
-        return file;
+        path = file.substr(pos+M_GetWriteDir().size());
     }
 
-    // Is this an explicitly relative path?  If so, stop here.
-    size_t fileLen = file.length();
-    if (fileLen >= 2 && file[0] == '.' && M_IsPathSep(file[1]))
+    // Still an absolute path?  If so, stop here.
+    if (!PathIsRelative(path.c_str()))
     {
-        return file;
-    }
-    else if (fileLen >= 3 && file[0] == '.' && file[1] == '.' && M_IsPathSep(file[2]))
-    {
-        return file;
+        I_FatalError("Attempting to write to %s, which is outside of the write directory at %s\n", file.c_str(), M_GetWriteDir().c_str());
     }
 
-    // Direct our path to our write directory.
-    std::string path = M_GetWriteDir();
-    if (!M_IsPathSep(*(path.end() - 1)))
-    {
-        path += PATHSEP;
-    }
-    path += file;
-
+    // If we get here, it should just be writing somewhere in
+    // our PHYSFS write path
     return path;
 }
 

@@ -36,8 +36,10 @@
 #endif
 
 #include "cmdlib.h"
+#include "m_argv.h"
 #include "m_fileio.h"
 #include "odamex.h"
+#include "physfs.h"
 #include "z_zone.h"
 
 // Simple logging
@@ -57,21 +59,7 @@ void M_ExpandHomeDir(std::string &path)
     if (path[0] != '~')
         return;
 
-    std::string user;
-
-    size_t slash_pos = path.find_first_of(PATHSEPCHAR);
-    size_t end_pos   = path.length();
-
-    if (slash_pos == std::string::npos)
-        slash_pos = end_pos;
-
-    if (path.length() != 1 && slash_pos != 1)
-        user = path.substr(1, slash_pos - 1);
-
-    if (slash_pos != end_pos)
-        slash_pos++;
-
-    path = M_GetHomeDir(user) + path.substr(slash_pos, end_pos - slash_pos);
+    path = M_GetHomeDir() + path.substr(1);
 }
 
 /**
@@ -85,14 +73,16 @@ void M_ExpandHomeDir(std::string &path)
 std::string M_FindUserFileName(const std::string &file, const char *ext)
 {
     std::string found = M_GetUserFileName(file);
-    if (M_FileExists(found))
+    std::string filename = M_ExtractFileName(found);
+    if (M_FileExists(filename))
     {
         return found;
     }
     else if (ext != NULL)
     {
         found = M_GetUserFileName(std::string(file) + ext);
-        if (M_FileExists(found))
+        filename = M_ExtractFileName(found);
+        if (M_FileExists(filename))
         {
             return found;
         }
@@ -143,20 +133,9 @@ std::string M_GetCWD()
 // M_FileLength
 //
 // Returns the length of a file using an open descriptor
-SDWORD M_FileLength(FILE *f)
+SDWORD M_FileLength(PHYSFS_File *f)
 {
-    SDWORD CurrentPosition = -1;
-    SDWORD FileSize        = -1;
-
-    if (f != NULL)
-    {
-        CurrentPosition = ftell(f);
-        fseek(f, 0, SEEK_END);
-        FileSize = ftell(f);
-        fseek(f, CurrentPosition, SEEK_SET);
-    }
-
-    return FileSize;
+    return PHYSFS_fileLength(f);
 }
 
 /**
@@ -166,14 +145,7 @@ SDWORD M_FileLength(FILE *f)
  */
 bool M_FileExists(const std::string &filename)
 {
-    FILE *f = fopen(filename.c_str(), "r");
-    if (f == NULL)
-    {
-        return false;
-    }
-
-    fclose(f);
-    return true;
+    return PHYSFS_exists(filename.c_str());
 }
 
 /**
@@ -205,10 +177,10 @@ bool M_FileExistsExt(const std::string &filename, const char *ext)
 // erased and recreated with the new contents
 BOOL M_WriteFile(std::string filename, void *source, QWORD length)
 {
-    FILE *handle;
+    PHYSFS_File *handle;
     QWORD count;
 
-    handle = fopen(filename.c_str(), "wb");
+    handle = PHYSFS_openWrite(filename.c_str());
 
     if (handle == NULL)
     {
@@ -216,8 +188,8 @@ BOOL M_WriteFile(std::string filename, void *source, QWORD length)
         return false;
     }
 
-    count = fwrite(source, 1, length, handle);
-    fclose(handle);
+    count = PHYSFS_writeBytes(handle, source, length);
+    PHYSFS_close(handle);
 
     if (count != length)
     {
@@ -235,11 +207,11 @@ BOOL M_WriteFile(std::string filename, void *source, QWORD length)
 // the buffer and the size.
 QWORD M_ReadFile(std::string filename, BYTE **buffer)
 {
-    FILE *handle;
+    PHYSFS_File *handle;
     QWORD count, length;
     BYTE *buf;
 
-    handle = fopen(filename.c_str(), "rb");
+    handle = PHYSFS_openRead(filename.c_str());
 
     if (handle == NULL)
     {
@@ -250,8 +222,8 @@ QWORD M_ReadFile(std::string filename, BYTE **buffer)
     length = M_FileLength(handle);
 
     buf   = (BYTE *)Z_Malloc(length, PU_STATIC, NULL);
-    count = fread(buf, 1, length, handle);
-    fclose(handle);
+    count = PHYSFS_readBytes(handle, buf, length);
+    PHYSFS_close(handle);
 
     if (count != length)
     {
@@ -567,6 +539,28 @@ std::string M_CleanPath(std::string path)
         out.push_back('.');
 
     return FromSlash(vol + out);
+}
+
+std::string M_GetBinaryDir()
+{
+    return PHYSFS_getBaseDir();
+}
+
+std::string M_GetWriteDir()
+{
+    if (Args.CheckParm("--portable"))
+        return PHYSFS_getBaseDir();
+    else
+#ifdef CLIENT_APP
+        return PHYSFS_getPrefDir("MUD Team", "MUD Client"); // subject to change - Dasho
+#else
+        return PHYSFS_getPrefDir("MUD Team", "MUD Server"); // subject to change - Dasho
+#endif
+}
+
+std::string M_GetHomeDir()
+{
+    return PHYSFS_getUserDir();
 }
 
 VERSION_CONTROL(m_fileio_cpp, "$Id: 4796a2c0595492f47c301b9c1c77867a74ae0895 $")

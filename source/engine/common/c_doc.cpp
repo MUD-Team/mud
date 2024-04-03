@@ -236,7 +236,7 @@ BEGIN_COMMAND(cvardoc)
 #endif
 
     // Try and open a file in our write directory.
-    FILE *fh = fopen(path.c_str(), "wt+");
+    PHYSFS_File *fh = PHYSFS_openWrite(path.c_str());
     if (fh == NULL)
     {
         Printf("error: Could not open \"%s\" for writing.\n", path.c_str());
@@ -244,10 +244,8 @@ BEGIN_COMMAND(cvardoc)
     }
 
     // First the header.
-    std::string title;
-    StrFormat(title, "%s %s Console Variables", CS_STRING, DOTVERSIONSTR);
+    std::string title = StrFormat("%s %s Console Variables", CS_STRING, DOTVERSIONSTR);
     HTMLHeader(buffer, title.c_str());
-    fwrite(buffer.data(), sizeof(char), buffer.size(), fh);
 
     // Then the title and initial paragraph.
     const char *PREAMBLE = "<h2>%s</h2>"
@@ -260,29 +258,30 @@ BEGIN_COMMAND(cvardoc)
                            "number with a decimal point in it, like 3.14."
                            "</p>";
 
-    StrFormat(buffer, PREAMBLE, title.c_str(), NiceVersion());
-    fwrite(buffer.data(), sizeof(char), buffer.size(), fh);
+    buffer.append(StrFormat(PREAMBLE, title.c_str(), NiceVersion()));
 
     // Initial tag for cvars.
-    fputs("<dl>", fh);
+    buffer.append("<dl>");
 
     // Stamp out our CVars
+    PHYSFS_writeBytes(fh, buffer.data(), buffer.size());
     CvarView view = GetSortedCvarView();
     for (CvarView::const_iterator it = view.begin(); it != view.end(); ++it)
     {
         HTMLCvarRow(buffer, **it);
-        fwrite(buffer.data(), sizeof(char), buffer.size(), fh);
+        PHYSFS_writeBytes(fh, buffer.data(), buffer.size());
     }
 
     // Ending tag for cvars.
-    fputs("</dl>", fh);
+    buffer = "</dl>";
+    PHYSFS_writeBytes(fh, buffer.data(), buffer.size());
 
     // Lastly the footer.
     HTMLFooter(buffer);
-    fwrite(buffer.data(), sizeof(char), buffer.size(), fh);
+    PHYSFS_writeBytes(fh, buffer.data(), buffer.size());
 
-    long bytes = ftell(fh);
-    fclose(fh);
+    long bytes = PHYSFS_tell(fh);
+    PHYSFS_close(fh);
 
     // Success!
     Printf("Wrote %ld bytes to \"%s\"\n", bytes, path.c_str());

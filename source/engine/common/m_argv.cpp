@@ -342,13 +342,21 @@ void M_FindResponseFile(void)
             char  *file;
             int    argc;
             int    argcinresp;
-            FILE  *handle;
+            PHYSFS_File  *handle;
             int    size;
             long   argsize;
             size_t index;
 
+            std::string responsepath = Args.GetArg(i) + 1;
+            std::string mountpath;
+            M_ExtractFilePath(responsepath, mountpath);
+            if (!mountpath.empty())
+            {
+                PHYSFS_mount(mountpath.c_str(), NULL, 0);
+            }
+
             // READ THE RESPONSE FILE INTO MEMORY
-            handle = fopen(Args.GetArg(i) + 1, "rb");
+            handle = PHYSFS_openRead(M_ExtractFileName(responsepath).c_str());
             if (!handle)
             { // [RH] Make this a warning, not an error.
                 Printf(PRINT_WARNING, "No such response file (%s)!", Args.GetArg(i) + 1);
@@ -356,17 +364,15 @@ void M_FindResponseFile(void)
             }
 
             Printf(PRINT_HIGH, "Found response file %s!\n", Args.GetArg(i) + 1);
-            fseek(handle, 0, SEEK_END);
-            size = ftell(handle);
-            fseek(handle, 0, SEEK_SET);
+            size = PHYSFS_fileLength(handle);
             file           = new char[size + 1];
-            size_t readlen = fread(file, size, 1, handle);
-            if (readlen < 1)
+            size_t readlen = PHYSFS_readBytes(handle, file, size);
+            if (readlen < size)
             {
                 Printf(PRINT_HIGH, "Failed to read response file %s.\n", Args.GetArg(i) + 1);
             }
             file[size] = 0;
-            fclose(handle);
+            PHYSFS_close(handle);
 
             argsize = ParseCommandLine(file, &argcinresp, NULL);
             argc    = argcinresp + Args.NumArgs() - 1;

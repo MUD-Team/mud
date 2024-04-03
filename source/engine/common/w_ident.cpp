@@ -739,29 +739,29 @@ class WadFileLumpFinder
   public:
     WadFileLumpFinder(const std::string &filename) : mNumLumps(0), mLumps(NULL)
     {
-        FILE *fp = fopen(filename.c_str(), "rb");
+        PHYSFS_File *fp = PHYSFS_openRead(filename.c_str());
         if (fp)
         {
             wadinfo_t header;
-            if (fread(&header, sizeof(header), 1, fp) == 1)
+            if (PHYSFS_readBytes(fp, &header, sizeof(header)) == sizeof(header))
             {
                 header.identification = LELONG(header.identification);
                 header.infotableofs   = LELONG(header.infotableofs);
 
                 if (header.identification == IWAD_ID || header.identification == PWAD_ID)
                 {
-                    if (fseek(fp, header.infotableofs, SEEK_SET) == 0)
+                    if (PHYSFS_seek(fp, header.infotableofs) != 0)
                     {
                         mNumLumps = LELONG(header.numlumps);
                         mLumps    = new filelump_t[mNumLumps];
 
-                        if (fread(mLumps, mNumLumps * sizeof(*mLumps), 1, fp) != 1)
+                        if (PHYSFS_readBytes(fp, mLumps, mNumLumps * sizeof(*mLumps)) != mNumLumps * sizeof(*mLumps))
                             mNumLumps = 0;
                     }
                 }
             }
 
-            fclose(fp);
+            PHYSFS_close(fp);
         }
     }
 
@@ -904,7 +904,7 @@ class FileIdentificationManager
             {'S', 'T', 'D', 'I', 'S', 'K'}            // 5
         };
 
-        WadFileLumpFinder lumps(file.getFullpath());
+        WadFileLumpFinder lumps(file.getBasename());
         for (int i = 0; i < NUM_CHECKLUMPS; i++)
             if (!lumps.exists(std::string(checklumps[i], 8)))
                 return false;
@@ -950,7 +950,7 @@ class FileIdentificationManager
 
         bool lumpsfound[NUM_CHECKLUMPS] = {0};
 
-        WadFileLumpFinder lumps(file.getFullpath());
+        WadFileLumpFinder lumps(file.getBasename());
         for (int i = 0; i < NUM_CHECKLUMPS; i++)
             if (lumps.exists(std::string(checklumps[i], 8)))
                 lumpsfound[i] = true;

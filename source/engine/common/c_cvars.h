@@ -238,7 +238,7 @@ class cvar_t
     // Called from G_InitNew()
     static void UnlatchCVars(void);
 
-    // archive cvars to FILE f
+    // archive cvars to PHYSFS_File f
     static void C_ArchiveCVars(void *f);
 
     // Initialize cvars to default values after they are created.

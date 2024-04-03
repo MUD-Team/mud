@@ -33,6 +33,7 @@
 #include "odamex.h"
 #include "p_local.h"
 #include "p_tick.h"
+#include "physfs.h"
 #include "r_data.h"
 #include "s_sound.h"
 #include "sv_main.h"
@@ -72,7 +73,7 @@ byte consoleplayer_id;  // player taking events and displaying
 byte displayplayer_id;  // view being displayed
 int  gametic;
 
-FILE *recorddemo_fp;    // Ch0wW : Keeping this for future serverside demo-recording.
+PHYSFS_File *recorddemo_fp;    // Ch0wW : Keeping this for future serverside demo-recording.
 BOOL  demoplayback;     // FIXME : remove this serverside !
 int   demostartgametic; // FIXME : remove this serverside !
 

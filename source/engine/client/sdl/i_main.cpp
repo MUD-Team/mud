@@ -97,18 +97,41 @@ int main(int argc, char *argv[])
         // [ML] 2007/9/3: From Eternity (originally chocolate Doom) Thanks SoM & fraggle!
         ::Args.SetArgs(argc, argv);
 
+        if (PHYSFS_init(::Args.GetArg(0)) == 0)
+            I_FatalError("Could not initialize PHYSFS:\n%s\n", PHYSFS_getLastError());
+
+        PHYSFS_setWriteDir(M_GetWriteDir().c_str());
+        // Ensure certain directories exist in the write folder
+        // These should be no-ops if already present - Dasho
+        PHYSFS_mkdir("saves");
+        PHYSFS_mkdir("screenshots");
+        PHYSFS_mkdir("soundfonts");
+
+        for (const std::string &dir : M_FileSearchDirs())
+        {
+            PHYSFS_mount(dir.c_str(), NULL, 0);
+        }
+
+        PHYSFS_mount(M_GetWriteDir().c_str(), NULL, 0);
+
         if (::Args.CheckParm("--version"))
         {
 #ifdef _WIN32
-            FILE *fh = fopen("odamex-version.txt", "w");
+            PHYSFS_File *fh = PHYSFS_openWrite("odamex-version.txt");
             if (!fh)
                 exit(EXIT_FAILURE);
 
-            const int ok = fprintf(fh, "Odamex %s\n", NiceVersion());
-            if (!ok)
+            std::string str;
+            StrFormat(str, "Odamex %s\n", NiceVersion());
+            const int ok = PHYSFS_writeBytes(fh, str.data(), str.size());
+            if (ok != str.size())
+            {
+                PHYSFS_deinit();
                 exit(EXIT_FAILURE);
+            }
 
-            fclose(fh);
+            PHYSFS_close(fh);
+            PHYSFS_deinit();
 #else
             printf("Odamex %s\n", NiceVersion());
 #endif
@@ -222,6 +245,7 @@ int main(int argc, char *argv[])
         // If D_DoomMain does return (as is the case with the +demotest parameter)
         // proper termination needs to occur -- Hyper_Eye
         call_terms();
+        PHYSFS_deinit();
     }
     catch (CDoomError &error)
     {
@@ -233,6 +257,7 @@ int main(int argc, char *argv[])
         I_ErrorMessageBox(error.GetMsg().c_str());
 
         call_terms();
+        PHYSFS_deinit();
         exit(EXIT_FAILURE);
     }
 #ifndef _DEBUG
