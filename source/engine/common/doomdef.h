@@ -326,17 +326,11 @@ enum GameMission_t
 // the game final animation, or a demo.
 enum gamestate_t
 {
+    GS_NONE,
     GS_LEVEL,
-    GS_INTERMISSION,
-    GS_FINALE,
-    GS_DEMOSCREEN,
-    GS_FULLCONSOLE, // [RH]	Fullscreen console
-    GS_HIDECONSOLE, // [RH] The menu just did something that should hide fs console
-    GS_STARTUP,     // [RH] Console is fullscreen, and game is just starting
-    GS_CONNECTING,  // denis - replace the old global "tryingtoconnect"
-    GS_CONNECTED,   // [ML] - For that brief time before GS_LEVEL But after GS_CONNECTING should be done
-
-    GS_FORCEWIPE = -1
+    GS_STARTUP,    // [RH] Console is fullscreen, and game is just starting
+    GS_CONNECTING, // denis - replace the old global "tryingtoconnect"
+    GS_CONNECTED   // [ML] - For that brief time before GS_LEVEL But after GS_CONNECTING should be done
 };
 
 //

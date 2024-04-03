@@ -69,4 +69,4 @@ bool C_DoKey(event_t *ev, OKeyBindings *binds, OKeyBindings *doublebinds);
 
 void C_ReleaseKeys();
 
-extern OKeyBindings Bindings, DoubleBindings, AutomapBindings, NetDemoBindings;
+extern OKeyBindings Bindings, DoubleBindings, AutomapBindings;

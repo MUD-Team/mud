@@ -1561,7 +1561,7 @@ void DLevelScript::ACS_Print(byte pcd, AActor *activator, const char *print)
     if (clientside &&
         (!local || (activator != NULL && activator->player && activator->player->mo == consoleplayer().camera)))
     {
-        C_MidPrint(print);
+        //C_MidPrint(print);
     }
 }
 

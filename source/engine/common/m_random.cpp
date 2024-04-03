@@ -88,7 +88,7 @@ extern bool step_mode;
 //
 int P_Random(AActor *actor)
 {
-    if (!actor || demoplayback || step_mode)
+    if (!actor || step_mode)
         return P_Random();
 
     return (rndtable[++actor->rndindex]);

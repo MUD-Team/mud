@@ -312,7 +312,7 @@ static void I_DisableKeyRepeat()
 //
 static bool I_CanRepeat()
 {
-    return ConsoleState == c_down;
+    return false;
 }
 
 //
@@ -323,8 +323,6 @@ static bool I_CanRepeat()
 //
 static bool I_CanGrab()
 {
-    extern constate_e ConsoleState;
-
     assert(I_GetWindow() != NULL);
 
     // If the window doesn't have the focus, don't grab
@@ -339,14 +337,14 @@ static bool I_CanGrab()
         return false;
 
     // If paused, in the menu or in the console, don't grab
-    if (ConsoleState == c_down || paused)
+    if (paused)
         return false;
 
     // If playing the game, always grab
-    if ((gamestate == GS_LEVEL || gamestate == GS_INTERMISSION) && !demoplayback)
-        return true;
+    //if (gamestate == GS_LEVEL)
+    //    return true;
 
-    return false;
+    return true;
 }
 
 //
@@ -569,45 +567,22 @@ void STACK_ARGS I_ShutdownInput()
 //
 // Checks for new input events and posts them to the Doom event queue.
 //
-void I_GetEvents(bool mouseOnly)
+void I_GetEvents()
 {
-    if (mouseOnly)
-    {
-        // D_PostEvent will process mouse events immediately
-        input_subsystem->gatherMouseEvents();
-    }
+    static bool previously_focused = false;
+    bool        currently_focused  = I_GetWindow()->isFocused();
+    if (currently_focused && !previously_focused)
+        I_FlushInput();
+    previously_focused = currently_focused;
+
+    I_UpdateGrab();
+    if (I_CanRepeat())
+        I_EnableKeyRepeat();
     else
-    {
-        static bool previously_focused = false;
-        bool        currently_focused  = I_GetWindow()->isFocused();
-        if (currently_focused && !previously_focused)
-            I_FlushInput();
-        previously_focused = currently_focused;
+        I_DisableKeyRepeat();
 
-        I_UpdateGrab();
-        if (I_CanRepeat())
-            I_EnableKeyRepeat();
-        else
-            I_DisableKeyRepeat();
-
-        // Get all of the events from the keboard, mouse, and joystick
-        input_subsystem->gatherEvents();
-    }
-
-    event_t ev;
-    while (input_subsystem->hasEvent())
-    {
-        input_subsystem->getEvent(&ev);
-        D_PostEvent(&ev);
-    }
-}
-
-//
-// I_StartTic
-//
-void I_StartTic(void)
-{
-    I_GetEvents(false);
+    // Get all of the events from the keboard, mouse, and joystick
+    input_subsystem->gatherEvents();
 }
 
 // ============================================================================
@@ -839,4 +814,137 @@ void IInputSubsystem::getEvent(event_t *ev)
     mEvents.pop();
 }
 
-VERSION_CONTROL(i_input_cpp, "$Id: 8ac766d983f209e3f8f18e7a5f33bbcefd369546 $")
+void I_PostInputEvent(event_t &event)
+{
+    input_subsystem->postEvent(event);
+}
+
+void I_HandleInputEvents()
+{
+    event_t ev;
+    while (input_subsystem->hasEvent())
+    {
+        input_subsystem->getEvent(&ev);
+        D_PostEvent(&ev);
+    }
+}
+
+static bool TranslateSDLMouseEvent(const SDL_Event &sdl, event_t &event)
+{
+    event.clear();
+
+    if (sdl.type == SDL_MOUSEMOTION)
+    {
+        event.type = ev_mouse;
+
+        event.data2 += sdl.motion.xrel;
+        event.data3 -= sdl.motion.yrel;
+
+        return event.data2 || event.data3;
+    }
+
+    if (sdl.type == SDL_MOUSEBUTTONUP || sdl.type == SDL_MOUSEBUTTONDOWN || sdl.type == SDL_MOUSEWHEEL)
+    {
+        if (sdl.type == SDL_MOUSEWHEEL)
+        {
+            event.type    = ev_keydown;
+            int direction = 1;
+#if (SDL_VERSION >= SDL_VERSIONNUM(2, 0, 4))
+            if (sdl.wheel.direction == SDL_MOUSEWHEEL_FLIPPED)
+                direction = -1;
+#endif
+
+            if (direction * sdl.wheel.y > 0)
+                event.data1 = OKEY_MWHEELUP;
+            else if (direction * sdl.wheel.y < 0)
+                event.data1 = OKEY_MWHEELDOWN;
+        }
+        else if (sdl.type == SDL_MOUSEBUTTONDOWN || sdl.type == SDL_MOUSEBUTTONUP)
+        {
+            event.type = (sdl.type == SDL_MOUSEBUTTONDOWN) ? ev_keydown : ev_keyup;
+            if (sdl.button.button == SDL_BUTTON_LEFT)
+                event.data1 = OKEY_MOUSE1;
+            else if (sdl.button.button == SDL_BUTTON_RIGHT)
+                event.data1 = OKEY_MOUSE2;
+            else if (sdl.button.button == SDL_BUTTON_MIDDLE)
+                event.data1 = OKEY_MOUSE3;
+            else if (sdl.button.button == SDL_BUTTON_X1)
+                event.data1 = OKEY_MOUSE4; // [Xyltol 07/21/2011] - Add support for MOUSE4
+            else if (sdl.button.button == SDL_BUTTON_X2)
+                event.data1 = OKEY_MOUSE5; // [Xyltol 07/21/2011] - Add support for MOUSE5
+        }
+
+        if (event.data1)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static bool TranslateSDLKeyboardEvent(const SDL_Event &sdl, event_t &event)
+{
+    // Process SDL_KEYDOWN / SDL_KEYUP events. SDL_TEXTINPUT events will
+    // be implicitly ignored unless handled below.
+    if (sdl.type == SDL_KEYDOWN || sdl.type == SDL_KEYUP)
+    {
+        const int sym = sdl.key.keysym.sym;
+        const int mod = sdl.key.keysym.mod;
+
+        event.type = (sdl.type == SDL_KEYDOWN) ? ev_keydown : ev_keyup;
+
+        // Get the Odamex key code from the scancode
+        event.data1 = sdl.key.keysym.sym;
+
+        // From Chocolate Doom:
+        // Get the localized version of the key press. This takes into account the
+        // keyboard layout, but does not apply any changes due to modifiers, (eg.
+        // shift-, alt-, etc.)
+        //
+        // [SL] not sure if this is actually useful...
+        if (sym > 0 && sym < 128)
+            event.data2 = sym;
+
+        // Get the unicode value for the key using the localized keyboard layout
+        // and includes modification via shift, etc.
+        /*
+        if (sdl.type == SDL_KEYDOWN)
+            event.data3 = getTextEventValue();
+        */
+
+        // Ch0wW : Fixes a problem of ultra-fast repeats.
+        if (sdl.key.repeat != 0)
+            return false;
+
+        // drop ALT-TAB events - they're handled elsewhere
+        if (sym == SDLK_TAB && mod & (KMOD_LALT | KMOD_RALT))
+            return false;
+
+        // Add the mod in
+        event.mod = mod;
+
+        // Normal game keyboard event - insert it into our internal queue
+        if (event.data1)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool I_TranslateSDLEvent(const SDL_Event &sdl, event_t &event)
+{
+    if (sdl.type == SDL_KEYDOWN || sdl.type == SDL_KEYUP)
+    {
+        return TranslateSDLKeyboardEvent(sdl, event);
+    }
+
+    if (sdl.type == SDL_MOUSEMOTION || sdl.type == SDL_MOUSEBUTTONUP || sdl.type == SDL_MOUSEBUTTONDOWN || sdl.type == SDL_MOUSEWHEEL)
+    {
+        return TranslateSDLMouseEvent(sdl, event);
+    }
+
+    return false;
+}

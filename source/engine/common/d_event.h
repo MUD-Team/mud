@@ -58,6 +58,15 @@ struct event_t
         mod   = other.mod;
         return *this;
     }
+    
+    void clear()
+    {
+        type = ev_keydown;
+        data1 = 0;
+        data2 = 0;
+        data3 = 0;
+        mod = 0;
+    }
 
     evtype_t type;
     int      data1; // keys / mouse/joystick buttons
@@ -73,12 +82,9 @@ typedef enum
     ga_newgame,
     ga_loadgame,
     ga_savegame,
-    ga_playdemo,
     ga_completed,
-    ga_victory,
     ga_worlddone,
     ga_screenshot,
-    ga_fullconsole,
     ga_fullresetlevel,
     ga_resetlevel
 } gameaction_t;

@@ -658,7 +658,7 @@ void R_DrawPlanes(void)
 //
 // R_PlaneInitData
 //
-bool R_PlaneInitData(IWindowSurface *surface)
+bool R_PlaneInitData(IRenderSurface *surface)
 {
     int surface_width  = surface->getWidth();
     int surface_height = surface->getHeight();

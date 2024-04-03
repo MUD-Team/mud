@@ -57,4 +57,4 @@ visplane_t *R_FindPlane(plane_t secplane, texhandle_t picnum, int lightlevel,
 visplane_t *R_CheckPlane(visplane_t *pl, int start, int stop);
 
 // [RH] Added for multires support
-bool R_PlaneInitData(IWindowSurface *surface);
+bool R_PlaneInitData(IRenderSurface *surface);

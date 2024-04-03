@@ -1802,9 +1802,6 @@ void P_SetupLevel(const char *lumpname, int position)
     // [RH] Clear all ThingID hash chains.
     AActor::ClearTIDHashes();
 
-    // [RH] clear out the mid-screen message
-    C_MidPrint(NULL);
-
     PolyBlockMap = NULL;
 
     // [AM] So shootthing isn't a wild pointer on map swtich.
@@ -1885,8 +1882,7 @@ void P_SetupLevel(const char *lumpname, int position)
     P_GroupLines();
 
     // [SL] don't move seg vertices if compatibility is cruical
-    if (!demoplayback)
-        P_RemoveSlimeTrails();
+    P_RemoveSlimeTrails();
 
     P_SetupSlopes();
 

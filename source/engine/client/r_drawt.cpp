@@ -26,7 +26,7 @@
 
 // Functions for v_video.cpp support
 
-void r_dimpatchD_c(IWindowSurface *surface, argb_t color, int alpha, int x1, int y1, int w, int h)
+void r_dimpatchD_c(IRenderSurface *surface, argb_t color, int alpha, int x1, int y1, int w, int h)
 {
     const int surface_pitch_pixels = surface->getPitchInPixels();
 

@@ -5,7 +5,9 @@
             "name": "curl",
             "default-features": false
         },
+        "freetype",        
         "jsoncpp",
+        "lua",
         "protobuf",
         "sdl2",
         {

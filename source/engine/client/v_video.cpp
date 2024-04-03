@@ -84,9 +84,6 @@ void V_AdjustVideoMode()
         if (!V_DoSetResolution())
             I_FatalError("Could not change screen mode");
 
-        // Refresh the console.
-        C_NewModeAdjust();
-
         // Recalculate various view parameters.
         R_ForceViewWindowResize();
     }
@@ -99,10 +96,8 @@ EXTERN_CVAR(vid_filter)
 EXTERN_CVAR(vid_widescreen)
 EXTERN_CVAR(sv_allowwidescreen)
 EXTERN_CVAR(vid_vsync)
-EXTERN_CVAR(vid_pillarbox)
 EXTERN_CVAR(vid_displayfps)
 
-static int vid_pillarbox_old  = -1;
 static int vid_widescreen_old = -1;
 
 static IVideoMode V_GetRequestedVideoMode()
@@ -131,12 +126,6 @@ bool V_CheckModeAdjustment()
     if (vid_widescreen.asInt() != vid_widescreen_old)
     {
         vid_widescreen_old = vid_widescreen.asInt();
-        return true;
-    }
-
-    if (vid_pillarbox_old != vid_pillarbox)
-    {
-        vid_pillarbox_old = vid_pillarbox;
         return true;
     }
 
@@ -185,29 +174,11 @@ CVAR_FUNC_IMPL(vid_overscan)
         V_ForceVideoModeAdjustment();
 }
 
-CVAR_FUNC_IMPL(vid_320x200)
-{
-    if (gamestate != GS_STARTUP)
-        V_ForceVideoModeAdjustment();
-}
-
-CVAR_FUNC_IMPL(vid_640x400)
-{
-    if (gamestate != GS_STARTUP)
-        V_ForceVideoModeAdjustment();
-}
-
 CVAR_FUNC_IMPL(vid_widescreen)
 {
     if (var < 0 || var > 5)
         var.RestoreDefault();
 
-    if (gamestate != GS_STARTUP && V_CheckModeAdjustment())
-        V_ForceVideoModeAdjustment();
-}
-
-CVAR_FUNC_IMPL(vid_pillarbox)
-{
     if (gamestate != GS_STARTUP && V_CheckModeAdjustment())
         V_ForceVideoModeAdjustment();
 }
@@ -289,7 +260,7 @@ BEGIN_COMMAND(vid_currentmode)
 {
     std::string pixel_string;
 
-    const PixelFormat *format = I_GetWindow()->getPrimarySurface()->getPixelFormat();
+    const PixelFormat *format = IRenderSurface::getCurrentRenderSurface()->getPixelFormat();
     char    temp_str[9] = {0};
     argb_t *d1          = (argb_t *)temp_str;
     argb_t *d2          = (argb_t *)temp_str + 1;
@@ -372,12 +343,6 @@ bool V_UseWidescreen()
     if (width == 0 || height == 0)
         return false;
 
-    if (I_IsProtectedResolution(width, height))
-        return false;
-
-    if (vid_320x200 || vid_640x400)
-        return true;
-
     return (vid_widescreen.asInt() > 0 && (serverside || sv_allowwidescreen));
 }
 
@@ -459,25 +424,21 @@ void V_Init()
     if (realcolormaps.shademap)
         Z_Free(realcolormaps.shademap);
 
-    R_InitColormaps();
+    R_InitColormaps();   
 
-    int surface_width = I_GetSurfaceWidth(), surface_height = I_GetSurfaceHeight();
-
+    // For automap
     // This uses the smaller of the two results. It's still not ideal but at least
     // this allows hud_scaletext to have some purpose...
-    CleanXfac = CleanYfac = std::max(1, std::min(surface_width / 320, surface_height / 200));
+     //int surface_width = I_GetSurfaceWidth(), surface_height = I_GetSurfaceHeight();
+    //CleanXfac = CleanYfac = std::max(1, std::min(surface_width / 320, surface_height / 200));
 
     R_InitColumnDrawers();
 
     I_SetWindowCaption(D_GetTitleString());
     I_SetWindowIcon();
 
-    // notify the console of changes in the screen resolution
-    C_NewModeAdjust();
-
     BuildTransTable(V_GetDefaultPalette()->basecolors);
 
-    vid_pillarbox_old  = vid_pillarbox;
     vid_widescreen_old = vid_widescreen.asInt();
 }
 

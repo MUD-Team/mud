@@ -67,17 +67,17 @@ int MeansOfDeath;
 int maxammo[NUMAMMO]  = {200, 50, 300, 50};
 int clipammo[NUMAMMO] = {10, 4, 20, 1};
 
-void         AM_Stop(void);
-void         SV_SpawnMobj(AActor *mobj);
-void         SV_UpdateFrags(player_t &player);
-void         SV_TouchSpecial(AActor *special, player_t *player);
-void         SV_SocketTouch(player_t &player, team_t f);
-void         SV_SendKillMobj(AActor *source, AActor *target, AActor *inflictor, bool joinkill);
-void         SV_SendDamagePlayer(player_t *player, AActor *inflictor, int healthDamage, int armorDamage);
-void         SV_SendDamageMobj(AActor *target, int pain);
-void         SV_ActorTarget(AActor *actor);
-void         PickupMessage(AActor *toucher, const char *message);
-void         WeaponPickupMessage(AActor *toucher, weapontype_t &Weapon);
+void AM_Stop(void);
+void SV_SpawnMobj(AActor *mobj);
+void SV_UpdateFrags(player_t &player);
+void SV_TouchSpecial(AActor *special, player_t *player);
+void SV_SocketTouch(player_t &player, team_t f);
+void SV_SendKillMobj(AActor *source, AActor *target, AActor *inflictor, bool joinkill);
+void SV_SendDamagePlayer(player_t *player, AActor *inflictor, int healthDamage, int armorDamage);
+void SV_SendDamageMobj(AActor *target, int pain);
+void SV_ActorTarget(AActor *actor);
+void PickupMessage(AActor *toucher, const char *message);
+void WeaponPickupMessage(AActor *toucher, weapontype_t &Weapon);
 
 #ifdef SERVER_APP
 void SV_ShareKeys(card_t card, player_t &player);
@@ -246,44 +246,7 @@ static ItemEquipVal P_GiveAmmoAutoSwitch(player_t *player, ammotype_t ammo, int 
 {
     int i;
 
-    // Keep the original behaviour while playbacking demos only.
-    if (demoplayback)
-    {
-        switch (ammo)
-        {
-        case am_clip:
-            if (player->readyweapon == wp_fist)
-            {
-                if (player->weaponowned[wp_chaingun])
-                    player->pendingweapon = wp_chaingun;
-                else
-                    player->pendingweapon = wp_pistol;
-            }
-            break;
-
-        case am_shell:
-            if (player->readyweapon == wp_fist || player->readyweapon == wp_pistol)
-            {
-                if (player->weaponowned[wp_shotgun])
-                    player->pendingweapon = wp_shotgun;
-            }
-            break;
-
-        case am_cell:
-            if (player->readyweapon == wp_fist || player->readyweapon == wp_pistol)
-                if (player->weaponowned[wp_plasma])
-                    player->pendingweapon = wp_plasma;
-            break;
-
-        case am_misl:
-            if (player->readyweapon == wp_fist)
-                if (player->weaponowned[wp_missile])
-                    player->pendingweapon = wp_missile;
-        default:
-            break;
-        }
-    }
-    else if (player->userinfo.switchweapon != WPSW_NEVER)
+    if (player->userinfo.switchweapon != WPSW_NEVER)
     {
         if (weaponinfo[player->readyweapon].flags & WPF_AUTOSWITCHFROM &&
             player->ammo[weaponinfo[player->readyweapon].ammotype] != ammo)
@@ -753,8 +716,8 @@ static void P_GiveCarePack(player_t *player)
         Printf(PRINT_PICKUP, "%s\n", message.c_str());
         if (!midmessage.empty())
         {
-            std::string buf = std::string(TEXTCOLOR_GREEN) + midmessage;
-            C_MidPrint(buf.c_str(), NULL, 0);
+            //std::string buf = std::string(TEXTCOLOR_GREEN) + midmessage;
+            //C_MidPrint(buf.c_str(), NULL, 0);
         }
     }
 }
@@ -772,7 +735,7 @@ bool P_SpecialIsWeapon(AActor *special)
 void P_PickupSound(AActor *ent, int channel, const char *name)
 {
     if (clientside && ent == consoleplayer().mo) // Only play our own pickup sounds, the server will send other
-                                                      // players pickup sounds if needed
+                                                 // players pickup sounds if needed
         S_Sound(ent, channel, name, 1, ATTN_NONE);
 }
 
@@ -1814,7 +1777,7 @@ void P_KillMobj(AActor *source, AActor *target, AActor *inflictor, bool joinkill
     // [RH] Death messages
     // Nes - Server now broadcasts obituaries.
     // [CG] Since this is a stub, no worries anymore.
-    if (target->player && ::level.time && !::clientside && !::demoplayback && !joinkill)
+    if (target->player && ::level.time && !::clientside && !joinkill)
     {
         ClientObituary(target, inflictor, source);
     }
@@ -1981,12 +1944,12 @@ void P_DamageMobj(AActor *target, AActor *inflictor, AActor *source, int damage,
 
     MeansOfDeath = mod;
 
-    TeamInfo *teamInfo      = NULL;    
-    team_t    f             = TEAM_NONE;
+    TeamInfo *teamInfo = NULL;
+    team_t    f        = TEAM_NONE;
 
     if (player)
     {
-        teamInfo      = GetTeamInfo(player->userinfo.team);
+        teamInfo = GetTeamInfo(player->userinfo.team);
     }
 
     if (target->flags & MF_SKULLFLY)
@@ -2275,13 +2238,13 @@ void P_PlayerLeavesGame(player_s *player)
         level.behavior->StartTypedScripts(SCRIPT_Disconnect, player->mo, player->GetPlayerNumber());
     }
 
-    TeamInfo *teamInfo      = NULL;
-    team_t    f             = TEAM_NONE;
-    team_t    current       = TEAM_NONE;
+    TeamInfo *teamInfo = NULL;
+    team_t    f        = TEAM_NONE;
+    team_t    current  = TEAM_NONE;
     if (player)
     {
-        current       = player->userinfo.team;
-        teamInfo      = GetTeamInfo(player->userinfo.team);
+        current  = player->userinfo.team;
+        teamInfo = GetTeamInfo(player->userinfo.team);
     }
 
     M_LogWDLEvent(WDL_EVENT_KILL, player, player, 0, 0, MOD_EXIT, 0);

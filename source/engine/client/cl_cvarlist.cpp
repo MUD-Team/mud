@@ -144,24 +144,6 @@ CVAR(message_showpickups, "1", "Show item pickup messages on the message line.",
 
 CVAR(message_showobituaries, "0", "Show player death messages on the message line.", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
 
-CVAR_RANGE_FUNC_DECL(msg0color, "6", "Color used for Pickup messages.", CVARTYPE_BYTE,
-                     CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE, 0.0f, 22.0f)
-
-CVAR_RANGE_FUNC_DECL(msg1color, "5", "Color used for obituary messages.", CVARTYPE_BYTE,
-                     CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE, 0.0f, 22.0f)
-
-CVAR_RANGE_FUNC_DECL(msg2color, "2", "Color used for all regular messages.", CVARTYPE_BYTE,
-                     CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE, 0.0f, 22.0f)
-
-CVAR_RANGE_FUNC_DECL(msg3color, "3", "Color used for chat messages.", CVARTYPE_BYTE,
-                     CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE, 0.0f, 22.0f)
-
-CVAR_RANGE_FUNC_DECL(msg4color, "8", "Color used for team-chat messages.", CVARTYPE_BYTE,
-                     CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE, 0.0f, 22.0f)
-
-CVAR_RANGE_FUNC_DECL(msgmidcolor, "5", "Color used for centered messages.", CVARTYPE_BYTE,
-                     CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE, 0.0f, 22.0f)
-
 // Intermission
 // ------------
 
@@ -324,38 +306,6 @@ CVAR(cl_run, "1", "Always run", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE) // Always run
 CVAR(in_autosr50, "1", "+strife activates automatic SR50", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
 
 CVAR(cl_showspawns, "0", "Show spawn points as particle fountains", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE | CVAR_LATCH)
-
-// Netdemo Preferences
-// --------------------
-
-// Netdemo format string
-CVAR_FUNC_DECL(cl_netdemoname, "Odamex_%g_%d_%t_%w_%m",
-               "Default netdemo name.  Parses the following tokens:\n// "
-               "%d: date in YYYYMMDD format\n// %t: time in HHMMSS format\n// "
-               "%n: player name\n// %g: gametype\n// %w: WAD file loaded; "
-               "either the first PWAD or the IWAD\n// %m: Map lump\n// %%: Literal percent sign",
-               CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
-CVAR(cl_autorecord, "0", "Automatically record netdemos", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
-
-CVAR(cl_autorecord_coop, "1", "Allows cooperative netdemos from cl_autorecord CVAR.", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
-
-CVAR(cl_autorecord_deathmatch, "1", "Allows deathmatch netdemos from cl_autorecord CVAR.", CVARTYPE_BOOL,
-     CVAR_CLIENTARCHIVE)
-
-CVAR(cl_autorecord_duel, "1", "Allows duel netdemos from cl_autorecord CVAR.", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
-
-CVAR(cl_autorecord_teamdm, "1", "Allows team deathmatch netdemos from cl_autorecord CVAR.", CVARTYPE_BOOL,
-     CVAR_CLIENTARCHIVE)
-
-CVAR(cl_autorecord_ctf, "1", "Allows CTF netdemos from cl_autorecord CVAR.", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
-
-CVAR(cl_autorecord_horde, "1", "Allows Horde netdemos from cl_autorecord CVAR.", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
-
-CVAR(cl_autoscreenshot, "0", "Automatically capture a screenshot at the end of a match.", CVARTYPE_BOOL,
-     CVAR_CLIENTARCHIVE)
-
-CVAR(cl_splitnetdemos, "0", "Create separate netdemos for each map", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
 
 // Mouse settings
 // --------------
@@ -565,8 +515,6 @@ CVAR_FUNC_DECL(vid_defheight, "720", "", CVARTYPE_WORD, CVAR_CLIENTARCHIVE | CVA
 CVAR_FUNC_DECL(vid_widescreen, "1", "Widescreen mode (0: Off, 1: Auto, 2: 16:10, 3: 16:9, 4: 21:9, 5: 32:9)",
                CVARTYPE_BYTE, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
 
-CVAR_FUNC_DECL(vid_pillarbox, "0", "Pillarbox 4:3 resolutions in widescreen", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
-
 CVAR(vid_autoadjust, "1", "Force fullscreen resolution to the closest available video mode.", CVARTYPE_BOOL,
      CVAR_CLIENTARCHIVE)
 
@@ -581,10 +529,6 @@ CVAR_FUNC_DECL(vid_maxfps, "60", "Maximum framerate (0 indicates unlimited frame
 CVAR_FUNC_DECL(vid_vsync, "0", "Enable/Disable vertical refresh sync (vsync)", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
 
 CVAR_FUNC_DECL(vid_fullscreen, "0", "Full screen video mode", CVARTYPE_BYTE, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
-CVAR_FUNC_DECL(vid_320x200, "0", "Enable 320x200 video emulation", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
-
-CVAR_FUNC_DECL(vid_640x400, "0", "Enable 640x400 video emulation", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
 
 CVAR_FUNC_DECL(vid_filter, "", "Set render scale quality setting for SDL 2.0, one of \"nearest\",\"linear\",\"best\"",
                CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)

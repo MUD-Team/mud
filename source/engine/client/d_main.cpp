@@ -67,18 +67,17 @@
 #include "res_texture.h"
 #include "s_sound.h"
 #include "stats.h"
+#include "ui_public.h"
 #include "v_video.h"
 #include "w_ident.h"
 #include "w_wad.h"
 #include "wi_stuff.h"
 #include "z_zone.h"
+#include "script/lua_client_public.h"
 
 extern size_t got_heapsize;
 
 void D_CheckNetGame(void);
-void D_ProcessEvents(void);
-void D_DoAdvanceDemo(void);
-
 void D_DoomLoop(void);
 
 extern int           testingmode;
@@ -90,17 +89,13 @@ extern dyncolormap_t NormalLight;
 BOOL        devparm;    // started game with -devparm
 const char *D_DrawIcon; // [RH] Patch name of icon to draw on next refresh
 
-char        startmap[8];
-BOOL        autostart;
-BOOL        advancedemo;
-event_t     events[MAXEVENTS];
-int         eventhead;
-int         eventtail;
-bool        demotest      = false;
+char    startmap[8];
+BOOL    autostart;
+event_t events[MAXEVENTS];
+int     eventhead;
+int     eventtail;
+bool    demotest = false;
 
-IWindowSurface *page_surface;
-
-static int demosequence;
 static int pagetic;
 
 EXTERN_CVAR(sv_allowexit)
@@ -132,8 +127,6 @@ void D_ProcessEvents(void)
     for (; eventtail != eventhead; eventtail = ++eventtail < MAXEVENTS ? eventtail : 0)
     {
         ev = &events[eventtail];
-        if (C_Responder(ev))
-            continue; // console ate the event
         G_Responder(ev);
     }
 }
@@ -144,8 +137,7 @@ void D_ProcessEvents(void)
 //
 void D_PostEvent(const event_t *ev)
 {
-    if (ev->type == ev_mouse && gamestate == GS_LEVEL && !paused && ConsoleState != c_down &&
-        ConsoleState != c_falling)
+    if (ev->type == ev_mouse && gamestate == GS_LEVEL && !paused)
     {
         G_Responder((event_t *)ev);
         return;
@@ -176,7 +168,7 @@ void D_Display()
     if (nodrawers || I_IsHeadless())
         return; // for comparative timing / profiling
 
-    MUD_ZoneScoped;    
+    MUD_ZoneScoped;
 
     BEGIN_STAT(D_Display);
 
@@ -191,10 +183,8 @@ void D_Display()
 
     switch (gamestate)
     {
-    case GS_FULLCONSOLE:
     case GS_CONNECTING:
     case GS_CONNECTED:
-        C_DrawConsole();        
         I_FinishUpdate();
         return;
 
@@ -202,31 +192,14 @@ void D_Display()
         if (!gametic || !g_ValidLevel)
             break;
 
-        V_DoPaletteEffects();
-
         // Drawn to R_GetRenderingSurface()
-        R_RenderPlayerView(&displayplayer());
-        
-        if (I_GetEmulatedSurface())
-            I_BlitEmulatedSurface();
+        // R_RenderPlayerView(&displayplayer());
 
-        if (AM_ClassicAutomapVisible() || AM_OverlayAutomapVisible())
-            AM_Drawer();
+        // if (AM_ClassicAutomapVisible() || AM_OverlayAutomapVisible())
+        //     AM_Drawer();
 
-        C_DrawMid();
-        C_DrawGMid();
-        break;
-
-    case GS_INTERMISSION:
-        C_DrawMid();
-        V_ResetPalette();
-        break;
-
-    case GS_FINALE:        
-        break;
-
-    case GS_DEMOSCREEN:
-        D_PageDrawer();
+        // C_DrawMid();
+        // C_DrawGMid();
         break;
 
     default:
@@ -243,7 +216,6 @@ void D_Display()
     {
     }
 
-    C_DrawConsole();  // draw console
     I_FinishUpdate(); // page flip or blit buffer
 
     END_STAT(D_Display);
@@ -264,9 +236,6 @@ void D_DoomLoop(void)
         {
             Printf(PRINT_ERROR, "\nERROR: %s\n", error.GetMsg().c_str());
 
-            // [AM] In case an error is caused by a console command.
-            C_ClearCommand();
-
             CL_QuitNetGame(NQ_SILENT);
 
             G_ClearSnapshots();
@@ -275,7 +244,7 @@ void D_DoomLoop(void)
 
             ::players.clear();
 
-            ::gameaction = ga_fullconsole;
+            ::gameaction = ga_nothing;
         }
     }
 }
@@ -286,8 +255,6 @@ void D_DoomLoop(void)
 //
 void D_PageTicker(void)
 {
-    if (--pagetic < 0)
-        D_AdvanceDemo();
 }
 
 //
@@ -295,129 +262,13 @@ void D_PageTicker(void)
 //
 void D_PageDrawer()
 {
-    IWindowSurface *primary_surface = I_GetPrimarySurface();
+    IRenderSurface *primary_surface = IRenderSurface::getCurrentRenderSurface();
+    if (!primary_surface || !primary_surface->getWidth() || !primary_surface->getHeight())
+    {
+        return;
+    }
     int             surface_width = primary_surface->getWidth(), surface_height = primary_surface->getHeight();
     primary_surface->clear(); // ensure black background in matted modes
-
-    if (page_surface)
-    {
-        int destw, desth;
-
-        if (I_IsProtectedResolution(I_GetVideoWidth(), I_GetVideoHeight()))
-            destw = surface_width, desth = surface_height;
-        else if (surface_width * 3 >= surface_height * 4)
-            destw = surface_height * 4 / 3, desth = surface_height;
-        else
-            destw = surface_width, desth = surface_width * 3 / 4;
-
-        page_surface->lock();
-
-        primary_surface->blit(page_surface, 0, 0, page_surface->getWidth(), page_surface->getHeight(),
-                              (surface_width - destw) / 2, (surface_height - desth) / 2, destw, desth);
-
-        page_surface->unlock();
-    }
-}
-
-//
-// D_AdvanceDemo
-// Called after each demo or intro demosequence finishes
-//
-void D_AdvanceDemo(void)
-{
-    advancedemo = true;
-}
-
-//
-// This cycles through the demo sequences.
-//
-void D_DoAdvanceDemo(void)
-{
-    const char *pagename = NULL;
-
-    consoleplayer().playerstate = PST_LIVE; // not reborn
-    advancedemo                 = false;
-    usergame                    = false;    // no save / end game here
-    paused                      = false;
-    gameaction                  = ga_nothing;
-
-    // [Russell] - Old demo sequence used in original games, zdoom's
-    // dynamic one was too dynamic for its own good
-    // [Nes] - Newer demo sequence with better flow.
-    if (W_CheckNumForName("DEMO4") >= 0 && gamemode != retail_chex)
-        demosequence = (demosequence + 1) % 8;
-    else
-        demosequence = (demosequence + 1) % 6;
-
-    switch (demosequence)
-    {
-    case 0:
-        if (gameinfo.flags & GI_MAPxx)
-            pagetic = TICRATE * 11;
-        else
-            pagetic = 170;
-
-        gamestate = GS_DEMOSCREEN;
-        pagename  = gameinfo.titlePage.c_str();
-
-        currentmusic = gameinfo.titleMusic.c_str();
-
-        S_StartMusic(currentmusic.c_str());
-
-        break;
-    case 1:
-        G_DeferedPlayDemo("DEMO1");
-
-        break;
-    case 2:
-        pagetic   = 200;
-        gamestate = GS_DEMOSCREEN;
-        pagename  = gameinfo.creditPage1;
-
-        break;
-    case 3:
-        G_DeferedPlayDemo("DEMO2");
-
-        break;
-    case 4:
-        gamestate = GS_DEMOSCREEN;
-
-        if ((gameinfo.flags & GI_MAPxx) || (gameinfo.flags & GI_MENUHACK_RETAIL))
-        {
-            if (gameinfo.flags & GI_MAPxx)
-                pagetic = TICRATE * 11;
-            else
-                pagetic = 170;
-            pagename     = gameinfo.titlePage.c_str();
-            currentmusic = gameinfo.titleMusic.c_str();
-
-            S_StartMusic(currentmusic.c_str());
-        }
-        else
-        {
-            pagetic = 200;
-            if (gamemode == retail_chex) // [ML] Chex mode just cycles this screen
-                pagename = gameinfo.creditPage1;
-            else
-                pagename = gameinfo.creditPage2;
-        }
-
-        break;
-    case 5:
-        G_DeferedPlayDemo("DEMO3");
-
-        break;
-    case 6:
-        pagetic   = 200;
-        gamestate = GS_DEMOSCREEN;
-        pagename  = gameinfo.creditPage2;
-
-        break;
-    case 7:
-        G_DeferedPlayDemo("DEMO4");
-
-        break;
-    }
 }
 
 //
@@ -425,8 +276,6 @@ void D_DoAdvanceDemo(void)
 //
 void STACK_ARGS D_Close()
 {
-    I_FreeSurface(page_surface);
-
     D_ClearTaskSchedulers();
 }
 
@@ -436,10 +285,7 @@ void STACK_ARGS D_Close()
 void D_StartTitle(void)
 {
     // CL_QuitNetGame(NQ_SILENT);
-
-    gameaction   = ga_nothing;
-    demosequence = -1;
-    D_AdvanceDemo();
+    gameaction   = ga_nothing;        
 }
 
 bool HashOk(std::string &required, std::string &available)
@@ -472,8 +318,10 @@ void D_Init()
     if (first_time)
         Printf("Z_Init: Using native allocator with OZone bookkeeping.\n");
 
+    UI_Initialize();        
+
     // Load palette and set up colormaps
-    V_Init();
+    V_Init();    
 
     if (first_time)
     	Printf(PRINT_HIGH, "Res_InitTextureManager: Init image resource management.\n");
@@ -484,12 +332,6 @@ void D_Init()
         Printf(PRINT_HIGH, "R_Init: Init DOOM refresh daemon.\n");
     R_Init();
 
-    //	V_LoadFonts();
-
-    C_InitConsoleBackground();
-
-    C_InitConCharsFont();    
-
     G_ParseMapInfo();
     G_ParseMusInfo();
     S_ParseSndInfo();
@@ -497,7 +339,7 @@ void D_Init()
 
     // init the menu subsystem
     if (first_time)
-        Printf(PRINT_HIGH, "M_Init: Init miscellaneous info.\n");    
+        Printf(PRINT_HIGH, "M_Init: Init miscellaneous info.\n");
 
     if (first_time)
         Printf(PRINT_HIGH, "P_Init: Init Playloop state.\n");
@@ -517,9 +359,11 @@ void D_Init()
 
     // init the status bar
     if (first_time)
-        Printf(PRINT_HIGH, "ST_Init: Init status bar.\n");
-    
+        Printf(PRINT_HIGH, "ST_Init: Init status bar.\n");    
+
     first_time = false;
+
+    LUA_OpenClientState();
 }
 
 //
@@ -530,6 +374,9 @@ void D_Init()
 //
 void STACK_ARGS D_Shutdown()
 {
+
+    LUA_CloseClientState();
+
     if (gamestate == GS_LEVEL)
         G_ExitLevel(0, 0);
 
@@ -549,12 +396,6 @@ void STACK_ARGS D_Shutdown()
 
     // close all open WAD files
     W_Close();
-
-    //	V_UnloadFonts();
-
-    C_ShutdownConCharsFont();
-
-    C_ShutdownConsoleBackground();
 
     R_Shutdown();
 
@@ -588,10 +429,6 @@ void D_DoomMain()
     gamestate = GS_STARTUP;
 
     atterm(D_Close);
-
-    // init console so it can capture all of the startup messages
-    C_InitConsole();
-    atterm(C_ShutdownConsole);
 
     // [RH] Initialize items. Still only used for the give command. :-(
     InitItems();
@@ -749,67 +586,6 @@ void D_DoomMain()
     // do all commands on the command line other than +set
     C_ExecCmdLineParams(false, false);
 
-    // --- process vanilla demo cli switches ---
-
-    // shorttics (quantize yaw like recording a vanilla demo)
-    extern bool longtics;
-    longtics = !(Args.CheckParm("-shorttics"));
-
-    // Check for -playdemo, play a single demo then quit.
-    p = Args.CheckParm("-playdemo");
-    // Hack to check for +playdemo command, since if you just add it normally
-    // it won't run because it's attempting to run a demo and still set up the
-    // first map as normal.
-    if (!p)
-        p = Args.CheckParm("+playdemo");
-    if (p && p < Args.NumArgs() - 1)
-    {
-        Printf(PRINT_HIGH, "Playdemo parameter found on command line.\n");
-        singledemo = true;
-
-        extern std::string defdemoname;
-        defdemoname = Args.GetArg(p + 1);
-    }
-
-    // [SL] check for -timedemo (was removed at some point)
-    p = Args.CheckParm("-timedemo");
-    if (p && p < Args.NumArgs() - 1)
-    {
-        singledemo = true;
-        G_TimeDemo(Args.GetArg(p + 1));
-    }
-
-    // denis - this will run a demo and quit
-    p = Args.CheckParm("+demotest");
-    if (p && p < Args.NumArgs() - 1)
-    {
-        singledemo = true;
-        G_TestDemo(Args.GetArg(p + 1));
-    }
-
-    // --- process network demo cli switches ---
-
-    // [SL] allow the user to pass the name of a netdemo as the first argument.
-    // This allows easy launching of netdemos from Windows Explorer or other GUIs.
-    //
-    // [Xyltol]
-    if (Args.GetArg(1))
-    {
-        std::string       demoarg = Args.GetArg(1);
-        const std::string demoext(".odd");
-
-        // does demoarg have a .odd extensions?
-        if (demoarg.find(".odd") == demoarg.length() - demoext.length())
-            CL_NetDemoPlay(demoarg);
-    }
-
-    p = Args.CheckParm("-netplay");
-    if (p && p < Args.NumArgs() - 1)
-    {
-        std::string filename = Args.GetArg(p + 1);
-        CL_NetDemoPlay(filename);
-    }
-
     // --- initialization complete ---
 
     Printf_Bold("\n\35\36\36\36\36 Odamex Client Initialized \36\36\36\36\37\n");
@@ -817,12 +593,7 @@ void D_DoomMain()
         Printf(PRINT_HIGH, "Type connect <address> or use the Odamex Launcher to connect to a game.\n");
     Printf(PRINT_HIGH, "\n");
 
-    // Play a demo, start a map, or show the title screen
-    if (singledemo)
-    {
-        G_DoPlayDemo();
-    }
-    else if (autostart)
+    if (autostart)
     {
         // single player warp (like in g_level)
         serverside = true;
@@ -840,14 +611,16 @@ void D_DoomMain()
     }
     else if (gamestate != GS_CONNECTING)
     {
-        C_HideConsole();
         D_StartTitle();                 // start up intro loop
 
         if (gamemode == commercial_bfg) // DOOM 2 BFG Edtion
             AddCommandString("menu_main");
     }
 
-    D_DoomLoop(); // never returns
+    void LUA_MainLoop();
+    LUA_MainLoop();
+    
+    //D_DoomLoop(); // never returns
 }
 
 VERSION_CONTROL(d_main_cpp, "$Id: 309553abfd782610a6419696f1c7ac781bb65246 $")

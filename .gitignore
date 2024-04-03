@@ -1,4 +1,10 @@
-bin
 build
 vcpkg_installed
 .vscode/settings.json
+*.pdb
+*.exe
+*.WAD
+*.wad
+
+
+freedoom2*

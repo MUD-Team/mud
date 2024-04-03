@@ -22,19 +22,15 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "cl_demo.h"
 #include "cl_main.h"
 #include "d_netinf.h"
 #include "g_game.h"
 #include "gi.h"
 #include "i_system.h"
+#include "i_input.h"
 #include "m_argv.h"
 #include "odamex.h"
 #include "p_local.h"
-
-extern NetDemo netdemo;
-
-extern byte *demo_p; // [RH] Special "ticcmds" get recorded in demos
 
 //
 // NETWORKING
@@ -48,7 +44,6 @@ bool step_mode = false;
 
 void D_ProcessEvents(void);
 void G_BuildTiccmd(ticcmd_t *cmd);
-void D_DoAdvanceDemo(void);
 
 //
 // NetUpdate
@@ -57,7 +52,7 @@ void D_DoAdvanceDemo(void);
 //
 void NetUpdate(void)
 {
-    I_StartTic();
+    I_GetEvents();
     D_ProcessEvents();
     G_BuildTiccmd(&consoleplayer().netcmds[gametic % BACKUPTICS]);
 }

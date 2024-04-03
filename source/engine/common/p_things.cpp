@@ -324,7 +324,7 @@ BOOL P_ActivateMobj(AActor *mobj, AActor *activator)
             {
                 if (mobj->args[0] <= 1)
                 {
-                    C_MidPrint("A secret is revealed!");
+                    //C_MidPrint("A secret is revealed!");
                 }
                 if (mobj->args[0] == 0 || mobj->args[0] == 2)
                 {

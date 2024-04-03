@@ -98,7 +98,7 @@ Unlag::~Unlag()
 
 bool Unlag::enabled()
 {
-    return (serverside && multiplayer && !demoplayback);
+    return (serverside && multiplayer);
 }
 
 //

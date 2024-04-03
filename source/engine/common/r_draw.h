@@ -144,14 +144,14 @@ void R_DrawSlopeSpanD_c(void);
 #define SPANJUMP   16
 #define INTERPSTEP (0.0625f)
 
-class IWindowSurface;
+class IRenderSurface;
 
-void r_dimpatchD_c(IWindowSurface *surface, argb_t color, int alpha, int x1, int y1, int w, int h);
+void r_dimpatchD_c(IRenderSurface *surface, argb_t color, int alpha, int x1, int y1, int w, int h);
 
 #ifdef __SSE2__
 void R_DrawSpanD_SSE2(void);
 void R_DrawSlopeSpanD_SSE2(void);
-void r_dimpatchD_SSE2(IWindowSurface *, argb_t color, int alpha, int x1, int y1, int w, int h);
+void r_dimpatchD_SSE2(IRenderSurface *, argb_t color, int alpha, int x1, int y1, int w, int h);
 #endif
 
 #ifdef __MMX__
@@ -169,7 +169,7 @@ void r_dimpatchD_ALTIVEC(IWindowSurface *, argb_t color, int alpha, int x1, int 
 // Vectorizable function pointers:
 extern void (*R_DrawSpanD)(void);
 extern void (*R_DrawSlopeSpanD)(void);
-extern void (*r_dimpatchD)(IWindowSurface *surface, argb_t color, int alpha, int x1, int y1, int w, int h);
+extern void (*r_dimpatchD)(IRenderSurface *surface, argb_t color, int alpha, int x1, int y1, int w, int h);
 
 extern byte   bosstable[256];
 extern byte  *translationtables;

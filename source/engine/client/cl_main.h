@@ -24,7 +24,6 @@
 
 #pragma once
 
-#include "cl_demo.h"
 #include "d_player.h"
 #include "d_ticcmd.h"
 #include "i_net.h"
@@ -38,8 +37,6 @@ extern bool noservermsgs;
 extern int  last_received;
 
 extern buf_t net_buffer;
-
-extern NetDemo netdemo;
 
 #define MAXSAVETICS 70
 

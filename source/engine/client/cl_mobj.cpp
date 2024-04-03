@@ -82,9 +82,7 @@ void P_SpawnPlayer(player_t &player, mapthing2_t *mthing)
     if (player.id == consoleplayer_id)
     {
         // NOTE(jsd): Copy the player setup menu's translation to the player_id's:
-        // [SL] don't screw with vanilla demo player colors
-        if (!demoplayback)
-            R_CopyTranslationRGB(0, player.id);
+        R_CopyTranslationRGB(0, player.id);
     }
 
     //	if (player.deadspectator && player.mo)
@@ -126,10 +124,6 @@ void P_SpawnPlayer(player_t &player, mapthing2_t *mthing)
         player.mo->flags &= ~MF_SOLID;
     }
 
-    // [RH] Allow chasecam for demo watching
-    if (demoplayback && chasedemo)
-        player.cheats = CF_CHASECAM;
-
     // setup gun psprite
     P_SetupPsprites(&player);
 
@@ -167,8 +161,6 @@ void P_ShowSpawns(mapthing2_t *mthing)
 {
     // Ch0wW: DO NOT add new spawns to a DOOM2 demo !
     // It'll immediately desync in DM!
-    if (demoplayback)
-        return;
 
     if (clientside && cl_showspawns)
     {

@@ -32,7 +32,6 @@
 #include "c_console.h"
 #include "c_dispatch.h"
 #include "c_effect.h"
-#include "cl_demo.h"
 #include "cl_download.h"
 #include "cl_maplist.h"
 #include "cl_parse.h"
@@ -111,11 +110,8 @@ huffman_client compressor;
 
 std::string server_host = ""; // hostname of server
 
-// [SL] 2011-06-27 - Class to record and playback network recordings
-NetDemo netdemo;
 // [SL] 2011-07-06 - not really connected (playing back a netdemo)
 bool simulated_connection = false;
-bool forcenetdemosplit    = false; // need to split demo due to svc_reconnect
 
 NetCommand localcmds[MAXSAVETICS];
 
@@ -207,10 +203,6 @@ argb_t CL_GetPlayerColor(player_t *player)
 
 static void CL_RebuildAllPlayerTranslations()
 {
-    // [SL] vanilla demo colors override
-    if (demoplayback)
-        return;
-
     for (Players::iterator it = players.begin(); it != players.end(); ++it)
         R_BuildPlayerTranslation(it->id, CL_GetPlayerColor(&*it));
 }
@@ -273,7 +265,6 @@ void CL_SimulateWorld();
 
 // some doom functions (not csDoom)
 void D_Display(void);
-void D_DoAdvanceDemo(void);
 
 void R_InterpolationTicker();
 
@@ -365,7 +356,7 @@ void CL_QuitNetGame2(const netQuitReason_e reason, const char *file, const int l
 
     memset(&serveraddr, 0, sizeof(serveraddr));
     connected    = false;
-    gameaction   = ga_fullconsole;
+    gameaction   = ga_nothing;
     noservermsgs = false;
     AM_Stop();
 
@@ -397,14 +388,6 @@ void CL_QuitNetGame2(const netQuitReason_e reason, const char *file, const int l
 
     recv_full_update = false;
 
-    if (netdemo.isRecording())
-        netdemo.stopRecording();
-
-    if (netdemo.isPlaying())
-        netdemo.stopPlaying();
-
-    demoplayback = false;
-
     // Reset the palette to default
     V_ResetPalette();
 
@@ -433,9 +416,6 @@ void CL_Reconnect(void)
 {
     recv_full_update = false;
 
-    if (netdemo.isRecording())
-        forcenetdemosplit = true;
-
     ClientReplay::getInstance().reset();
 
     if (connected)
@@ -444,7 +424,7 @@ void CL_Reconnect(void)
         NET_SendPacket(net_buffer, serveraddr);
         SZ_Clear(&net_buffer);
         connected  = false;
-        gameaction = ga_fullconsole;
+        gameaction = ga_nothing;
 
         P_ClearAllNetIds();
     }
@@ -487,7 +467,7 @@ void CL_CheckDisplayPlayer(void)
     if (!validplayer(displayplayer()) || !displayplayer().mo)
         newid = consoleplayer_id;
 
-    if (!P_CanSpy(consoleplayer(), displayplayer(), demoplayback || netdemo.isPlaying() || netdemo.isPaused()))
+    if (!P_CanSpy(consoleplayer(), displayplayer()))
         newid = consoleplayer_id;
 
     if (displayplayer().spectator)
@@ -523,12 +503,6 @@ template <class Iterator> void CL_SpyCycle(Iterator begin, Iterator end)
     if (players.empty())
         return;
 
-    if (gamestate == GS_INTERMISSION)
-    {
-        displayplayer_id = consoleplayer_id;
-        return;
-    }
-
     if (!validplayer(displayplayer()))
     {
         CL_CheckDisplayPlayer();
@@ -558,22 +532,16 @@ template <class Iterator> void CL_SpyCycle(Iterator begin, Iterator end)
         player_t &player = *it;
 
         // spectators only cycle between active players
-        if (P_CanSpy(self, player, demoplayback || netdemo.isPlaying() || netdemo.isPaused()))
+        if (P_CanSpy(self, player))
         {
             displayplayer_id = player.id;
             CL_CheckDisplayPlayer();
-
-            if (demoplayback)
-            {
-                consoleplayer_id = player.id;                
-            }
 
             return;
         }
     } while (it != sentinal);
 }
 
-extern BOOL advancedemo;
 QWORD       nextstep   = 0;
 int         canceltics = 0;
 
@@ -589,11 +557,6 @@ void CL_StepTics(unsigned int count)
 
         NetUpdate();
 
-        if (advancedemo)
-            D_DoAdvanceDemo();
-
-        C_Ticker();        
-
         if (P_AtInterval(TICRATE))
             CL_PlayerTimes();
 
@@ -605,8 +568,6 @@ void CL_StepTics(unsigned int count)
 
         G_Ticker();
         gametic++;
-        if (netdemo.isPlaying() && !netdemo.isPaused())
-            netdemo.ticker();
     }
 
     DObject::EndFrame();
@@ -617,8 +578,11 @@ void CL_StepTics(unsigned int count)
 //
 void CL_DisplayTics()
 {
-    I_GetEvents(true);
-    D_Display();
+    //I_GetEvents(true);
+    //D_Display();
+    void LUA_Display();
+    LUA_Display();
+    
 }
 
 //
@@ -703,8 +667,7 @@ BEGIN_COMMAND(connect)
     }
 
     simulated_connection = false; // Ch0wW : don't block people connect to a server after playing a demo
-
-    C_FullConsole();
+    
     gamestate = GS_CONNECTING;
 
     CL_QuitNetGame(NQ_SILENT);
@@ -1069,178 +1032,6 @@ BEGIN_COMMAND(exit)
 END_COMMAND(exit)
 
 //
-// NetDemo related functions
-//
-
-CVAR_FUNC_IMPL(cl_netdemoname)
-{
-    // No empty format strings allowed.
-    if (strlen(var.cstring()) == 0)
-        var.RestoreDefault();
-}
-
-//
-// CL_GenerateNetDemoFileName
-//
-//
-std::string CL_GenerateNetDemoFileName(const std::string &filename = cl_netdemoname.cstring())
-{
-    const std::string expanded_filename(M_ExpandTokens(filename));
-    std::string       newfilename(expanded_filename);
-    newfilename = M_GetUserFileName(newfilename.c_str());
-
-    // keep trying to find a filename that doesn't yet exist
-    if (!M_FindFreeName(newfilename, "odd"))
-    {
-        I_Warning("Unable to generate netdemo file name.");
-        return std::string();
-    }
-
-    return newfilename;
-}
-
-void CL_NetDemoPlay(const std::string &filename)
-{
-    std::string found = M_FindUserFileName(filename, ".odd");
-    if (found.empty())
-    {
-        Printf(PRINT_WARNING, "Could not find demo %s.\n", filename.c_str());
-        return;
-    }
-
-    netdemo.startPlaying(found);
-}
-
-BEGIN_COMMAND(stopnetdemo)
-{
-    if (netdemo.isRecording())
-    {
-        netdemo.stopRecording();
-    }
-    else if (netdemo.isPlaying())
-    {
-        netdemo.stopPlaying();
-    }
-}
-END_COMMAND(stopnetdemo)
-
-BEGIN_COMMAND(netrecord)
-{
-    if (netdemo.isRecording())
-    {
-        Printf(PRINT_HIGH, "Already recording a netdemo.  Please stop recording before "
-                           "beginning a new netdemo recording.\n");
-        return;
-    }
-
-    if (!connected || simulated_connection)
-    {
-        Printf(PRINT_HIGH, "You must be connected to a server to record a netdemo.\n");
-        return;
-    }
-
-    std::string filename;
-    if (argc > 1 && strlen(argv[1]) > 0)
-        filename = CL_GenerateNetDemoFileName(argv[1]);
-    else
-        filename = CL_GenerateNetDemoFileName();
-
-    if (netdemo.startRecording(filename))
-        netdemo.writeMapChange();
-}
-END_COMMAND(netrecord)
-
-BEGIN_COMMAND(netpause)
-{
-    if (netdemo.isPaused())
-    {
-        netdemo.resume();
-        paused = false;
-        Printf(PRINT_HIGH, "Demo resumed.\n");
-    }
-    else if (netdemo.isPlaying())
-    {
-        netdemo.pause();
-        paused = true;
-        Printf(PRINT_HIGH, "Demo paused.\n");
-    }
-}
-END_COMMAND(netpause)
-
-BEGIN_COMMAND(netplay)
-{
-    if (argc <= 1)
-    {
-        Printf(PRINT_HIGH, "Usage: netplay <demoname>\n");
-        return;
-    }
-
-    if (!connected)
-    {
-        G_CheckDemoStatus(); // cleans up vanilla demo or single player game
-    }
-
-    CL_QuitNetGame(NQ_SILENT);
-    connected = false;
-
-    std::string filename = argv[1];
-    CL_NetDemoPlay(filename);
-}
-END_COMMAND(netplay)
-
-BEGIN_COMMAND(netdemostats)
-{
-    if (!netdemo.isPlaying() && !netdemo.isPaused())
-        return;
-
-    std::vector<int> maptimes  = netdemo.getMapChangeTimes();
-    int              curtime   = netdemo.calculateTimeElapsed();
-    int              totaltime = netdemo.calculateTotalTime();
-
-    Printf(PRINT_HIGH, "\n%s\n", netdemo.getFileName().c_str());
-    Printf(PRINT_HIGH, "============================================\n");
-    Printf(PRINT_HIGH, "Total time: %i seconds\n", totaltime);
-    Printf(PRINT_HIGH, "Current position: %i seconds (%i%%)\n", curtime, curtime * 100 / totaltime);
-    Printf(PRINT_HIGH, "Number of maps: %i\n", maptimes.size());
-    for (size_t i = 0; i < maptimes.size(); i++)
-    {
-        Printf(PRINT_HIGH, "> %02i Starting time: %i seconds\n", i + 1, maptimes[i]);
-    }
-}
-END_COMMAND(netdemostats)
-
-BEGIN_COMMAND(netff)
-{
-    if (netdemo.isPlaying())
-        netdemo.nextSnapshot();
-    else if (netdemo.isPaused())
-        ;
-    netdemo.nextTic();
-}
-END_COMMAND(netff)
-
-BEGIN_COMMAND(netrew)
-{
-    if (netdemo.isPlaying())
-        netdemo.prevSnapshot();
-}
-END_COMMAND(netrew)
-
-BEGIN_COMMAND(netnextmap)
-{
-    if (netdemo.isPlaying())
-        netdemo.nextMap();
-}
-END_COMMAND(netnextmap)
-
-BEGIN_COMMAND(netprevmap)
-{
-    if (netdemo.isPlaying())
-        netdemo.prevMap();
-}
-END_COMMAND(netprevmap)
-
-//
 // CL_MoveThing
 //
 void CL_MoveThing(AActor *mobj, fixed_t x, fixed_t y, fixed_t z)
@@ -1422,7 +1213,7 @@ void CL_QuitAndTryDownload(const OWantFile &missing_file)
 {
     // Need to set this here, otherwise we render a frame of wild pointers
     // filled with garbage data.
-    gamestate = GS_FULLCONSOLE;
+    gamestate = GS_NONE;
 
     if (missing_file.getBasename().empty())
     {
@@ -1440,15 +1231,6 @@ void CL_QuitAndTryDownload(const OWantFile &missing_file)
         Printf(PRINT_WARNING,
                "Unable to find \"%s\". Downloading is disabled on your client.  Go to "
                "Options > Network Options to enable downloading.\n",
-               missing_file.getBasename().c_str());
-        CL_QuitNetGame(NQ_DISCONNECT);
-        return;
-    }
-
-    if (netdemo.isPlaying())
-    {
-        // Playing a netdemo and unable to download from the server
-        Printf(PRINT_WARNING, "Unable to find \"%s\".  Cannot download while playing a netdemo.\n",
                missing_file.getBasename().c_str());
         CL_QuitNetGame(NQ_DISCONNECT);
         return;
@@ -1492,8 +1274,6 @@ void CL_QuitAndTryDownload(const OWantFile &missing_file)
 //
 bool CL_PrepareConnect()
 {
-    G_CleanupDemo(); // stop demos from playing before D_DoomWadReboot wipes out Zone memory
-
     cvar_t::C_BackupCVars(CVAR_SERVERINFO);
 
     DWORD server_token = MSG_ReadLong();
@@ -1685,7 +1465,7 @@ bool CL_Connect()
     multiplayer          = true;
     network_game         = true;
     serverside           = false;
-    simulated_connection = netdemo.isPlaying();
+    simulated_connection = false;
 
     byte flags = MSG_ReadByte();
     if (flags & SVF_UNUSED_MASK)
@@ -1699,7 +1479,7 @@ bool CL_Connect()
     }
     CL_ParseCommands();
 
-    if (gameaction == ga_fullconsole) // Host_EndGame was called
+    if (gameaction == ga_nothing) // Host_EndGame was called
         return false;
 
     D_SetupUserInfo();
@@ -1993,9 +1773,6 @@ extern int outrate;
 void CL_SendCmd(void)
 {
     player_t *p = &consoleplayer();
-
-    if (netdemo.isPlaying()) // we're not really connected to a server
-        return;
 
     if (!p->mo || gametic < 1)
         return;
@@ -2291,7 +2068,7 @@ void CL_SimulatePlayers()
 //
 void CL_SimulateWorld()
 {
-    if (gamestate != GS_LEVEL || netdemo.isPaused())
+    if (gamestate != GS_LEVEL)
         return;
 
     // if the world_index falls outside this range, resync it

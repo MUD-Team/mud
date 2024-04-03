@@ -774,7 +774,7 @@ bool P_AreTeammates(player_t &a, player_t &b)
     return G_IsCoopGame() || ((a.userinfo.team == b.userinfo.team) && G_IsTeamGame());
 }
 
-bool P_CanSpy(player_t &viewer, player_t &other, bool demo)
+bool P_CanSpy(player_t &viewer, player_t &other)
 {
     // Viewers can always spy themselves.
     if (viewer.id == other.id)
@@ -783,10 +783,6 @@ bool P_CanSpy(player_t &viewer, player_t &other, bool demo)
     // You cannot view those without bodies or spectators.
     if (!other.mo || other.spectator)
         return false;
-
-    // Demo-watchers can view anybody.
-    if (demo)
-        return true;
 
     // Is the player a teammate?
     bool isTeammate = false;

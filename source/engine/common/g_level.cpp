@@ -328,13 +328,6 @@ bool G_LoadWad(const OWantFiles &newwadfiles, const std::string &mapname)
     {
         unnatural_level_progression = true;
 
-        // [SL] Stop any playing/recording demos before D_DoomWadReboot wipes out
-        // the zone memory heap and takes the demo data with it.
-#ifdef CLIENT_APP
-        {
-            G_CheckDemoStatus();
-        }
-#endif
         D_DoomWadReboot(newwadfiles);
         if (!missingfiles.empty())
         {

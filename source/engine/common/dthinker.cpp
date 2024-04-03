@@ -206,7 +206,7 @@ void DThinker::DestroyMostThinkers()
 bool IndependentThinker(DThinker *thinker)
 {
     // Only have independent thinkers in client/server mode
-    if (!multiplayer || demoplayback)
+    if (!multiplayer)
         return false;
 
     if (thinker->IsKindOf(RUNTIME_CLASS(AActor)))

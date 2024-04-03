@@ -28,7 +28,7 @@
 #include "r_data.h"
 #include "v_palette.h"
 
-class IWindowSurface;
+class IRenderSurface;
 
 extern int CleanXfac, CleanYfac;
 

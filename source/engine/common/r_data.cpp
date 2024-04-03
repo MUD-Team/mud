@@ -1024,9 +1024,6 @@ void R_PrecacheLevel(void)
     byte *hitlist;
     int   i;
 
-    if (demoplayback)
-        return;
-
     {
         int size = (numflats > numsprites) ? numflats : numsprites;
 

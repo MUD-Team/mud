@@ -564,8 +564,8 @@ static TaskScheduler *display_scheduler;
 //
 static void D_InitTaskSchedulers(void (*sim_func)(), void (*display_func)())
 {
-    bool capped_simulation = !timingdemo;
-    bool capped_display    = !timingdemo && capfps;
+    bool capped_simulation = true;
+    bool capped_display    = capfps;
 
     static bool  previous_capped_simulation = !capped_simulation;
     static bool  previous_capped_display    = !capped_display;
@@ -628,17 +628,13 @@ void D_RunTics(void (*sim_func)(), void (*display_func)())
     // framerate is not synced with the simulation frequency.
     // Ch0wW : if you experience a spinning effect while trying to pause the frame,
     // don't forget to add your condition here.
-    if ((maxfps == TICRATE && capfps) || timingdemo || paused || step_mode ||
-        ((ConsoleState == c_down || ConsoleState == c_falling) && !network_game && !demoplayback))
+    if ((maxfps == TICRATE && capfps) || paused || step_mode)
         render_lerp_amount = FRACUNIT;
     else
         render_lerp_amount = simulation_scheduler->getRemainder() * FRACUNIT;
 #endif
 
     display_scheduler->run();
-
-    if (timingdemo)
-        return;
 
     // Sleep until the next scheduled task.
     dtime_t simulation_wake_time = simulation_scheduler->getNextTime();

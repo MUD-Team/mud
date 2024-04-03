@@ -35,6 +35,7 @@
 #include <cassert>
 #include <functional>
 
+#include "../ui/ui_public.h"
 #include "c_dispatch.h"
 #include "i_icon.h"
 #include "i_input.h"
@@ -46,11 +47,13 @@
 #include "v_palette.h"
 #include "v_video.h"
 
+#include "ui_public.h"
+
 EXTERN_CVAR(vid_fullscreen)
 EXTERN_CVAR(vid_widescreen)
-EXTERN_CVAR(vid_pillarbox)
 
 #ifdef SDL20
+
 // ============================================================================
 //
 // ISDL20VideoCapabilities class implementation
@@ -90,13 +93,6 @@ static void I_AddSDL20VideoModes(IVideoModeList *modelist, int bpp)
         modelist->push_back(IVideoMode(width, height, bpp, WINDOW_Fullscreen));
     }
 }
-
-#ifdef _WIN32
-static bool Is8bppFullScreen(const IVideoMode &mode)
-{
-    return mode.bpp == 8 && mode.isFullScreen();
-}
-#endif
 
 //
 // ISDL20VideoCapabilities::ISDL20VideoCapabilities
@@ -151,176 +147,8 @@ ISDL20VideoCapabilities::ISDL20VideoCapabilities() : IVideoCapabilities(), mNati
     // get rid of any duplicates (SDL sometimes reports duplicates)
     mModeList.erase(std::unique(mModeList.begin(), mModeList.end()), mModeList.end());
 
-#ifdef _WIN32
-    // fullscreen directx requires a 32-bit mode to fix broken palette
-    // [Russell] - Use for gdi as well, fixes d2 map02 water
-    // [SL] remove all fullscreen 8bpp modes
-    mModeList.erase(std::remove_if(mModeList.begin(), mModeList.end(), Is8bppFullScreen), mModeList.end());
-#endif
-
     assert(supportsWindowed() || supportsFullScreen());
     assert(supports32bpp());
-}
-
-// ****************************************************************************
-
-// ============================================================================
-//
-// ISDL20TextureWindowSurfaceManager implementation
-//
-// Helper class for IWindow to encapsulate the creation of a IWindowSurface
-// primary surface and to assist in using it to refresh the window.
-//
-// ============================================================================
-
-//
-// ISDL20TextureWindowSurfaceManager::ISDL20TextureWindowSurfaceManager
-//
-ISDL20TextureWindowSurfaceManager::ISDL20TextureWindowSurfaceManager(uint16_t width, uint16_t height,
-                                                                     const PixelFormat *format, ISDL20Window *window,
-                                                                     bool vsync, const char *render_scale_quality)
-    : mWindow(window), mSDLRenderer(NULL), mSDLTexture(NULL), mSurface(NULL), mWidth(width),
-      mHeight(height)
-{
-    assert(mWindow != NULL);
-    assert(mWindow->mSDLWindow != NULL);
-
-    memcpy(&mFormat, format, sizeof(mFormat));
-
-    // [jsd] set the user's preferred render scaling hint if non-empty:
-    // acceptable values are [("0" or "nearest"), ("1" or "linear"), ("2" or "best")].
-    bool quality_set = false;
-    if (render_scale_quality != NULL && render_scale_quality[0] != '\0')
-    {
-        if (SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, render_scale_quality) == SDL_TRUE)
-        {
-            quality_set = true;
-        }
-    }
-
-    if (!quality_set)
-    {
-        // Select the best RENDER_SCALE_QUALITY that is supported
-        const char *scale_hints[] = {"best", "linear", "nearest", ""};
-        for (int i = 0; scale_hints[i][0] != '\0'; i++)
-        {
-            if (SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, scale_hints[i]))
-                break;
-        }
-    }
-
-    mSDLRenderer = createRenderer(vsync);
-    if (mSDLRenderer == NULL)
-        I_FatalError("I_InitVideo: unable to create SDL2 renderer: %s\n", SDL_GetError());
-
-    const IVideoMode &native_mode = I_GetVideoCapabilities()->getNativeMode();
-    if (vid_widescreen.asInt() == 0 && vid_pillarbox && (3 * native_mode.width > 4 * native_mode.height))
-    {
-        int windowWidth, windowHeight;
-        SDL_GetWindowSize(mWindow->mSDLWindow, &windowWidth, &windowHeight);
-
-        float ratio        = (mWidth * windowHeight) / (float)(windowWidth * mHeight);
-        int   logicalWidth = windowWidth * ratio;
-
-        mLogicalRect.h = windowHeight;
-        mLogicalRect.w = logicalWidth;
-        mLogicalRect.x = (windowWidth - logicalWidth) / 2;
-        mLogicalRect.y = 0;
-
-        mDrawLogicalRect = true;
-        SDL_RenderSetLogicalSize(mSDLRenderer, mLogicalRect.w, mLogicalRect.h);
-    }
-    else
-    {
-        mDrawLogicalRect = false;
-        SDL_RenderSetLogicalSize(mSDLRenderer, mWidth, mHeight);
-    }
-
-    // Ensure the game window is clear, even if using -noblit
-    SDL_SetRenderDrawColor(mSDLRenderer, 0, 0, 0, 255);
-    SDL_RenderClear(mSDLRenderer);
-    SDL_RenderPresent(mSDLRenderer);
-
-    uint32_t texture_flags = SDL_TEXTUREACCESS_STREAMING;
-
-    SDL_DisplayMode sdl_mode;
-    SDL_GetWindowDisplayMode(mWindow->mSDLWindow, &sdl_mode);
-
-    mSDLTexture = SDL_CreateTexture(mSDLRenderer, sdl_mode.format, texture_flags, mWidth, mHeight);
-
-    if (mSDLTexture == NULL)
-        I_FatalError("I_InitVideo: unable to create SDL2 texture: %s\n", SDL_GetError());
-
-    mSurface = new IWindowSurface(width, height, &mFormat);
-}
-
-//
-// ISDL20TextureWindowSurfaceManager::~ISDL20TextureWindowSurfaceManager
-//
-ISDL20TextureWindowSurfaceManager::~ISDL20TextureWindowSurfaceManager()
-{
-    delete mSurface;
-
-    if (mSDLTexture)
-        SDL_DestroyTexture(mSDLTexture);
-    if (mSDLRenderer)
-        SDL_DestroyRenderer(mSDLRenderer);
-}
-
-//
-// ISDL20TextureWindowSurfaceManager::createRenderer
-//
-SDL_Renderer *ISDL20TextureWindowSurfaceManager::createRenderer(bool vsync) const
-{
-    const char *driver = mWindow->getRendererDriver();
-
-    uint32_t renderer_flags = 0;
-    if (strncmp(driver, "software", strlen(driver)) == 0)
-        renderer_flags |= SDL_RENDERER_SOFTWARE;
-    else
-        renderer_flags |= SDL_RENDERER_ACCELERATED;
-    if (vsync)
-        renderer_flags |= SDL_RENDERER_PRESENTVSYNC;
-
-    return SDL_CreateRenderer(mWindow->mSDLWindow, -1, renderer_flags);
-}
-
-//
-// ISDL20TextureWindowSurfaceManager::lockSurface
-//
-void ISDL20TextureWindowSurfaceManager::lockSurface()
-{
-}
-
-//
-// ISDL20TextureWindowSurfaceManager::unlockSurface
-//
-void ISDL20TextureWindowSurfaceManager::unlockSurface()
-{
-}
-
-//
-// ISDL20TextureWindowSurfaceManager::startRefresh
-//
-void ISDL20TextureWindowSurfaceManager::startRefresh()
-{
-}
-
-//
-// ISDL20TextureWindowSurfaceManager::finishRefresh
-//
-void ISDL20TextureWindowSurfaceManager::finishRefresh()
-{
-    SDL_UpdateTexture(mSDLTexture, NULL, mSurface->getBuffer(), mSurface->getPitch());
-
-    if (mDrawLogicalRect)
-        SDL_RenderCopy(mSDLRenderer, mSDLTexture, NULL, &mLogicalRect);
-    else
-        SDL_RenderCopy(mSDLRenderer, mSDLTexture, NULL, NULL);
-
-    SDL_RenderPresent(mSDLRenderer);
-
-    MUD_FrameMark;
 }
 
 // ============================================================================
@@ -336,9 +164,8 @@ void ISDL20TextureWindowSurfaceManager::finishRefresh()
 // A ISDL20WindowSurface object is instantiated for frame rendering.
 //
 ISDL20Window::ISDL20Window(uint16_t width, uint16_t height, uint8_t bpp, EWindowMode window_mode, bool vsync)
-    : IWindow(), mSDLWindow(NULL), mSurfaceManager(NULL), mVideoMode(0, 0, 0, WINDOW_Windowed),
-      mNeedPaletteRefresh(true), mBlit(true), mMouseFocus(false), mKeyboardFocus(false), mAcceptResizeEventsTime(0),
-      mLocks(0)
+    : IWindow(), mSDLWindow(NULL), mVideoMode(0, 0, 0, WINDOW_Windowed), mNeedPaletteRefresh(true), mBlit(true),
+      mMouseFocus(false), mKeyboardFocus(false), mAcceptResizeEventsTime(0)
 {
     setRendererDriver();
     const char *driver_name = getRendererDriver();
@@ -374,10 +201,10 @@ ISDL20Window::ISDL20Window(uint16_t width, uint16_t height, uint8_t bpp, EWindow
 //
 ISDL20Window::~ISDL20Window()
 {
-    delete mSurfaceManager;
-
     if (mSDLWindow)
         SDL_DestroyWindow(mSDLWindow);
+
+    UI_Shutdown();        
 }
 
 //
@@ -427,34 +254,6 @@ const char *ISDL20Window::getRendererDriver() const
     if (hint_value)
         strncpy(driver_name, hint_value, sizeof(driver_name) - 1);
     return driver_name;
-}
-
-//
-// ISDL20Window::lockSurface
-//
-// Locks the surface for direct pixel access. This must be called prior to
-// accessing the primary surface's buffer.
-//
-void ISDL20Window::lockSurface()
-{
-    if (++mLocks == 1)
-        mSurfaceManager->lockSurface();
-
-    assert(mLocks >= 1 && mLocks < 100);
-}
-
-//
-// ISDL20Window::unlockSurface
-//
-// Unlocks the surface after direct pixel access. This must be called after
-// accessing the primary surface's buffer.
-//
-void ISDL20Window::unlockSurface()
-{
-    if (--mLocks == 0)
-        mSurfaceManager->unlockSurface();
-
-    assert(mLocks >= 0 && mLocks < 100);
 }
 
 //
@@ -568,8 +367,6 @@ void ISDL20Window::startRefresh()
 //
 void ISDL20Window::finishRefresh()
 {
-    assert(mLocks == 0); // window surface shouldn't be locked when blitting
-
     if (mNeedPaletteRefresh)
     {
         //		if (sdlsurface->format->BitsPerPixel == 8)
@@ -578,8 +375,7 @@ void ISDL20Window::finishRefresh()
 
     mNeedPaletteRefresh = false;
 
-    if (mBlit)
-        mSurfaceManager->finishRefresh();
+    MUD_FrameMark;
 }
 
 //
@@ -669,22 +465,6 @@ std::string ISDL20Window::getVideoDriverName() const
     if (driver_name)
         return std::string(driver_name);
     return "";
-}
-
-//
-// ISDL20Window::setPalette
-//
-// Saves the given palette and updates it during refresh.
-//
-void ISDL20Window::setPalette(const argb_t *palette_colors)
-{
-    lockSurface();
-
-    getPrimarySurface()->setPalette(palette_colors);
-
-    mNeedPaletteRefresh = true;
-
-    unlockSurface();
 }
 
 //
@@ -835,9 +615,7 @@ bool ISDL20Window::setMode(const IVideoMode &video_mode)
     mVideoMode.vsync        = video_mode.vsync;
     mVideoMode.stretch_mode = video_mode.stretch_mode;
 
-    delete mSurfaceManager;
-    mSurfaceManager = new ISDL20TextureWindowSurfaceManager(mVideoMode.width, mVideoMode.height, &format, this,
-                                                            mVideoMode.vsync, mVideoMode.stretch_mode.c_str());
+    UI_SetMode(mVideoMode.width, mVideoMode.height, &format, this, mVideoMode.vsync, mVideoMode.stretch_mode.c_str());
 
     return true;
 }

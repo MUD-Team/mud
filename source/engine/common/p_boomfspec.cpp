@@ -82,125 +82,122 @@ bool P_CrossCompatibleSpecialLine(line_t *line, int side, AActor *thing, bool bo
     }
 
     // jff 02/04/98 add check here for generalized lindef types
-    if (!demoplayback) // generalized types not recognized if old demo
+    // pointer to line function is NULL by default, set non-null if
+    // line special is walkover generalized linedef type
+    BOOL (*linefunc)(line_t *line) = NULL;
+
+    // check each range of generalized linedefs
+    if ((unsigned)line->special >= GenEnd)
     {
-        // pointer to line function is NULL by default, set non-null if
-        // line special is walkover generalized linedef type
-        BOOL (*linefunc)(line_t *line) = NULL;
-
-        // check each range of generalized linedefs
-        if ((unsigned)line->special >= GenEnd)
-        {
-            // Out of range for GenFloors
-        }
-        else if ((unsigned)line->special >= GenFloorBase)
-        {
-            if (!thing->player && thing->type != MT_AVATAR && !bossaction)
-                if ((line->special & FloorChange) || !(line->special & FloorModel))
-                    return false; // FloorModel is "Allow Monsters" if FloorChange is 0
-            /*
-            if (!comperr(comperr_zerotag) &&
-                !line->tag) // e6y //jff 2/27/98 all walk generalized types require tag
-                return;
-            */
-            linefunc = EV_DoGenFloor;
-        }
-        else if ((unsigned)line->special >= GenCeilingBase)
-        {
-            if (!thing->player && thing->type != MT_AVATAR && !bossaction)
-                if ((line->special & CeilingChange) || !(line->special & CeilingModel))
-                    return false; // CeilingModel is "Allow Monsters" if CeilingChange is
-                                  // 0
-            /*
-            if (!comperr(comperr_zerotag) &&
-                !line->tag) // e6y //jff 2/27/98 all walk generalized types require tag
-                return;
-            */
-            linefunc = EV_DoGenCeiling;
-        }
-        else if ((unsigned)line->special >= GenDoorBase)
-        {
-            if (!thing->player && thing->type != MT_AVATAR && !bossaction)
-            {
-                if (!(line->special & DoorMonster))
-                    return false;            // monsters disallowed from this door
-                if (line->flags & ML_SECRET) // they can't open secret doors either
-                    return false;
-            }
-            /*
-            if (!comperr(comperr_zerotag) &&
-                !line->tag) // e6y //3/2/98 move outside the monster check
-                return;
-            */
-            linefunc = EV_DoGenDoor;
-        }
-        else if ((unsigned)line->special >= GenLockedBase)
-        {
-            if ((!thing->player && thing->type != MT_AVATAR) || bossaction) // boss actions can't handle locked doors
-                return false;                                               // monsters disallowed from unlocking doors
-            if (((line->special & TriggerType) == WalkOnce) || ((line->special & TriggerType) == WalkMany))
-            { // jff 4/1/98 check for being a walk type before reporting door type
-                if (!P_CanUnlockGenDoor(line, thing->player))
-                    return false;
-            }
-            else
-                return false;
-            linefunc = EV_DoGenLockedDoor;
-        }
-        else if ((unsigned)line->special >= GenLiftBase)
-        {
-            if (!thing->player && thing->type != MT_AVATAR && !bossaction)
-                if (!(line->special & LiftMonster))
-                    return false; // monsters disallowed
-            /*
-            if (!comperr(comperr_zerotag) &&
-                !line->tag) // e6y //jff 2/27/98 all walk generalized types require tag
-                return;
-            */
-            linefunc = EV_DoGenLift;
-        }
-        else if ((unsigned)line->special >= GenStairsBase)
-        {
-            if (!thing->player && thing->type != MT_AVATAR && !bossaction)
-                if (!(line->special & StairMonster))
-                    return false; // monsters disallowed
-            /*
-            if (!comperr(comperr_zerotag) &&
-                !line->tag) // e6y //jff 2/27/98 all walk generalized types require tag
-                return;
-            */
-            linefunc = EV_DoGenStairs;
-        }
-        else if ((unsigned)line->special >= GenCrusherBase)
-        {
-            // haleyjd 06/09/09: This was completely forgotten in BOOM, disabling
-            // all generalized walk-over crusher types!
-            if (!thing->player && thing->type != MT_AVATAR && !bossaction)
-                if (!(line->special & StairMonster))
-                    return false; // monsters disallowed
-            /*
-            if (!comperr(comperr_zerotag) &&
-                !line->tag) // e6y //jff 2/27/98 all walk generalized types require tag
-                return;
-            */
-            linefunc = EV_DoGenCrusher;
-        }
-
-        if (linefunc) // if it was a valid generalized type
-            switch ((line->special & TriggerType) >> TriggerTypeShift)
-            {
-            case WalkOnce:
-                if (linefunc(line))
-                {
-                    return true;
-                }
-            case WalkMany:
-                linefunc(line);
-                return true;
-            default: // if not a walk type, do nothing here
-                return false;
-            }
+        // Out of range for GenFloors
     }
+    else if ((unsigned)line->special >= GenFloorBase)
+    {
+        if (!thing->player && thing->type != MT_AVATAR && !bossaction)
+            if ((line->special & FloorChange) || !(line->special & FloorModel))
+                return false; // FloorModel is "Allow Monsters" if FloorChange is 0
+        /*
+        if (!comperr(comperr_zerotag) &&
+            !line->tag) // e6y //jff 2/27/98 all walk generalized types require tag
+            return;
+        */
+        linefunc = EV_DoGenFloor;
+    }
+    else if ((unsigned)line->special >= GenCeilingBase)
+    {
+        if (!thing->player && thing->type != MT_AVATAR && !bossaction)
+            if ((line->special & CeilingChange) || !(line->special & CeilingModel))
+                return false; // CeilingModel is "Allow Monsters" if CeilingChange is
+                              // 0
+        /*
+        if (!comperr(comperr_zerotag) &&
+            !line->tag) // e6y //jff 2/27/98 all walk generalized types require tag
+            return;
+        */
+        linefunc = EV_DoGenCeiling;
+    }
+    else if ((unsigned)line->special >= GenDoorBase)
+    {
+        if (!thing->player && thing->type != MT_AVATAR && !bossaction)
+        {
+            if (!(line->special & DoorMonster))
+                return false;            // monsters disallowed from this door
+            if (line->flags & ML_SECRET) // they can't open secret doors either
+                return false;
+        }
+        /*
+        if (!comperr(comperr_zerotag) &&
+            !line->tag) // e6y //3/2/98 move outside the monster check
+            return;
+        */
+        linefunc = EV_DoGenDoor;
+    }
+    else if ((unsigned)line->special >= GenLockedBase)
+    {
+        if ((!thing->player && thing->type != MT_AVATAR) || bossaction) // boss actions can't handle locked doors
+            return false;                                               // monsters disallowed from unlocking doors
+        if (((line->special & TriggerType) == WalkOnce) || ((line->special & TriggerType) == WalkMany))
+        { // jff 4/1/98 check for being a walk type before reporting door type
+            if (!P_CanUnlockGenDoor(line, thing->player))
+                return false;
+        }
+        else
+            return false;
+        linefunc = EV_DoGenLockedDoor;
+    }
+    else if ((unsigned)line->special >= GenLiftBase)
+    {
+        if (!thing->player && thing->type != MT_AVATAR && !bossaction)
+            if (!(line->special & LiftMonster))
+                return false; // monsters disallowed
+        /*
+        if (!comperr(comperr_zerotag) &&
+            !line->tag) // e6y //jff 2/27/98 all walk generalized types require tag
+            return;
+        */
+        linefunc = EV_DoGenLift;
+    }
+    else if ((unsigned)line->special >= GenStairsBase)
+    {
+        if (!thing->player && thing->type != MT_AVATAR && !bossaction)
+            if (!(line->special & StairMonster))
+                return false; // monsters disallowed
+        /*
+        if (!comperr(comperr_zerotag) &&
+            !line->tag) // e6y //jff 2/27/98 all walk generalized types require tag
+            return;
+        */
+        linefunc = EV_DoGenStairs;
+    }
+    else if ((unsigned)line->special >= GenCrusherBase)
+    {
+        // haleyjd 06/09/09: This was completely forgotten in BOOM, disabling
+        // all generalized walk-over crusher types!
+        if (!thing->player && thing->type != MT_AVATAR && !bossaction)
+            if (!(line->special & StairMonster))
+                return false; // monsters disallowed
+        /*
+        if (!comperr(comperr_zerotag) &&
+            !line->tag) // e6y //jff 2/27/98 all walk generalized types require tag
+            return;
+        */
+        linefunc = EV_DoGenCrusher;
+    }
+
+    if (linefunc) // if it was a valid generalized type
+        switch ((line->special & TriggerType) >> TriggerTypeShift)
+        {
+        case WalkOnce:
+            if (linefunc(line))
+            {
+                return true;
+            }
+        case WalkMany:
+            linefunc(line);
+            return true;
+        default: // if not a walk type, do nothing here
+            return false;
+        }
 
     if ((!thing->player && thing->type != MT_AVATAR) || bossaction)
     {
@@ -1568,9 +1565,6 @@ void P_SpawnCompatibleScroller(line_t *l, int i)
     int     control = -1, accel = 0;         // no control sector or acceleration
     int     special = l->special;
 
-    if (demoplayback && special != 48)       // demo compat
-        return;                              // e6y
-
     // killough 3/7/98: Types 245-249 are same as 250-254 except that the
     // first side's sector's heights cause scrolling when they change, and
     // this linedef controls the direction and speed of the scrolling. The
@@ -1675,7 +1669,7 @@ void P_SpawnCompatibleFriction(line_t *l)
         bool use_thinker;
 
         value       = P_AproxDistance(l->dx, l->dy) >> FRACBITS;
-        use_thinker = !demoplayback;
+        use_thinker = true;
 
         P_ApplySectorFriction(l->id, value, use_thinker);
     }
@@ -3228,7 +3222,7 @@ bool P_ShootCompatibleSpecialLine(AActor *thing, line_t *line)
     {
     case 24:
         // 24 G1 raise floor to highest adjacent
-        if (EV_DoFloor(DFloor::floorRaiseToLowestCeiling, line, line->id, SPEED(FLOOR_SLOW), 0, 0, 0) || demoplayback)
+        if (EV_DoFloor(DFloor::floorRaiseToLowestCeiling, line, line->id, SPEED(FLOOR_SLOW), 0, 0, 0))
         {
             return true;
         }
@@ -3241,7 +3235,7 @@ bool P_ShootCompatibleSpecialLine(AActor *thing, line_t *line)
 
     case 47:
         // 47 G1 raise floor to nearest and change texture and type
-        if (EV_DoPlat(line->id, line, DPlat::platRaiseAndStay, 0, SPEED(DOOR_SLOW), 0, 0, 1) || demoplayback)
+        if (EV_DoPlat(line->id, line, DPlat::platRaiseAndStay, 0, SPEED(DOOR_SLOW), 0, 0, 1))
         {
             return true;
         }
@@ -3294,7 +3288,7 @@ const unsigned int P_TranslateCompatibleLineFlags(const unsigned int flags, cons
 
     unsigned int filter;
 
-    if (demoplayback || reserved)
+    if (reserved)
         filter = 0x01ff;
     else
         filter = 0x3fff;
