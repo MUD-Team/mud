@@ -313,7 +313,6 @@ static StringTokens GetDownloadDirs()
     D_AddSearchDir(dirs, getenv("DOOMWADPATH"), PATHLISTSEPCHAR);
 
     D_AddSearchDir(dirs, waddirs.cstring(), PATHLISTSEPCHAR);
-    dirs.push_back(M_GetUserDir());
 
     dirs.push_back(M_GetCWD());
 

@@ -2130,7 +2130,7 @@ void Reset2Defaults(void)
 
 void Reset2Saved(void)
 {
-    std::string cmd = "exec " + C_QuoteString(M_GetConfigPath());
+    std::string cmd = "exec " + C_QuoteString("odamex.cfg");
     AddCommandString(cmd);
     UpdateStuff();
 }

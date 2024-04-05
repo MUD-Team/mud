@@ -364,6 +364,18 @@ FORMAT_PRINTF(2, 3) void STACK_ARGS StrFormat(std::string &out, const char *fmt,
 //
 // A quick and dirty std::string formatting that uses snprintf under the covers.
 //
+FORMAT_PRINTF(2, 3) std::string STACK_ARGS StrFormat(const char *fmt, ...)
+{
+    va_list va;
+    va_start(va, fmt);
+    std::string ret_string = VStrFormat(fmt, va);
+    va_end(va);
+    return ret_string;
+}
+
+//
+// A quick and dirty std::string formatting that uses snprintf under the covers.
+//
 void STACK_ARGS VStrFormat(std::string &out, const char *fmt, va_list va)
 {
     va_list va2;
@@ -393,6 +405,42 @@ void STACK_ARGS VStrFormat(std::string &out, const char *fmt, va_list va)
 
     out = buf;
     free(buf);
+}
+
+//
+// A quick and dirty std::string formatting that uses snprintf under the covers.
+//
+std::string STACK_ARGS VStrFormat(const char *fmt, va_list va)
+{
+    std::string ret_string;
+    va_list va2;
+    va_copy(va2, va);
+
+    // Get desired length of buffer.
+    int chars = vsnprintf(NULL, 0, fmt, va);
+    if (chars < 0)
+    {
+        I_Error("Encoding error detected in StrFormat\n");
+    }
+    size_t len = (size_t)chars + sizeof('\0');
+
+    // Allocate the buffer.
+    char *buf = (char *)malloc(len);
+    if (buf == NULL)
+    {
+        I_Error("Could not allocate StrFormat buffer\n");
+    }
+
+    // Actually write to the buffer.
+    int ok = vsnprintf(buf, len, fmt, va2);
+    if (ok != chars)
+    {
+        I_Error("Truncation detected in StrFormat\n");
+    }
+
+    ret_string = buf;
+    free(buf);
+    return ret_string;
 }
 
 /**

@@ -28,6 +28,7 @@
 
 #include "dobject.h"
 #include "doomtype.h"
+#include "physfs.h"
 
 #define FA_RESET (1 << 0)
 
@@ -77,7 +78,7 @@ class FLZOFile : public FFile
   public:
     FLZOFile();
     FLZOFile(const char *name, EOpenMode mode, bool dontcompress = false);
-    FLZOFile(FILE *file, EOpenMode mode, bool dontcompress = false);
+    FLZOFile(PHYSFS_File *file, EOpenMode mode, bool dontcompress = false);
     virtual ~FLZOFile();
 
     virtual bool      Open(const char *name, EOpenMode mode);
@@ -102,7 +103,7 @@ class FLZOFile : public FFile
     unsigned char *m_Buffer;
     bool           m_NoCompress;
     EOpenMode      m_Mode;
-    FILE          *m_File;
+    PHYSFS_File   *m_File;
 
     virtual void Implode();
     virtual void Explode();

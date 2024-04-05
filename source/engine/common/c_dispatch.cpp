@@ -444,7 +444,9 @@ BEGIN_COMMAND(exec)
         return;
     }
 
-    std::ifstream ifs(argv[1]);
+    found = StrFormat("%s%s", PHYSFS_getRealDir(found.c_str()), argv[1]);
+
+    std::ifstream ifs(found);
     if (ifs.fail())
     {
         Printf(PRINT_WARNING, "Could not open \"%s\"\n", argv[1]);
@@ -825,12 +827,13 @@ static int DumpHash(BOOL aliases)
     return count;
 }
 
-void DConsoleAlias::Archive(FILE *f)
+void DConsoleAlias::Archive(PHYSFS_File *f)
 {
-    fprintf(f, "alias %s %s\n", C_QuoteString(m_Name).c_str(), C_QuoteString(m_Command).c_str());
+    std::string str = StrFormat("alias %s %s\n", C_QuoteString(m_Name).c_str(), C_QuoteString(m_Command).c_str());
+    PHYSFS_writeBytes(f, str.data(), str.size());
 }
 
-void DConsoleAlias::C_ArchiveAliases(FILE *f)
+void DConsoleAlias::C_ArchiveAliases(PHYSFS_File *f)
 {
     for (command_map_t::iterator i = Commands().begin(), e = Commands().end(); i != e; ++i)
     {
@@ -968,7 +971,8 @@ BEGIN_COMMAND(logfile)
 {
     time_t            rawtime;
     struct tm        *timeinfo;
-    const std::string default_logname = M_GetUserFileName(::serverside ? "odasrv.log" : "odamex.log");
+    std::string default_logname = M_GetWriteDir();
+    default_logname.append(::serverside ? "odasrv.log" : "odamex.log");
 
     if (::LOG.is_open())
     {

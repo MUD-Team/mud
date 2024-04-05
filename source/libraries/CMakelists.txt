@@ -1,6 +1,6 @@
 
 add_subdirectory(minilzo)
-
+add_subdirectory(physfs)
 if (MUD_PROFILING)
     add_subdirectory(tracy)
 endif()

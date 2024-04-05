@@ -25,6 +25,7 @@
 
 #include "g_level.h"
 #include "m_resfile.h"
+#include "physfs.h"
 #include "r_defs.h"
 #include "z_zone.h"
 
@@ -64,7 +65,7 @@ typedef struct
 typedef struct lumpinfo_s
 {
     char  name[8]; // denis - todo - string
-    FILE *handle;
+    PHYSFS_File *handle;
     int   position;
     int   size;
 

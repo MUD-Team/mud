@@ -26,6 +26,7 @@
 #include "c_console.h"
 #include "d_player.h"
 #include "p_local.h"
+#include "physfs.h"
 #include "sv_main.h"
 
 bool SV_AddMaster(const char *masterip);
@@ -35,4 +36,4 @@ void SV_ListMasters();
 bool SV_RemoveMaster(const char *masterip);
 void SV_UpdateMasterServers(void);
 void SV_UpdateMaster(void);
-void SV_ArchiveMasters(FILE *fp);
+void SV_ArchiveMasters(PHYSFS_File *fp);

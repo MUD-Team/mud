@@ -950,7 +950,7 @@ void M_CommitWDLLog()
     char iso8601buf[sizeof "2011-10-08T07:07:09Z"];
     strftime(iso8601buf, sizeof iso8601buf, "%Y-%m-%dT%H:%M:%SZ", gmtime(&now));
 
-    FILE *fh = fopen(filename.c_str(), "w+");
+    PHYSFS_File *fh = PHYSFS_openWrite(filename.c_str());
     if (fh == NULL)
     {
         ::wdlstate.recording = false;
@@ -959,64 +959,65 @@ void M_CommitWDLLog()
     }
 
     // Header (metadata)
-    fprintf(fh, "version=%d\n", WDLSTATS_VERSION);
-    fprintf(fh, "time=%s\n", iso8601buf);
-    fprintf(fh, "levelnum=%d\n", ::level.levelnum);
-    fprintf(fh, "levelname=%s\n", ::level.level_name);
-    fprintf(fh, "levelhash=%.16llx%.16llx\n", reconsthash1, reconsthash2);
-    fprintf(fh, "gametype=%s\n", ::sv_gametype.cstring());
-    fprintf(fh, "lives=%s\n", ::g_lives.cstring());
-    fprintf(fh, "attackdefend=%s\n", ::g_sides.cstring());
-    fprintf(fh, "duration=%d\n", ::gametic - ::wdlstate.begintic);
-    fprintf(fh, "endgametic=%d\n", ::gametic);
-    fprintf(fh, "round=%d\n", ::levelstate.getRound());
-    fprintf(fh, "winresult=%d\n", ::levelstate.getWinInfo().type);
-    fprintf(fh, "winid=%d\n", ::levelstate.getWinInfo().id);
-    fprintf(fh, "hostname=%s\n", ::sv_hostname.cstring());
+    std::string str = StrFormat("version=%d\n", WDLSTATS_VERSION);
+    str.append(StrFormat("time=%s\n", iso8601buf));
+    str.append(StrFormat("levelnum=%d\n", ::level.levelnum));
+    str.append(StrFormat("levelname=%s\n", ::level.level_name));
+    str.append(StrFormat("levelhash=%.16llx%.16llx\n", reconsthash1, reconsthash2));
+    str.append(StrFormat("gametype=%s\n", ::sv_gametype.cstring()));
+    str.append(StrFormat("lives=%s\n", ::g_lives.cstring()));
+    str.append(StrFormat("attackdefend=%s\n", ::g_sides.cstring()));
+    str.append(StrFormat("duration=%d\n", ::gametic - ::wdlstate.begintic));
+    str.append(StrFormat("endgametic=%d\n", ::gametic));
+    str.append(StrFormat("round=%d\n", ::levelstate.getRound()));
+    str.append(StrFormat("winresult=%d\n", ::levelstate.getWinInfo().type));
+    str.append(StrFormat("winid=%d\n", ::levelstate.getWinInfo().id));
+    str.append(StrFormat("hostname=%s\n", ::sv_hostname.cstring()));
 
     // Players
-    fprintf(fh, "players\n");
+    str.append("players\n");
     WDLPlayers::const_iterator pit = ::wdlplayers.begin();
     for (; pit != ::wdlplayers.end(); ++pit)
-        fprintf(fh, "%d,%d,%d,%s\n", pit->id, pit->pid, pit->team, pit->netname.c_str());
+        str.append(StrFormat("%d,%d,%d,%s\n", pit->id, pit->pid, pit->team, pit->netname.c_str()));
 
     // ItemSpawns
-    fprintf(fh, "itemspawns\n");
+    str.append("itemspawns\n");
     WDLItemSpawns::const_iterator isit = ::wdlitemspawns.begin();
     for (; isit != ::wdlitemspawns.end(); ++isit)
-        fprintf(fh, "%d,%d,%d,%d,%d\n", isit->id, isit->x, isit->y, isit->z, isit->item);
+        str.append(StrFormat("%d,%d,%d,%d,%d\n", isit->id, isit->x, isit->y, isit->z, isit->item));
 
     // PlayerSpawns
-    fprintf(fh, "playerspawns\n");
+    str.append("playerspawns\n");
     WDLPlayerSpawns::const_iterator psit = ::wdlplayerspawns.begin();
     for (; psit != ::wdlplayerspawns.end(); ++psit)
-        fprintf(fh, "%d,%d,%d,%d,%d\n", psit->id, psit->team, psit->x, psit->y, psit->z);
+        str.append(StrFormat("%d,%d,%d,%d,%d\n", psit->id, psit->team, psit->x, psit->y, psit->z));
 
     if (sv_gametype == GM_CTF)
     {
         // FlagLocation
-        fprintf(fh, "flaglocations\n");
+        str.append("flaglocations\n");
         WDLFlagLocations::const_iterator flit = ::wdlflaglocations.begin();
         for (; flit != ::wdlflaglocations.end(); ++flit)
-            fprintf(fh, "%d,%d,%d,%d\n", flit->team, flit->x, flit->y, flit->z);
+            str.append(StrFormat("%d,%d,%d,%d\n", flit->team, flit->x, flit->y, flit->z));
     }
 
     // Wads
-    fprintf(fh, "wads\n");
-    fprintf(fh, "%s", M_GetCurrentWadHashes().c_str());
+    str.append("wads\n");
+    str.append(StrFormat("%s", M_GetCurrentWadHashes().c_str()));
 
     // Events
-    fprintf(fh, "events\n");
+    str.append("events\n");
     WDLEventLog::const_iterator eit = ::wdlevents.begin();
     for (; eit != ::wdlevents.end(); ++eit)
     {
         //          "ev,ac,tg,gt,ax,ay,az,tx,ty,tz,a0,a1,a2,a3"
-        fprintf(fh, "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n", eit->ev, eit->activator, eit->target, eit->gametic,
+        str.append(StrFormat("%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n", eit->ev, eit->activator, eit->target, eit->gametic,
                 eit->apos[0], eit->apos[1], eit->apos[2], eit->tpos[0], eit->tpos[1], eit->tpos[2], eit->arg0,
-                eit->arg1, eit->arg2, eit->arg3);
+                eit->arg1, eit->arg2, eit->arg3));
     }
 
-    fclose(fh);
+    PHYSFS_writeBytes(fh, str.data(), str.size());
+    PHYSFS_close(fh);
 
     // Turn off stat recording global - it must be turned on again by the
     // log starter next go-around.

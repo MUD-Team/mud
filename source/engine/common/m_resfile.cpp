@@ -45,11 +45,6 @@ EXTERN_CVAR(waddirs)
  */
 bool OResFile::make(OResFile &out, const std::string &file)
 {
-    if (!M_FileExists(file))
-    {
-        return false;
-    }
-
     std::string fullpath;
     if (!M_GetAbsPath(file, fullpath))
     {
@@ -62,7 +57,19 @@ bool OResFile::make(OResFile &out, const std::string &file)
         return false;
     }
 
-    OMD5Hash hash = W_MD5(file);
+    std::string mountpath;
+    M_ExtractFilePath(fullpath, mountpath);
+    if (!mountpath.empty())
+    {
+        PHYSFS_mount(mountpath.c_str(), NULL, 0);
+    }
+
+    if (!M_FileExists(basename))
+    {
+        return false;
+    }
+
+    OMD5Hash hash = W_MD5(basename);
     if (hash.empty())
     {
         return false;
@@ -86,11 +93,6 @@ bool OResFile::make(OResFile &out, const std::string &file)
  */
 bool OResFile::makeWithHash(OResFile &out, const std::string &file, const OMD5Hash &hash)
 {
-    if (!M_FileExists(file))
-    {
-        return false;
-    }
-
     std::string fullpath;
     if (!M_GetAbsPath(file, fullpath))
     {
@@ -104,6 +106,18 @@ bool OResFile::makeWithHash(OResFile &out, const std::string &file, const OMD5Ha
 
     std::string basename = M_ExtractFileName(fullpath);
     if (basename.empty())
+    {
+        return false;
+    }
+
+    std::string mountpath;
+    M_ExtractFilePath(fullpath, mountpath);
+    if (!mountpath.empty())
+    {
+        PHYSFS_mount(mountpath.c_str(), NULL, 0);
+    }
+
+    if (!M_FileExists(basename))
     {
         return false;
     }
@@ -235,7 +249,6 @@ std::vector<std::string> M_FileSearchDirs()
     D_AddSearchDir(dirs, getenv("DOOMWADDIR"), PATHLISTSEPCHAR);
     D_AddSearchDir(dirs, getenv("DOOMWADPATH"), PATHLISTSEPCHAR);
     D_AddSearchDir(dirs, ::waddirs.cstring(), PATHLISTSEPCHAR);
-    dirs.push_back(M_GetUserDir());
     dirs.push_back(M_GetCWD());
     dirs.push_back(M_GetBinaryDir());
 
@@ -257,9 +270,16 @@ std::vector<std::string> M_FileSearchDirs()
  */
 bool M_ResolveWantedFile(OResFile &out, const OWantFile &wanted)
 {
+    std::string mountpath;
+    M_ExtractFilePath(wanted.getWantedPath(), mountpath);
+    if (!mountpath.empty())
+    {
+        PHYSFS_mount(mountpath.c_str(), NULL, 0);
+    }
+
     // If someone goes throught the effort of pointing directly to a file
     // correctly, believe them.
-    if (M_FileExists(wanted.getWantedPath()))
+    if (M_FileExists(wanted.getBasename()))
     {
         if (wanted.getWantedMD5().empty())
         {
@@ -267,7 +287,7 @@ bool M_ResolveWantedFile(OResFile &out, const OWantFile &wanted)
             return OResFile::make(out, wanted.getWantedPath());
         }
 
-        OMD5Hash hash = W_MD5(wanted.getWantedPath());
+        OMD5Hash hash = W_MD5(wanted.getBasename());
         if (wanted.getWantedMD5() == hash)
         {
             // File matches our hash.

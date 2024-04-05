@@ -548,18 +548,19 @@ void cvar_t::C_SetCVarsToDefaults(unsigned int bitflag)
 void cvar_t::C_ArchiveCVars(void *f)
 {
     cvar_t *cvar = ad.GetCVars();
-
+    std::string str;
     while (cvar)
     {
         if ((baseapp == client && (cvar->m_Flags & CVAR_CLIENTARCHIVE)) ||
             (baseapp == server && (cvar->m_Flags & CVAR_SERVERARCHIVE)))
         {
-            fprintf((FILE *)f, "// %s\n", cvar->helptext());
-            fprintf((FILE *)f, "set %s %s\n\n", C_QuoteString(cvar->name()).c_str(),
-                    C_QuoteString(cvar->cstring()).c_str());
+            str.append(StrFormat("// %s\nset %s %s\n\n", cvar->helptext(), C_QuoteString(cvar->name()).c_str(),
+                    C_QuoteString(cvar->cstring()).c_str()));
         }
         cvar = cvar->m_Next;
     }
+    if (!str.empty())
+        PHYSFS_writeBytes((PHYSFS_File *)f, str.data(), str.size());
 }
 
 void cvar_t::cvarlist()

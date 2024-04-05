@@ -26,6 +26,7 @@
 #include <vector>
 
 #include "dobject.h"
+#include "physfs.h"
 
 void C_ExecCmdLineParams(bool onlyset, bool onlylogfile);
 
@@ -106,10 +107,10 @@ class DConsoleAlias : public DConsoleCommand
     {
         Printf(PRINT_HIGH, "%s : %s\n", m_Name.c_str(), m_Command.c_str());
     }
-    void Archive(FILE *f);
+    void Archive(PHYSFS_File *f);
 
     // Write out alias commands to a file for all current aliases.
-    static void C_ArchiveAliases(FILE *f);
+    static void C_ArchiveAliases(PHYSFS_File *f);
 
     // Destroy all aliases (used on shutdown)
     static void DestroyAll();

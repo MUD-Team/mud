@@ -12,13 +12,13 @@ file(GLOB CLIENT_SDL_SOURCES sdl/*.cpp sdl/*.h)
 get_target_property(COMMON_SOURCES engine-common INTERFACE_SOURCES)
 
 # Client includes
-include_directories(./ ./sdl ../common ../../libraries/stb)
+include_directories(./ ./sdl ../common ../../libraries/physfs ../../libraries/stb)
 
 add_executable(mud-client WIN32 ${CLIENT_SOURCES} ${CLIENT_SDL_SOURCES} ${COMMON_SOURCES})
 set_target_properties(mud-client PROPERTIES DEBUG_POSTFIX "_DEBUG")
 set_target_properties(mud-client PROPERTIES RELWITHDEBINFO_POSTFIX "_RELWITHDEBINFO")
 
-set (MUD_CLIENT_LIBRARIES minilzo)
+set (MUD_CLIENT_LIBRARIES minilzo physfs-static)
 
 if (MUD_PROFILING)
   set (MUD_CLIENT_LIBRARIES ${MUD_CLIENT_LIBRARIES} tracy)

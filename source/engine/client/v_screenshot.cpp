@@ -124,7 +124,7 @@ static bool V_SavePNG(const std::string &filename, IWindowSurface *surface)
     }
     surface->unlock();
 
-    int result = stbi_write_png(filename.c_str(), width, height, 3, pixels, 0);
+    int result = stbi_write_png(M_GetWriteDir().append(filename).c_str(), width, height, 3, pixels, 0);
 
     delete[] pixels;
 
@@ -149,10 +149,10 @@ void V_ScreenShot(std::string filename)
     filename = M_ExpandTokens(filename);
 
     // Turn filename into complete path.
-    std::string pathname = M_GetUserFileName(filename);
+    filename = StrFormat("screenshots/%s", filename.c_str());
 
     // If the file already exists, append numbers.
-    if (!M_FindFreeName(pathname, extension))
+    if (!M_FindFreeName(filename, extension))
     {
         Printf(PRINT_WARNING, "I_ScreenShot: Delete some screenshots\n");
         return;
@@ -161,13 +161,13 @@ void V_ScreenShot(std::string filename)
     // Create an SDL_Surface object from our screen buffer
     IWindowSurface *primary_surface = I_GetPrimarySurface();
 
-    if (!V_SavePNG(pathname, primary_surface))
+    if (!V_SavePNG(filename, primary_surface))
     {
-        Printf(PRINT_WARNING, "I_SavePNG:Error while saving %s.%s\n", filename.c_str(), extension.c_str());
+        Printf(PRINT_WARNING, "I_SavePNG:Error while saving %s\n", M_ExtractFileName(filename).c_str());
         return;
     }
 
-    Printf(PRINT_HIGH, "Screenshot taken: %s.%s\n", filename.c_str(), extension.c_str());
+    Printf(PRINT_HIGH, "Screenshot taken: %s\n", M_ExtractFileName(filename).c_str());
 }
 
 VERSION_CONTROL(v_screenshot_cpp, "$Id: 2f24cb1846fd19e022aabff7cfd82d341c44a869 $")
