@@ -1580,7 +1580,7 @@ bool CL_PrepareConnect()
         const std::string hashStr = MSG_ReadString();
         OMD5Hash          hash;
         OMD5Hash::makeFromHexStr(hash, hashStr);
-        if (!OWantFile::makeWithHash(file, newwadnames.at(i), OFILE_WAD, hash))
+        if (!OWantFile::makeWithHash(file, newwadnames.at(i), hash))
         {
             Printf(PRINT_WARNING, "Could not construct wanted file \"%s\" that server requested.\n",
                    newwadnames.at(i).c_str());
@@ -1672,28 +1672,9 @@ bool CL_PrepareConnect()
         return false;
     }
 
-    // DEH/BEX Patch files
-    size_t patch_count = MSG_ReadByte();
-
-    OWantFiles newpatchfiles;
-    newpatchfiles.resize(patch_count);
-    for (byte i = 0; i < patch_count; ++i)
-    {
-        OWantFile  &file     = newpatchfiles.at(i);
-        std::string filename = MSG_ReadString();
-        if (!OWantFile::make(file, filename, OFILE_DEH))
-        {
-            Printf(PRINT_WARNING, "Could not construct wanted file \"%s\" that server requested.\n", filename.c_str());
-            CL_QuitNetGame(NQ_ABORT);
-            return false;
-        }
-
-        Printf("> %s\n", file.getBasename().c_str());
-    }
-
     // TODO: Allow deh/bex file downloads
     Printf("\n");
-    bool ok = D_DoomWadReboot(newwadfiles, newpatchfiles);
+    bool ok = D_DoomWadReboot(newwadfiles);
     if (!ok && missingfiles.empty())
     {
         Printf(PRINT_WARNING, "Could not load required set of WAD files.\n");

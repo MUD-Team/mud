@@ -86,7 +86,7 @@ odaproto::svc::PingRequest       SVC_PingRequest();
 odaproto::svc::UpdatePing        SVC_UpdatePing(player_t &player);
 odaproto::svc::SpawnMobj         SVC_SpawnMobj(AActor *mo);
 odaproto::svc::DisconnectClient  SVC_DisconnectClient(player_t &player);
-odaproto::svc::LoadMap SVC_LoadMap(const OResFiles &wadnames, const OResFiles &patchnames, const std::string &mapname,
+odaproto::svc::LoadMap SVC_LoadMap(const OResFiles &wadnames, const std::string &mapname,
                                    int time);
 odaproto::svc::ConsolePlayer    SVC_ConsolePlayer(player_t &player, const std::string &digest);
 odaproto::svc::ExplodeMissile   SVC_ExplodeMissile(AActor &mobj);

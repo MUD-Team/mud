@@ -144,8 +144,18 @@ int __cdecl main(int argc, char *argv[])
             I_FatalError("Could not initialize PHYSFS:\n%s\n", PHYSFS_getLastError());
 
         PHYSFS_setWriteDir(M_GetWriteDir().c_str());
+        // Ensure certain directories exist in the write folder
+        // These should be no-ops if already present - Dasho
+        PHYSFS_mkdir("assets");
+        // Ensure downloads folder exists (I don't think we need to do this for core in the writeable folder)
+        PHYSFS_mkdir("assets/downloads");
+        // Not sure what other folders the server needs vs. the client - Dasho
+
         PHYSFS_mount(M_GetBinaryDir().c_str(), NULL, 0);
         PHYSFS_mount(M_GetWriteDir().c_str(), NULL, 0);
+
+        PHYSFS_mount(M_GetBinaryDir().append(PATHSEP).append("assets").append(PATHSEP).append("core").c_str(), NULL, 0);
+        PHYSFS_mount(M_GetWriteDir().append(PATHSEP).append("assets").append(PATHSEP).append("downloads").c_str(), NULL, 0);
 
         if (::Args.CheckParm("--version"))
         {
@@ -267,12 +277,23 @@ int main(int argc, char **argv)
             I_FatalError("Could not initialize PHYSFS:\n%s\n", PHYSFS_getLastError());
 
         PHYSFS_setWriteDir(M_GetWriteDir().c_str());
+        // Ensure certain directories exist in the write folder
+        // These should be no-ops if already present - Dasho
+        PHYSFS_mkdir("assets");
+        // Ensure downloads folder exists (I don't think we need to do this for core in the writeable folder)
+        PHYSFS_mkdir("assets/downloads");
+        // Not sure what other folders the server needs vs. the client - Dasho
+
         PHYSFS_mount(M_GetBinaryDir().c_str(), NULL, 0);
         PHYSFS_mount(M_GetWriteDir().c_str(), NULL, 0);
+
+        PHYSFS_mount(M_GetBinaryDir().append(PATHSEP).append("assets").append(PATHSEP).append("core").c_str(), NULL, 0);
+        PHYSFS_mount(M_GetWriteDir().append(PATHSEP).append("assets").append(PATHSEP).append("downloads").c_str(), NULL, 0);
 
         if (::Args.CheckParm("--version"))
         {
             printf("Odamex %s\n", NiceVersion());
+            PHYSFS_deinit();
             exit(EXIT_SUCCESS);
         }
 

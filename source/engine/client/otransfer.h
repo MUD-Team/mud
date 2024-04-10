@@ -29,6 +29,7 @@
 #endif
 #include "curl/curl.h"
 #include "ohash.h"
+#include "physfs.h"
 
 struct OTransferProgress
 {
@@ -97,7 +98,7 @@ class OTransfer
     OTransferErrorProc m_errorProc;
     CURLM             *m_curlm;
     CURL              *m_curl;
-    FILE              *m_file;
+    PHYSFS_File       *m_file;
     OTransferProgress  m_progress;
     std::string        m_filename;
     std::string        m_filePart;
@@ -106,6 +107,7 @@ class OTransfer
 
     OTransfer(const OTransfer &);
     static int curlProgress(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow);
+    static size_t curlWrite(void *data, size_t size, size_t nmemb, void *userp);
 
   public:
     OTransfer(OTransferDoneProc done, OTransferErrorProc err)
@@ -117,7 +119,7 @@ class OTransfer
     ~OTransfer()
     {
         if (m_file != NULL)
-            fclose(m_file);
+            PHYSFS_close(m_file);
         curl_multi_remove_handle(m_curlm, m_curl);
         curl_easy_cleanup(m_curl);
         curl_multi_cleanup(m_curlm);

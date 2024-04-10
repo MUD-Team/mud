@@ -43,12 +43,30 @@ CVAR_FUNC_IMPL(language)
 
     // Reload LANGUAGE strings.
     ::GStrings.loadStrings(false);
-
-    // Reapply DeHackEd patches on top of these strings.
-    D_LoadResolvedPatches();
 }
 
 // Set if homebrew PWAD stuff has been added.
 BOOL modifiedgame;
+
+// Miscellaneous info that used to be constant
+// Formerly in d_dehacked, subject to change - Dasho
+struct DehInfo deh = {
+    100, // .StartHealth
+    50,  // .StartBullets
+    100, // .MaxHealth
+    200, // .MaxArmor
+    1,   // .GreenAC
+    2,   // .BlueAC
+    200, // .MaxSoulsphere
+    100, // .SoulsphereHealth
+    200, // .MegasphereHealth
+    100, // .GodHealth
+    200, // .FAArmor
+    2,   // .FAAC
+    200, // .KFAArmor
+    2,   // .KFAAC
+    40,  // .BFGCells (No longer used)
+    0,   // .Infight
+};
 
 VERSION_CONTROL(doomstat_cpp, "$Id: 686011b85d769015f0aa65907035336a1d6e9867 $")

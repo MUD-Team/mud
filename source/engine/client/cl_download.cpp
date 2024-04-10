@@ -38,9 +38,6 @@
 #include "odamex.h"
 #include "w_ident.h"
 
-EXTERN_CVAR(cl_waddownloaddir)
-EXTERN_CVAR(waddirs)
-
 enum States
 {
     STATE_SHUTDOWN,
@@ -298,34 +295,6 @@ static void TickCheck()
     ::dlstate.check->tick();
 }
 
-/**
- * @brief Construct a list of download directories.
- */
-static StringTokens GetDownloadDirs()
-{
-    StringTokens dirs;
-
-    // Add all of the sources.
-    D_AddSearchDir(dirs, cl_waddownloaddir.cstring(), PATHLISTSEPCHAR);
-
-    D_AddSearchDir(dirs, Args.CheckValue("-waddir"), PATHLISTSEPCHAR);
-    D_AddSearchDir(dirs, getenv("DOOMWADDIR"), PATHLISTSEPCHAR);
-    D_AddSearchDir(dirs, getenv("DOOMWADPATH"), PATHLISTSEPCHAR);
-
-    D_AddSearchDir(dirs, waddirs.cstring(), PATHLISTSEPCHAR);
-
-    dirs.push_back(M_GetCWD());
-
-    // Clean up all of the directories before deduping them.
-    StringTokens::iterator it = dirs.begin();
-    for (; it != dirs.end(); ++it)
-        *it = M_CleanPath(*it);
-
-    // Dedupe directories.
-    dirs.erase(std::unique(dirs.begin(), dirs.end()), dirs.end());
-    return dirs;
-}
-
 static void TransferDone(const OTransferInfo &info)
 {
     std::string bytes;
@@ -349,40 +318,8 @@ static void TickDownload()
         ::dlstate.transfer = new OTransfer(TransferDone, TransferError);
         ::dlstate.transfer->setURL(::dlstate.url.c_str());
 
-        // Figure out where our destination should be.
-        std::string  dest;
-        StringTokens dirs = GetDownloadDirs();
-        for (StringTokens::iterator it = dirs.begin(); it != dirs.end(); ++it)
-        {
-            // Ensure no path-traversal shenanegins are going on.
-            dest = *it + PATHSEP + ::dlstate.filename;
-            M_CleanPath(dest);
-            if (dest.find(*it) != 0)
-            {
-                // Something about the filename is trying to escape the
-                // download directory.  This is almost certainly malicious.
-                TransferError("Saved file tried to escape download directory.\n");
-                ::dlstate.Ready();
-                return;
-            }
-
-            // If the output file was set successfully, escape the loop.
-            int err = ::dlstate.transfer->setOutputFile(dest.c_str());
-            if (err == 0)
-                break;
-
-            // Otherwise, set the destination to the empty string and try again.
-            Printf(PRINT_WARNING, "Could not save to %s (%s)\n", dest.c_str(), strerror(err));
-            dest = "";
-        }
-
-        if (dest.empty())
-        {
-            // Found no safe place to write, bail out.
-            TransferError("No safe place to save file.\n");
-            ::dlstate.Ready();
-            return;
-        }
+        // This should resolve within PHYSFS to the pref path/downloads folder
+        std::string  dest = "downloads/" + ::dlstate.filename;
 
         // Set our expected hash of the file.
         ::dlstate.transfer->setMD5(::dlstate.hash);
@@ -510,7 +447,7 @@ BEGIN_COMMAND(download)
 
         // Attach the website to the file and download it.
         OWantFile file;
-        OWantFile::make(file, argv[2], OFILE_UNKNOWN);
+        OWantFile::make(file, argv[2]);
         CL_StartDownload(clientsites, file, 0);
         return;
     }

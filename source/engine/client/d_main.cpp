@@ -43,7 +43,6 @@
 #include "c_effect.h"
 #include "cl_download.h"
 #include "cl_main.h"
-#include "d_dehacked.h"
 #include "d_main.h"
 #include "f_finale.h"
 #include "f_wipe.h"
@@ -652,8 +651,6 @@ void STACK_ARGS D_Shutdown()
 
     DThinker::DestroyAllThinkers();
 
-    D_UndoDehPatch();
-
     // close all open WAD files
     W_Close();
 
@@ -734,12 +731,12 @@ void D_DoomMain()
         iwad = iwadParam;
     }
 
-    OWantFiles newwadfiles, newpatchfiles;
+    OWantFiles newwadfiles;
 
     if (!iwad.empty())
     {
         OWantFile file;
-        OWantFile::make(file, iwad, OFILE_WAD);
+        OWantFile::make(file, iwad);
         newwadfiles.push_back(file);
     }
 
@@ -748,15 +745,14 @@ void D_DoomMain()
         for (size_t i = 0; i < pwads.size(); i++)
         {
             OWantFile file;
-            OWantFile::make(file, pwads[i], OFILE_WAD);
+            OWantFile::make(file, pwads[i]);
             newwadfiles.push_back(file);
         }
     }
 
     D_AddWadCommandLineFiles(newwadfiles);
-    D_AddDehCommandLineFiles(newpatchfiles);
 
-    D_LoadResourceFiles(newwadfiles, newpatchfiles);
+    D_LoadResourceFiles(newwadfiles);
 
     Printf(PRINT_HIGH, "I_Init: Init hardware.\n");
     atterm(I_ShutdownHardware);

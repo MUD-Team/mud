@@ -265,6 +265,14 @@ int OTransfer::curlProgress(void *clientp, double dltotal, double dlnow, double 
     return 0;
 }
 
+//
+// https://curl.haxx.se/libcurl/c/CURLOPT_WRITEFUNCTION.html
+//
+size_t OTransfer::curlWrite(void *data, size_t size, size_t nmemb, void *userp)
+{
+    return PHYSFS_writeBytes((PHYSFS_File *)userp, data, size * nmemb);
+}
+
 // PUBLIC //
 
 /**
@@ -289,11 +297,12 @@ int OTransfer::setOutputFile(const std::string &dest)
     m_filename = dest;
     m_filePart = dest + ".part";
 
-    m_file = fopen(m_filePart.c_str(), "wb+");
+    m_file = PHYSFS_openWrite(m_filePart.c_str());
     if (m_file == NULL)
         return errno;
 
     curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, m_file);
+    curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, OTransfer::curlWrite);
     return 0;
 }
 
@@ -406,7 +415,7 @@ bool OTransfer::tick()
     }
 
     // Close the file so we can rename it.
-    fclose(m_file);
+    PHYSFS_close(m_file);
     m_file = NULL;
 
     // Verify that the file is what the server wants and is not a renamed

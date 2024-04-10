@@ -25,7 +25,6 @@
 
 #include <math.h>
 
-#include "d_dehacked.h"
 #include "d_player.h"
 #include "g_skill.h"
 #include "gi.h"

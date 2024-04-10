@@ -432,7 +432,7 @@ extern bool unnatural_level_progression;
 
 void P_RemoveDefereds();
 
-bool G_LoadWad(const OWantFiles &newwadfiles, const OWantFiles &newpatchfiles, const std::string &mapname = "");
+bool G_LoadWad(const OWantFiles &newwadfiles, const std::string &mapname = "");
 bool G_LoadWadString(const std::string &str, const std::string &mapname = "");
 
 LevelInfos   &getLevelInfos();

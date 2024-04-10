@@ -1061,12 +1061,7 @@ void NetDemo::writeLauncherSequence(buf_t *netbuffer)
 
     MSG_WriteLong(netbuffer, GAMEVER);
 
-    // TODO: handle patch files
-    MSG_WriteByte(netbuffer, 0); // patchfiles.size()
-    //	MSG_WriteByte	(netbuffer, patchfiles.size());
-
-    //	for (size_t n = 0; n < patchfiles.size(); n++)
-    //		MSG_WriteString(netbuffer, patchfiles[n].c_str());
+    MSG_WriteByte(netbuffer, 0);
 }
 
 //
@@ -1105,7 +1100,7 @@ void NetDemo::writeConnectionSequence(buf_t *netbuffer)
     MSG_WriteSVC(netbuffer, SVC_PlayerMembers(consoleplayer(), SVC_PM_SPECTATOR));
 
     // Server sends wads & map name
-    MSG_WriteSVC(netbuffer, SVC_LoadMap(wadfiles, patchfiles, level.mapname.c_str(), level.time));
+    MSG_WriteSVC(netbuffer, SVC_LoadMap(wadfiles, level.mapname.c_str(), level.time));
 
     // Server spawns the player
     MSG_WriteSVC(netbuffer, SVC_SpawnPlayer(consoleplayer()));
@@ -1399,13 +1394,6 @@ void NetDemo::writeSnapshotData(std::vector<byte> &buf)
         arc << ::wadfiles[i].getMD5().getHexCStr();
     }
 
-    arc << (byte)patchfiles.size();
-    for (size_t i = 0; i < patchfiles.size(); i++)
-    {
-        arc << D_CleanseFileName(::patchfiles[i].getBasename()).c_str();
-        arc << ::patchfiles[i].getMD5().getHexCStr();
-    }
-
     // write map info
     arc << level.mapname.c_str();
     arc << (BYTE)(gamestate == GS_INTERMISSION);
@@ -1481,7 +1469,7 @@ void NetDemo::readSnapshotData(std::vector<byte> &buf)
     cvar_t::C_ReadCVars(&vars_p);
 
     // read wad info
-    OWantFiles  newwadfiles, newpatchfiles;
+    OWantFiles  newwadfiles;
     byte        numwads, numpatches;
     std::string res, hashStr;
 
@@ -1495,22 +1483,8 @@ void NetDemo::readSnapshotData(std::vector<byte> &buf)
         OMD5Hash::makeFromHexStr(hash, hashStr);
 
         OWantFile want;
-        OWantFile::makeWithHash(want, res, OFILE_WAD, hash);
+        OWantFile::makeWithHash(want, res, hash);
         newwadfiles.push_back(want);
-    }
-
-    arc >> numpatches;
-    for (size_t i = 0; i < numpatches; i++)
-    {
-        arc >> res;
-        arc >> hashStr;
-
-        OMD5Hash hash;
-        OMD5Hash::makeFromHexStr(hash, hashStr);
-
-        OWantFile want;
-        OWantFile::makeWithHash(want, res, OFILE_DEH, hash);
-        newpatchfiles.push_back(want);
     }
 
     std::string mapname;
@@ -1545,7 +1519,7 @@ void NetDemo::readSnapshotData(std::vector<byte> &buf)
     savegamerestore = true; // Use the player actors in the savegame
     serverside      = false;
 
-    G_LoadWad(newwadfiles, newpatchfiles);
+    G_LoadWad(newwadfiles);
 
     G_InitNew(mapname.c_str());
     displayplayer_id = consoleplayer_id = 1;

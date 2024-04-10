@@ -40,8 +40,8 @@ extern std::string LOG_FILE;
 //
 void D_DoomMain(void);
 
-void D_LoadResourceFiles(const OWantFiles &newwadfiles, const OWantFiles &newpatchfiles);
-bool D_DoomWadReboot(const OWantFiles &newwadfiles, const OWantFiles &newpatchfiles);
+void D_LoadResourceFiles(const OWantFiles &newwadfiles);
+bool D_DoomWadReboot(const OWantFiles &newwadfiles);
 
 // Called by IO functions when input is detected.
 void D_PostEvent(const event_t *ev);
@@ -59,12 +59,9 @@ void D_DisplayTicker(void);
 extern const char *D_DrawIcon;
 
 void        D_AddSearchDir(std::vector<std::string> &dirs, const char *dir, const char separator);
-void        D_AddPlatformSearchDirs(std::vector<std::string> &dirs);
-void        D_LoadResolvedPatches();
 std::string D_CleanseFileName(const std::string &filename, const std::string &ext = "");
 
 extern OResFiles  wadfiles;
-extern OResFiles  patchfiles;
 extern OWantFiles missingfiles;
 
 extern bool     capfps;
@@ -73,7 +70,6 @@ void STACK_ARGS D_ClearTaskSchedulers();
 void            D_RunTics(void (*sim_func)(), void (*display_func)());
 
 void D_AddWadCommandLineFiles(OWantFiles &out);
-void D_AddDehCommandLineFiles(OWantFiles &out);
 
 std::string D_GetTitleString();
 

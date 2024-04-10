@@ -193,14 +193,6 @@ static void IntQryBuildInformation(const DWORD &EqProtocolVersion, const DWORD &
         }
     }
 
-    // Patch files
-    MSG_WriteByte(&ml_message, patchfiles.size());
-
-    for (size_t i = 0; i < patchfiles.size(); ++i)
-    {
-        MSG_WriteString(&ml_message, D_CleanseFileName(::patchfiles[i].getBasename()).c_str());
-    }
-
     // Wad files
     MSG_WriteByte(&ml_message, wadfiles.size());
 
