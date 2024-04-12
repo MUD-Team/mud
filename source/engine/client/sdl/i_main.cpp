@@ -113,8 +113,8 @@ int main(int argc, char *argv[])
         PHYSFS_mount(M_GetBinaryDir().c_str(), NULL, 0);
         PHYSFS_mount(M_GetWriteDir().c_str(), NULL, 0);
 
-        PHYSFS_mount(M_GetBinaryDir().append(PATHSEP).append("assets").append(PATHSEP).append("core").c_str(), NULL, 0);
-        PHYSFS_mount(M_GetWriteDir().append(PATHSEP).append("assets").append(PATHSEP).append("downloads").c_str(), NULL, 0);
+        PHYSFS_mount(M_GetBinaryDir().append("assets").append(PATHSEP).append("core").c_str(), NULL, 0);
+        PHYSFS_mount(M_GetWriteDir().append("assets").append(PATHSEP).append("downloads").c_str(), NULL, 0);
 
         if (::Args.CheckParm("--version"))
         {
