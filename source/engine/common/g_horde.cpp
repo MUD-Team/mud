@@ -360,6 +360,30 @@ static void ParseDefine(OScanner &os)
     ::WAVE_DEFINES.push_back(define);
 }
 
+/*
+ * @brief Checks to see if TNT-range actor is defined, but useful for DEHEXTRA monsters.
+ * Because in HORDEDEF, sometimes a WAD author may accidentally use a DEHEXTRA monster
+ * that is undefined.
+ */
+// Formerly in d_dehacked; may get yoinked later - Dasho
+static bool CheckIfDehActorDefined(const mobjtype_t mobjtype)
+{
+    const mobjinfo_t mobj = ::mobjinfo[mobjtype];
+    if (mobj.doomednum == -1 && mobj.spawnstate == S_TNT1 && mobj.spawnhealth == 0 && mobj.gibhealth == 0 &&
+        mobj.seestate == S_NULL && mobj.seesound == NULL && mobj.reactiontime == 0 && mobj.attacksound == NULL &&
+        mobj.painstate == S_NULL && mobj.painchance == 0 && mobj.painsound == NULL && mobj.meleestate == S_NULL &&
+        mobj.missilestate == S_NULL && mobj.deathstate == S_NULL && mobj.xdeathstate == S_NULL &&
+        mobj.deathsound == NULL && mobj.speed == 0 && mobj.radius == 0 && mobj.height == 0 && mobj.cdheight == 0 &&
+        mobj.mass == 0 && mobj.damage == 0 && mobj.activesound == NULL && mobj.flags == 0 && mobj.flags2 == 0 &&
+        mobj.raisestate == S_NULL && mobj.translucency == 0x10000 && mobj.altspeed == NO_ALTSPEED &&
+        mobj.infighting_group == IG_DEFAULT && mobj.projectile_group == PG_DEFAULT && mobj.splash_group == SG_DEFAULT &&
+        mobj.ripsound == "" && mobj.meleerange == (64 * FRACUNIT) && mobj.droppeditem == MT_NULL)
+    {
+        return false;
+    }
+    return true;
+}
+
 static void ParseAlias(OScanner &os)
 {
     os.assertTokenIs("alias");

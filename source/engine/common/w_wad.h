@@ -35,7 +35,6 @@
 
 // [RH] Remove limit on number of WAD files
 extern OResFiles  wadfiles;
-extern OResFiles  patchfiles;
 extern OWantFiles missingfiles;
 extern bool       missingCommercialIWAD;
 

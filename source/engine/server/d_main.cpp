@@ -41,7 +41,6 @@
 #include <algorithm>
 
 #include "c_dispatch.h"
-#include "d_dehacked.h"
 #include "g_game.h"
 #include "g_horde.h"
 #include "g_mapinfo.h"
@@ -196,8 +195,6 @@ void STACK_ARGS D_Shutdown()
 
     DThinker::DestroyAllThinkers();
 
-    D_UndoDehPatch();
-
     // close all open WAD files
     W_Close();
 
@@ -246,20 +243,19 @@ void D_DoomMain()
     if (!LOG.is_open())
         C_DoCommand("logfile");
 
-    OWantFiles newwadfiles, newpatchfiles;
+    OWantFiles newwadfiles;
 
     const char *iwad_filename_cstr = Args.CheckValue("-iwad");
     if (iwad_filename_cstr)
     {
         OWantFile file;
-        OWantFile::make(file, iwad_filename_cstr, OFILE_WAD);
+        OWantFile::make(file, iwad_filename_cstr);
         newwadfiles.push_back(file);
     }
 
     D_AddWadCommandLineFiles(newwadfiles);
-    D_AddDehCommandLineFiles(newpatchfiles);
 
-    D_LoadResourceFiles(newwadfiles, newpatchfiles);
+    D_LoadResourceFiles(newwadfiles);
 
     // Ch0wW: Loading the config here fixes the "addmap" issue.
     M_LoadDefaults();                 // load before initing other systems

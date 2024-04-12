@@ -30,19 +30,19 @@
 enum ofile_t
 {
     /**
-     * @brief Unknown file type.
+     * @brief Zips passed via -game or -file.
      */
-    OFILE_UNKNOWN,
+    OFILE_ARCHIVE,
 
     /**
-     * @brief Anything that would be passed as a -file or -iwad parameter.
+     * @brief (Real, not PHYSFS) directories passed via -game or -file.
      */
-    OFILE_WAD,
+    OFILE_FOLDER,
 
     /**
-     * @brief Anything that would be passed as a -deh parameter.
+     * @brief Individual files passed via -game or -file; unsure of utility for MUD yet - Dasho
      */
-    OFILE_DEH,
+    OFILE_LOOSE,
 };
 
 /**
@@ -51,10 +51,20 @@ enum ofile_t
 class OResFile
 {
     std::string m_fullpath;
+    ofile_t     m_type;
     OMD5Hash    m_md5;
     std::string m_basename;
 
   public:
+    /**
+     * @brief Get the resource file type.
+     */
+    const ofile_t &getType() const
+    {
+        return m_type;
+    }
+
+
     bool operator==(const OResFile &other) const
     {
         return m_md5 == other.m_md5;
@@ -99,7 +109,6 @@ typedef std::vector<OResFile> OResFiles;
 class OWantFile
 {
     std::string m_wantedpath;
-    ofile_t     m_wantedtype;
     OMD5Hash    m_wantedMD5;
     OCRC32Sum   m_wantedCRC32;
     std::string m_basename;
@@ -112,14 +121,6 @@ class OWantFile
     const std::string &getWantedPath() const
     {
         return m_wantedpath;
-    }
-
-    /**
-     * @brief Get the original "wanted" path.
-     */
-    ofile_t getWantedType() const
-    {
-        return m_wantedtype;
     }
 
     /**
@@ -147,8 +148,8 @@ class OWantFile
         return m_extension;
     }
 
-    static bool make(OWantFile &out, const std::string &file, const ofile_t type);
-    static bool makeWithHash(OWantFile &out, const std::string &file, const ofile_t type, const OMD5Hash &hash);
+    static bool make(OWantFile &out, const std::string &file);
+    static bool makeWithHash(OWantFile &out, const std::string &file, const OMD5Hash &hash);
 };
 typedef std::vector<OWantFile> OWantFiles;
 
@@ -167,8 +168,4 @@ struct scannedPWAD_t
 };
 
 std::string                     M_ResFilesToString(const OResFiles &files);
-const std::vector<std::string> &M_FileTypeExts(ofile_t type);
-std::vector<std::string>        M_FileSearchDirs();
 bool                            M_ResolveWantedFile(OResFile &out, const OWantFile &wanted);
-std::vector<scannedIWAD_t>      M_ScanIWADs();
-std::vector<scannedPWAD_t>      M_ScanPWADs();

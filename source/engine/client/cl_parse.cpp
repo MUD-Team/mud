@@ -760,7 +760,7 @@ static void CL_LoadMap(const odaproto::svc::LoadMap *msg)
         OMD5Hash::makeFromHexStr(hash, hashStr);
 
         OWantFile file;
-        if (!OWantFile::makeWithHash(file, name, OFILE_WAD, hash))
+        if (!OWantFile::makeWithHash(file, name, hash))
         {
             Printf(PRINT_WARNING, "Could not construct wanted file \"%s\" that server requested.\n", name.c_str());
             CL_QuitNetGame(NQ_DISCONNECT);
@@ -769,33 +769,12 @@ static void CL_LoadMap(const odaproto::svc::LoadMap *msg)
         newwadfiles.push_back(file);
     }
 
-    size_t     patchcount = msg->patchnames_size();
-    OWantFiles newpatchfiles;
-    newpatchfiles.reserve(patchcount);
-    for (size_t i = 0; i < patchcount; i++)
-    {
-        std::string name    = msg->patchnames().Get(i).name();
-        std::string hashStr = msg->patchnames().Get(i).hash();
-
-        OMD5Hash hash;
-        OMD5Hash::makeFromHexStr(hash, hashStr);
-
-        OWantFile file;
-        if (!OWantFile::makeWithHash(file, name, OFILE_DEH, hash))
-        {
-            Printf(PRINT_WARNING, "Could not construct wanted patch \"%s\" that server requested.\n", name.c_str());
-            CL_QuitNetGame(NQ_DISCONNECT);
-            return;
-        }
-        newpatchfiles.push_back(file);
-    }
-
     std::string mapname           = msg->mapname();
     int         server_level_time = msg->time();
 
-    // Load the specified WAD and DEH files and change the level.
+    // Load the specified WAD files and change the level.
     // if any WADs are missing, reconnect to begin downloading.
-    G_LoadWad(newwadfiles, newpatchfiles);
+    G_LoadWad(newwadfiles);
 
     if (!missingfiles.empty())
     {

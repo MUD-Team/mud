@@ -348,7 +348,7 @@ void G_DoNewGame()
         if (!(it->ingame()))
             continue;
 
-        MSG_WriteSVC(&it->client.reliablebuf, SVC_LoadMap(::wadfiles, ::patchfiles, d_mapname, 0));
+        MSG_WriteSVC(&it->client.reliablebuf, SVC_LoadMap(::wadfiles, d_mapname, 0));
     }
 
     sv_curmap.ForceSet(d_mapname);

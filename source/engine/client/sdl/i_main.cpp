@@ -103,16 +103,18 @@ int main(int argc, char *argv[])
         PHYSFS_setWriteDir(M_GetWriteDir().c_str());
         // Ensure certain directories exist in the write folder
         // These should be no-ops if already present - Dasho
+        PHYSFS_mkdir("assets");
+        // Ensure downloads folder exists (I don't think we need to do this for core in the writeable folder)
+        PHYSFS_mkdir("assets/downloads");
         PHYSFS_mkdir("saves");
         PHYSFS_mkdir("screenshots");
         PHYSFS_mkdir("soundfonts");
 
-        for (const std::string &dir : M_FileSearchDirs())
-        {
-            PHYSFS_mount(dir.c_str(), NULL, 0);
-        }
-
+        PHYSFS_mount(M_GetBinaryDir().c_str(), NULL, 0);
         PHYSFS_mount(M_GetWriteDir().c_str(), NULL, 0);
+
+        PHYSFS_mount(M_GetBinaryDir().append("assets").append(PATHSEP).append("core").c_str(), NULL, 0);
+        PHYSFS_mount(M_GetWriteDir().append("assets").append(PATHSEP).append("downloads").c_str(), NULL, 0);
 
         if (::Args.CheckParm("--version"))
         {
@@ -173,38 +175,6 @@ int main(int argc, char *argv[])
                 Args.AppendArg(location.substr(0, term).c_str());
             }
         }
-
-#if defined _WIN32
-
-#if defined(SDL20)
-        // FIXME: Remove this when SDL gets it shit together, see
-        // https://bugzilla.libsdl.org/show_bug.cgi?id=2089
-        // ...
-        // Disable thread naming on windows, with SDL 2.0.5 and GDB > 7.8.1
-        // RaiseException will be thrown and will crash under the debugger with symbols
-        // loaded or not
-        SDL_SetHint(SDL_HINT_WINDOWS_DISABLE_THREAD_NAMING, "1");
-#endif // SDL20
-
-        // Set the process affinity mask to 1 on Windows, so that all threads
-        // run on the same processor.  This is a workaround for a bug in
-        // SDL_mixer that causes occasional crashes.  Thanks to entryway and fraggle for this.
-        //
-        // [ML] 8/6/10: Updated to match prboom+'s I_SetAffinityMask.  We don't do everything
-        // you might find in there but we do enough for now.
-        HMODULE kernel32_dll = LoadLibrary("kernel32.dll");
-
-        if (kernel32_dll)
-        {
-            SetAffinityFunc SetAffinity = (SetAffinityFunc)GetProcAddress(kernel32_dll, "SetProcessAffinityMask");
-
-            if (SetAffinity)
-            {
-                if (!SetAffinity(GetCurrentProcess(), 1))
-                    LOG << "Failed to set process affinity mask: " << GetLastError() << std::endl;
-            }
-        }
-#endif // _WIN32
 
         unsigned int sdl_flags = SDL_INIT_TIMER;
 

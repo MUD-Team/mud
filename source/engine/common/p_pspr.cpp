@@ -26,7 +26,6 @@
 
 #include <stdlib.h>
 
-#include "d_dehacked.h"
 #include "d_event.h"
 #include "g_gametype.h"
 #include "m_random.h"

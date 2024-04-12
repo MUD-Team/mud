@@ -29,13 +29,8 @@
 //
 //-----------------------------------------------------------------------------
 
-#if defined(_WIN32)
-#include <direct.h> // getcwd
-#else
-#include <unistd.h> // getcwd
-#endif
-
 #include "cmdlib.h"
+#include "i_system.h"
 #include "m_argv.h"
 #include "m_fileio.h"
 #include "odamex.h"
@@ -47,6 +42,53 @@ std::ofstream LOG;
 
 // Simple file based console input
 std::ifstream CON;
+
+static bool M_IsAbsolutePath(const std::string &path)
+{
+    if (path.empty())
+        return false;
+
+#ifdef _WIN32
+    // Check for Drive letter, colon and slash...
+    if (path.size() > 2 && path[1] == ':' && (path[2] == '\\' || path[2] == '/') &&
+        ((path[0] > '@' && path[0] < '[') || (path[0] > '`' && path[0] < '{')))
+    {
+        return true;
+    }
+    // Check for share name...
+    if (path.size() > 1 && path[0] == '\\' && path[1] == '\\')
+        return true;
+#else
+    if (M_IsPathSep(path[0]))
+        return true;
+#endif
+
+    return false;
+}
+
+std::string M_GetUserFileName(const std::string &file)
+{
+    std::string path = file;
+    // If an absolute path that contains our write directory,
+    // make it relative
+    // Todo: Should we do case insensitive compare on Windows? - Dasho
+    std::string::size_type pos = file.find(M_GetWriteDir());
+    if (pos != std::string::npos)
+    {
+        path = file.substr(pos + M_GetWriteDir().size());
+    }
+
+    // Still an absolute path?  If so, stop here.
+    if (M_IsAbsolutePath(path))
+    {
+        I_FatalError("Attempting to write to %s, which is outside of the write directory at %s\n", file.c_str(),
+                     M_GetWriteDir().c_str());
+    }
+
+    // If we get here, it should just be writing somewhere in
+    // our PHYSFS write path
+    return path;
+}
 
 /**
  * @brief Expand "~" into the user's home directory.
@@ -72,7 +114,7 @@ void M_ExpandHomeDir(std::string &path)
  */
 std::string M_FindUserFileName(const std::string &file, const char *ext)
 {
-    std::string found = M_GetUserFileName(file);
+    std::string found    = M_GetUserFileName(file);
     std::string filename = M_ExtractFileName(found);
     if (M_FileExists(filename))
     {
@@ -80,7 +122,7 @@ std::string M_FindUserFileName(const std::string &file, const char *ext)
     }
     else if (ext != NULL)
     {
-        found = M_GetUserFileName(std::string(file) + ext);
+        found    = M_GetUserFileName(std::string(file) + ext);
         filename = M_ExtractFileName(found);
         if (M_FileExists(filename))
         {
@@ -110,23 +152,6 @@ void M_FixPathSep(std::string &path)
             path[i] = PATHSEPCHAR;
         }
     }
-}
-
-/**
- * @brief Get the current working directory.
- */
-std::string M_GetCWD()
-{
-    char        tmp[4096] = {0};
-    std::string ret       = "./";
-
-    const char *cwd = getcwd(tmp, sizeof(tmp));
-    if (cwd)
-        ret = cwd;
-
-    M_FixPathSep(ret);
-
-    return ret;
 }
 
 //
@@ -178,7 +203,7 @@ bool M_FileExistsExt(const std::string &filename, const char *ext)
 BOOL M_WriteFile(std::string filename, void *source, QWORD length)
 {
     PHYSFS_File *handle;
-    QWORD count;
+    QWORD        count;
 
     handle = PHYSFS_openWrite(filename.c_str());
 
@@ -208,8 +233,8 @@ BOOL M_WriteFile(std::string filename, void *source, QWORD length)
 QWORD M_ReadFile(std::string filename, BYTE **buffer)
 {
     PHYSFS_File *handle;
-    QWORD count, length;
-    BYTE *buf;
+    QWORD        count, length;
+    BYTE        *buf;
 
     handle = PHYSFS_openRead(filename.c_str());
 
@@ -548,13 +573,10 @@ std::string M_GetBinaryDir()
 
 std::string M_GetWriteDir()
 {
-    if (Args.CheckParm("--portable"))
-        return PHYSFS_getBaseDir();
-    else
 #ifdef CLIENT_APP
-        return PHYSFS_getPrefDir("MUD Team", "MUD Client"); // subject to change - Dasho
+    return PHYSFS_getPrefDir("MUD Team", "MUD Client"); // subject to change - Dasho
 #else
-        return PHYSFS_getPrefDir("MUD Team", "MUD Server"); // subject to change - Dasho
+    return PHYSFS_getPrefDir("MUD Team", "MUD Server"); // subject to change - Dasho
 #endif
 }
 

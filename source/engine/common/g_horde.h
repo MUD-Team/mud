@@ -26,4 +26,3 @@
 
 void                 G_ParseHordeDefs();
 const hordeDefine_t &G_HordeDefine(size_t id);
-bool                 CheckIfDehActorDefined(const mobjtype_t mobjtype);

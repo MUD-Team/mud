@@ -282,10 +282,18 @@ void W_AddLumps(PHYSFS_File *handle, filelump_t *fileinfo, size_t newlumps, bool
 //
 void AddFile(const OResFile &file)
 {
-    PHYSFS_File       *handle;
-    filelump_t *fileinfo;
+    if (file.getType() != OFILE_LOOSE)
+    {
+        if (PHYSFS_mount(file.getFullpath().c_str(), NULL, 0) == 0)
+        {
+            Printf(PRINT_WARNING, "couldn't mount %s\n", file.getFullpath().c_str());
+        }
+        return;
+    }
 
     const std::string filename = file.getBasename();
+    PHYSFS_File       *handle = NULL;
+    filelump_t *fileinfo = NULL;
 
     if ((handle = PHYSFS_openRead(filename.c_str())) == NULL)
     {

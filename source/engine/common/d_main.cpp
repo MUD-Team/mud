@@ -36,7 +36,6 @@
 #include <sstream>
 
 #include "c_console.h"
-#include "d_dehacked.h"
 #include "d_main.h"
 #include "g_game.h"
 #include "g_spawninv.h"
@@ -55,7 +54,6 @@
 #include "z_zone.h"
 
 OResFiles  wadfiles;
-OResFiles  patchfiles;
 OWantFiles missingfiles;
 bool       missingCommercialIWAD = false;
 
@@ -223,117 +221,6 @@ void D_AddSearchDir(std::vector<std::string> &dirs, const char *dir, const char 
     }
 }
 
-// [AM] Add platform-sepcific search directories
-void D_AddPlatformSearchDirs(std::vector<std::string> &dirs)
-{
-#if defined(_WIN32)
-
-    const char separator = ';';
-
-    // Doom 95
-    {
-        unsigned int i;
-
-        for (i = 0; i < ARRAY_LENGTH(uninstall_values); ++i)
-        {
-            char *val;
-            char *path;
-            char *unstr;
-
-            val = GetRegistryString(&uninstall_values[i]);
-
-            if (val == NULL)
-                continue;
-
-            unstr = strstr(val, uninstaller_string);
-
-            if (unstr == NULL)
-            {
-                free(val);
-            }
-            else
-            {
-                path = unstr + strlen(uninstaller_string);
-
-                const char *cpath = path;
-                D_AddSearchDir(dirs, cpath, separator);
-            }
-        }
-    }
-
-    // Doom Collectors Edition
-    {
-        char        *install_path;
-        char        *subpath;
-        unsigned int i;
-
-        install_path = GetRegistryString(&collectors_edition_value);
-
-        if (install_path != NULL)
-        {
-            for (i = 0; i < ARRAY_LENGTH(collectors_edition_subdirs); ++i)
-            {
-                subpath = static_cast<char *>(malloc(strlen(install_path) + strlen(collectors_edition_subdirs[i]) + 5));
-                sprintf(subpath, "%s\\%s", install_path, collectors_edition_subdirs[i]);
-
-                const char *csubpath = subpath;
-                D_AddSearchDir(dirs, csubpath, separator);
-            }
-
-            free(install_path);
-        }
-    }
-
-    // Doom on Steam
-    {
-        char  *install_path;
-        char  *subpath;
-        size_t i;
-
-        install_path = GetRegistryString(&steam_install_location);
-
-        if (install_path != NULL)
-        {
-            for (i = 0; i < ARRAY_LENGTH(steam_install_subdirs); ++i)
-            {
-                subpath = static_cast<char *>(malloc(strlen(install_path) + strlen(steam_install_subdirs[i]) + 5));
-                sprintf(subpath, "%s\\%s", install_path, steam_install_subdirs[i]);
-
-                const char *csubpath = subpath;
-                D_AddSearchDir(dirs, csubpath, separator);
-
-                free(subpath);
-            }
-
-            free(install_path);
-        }
-    }
-
-    // DOS Doom via DEICE
-    D_AddSearchDir(dirs, "\\doom2", separator);    // Doom II
-    D_AddSearchDir(dirs, "\\plutonia", separator); // Final Doom
-    D_AddSearchDir(dirs, "\\tnt", separator);
-    D_AddSearchDir(dirs, "\\doom_se", separator);  // Ultimate Doom
-    D_AddSearchDir(dirs, "\\doom", separator);     // Shareware / Registered Doom
-    D_AddSearchDir(dirs, "\\dooms", separator);    // Shareware versions
-    D_AddSearchDir(dirs, "\\doomsw", separator);
-
-#elif defined(UNIX)
-
-    const char separator = ':';
-
-#if defined(INSTALL_PREFIX) && defined(INSTALL_DATADIR)
-    D_AddSearchDir(dirs, INSTALL_PREFIX "/" INSTALL_DATADIR "/odamex", separator);
-    D_AddSearchDir(dirs, INSTALL_PREFIX "/" INSTALL_DATADIR "/games/odamex", separator);
-#endif
-
-    D_AddSearchDir(dirs, "/usr/share/doom", separator);
-    D_AddSearchDir(dirs, "/usr/share/games/doom", separator);
-    D_AddSearchDir(dirs, "/usr/local/share/games/doom", separator);
-    D_AddSearchDir(dirs, "/usr/local/share/doom", separator);
-#endif
-}
-
 //
 // D_GetTitleString
 //
@@ -381,38 +268,6 @@ static void D_PrintIWADIdentity()
     }
 }
 
-/**
- * @brief Load all found DEH patches, as well as all found DEHACKED lumps.
- */
-void D_LoadResolvedPatches()
-{
-    // Load external patch files first.
-    bool chexLoaded = false;
-    for (OResFiles::const_iterator it = ::patchfiles.begin(); it != ::patchfiles.end(); ++it)
-    {
-        if (it->getBasename() == "CHEX.DEH")
-        {
-            chexLoaded = true;
-        }
-        D_DoDehPatch(&*it, -1);
-    }
-
-    // Check WAD files for lumps.
-    int lump = -1;
-    while ((lump = W_FindLump("DEHACKED", lump)) != -1)
-    {
-        D_DoDehPatch(NULL, lump);
-    }
-
-    if (::gamemode == retail_chex && !::multiplayer && !chexLoaded)
-    {
-        Printf(PRINT_WARNING, "Warning: chex.deh not loaded, experience may differ from the original!\n");
-    }
-
-    // Re-apply spawninv settings with our new DEH settings.
-    G_SetupSpawnInventory();
-}
-
 //
 // D_CleanseFileName
 //
@@ -450,7 +305,7 @@ static bool FindIWAD(OResFile &out)
         // Construct a file.
         OWantFile   wantfile;
         std::string filename = it->c_str();
-        if (!OWantFile::make(wantfile, filename, OFILE_WAD))
+        if (!OWantFile::make(wantfile, filename))
         {
             continue;
         }
@@ -472,9 +327,8 @@ static bool FindIWAD(OResFile &out)
  *        and complete.
  *
  * @param newwadfiles New set of WAD files.
- * @param newpatchfiles New set of patch files.
  */
-static void LoadResolvedFiles(const OResFiles &newwadfiles, const OResFiles &newpatchfiles)
+static void LoadResolvedFiles(const OResFiles &newwadfiles)
 {
     if (newwadfiles.size() < 2)
     {
@@ -482,7 +336,6 @@ static void LoadResolvedFiles(const OResFiles &newwadfiles, const OResFiles &new
     }
 
     ::wadfiles   = newwadfiles;
-    ::patchfiles = newpatchfiles;
 
     // Now scan the contents of the IWAD to determine which one it is
     W_ConfigureGameInfo(::wadfiles.at(1));
@@ -493,7 +346,7 @@ static void LoadResolvedFiles(const OResFiles &newwadfiles, const OResFiles &new
     // set the window title based on which IWAD we're using
     I_SetTitleString(D_GetTitleString().c_str());
 
-    ::modifiedgame = (::wadfiles.size() > 2) || !::patchfiles.empty(); // more than odamex.wad and IWAD?
+    ::modifiedgame = (::wadfiles.size() > 2); // more than odamex.wad and IWAD?
 
     if (::modifiedgame && (::gameinfo.flags & GI_SHAREWARE))
     {
@@ -506,9 +359,6 @@ static void LoadResolvedFiles(const OResFiles &newwadfiles, const OResFiles &new
     // [SL] It is necessary to load the strings here since a dehacked patch
     // might change the strings
     ::GStrings.loadStrings(false);
-
-    // Apply DEH patches.
-    D_LoadResolvedPatches();
 }
 
 /**
@@ -545,7 +395,7 @@ static bool CommercialIWADWarning(const OWantFile &wanted)
 
     // Try to find an IWAD file with a matching name in the user's directories.
     OWantFile sameNameWant;
-    OWantFile::make(sameNameWant, wanted.getBasename(), OFILE_WAD);
+    OWantFile::make(sameNameWant, wanted.getBasename());
     OResFile   sameNameRes;
     const bool resolved = M_ResolveWantedFile(sameNameRes, sameNameWant);
     if (!resolved)
@@ -593,11 +443,11 @@ static bool CommercialIWADWarning(const OWantFile &wanted)
 // D_LoadResourceFiles
 //
 // Performs the grunt work of loading WAD and DEH/BEX files.
-// The global wadfiles and patchfiles vectors are filled with the list
+// The global wadfiles vector is filled with the list
 // of loaded filenames and the missingfiles vector is also filled if
 // applicable.
 //
-void D_LoadResourceFiles(const OWantFiles &newwadfiles, const OWantFiles &newpatchfiles)
+void D_LoadResourceFiles(const OWantFiles &newwadfiles)
 {
     OResFile odamex_wad;
     OResFile next_iwad;
@@ -627,28 +477,13 @@ void D_LoadResourceFiles(const OWantFiles &newwadfiles, const OWantFiles &newpat
         resolved_wads.push_back(file);
     }
 
-    // Resolve wanted patches.
-    OResFiles resolved_patches;
-    resolved_patches.reserve(newpatchfiles.size());
-    for (OWantFiles::const_iterator it = newpatchfiles.begin(); it != newpatchfiles.end(); ++it)
-    {
-        OResFile file;
-        if (!M_ResolveWantedFile(file, *it))
-        {
-            ::missingfiles.push_back(*it);
-            Printf(PRINT_WARNING, "Could not resolve patch file \"%s\".", it->getWantedPath().c_str());
-            continue;
-        }
-        resolved_patches.push_back(file);
-    }
-
     // ODAMEX.WAD //
 
     if (::wadfiles.empty())
     {
         // If we don't have odamex.wad, resolve it now.
         OWantFile want_odamex;
-        OWantFile::make(want_odamex, "odamex.wad", OFILE_WAD);
+        OWantFile::make(want_odamex, "odamex.wad");
         if (!M_ResolveWantedFile(odamex_wad, want_odamex))
         {
             I_FatalError("Could not resolve \"%s\".  Please ensure this file is "
@@ -706,7 +541,7 @@ void D_LoadResourceFiles(const OWantFiles &newwadfiles, const OWantFiles &newpat
 
     resolved_wads.insert(resolved_wads.begin(), odamex_wad);
     resolved_wads.insert(resolved_wads.begin() + 1, next_iwad);
-    LoadResolvedFiles(resolved_wads, resolved_patches);
+    LoadResolvedFiles(resolved_wads);
 }
 
 /**
@@ -718,19 +553,13 @@ void D_LoadResourceFiles(const OWantFiles &newwadfiles, const OWantFiles &newpat
  *         time they reach this spot.
  *
  * @param newwadfiles WAD files to check.
- * @param newpatchfiles Patch files to check.
  * @return True if everything checks out.
  */
-static bool CheckWantedMatchesLoaded(const OWantFiles &newwadfiles, const OWantFiles &newpatchfiles)
+static bool CheckWantedMatchesLoaded(const OWantFiles &newwadfiles)
 {
     // Cheking sizes is a good first approximation.
 
     if (newwadfiles.size() + 1 != ::wadfiles.size())
-    {
-        return false;
-    }
-
-    if (newpatchfiles.size() != ::patchfiles.size())
     {
         return false;
     }
@@ -740,16 +569,6 @@ static bool CheckWantedMatchesLoaded(const OWantFiles &newwadfiles, const OWantF
     {
         size_t idx = it - newwadfiles.begin();
         if (it->getWantedMD5() != ::wadfiles.at(idx + 1).getMD5())
-        {
-            return false;
-        }
-    }
-
-    // Check patch hashes.
-    for (OWantFiles::const_iterator it = newpatchfiles.begin(); it != newpatchfiles.end(); ++it)
-    {
-        size_t idx = it - newpatchfiles.begin();
-        if (it->getWantedMD5() != ::patchfiles.at(idx).getMD5())
         {
             return false;
         }
@@ -765,12 +584,11 @@ static bool CheckWantedMatchesLoaded(const OWantFiles &newwadfiles, const OWantF
 // vector
 //
 // [SL] passing an IWAD as newwadfiles[0] is now optional
-// TODO: hash checking for patchfiles
 //
-bool D_DoomWadReboot(const OWantFiles &newwadfiles, const OWantFiles &newpatchfiles)
+bool D_DoomWadReboot(const OWantFiles &newwadfiles)
 {
     // already loaded these?
-    if (::lastWadRebootSuccess && CheckWantedMatchesLoaded(newwadfiles, newpatchfiles))
+    if (::lastWadRebootSuccess && CheckWantedMatchesLoaded(newwadfiles))
     {
         // fast track if files have not been changed
         Printf("Currently loaded resources match server checksums.\n\n");
@@ -786,11 +604,10 @@ bool D_DoomWadReboot(const OWantFiles &newwadfiles, const OWantFiles &newpatchfi
 
     // Load all the WAD and DEH/BEX files
     OResFiles   oldwadfiles   = ::wadfiles;
-    OResFiles   oldpatchfiles = ::patchfiles;
     std::string failmsg;
     try
     {
-        D_LoadResourceFiles(newwadfiles, newpatchfiles);
+        D_LoadResourceFiles(newwadfiles);
 
         // get skill / episode / map from parms
         strcpy(startmap, (gameinfo.flags & GI_MAPxx) ? "MAP01" : "E1M1");
@@ -815,7 +632,7 @@ bool D_DoomWadReboot(const OWantFiles &newwadfiles, const OWantFiles &newpatchfi
         std::string fatalmsg;
         try
         {
-            LoadResolvedFiles(oldwadfiles, oldpatchfiles);
+            LoadResolvedFiles(oldwadfiles);
 
             // get skill / episode / map from parms
             strcpy(startmap, (gameinfo.flags & GI_MAPxx) ? "MAP01" : "E1M1");
@@ -850,13 +667,13 @@ bool D_DoomWadReboot(const OWantFiles &newwadfiles, const OWantFiles &newpatchfi
 // option parameter (eg, "-file") matching the specified extension to the
 // filenames vector.
 //
-static void AddCommandLineOptionFiles(OWantFiles &out, const std::string &option, ofile_t type)
+static void AddCommandLineOptionFiles(OWantFiles &out, const std::string &option)
 {
     DArgs files = Args.GatherFiles(option.c_str());
     for (size_t i = 0; i < files.NumArgs(); i++)
     {
         OWantFile file;
-        OWantFile::make(file, files.GetArg(i), type);
+        OWantFile::make(file, files.GetArg(i));
         out.push_back(file);
     }
 
@@ -871,19 +688,7 @@ static void AddCommandLineOptionFiles(OWantFiles &out, const std::string &option
 //
 void D_AddWadCommandLineFiles(OWantFiles &out)
 {
-    AddCommandLineOptionFiles(out, "-file", OFILE_WAD);
-}
-
-//
-// D_AddDehCommandLineFiles
-//
-// Adds the DEH/BEX files specified with -bex or -deh.
-// Call this from D_DoomMain
-//
-void D_AddDehCommandLineFiles(OWantFiles &out)
-{
-    AddCommandLineOptionFiles(out, "-bex", OFILE_DEH);
-    AddCommandLineOptionFiles(out, "-deh", OFILE_DEH);
+    AddCommandLineOptionFiles(out, "-file");
 }
 
 // ============================================================================

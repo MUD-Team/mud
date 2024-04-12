@@ -35,7 +35,6 @@ extern std::ifstream CON;
 void        M_ExpandHomeDir(std::string &path);
 std::string M_FindUserFileName(const std::string &file, const char *ext);
 void        M_FixPathSep(std::string &path);
-std::string M_GetCWD();
 
 SDWORD M_FileLength(PHYSFS_File *f);
 bool   M_FileExists(const std::string &filename);
@@ -95,49 +94,3 @@ std::string M_GetWriteDir();
  * @return An absolute path pointing to the resolved file.
  */
 std::string M_GetUserFileName(const std::string &file);
-
-/**
- * @brief Attempt to find a file in a directory - case insensitive.
- *
- * @detail This function is OS-specific.
- *
- * @param dir Directory to search.
- * @param file File to search, without extension.
- * @param exts Extensions to search, including initial dot - must be capitalized.
- * @param hash Optional hash to match against - must be capitalized.
- * @return Filename of the found file, or empty string if not found.
- */
-std::string M_BaseFileSearchDir(std::string dir, const std::string &file, const std::vector<std::string> &exts,
-                                const OMD5Hash &hash);
-
-/**
- * @brief Attempt to find multiple files in a directory - case insensitive.
- *
- * @detail Unlike M_BaseFileSearchDir, this scans the entire directory and
- *         doesn't care about hashes or hashed files.
- *
- * @param dir Directory to search.
- * @param files Files to search, with extension.
- * @return Filenames of any found files.
- */
-std::vector<std::string> M_BaseFilesScanDir(std::string dir, std::vector<OString> files);
-
-/**
- * @brief Attempt to find multiple PWAD files in a directory - case insensitive.
- *
- * @detail Unlike M_BaseFileSearchDir, this scans the entire directory and
- *         doesn't care about hashes or hashed files.
- *
- * @param dir Directory to search.
- * @return Filenames of any found files.
- */
-std::vector<std::string> M_PWADFilesScanDir(std::string dir);
-
-/**
- * @brief Get absolute path from passed path.
- *
- * @param path Path to make absolute.
- * @param out Resulting path.
- * @return True if the path was made absolute successfully.
- */
-bool M_GetAbsPath(const std::string &path, std::string &out);
