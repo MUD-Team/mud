@@ -40,7 +40,7 @@
 
 static palette_t default_palette;
 static palette_t game_palette;
-
+static shaderef_t V_Palette;
 //
 // V_GetDefaultPalette
 //
@@ -329,8 +329,7 @@ static void V_UpdateGammaLevel(float level)
 
         V_RestoreScreenPalette();
 
-        if (I_GetPrimarySurface()->getBitsPerPixel() == 32)
-            V_RefreshColormaps();
+        V_RefreshColormaps();
     }
 }
 
@@ -385,8 +384,6 @@ END_COMMAND(bumpgamma)
 // [Russell] - Restore original screen palette from current gamma level
 void V_RestoreScreenPalette()
 {
-    if (I_GetPrimarySurface()->getBitsPerPixel() == 8)
-        V_ForceBlend(blend_color);
 }
 
 //
@@ -800,25 +797,6 @@ static void V_AddBlend(fargb_t &blend, const fargb_t &newcolor)
 //
 void V_ForceBlend(const argb_t color)
 {
-    blend_color = color;
-
-    // blend the palette for 8-bit mode
-    // shademap_t::shade takes care of blending
-    // [SL] actually, an alpha overlay is drawn on top of the rendered screen
-    // in R_RenderPlayerView
-    if (I_GetPrimarySurface()->getBitsPerPixel() == 8)
-    {
-        argb_t palette_colors[256];
-        V_DoBlending(palette_colors, game_palette.basecolors, blend_color);
-
-        for (int i = 0; i < 256; i++)
-        {
-            game_palette.basecolors[i] = palette_colors[i];
-            game_palette.colors[i]     = V_GammaCorrect(palette_colors[i]);
-        }
-
-        I_SetPalette(game_palette.colors);
-    }
 }
 
 //
@@ -1052,135 +1030,75 @@ void V_DoPaletteEffects()
 
     player_t *plyr = &displayplayer();
 
-    if (primary_surface->getBitsPerPixel() == 8)
+    fargb_t blend(0.0f, 0.0f, 0.0f, 0.0f);
+
+    V_AddBlend(blend, R_GetSectorBlend());
+    V_AddBlend(blend, plyr->blend_color);
+
+    float greendamagecolor;
+    float reddamagecolor;
+
+    if (gamemode == retail_chex)
     {
-        int palette_num = 0;
-
-        float red_count = (float)plyr->damagecount;
-        if (!multiplayer || sv_allowredscreen)
-            red_count *= r_painintensity;
-
-        // slowly fade the berzerk out
-        if (plyr->powers[pw_strength])
-            red_count = MAX(red_count, 12.0f - float(plyr->powers[pw_strength] >> 6));
-
-        if (red_count > 0.0f)
-        {
-            palette_num = ((int)red_count + 7) >> 3;
-
-            if (gamemode == retail_chex)
-                palette_num = RADIATIONPAL;
-            else
-            {
-                if (palette_num >= NUMREDPALS)
-                    palette_num = NUMREDPALS - 1;
-
-                palette_num += STARTREDPALS;
-
-                if (palette_num < 0)
-                    palette_num = 0;
-            }
-        }
-        else if (plyr->bonuscount)
-        {
-            palette_num = (plyr->bonuscount + 7) >> 3;
-
-            if (palette_num >= NUMBONUSPALS)
-                palette_num = NUMBONUSPALS - 1;
-
-            palette_num += STARTBONUSPALS;
-        }
-        else if (plyr->powers[pw_ironfeet] > 4 * 32 || plyr->powers[pw_ironfeet] & 8)
-            palette_num = RADIATIONPAL;
-
-        if (palette_num != current_palette_num)
-        {
-            // [SL] Load palette_num from disk and setup game_palette
-            current_palette_num = palette_num;
-            const byte *data    = (byte *)W_CacheLumpName(palette_lumpname.c_str(), PU_CACHE) + palette_num * 768;
-
-            for (int i = 0; i < 256; i++, data += 3)
-            {
-                game_palette.basecolors[i] = argb_t(255, data[0], data[1], data[2]);
-                game_palette.colors[i]     = V_GammaCorrect(game_palette.basecolors[i]);
-            }
-
-            // Sets the video adapter's palette to the given 768 byte palette lump.
-            I_SetPalette(game_palette.colors);
-        }
+        reddamagecolor   = 0.0f;
+        greendamagecolor = 255.0f / 255.0f;
     }
     else
     {
-        fargb_t blend(0.0f, 0.0f, 0.0f, 0.0f);
+        reddamagecolor   = 255.0f / 255.0f;
+        greendamagecolor = 0.0f;
+    }
 
-        V_AddBlend(blend, R_GetSectorBlend());
-        V_AddBlend(blend, plyr->blend_color);
+    // red tint for pain / berzerk power
+    if (plyr->damagecount || plyr->powers[pw_strength])
+    {
+        float red_amount = (float)plyr->damagecount;
+        if (!multiplayer || sv_allowredscreen)
+            red_amount *= r_painintensity;
 
-        float greendamagecolor;
-        float reddamagecolor;
+        // slowly fade the berzerk out
+        if (plyr->powers[pw_strength])
+            red_amount = MAX(red_amount, 12.0f - float(plyr->powers[pw_strength]) / 64.0f);
 
-        if (gamemode == retail_chex)
+        if (red_amount > 0.0f)
         {
-            reddamagecolor   = 0.0f;
-            greendamagecolor = 255.0f / 255.0f;
-        }
-        else
-        {
-            reddamagecolor   = 255.0f / 255.0f;
-            greendamagecolor = 0.0f;
-        }
+            red_amount  = MIN(red_amount, 56.0f);
+            float alpha = (red_amount + 8.0f) / 72.0f;
 
-        // red tint for pain / berzerk power
-        if (plyr->damagecount || plyr->powers[pw_strength])
-        {
-            float red_amount = (float)plyr->damagecount;
-            if (!multiplayer || sv_allowredscreen)
-                red_amount *= r_painintensity;
-
-            // slowly fade the berzerk out
-            if (plyr->powers[pw_strength])
-                red_amount = MAX(red_amount, 12.0f - float(plyr->powers[pw_strength]) / 64.0f);
-
-            if (red_amount > 0.0f)
-            {
-                red_amount  = MIN(red_amount, 56.0f);
-                float alpha = (red_amount + 8.0f) / 72.0f;
-
-                static const float red   = reddamagecolor;
-                static const float green = greendamagecolor;
-                static const float blue  = 0.0f;
-                V_AddBlend(blend, fargb_t(alpha, red, green, blue));
-            }
-        }
-
-        // yellow tint for item pickup
-        if (plyr->bonuscount)
-        {
-            float bonus_amount = (float)plyr->bonuscount;
-            if (bonus_amount > 0.0f)
-            {
-                bonus_amount = MIN(bonus_amount, 24.0f);
-                float alpha  = (bonus_amount + 8.0f) / 64.0f;
-
-                static const float red   = 215.0f / 255.0f;
-                static const float green = 186.0f / 255.0f;
-                static const float blue  = 69.0f / 255.0f;
-                V_AddBlend(blend, fargb_t(alpha, red, green, blue));
-            }
-        }
-
-        // green tint for radiation suit
-        if (plyr->powers[pw_ironfeet] > 4 * 32 || plyr->powers[pw_ironfeet] & 8)
-        {
-            static const float alpha = 1.0f / 8.0f;
-            static const float red   = 0.0f;
-            static const float green = 255.0f / 255.0f;
+            static const float red   = reddamagecolor;
+            static const float green = greendamagecolor;
             static const float blue  = 0.0f;
             V_AddBlend(blend, fargb_t(alpha, red, green, blue));
         }
-
-        V_SetBlend(blend);
     }
+
+    // yellow tint for item pickup
+    if (plyr->bonuscount)
+    {
+        float bonus_amount = (float)plyr->bonuscount;
+        if (bonus_amount > 0.0f)
+        {
+            bonus_amount = MIN(bonus_amount, 24.0f);
+            float alpha  = (bonus_amount + 8.0f) / 64.0f;
+
+            static const float red   = 215.0f / 255.0f;
+            static const float green = 186.0f / 255.0f;
+            static const float blue  = 69.0f / 255.0f;
+            V_AddBlend(blend, fargb_t(alpha, red, green, blue));
+        }
+    }
+
+    // green tint for radiation suit
+    if (plyr->powers[pw_ironfeet] > 4 * 32 || plyr->powers[pw_ironfeet] & 8)
+    {
+        static const float alpha = 1.0f / 8.0f;
+        static const float red   = 0.0f;
+        static const float green = 255.0f / 255.0f;
+        static const float blue  = 0.0f;
+        V_AddBlend(blend, fargb_t(alpha, red, green, blue));
+    }
+
+    V_SetBlend(blend);
 }
 
 //

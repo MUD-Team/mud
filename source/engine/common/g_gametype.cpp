@@ -76,12 +76,6 @@ const std::string &G_GametypeName()
         name = "Team Last Marine Standing";
     else if (sv_gametype == GM_TEAMDM)
         name = "Team Deathmatch";
-    else if (sv_gametype == GM_CTF && g_sides)
-        name = "Attack & Defend CTF";
-    else if (sv_gametype == GM_CTF && g_lives)
-        name = "LMS Capture The Flag";
-    else if (sv_gametype == GM_CTF)
-        name = "Capture The Flag";
     return name;
 }
 
@@ -330,7 +324,7 @@ bool G_IsDuelGame()
  */
 bool G_IsTeamGame()
 {
-    return sv_gametype == GM_TEAMDM || sv_gametype == GM_CTF;
+    return sv_gametype == GM_TEAMDM;
 }
 
 /**
@@ -399,7 +393,7 @@ bool G_UsesRoundlimit()
  */
 bool G_UsesScorelimit()
 {
-    return sv_gametype == GM_CTF;
+    return false;
 }
 
 /**
@@ -815,34 +809,6 @@ void G_LivesCheckEndGame()
         {
             if (pr.teamCount[i] > 0)
                 aliveteams += 1;
-        }
-
-        // [AM] This end-of-game logic branch is necessary becuase otherwise
-        //      going for objectives in CTF would never be worth it.  However,
-        //      side-mode needs a special-case because otherwise in games
-        //      with scorelimit > 1 the offense can just score once and
-        //      turtle.
-        if (aliveteams <= 1 && sv_gametype == GM_CTF && !G_IsSidesGame())
-        {
-            const char *teams = aliveteams == 1 ? "one team" : "no teams";
-
-            TeamsView tv = TeamQuery().filterSortMax().sortScore().execute();
-            if (tv.size() == 1)
-            {
-                GiveTeamWins(tv.front()->Team, 1);
-                SV_BroadcastPrintf("%s team wins for having the highest score with %s left!\n",
-                                   tv.front()->ColorizedTeamName().c_str(), teams);
-                ::levelstate.setWinner(WinInfo::WIN_TEAM, tv.front()->Team);
-                M_CommitWDLLog();
-                ::levelstate.endRound();
-            }
-            else
-            {
-                SV_BroadcastPrintf("Score is tied with with %s left. Game is a draw!\n", teams);
-                ::levelstate.setWinner(WinInfo::WIN_DRAW, 0);
-                M_CommitWDLLog();
-                ::levelstate.endRound();
-            }
         }
 
         if (aliveteams == 0 || pr.count == 0)

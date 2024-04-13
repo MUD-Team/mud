@@ -27,7 +27,6 @@
 #include "g_gametype.h"
 #include "md5.h"
 #include "odamex.h"
-#include "p_ctf.h"
 
 static buf_t ml_message(MAX_UDP_PACKET);
 

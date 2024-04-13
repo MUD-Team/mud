@@ -186,8 +186,6 @@ const char *GetShortGameModeString()
         return "DM";
     else if (sv_gametype == GM_TEAMDM)
         return "TDM";
-    else if (sv_gametype == GM_CTF)
-        return "CTF";
 
     return "";
 }

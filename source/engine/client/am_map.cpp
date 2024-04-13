@@ -37,9 +37,7 @@
 #include "p_local.h"
 #include "p_mapformat.h"
 #include "r_state.h"
-#include "st_stuff.h"
 #include "v_palette.h"
-#include "v_text.h"
 #include "v_video.h"
 #include "w_wad.h"
 #include "z_zone.h"
@@ -98,6 +96,10 @@ EXTERN_CVAR(am_ovnotseencolor)
 EXTERN_CVAR(am_ovlockedcolor)
 EXTERN_CVAR(am_ovexitcolor)
 EXTERN_CVAR(am_ovteleportcolor)
+
+// 
+int CleanXfac = 0;
+int CleanYfac = 0;
 
 BEGIN_COMMAND(resetcustomcolors)
 {
@@ -483,9 +485,6 @@ void AM_initVariables()
     AM_changeWindowLoc();
 
     AM_saveScaleAndLoc();
-
-    // inform the status bar of the change
-    ST_Responder(&st_notify);
 }
 
 am_color_t AM_GetColorFromString(const argb_t *palette_colors, const char *colorstring)
@@ -750,9 +749,6 @@ void AM_Stop()
     AM_unloadPics();
     automapactive = false;
 
-    static event_t st_notify(ev_keyup, AM_MSGEXITED, 0, 0);
-    ST_Responder(&st_notify);
-
     stopped    = true;
     viewactive = true;
 }
@@ -818,9 +814,6 @@ BEGIN_COMMAND(togglemap)
 
     if (automapactive)
         AM_initColors(viewactive);
-
-    // status bar is drawn in classic automap
-    ST_ForceRefresh();
 }
 END_COMMAND(togglemap)
 
@@ -963,24 +956,13 @@ void AM_Ticker()
 //
 void AM_clearFB(am_color_t color)
 {
-    if (I_GetPrimarySurface()->getBitsPerPixel() == 8)
-    {
-        if (f_w == f_p)
-            memset(fb, color.index, f_w * f_h);
-        else
-            for (int y = 0; y < f_h; y++)
-                memset(fb + y * f_p, color.index, f_w);
-    }
-    else
-    {
-        argb_t *line = reinterpret_cast<argb_t *>(fb);
+    argb_t *line = reinterpret_cast<argb_t *>(fb);
 
-        for (int y = 0; y < f_h; y++)
-        {
-            for (int x = 0; x < f_w; x++)
-                line[x] = color.rgb;
-            line += f_p >> 2;
-        }
+    for (int y = 0; y < f_h; y++)
+    {
+        for (int x = 0; x < f_w; x++)
+            line[x] = color.rgb;
+        line += f_p >> 2;
     }
 }
 
@@ -1124,62 +1106,6 @@ bool AM_clipMline(mline_t *ml, fline_t *fl)
 // Classic Bresenham w/ whatever optimizations needed for speed
 //
 
-// Palettized (8bpp) version:
-
-void AM_drawFlineP(fline_t *fl, byte color)
-{
-    fl->a.x += f.x;
-    fl->a.y += f.y;
-    fl->b.x += f.x;
-    fl->b.y += f.y;
-
-    const int dx = fl->b.x - fl->a.x;
-    const int ax = 2 * (dx < 0 ? -dx : dx);
-    const int sx = dx < 0 ? -1 : 1;
-
-    const int dy = fl->b.y - fl->a.y;
-    const int ay = 2 * (dy < 0 ? -dy : dy);
-    const int sy = dy < 0 ? -1 : 1;
-
-    int x = fl->a.x;
-    int y = fl->a.y;
-
-    if (ax > ay)
-    {
-        int d = ay - ax / 2;
-        while (true)
-        {
-            PUTDOTP(x, y, (byte)color);
-            if (x == fl->b.x)
-                return;
-            if (d >= 0)
-            {
-                y += sy;
-                d -= ax;
-            }
-            x += sx;
-            d += ay;
-        }
-    }
-    else
-    {
-        int d = ax - ay / 2;
-        while (true)
-        {
-            PUTDOTP(x, y, (byte)color);
-            if (y == fl->b.y)
-                return;
-            if (d >= 0)
-            {
-                x += sx;
-                d -= ay;
-            }
-            y += sy;
-            d += ax;
-        }
-    }
-}
-
 // Direct (32bpp) version:
 
 void AM_drawFlineD(fline_t *fl, argb_t color)
@@ -1249,10 +1175,7 @@ void AM_drawMline(mline_t *ml, am_color_t color)
     if (AM_clipMline(ml, &fl))
     {
         // draws it on frame buffer using fb coords
-        if (I_GetPrimarySurface()->getBitsPerPixel() == 8)
-            AM_drawFlineP(&fl, color.index);
-        else
-            AM_drawFlineD(&fl, color.rgb);
+        AM_drawFlineD(&fl, color.rgb);
     }
 }
 
@@ -1752,7 +1675,7 @@ void AM_drawMarks()
 
             if (fx >= f.x && fx <= f_w - w && fy >= f.y && fy <= f_h - h)
             {
-                screen->DrawPatchCleanNoMove(W_ResolvePatchHandle(marknums[i]), fx, fy);
+                //screen->DrawPatchCleanNoMove(W_ResolvePatchHandle(marknums[i]), fx, fy);
             }
         }
     }
@@ -1761,10 +1684,7 @@ void AM_drawMarks()
 void AM_drawCrosshair(am_color_t color)
 {
     // single point for now
-    if (I_GetPrimarySurface()->getBitsPerPixel() == 8)
-        PUTDOTP(f_w / 2, (f_h + 1) / 2, (byte)color.index);
-    else
-        PUTDOTD(f_w / 2, (f_h + 1) / 2, color.rgb);
+    PUTDOTD(f_w / 2, (f_h + 1) / 2, color.rgb);
 }
 
 //
@@ -1772,6 +1692,7 @@ void AM_drawCrosshair(am_color_t color)
 //
 void AM_Drawer()
 {
+/*    
     if (!AM_ClassicAutomapVisible() && !AM_OverlayAutomapVisible())
         return;
 
@@ -1983,6 +1904,7 @@ void AM_Drawer()
             screen->DrawTextClean(CR_GREY, x, y, line);
         }
     }
+    */
 }
 
 VERSION_CONTROL(am_map_cpp, "$Id: db0812f3c1461ea73d40d21d0050bd8db5cb4506 $")

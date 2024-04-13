@@ -40,7 +40,6 @@
 #include "minilzo.h"
 #include "odamex.h"
 #include "p_acs.h"
-#include "p_ctf.h"
 #include "p_hordespawn.h"
 #include "p_local.h"
 #include "p_mobj.h"
@@ -650,12 +649,6 @@ void G_DoResetLevel(bool full_reset)
         TThinkerIterator<AActor> iterator;
         while ((mo = iterator.Next()))
         {
-            // In sides-based games, destroy objectives that aren't relevant.
-            if (mo->netid && !CTF_ShouldSpawnHomeFlag(mo->type))
-            {
-                CTF_ReplaceFlagWithWaypoint(mo);
-            }
-
             // Assign new netids to every non-player actor to make sure we don't have
             // any weird destruction of any items post-reset.
             if (mo->netid && mo->type != MT_PLAYER)
@@ -741,7 +734,6 @@ void G_DoResetLevel(bool full_reset)
 //
 // G_DoLoadLevel
 //
-extern gamestate_t wipegamestate;
 extern float       BaseBlendA;
 
 void G_DoLoadLevel(int position)
@@ -763,9 +755,6 @@ void G_DoLoadLevel(int position)
         Printf_Bold("--- %s: \"%s\" ---\n", level.mapname.c_str(), level.level_name);
         firstmapinit = false;
     }
-
-    if (wipegamestate == GS_LEVEL)
-        wipegamestate = GS_FORCEWIPE;
 
     gamestate = GS_LEVEL;
 
@@ -847,30 +836,7 @@ void G_DoLoadLevel(int position)
     for (Players::iterator it = players.begin(); it != players.end(); ++it)
         it->joindelay = 0;
 
-    // Nes - CTF Pre flag setup
-    if (sv_gametype == GM_CTF)
-    {
-
-        for (int i = 0; i < NUMTEAMS; i++)
-            GetTeamInfo((team_t)i)->FlagData.flaglocated = false;
-    }
-
     P_SetupLevel(level.mapname.c_str(), position);
-
-    // Nes - CTF Post flag setup
-    if (sv_gametype == GM_CTF)
-    {
-        for (int i = 0; i < sv_teamsinplay; i++)
-        {
-            TeamInfo *teamInfo = GetTeamInfo((team_t)i);
-            if (!teamInfo->FlagData.flaglocated)
-            {
-                const char *teamColor = teamInfo->ColorString.c_str();
-                SV_BroadcastPrintf(PRINT_WARNING, "WARNING: %s flag pedestal not found! No %s flags in game.\n",
-                                   teamColor, teamColor);
-            }
-        }
-    }
 
     displayplayer_id = consoleplayer_id; // view the guy you are playing
 
@@ -888,21 +854,6 @@ void G_DoLoadLevel(int position)
 
     // [AM] Handle levelstate init (before we handle per-round init).
     ::levelstate.reset();
-
-    // [AM] In sides-based games, destroy objectives that aren't relevant.
-    //      Must happen after saving state.
-    if (G_IsSidesGame())
-    {
-        AActor                  *mo;
-        TThinkerIterator<AActor> iterator;
-        while ((mo = iterator.Next()))
-        {
-            if (mo->netid && !CTF_ShouldSpawnHomeFlag(mo->type))
-            {
-                CTF_ReplaceFlagWithWaypoint(mo);
-            }
-        }
-    }
 
     //	C_FlushDisplay ();
 }

@@ -42,12 +42,11 @@
 #include "odamex.h"
 #include "r_main.h"
 #include "s_sound.h"
-#include "st_stuff.h"
 #include "v_palette.h"
-#include "v_text.h"
 #include "v_video.h"
 #include "w_wad.h"
 #include "z_zone.h"
+#include "v_textcolors.h"
 
 // These functions are standardized in C++11, POSIX standard otherwise
 #if defined(_WIN32) && (__cplusplus <= 199711L)
@@ -61,8 +60,6 @@ static bool   ShouldTabCycle = false;
 static size_t NextCycleIndex = 0;
 static size_t PrevCycleIndex = 0;
 
-static IWindowSurface *background_surface;
-
 extern int gametic;
 
 static unsigned int ConRows, ConCols, PhysRows;
@@ -73,8 +70,6 @@ static int  RowAdjust = 0;
 
 int        CursorTicker, ScrollState = 0;
 constate_e ConsoleState = c_up;
-
-extern byte *ConChars;
 
 bool KeysShifted;
 bool KeysCtrl;
@@ -918,54 +913,7 @@ EXTERN_CVAR(con_scrlock)
 //
 void C_InitConCharsFont()
 {
-    static palindex_t transcolor = 0xF7;
 
-    // Load the CONCHARS lump and convert it from patch_t format
-    // to a raw linear byte buffer with a background color of 'transcolor'
-    IWindowSurface *temp_surface = I_AllocateSurface(128, 128, 8);
-    temp_surface->lock();
-
-    // fill with color 'transcolor'
-    for (int y = 0; y < 128; y++)
-        memset(temp_surface->getBuffer() + y * temp_surface->getPitchInPixels(), transcolor, 128);
-
-    // paste the patch into the linear byte bufer
-    DCanvas *canvas = temp_surface->getDefaultCanvas();
-    canvas->DrawPatch(W_CachePatch("CONCHARS"), 0, 0);
-
-    ConChars   = new byte[256 * 8 * 8 * 2];
-    byte *dest = ConChars;
-
-    for (int y = 0; y < 16; y++)
-    {
-        for (int x = 0; x < 16; x++)
-        {
-            const byte *source = temp_surface->getBuffer() + x * 8 + (y * 8 * temp_surface->getPitch());
-            for (int z = 0; z < 8; z++)
-            {
-                for (int a = 0; a < 8; a++)
-                {
-                    byte val = source[a];
-                    if (val == transcolor)
-                    {
-                        dest[a]     = 0x00;
-                        dest[a + 8] = 0xff;
-                    }
-                    else
-                    {
-                        dest[a]     = val;
-                        dest[a + 8] = 0x00;
-                    }
-                }
-
-                dest += 16;
-                source += temp_surface->getPitch();
-            }
-        }
-    }
-
-    temp_surface->unlock();
-    I_FreeSurface(temp_surface);
 }
 
 //
@@ -973,8 +921,6 @@ void C_InitConCharsFont()
 //
 void STACK_ARGS C_ShutdownConCharsFont()
 {
-    delete[] ConChars;
-    ConChars = NULL;
 }
 
 //
@@ -1015,12 +961,6 @@ void C_ClearCommand()
 //
 void C_InitConsoleBackground()
 {
-    const patch_t *bg_patch = W_CachePatch(W_GetNumForName("CONBACK"));
-
-    background_surface = I_AllocateSurface(bg_patch->width(), bg_patch->height(), 8);
-    background_surface->lock();
-    background_surface->getDefaultCanvas()->DrawPatch(bg_patch, 0, 0);
-    background_surface->unlock();
 }
 
 //
@@ -1029,8 +969,7 @@ void C_InitConsoleBackground()
 // Frees the background_surface
 //
 void STACK_ARGS C_ShutdownConsoleBackground()
-{
-    I_FreeSurface(background_surface);
+{    
 }
 
 //
@@ -1116,65 +1055,7 @@ static void setmsgcolor(int index, const char *color)
 //
 void C_AddNotifyString(int printlevel, const char *color_code, const char *source)
 {
-    static enum
-    {
-        NEWLINE,
-        APPENDLINE,
-        REPLACELINE
-    } addtype = NEWLINE;
 
-    char           work[MAX_LINE_LENGTH];
-    brokenlines_t *lines;
-
-    int len = strlen(source);
-
-    if ((printlevel != 128 && !show_messages) || len == 0 || (gamestate != GS_LEVEL && gamestate != GS_INTERMISSION))
-        return;
-
-    // Do not display filtered chat messages
-    if (printlevel == PRINT_FILTERCHAT)
-        return;
-
-    int width = I_GetSurfaceWidth() / V_TextScaleXAmount();
-
-    if (addtype == APPENDLINE && NotifyStrings[NUMNOTIFIES - 1].printlevel == printlevel)
-    {
-        sprintf(work, "%s%s", NotifyStrings[NUMNOTIFIES - 1].text, source);
-        lines = V_BreakLines(width, work);
-    }
-    else
-    {
-        lines   = V_BreakLines(width, source);
-        addtype = (addtype == APPENDLINE) ? NEWLINE : addtype;
-    }
-
-    if (!lines)
-        return;
-
-    for (int i = 0; lines[i].width != -1; i++)
-    {
-        if (addtype == NEWLINE)
-            memmove(&NotifyStrings[0], &NotifyStrings[1], sizeof(struct NotifyText) * (NUMNOTIFIES - 1));
-        strcpy((char *)NotifyStrings[NUMNOTIFIES - 1].text, lines[i].string);
-        NotifyStrings[NUMNOTIFIES - 1].timeout    = gametic + (con_notifytime.asInt() * TICRATE);
-        NotifyStrings[NUMNOTIFIES - 1].printlevel = printlevel;
-        addtype                                   = NEWLINE;
-    }
-
-    V_FreeBrokenLines(lines);
-
-    switch (source[len - 1])
-    {
-    case '\r':
-        addtype = REPLACELINE;
-        break;
-    case '\n':
-        addtype = NEWLINE;
-        break;
-    default:
-        addtype = APPENDLINE;
-        break;
-    }
 }
 
 //
@@ -1499,28 +1380,7 @@ void C_Ticker()
 //
 static void C_DrawNotifyText()
 {
-    if ((gamestate != GS_LEVEL && gamestate != GS_INTERMISSION) || menuactive)
-        return;
 
-    int ypos = 0;
-    for (int i = 0; i < NUMNOTIFIES; i++)
-    {
-        if (NotifyStrings[i].timeout > gametic)
-        {
-            if (!show_messages && NotifyStrings[i].printlevel != 128)
-                continue;
-
-            int color;
-            if (NotifyStrings[i].printlevel >= PRINTLEVELS)
-                color = CR_RED;
-            else
-                color = PrintColors[NotifyStrings[i].printlevel];
-
-            screen->DrawTextStretched(color, 0, ypos, NotifyStrings[i].text, V_TextScaleXAmount(),
-                                      V_TextScaleYAmount());
-            ypos += 8 * V_TextScaleYAmount();
-        }
-    }
 }
 
 void C_InitTicker(const char *label, unsigned int max)
@@ -1593,8 +1453,6 @@ void C_NewModeAdjust()
 void C_FullConsole()
 {
     // SoM: disconnect effect.
-    if ((gamestate == GS_LEVEL || gamestate == GS_INTERMISSION) && ConsoleState == c_up && !menuactive)
-        screen->Dim(0, 0, I_GetSurfaceWidth(), I_GetSurfaceHeight());
 
     ConsoleState = c_down;
 
@@ -1659,262 +1517,7 @@ void C_ToggleConsole()
 //
 void C_DrawConsole()
 {
-    IWindowSurface *primary_surface        = I_GetPrimarySurface();
-    int             primary_surface_width  = primary_surface->getWidth();
-    int             primary_surface_height = primary_surface->getHeight();
 
-    int left  = 8;
-    int lines = (ConBottom - 12) / 8;
-
-    int offset;
-    if (lines * 8 > ConBottom - 16)
-        offset = -16;
-    else
-        offset = -12;
-
-    if (ConsoleState == c_up || ConBottom == 0)
-    {
-        C_DrawNotifyText();
-        return;
-    }
-
-    if (!C_UseFullConsole())
-    {
-        // Non-fullscreen console. Overlay a translucent background.
-        screen->Dim(0, 0, primary_surface_width, ConBottom);
-    }
-    else if (::background_surface != NULL)
-    {
-        // Fullscreen console. Blit the image in the center of a black background.
-        screen->Clear(0, 0, primary_surface_width, primary_surface_height, argb_t(0, 0, 0));
-
-        int x = (primary_surface_width - background_surface->getWidth()) / 2;
-        int y = (primary_surface_height - background_surface->getHeight()) / 2;
-
-        background_surface->lock();
-
-        primary_surface->blit(background_surface, 0, 0, background_surface->getWidth(), background_surface->getHeight(),
-                              x, y, background_surface->getWidth(), background_surface->getHeight());
-
-        background_surface->unlock();
-    }
-
-    if (ConBottom >= 12)
-    {
-        const char *version = NiceVersion();
-
-        // print the Odamex version in gold in the bottom right corner of console
-        screen->PrintStr(primary_surface_width - 8 - C_StringWidth(version), ConBottom - 12, version, CR_ORANGE);
-
-        // Amount of space remaining.
-        int remain = primary_surface_width - 16 - C_StringWidth(version);
-
-        if (CL_IsDownloading())
-        {
-            // Use the remaining space for a download bar.
-            size_t      chars = remain / C_StringWidth(" ");
-            std::string download;
-
-            // Stamp out the text bits.
-            std::string filename = CL_DownloadFilename();
-            if (filename.empty())
-                filename = "...";
-            OTransferProgress progress = CL_DownloadProgress();
-            std::string       dlnow;
-            StrFormatBytes(dlnow, progress.dlnow);
-            std::string dltotal;
-            StrFormatBytes(dltotal, progress.dltotal);
-            StrFormat(download, "%s: %s/%s", filename.c_str(), dlnow.c_str(), dltotal.c_str());
-
-            // Avoid divide by zero.
-            if (progress.dltotal == 0)
-                progress.dltotal = 1;
-
-            // Stamp out the bar...if we have enough room - if we at tiny
-            // resolutions we may not.
-            size_t    dltxtlen = download.length();
-            ptrdiff_t barchars = chars - dltxtlen;
-
-            if (barchars >= 2)
-            {
-                download.resize(chars);
-                for (size_t i = 0; i < barchars; i++)
-                {
-                    char ch = '\30'; // empty middle
-                    if (i == 0)
-                        ch = '\27';  // empty left
-                    else if (i == barchars - 1)
-                        ch = '\31';  // empty right
-
-                    double barpct = i / (double)barchars;
-                    double dlpct  = progress.dlnow / (double)progress.dltotal;
-
-                    if (dlpct > barpct)
-                        ch += 3; // full bar
-
-                    download.at(i + dltxtlen) = ch;
-                }
-            }
-
-            // Draw the thing.
-            screen->PrintStr(left + 2, ConBottom - 12, download.c_str(), CR_GREEN);
-        }
-
-        if (TickerMax)
-        {
-            char         tickstr[256];
-            unsigned int i, tickend = ConCols - primary_surface_width / 90 - 6;
-            unsigned int tickbegin = 0;
-
-            if (TickerLabel)
-            {
-                tickbegin = strlen(TickerLabel) + 2;
-                tickend -= tickbegin;
-                sprintf(tickstr, "%s: ", TickerLabel);
-            }
-            if (tickend > 256 - 8)
-                tickend = 256 - 8;
-            tickstr[tickbegin] = -128;
-            memset(tickstr + tickbegin + 1, 0x81, tickend - tickbegin);
-            tickstr[tickend + 1] = -126;
-            tickstr[tickend + 2] = ' ';
-            i                    = tickbegin + 1 + (TickerAt * (tickend - tickbegin - 1)) / TickerMax;
-            if (i > tickend)
-                i = tickend;
-            tickstr[i] = -125;
-            sprintf(tickstr + tickend + 3, "%u%%", (TickerAt * 100) / TickerMax);
-            screen->PrintStr(8, ConBottom - 12, tickstr);
-        }
-    }
-
-    if (menuactive)
-        return;
-
-    if (lines > 0)
-    {
-        // First draw any completions, if we have any.
-        if (!::CmdCompletions.empty())
-        {
-            // True if we have too many completions to render all of them.
-            bool cOverflow = false;
-
-            // We want at least 8-space tabs.
-            size_t cTabLen = (::CmdCompletions.getMaxLen() + 1);
-            if (cTabLen < 8)
-                cTabLen = 8;
-
-            // How many columns can we fit on the screen at one time?
-            size_t cColumns = ::ConCols / cTabLen;
-            if (cColumns == 0)
-                cColumns += 1;
-
-            // Given the number of columns, how many lines do we need?
-            size_t cLines = ::CmdCompletions.size() / cColumns;
-            if (::CmdCompletions.size() % cColumns != 0)
-                cLines += 1;
-
-            // Currently we cap the number of completion lines to 5
-            if (cLines > 5)
-            {
-                cLines    = 5;
-                cOverflow = true;
-            }
-
-            // Offset our standard console printing.
-            if (cOverflow)
-                lines -= cLines + 1;
-            else
-                lines -= cLines;
-
-            static char rowstring[MAX_LINE_LENGTH];
-
-            // Completions are rendered top to bottom in columns like a
-            // backwards "N".
-            for (size_t l = 0; l < cLines; l++)
-            {
-                // Prepare a row string to copy completions into.
-                memset(rowstring, ' ', ARRAY_LENGTH(rowstring));
-                unsigned int col = 0;
-
-                for (size_t c = 0; c < cColumns; c++)
-                {
-                    // Turn our current line/column into an index.
-                    size_t index = (c * cLines) + l;
-                    if (index >= ::CmdCompletions.size())
-                    {
-                        rowstring[col] = '\0';
-                        break;
-                    }
-
-                    // Copy our completion into the row.
-                    const std::string &str = ::CmdCompletions.at(index);
-                    memcpy(&rowstring[col], str.c_str(), str.length());
-                    col += cTabLen;
-
-                    if (c + 1 == cColumns)
-                        rowstring[col - 1] = '\0';
-                    else
-                        rowstring[col - 1] = ' ';
-                }
-
-                screen->PrintStr(left, offset + (lines + l + 1) * 8, rowstring, CR_YELLOW);
-            }
-
-            // Render an overflow message if necessary.
-            if (cOverflow)
-            {
-                snprintf(rowstring, ARRAY_LENGTH(rowstring), "...and %lu more...",
-                         ::CmdCompletions.size() - (cLines * cColumns));
-                screen->PrintStr(left, offset + (lines + cLines + 1) * 8, rowstring, CR_YELLOW);
-            }
-        }
-
-        // find the ConsoleLine that will be printed to bottom of the console
-        ConsoleLineList::reverse_iterator current_line_it = Lines.rbegin();
-        for (unsigned i = 0; i < RowAdjust && current_line_it != Lines.rend(); i++)
-            ++current_line_it;
-
-        // print as many ConsoleLines as will fit in the screen, starting at the bottom
-        for (; lines > 1 && current_line_it != Lines.rend(); lines--, ++current_line_it)
-        {
-            const char *str        = current_line_it->text.c_str();
-            const char *color_code = current_line_it->color_code.c_str();
-            int         color      = color_code[0] != '\0' ? V_GetTextColor(color_code) : CR_GRAY;
-            screen->PrintStr(left, offset + lines * 8, str, color);
-        }
-
-        if (ConBottom >= 20)
-        {
-            screen->PrintStr(left, ConBottom - 20, "]", CR_TAN);
-
-            size_t cmdline_len = std::min<size_t>(CmdLine.text.length() - CmdLine.scrolled_columns, ConCols - 1);
-            if (cmdline_len)
-            {
-                char str[MAX_LINE_LENGTH];
-                strncpy(str, CmdLine.text.c_str() + CmdLine.scrolled_columns, cmdline_len);
-                str[cmdline_len]     = '\0';
-                bool use_color_codes = false;
-                screen->PrintStr(left + 8, ConBottom - 20, str, CR_GRAY, use_color_codes);
-            }
-
-            if (cursoron)
-            {
-                const char str[]         = "_";
-                size_t     cursor_offset = CmdLine.cursor_position - CmdLine.scrolled_columns;
-                screen->PrintStr(left + 8 + 8 * cursor_offset, ConBottom - 20, str, CR_TAN);
-            }
-
-            if (RowAdjust && ConBottom >= 28)
-            {
-                // Indicate that the view has been scrolled up (10)
-                // and if we can scroll no further (12)
-                const char  scrolled_up_str[] = "\012"; // 10 = \012 octal
-                const char  no_scroll_str[]   = "\014"; // 12 = \014 octal
-                const char *str               = (RowAdjust + ConBottom / 8 < ConRows) ? scrolled_up_str : no_scroll_str;
-                screen->PrintStr(0, ConBottom - 28, str);
-            }
-        }
-    }
 }
 
 static bool C_HandleKey(const event_t *ev)
@@ -2113,7 +1716,7 @@ static bool C_HandleKey(const event_t *ev)
 
 BOOL C_Responder(event_t *ev)
 {
-    if (ConsoleState == c_up || ConsoleState == c_rising || ConsoleState == c_risefull || menuactive)
+    if (ConsoleState == c_up || ConsoleState == c_rising || ConsoleState == c_risefull)
         return false;
 
     if (ev->type == ev_keyup)
@@ -2174,85 +1777,18 @@ END_COMMAND(toggleconsole)
 
 /* Printing in the middle of the screen */
 
-static brokenlines_t *MidMsg    = NULL;
+
 static int            MidTicker = 0, MidLines;
 EXTERN_CVAR(con_midtime)
 
 void C_MidPrint(const char *msg, player_t *p, int msgtime)
 {
-    unsigned int i;
-
-    const float fmsgtime = msgtime ? float(msgtime) : con_midtime;
-
-    if (MidMsg)
-        V_FreeBrokenLines(MidMsg);
-
-    if (msg)
-    {
-        midprinting = true;
-
-        // [Russell] - convert textual "\n" into the binary representation for
-        // line breaking
-        std::string str = msg;
-
-        for (size_t pos = str.find("\\n"); pos != std::string::npos; pos = str.find("\\n", pos))
-        {
-            str[pos] = '\n';
-            str.erase(pos + 1, 1);
-        }
-
-        char *newmsg = strdup(str.c_str());
-
-        Printf(PRINT_HIGH, "%s\n", newmsg);
-        midprinting = false;
-
-        if ((MidMsg = V_BreakLines(I_GetSurfaceWidth() / V_TextScaleXAmount(), (byte *)newmsg)))
-        {
-            MidTicker = (int)(fmsgtime * TICRATE) + gametic;
-
-            for (i = 0; MidMsg[i].width != -1; i++)
-                ;
-
-            MidLines = i;
-        }
-
-        free(newmsg);
-    }
-    else
-        MidMsg = NULL;
 }
 
 void C_DrawMid()
 {
-    if (MidMsg)
-    {
-        int surface_width = I_GetSurfaceWidth(), surface_height = I_GetSurfaceHeight();
-
-        int xscale = V_TextScaleXAmount();
-        int yscale = V_TextScaleYAmount();
-
-        const int line_height = 8 * yscale;
-
-        int bottom = R_StatusBarVisible() ? ST_StatusBarY(surface_width, surface_height) : surface_height;
-
-        int x = surface_width / 2;
-        int y = (bottom - line_height * MidLines) / 2;
-
-        for (int i = 0; i < MidLines; i++, y += line_height)
-        {
-            screen->DrawTextStretched(PrintColors[PRINTLEVELS - 1], x - xscale * (MidMsg[i].width / 2), y,
-                                      (byte *)MidMsg[i].string, xscale, yscale);
-        }
-
-        if (gametic >= MidTicker)
-        {
-            V_FreeBrokenLines(MidMsg);
-            MidMsg = NULL;
-        }
-    }
 }
 
-static brokenlines_t *GameMsg    = NULL;
 static int            GameTicker = 0, GameColor = CR_GREY, GameLines;
 
 // [AM] This is literally the laziest excuse of a copy-paste job I have ever
@@ -2261,88 +1797,16 @@ static int            GameTicker = 0, GameColor = CR_GREY, GameLines;
 //      any direct calls to these two functions are all you need to remove.
 void C_GMidPrint(const char *msg, int color, int msgtime)
 {
-    unsigned int i;
-
-    const float fmsgtime = msgtime ? float(msgtime) : con_midtime;
-
-    if (GameMsg)
-        V_FreeBrokenLines(GameMsg);
-
-    if (msg)
-    {
-        // [Russell] - convert textual "\n" into the binary representation for
-        // line breaking
-        std::string str = msg;
-
-        for (size_t pos = str.find("\\n"); pos != std::string::npos; pos = str.find("\\n", pos))
-        {
-            str[pos] = '\n';
-            str.erase(pos + 1, 1);
-        }
-
-        char *newmsg = strdup(str.c_str());
-
-        if ((GameMsg = V_BreakLines(I_GetSurfaceWidth() / V_TextScaleXAmount(), (byte *)newmsg)))
-        {
-            GameTicker = (int)(fmsgtime * TICRATE) + gametic;
-
-            for (i = 0; GameMsg[i].width != -1; i++)
-                ;
-
-            GameLines = i;
-        }
-
-        GameColor = color;
-        free(newmsg);
-    }
-    else
-    {
-        GameMsg   = NULL;
-        GameColor = CR_GREY;
-    }
 }
 
 void C_DrawGMid()
 {
-    if (GameMsg)
-    {
-        int surface_width = I_GetSurfaceWidth(), surface_height = I_GetSurfaceHeight();
-
-        int xscale = V_TextScaleXAmount();
-        int yscale = V_TextScaleYAmount();
-
-        const int line_height = 8 * yscale;
-
-        int bottom = R_StatusBarVisible() ? ST_StatusBarY(surface_width, surface_height) : surface_height;
-
-        int x = surface_width / 2;
-        int y = (bottom / 2 - line_height * GameLines) / 2;
-
-        for (int i = 0; i < GameLines; i++, y += line_height)
-        {
-            screen->DrawTextStretched(GameColor, x - xscale * (GameMsg[i].width / 2), y, (byte *)GameMsg[i].string,
-                                      xscale, yscale);
-        }
-
-        if (gametic >= GameTicker)
-        {
-            V_FreeBrokenLines(GameMsg);
-            GameMsg = NULL;
-        }
-    }
 }
 
 // denis - moved secret discovery message to this function
 EXTERN_CVAR(hud_revealsecrets)
 void C_RevealSecret()
 {
-    if (!hud_revealsecrets || !G_IsCoopGame() || !show_messages) // [ML] 09/4/06: Check for hud_revealsecrets
-        return;                                                  // NES - Also check for deathmatch
-
-    C_MidPrint("A secret is revealed!");
-
-    if (hud_revealsecrets == 1 || hud_revealsecrets == 3)
-        S_Sound(CHAN_INTERFACE, "misc/secret", 1, ATTN_NONE);
 }
 
 VERSION_CONTROL(c_console_cpp, "$Id: e7b26ff55265c64f835d2dceb76bab9b7044396a $")

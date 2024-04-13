@@ -992,15 +992,6 @@ void M_CommitWDLLog()
     for (; psit != ::wdlplayerspawns.end(); ++psit)
         str.append(StrFormat("%d,%d,%d,%d,%d\n", psit->id, psit->team, psit->x, psit->y, psit->z));
 
-    if (sv_gametype == GM_CTF)
-    {
-        // FlagLocation
-        str.append("flaglocations\n");
-        WDLFlagLocations::const_iterator flit = ::wdlflaglocations.begin();
-        for (; flit != ::wdlflaglocations.end(); ++flit)
-            str.append(StrFormat("%d,%d,%d,%d\n", flit->team, flit->x, flit->y, flit->z));
-    }
-
     // Wads
     str.append("wads\n");
     str.append(StrFormat("%s", M_GetCurrentWadHashes().c_str()));

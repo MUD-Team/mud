@@ -1045,53 +1045,6 @@ odaproto::svc::Say SVC_Say(const bool visibility, const byte pid, const std::str
     return msg;
 }
 
-odaproto::svc::CTFRefresh SVC_CTFRefresh(const TeamsView &teams, const bool full)
-{
-    odaproto::svc::CTFRefresh msg;
-
-    msg.set_full(full);
-
-    for (TeamsView::const_iterator it = teams.begin(); it != teams.end(); ++it)
-    {
-        odaproto::svc::CTFRefresh_TeamInfo *info = msg.add_team_info();
-
-        info->set_points((*it)->Points);
-
-        if (full)
-        {
-            info->set_flag_state((*it)->FlagData.state);
-            info->set_flag_flagger((*it)->FlagData.flagger);
-        }
-    }
-
-    return msg;
-}
-
-odaproto::svc::CTFEvent SVC_CTFEvent(const flag_score_t event, const team_t target, const player_t &player)
-{
-    odaproto::svc::CTFEvent msg;
-
-    msg.set_event(event);
-    msg.set_target_team(target);
-
-    // [AM] FIXME: validplayer shouldn't need a const I don't think...
-    if (validplayer(const_cast<player_t &>(player)))
-    {
-        msg.set_player_team(player.userinfo.team);
-        msg.set_player_id(player.id);
-        if (G_IsRoundsGame())
-        {
-            msg.set_player_totalpoints(player.totalpoints);
-        }
-        else
-        {
-            msg.set_player_points(player.points);
-        }
-    }
-
-    return msg;
-}
-
 /**
  * @brief Send information about a player who discovered a secret.
  */

@@ -77,8 +77,6 @@ static void InitMap()
     MapProto(svc_forceteam, odaproto::svc::ForceTeam::descriptor());
     MapProto(svc_switch, odaproto::svc::Switch::descriptor());
     MapProto(svc_say, odaproto::svc::Say::descriptor());
-    MapProto(svc_ctfrefresh, odaproto::svc::CTFRefresh::descriptor());
-    MapProto(svc_ctfevent, odaproto::svc::CTFEvent::descriptor());
     MapProto(svc_secretevent, odaproto::svc::SecretEvent::descriptor());
     MapProto(svc_serversettings, odaproto::svc::ServerSettings::descriptor());
     MapProto(svc_connectclient, odaproto::svc::ConnectClient::descriptor());

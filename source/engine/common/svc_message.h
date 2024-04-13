@@ -33,7 +33,6 @@
 #include "d_player.h"
 #include "g_levelstate.h"
 #include "i_net.h"
-#include "p_ctf.h"
 #include "p_horde.h"
 #include "p_spec.h"
 #include "r_state.h"
@@ -112,8 +111,6 @@ odaproto::svc::PlayerQueuePos   SVC_PlayerQueuePos(const player_t &source);
 odaproto::svc::ForceTeam        SVC_ForceTeam(team_t team);
 odaproto::svc::Switch           SVC_Switch(line_t &line, uint32_t state, uint32_t timer);
 odaproto::svc::Say              SVC_Say(const bool visibility, const byte pid, const std::string &message);
-odaproto::svc::CTFRefresh       SVC_CTFRefresh(const TeamsView &teams, const bool full);
-odaproto::svc::CTFEvent         SVC_CTFEvent(const flag_score_t event, const team_t target, const player_t &player);
 odaproto::svc::SecretEvent      SVC_SecretEvent(player_t &player, sector_t &sector);
 odaproto::svc::ServerSettings   SVC_ServerSettings(const cvar_t &var);
 odaproto::svc::ConnectClient    SVC_ConnectClient(const player_t &player);

@@ -31,11 +31,10 @@
 #include "m_argv.h"
 #include "m_fileio.h"
 #include "odamex.h"
-#include "p_ctf.h"
 #include "p_mobj.h"
 #include "p_saveg.h"
-#include "st_stuff.h"
 #include "svc_message.h"
+#include "p_local.h"
 
 EXTERN_CVAR(sv_maxclients)
 EXTERN_CVAR(sv_maxplayers)
@@ -979,7 +978,7 @@ void NetDemo::writeLauncherSequence(buf_t *netbuffer)
     MSG_WriteBool(netbuffer, 0); // deathmatch?
     MSG_WriteByte(netbuffer, 0); // sv_skill
     MSG_WriteBool(netbuffer, (sv_gametype == GM_TEAMDM));
-    MSG_WriteBool(netbuffer, (sv_gametype == GM_CTF));
+    //MSG_WriteBool(netbuffer, (sv_gametype == GM_CTF));
 
     for (Players::const_iterator it = players.begin(); it != players.end(); ++it)
     {
@@ -1403,10 +1402,6 @@ void NetDemo::writeSnapshotData(std::vector<byte> &buf)
     P_SerializeACSDefereds(arc);
     P_SerializeHorde(arc);
 
-    // Save the status of the flags in CTF
-    for (int i = 0; i < NUMTEAMS; i++)
-        arc << GetTeamInfo((team_t)i)->FlagData;
-
     // Save team points
     for (int i = 0; i < NUMTEAMS; i++)
         arc << GetTeamInfo((team_t)i)->Points;
@@ -1497,10 +1492,6 @@ void NetDemo::readSnapshotData(std::vector<byte> &buf)
     P_SerializeACSDefereds(arc);
     P_SerializeHorde(arc);
 
-    // Read the status of flags in CTF
-    for (int i = 0; i < NUMTEAMS; i++)
-        arc >> GetTeamInfo((team_t)i)->FlagData;
-
     // Read team points
     for (int i = 0; i < NUMTEAMS; i++)
         arc >> GetTeamInfo((team_t)i)->Points;
@@ -1551,21 +1542,6 @@ void NetDemo::readSnapshotData(std::vector<byte> &buf)
     }
 
     R_CopyTranslationRGB(0, consoleplayer_id);
-
-    // Link the CTF flag actors to CTFdata[i].actor
-    TThinkerIterator<AActor> flagiterator;
-    while ((mo = flagiterator.Next()))
-    {
-        for (int iTeam = 0; iTeam < NUMTEAMS; iTeam++)
-        {
-            TeamInfo *teamInfo = GetTeamInfo((team_t)iTeam);
-            if (mo->sprite == teamInfo->FlagDownSprite || mo->sprite == teamInfo->FlagCarrySprite)
-                teamInfo->FlagData.actor = mo->ptr();
-        }
-    }
-
-    // Make sure the status bar is displayed correctly
-    ST_Start();
 }
 
 //

@@ -109,7 +109,6 @@ class ISDL20TextureWindowSurfaceManager : public IWindowSurfaceManager
     SDL_Texture  *mSDLTexture;
 
     IWindowSurface *mSurface;
-    IWindowSurface *m8bppTo32BppSurface;
 
     uint16_t mWidth;
     uint16_t mHeight;

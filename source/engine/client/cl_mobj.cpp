@@ -28,11 +28,9 @@
 #include "m_vectors.h"
 #include "odamex.h"
 #include "p_acs.h"
-#include "p_ctf.h"
 #include "p_local.h"
 #include "p_mobj.h"
 #include "s_sound.h"
-#include "st_stuff.h"
 #include "v_video.h"
 
 EXTERN_CVAR(sv_nomonsters)
@@ -145,9 +143,6 @@ void P_SpawnPlayer(player_t &player, mapthing2_t *mthing)
     // Give any other between-level inventory.
     if (!player.spectator)
         G_GiveBetweenInventory(player);
-
-    if (consoleplayer().camera == player.mo)
-        ST_Start(); // wake up the status bar
 
     // [RH] If someone is in the way, kill them
     P_TeleportMove(mobj, mobj->x, mobj->y, mobj->z, true);

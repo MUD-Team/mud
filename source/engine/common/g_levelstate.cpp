@@ -339,7 +339,7 @@ void LevelState::tic()
         return;
 
     // Handle singleplayer pauses.
-    if (::paused || ::menuactive)
+    if (::paused)
         return;
 
     // If there aren't any more active players, go back to warm up mode [tm512 2014/04/08]

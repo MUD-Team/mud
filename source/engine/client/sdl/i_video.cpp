@@ -66,7 +66,6 @@ static IWindowSurface *emulated_surface = NULL;
 
 extern int NewWidth, NewHeight, NewBits, DisplayBits;
 
-EXTERN_CVAR(vid_32bpp)
 EXTERN_CVAR(vid_fullscreen)
 EXTERN_CVAR(vid_vsync)
 EXTERN_CVAR(vid_filter)
@@ -98,7 +97,7 @@ EXTERN_CVAR(sv_allowwidescreen)
 // the basis for the pitch.
 //
 IWindowSurface::IWindowSurface(uint16_t width, uint16_t height, const PixelFormat *format, void *buffer, uint16_t pitch)
-    : mCanvas(NULL), mSurfaceBuffer((uint8_t *)buffer), mOwnsSurfaceBuffer(buffer == NULL),
+    : mSurfaceBuffer((uint8_t *)buffer), mOwnsSurfaceBuffer(buffer == NULL),
       mPalette(V_GetDefaultPalette()->colors), mPixelFormat(*format), mWidth(width), mHeight(height), mPitch(pitch),
       mLocks(0)
 {
@@ -144,7 +143,7 @@ IWindowSurface::IWindowSurface(uint16_t width, uint16_t height, const PixelForma
 // inside the existing surface.
 //
 IWindowSurface::IWindowSurface(IWindowSurface *base_surface, uint16_t width, uint16_t height)
-    : mCanvas(NULL), mOwnsSurfaceBuffer(false), mPixelFormat(*base_surface->getPixelFormat()),
+    : mOwnsSurfaceBuffer(false), mPixelFormat(*base_surface->getPixelFormat()),
       mPitch(base_surface->getPitch()), mPitchInPixels(base_surface->getPitchInPixels()), mLocks(0)
 {
     mWidth  = std::min(base_surface->getWidth(), width);
@@ -166,10 +165,6 @@ IWindowSurface::IWindowSurface(IWindowSurface *base_surface, uint16_t width, uin
 //
 IWindowSurface::~IWindowSurface()
 {
-    // free all DCanvas objects allocated by this surface
-    for (DCanvasCollection::iterator it = mCanvasStore.begin(); it != mCanvasStore.end(); ++it)
-        delete *it;
-
     // calculate the buffer's original address when freeing mSurfaceBuffer
     if (mOwnsSurfaceBuffer)
     {
@@ -336,83 +331,17 @@ void IWindowSurface::clear()
 
     lock();
 
-    if (getBitsPerPixel() == 8)
+    argb_t *dest = (argb_t *)getBuffer();
+
+    for (int y = 0; y < getHeight(); y++)
     {
-        const argb_t *palette_colors = V_GetDefaultPalette()->basecolors;
-        palindex_t    color_index    = V_BestColor(palette_colors, color);
-        palindex_t   *dest           = (palindex_t *)getBuffer();
+        for (int x = 0; x < getWidth(); x++)
+            dest[x] = color;
 
-        for (int y = 0; y < getHeight(); y++)
-        {
-            memset(dest, color_index, getWidth());
-            dest += getPitchInPixels();
-        }
-    }
-    else
-    {
-        argb_t *dest = (argb_t *)getBuffer();
-
-        for (int y = 0; y < getHeight(); y++)
-        {
-            for (int x = 0; x < getWidth(); x++)
-                dest[x] = color;
-
-            dest += getPitchInPixels();
-        }
+        dest += getPitchInPixels();
     }
 
     unlock();
-}
-
-//
-// IWindowSurface::createCanvas
-//
-// Generic factory function to instantiate a DCanvas object capable of drawing
-// to this surface.
-//
-DCanvas *IWindowSurface::createCanvas()
-{
-    DCanvas *canvas = new DCanvas(this);
-    mCanvasStore.push_back(canvas);
-
-    return canvas;
-}
-
-//
-// IWindowSurface::getDefaultCanvas
-//
-// Returns the default DCanvas object for the surface, creating it if it
-// has not yet been instantiated.
-//
-DCanvas *IWindowSurface::getDefaultCanvas()
-{
-    if (mCanvas == NULL)
-        mCanvas = createCanvas();
-
-    return mCanvas;
-}
-
-//
-// IWindowSurface::releaseCanvas
-//
-// Manually frees a DCanvas object that was instantiated by this surface
-// via the createCanvas function. Note that the destructor takes care of
-// freeing all of the instantiated DCanvas objects.
-//
-void IWindowSurface::releaseCanvas(DCanvas *canvas)
-{
-    if (canvas->getSurface() != this)
-        I_Error("IWindowSurface::releaseCanvas: releasing canvas not owned by this surface\n");
-
-    // Remove the DCanvas pointer from the surface's list of allocated canvases
-    DCanvasCollection::iterator it = std::find(mCanvasStore.begin(), mCanvasStore.end(), canvas);
-    if (it != mCanvasStore.end())
-        mCanvasStore.erase(it);
-
-    if (canvas == mCanvas)
-        mCanvas = NULL;
-
-    delete canvas;
 }
 
 // ****************************************************************************
@@ -636,8 +565,6 @@ void I_SetVideoMode(const IVideoMode &requested_mode)
         emulated_surface->clear();
     }
 
-    screen = primary_surface->getDefaultCanvas();
-
     assert(I_VideoInitialized());
 
     if (window->getVideoMode() != requested_mode)
@@ -770,18 +697,6 @@ int I_GetVideoBitDepth()
 IWindowSurface *I_GetPrimarySurface()
 {
     return primary_surface;
-}
-
-//
-// I_GetPrimaryCanvas
-//
-// Returns a pointer to the primary surface's default canvas.
-//
-DCanvas *I_GetPrimaryCanvas()
-{
-    if (I_VideoInitialized())
-        return I_GetPrimarySurface()->getDefaultCanvas();
-    return NULL;
 }
 
 //
@@ -948,14 +863,6 @@ void I_FinishUpdate()
 {
     if (I_VideoInitialized())
     {
-        // draws little dots on the bottom of the screen
-        if (vid_ticker)
-            V_DrawFPSTicker();
-
-        // Draws frame time and cumulative fps
-        if (vid_displayfps)
-            V_DrawFPSWidget();
-
         // Handle blitting our 8bpp surface to the 32bpp video window surface
         if (converted_surface)
         {

@@ -35,7 +35,6 @@
 #include "cl_demo.h"
 #include "cl_download.h"
 #include "cl_maplist.h"
-#include "cl_netgraph.h"
 #include "cl_parse.h"
 #include "cl_replay.h"
 #include "cl_vote.h"
@@ -47,7 +46,6 @@
 #include "g_levelstate.h"
 #include "gi.h"
 #include "gstrings.h"
-#include "hu_stuff.h"
 #include "i_input.h"
 #include "i_net.h"
 #include "i_system.h"
@@ -58,7 +56,6 @@
 #include "md5.h"
 #include "odamex.h"
 #include "p_acs.h"
-#include "p_ctf.h"
 #include "p_lnspec.h"
 #include "p_local.h"
 #include "p_mobj.h"
@@ -68,9 +65,9 @@
 #include "r_sky.h"
 #include "s_sound.h"
 #include "server.pb.h"
-#include "st_stuff.h"
-#include "v_text.h"
 #include "w_ident.h"
+
+extern bool       missingCommercialIWAD;
 
 // denis - fancy gfx, but no game manipulation
 bool      clientside = true, serverside = false;
@@ -124,7 +121,7 @@ bool forcenetdemosplit    = false; // need to split demo due to svc_reconnect
 
 NetCommand localcmds[MAXSAVETICS];
 
-extern NetGraph netgraph;
+//extern NetGraph netgraph;
 
 // [SL] 2012-03-07 - Players that were teleported during the current gametic
 std::set<byte> teleported_players;
@@ -281,7 +278,6 @@ void CL_SimulateWorld();
 // some doom functions (not csDoom)
 void D_Display(void);
 void D_DoAdvanceDemo(void);
-void M_Ticker(void);
 
 void R_InterpolationTicker();
 
@@ -517,8 +513,6 @@ void CL_CheckDisplayPlayer(void)
         // widget background color changes.
         if (idplayer(newid).spectator != idplayer(previd).spectator)
             R_ForceViewWindowResize();
-        ST_ForceRefresh();
-
         previd = newid;
     }
 }
@@ -577,8 +571,7 @@ template <class Iterator> void CL_SpyCycle(Iterator begin, Iterator end)
 
             if (demoplayback)
             {
-                consoleplayer_id = player.id;
-                ST_ForceRefresh();
+                consoleplayer_id = player.id;                
             }
 
             return;
@@ -605,15 +598,10 @@ void CL_StepTics(unsigned int count)
         if (advancedemo)
             D_DoAdvanceDemo();
 
-        C_Ticker();
-        M_Ticker();
-        HU_Ticker();
+        C_Ticker();        
 
         if (P_AtInterval(TICRATE))
             CL_PlayerTimes();
-
-        if (sv_gametype == GM_CTF)
-            CTF_RunTics();
 
         ::levelstate.tic();
 
@@ -822,11 +810,6 @@ BEGIN_COMMAND(playerinfo)
     Printf(PRINT_HIGH, "---------------[player info]----------- \n");
     Printf(PRINT_HIGH, " userinfo.netname - %s \n", player->userinfo.netname.c_str());
 
-    if (sv_gametype == GM_CTF || sv_gametype == GM_TEAMDM)
-    {
-        Printf(PRINT_HIGH, " userinfo.team    - %s \n",
-               GetTeamInfo(player->userinfo.team)->ColorizedTeamName().c_str());
-    }
     Printf(PRINT_HIGH, " userinfo.aimdist - %d \n", player->userinfo.aimdist >> FRACBITS);
     Printf(PRINT_HIGH, " userinfo.color   - %s \n", color);
     Printf(PRINT_HIGH, " userinfo.gender  - %d \n", player->userinfo.gender);
@@ -1025,24 +1008,6 @@ BEGIN_COMMAND(join)
     MSG_WriteByte(&net_buffer, false);
 }
 END_COMMAND(join)
-
-BEGIN_COMMAND(flagnext)
-{
-    if (sv_gametype == GM_CTF && (consoleplayer().spectator || netdemo.isPlaying()))
-    {
-        for (int i = 0; i < NUMTEAMS; i++)
-        {
-            byte id = GetTeamInfo((team_t)i)->FlagData.flagger;
-            if (id != 0 && displayplayer_id != id)
-            {
-                displayplayer_id = id;
-                CL_CheckDisplayPlayer();
-                return;
-            }
-        }
-    }
-}
-END_COMMAND(flagnext)
 
 BEGIN_COMMAND(spynext)
 {
@@ -1561,8 +1526,7 @@ bool CL_PrepareConnect()
 
     MSG_ReadBool();                        // deathmatch
     MSG_ReadByte();                        // skill
-    recv_teamplay_stats |= MSG_ReadBool(); // teamplay
-    recv_teamplay_stats |= MSG_ReadBool(); // ctf
+    recv_teamplay_stats |= MSG_ReadBool(); // teamplay    
 
     for (byte i = 0; i < playercount; i++)
     {
@@ -1935,7 +1899,7 @@ bool CL_ReadPacketHeader()
         CL_Decompress();
     }
 
-    netgraph.addPacketIn();
+    //netgraph.addPacketIn();
     return true;
 }
 
@@ -2022,7 +1986,7 @@ void CL_ParseCommands()
             Printf("CL_ParseCommands: end byte (%d) < start byte (%d)\n", ::net_message.BytesRead(), byteStart);
         }
 
-        ::netgraph.addTrafficIn(::net_message.BytesRead() - byteStart);
+        //::netgraph.addTrafficIn(::net_message.BytesRead() - byteStart);
     }
 }
 
@@ -2080,7 +2044,7 @@ void CL_SendCmd(void)
     }
 
     int bytesWritten = NET_SendPacket(net_buffer, serveraddr);
-    netgraph.addTrafficOut(bytesWritten);
+    //netgraph.addTrafficOut(bytesWritten);
 
     outrate += net_buffer.size();
     SZ_Clear(&net_buffer);
@@ -2204,7 +2168,7 @@ CVAR_FUNC_IMPL(cl_interp)
 {
     // Resync the world index since the sync offset has changed
     CL_ResyncWorldIndex();
-    netgraph.setInterpolation(var);
+    //netgraph.setInterpolation(var);
 }
 
 //
@@ -2383,7 +2347,7 @@ void CL_SimulateWorld()
 #endif // _WORLD_INDEX_DEBUG_
 
     // [SL] 2012-03-29 - Add sync information to the netgraph
-    netgraph.setWorldIndexSync(world_index - (last_svgametic - cl_interp));
+    //netgraph.setWorldIndexSync(world_index - (last_svgametic - cl_interp));
 
     CL_SimulateSectors();
     CL_SimulatePlayers();

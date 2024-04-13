@@ -177,12 +177,6 @@ CVAR_RANGE(ui_dimamount, "0.7", "", CVARTYPE_FLOAT, CVAR_CLIENTARCHIVE | CVAR_NO
 
 CVAR(ui_dimcolor, "00 00 00", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
 
-CVAR_RANGE_FUNC_DECL(ui_transred, "0", "", CVARTYPE_BYTE, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE, 0.0f, 255.0f)
-
-CVAR_RANGE_FUNC_DECL(ui_transgreen, "0", "", CVARTYPE_BYTE, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE, 0.0f, 255.0f)
-
-CVAR_RANGE_FUNC_DECL(ui_transblue, "0", "", CVARTYPE_BYTE, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE, 0.0f, 255.0f)
-
 // Gameplay/Other
 // --------------
 
@@ -342,14 +336,6 @@ CVAR_FUNC_DECL(cl_netdemoname, "Odamex_%g_%d_%t_%w_%m",
                "either the first PWAD or the IWAD\n// %m: Map lump\n// %%: Literal percent sign",
                CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
 
-// Screenshot format string
-CVAR_FUNC_DECL(cl_screenshotname, "Odamex_%g_%d_%t",
-               "Default screenshot name.  Parses the following tokens:\n// "
-               "%d: date in YYYYMMDD format\n// %t: time in HHMMSS format\n// "
-               "%n: player name\n// %g: gametype\n// %w: WAD file loaded; "
-               "either the first PWAD or the IWAD\n// %m: Map lump\n// %%: Literal percent sign",
-               CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
 CVAR(cl_autorecord, "0", "Automatically record netdemos", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
 
 CVAR(cl_autorecord_coop, "1", "Allows cooperative netdemos from cl_autorecord CVAR.", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
@@ -411,9 +397,6 @@ CVAR(hud_bigfont, "0", "Use BIGFONT for certain HUD items - intended as a stopga
 CVAR(hud_crosshairdim, "0", "Crosshair transparency", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
 
 CVAR(hud_crosshairscale, "1", "Crosshair scaling", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
-
-CVAR_FUNC_DECL(hud_crosshaircolor, "ff ff ff", "Crosshair color", CVARTYPE_STRING,
-               CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
 
 CVAR(hud_crosshairhealth, "1", "Color of crosshair represents health level", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
 
@@ -531,11 +514,6 @@ static char *C_GetDefaultMusicSystem()
 CVAR_FUNC_DECL(snd_musicsystem, C_GetDefaultMusicSystem(), "Music subsystem preference", CVARTYPE_BYTE,
                CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
 
-// Status bar
-// ----------
-
-CVAR_FUNC_DECL(st_scale, "1", "", CVARTYPE_BYTE, CVAR_CLIENTARCHIVE)
-
 // Video and Renderer
 // ------------------
 
@@ -543,9 +521,6 @@ CVAR_FUNC_DECL(gammalevel, "1", "Gamma correction level", CVARTYPE_FLOAT, CVAR_C
 
 CVAR_RANGE_FUNC_DECL(vid_gammatype, "1", "Select between ZDoom and DOS Doom gamma correction", CVARTYPE_BYTE,
                      CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE, 0.0f, 1.0f)
-
-CVAR_RANGE_FUNC_DECL(hud_crosshair, "0", "Type of crosshair, 0 means no crosshair", CVARTYPE_BYTE,
-                     CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE, 0.0f, 255.0f)
 
 CVAR(r_flashhom, "0", "Draws flashing colors where there is HOM", CVARTYPE_BOOL, CVAR_NULL)
 
@@ -606,8 +581,6 @@ CVAR_FUNC_DECL(vid_maxfps, "60", "Maximum framerate (0 indicates unlimited frame
 CVAR_FUNC_DECL(vid_vsync, "0", "Enable/Disable vertical refresh sync (vsync)", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
 
 CVAR_FUNC_DECL(vid_fullscreen, "0", "Full screen video mode", CVARTYPE_BYTE, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
-CVAR_FUNC_DECL(vid_32bpp, "0", "Enable 32-bit color rendering", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
 
 CVAR_FUNC_DECL(vid_320x200, "0", "Enable 320x200 video emulation", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
 

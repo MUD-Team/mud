@@ -29,7 +29,6 @@
 #include "c_dispatch.h"
 #include "g_game.h"
 #include "gi.h"
-#include "hu_stuff.h"
 #include "i_video.h"
 #include "m_random.h"
 #include "odamex.h"
@@ -37,7 +36,6 @@
 #include "s_sndseq.h"
 #include "s_sound.h"
 #include "v_palette.h"
-#include "v_text.h"
 #include "v_textcolors.h"
 #include "v_video.h"
 #include "w_wad.h"
@@ -402,118 +400,6 @@ void WI_slamBackground()
     background_surface->unlock();
 }
 
-static int WI_DrawName(const char *str, int x, int y)
-{
-    patch_t *p = NULL;
-
-    ::V_ColorMap = translationref_t(::Ranges + CR_GREY * 256);
-    while (*str)
-    {
-        char charname[9];
-        sprintf(charname, "FONTB%02u", toupper(*str) - 32);
-        int lump = W_CheckNumForName(charname);
-
-        if (lump != -1)
-        {
-            p = W_CachePatch(lump);
-            screen->DrawTranslatedPatchClean(p, x, y);
-            x += p->width() - 1;
-        }
-        else
-        {
-            x += 12;
-        }
-        str++;
-    }
-
-    p = W_CachePatch("FONTB39");
-    return (5 * (p->height() - p->topoffset())) / 4;
-}
-
-static int WI_DrawSmallName(const char *str, int x, int y)
-{
-    patch_t *p = NULL;
-
-    while (*str)
-    {
-        char charname[9];
-        sprintf(charname, "STCFN%.3d", HU_FONTSTART + (toupper(*str) - 32) - 1);
-        int lump = W_CheckNumForName(charname);
-
-        if (lump != -1)
-        {
-            p = W_CachePatch(lump);
-            screen->DrawPatchClean(p, x, y);
-            x += p->width() - 1;
-        }
-        else
-        {
-            x += 12;
-        }
-        str++;
-    }
-
-    p = W_CachePatch("FONTB39");
-    return (5 * (p->height() - p->topoffset())) / 4;
-}
-
-// Draws "<Levelname> Finished!"
-void WI_drawLF()
-{
-    if (lnames[0].empty() && !lnamewidths[0])
-        return;
-
-    int y = WI_TITLEY;
-
-    if (!lnames[0].empty())
-    {
-        // draw <LevelName>
-        patch_t *lnames0 = W_ResolvePatchHandle(lnames[0]);
-        screen->DrawPatchClean(lnames0, (320 - lnames0->width()) / 2, y);
-        y += (5 * lnames0->height()) / 4;
-    }
-    else
-    {
-        // [RH] draw a dynamic title string
-        y += WI_DrawName(lnametexts[0], 160 - lnamewidths[0] / 2, y);
-    }
-
-    // draw "Finished!"
-    // if (!multiplayer || sv_maxplayers <= 1)
-    patch_t *fin = W_ResolvePatchHandle(finished);
-
-    // (Removed) Dan - Causes GUI Issues |FIX-ME|
-    screen->DrawPatchClean(fin, (320 - fin->width()) / 2, y);
-}
-
-// Draws "Entering <LevelName>"
-void WI_drawEL()
-{
-    if (lnames[1].empty() && !lnamewidths[1])
-        return;
-
-    int y = WI_TITLEY;
-
-    patch_t *ent     = W_ResolvePatchHandle(entering);
-    patch_t *lnames1 = W_ResolvePatchHandle(lnames[1]);
-
-    // draw "Entering"
-    screen->DrawPatchClean(ent, (320 - ent->width()) / 2, y);
-
-    // [RH] Changed to adjust by height of entering patch instead of title
-    y += (5 * ent->height()) / 4;
-
-    if (!lnames[1].empty())
-    {
-        // draw level
-        screen->DrawPatchClean(lnames1, (320 - lnames1->width()) / 2, y);
-    }
-    else
-    {
-        // [RH] draw a dynamic title string
-        WI_DrawName(lnametexts[1], 160 - lnamewidths[1] / 2, y);
-    }
-}
 
 int WI_MapToIndex(char *map)
 {
@@ -526,54 +412,6 @@ int WI_MapToIndex(char *map)
     }
 
     return i;
-}
-
-// ====================================================================
-// WI_drawOnLnode
-// Purpose: Draw patches at a location based on episode/map
-// Args:    n   -- index to map# within episode
-//          c[] -- array of patches to be drawn
-//          numpatches -- haleyjd 04/12/03: bug fix - number of patches
-// Returns: void
-//
-// draw stuff at a location by episode/map#
-//
-// [Russell] - Modified for odamex, fixes a crash with certain pwads at
-// intermission change
-void WI_drawOnLnode(int n, lumpHandle_t *c, int numpatches)
-{
-    int  i    = 0;
-    bool fits = false;
-
-    do
-    {
-        patch_t *ch = W_ResolvePatchHandle(c[i]);
-
-        int left   = lnodes[wbs->epsd][n].x - ch->leftoffset();
-        int top    = lnodes[wbs->epsd][n].y - ch->topoffset();
-        int right  = left + ch->width();
-        int bottom = top + ch->height();
-
-        if (left >= 0 && right < WI_GetWidth() && top >= 0 && bottom < WI_GetHeight())
-        {
-            fits = true;
-        }
-        else
-        {
-            i++;
-        }
-    } while (!fits && i != numpatches); // haleyjd: bug fix
-
-    if (fits && i < numpatches)         // haleyjd: bug fix
-    {
-        patch_t *ch = W_ResolvePatchHandle(c[i]);
-        screen->DrawPatchIndirect(ch, lnodes[wbs->epsd][n].x, lnodes[wbs->epsd][n].y);
-    }
-    else
-    {
-        // DEBUG
-        DPrintf("Could not place patch on level %d", n + 1);
-    }
 }
 
 void WI_initAnimatedBack()
@@ -643,119 +481,6 @@ void WI_updateAnimatedBack()
     }
 }
 
-void WI_drawAnimatedBack()
-{
-    if (gamemode != commercial && gamemode != commercial_bfg && wbs->epsd <= 2 && NUMANIMS[wbs->epsd] > 0)
-    {
-        DCanvas *canvas = background_surface->getDefaultCanvas();
-
-        background_surface->lock();
-
-        for (int i = 0; i < NUMANIMS[wbs->epsd]; i++)
-        {
-            animinfo_t *a = &anims[wbs->epsd][i];
-            if (a->ctr >= 0)
-                canvas->DrawPatch(a->p[a->ctr], a->loc.x, a->loc.y);
-        }
-
-        background_surface->unlock();
-    }
-
-    WI_slamBackground();
-}
-
-int WI_drawNum(int n, int x, int y, int digits)
-{
-    if (digits < 0)
-    {
-        if (n == 0)
-        {
-            // make variable-length zeros 1 digit long
-            digits = 1;
-        }
-        else
-        {
-            // figure out # of digits in #
-            digits   = 0;
-            int temp = n;
-
-            while (temp)
-            {
-                temp /= 10;
-                digits++;
-            }
-        }
-    }
-
-    const bool neg = n < 0;
-    if (neg)
-        n = -n;
-
-    // if non-number, do not draw it
-    if (n == 1994)
-        return 0;
-
-    const int fontwidth = W_ResolvePatchHandle(num[0])->width();
-
-    // draw the new number
-    while (digits--)
-    {
-        x -= fontwidth;
-        screen->DrawPatchClean(W_ResolvePatchHandle(num[n % 10]), x, y);
-        n /= 10;
-    }
-
-    // draw a minus sign if necessary
-    if (neg)
-        screen->DrawPatchClean(W_ResolvePatchHandle(wiminus), x -= 8, y);
-
-    return x;
-}
-
-void WI_drawPercent(int p, int x, int y, int b = 0)
-{
-    if (p < 0)
-        return;
-
-    screen->DrawPatchClean(W_ResolvePatchHandle(percent), x, y);
-    if (b == 0)
-        WI_drawNum(p, x, y, -1);
-    else
-        WI_drawNum(p * 100 / b, x, y, -1);
-}
-
-void WI_drawTime(int t, int x, int y)
-{
-    if (t < 0)
-        return;
-
-    if (t <= 61 * 59)
-    {
-        int div = 1;
-
-        patch_t *col = W_ResolvePatchHandle(colon);
-
-        do
-        {
-            const int n = (t / div) % 60;
-            x           = WI_drawNum(n, x, y, 2) - col->width();
-            div *= 60;
-
-            // draw
-            if (div == 60 || t / div)
-                screen->DrawPatchClean(col, x, y);
-
-        } while (t / div);
-    }
-    else
-    {
-        patch_t *suk = W_ResolvePatchHandle(sucks);
-
-        // "sucks"
-        screen->DrawPatchClean(suk, x - suk->width(), y);
-    }
-}
-
 void WI_End()
 {
     WI_unloadData();
@@ -807,44 +532,6 @@ void WI_updateShowNextLoc()
     }
 }
 
-void WI_drawShowNextLoc()
-{
-    // draw animated background
-    WI_drawAnimatedBack();
-
-    if (gamemode != commercial && gamemode != commercial_bfg)
-    {
-        if (wbs->epsd > 2 || strnicmp(level.nextmap.c_str(), "EndGame", 7) == 0)
-        {
-            WI_drawEL();
-            return;
-        }
-
-        // draw a splat on taken cities.
-        LevelInfos &levels = getLevelInfos();
-        for (int i = 0; i < NUMMAPS; i++)
-        {
-            if (levels.findByName(names[wbs->epsd][i]).flags & LEVEL_VISITED)
-            {
-                WI_drawOnLnode(i, &splat, 1);
-            }
-        }
-
-        // draw flashing ptr
-        if (snl_pointeron)
-            WI_drawOnLnode(WI_MapToIndex(wbs->next), yah, 2);
-    }
-
-    // draws which level you are entering..
-    WI_drawEL();
-}
-
-void WI_drawNoState()
-{
-    snl_pointeron = true;
-    WI_drawShowNextLoc();
-}
-
 int WI_fragSum(player_t &player)
 {
     return player.fragcount;
@@ -852,12 +539,6 @@ int WI_fragSum(player_t &player)
 
 void WI_drawDeathmatchStats()
 {
-    // draw animated background
-    WI_drawAnimatedBack();
-    WI_drawLF();
-
-    // [RH] Draw heads-up scores display
-    HU_DrawScores(&idplayer(me));
 }
 
 void WI_initNetgameStats()
@@ -1046,92 +727,6 @@ void WI_updateNetgameStats()
     }
 }
 
-void WI_drawNetgameStats()
-{
-    unsigned int nbPlayers = 0;
-
-    const patch_t *pPercent = W_ResolvePatchHandle(::percent);
-    const patch_t *pKills   = W_ResolvePatchHandle(::kills);
-    const patch_t *pItems   = W_ResolvePatchHandle(::items);
-    const patch_t *pScrt    = W_ResolvePatchHandle(::scrt);
-    const patch_t *pFrags   = W_ResolvePatchHandle(::frags);
-    const patch_t *pStar    = W_ResolvePatchHandle(::star);
-    const patch_t *pP       = W_ResolvePatchHandle(::p);
-
-    const short pwidth = pPercent->width();
-
-    // draw animated background
-    WI_drawAnimatedBack();
-
-    WI_drawLF();
-
-    // draw stat titles (top line)
-    screen->DrawPatchClean(pKills, NG_STATSX + NG_SPACINGX - pKills->width(), NG_STATSY);
-    screen->DrawPatchClean(pItems, NG_STATSX + 2 * NG_SPACINGX - pItems->width(), NG_STATSY);
-    screen->DrawPatchClean(pScrt, NG_STATSX + 3 * NG_SPACINGX - pScrt->width(), NG_STATSY);
-
-    if (::dofrags)
-    {
-        screen->DrawPatchClean(pFrags, NG_STATSX + 4 * NG_SPACINGX - pFrags->width(), NG_STATSY);
-    }
-
-    // draw stats
-    unsigned int y = NG_STATSY + pKills->height();
-
-    for (Players::iterator it = players.begin(); it != players.end(); ++it)
-    {
-        // Make sure while demoplaybacking that we're not exceeding the hardlimit of 4 players.
-        if (demoplayback && it->id > 4)
-            break;
-
-        // Break it anyway if we count more than 4 ACTIVE players in our session.
-        if (!demoplayback && nbPlayers > 4)
-            break;
-
-        const byte i = (it->id) - 1;
-
-        if (!it->ingame())
-            continue;
-
-        unsigned int x = NG_STATSX;
-        // [RH] Only use one graphic for the face backgrounds
-        if (demoplayback)
-            V_ColorMap = translationref_t(translationtables + it->id * 256, it->id);
-        else
-            V_ColorMap = translationref_t(translationtables + i * 256, i);
-
-        screen->DrawTranslatedPatchClean(pP, x - pP->width(), y);
-        // classic face background colour
-        // screen->DrawTranslatedPatchClean (faceclassic[i], x-p->width(), y);
-
-        if (i == me)
-            screen->DrawPatchClean(pStar, x - pP->width(), y);
-
-        // Display player names online!
-        if (!demoplayback)
-        {
-            std::string str;
-            StrFormat(str, "%s", it->userinfo.netname.c_str());
-            WI_DrawSmallName(str.c_str(), x + 10, y + 24);
-        }
-
-        x += NG_SPACINGX;
-
-        WI_drawPercent(cnt_kills_c[i], x - pwidth, y + 10, wbs->maxkills);
-        x += NG_SPACINGX;
-        WI_drawPercent(cnt_items_c[i], x - pwidth, y + 10, wbs->maxitems);
-        x += NG_SPACINGX;
-        WI_drawPercent(cnt_secret_c[i], x - pwidth, y + 10, wbs->maxsecret);
-        x += NG_SPACINGX;
-
-        if (dofrags)
-            WI_drawNum(cnt_frags_c[i], x, y + 10, -1);
-
-        y += WI_SPACINGY + 4;
-        nbPlayers++;
-    }
-}
-
 static int sp_state;
 
 void WI_initStats()
@@ -1233,18 +828,6 @@ void WI_updateStats()
             level_pwad_info_t &nextlevel = getLevelInfos().findByName(wbs->next);
             OLumpName          name      = nextlevel.enterpic;
 
-            if (nextlevel.enterpic[0])
-            {
-                // background
-                const patch_t *bg_patch = W_CachePatch(name.c_str());
-                background_surface      = I_AllocateSurface(bg_patch->width(), bg_patch->height(), 8);
-                const DCanvas *canvas   = background_surface->getDefaultCanvas();
-
-                background_surface->lock();
-                canvas->DrawPatch(bg_patch, 0, 0);
-                background_surface->unlock();
-            }
-
             WI_initAnimatedBack();
 
             S_Sound(CHAN_INTERFACE, "weapons/shotgr", 1, ATTN_NONE);
@@ -1262,40 +845,6 @@ void WI_updateStats()
             sp_state++;
             cnt_pause = TICRATE;
         }
-    }
-}
-
-void WI_drawStats()
-{
-    const patch_t *pKills     = W_ResolvePatchHandle(::kills);
-    const patch_t *pItems     = W_ResolvePatchHandle(::items);
-    const patch_t *pSecret    = W_ResolvePatchHandle(::secret);
-    const patch_t *pTimepatch = W_ResolvePatchHandle(::timepatch);
-    const patch_t *pPar       = W_ResolvePatchHandle(::par);
-
-    // line height
-    const int lh = (3 * W_ResolvePatchHandle(::num[0])->height()) / 2;
-
-    // draw animated background
-    WI_drawAnimatedBack();
-    WI_drawLF();
-
-    screen->DrawPatchClean(pKills, SP_STATSX, SP_STATSY);
-    WI_drawPercent(cnt_kills, 320 - SP_STATSX, SP_STATSY);
-
-    screen->DrawPatchClean(pItems, SP_STATSX, SP_STATSY + lh);
-    WI_drawPercent(cnt_items, 320 - SP_STATSX, SP_STATSY + lh);
-
-    screen->DrawPatchClean(pSecret, SP_STATSX, SP_STATSY + 2 * lh);
-    WI_drawPercent(cnt_secret, 320 - SP_STATSX, SP_STATSY + 2 * lh);
-
-    screen->DrawPatchClean(pTimepatch, SP_TIMEX, SP_TIMEY);
-    WI_drawTime(cnt_time, 160 - SP_TIMEX, SP_TIMEY);
-
-    if ((gameinfo.flags & GI_MAPxx) || wbs->epsd < 3)
-    {
-        screen->DrawPatchClean(pPar, SP_TIMEX + 160, SP_TIMEY);
-        WI_drawTime(cnt_par, 320 - SP_TIMEX, SP_TIMEY);
     }
 }
 
@@ -1431,11 +980,6 @@ void WI_loadData()
     // background
     const patch_t *bg_patch = W_CachePatch(name);
     background_surface      = I_AllocateSurface(bg_patch->width(), bg_patch->height(), 8);
-    const DCanvas *canvas   = background_surface->getDefaultCanvas();
-
-    background_surface->lock();
-    canvas->DrawPatch(bg_patch, 0, 0);
-    background_surface->unlock();
 
     for (int i = 0, j; i < 2; i++)
     {
@@ -1619,46 +1163,6 @@ void WI_unloadData()
 
     for (int i = 0; i < 4; i++)
         faceclassic[i].clear();
-}
-
-void WI_Drawer()
-{
-    C_MidPrint(NULL); // Don't midprint anything during intermission
-
-    // If the background screen has been freed, then we really shouldn't
-    // be in here. (But it happens anyway.)
-    if (background_surface)
-    {
-        switch (state)
-        {
-        case StatCount:
-            if (multiplayer)
-            {
-                if (demoplayback)
-                {
-                    WI_drawNetgameStats();
-                }
-                else
-                {
-                    if (sv_gametype == 0 && wi_oldintermission && P_NumPlayersInGame() < 5)
-                        WI_drawNetgameStats();
-                    else
-                        WI_drawDeathmatchStats();
-                }
-            }
-            else
-                WI_drawStats();
-            break;
-
-        case ShowNextLoc:
-            WI_drawShowNextLoc();
-            break;
-
-        default:
-            WI_drawNoState();
-            break;
-        }
-    }
 }
 
 void WI_initVariables(wbstartstruct_t *wbstartstruct)

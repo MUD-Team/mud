@@ -27,7 +27,6 @@
 #include "cmdlib.h"
 #include "d_player.h"
 #include "odamex.h"
-#include "p_ctf.h"
 
 // Unnatural Level Progression.  True if we've used 'map' or another command
 // to switch to a specific map out of order, otherwise false.
@@ -98,9 +97,6 @@ void SV_SendDamagePlayer(player_t *player, AActor *inflictor, int healthDamage, 
 {
 }
 void SV_SendDamageMobj(AActor *target, int pain)
-{
-}
-void SV_CTFEvent(team_t f, flag_score_t event, player_t &who)
 {
 }
 void SV_UpdateFrags(player_t &player)

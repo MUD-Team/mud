@@ -29,7 +29,6 @@
 #if defined(SERVER_APP)
 #include "svc_message.h"
 #else
-#include "st_stuff.h"
 #endif
 #include "v_textcolors.h"
 
@@ -41,7 +40,7 @@ void COM_PushToast(const toast_t &toast)
         MSG_WriteSVC(&it->client.reliablebuf, SVC_Toast(toast));
     }
 #else
-    hud::PushToast(toast);
+    //hud::PushToast(toast);
 #endif
 }
 
