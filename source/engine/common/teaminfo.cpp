@@ -48,11 +48,6 @@ void InitTeamInfo()
     teamInfo->TransColor         = CR_BLUE;
     teamInfo->FountainColorArg   = 3;
     teamInfo->TeamSpawnThingNum  = 5080;
-    teamInfo->FlagThingNum       = 5130;
-    teamInfo->FlagSocketSprite   = SPR_BSOK;
-    teamInfo->FlagSprite         = SPR_BFLG;
-    teamInfo->FlagDownSprite     = SPR_BDWN;
-    teamInfo->FlagWaypointSprite = SPR_WPBF;
     teamInfo->Points             = 0;
     teamInfo->RoundWins          = 0;
 
@@ -66,12 +61,6 @@ void InitTeamInfo()
     teamInfo->TransColor         = CR_RED;
     teamInfo->FountainColorArg   = 1;
     teamInfo->TeamSpawnThingNum  = 5081;
-    teamInfo->FlagThingNum       = 5131;
-    teamInfo->FlagSocketSprite   = SPR_RSOK;
-    teamInfo->FlagSprite         = SPR_RFLG;
-    teamInfo->FlagDownSprite     = SPR_RDWN;
-    teamInfo->FlagCarrySprite    = SPR_RCAR;
-    teamInfo->FlagWaypointSprite = SPR_WPBF;
     teamInfo->Points             = 0;
     teamInfo->RoundWins          = 0;
 
@@ -85,12 +74,6 @@ void InitTeamInfo()
     teamInfo->TransColor         = CR_GREEN;
     teamInfo->FountainColorArg   = 2;
     teamInfo->TeamSpawnThingNum  = 5083;
-    teamInfo->FlagThingNum       = 5133;
-    teamInfo->FlagSocketSprite   = SPR_GSOK;
-    teamInfo->FlagSprite         = SPR_GFLG;
-    teamInfo->FlagDownSprite     = SPR_GDWN;
-    teamInfo->FlagCarrySprite    = SPR_GCAR;
-    teamInfo->FlagWaypointSprite = SPR_WPBF;
     teamInfo->Points             = 0;
     teamInfo->RoundWins          = 0;
 
@@ -103,11 +86,6 @@ void InitTeamInfo()
     s_NoTeam.TransColor         = CR_GRAY;
     s_NoTeam.FountainColorArg   = 0;
     s_NoTeam.TeamSpawnThingNum  = 0;
-    s_NoTeam.FlagSocketSprite   = 0;
-    s_NoTeam.FlagSprite         = 0;
-    s_NoTeam.FlagDownSprite     = 0;
-    s_NoTeam.FlagCarrySprite    = 0;
-    s_NoTeam.FlagWaypointSprite = 0;
     s_NoTeam.Points             = 0;
     s_NoTeam.RoundWins          = 0;
 }
@@ -122,9 +100,6 @@ void TeamInfo_ResetScores(bool fullreset)
             it->flags[i] = false;
 
         TeamInfo *teamInfo           = GetTeamInfo((team_t)i);
-        teamInfo->FlagData.flagger   = 0;
-        teamInfo->FlagData.state     = flag_home;
-        teamInfo->FlagData.firstgrab = false;
         teamInfo->Points             = 0;
 
         if (fullreset)

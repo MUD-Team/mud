@@ -557,13 +557,6 @@ class ScorelimitVote : public Vote
         if (!Vote::setup_check_cvar())
             return false;
 
-        // Does scorelimit voting make sense in this gametype?
-        if (sv_gametype != GM_CTF)
-        {
-            this->error = "scorelimit does nothing in this gametype.";
-            return false;
-        }
-
         // Do we have at least one argument?
         if (args.size() < 1)
         {

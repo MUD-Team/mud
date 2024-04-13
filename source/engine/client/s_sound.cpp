@@ -41,7 +41,6 @@
 #include "p_local.h"
 #include "physfs.h"
 #include "s_sndseq.h"
-#include "v_text.h"
 #include "v_video.h"
 #include "w_wad.h"
 #include "z_zone.h"
@@ -139,6 +138,7 @@ size_t numChannels;
 //
 void S_NoiseDebug()
 {
+    /*
     fixed_t ox, oy;
 
     int y = 32 * CleanYfac;
@@ -199,6 +199,7 @@ void S_NoiseDebug()
             screen->DrawText(CR_GREY, 0, y, "------");
         }
     }
+    */
 }
 
 //

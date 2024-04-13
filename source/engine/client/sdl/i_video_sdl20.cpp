@@ -136,13 +136,6 @@ ISDL20VideoCapabilities::ISDL20VideoCapabilities() : IVideoCapabilities(), mNati
     // always add the following windowed modes (if windowed modes are supported)
     if (supportsWindowed())
     {
-        if (supports8bpp())
-        {
-            mModeList.push_back(IVideoMode(320, 200, 8, WINDOW_Windowed));
-            mModeList.push_back(IVideoMode(320, 240, 8, WINDOW_Windowed));
-            mModeList.push_back(IVideoMode(640, 400, 8, WINDOW_Windowed));
-            mModeList.push_back(IVideoMode(640, 480, 8, WINDOW_Windowed));
-        }
         if (supports32bpp())
         {
             mModeList.push_back(IVideoMode(320, 200, 32, WINDOW_Windowed));
@@ -166,7 +159,7 @@ ISDL20VideoCapabilities::ISDL20VideoCapabilities() : IVideoCapabilities(), mNati
 #endif
 
     assert(supportsWindowed() || supportsFullScreen());
-    assert(supports8bpp() || supports32bpp());
+    assert(supports32bpp());
 }
 
 // ****************************************************************************
@@ -186,7 +179,7 @@ ISDL20VideoCapabilities::ISDL20VideoCapabilities() : IVideoCapabilities(), mNati
 ISDL20TextureWindowSurfaceManager::ISDL20TextureWindowSurfaceManager(uint16_t width, uint16_t height,
                                                                      const PixelFormat *format, ISDL20Window *window,
                                                                      bool vsync, const char *render_scale_quality)
-    : mWindow(window), mSDLRenderer(NULL), mSDLTexture(NULL), mSurface(NULL), m8bppTo32BppSurface(NULL), mWidth(width),
+    : mWindow(window), mSDLRenderer(NULL), mSDLTexture(NULL), mSurface(NULL), mWidth(width),
       mHeight(height)
 {
     assert(mWindow != NULL);
@@ -259,8 +252,6 @@ ISDL20TextureWindowSurfaceManager::ISDL20TextureWindowSurfaceManager(uint16_t wi
         I_FatalError("I_InitVideo: unable to create SDL2 texture: %s\n", SDL_GetError());
 
     mSurface = new IWindowSurface(width, height, &mFormat);
-    if (mSurface->getBitsPerPixel() == 8)
-        m8bppTo32BppSurface = new IWindowSurface(width, height, mWindow->getPixelFormat());
 }
 
 //
@@ -268,7 +259,6 @@ ISDL20TextureWindowSurfaceManager::ISDL20TextureWindowSurfaceManager(uint16_t wi
 //
 ISDL20TextureWindowSurfaceManager::~ISDL20TextureWindowSurfaceManager()
 {
-    delete m8bppTo32BppSurface;
     delete mSurface;
 
     if (mSDLTexture)
@@ -321,16 +311,7 @@ void ISDL20TextureWindowSurfaceManager::startRefresh()
 //
 void ISDL20TextureWindowSurfaceManager::finishRefresh()
 {
-    if (mSurface->getBitsPerPixel() == 8)
-    {
-        m8bppTo32BppSurface->blit(mSurface, 0, 0, mSurface->getWidth(), mSurface->getHeight(), 0, 0,
-                                  m8bppTo32BppSurface->getWidth(), m8bppTo32BppSurface->getHeight());
-        SDL_UpdateTexture(mSDLTexture, NULL, m8bppTo32BppSurface->getBuffer(), m8bppTo32BppSurface->getPitch());
-    }
-    else
-    {
-        SDL_UpdateTexture(mSDLTexture, NULL, mSurface->getBuffer(), mSurface->getPitch());
-    }
+    SDL_UpdateTexture(mSDLTexture, NULL, mSurface->getBuffer(), mSurface->getPitch());
 
     if (mDrawLogicalRect)
         SDL_RenderCopy(mSDLRenderer, mSDLTexture, NULL, &mLogicalRect);
@@ -771,7 +752,7 @@ PixelFormat ISDL20Window::buildSurfacePixelFormat(uint8_t bpp)
 {
     uint8_t native_bpp = getPixelFormat()->getBitsPerPixel();
     if (bpp == 8)
-        return PixelFormat(8, 0, 0, 0, 0, 0, 0, 0, 0);
+        I_Error("Invalid 8pp pixel format");
     else if (bpp == 32 && native_bpp == 32)
         return *getPixelFormat();
     else

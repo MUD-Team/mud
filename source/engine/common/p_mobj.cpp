@@ -30,16 +30,12 @@
 #include "g_mapinfo.h"
 #include "g_skill.h"
 #include "gi.h"
-#ifdef CLIENT_APP
-#include "hu_speedometer.h"
-#endif
 #include "i_system.h"
 #include "m_alloc.h"
 #include "m_random.h"
 #include "m_vectors.h"
 #include "m_wdlstats.h"
 #include "odamex.h"
-#include "p_ctf.h"
 #include "p_horde.h"
 #include "p_hordespawn.h"
 #include "p_lnspec.h"
@@ -762,8 +758,7 @@ void AActor::RunThink()
         v3double_t start, end;
         M_ActorPositionToVec3(&start, this);
         P_MoveActor(this);
-        M_ActorPositionToVec3(&end, this);
-        HU_AddPlayerSpeed(start, end);
+        M_ActorPositionToVec3(&end, this);        
     }
     else
 #endif
@@ -2977,20 +2972,6 @@ void P_SpawnMapThing(mapthing2_t *mthing, int position)
         mobj->subsector->sector->SecActTarget = mobj->ptr();
     }
 
-    if (sv_gametype == GM_CTF)
-    {
-        for (int iTeam = 0; iTeam < sv_teamsinplay; iTeam++)
-        {
-            TeamInfo *teamInfo = GetTeamInfo((team_t)iTeam);
-            if (mthing->type == teamInfo->FlagThingNum)
-            {
-                SpawnFlag(mthing, teamInfo->Team);
-                M_LogWDLFlagLocation(mthing, teamInfo->Team);
-                break;
-            }
-        }
-    }
-
     // [RH] Go dormant as needed
     if (mthing->flags & MTF_DORMANT)
         P_DeactivateMobj(mobj);
@@ -3025,15 +3006,6 @@ void P_SpawnAvatars()
     {
         new AActor(it->x << FRACBITS, it->y << FRACBITS, it->z << FRACBITS, MT_AVATAR);
     }
-}
-
-void SpawnFlag(mapthing2_t *mthing, team_t flag)
-{
-    if (GetTeamInfo(flag)->FlagData.flaglocated)
-        return;
-
-    CTF_RememberFlagPos(mthing);
-    CTF_SpawnFlag(flag);
 }
 
 //

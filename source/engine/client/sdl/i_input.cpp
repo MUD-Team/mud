@@ -30,7 +30,6 @@
 #include "c_bind.h"
 #include "c_console.h"
 #include "d_main.h"
-#include "hu_stuff.h"
 #include "i_input_sdl20.h"
 #include "i_sdl.h"
 #include "i_system.h"
@@ -313,7 +312,7 @@ static void I_DisableKeyRepeat()
 //
 static bool I_CanRepeat()
 {
-    return ConsoleState == c_down || HU_ChatMode() != CHAT_INACTIVE || menuactive;
+    return ConsoleState == c_down;
 }
 
 //
@@ -324,7 +323,6 @@ static bool I_CanRepeat()
 //
 static bool I_CanGrab()
 {
-    extern bool       configuring_controls;
     extern constate_e ConsoleState;
 
     assert(I_GetWindow() != NULL);
@@ -340,12 +338,8 @@ static bool I_CanGrab()
     if (nomouse)
         return false;
 
-    // Always grab when configuring controllers in the menu
-    if (configuring_controls)
-        return true;
-
     // If paused, in the menu or in the console, don't grab
-    if (menuactive || ConsoleState == c_down || paused)
+    if (ConsoleState == c_down || paused)
         return false;
 
     // If playing the game, always grab

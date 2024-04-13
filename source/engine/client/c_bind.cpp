@@ -32,7 +32,6 @@
 #include "d_player.h"
 #include "g_gametype.h"
 #include "hashtable.h"
-#include "hu_stuff.h"
 #include "i_input.h"
 #include "m_ostring.h"
 #include "odamex.h"
@@ -299,7 +298,7 @@ bool C_DoKey(event_t *ev, OKeyBindings *binds, OKeyBindings *doublebinds)
     if (binding->empty())
         binding = &binds->Binds[key];
 
-    if (!binding->empty() && (HU_ChatMode() == CHAT_INACTIVE || key < 256))
+    if (!binding->empty())
     {
         if (ev->type == ev_keydown)
         {
@@ -355,9 +354,7 @@ void C_ReleaseKeys()
                 }
             }
         }
-    }
-
-    HU_ReleaseKeyStates();
+    }    
 }
 
 void OKeyBindings::ArchiveBindings(PHYSFS_File *f)

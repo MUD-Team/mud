@@ -52,7 +52,6 @@
 #include "m_wdlstats.h"
 #include "md5.h"
 #include "odamex.h"
-#include "p_ctf.h"
 #include "p_inter.h"
 #include "p_lnspec.h"
 #include "p_local.h"
@@ -595,9 +594,6 @@ Players::iterator SV_RemoveDisconnectedPlayer(Players::iterator it)
     // remove this player's actor object
     if (it->mo)
     {
-        if (sv_gametype == GM_CTF) //  [Toke - CTF]
-            CTF_CheckFlags(*it);
-
         // [AM] AActor->Destroy() does not destroy the AActor for good, and also
         //      does not null the player reference.  We have to do it here to
         //      prevent actions on a zombie mobj from using a player that we
@@ -1500,10 +1496,6 @@ void SV_ClientFullUpdate(player_t &pl)
 
     SV_UpdateHiddenMobj();
 
-    // update flags
-    if (sv_gametype == GM_CTF)
-        CTF_Connect(pl);
-
     SV_UpdateSectors(cl);
 
     P_UpdateButtons(cl);
@@ -1949,13 +1941,6 @@ std::string SV_BuildKillsDeathsStatusString(player_t &player)
             status += temp_str;
         }
 
-        // Points (CTF).
-        if (sv_gametype == GM_CTF)
-        {
-            sprintf(temp_str, "%d POINTS, ", player.points);
-            status += temp_str;
-        }
-
         // Frags (DM/TDM/CTF) or Kills (Coop).
         if (G_IsCoopGame())
             sprintf(temp_str, "%d KILLS, ", player.killcount);
@@ -2178,58 +2163,7 @@ void SV_DrawScores()
 
     Printf_Bold("\n");
 
-    if (sv_gametype == GM_CTF)
-    {
-        compare_player_points comparison_functor;
-        sortedplayers.sort(comparison_functor);
-
-        Printf_Bold("                    CAPTURE THE FLAG");
-        Printf_Bold("-----------------------------------------------------------");
-
-        if (sv_scorelimit)
-            sprintf(str, "Scorelimit: %-6d", sv_scorelimit.asInt());
-        else
-            sprintf(str, "Scorelimit: N/A   ");
-
-        Printf_Bold("%s  ", str);
-
-        if (sv_timelimit)
-            sprintf(str, "Timelimit: %-7d", sv_timelimit.asInt());
-        else
-            sprintf(str, "Timelimit: N/A");
-
-        Printf_Bold("%18s\n", str);
-
-        for (int team_num = 0; team_num < sv_teamsinplay; team_num++)
-        {
-            if (team_num == TEAM_BLUE)
-                Printf_Bold("--------------------------------------------------BLUE TEAM");
-            else if (team_num == TEAM_RED)
-                Printf_Bold("---------------------------------------------------RED TEAM");
-            else if (team_num == TEAM_GREEN)
-                Printf_Bold("-------------------------------------------------GREEN TEAM");
-            else // shouldn't happen
-                Printf_Bold("-----------------------------------------------UNKNOWN TEAM");
-
-            Printf_Bold("ID  Address          Name            Points Caps Frags Time");
-            Printf_Bold("-----------------------------------------------------------");
-
-            for (PlayerPtrList::const_iterator it = sortedplayers.begin(); it != sortedplayers.end(); ++it)
-            {
-                const player_t *itplayer = *it;
-                if (itplayer->userinfo.team == team_num)
-                {
-                    Printf_Bold("%-3d %-16s %-15s %-6d N/A  %-5d %-3d", itplayer->id,
-                                NET_AdrToString(itplayer->client.address), itplayer->userinfo.netname.c_str(),
-                                P_GetPointCount(itplayer),
-                                // itplayer->captures,
-                                P_GetFragCount(itplayer), itplayer->GameTime / 60);
-                }
-            }
-        }
-    }
-
-    else if (sv_gametype == GM_TEAMDM)
+    if (sv_gametype == GM_TEAMDM)
     {
         compare_player_frags comparison_functor;
         sortedplayers.sort(comparison_functor);
@@ -2480,9 +2414,6 @@ void STACK_ARGS SV_PlayerPrintf(int level, int player_id, const char *fmt, ...)
 
 void STACK_ARGS SV_TeamPrintf(int level, int who, const char *fmt, ...)
 {
-    if (sv_gametype != GM_TEAMDM && sv_gametype != GM_CTF)
-        return;
-
     va_list argptr;
     char    string[2048];
 
@@ -3501,11 +3432,8 @@ void SV_JoinPlayer(player_t &player, bool silent)
     // Everything is set, now warn everyone the player joined.
     if (!silent)
     {
-        if (sv_gametype != GM_TEAMDM && sv_gametype != GM_CTF)
-            SV_BroadcastPrintf("%s joined the game.\n", player.userinfo.netname.c_str());
-        else
-            SV_BroadcastPrintf("%s joined the game on the %s team.\n", player.userinfo.netname.c_str(),
-                               V_GetTeamColor(player.userinfo.team).c_str());
+        SV_BroadcastPrintf("%s joined the game on the %s team.\n", player.userinfo.netname.c_str(),
+                            V_GetTeamColor(player.userinfo.team).c_str());
     }
 
     M_LogWDLEvent(WDL_EVENT_JOINGAME, &player, NULL, player.userinfo.team, M_GetPlayerId(&player, player.userinfo.team),
@@ -3514,12 +3442,6 @@ void SV_JoinPlayer(player_t &player, bool silent)
 
 void SV_SpecPlayer(player_t &player, bool silent)
 {
-    // call CTF_CheckFlags _before_ the player becomes a spectator.
-    // Otherwise a flag carrier will drop his flag at (0,0), which
-    // is often right next to one of the bases...
-    if (sv_gametype == GM_CTF)
-        CTF_CheckFlags(player);
-
     // [tm512 2014/04/18] Avoid setting spectator flags on a dead player
     // Instead we respawn the player, move him back, and immediately spectate him afterwards
     if (player.playerstate == PST_DEAD)
@@ -4085,9 +4007,6 @@ static void IntermissionTimeCheck()
 //
 void SV_GameTics(void)
 {
-    if (sv_gametype == GM_CTF)
-        CTF_RunTics();
-
     switch (gamestate)
     {
     case GS_LEVEL:
@@ -4314,10 +4233,6 @@ BEGIN_COMMAND(playerinfo)
     Printf("---------------[player info]----------- \n");
     Printf(" IP Address       - %s \n", ip);
     Printf(" userinfo.netname - %s \n", player->userinfo.netname.c_str());
-    if (sv_gametype == GM_CTF || sv_gametype == GM_TEAMDM)
-    {
-        Printf(" userinfo.team    - %s \n", team);
-    }
     Printf(" userinfo.aimdist - %d \n", player->userinfo.aimdist >> FRACBITS);
     Printf(" userinfo.color   - %s \n", color);
     Printf(" userinfo.gender  - %d \n", player->userinfo.gender);
@@ -4403,20 +4318,6 @@ BEGIN_COMMAND(playerlist)
             {
                 // Frags
                 StrFormat(strScore, " - frags:%d", frags);
-            }
-        }
-        else if (sv_gametype == GM_CTF)
-        {
-            if (G_IsLivesGame())
-            {
-                // Points and Lives
-                StrFormat(strScore, " - points:%d - lives:%d", points, it->lives);
-            }
-            else
-            {
-                // Points and Frags
-                // Special case here: frags will only be from the current round, not global.
-                StrFormat(strScore, " - points:%d - frags:%d", points, it->fragcount);
             }
         }
 

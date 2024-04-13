@@ -50,7 +50,6 @@ class IVideoMode;
 class IVideoCapabilities;
 class IWindow;
 class IWindowSurface;
-class DCanvas;
 
 void            I_InitHardware();
 void STACK_ARGS I_ShutdownHardware();
@@ -62,7 +61,6 @@ const IVideoCapabilities *I_GetVideoCapabilities();
 int                       I_GetMonitorCount();
 IWindow                  *I_GetWindow();
 IWindowSurface           *I_GetPrimarySurface();
-DCanvas                  *I_GetPrimaryCanvas();
 
 IWindowSurface *I_GetEmulatedSurface();
 void            I_BlitEmulatedSurface();
@@ -230,17 +228,6 @@ class IVideoCapabilities
 
     virtual const EDisplayType getDisplayType() const = 0;
 
-    virtual bool supports8bpp() const
-    {
-        const IVideoModeList *modelist = getSupportedVideoModes();
-        for (IVideoModeList::const_iterator it = modelist->begin(); it != modelist->end(); ++it)
-        {
-            if (it->bpp == 8)
-                return true;
-        }
-        return false;
-    }
-
     virtual bool supports32bpp() const
     {
         const IVideoModeList *modelist = getSupportedVideoModes();
@@ -314,10 +301,6 @@ class IWindowSurface
     IWindowSurface(IWindowSurface *base_surface, uint16_t width, uint16_t height);
 
     ~IWindowSurface();
-
-    DCanvas *getDefaultCanvas();
-    DCanvas *createCanvas();
-    void     releaseCanvas(DCanvas *canvas);
 
     inline const uint8_t *getBuffer() const
     {
@@ -405,12 +388,6 @@ class IWindowSurface
     // disable copy constructor and assignment operator
     IWindowSurface(const IWindowSurface &);
     IWindowSurface &operator=(const IWindowSurface &);
-
-    // Storage for all DCanvas objects allocated by this surface
-    typedef std::vector<DCanvas *> DCanvasCollection;
-    DCanvasCollection              mCanvasStore;
-
-    DCanvas *mCanvas;
 
     uint8_t *mSurfaceBuffer;
     bool     mOwnsSurfaceBuffer;

@@ -352,31 +352,6 @@ message Say
 	string message = 3;	
 }
 
-// svc_ctfrefresh
-message CTFRefresh
-{
-	message TeamInfo
-	{
-		int32 points = 1;
-		int32 flag_state = 2;
-		int32 flag_flagger = 3;
-	}
-
-	bool full = 1;
-	repeated TeamInfo team_info = 2;
-}
-
-// svc_ctfevent
-message CTFEvent
-{
-	int32 event = 1;
-	int32 target_team = 2;
-	int32 player_team = 3;
-	int32 player_id = 4;
-	int32 player_points = 5;
-	int32 player_totalpoints = 6;
-}
-
 // svc_secretevent
 message SecretEvent
 {

@@ -72,7 +72,7 @@ EXTERN_CVAR(sv_maxplayers)
 #define GM_COOP   0.0f
 #define GM_DM     1.0f
 #define GM_TEAMDM 2.0f
-#define GM_CTF    3.0f
+//#define GM_CTF    3.0f
 #define GM_HORDE  4.0f
 
 #define FPS_NONE    0
@@ -100,7 +100,6 @@ EXTERN_CVAR(sv_maxplayers)
 //	status bar explicitely.
 extern BOOL statusbaractive;
 
-extern BOOL menuactive; // Menu overlayed?
 extern BOOL paused;     // Game Pause?
 
 extern BOOL viewactive;
@@ -160,10 +159,6 @@ extern int maxammo[NUMAMMO];
 
 // if true, load all graphics at level load
 extern BOOL precache;
-
-// wipegamestate can be set to -1
-//	to force a wipe on the next draw
-extern gamestate_t wipegamestate;
 
 EXTERN_CVAR(mouse_sensitivity) // removeme // ?
 

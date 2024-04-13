@@ -32,21 +32,17 @@
 #include "cl_main.h"
 #include "cl_replay.h"
 #include "d_main.h"
-#include "f_finale.h"
 #include "g_game.h"
 #include "g_gametype.h"
 #include "g_spawninv.h"
 #include "gi.h"
 #include "gstrings.h"
-#include "hu_mousegraph.h"
-#include "hu_stuff.h"
 #include "i_input.h"
 #include "i_system.h"
 #include "i_video.h"
 #include "m_alloc.h"
 #include "m_argv.h"
 #include "m_fileio.h"
-#include "m_menu.h"
 #include "m_random.h"
 #include "minilzo.h"
 #include "odamex.h"
@@ -58,8 +54,6 @@
 #include "r_sky.h"
 #include "s_sndseq.h"
 #include "s_sound.h"
-#include "st_stuff.h"
-#include "v_screenshot.h"
 #include "v_video.h"
 #include "w_wad.h"
 #include "wi_stuff.h"
@@ -467,7 +461,7 @@ void G_BuildTiccmd(ticcmd_t *cmd)
 
     // buttons
     // john - only add attack when console up
-    if (Actions[ACTION_ATTACK] && ConsoleState == c_up && HU_ChatMode() == CHAT_INACTIVE)
+    if (Actions[ACTION_ATTACK] && ConsoleState == c_up)
         cmd->buttons |= BT_ATTACK;
 
     if (Actions[ACTION_USE])
@@ -705,7 +699,6 @@ BOOL G_Responder(event_t *ev)
                          stricmp(cmd, "screenshot") && stricmp(cmd, "stepmode") && stricmp(cmd, "step")))
             {
                 S_Sound(CHAN_INTERFACE, "switches/normbutn", 1, ATTN_NONE);
-                M_StartControlPanel();
                 return true;
             }
             else
@@ -726,18 +719,12 @@ BOOL G_Responder(event_t *ev)
         if (C_DoSpectatorKey(ev))
             return true;
 
-        if (HU_Responder(ev))
-            return true;     // chat ate the event
-        if (ST_Responder(ev))
-            return true;     // status window ate it
         if (!viewactive)
             if (AM_Responder(ev))
                 return true; // automap ate it
     }
     else if (gamestate == GS_FINALE)
     {
-        if (F_Responder(ev))
-            return true; // finale ate the event
     }
 
     switch (ev->type)
@@ -755,8 +742,8 @@ BOOL G_Responder(event_t *ev)
     case ev_mouse:
         G_ProcessMouseMovementEvent(ev);
 
-        if (hud_mousegraph)
-            mousegraph.append(mousex, mousey);
+        //if (hud_mousegraph)
+        //    mousegraph.append(mousex, mousey);
 
         break;
 
@@ -875,7 +862,7 @@ void G_Ticker(void)
             G_DoWorldDone();
             break;
         case ga_screenshot:
-            V_ScreenShot(shotfile);
+            //V_ScreenShot(shotfile);
             gameaction = ga_nothing;
             break;
         case ga_fullconsole:
@@ -1085,18 +1072,15 @@ void G_Ticker(void)
             // Replay item pickups if the items arrived now.
             ClientReplay::getInstance().itemReplay();
         }
-        P_Ticker();
-        ST_Ticker();
+        P_Ticker();        
         AM_Ticker();
         break;
 
     case GS_INTERMISSION:
-        ST_Ticker();
         WI_Ticker();
         break;
 
     case GS_FINALE:
-        F_Ticker();
         break;
 
     case GS_DEMOSCREEN:

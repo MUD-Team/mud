@@ -35,11 +35,10 @@
 #include "mud_profiling.h"
 #include "r_intrin.h"
 #include "r_local.h"
-#include "st_stuff.h"
-#include "v_text.h"
 #include "v_video.h"
 #include "w_wad.h"
 #include "z_zone.h"
+#include "v_textcolors.h"
 
 #undef RANGECHECK
 
@@ -1041,158 +1040,6 @@ class PaletteSlopeColormapFunc
     const shaderef_t *colormap;
 };
 
-// ----------------------------------------------------------------------------
-//
-// 8bpp color column drawing wrappers
-//
-// ----------------------------------------------------------------------------
-
-#define FB_COLDEST_P ((palindex_t *)dcol.destination + dcol.yl * dcol.pitch_in_pixels + dcol.x)
-
-//
-// R_FillColumnP
-//
-// Fills a column in the 8bpp palettized screen buffer with a solid color,
-// determined by dcol.color. Performs no shading.
-//
-void R_FillColumnP()
-{
-    R_FillColumnGeneric<palindex_t, PaletteFunc>(FB_COLDEST_P, dcol);
-}
-
-//
-// R_DrawColumnP
-//
-// Renders a column to the 8bpp palettized screen buffer from the source buffer
-// dcol.source and scaled by dcol.iscale. Shading is performed using dcol.colormap.
-//
-void R_DrawColumnP()
-{
-    R_DrawColumnGeneric<palindex_t, PaletteColormapFunc>(FB_COLDEST_P, dcol);
-}
-
-//
-// R_StretchColumnP
-//
-// Renders a column to the 8bpp palettized screen buffer from the source buffer
-// dcol.source and scaled by dcol.iscale. Performs no shading.
-//
-void R_StretchColumnP()
-{
-    R_DrawColumnGeneric<palindex_t, PaletteFunc>(FB_COLDEST_P, dcol);
-}
-
-//
-// R_DrawFuzzColumnP
-//
-// Alters a column in the 8bpp palettized screen buffer using Doom's partial
-// invisibility effect, which shades the column and rearranges the ordering
-// the pixels to create distortion. Shading is performed using colormap 6.
-//
-void R_DrawFuzzColumnP()
-{
-    // adjust the borders (prevent buffer over/under-reads)
-    if (dcol.yl <= 0)
-        dcol.yl = 1;
-    if (dcol.yh >= viewheight - 1)
-        dcol.yh = viewheight - 2;
-
-    R_FillColumnGeneric<palindex_t, PaletteFuzzyFunc>(FB_COLDEST_P, dcol);
-    fuzztable.incrementColumn();
-}
-
-//
-// R_DrawTranslucentColumnP
-//
-// Renders a translucent column to the 8bpp palettized screen buffer from the
-// source buffer dcol.source and scaled by dcol.iscale. The amount of
-// translucency is controlled by dcol.translevel. Shading is performed using
-// dcol.colormap.
-//
-void R_DrawTranslucentColumnP()
-{
-    R_DrawColumnGeneric<palindex_t, PaletteTranslucentColormapFunc>(FB_COLDEST_P, dcol);
-}
-
-//
-// R_DrawTranslatedColumnP
-//
-// Renders a column to the 8bpp palettized screen buffer with color-remapping
-// from the source buffer dcol.source and scaled by dcol.iscale. The translation
-// table is supplied by dcol.translation. Shading is performed using dcol.colormap.
-//
-void R_DrawTranslatedColumnP()
-{
-    R_DrawColumnGeneric<palindex_t, PaletteTranslatedColormapFunc>(FB_COLDEST_P, dcol);
-}
-
-//
-// R_DrawTlatedLucentColumnP
-//
-// Renders a translucent column to the 8bpp palettized screen buffer with
-// color-remapping from the source buffer dcol.source and scaled by dcol.iscale.
-// The translation table is supplied by dcol.translation and the amount of
-// translucency is controlled by dcol.translevel. Shading is performed using
-// dcol.colormap.
-//
-void R_DrawTlatedLucentColumnP()
-{
-    R_DrawColumnGeneric<palindex_t, PaletteTranslatedTranslucentColormapFunc>(FB_COLDEST_P, dcol);
-}
-
-// ----------------------------------------------------------------------------
-//
-// 8bpp color span drawing wrappers
-//
-// ----------------------------------------------------------------------------
-
-#define FB_SPANDEST_P ((palindex_t *)dspan.destination + dspan.y * dspan.pitch_in_pixels + dspan.x1)
-
-//
-// R_FillSpanP
-//
-// Fills a span in the 8bpp palettized screen buffer with a solid color,
-// determined by dspan.color. Performs no shading.
-//
-void R_FillSpanP()
-{
-    R_FillSpanGeneric<palindex_t, PaletteFunc>(FB_SPANDEST_P, dspan);
-}
-
-//
-// R_FillTranslucentSpanP
-//
-// Fills a span in the 8bpp palettized screen buffer with a solid color,
-// determined by dspan.color using translucency. Shading is performed
-// using dspan.colormap.
-//
-void R_FillTranslucentSpanP()
-{
-    R_FillSpanGeneric<palindex_t, PaletteTranslucentColormapFunc>(FB_SPANDEST_P, dspan);
-}
-
-//
-// R_DrawSpanP
-//
-// Renders a span for a level plane to the 8bpp palettized screen buffer from
-// the source buffer dspan.source. Shading is performed using dspan.colormap.
-//
-void R_DrawSpanP()
-{
-    R_DrawLevelSpanGeneric<palindex_t, PaletteColormapFunc>(FB_SPANDEST_P, dspan);
-}
-
-//
-// R_DrawSlopeSpanP
-//
-// Renders a span for a sloped plane to the 8bpp palettized screen buffer from
-// the source buffer dspan.source. Shading is performed using dspan.colormap.
-//
-void R_DrawSlopeSpanP()
-{
-    R_DrawSlopedSpanGeneric<palindex_t, PaletteSlopeColormapFunc>(FB_SPANDEST_P, dspan);
-}
-
 /****************************************/
 /*										*/
 /* [RH] ARGB8888 drawers (C versions)	*/
@@ -1490,79 +1337,12 @@ void R_DrawSlopeSpanD_c()
 
 /****************************************************/
 
-void R_DrawBorder(int x1, int y1, int x2, int y2)
-{
-    IWindowSurface *surface = R_GetRenderingSurface();
-    DCanvas        *canvas  = surface->getDefaultCanvas();
-
-    int lumpnum = W_CheckNumForName(gameinfo.borderFlat, ns_flats);
-    if (lumpnum >= 0)
-    {
-        const byte *patch_data = (byte *)W_CacheLumpNum(lumpnum, PU_CACHE);
-        canvas->FlatFill(x1, y1, x2, y2, patch_data);
-    }
-    else
-    {
-        canvas->Clear(x1, y1, x2, y2, argb_t(0, 0, 0));
-    }
-}
-
 //
 // R_DrawViewBorder
 // Draws the border around the view
 //  for different size windows?
 //
 void V_MarkRect(int x, int y, int width, int height);
-
-void R_DrawViewBorder()
-{    
-    if (!R_BorderVisible())
-        return;
-
-    MUD_ZoneScoped;    
-
-    IWindowSurface *surface        = R_GetRenderingSurface();
-    DCanvas        *canvas         = surface->getDefaultCanvas();
-    int             surface_width  = surface->getWidth();
-    int             surface_height = surface->getHeight();
-    int             top = 0, bottom = ST_StatusBarY(surface_width, surface_height);
-    int             left = 0, right = surface_width;
-
-    const gameborder_t *border = gameinfo.border;
-    const int           offset = border->offset;
-    const int           size   = border->size;
-
-    // draw top border
-    R_DrawBorder(left, top, right, viewwindowy);
-    // draw bottom border
-    R_DrawBorder(left, viewwindowy + viewheight, right, bottom);
-    // draw left border
-    R_DrawBorder(left, viewwindowy, viewwindowx, viewwindowy + viewheight);
-    // draw right border
-    R_DrawBorder(viewwindowx + viewwidth, viewwindowy, right, viewwindowy + viewheight);
-
-    // draw beveled edge for the viewing window's top and bottom edges
-    for (int x = viewwindowx; x < viewwindowx + viewwidth; x += size)
-    {
-        canvas->DrawPatch(W_CachePatch(border->t), x, viewwindowy - offset);
-        canvas->DrawPatch(W_CachePatch(border->b), x, viewwindowy + viewheight);
-    }
-
-    // draw beveled edge for the viewing window's left and right edges
-    for (int y = viewwindowy; y < viewwindowy + viewheight; y += size)
-    {
-        canvas->DrawPatch(W_CachePatch(border->l), viewwindowx - offset, y);
-        canvas->DrawPatch(W_CachePatch(border->r), viewwindowx + viewwidth, y);
-    }
-
-    // draw beveled edge for the viewing window's corners
-    canvas->DrawPatch(W_CachePatch(border->tl), viewwindowx - offset, viewwindowy - offset);
-    canvas->DrawPatch(W_CachePatch(border->tr), viewwindowx + viewwidth, viewwindowy - offset);
-    canvas->DrawPatch(W_CachePatch(border->bl), viewwindowx - offset, viewwindowy + viewheight);
-    canvas->DrawPatch(W_CachePatch(border->br), viewwindowx + viewwidth, viewwindowy + viewheight);
-
-    V_MarkRect(left, top, right, bottom);
-}
 
 enum r_optimize_kind
 {
@@ -1748,33 +1528,16 @@ void R_InitColumnDrawers()
     if (!I_VideoInitialized())
         return;
 
-    if (I_GetPrimarySurface()->getBitsPerPixel() == 8)
-    {
-        R_DrawColumn             = R_DrawColumnP;
-        R_DrawFuzzColumn         = R_DrawFuzzColumnP;
-        R_DrawTranslucentColumn  = R_DrawTranslucentColumnP;
-        R_DrawTranslatedColumn   = R_DrawTranslatedColumnP;
-        R_DrawTlatedLucentColumn = R_DrawTlatedLucentColumnP;
-        R_DrawSlopeSpan          = R_DrawSlopeSpanP;
-        R_DrawSpan               = R_DrawSpanP;
-        R_FillColumn             = R_FillColumnP;
-        R_FillSpan               = R_FillSpanP;
-        R_FillTranslucentSpan    = R_FillTranslucentSpanP;
-    }
-    else
-    {
-        // 32bpp rendering functions:
-        R_DrawColumn             = R_DrawColumnD;
-        R_DrawFuzzColumn         = R_DrawFuzzColumnD;
-        R_DrawTranslucentColumn  = R_DrawTranslucentColumnD;
-        R_DrawTranslatedColumn   = R_DrawTranslatedColumnD;
-        R_DrawTlatedLucentColumn = R_DrawTlatedLucentColumnD;
-        R_DrawSlopeSpan          = R_DrawSlopeSpanD;
-        R_DrawSpan               = R_DrawSpanD;
-        R_FillColumn             = R_FillColumnD;
-        R_FillSpan               = R_FillSpanD;
-        R_FillTranslucentSpan    = R_FillTranslucentSpanD;
-    }
+    R_DrawColumn             = R_DrawColumnD;
+    R_DrawFuzzColumn         = R_DrawFuzzColumnD;
+    R_DrawTranslucentColumn  = R_DrawTranslucentColumnD;
+    R_DrawTranslatedColumn   = R_DrawTranslatedColumnD;
+    R_DrawTlatedLucentColumn = R_DrawTlatedLucentColumnD;
+    R_DrawSlopeSpan          = R_DrawSlopeSpanD;
+    R_DrawSpan               = R_DrawSpanD;
+    R_FillColumn             = R_FillColumnD;
+    R_FillSpan               = R_FillSpanD;
+    R_FillTranslucentSpan    = R_FillTranslucentSpanD;
 }
 
 VERSION_CONTROL(r_draw_cpp, "$Id: f878e66e7201c97021a528e052d53ef9a0811b5e $")

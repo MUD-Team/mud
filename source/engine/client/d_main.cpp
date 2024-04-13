@@ -44,14 +44,11 @@
 #include "cl_download.h"
 #include "cl_main.h"
 #include "d_main.h"
-#include "f_finale.h"
-#include "f_wipe.h"
 #include "g_game.h"
 #include "g_horde.h"
 #include "g_mapinfo.h"
 #include "gi.h"
 #include "gstrings.h"
-#include "hu_stuff.h"
 #include "i_input.h"
 #include "i_music.h"
 #include "i_system.h"
@@ -59,18 +56,15 @@
 #include "m_alloc.h"
 #include "m_argv.h"
 #include "m_fileio.h"
-#include "m_menu.h"
 #include "m_misc.h"
 #include "m_random.h"
 #include "minilzo.h"
 #include "mud_profiling.h"
 #include "odamex.h"
-#include "p_ctf.h"
 #include "p_setup.h"
 #include "r_local.h"
 #include "r_sky.h"
 #include "s_sound.h"
-#include "st_stuff.h"
 #include "stats.h"
 #include "v_video.h"
 #include "w_ident.h"
@@ -94,7 +88,6 @@ extern dyncolormap_t NormalLight;
 
 BOOL        devparm;    // started game with -devparm
 const char *D_DrawIcon; // [RH] Patch name of icon to draw on next refresh
-static bool wiping_screen = false;
 
 char        startmap[8];
 BOOL        autostart;
@@ -102,7 +95,6 @@ BOOL        advancedemo;
 event_t     events[MAXEVENTS];
 int         eventhead;
 int         eventtail;
-gamestate_t wipegamestate = GS_DEMOSCREEN; // can be -1 to force a wipe
 bool        demotest      = false;
 
 IWindowSurface *page_surface;
@@ -123,16 +115,12 @@ EXTERN_CVAR(snd_musicvolume) // maximum volume for music
 EXTERN_CVAR(vid_ticker)
 EXTERN_CVAR(vid_defwidth)
 EXTERN_CVAR(vid_defheight)
-EXTERN_CVAR(vid_32bpp)
 EXTERN_CVAR(vid_widescreen)
 EXTERN_CVAR(vid_fullscreen)
 EXTERN_CVAR(vid_vsync)
 EXTERN_CVAR(g_resetinvonexit)
 
 std::string LOG_FILE;
-
-void M_RestoreVideoMode();
-void M_ModeFlashTestText();
 
 //
 // D_ProcessEvents
@@ -142,24 +130,11 @@ void D_ProcessEvents(void)
 {
     event_t *ev;
 
-    // [RH] If testing mode, do not accept input until test is over
-    if (testingmode)
-    {
-        if (testingmode <= I_MSTime() * TICRATE / 1000)
-            M_RestoreVideoMode();
-        else
-            M_ModeFlashTestText();
-
-        return;
-    }
-
     for (; eventtail != eventhead; eventtail = ++eventtail < MAXEVENTS ? eventtail : 0)
     {
         ev = &events[eventtail];
         if (C_Responder(ev))
             continue; // console ate the event
-        if (M_Responder(ev))
-            continue; // menu ate the event
         G_Responder(ev);
     }
 }
@@ -170,7 +145,7 @@ void D_ProcessEvents(void)
 //
 void D_PostEvent(const event_t *ev)
 {
-    if (ev->type == ev_mouse && !menuactive && gamestate == GS_LEVEL && !paused && ConsoleState != c_down &&
+    if (ev->type == ev_mouse && gamestate == GS_LEVEL && !paused && ConsoleState != c_down &&
         ConsoleState != c_falling)
     {
         G_Responder((event_t *)ev);
@@ -191,8 +166,6 @@ void D_PostEvent(const event_t *ev)
 //
 void D_DisplayTicker()
 {
-    if (wiping_screen)
-        wiping_screen = (Wipe_Ticker() == false);
 }
 
 //
@@ -213,19 +186,6 @@ void D_Display()
 
     I_BeginUpdate();
 
-    // [RH] Allow temporarily disabling wipes
-    if (NoWipe)
-    {
-        NoWipe--;
-        wipegamestate = gamestate;
-    }
-    else if (gamestate != wipegamestate && gamestate != GS_FULLCONSOLE)
-    {
-        wipegamestate = gamestate;
-        Wipe_Start();
-        wiping_screen = true;
-    }
-
     // We always want to service downloads, even outside of a specific
     // download gamestate.
     CL_DownloadTick();
@@ -235,8 +195,7 @@ void D_Display()
     case GS_FULLCONSOLE:
     case GS_CONNECTING:
     case GS_CONNECTED:
-        C_DrawConsole();
-        M_Drawer();
+        C_DrawConsole();        
         I_FinishUpdate();
         return;
 
@@ -248,31 +207,23 @@ void D_Display()
 
         // Drawn to R_GetRenderingSurface()
         R_RenderPlayerView(&displayplayer());
-        R_DrawViewBorder();
-        ST_Drawer();
-
+        
         if (I_GetEmulatedSurface())
             I_BlitEmulatedSurface();
 
         if (AM_ClassicAutomapVisible() || AM_OverlayAutomapVisible())
             AM_Drawer();
 
-        CTF_DrawHud();
-        HU_Drawer();
         C_DrawMid();
         C_DrawGMid();
         break;
 
     case GS_INTERMISSION:
-        CTF_DrawHud();
-        WI_Drawer();
-        HU_Drawer();
         C_DrawMid();
         V_ResetPalette();
         break;
 
-    case GS_FINALE:
-        F_Drawer();
+    case GS_FINALE:        
         break;
 
     case GS_DEMOSCREEN:
@@ -284,35 +235,16 @@ void D_Display()
     }
 
     // draw pause pic
-    if (paused && !menuactive)
+    if (paused)
     {
-        patch_t *pause = W_CachePatch("M_PAUSE");
-        int      y;
-
-        y = AM_ClassicAutomapVisible() ? 4 : viewwindowy + 4;
-        screen->DrawPatchCleanNoMove(pause, (I_GetSurfaceWidth() - (pause->width()) * CleanXfac) / 2, y);
     }
 
     // [RH] Draw icon, if any
     if (D_DrawIcon)
     {
-        int lump = W_CheckNumForName(D_DrawIcon);
-
-        D_DrawIcon = NULL;
-        if (lump >= 0)
-        {
-            patch_t *p = W_CachePatch(lump);
-
-            screen->DrawPatchIndirect(p, 160 - p->width() / 2, 100 - p->height() / 2);
-        }
-        NoWipe = 10;
     }
 
-    if (wiping_screen)
-        Wipe_Drawer();
-
     C_DrawConsole();  // draw console
-    M_Drawer();       // menu is drawn even on top of everything
     I_FinishUpdate(); // page flip or blit buffer
 
     END_STAT(D_Display);
@@ -487,33 +419,6 @@ void D_DoAdvanceDemo(void)
 
         break;
     }
-
-    // [Russell] - Still need this toilet humor for now unfortunately
-    if (pagename)
-    {
-        const patch_t *patch = W_CachePatch(pagename);
-
-        I_FreeSurface(page_surface);
-
-        if (gameinfo.flags & GI_PAGESARERAW)
-        {
-            page_surface    = I_AllocateSurface(320, 200, 8);
-            DCanvas *canvas = page_surface->getDefaultCanvas();
-
-            page_surface->lock();
-            canvas->DrawBlock(0, 0, 320, 200, (byte *)patch);
-            page_surface->unlock();
-        }
-        else
-        {
-            page_surface    = I_AllocateSurface(patch->width(), patch->height(), 8);
-            DCanvas *canvas = page_surface->getDefaultCanvas();
-
-            page_surface->lock();
-            canvas->DrawPatch(patch, 0, 0);
-            page_surface->unlock();
-        }
-    }
 }
 
 //
@@ -584,9 +489,7 @@ void D_Init()
 
     C_InitConsoleBackground();
 
-    C_InitConCharsFont();
-
-    HU_Init();
+    C_InitConCharsFont();    
 
     G_ParseMapInfo();
     G_ParseMusInfo();
@@ -595,8 +498,7 @@ void D_Init()
 
     // init the menu subsystem
     if (first_time)
-        Printf(PRINT_HIGH, "M_Init: Init miscellaneous info.\n");
-    M_Init();
+        Printf(PRINT_HIGH, "M_Init: Init miscellaneous info.\n");    
 
     if (first_time)
         Printf(PRINT_HIGH, "P_Init: Init Playloop state.\n");
@@ -617,8 +519,7 @@ void D_Init()
     // init the status bar
     if (first_time)
         Printf(PRINT_HIGH, "ST_Init: Init status bar.\n");
-    ST_Init();
-
+    
     first_time = false;
 }
 
@@ -636,10 +537,6 @@ void STACK_ARGS D_Shutdown()
     getLevelInfos().clear();
     getClusterInfos().clear();
 
-    F_ShutdownFinale();
-
-    ST_Shutdown();
-
     //	R_ShutdownViewBorder();
 
     // stop sound effects and music
@@ -655,8 +552,6 @@ void STACK_ARGS D_Shutdown()
     W_Close();
 
     //	V_UnloadFonts();
-
-    HU_Shutdown();
 
     C_ShutdownConCharsFont();
 

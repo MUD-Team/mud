@@ -129,26 +129,13 @@ void R_InitColumnDrawers();
 
 void R_InitVectorizedDrawers();
 
-void R_DrawColumnP(void);
-void R_DrawFuzzColumnP(void);
-void R_DrawTranslucentColumnP(void);
-void R_DrawTranslatedColumnP(void);
-void R_DrawSpanP(void);
-void R_DrawSlopeSpanIdealP_C(void);
-
 void R_DrawColumnD(void);
 void R_DrawFuzzColumnD(void);
 void R_DrawTranslucentColumnD(void);
 void R_DrawTranslatedColumnD(void);
 
-void R_DrawTlatedLucentColumnP(void);
-void R_StretchColumnP(void);
-#define R_StretchColumn R_StretchColumnP
-
 void R_BlankColumn(void);
-void R_FillColumnP(void);
 void R_BlankSpan(void);
-void R_FillSpanP(void);
 void R_FillSpanD(void);
 
 void R_DrawSpanD_c(void);
@@ -216,7 +203,3 @@ void R_BuildPlayerTranslation(int player, argb_t dest_color);
 
 // [Nes] Classic player translation table.
 void R_BuildClassicPlayerTranslation(int player, int color);
-
-// If the view size is not full screen, draws a border around it.
-void R_DrawViewBorder(void);
-void R_DrawBorder(int x1, int y1, int x2, int y2);

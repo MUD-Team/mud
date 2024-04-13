@@ -23,7 +23,6 @@
 
 #include "cl_demo.h"
 #include "cl_main.h"
-#include "cl_netgraph.h"
 #include "d_player.h"
 #include "odamex.h"
 #include "p_local.h"
@@ -31,8 +30,6 @@
 
 EXTERN_CVAR(cl_prednudge)
 EXTERN_CVAR(cl_predictsectors)
-
-extern NetGraph netgraph;
 
 void P_DeathThink(player_t *player);
 void P_MovePlayer(player_t *player);
@@ -252,7 +249,7 @@ void CL_PredictWorld(void)
         return;
 
     // tenatively tell the netgraph that our prediction was successful
-    netgraph.setMisprediction(false);
+    //netgraph.setMisprediction(false);
 
     if (consoleplayer_id != displayplayer_id)
         CL_PredictSpying();
@@ -311,7 +308,7 @@ void CL_PredictWorld(void)
         if (!correct)
         {
             // Update the netgraph concerning our prediction's error
-            netgraph.setMisprediction(true);
+            //netgraph.setMisprediction(true);
 
             // Lerp from the our previous position to the correct position
             PlayerSnapshot lerpedsnap = P_LerpPlayerPosition(prevsnap, correctedprevsnap, cl_prednudge);

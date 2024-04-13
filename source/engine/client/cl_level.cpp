@@ -30,7 +30,6 @@
 #include "cl_main.h"
 #include "d_event.h"
 #include "d_main.h"
-#include "f_finale.h"
 #include "g_game.h"
 #include "g_levelstate.h"
 #include "g_skill.h"
@@ -49,7 +48,6 @@
 #include "r_sky.h"
 #include "s_sndseq.h"
 #include "s_sound.h"
-#include "st_stuff.h"
 #include "v_video.h"
 #include "w_wad.h"
 #include "wi_stuff.h"
@@ -299,7 +297,6 @@ void G_InitNew(const char *mapname)
 //
 BOOL        secretexit;
 static int  startpos; // [RH] Support for multiple starts per level
-extern BOOL NoWipe;   // [RH] Don't wipe when travelling in hubs
 
 // [RH] The position parameter to these next three functions should
 //		match the first parameter of the single player start spots
@@ -316,10 +313,6 @@ static void goOn(int position)
 
     if (thiscluster.cluster != 0 && (thiscluster.flags & CLUSTER_HUB))
     {
-        if ((level.flags & LEVEL_NOINTERMISSION) || (nextcluster.cluster == thiscluster.cluster))
-        {
-            NoWipe = 4;
-        }
         D_DrawIcon = "TELEICON";
     }
 }
@@ -490,7 +483,6 @@ void G_DoCompleted(void)
 //
 // G_DoLoadLevel
 //
-extern gamestate_t wipegamestate;
 
 void G_DoLoadLevel(int position)
 {
@@ -510,9 +502,6 @@ void G_DoLoadLevel(int position)
                 "\36\36\36\36\36\36\36\36\36\36\36\36\37\n"
                 "%s: \"%s\"\n\n",
                 level.mapname.c_str(), level.level_name);
-
-    if (wipegamestate == GS_LEVEL)
-        wipegamestate = GS_FORCEWIPE;
 
     const bool demoscreen = (gamestate == GS_DEMOSCREEN);
 
@@ -619,7 +608,7 @@ void G_DoLoadLevel(int position)
     }
 
     displayplayer_id = consoleplayer_id; // view the guy you are playing
-    ST_Start();                          // [RH] Make sure status bar knows who we are
+    
     gameaction = ga_nothing;
 
     // clear cmd building stuff // denis - todo - could we get rid of this?
@@ -668,40 +657,10 @@ void G_WorldDone()
 
     cluster_info_t &thiscluster = clusters.findByCluster(level.cluster);
 
-    // Sort out default options to pass to F_StartFinale
-    finale_options_t options = {0};
-    options.music            = !level.intermusic.empty() ? level.intermusic.c_str() : thiscluster.messagemusic.c_str();
-
-    if (!level.interbackdrop.empty())
-    {
-        options.flat = level.interbackdrop.c_str();
-    }
-    else if (!thiscluster.finalepic.empty())
-    {
-        options.pic = &thiscluster.finalepic[0];
-    }
-    else
-    {
-        options.flat = &thiscluster.finaleflat[0];
-    }
-
-    if (secretexit)
-    {
-        options.text = (!level.intertextsecret.empty()) ? level.intertextsecret.c_str() : thiscluster.exittext;
-    }
-    else
-    {
-        options.text = (!level.intertext.empty()) ? level.intertext.c_str() : thiscluster.exittext;
-    }
 
     if (!strnicmp(level.nextmap.c_str(), "EndGame", 7))
     {
         AM_Stop();
-        if (thiscluster.flags & CLUSTER_EXITTEXTISLUMP)
-        {
-            options.text = static_cast<const char *>(W_CacheLumpName(thiscluster.exittext, PU_STATIC));
-        }
-        F_StartFinale(options);
     }
     else
     {
@@ -716,29 +675,11 @@ void G_WorldDone()
             // than the current one and we're not in deathmatch.
             if (nextcluster.entertext)
             {
-                // All of our options need to be from the next cluster.
-                options.music = nextcluster.messagemusic.c_str();
-                if (!nextcluster.finalepic.empty())
-                {
-                    options.pic = &nextcluster.finalepic[0];
-                }
-                else
-                {
-                    options.flat = &nextcluster.finaleflat[0];
-                }
-                options.text = nextcluster.entertext;
-
                 AM_Stop();
-                F_StartFinale(options);
             }
             else if (thiscluster.exittext)
             {
                 AM_Stop();
-                if (thiscluster.flags & CLUSTER_EXITTEXTISLUMP)
-                {
-                    options.text = static_cast<const char *>(W_CacheLumpName(thiscluster.exittext, PU_STATIC));
-                }
-                F_StartFinale(options);
             }
         }
     }

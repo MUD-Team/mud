@@ -47,7 +47,6 @@
 #include "m_strindex.h"
 #include "odamex.h"
 #include "p_acs.h"
-#include "p_ctf.h"
 #include "p_horde.h"
 #include "p_inter.h"
 #include "p_lnspec.h"
@@ -57,15 +56,15 @@
 #include "r_state.h"
 #include "s_sound.h"
 #include "server.pb.h"
-#include "st_stuff.h"
 #include "svc_map.h"
 #include "v_textcolors.h"
+
+extern bool missingCommercialIWAD;
 
 // Extern data from other files.
 
 EXTERN_CVAR(cl_autorecord)
 EXTERN_CVAR(cl_autorecord_coop)
-EXTERN_CVAR(cl_autorecord_ctf)
 EXTERN_CVAR(cl_autorecord_deathmatch)
 EXTERN_CVAR(cl_autorecord_duel)
 EXTERN_CVAR(cl_autorecord_teamdm)
@@ -811,8 +810,6 @@ static void CL_LoadMap(const odaproto::svc::LoadMap *msg)
     CL_ResyncWorldIndex();
     ::last_svgametic = 0;
 
-    CTF_CheckFlags(consoleplayer());
-
     gameaction = ga_nothing;
 
     // Autorecord netdemo or continue recording in a new file
@@ -825,7 +822,7 @@ static void CL_LoadMap(const odaproto::svc::LoadMap *msg)
 
         bool bCanAutorecord = (sv_gametype == GM_COOP && cl_autorecord_coop) || (isFFA && cl_autorecord_deathmatch) ||
                               (isDuel && cl_autorecord_duel) || (sv_gametype == GM_TEAMDM && cl_autorecord_teamdm) ||
-                              (sv_gametype == GM_CTF && cl_autorecord_ctf) || (G_IsHordeMode() && cl_autorecord_horde);
+                              (G_IsHordeMode() && cl_autorecord_horde);
 
         size_t param = Args.CheckParm("-netrecord");
         if (param && Args.GetArg(param + 1))
@@ -1089,9 +1086,6 @@ static void CL_SpawnPlayer(const odaproto::svc::SpawnPlayer *msg)
 
     if (p->id == consoleplayer_id)
     {
-        // denis - if this concerns the local player, restart the status bar
-        ST_Start();
-
         // flash taskbar icon
         IWindow *window = I_GetWindow();
         window->flashWindow();
@@ -1777,149 +1771,6 @@ static void CL_Say(const odaproto::svc::Say *msg)
         if (show_messages && cl_chatsounds && !filtermessage)
             S_Sound(CHAN_INTERFACE, "misc/teamchat", 1, ATTN_NONE);
     }
-}
-
-static void CL_CTFRefresh(const odaproto::svc::CTFRefresh *msg)
-{
-    // clear player flags client may have imagined
-    for (Players::iterator it = players.begin(); it != players.end(); ++it)
-    {
-        for (size_t i = 0; i < NUMTEAMS; i++)
-        {
-            it->flags[i] = false;
-        }
-    }
-
-    for (size_t i = 0; i < NUMTEAMS; i++)
-    {
-        team_t    team     = static_cast<team_t>(i);
-        TeamInfo *teamInfo = GetTeamInfo(team);
-
-        if (i < msg->team_info_size())
-        {
-            const odaproto::svc::CTFRefresh_TeamInfo &info = msg->team_info().Get(i);
-
-            flag_state_t state = static_cast<flag_state_t>(info.flag_state());
-            if (state < flag_home || state >= NUMFLAGSTATES)
-            {
-                continue;
-            }
-
-            teamInfo->Points           = info.points();
-            teamInfo->FlagData.flagger = 0;
-            teamInfo->FlagData.state   = state;
-
-            if (teamInfo->FlagData.state == flag_carried)
-            {
-                player_t &player = idplayer(info.flag_flagger());
-                if (validplayer(player))
-                {
-                    CTF_CarryFlag(player, team);
-                }
-            }
-        }
-    }
-}
-
-static void CL_CTFEvent(const odaproto::svc::CTFEvent *msg)
-{
-    // Range checking on events.
-    if (msg->event() <= SCORE_REFRESH || msg->event() >= NUM_CTF_SCORE)
-    {
-        return;
-    }
-    if (msg->target_team() < 0 || msg->target_team() > TEAM_NONE || msg->target_team() == NUMTEAMS)
-    {
-        return;
-    }
-    if (msg->player_team() < 0 || msg->player_team() > TEAM_NONE || msg->player_team() == NUMTEAMS)
-    {
-        return;
-    }
-
-    // Convert our data to proper types.
-    flag_score_t event           = static_cast<flag_score_t>(msg->event());
-    team_t       target_team     = static_cast<team_t>(msg->target_team());
-    player_t    &player          = idplayer(msg->player_id());
-    team_t       player_team     = static_cast<team_t>(msg->player_team());
-    TeamInfo    *target_teaminfo = GetTeamInfo(target_team);
-
-    // If our player is valid, assign passed points to them.
-    if (validplayer(player))
-    {
-        if (G_IsRoundsGame())
-        {
-            player.totalpoints = msg->player_totalpoints();
-        }
-        else
-        {
-            player.points = msg->player_points();
-        }
-    }
-
-    switch (event)
-    {
-    default:
-    case SCORE_NONE:
-    case SCORE_REFRESH:
-    case SCORE_KILL:
-    case SCORE_BETRAYAL:
-    case SCORE_CARRIERKILL:
-        break;
-
-    case SCORE_GRAB:
-    case SCORE_FIRSTGRAB:
-    case SCORE_MANUALRETURN:
-        if (validplayer(player))
-        {
-            CTF_CarryFlag(player, target_team);
-            if (player.id == displayplayer().id)
-                player.bonuscount = BONUSADD;
-        }
-        break;
-
-    case SCORE_CAPTURE:
-        if (validplayer(player))
-        {
-            player.flags[target_team] = 0;
-        }
-
-        target_teaminfo->FlagData.flagger = 0;
-        target_teaminfo->FlagData.state   = flag_home;
-        if (target_teaminfo->FlagData.actor)
-            target_teaminfo->FlagData.actor->Destroy();
-        break;
-
-    case SCORE_RETURN:
-        if (validplayer(player))
-        {
-            player.flags[target_team] = 0;
-        }
-
-        target_teaminfo->FlagData.flagger = 0;
-        target_teaminfo->FlagData.state   = flag_home;
-        if (target_teaminfo->FlagData.actor)
-            target_teaminfo->FlagData.actor->Destroy();
-        break;
-
-    case SCORE_DROP:
-        if (validplayer(player))
-        {
-            player.flags[target_team] = 0;
-        }
-
-        target_teaminfo->FlagData.flagger = 0;
-        target_teaminfo->FlagData.state   = flag_dropped;
-        if (target_teaminfo->FlagData.actor)
-            target_teaminfo->FlagData.actor->Destroy();
-        break;
-    }
-
-    // [AM] Play CTF sound, moved from server.
-    CTF_Sound(target_team, player_team, event);
-
-    // [AM] Show CTF message.
-    CTF_Message(target_team, player_team, event);
 }
 
 //
@@ -2715,6 +2566,7 @@ static void CL_MaplistIndex(const odaproto::svc::MaplistIndex *msg)
 
 static void CL_Toast(const odaproto::svc::Toast *msg)
 {
+    /*
     toast_t toast;
     toast.flags     = msg->flags();
     toast.left      = msg->left();
@@ -2724,6 +2576,7 @@ static void CL_Toast(const odaproto::svc::Toast *msg)
     toast.icon      = msg->icon();
 
     COM_PushToast(toast);
+    */
 }
 
 static void CL_HordeInfo(const odaproto::svc::HordeInfo *msg)
@@ -2949,8 +2802,6 @@ parseError_e CL_ParseCommand()
 		SV_MSG(svc_forceteam, CL_ForceTeam, odaproto::svc::ForceTeam);
 		SV_MSG(svc_switch, CL_Switch, odaproto::svc::Switch);
 		SV_MSG(svc_say, CL_Say, odaproto::svc::Say);
-		SV_MSG(svc_ctfrefresh, CL_CTFRefresh, odaproto::svc::CTFRefresh);
-		SV_MSG(svc_ctfevent, CL_CTFEvent, odaproto::svc::CTFEvent);
 		SV_MSG(svc_secretevent, CL_SecretEvent, odaproto::svc::SecretEvent);
 		SV_MSG(svc_serversettings, CL_ServerSettings, odaproto::svc::ServerSettings);
 		SV_MSG(svc_connectclient, CL_ConnectClient, odaproto::svc::ConnectClient);

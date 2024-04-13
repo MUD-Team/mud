@@ -35,7 +35,6 @@
 #include "p_local.h"
 #include "r_local.h"
 #include "r_sky.h"
-#include "st_stuff.h"
 #include "stats.h"
 #include "v_video.h"
 #include "z_zone.h"
@@ -819,8 +818,8 @@ void R_SetupFrame(player_t *player)
 
             // use colormap lumps in 8bpp mode instead of blends
             int colormap_num = 0;
-            if (I_GetPrimarySurface()->getBitsPerPixel() == 8)
-                colormap_num = R_ColormapForBlend(new_sector_blend_color);
+            // if (I_GetPrimarySurface()->getBitsPerPixel() == 8)
+            //     colormap_num = R_ColormapForBlend(new_sector_blend_color);
 
             NormalLight.maps = shaderef_t(&realcolormaps, (NUMCOLORMAPS + 1) * colormap_num);
         }
@@ -996,7 +995,6 @@ void R_RenderPlayerView(player_t *player)
     if (setsizeneeded)
     {
         R_InitViewWindow();
-        ST_ForceRefresh();
         setsizeneeded = false;
     }
 
@@ -1023,7 +1021,7 @@ void R_RenderPlayerView(player_t *player)
         int    x1 = viewwindowx, y1 = viewwindowy;
         int    x2 = viewwindowx + viewwidth - 1, y2 = viewwindowy + viewheight - 1;
 
-        surface->getDefaultCanvas()->Clear(x1, y1, x2, y2, color);
+        //surface->getDefaultCanvas()->Clear(x1, y1, x2, y2, color);
     }
 
     R_BeginInterpolation(render_lerp_amount);
@@ -1049,7 +1047,7 @@ void R_RenderPlayerView(player_t *player)
 
     // NOTE(jsd): Full-screen status color blending:
     int blend_alpha = int(blend_color.geta() * 255.0f);
-    if (surface->getBitsPerPixel() == 32 && blend_alpha > 0)
+    if (blend_alpha > 0)
     {
         r_dimpatchD(surface, V_GammaCorrect(blend_color), blend_alpha, viewwindowx, viewwindowy, viewwidth, viewheight);
     }
@@ -1108,12 +1106,12 @@ int R_ViewWidth(int width, int height)
 //
 int R_ViewHeight(int width, int height)
 {
-    if (setblocks == 11 || setblocks == 12)
-        return height;
-    else if (setblocks == 10)
-        return ST_StatusBarY(width, height);
-    else
-        return (setblocks * ST_StatusBarY(width, height) / 10) & ~7;
+    // if (setblocks == 11 || setblocks == 12)
+    return height;
+    // else if (setblocks == 10)
+    //     return ST_StatusBarY(width, height);
+    // else
+    //     return (setblocks * ST_StatusBarY(width, height) / 10) & ~7;
 }
 
 //
@@ -1129,10 +1127,7 @@ int R_ViewWindowX(int width, int height)
 //
 int R_ViewWindowY(int width, int height)
 {
-    if (setblocks == 10 || setblocks == 11 || setblocks == 12)
-        return 0;
-    else
-        return (ST_StatusBarY(width, height) - R_ViewHeight(width, height)) / 2;
+    return 0;
 }
 
 //

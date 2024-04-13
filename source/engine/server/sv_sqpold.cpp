@@ -27,7 +27,6 @@
 #include "g_gametype.h"
 #include "i_system.h"
 #include "odamex.h"
-#include "p_ctf.h"
 
 static buf_t ml_message(MAX_UDP_PACKET);
 
@@ -173,7 +172,6 @@ void SV_SendServerInfo()
     MSG_WriteBool(&ml_message, (sv_gametype == GM_DM || sv_gametype == GM_TEAMDM));
     MSG_WriteByte(&ml_message, sv_skill.asInt());
     MSG_WriteBool(&ml_message, (sv_gametype == GM_TEAMDM));
-    MSG_WriteBool(&ml_message, (sv_gametype == GM_CTF));
 
     for (Players::iterator it = players.begin(); it != players.end(); ++it)
     {
@@ -202,15 +200,7 @@ void SV_SendServerInfo()
 
         for (size_t i = 0; i < NUMTEAMS; i++)
         {
-            if ((sv_gametype == GM_CTF && i < 2) || (sv_gametype != GM_CTF && i < sv_teamsinplay))
-            {
-                MSG_WriteByte(&ml_message, 1);
-                MSG_WriteLong(&ml_message, GetTeamInfo((team_t)i)->Points);
-            }
-            else
-            {
-                MSG_WriteByte(&ml_message, 0);
-            }
+            MSG_WriteByte(&ml_message, 0);
         }
     }
 

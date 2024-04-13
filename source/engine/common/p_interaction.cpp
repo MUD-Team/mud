@@ -31,7 +31,6 @@
 #include "m_wdlstats.h"
 #include "odamex.h"
 #include "p_acs.h"
-#include "p_ctf.h"
 #include "p_horde.h"
 #include "p_inter.h"
 #include "p_lnspec.h"
@@ -74,9 +73,7 @@ int clipammo[NUMAMMO] = {10, 4, 20, 1};
 void         AM_Stop(void);
 void         SV_SpawnMobj(AActor *mobj);
 void         SV_UpdateFrags(player_t &player);
-void         SV_CTFEvent(team_t f, flag_score_t event, player_t &who);
 void         SV_TouchSpecial(AActor *special, player_t *player);
-ItemEquipVal SV_FlagTouch(player_t &player, team_t f, bool firstgrab);
 void         SV_SocketTouch(player_t &player, team_t f);
 void         SV_SendKillMobj(AActor *source, AActor *target, AActor *inflictor, bool joinkill);
 void         SV_SendDamagePlayer(player_t *player, AActor *inflictor, int healthDamage, int armorDamage);
@@ -155,7 +152,7 @@ bool P_GiveFrags(player_t *player, int num)
 
     player->fragcount += num;
 
-    if (G_IsRoundsGame() && !G_IsDuelGame() && !(sv_gametype == GM_CTF))
+    if (G_IsRoundsGame() && !G_IsDuelGame())
         player->totalpoints += num;
 
     return true;
@@ -1179,31 +1176,8 @@ void P_GiveSpecial(player_t *player, AActor *special)
         break;
 
     default: {
-        bool teamItemSuccess = false;
-        for (int iTeam = 0; iTeam < NUMTEAMS; iTeam++)
-        {
-            TeamInfo *teamInfo = GetTeamInfo((team_t)iTeam);
-
-            if (teamInfo->FlagSprite == special->sprite || teamInfo->FlagDownSprite == special->sprite)
-            {
-                val             = SV_FlagTouch(*player, teamInfo->Team, teamInfo->FlagSprite == special->sprite);
-                sound           = -1;
-                teamItemSuccess = true;
-                break;
-            }
-
-            if (teamInfo->FlagSocketSprite == special->sprite)
-            {
-                SV_SocketTouch(*player, teamInfo->Team);
-                return;
-            }
-        }
-
-        if (!teamItemSuccess)
-        {
-            Printf(PRINT_HIGH, "P_SpecialThing: Unknown gettable thing %d: %s\n", special->sprite, special->info->name);
-            return;
-        }
+        Printf(PRINT_HIGH, "P_SpecialThing: Unknown gettable thing %d: %s\n", special->sprite, special->info->name);
+        return;
     }
     }
 
@@ -1749,10 +1723,6 @@ void P_KillMobj(AActor *source, AActor *target, AActor *inflictor, bool joinkill
                     {
                         sendTeamScore |= P_GiveTeamPoints(splayer, -1);
                     }
-                    else if (sv_gametype == GM_CTF)
-                    {
-                        SV_CTFEvent((team_t)0, SCORE_BETRAYAL, *splayer);
-                    }
                 }
                 else
                 {
@@ -1761,17 +1731,6 @@ void P_KillMobj(AActor *source, AActor *target, AActor *inflictor, bool joinkill
                     if (sv_gametype == GM_TEAMDM)
                     {
                         sendTeamScore |= P_GiveTeamPoints(splayer, 1);
-                    }
-                    else if (sv_gametype == GM_CTF)
-                    {
-                        if (tplayer->flags[splayer->userinfo.team])
-                        {
-                            SV_CTFEvent((team_t)0, SCORE_CARRIERKILL, *splayer);
-                        }
-                        else
-                        {
-                            SV_CTFEvent((team_t)0, SCORE_KILL, *splayer);
-                        }
                     }
                 }
             }
@@ -1793,10 +1752,6 @@ void P_KillMobj(AActor *source, AActor *target, AActor *inflictor, bool joinkill
 
     if (target->player)
     {
-        // [Toke - CTF]
-        if (sv_gametype == GM_CTF)
-            CTF_CheckFlags(*target->player);
-
         if (!joinkill)
             sendScore |= P_GiveDeaths(tplayer, 1);
 
@@ -2031,25 +1986,12 @@ void P_DamageMobj(AActor *target, AActor *inflictor, AActor *source, int damage,
 
     MeansOfDeath = mod;
 
-    TeamInfo *teamInfo      = NULL;
-    bool      targethasflag = false;
+    TeamInfo *teamInfo      = NULL;    
     team_t    f             = TEAM_NONE;
 
     if (player)
     {
         teamInfo      = GetTeamInfo(player->userinfo.team);
-        targethasflag = &idplayer(teamInfo->FlagData.flagger) == player;
-        // Determine the team's flag the player has.
-        if (targethasflag)
-        {
-            for (size_t i = 0; i < NUMTEAMS; i++)
-            {
-                if ((*player).flags[i])
-                {
-                    f = (team_t)i;
-                }
-            }
-        }
     }
 
     if (target->flags & MF_SKULLFLY)
@@ -2157,17 +2099,9 @@ void P_DamageMobj(AActor *target, AActor *inflictor, AActor *source, int damage,
             sangle = splayer->mo->angle / 4;
         }
 
-        if (source == NULL && !targethasflag)
+        if (source == NULL)
         {
             M_LogActorWDLEvent(WDL_EVENT_ENVIRODAMAGE, source, target, actualdamage, armorDamage, mod, 0);
-        }
-        else if (source == NULL && targethasflag)
-        {
-            M_LogActorWDLEvent(WDL_EVENT_ENVIROCARRIERDAMAGE, source, target, actualdamage, armorDamage, mod, f);
-        }
-        else if (source != NULL && targethasflag)
-        {
-            M_LogActorWDLEvent(WDL_EVENT_CARRIERDAMAGE, source, target, actualdamage, armorDamage, mod, f);
         }
         else
         {
@@ -2268,17 +2202,9 @@ void P_DamageMobj(AActor *target, AActor *inflictor, AActor *source, int damage,
     {
         // WDL damage events.
         // todo: handle voodoo dolls here
-        if (source == NULL && targethasflag)
-        {
-            M_LogActorWDLEvent(WDL_EVENT_ENVIROCARRIERKILL, source, target, f, 0, mod, 0);
-        }
-        else if (source == NULL)
+        if (source == NULL)
         {
             M_LogActorWDLEvent(WDL_EVENT_ENVIROKILL, source, target, 0, 0, mod, 0);
-        }
-        else if (targethasflag)
-        {
-            M_LogActorWDLEvent(WDL_EVENT_CARRIERKILL, source, target, f, 0, mod, 0);
         }
         else
         {
@@ -2355,35 +2281,15 @@ void P_PlayerLeavesGame(player_s *player)
     }
 
     TeamInfo *teamInfo      = NULL;
-    bool      targethasflag = false;
     team_t    f             = TEAM_NONE;
     team_t    current       = TEAM_NONE;
     if (player)
     {
         current       = player->userinfo.team;
         teamInfo      = GetTeamInfo(player->userinfo.team);
-        targethasflag = &idplayer(teamInfo->FlagData.flagger) == player;
-        // Determine the team's flag the player has.
-        if (targethasflag)
-        {
-            for (size_t i = 0; i < NUMTEAMS; i++)
-            {
-                if ((*player).flags[i])
-                {
-                    f = (team_t)i;
-                }
-            }
-        }
     }
 
-    if (targethasflag)
-    {
-        M_LogWDLEvent(WDL_EVENT_CARRIERKILL, player, player, f, 0, MOD_EXIT, 0);
-    }
-    else
-    {
-        M_LogWDLEvent(WDL_EVENT_KILL, player, player, 0, 0, MOD_EXIT, 0);
-    }
+    M_LogWDLEvent(WDL_EVENT_KILL, player, player, 0, 0, MOD_EXIT, 0);
     M_LogWDLEvent(WDL_EVENT_DISCONNECT, player, NULL, current, 0, 0, 0);
 
     // Playercount changes can cause end-of-game conditions.

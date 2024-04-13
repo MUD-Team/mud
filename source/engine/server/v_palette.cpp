@@ -24,7 +24,6 @@
 #include "m_alloc.h"
 #include "odamex.h"
 #include "r_main.h" // For lighting constants
-#include "st_stuff.h"
 #include "v_video.h"
 #include "z_zone.h"
 

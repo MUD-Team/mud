@@ -1921,7 +1921,7 @@ BOOL PTR_AimTraverse(intercept_t *in)
         return true;
 
     // [SL] 2011-10-31 - Don't aim at teammates
-    if ((sv_gametype == GM_CTF || sv_gametype == GM_TEAMDM) && shootthing->player && th->player &&
+    if ((sv_gametype == GM_TEAMDM) && shootthing->player && th->player &&
         shootthing->player->userinfo.team == th->player->userinfo.team && !sv_friendlyfire)
         return true;
 
