@@ -54,10 +54,7 @@ EXTERN_CVAR(sv_friendlyfire)
 EXTERN_CVAR(sv_allowexit)
 EXTERN_CVAR(sv_forcerespawn)
 EXTERN_CVAR(sv_forcerespawntime)
-EXTERN_CVAR(co_zdoomphys)
 EXTERN_CVAR(cl_predictpickup)
-EXTERN_CVAR(co_zdoomsound)
-EXTERN_CVAR(co_globalsound)
 EXTERN_CVAR(g_lives)
 
 // sapientlion - experimental
@@ -774,9 +771,7 @@ bool P_SpecialIsWeapon(AActor *special)
 
 void P_PickupSound(AActor *ent, int channel, const char *name)
 {
-    if (serverside && co_globalsound)                 // Send pickup sound to all other players
-        UV_SoundAvoidPlayer(ent, channel, name, co_zdoomsound ? ATTN_NORM : ATTN_NONE);
-    else if (clientside && ent == consoleplayer().mo) // Only play our own pickup sounds, the server will send other
+    if (clientside && ent == consoleplayer().mo) // Only play our own pickup sounds, the server will send other
                                                       // players pickup sounds if needed
         S_Sound(ent, channel, name, 1, ATTN_NONE);
 }
@@ -1244,7 +1239,7 @@ void P_TouchSpecialThing(AActor *special, AActor *toucher)
 
     // out of reach?
     fixed_t delta      = special->z - toucher->z;
-    fixed_t lowerbound = co_zdoomphys ? -32 * FRACUNIT : -8 * FRACUNIT;
+    fixed_t lowerbound = -32 * FRACUNIT;
 
     if (delta > toucher->height || delta < lowerbound)
         return;

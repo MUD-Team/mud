@@ -69,14 +69,10 @@ EXTERN_CVAR(sv_freelook)
 EXTERN_CVAR(sv_itemsrespawn)
 EXTERN_CVAR(sv_respawnsuper)
 EXTERN_CVAR(sv_itemrespawntime)
-EXTERN_CVAR(co_zdoomphys)
-EXTERN_CVAR(co_realactorheight)
 EXTERN_CVAR(sv_teamspawns)
 EXTERN_CVAR(sv_nomonsters)
 EXTERN_CVAR(sv_monstersrespawn)
 EXTERN_CVAR(sv_monstershealth)
-EXTERN_CVAR(co_fixweaponimpacts)
-EXTERN_CVAR(co_fineautoaim)
 EXTERN_CVAR(sv_allowshowspawns)
 EXTERN_CVAR(sv_teamsinplay)
 EXTERN_CVAR(g_thingfilter)
@@ -446,16 +442,8 @@ fixed_t P_CalculateMinMom(AActor *mo)
 {
     fixed_t levelgravity, sectorgravity;
 
-    if (co_zdoomphys)
-    {
-        levelgravity  = FixedDiv(FLOAT2FIXED(level.gravity), 100 << FRACBITS);
-        sectorgravity = FLOAT2FIXED(mo->subsector->sector->gravity);
-    }
-    else
-    {
-        levelgravity  = GRAVITY * 8;
-        sectorgravity = FLOAT2FIXED(mo->subsector->sector->gravity);
-    }
+    levelgravity  = FixedDiv(FLOAT2FIXED(level.gravity), 100 << FRACBITS);
+    sectorgravity = FLOAT2FIXED(mo->subsector->sector->gravity);
 
     return -FixedMul(levelgravity, sectorgravity);
 }
@@ -522,7 +510,7 @@ void P_MoveActor(AActor *mo)
     if ((mo->z != mo->floorz) || mo->momz || BlockingMobj)
     {
         // Handle Z momentum and gravity
-        if (P_AllowPassover() && (mo->flags2 & MF2_PASSMOBJ))
+        if (mo->flags2 & MF2_PASSMOBJ)
         {
             if (!(onmo = P_CheckOnmobj(mo)))
             {
@@ -606,7 +594,7 @@ void P_MoveActor(AActor *mo)
     // slightly push off of ledge if hanging more than halfway off
     // [RH] Be more restrictive to avoid pushing monsters/players down steps
     if (!(mo->flags & MF_NOGRAVITY) && !(mo->flags2 & MF2_FLOATBOB) && (mo->z > mo->dropoffz) &&
-        (mo->health <= 0 || (mo->flags & MF_COUNTKILL && mo->z - mo->dropoffz > 24 * FRACUNIT)) && P_AllowDropOff())
+        (mo->health <= 0 || (mo->flags & MF_COUNTKILL && mo->z - mo->dropoffz > 24 * FRACUNIT)))
     {
         P_ApplyTorque(mo); // Apply torque
     }
@@ -935,7 +923,7 @@ void AActor::Serialize(FArchive &arc)
 //
 int P_ThingInfoHeight(mobjinfo_t *mi)
 {
-    return (P_AllowPassover() && mi->cdheight ? mi->cdheight : mi->height);
+    return (mi->cdheight ? mi->cdheight : mi->height);
 }
 
 // Use a heuristic approach to detect infinite state cycles: Count the number
@@ -1086,7 +1074,7 @@ static bool P_ExplodeMissileAgainstWall(AActor *mo)
         if (ceilingline)
         {
             const sector_t *sec1, *sec2;
-            if (!co_fixweaponimpacts || !ceilingline->backsector || !P_PointOnLineSide(mo->x, mo->y, ceilingline))
+            if (!ceilingline->backsector || !P_PointOnLineSide(mo->x, mo->y, ceilingline))
             {
                 sec1 = ceilingline->frontsector;
                 sec2 = ceilingline->backsector;
@@ -1102,7 +1090,7 @@ static bool P_ExplodeMissileAgainstWall(AActor *mo)
 
             if (skyceiling2)
             {
-                if (!co_fixweaponimpacts || (skyceiling1 && mo->z > P_CeilingHeight(mo->x, mo->y, sec2)))
+                if ((skyceiling1 && mo->z > P_CeilingHeight(mo->x, mo->y, sec2)))
                 {
                     mo->Destroy();
                     return false;
@@ -1173,7 +1161,7 @@ static void P_ApplyXYFriction(AActor *mo)
     // Apply air friction
     if (mo->z > mo->floorz && !(mo->flags2 & (MF2_ONMOBJ | MF2_FLY)) && mo->waterlevel == 0)
     {
-        if (co_zdoomphys && mo->player && level.airfriction != FRACUNIT)
+        if (mo->player && level.airfriction != FRACUNIT)
         {
             mo->momx = FixedMul(mo->momx, level.airfriction);
             mo->momy = FixedMul(mo->momy, level.airfriction);
@@ -1265,19 +1253,12 @@ void P_XYMovement(AActor *mo)
         // allows wallrunning North and East, while ZDoom physics allow
         // North and South.
 
-        if (co_zdoomphys && (abs(xmove) > maxmove || abs(ymove) > maxmove))
+        if ((abs(xmove) > maxmove || abs(ymove) > maxmove))
         {
             xmove >>= 1;
             ymove >>= 1;
             ptryx = mo->x + xmove;
             ptryy = mo->y + ymove;
-        }
-        else if (!co_zdoomphys && (xmove > maxmove || ymove > maxmove))
-        {
-            ptryx = mo->x + xmove / 2;
-            ptryy = mo->y + ymove / 2;
-            xmove >>= 1;
-            ymove >>= 1;
         }
         else
         {
@@ -1322,45 +1303,6 @@ void P_XYMovement(AActor *mo)
     }
 
     P_ApplyXYFriction(mo);
-}
-
-//
-// P_CorrectLostSoulBounce
-//
-// Note (id):
-//  somebody left this after the setting momz to 0,
-//  kinda useless there.
-//
-// cph - This was the a bug in the linuxdoom-1.10 source which
-//  caused it not to sync Doom 2 v1.9 demos. Someone
-//  added the above comment and moved up the following code. So
-//  demos would desync in close lost soul fights.
-// Note that this only applies to original Doom 1 or Doom2 demos - not
-//  Final Doom and Ultimate Doom.  So we test demo_compatibility *and*
-//  gamemission. (Note we assume that Doom1 is always Ult Doom, which
-//  seems to hold for most published demos.)
-//
-//  fraggle - cph got the logic here slightly wrong.  There are three
-//  versions of Doom 1.9:
-//
-//  * The version used in registered doom 1.9 + doom2 - no bounce
-//  * The version used in ultimate doom - has bounce
-//  * The version used in final doom - has bounce
-//
-// So we need to check that this is either retail or commercial
-// (but not doom2)
-//
-// [SL] The source code shows both Doom & Doom 2 BFG Editions also have bounce.
-//
-static bool P_CorrectLostSoulBounce()
-{
-    if (co_zdoomphys)
-        return true;
-    if (gamemode == retail || gamemode == retail_bfg || gamemode == commercial_bfg)
-        return true;
-    if ((gamemode == commercial || gamemode == commercial_bfg) && (gamemission == pack_tnt || gamemission == pack_plut))
-        return true;
-    return false;
 }
 
 //
@@ -1506,7 +1448,7 @@ static bool P_ClipMovementToFloor(AActor *mo)
             A_TriggerAction(mo->subsector->sector->SecActTarget, mo, SECSPAC_HitFloor);
 
         // Lost Soul hit the floor
-        if (mo->flags & MF_SKULLFLY && P_CorrectLostSoulBounce())
+        if (mo->flags & MF_SKULLFLY)
             mo->momz = -mo->momz;
 
         mo->z = mo->floorz;
@@ -1519,16 +1461,10 @@ static bool P_ClipMovementToFloor(AActor *mo)
             mo->momz = 0;
         }
 
-        // cph 2001/05/26 - See lost soul bouncing comment above. We need this here
-        // for bug compatibility with original Doom2 v1.9 - if a soul is charging
-        // and hit by a raising floor this incorrectly reverses its Y momentum.
-        if (mo->flags & MF_SKULLFLY && !P_CorrectLostSoulBounce())
-            mo->momz = -mo->momz;
-
         // Explode missiles
         if ((mo->flags & MF_MISSILE) && !(mo->flags & MF_NOCLIP))
         {
-            if (co_fixweaponimpacts && mo->subsector->sector->floorpic == skyflatnum)
+            if (mo->subsector->sector->floorpic == skyflatnum)
                 mo->Destroy();
             else if (serverside)
                 P_ExplodeMissile(mo);
@@ -1564,7 +1500,7 @@ static bool P_ClipMovementToCeiling(AActor *mo)
         // Explode missiles
         if ((mo->flags & MF_MISSILE) && !(mo->flags & MF_NOCLIP))
         {
-            if (co_fixweaponimpacts && mo->subsector->sector->ceilingpic == skyflatnum)
+            if (mo->subsector->sector->ceilingpic == skyflatnum)
                 mo->Destroy();
             else if (serverside)
                 P_ExplodeMissile(mo);
@@ -1700,8 +1636,7 @@ void P_ZMovement(AActor *mo)
         P_PlayerSmoothStepUp(mo);
 
     // ZDoom applies gravity earlier in the function than vanilla
-    if (co_zdoomphys)
-        P_ApplyGravity(mo, P_CalculateActorGravityZDoom(mo));
+    P_ApplyGravity(mo, P_CalculateActorGravityZDoom(mo));
 
     mo->z += mo->momz;
 
@@ -1717,10 +1652,6 @@ void P_ZMovement(AActor *mo)
 
     if (!P_ClipMovementToFloor(mo))
         return;
-
-    // Apply vanilla gravity
-    if (!co_zdoomphys)
-        P_ApplyGravity(mo, P_CalculateActorGravityDoom(mo));
 
     if (!P_ClipMovementToCeiling(mo))
         return;
@@ -1743,23 +1674,14 @@ void PlayerLandedOnThing(AActor *mo, AActor *onmobj)
     if (mo->player->id != consoleplayer_id && !serverside)
         return;
 
-    if (co_zdoomphys)
+    // [SL] 2011-06-16 - ZDoom Oomphiness
+    if (mo->health > 0)
     {
-        // [SL] 2011-06-16 - ZDoom Oomphiness
-        if (mo->health > 0)
-        {
-            if (mo->momz < (fixed_t)(level.gravity * mo->subsector->sector->gravity * -983.04f))
-                UV_SoundAvoidPlayer(mo, CHAN_VOICE, "player/male/land1", ATTN_NORM);
-
+        if (mo->momz < (fixed_t)(level.gravity * mo->subsector->sector->gravity * -983.04f))
             UV_SoundAvoidPlayer(mo, CHAN_VOICE, "player/male/land1", ATTN_NORM);
-        }
-    }
-    else
-    {
-        // [SL] 2011-06-16 - Vanilla Doom Oomphiness
+
         UV_SoundAvoidPlayer(mo, CHAN_VOICE, "player/male/land1", ATTN_NORM);
     }
-    //	mo->player->centering = true;
 }
 
 //
@@ -2291,10 +2213,7 @@ void P_SpawnPlayerMissile(AActor *source, mobjtype_t type)
     angle_t an = source->angle;
 
     // [AM] Refactored autoaim into a single function.
-    if (co_fineautoaim)
-        slope = P_AutoAimLineAttack(source, an, 1 << 26, 10, 16 * 64 * FRACUNIT);
-    else
-        slope = P_AutoAimLineAttack(source, an, 1 << 26, 1, 16 * 64 * FRACUNIT);
+    slope = P_AutoAimLineAttack(source, an, 1 << 26, 10, 16 * 64 * FRACUNIT);
 
     if (!linetarget)
         an = source->angle;
@@ -2317,27 +2236,18 @@ void P_SpawnPlayerMissile(AActor *source, mobjtype_t type)
     th->target = source->ptr();
     th->angle  = an;
 
-    if (co_zdoomphys)
-    {
-        v3float_t velocity;
-        float     speed = FIXED2FLOAT(th->info->speed);
+    v3float_t velocity;
+    float     speed = FIXED2FLOAT(th->info->speed);
 
-        velocity.x = FIXED2FLOAT(finecosine[an >> ANGLETOFINESHIFT]);
-        velocity.y = FIXED2FLOAT(finesine[an >> ANGLETOFINESHIFT]);
-        velocity.z = FIXED2FLOAT(slope);
+    velocity.x = FIXED2FLOAT(finecosine[an >> ANGLETOFINESHIFT]);
+    velocity.y = FIXED2FLOAT(finesine[an >> ANGLETOFINESHIFT]);
+    velocity.z = FIXED2FLOAT(slope);
 
-        M_NormalizeVec3f(&velocity, &velocity);
+    M_NormalizeVec3f(&velocity, &velocity);
 
-        th->momx = FLOAT2FIXED(velocity.x * speed);
-        th->momy = FLOAT2FIXED(velocity.y * speed);
-        th->momz = FLOAT2FIXED(velocity.z * speed);
-    }
-    else
-    {
-        th->momx = FixedMul(th->info->speed, finecosine[an >> ANGLETOFINESHIFT]);
-        th->momy = FixedMul(th->info->speed, finesine[an >> ANGLETOFINESHIFT]);
-        th->momz = FixedMul(th->info->speed, slope);
-    }
+    th->momx = FLOAT2FIXED(velocity.x * speed);
+    th->momy = FLOAT2FIXED(velocity.y * speed);
+    th->momz = FLOAT2FIXED(velocity.z * speed);
 
     P_CheckMissileSpawn(th);
 }
@@ -2359,10 +2269,7 @@ void P_SpawnMBF21PlayerMissile(AActor *source, mobjtype_t type, fixed_t angle, f
     angle_t an = source->angle;
 
     // [AM] Refactored autoaim into a single function.
-    if (co_fineautoaim)
-        slope = P_AutoAimLineAttack(source, an, 1 << 26, 10, 16 * 64 * FRACUNIT);
-    else
-        slope = P_AutoAimLineAttack(source, an, 1 << 26, 1, 16 * 64 * FRACUNIT);
+    slope = P_AutoAimLineAttack(source, an, 1 << 26, 10, 16 * 64 * FRACUNIT);
 
     if (!linetarget)
         an = source->angle;
@@ -2387,27 +2294,18 @@ void P_SpawnMBF21PlayerMissile(AActor *source, mobjtype_t type, fixed_t angle, f
     an += (angle_t)(((int64_t)angle << 16) / 360);
     th->angle = an;
 
-    if (co_zdoomphys)
-    {
-        v3float_t velocity;
-        float     speed = FIXED2FLOAT(th->info->speed);
+    v3float_t velocity;
+    float     speed = FIXED2FLOAT(th->info->speed);
 
-        velocity.x = FIXED2FLOAT(finecosine[an >> ANGLETOFINESHIFT]);
-        velocity.y = FIXED2FLOAT(finesine[an >> ANGLETOFINESHIFT]);
-        velocity.z = FIXED2FLOAT(slope);
+    velocity.x = FIXED2FLOAT(finecosine[an >> ANGLETOFINESHIFT]);
+    velocity.y = FIXED2FLOAT(finesine[an >> ANGLETOFINESHIFT]);
+    velocity.z = FIXED2FLOAT(slope);
 
-        M_NormalizeVec3f(&velocity, &velocity);
+    M_NormalizeVec3f(&velocity, &velocity);
 
-        th->momx = FLOAT2FIXED(velocity.x * speed);
-        th->momy = FLOAT2FIXED(velocity.y * speed);
-        th->momz = FLOAT2FIXED(velocity.z * speed);
-    }
-    else
-    {
-        th->momx = FixedMul(th->info->speed, finecosine[an >> ANGLETOFINESHIFT]);
-        th->momy = FixedMul(th->info->speed, finesine[an >> ANGLETOFINESHIFT]);
-        th->momz = FixedMul(th->info->speed, slope);
-    }
+    th->momx = FLOAT2FIXED(velocity.x * speed);
+    th->momy = FLOAT2FIXED(velocity.y * speed);
+    th->momz = FLOAT2FIXED(velocity.z * speed);
 
     an = (th->angle - ANG90) >> ANGLETOFINESHIFT;
     // Adjust based on MBF21 params.

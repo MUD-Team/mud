@@ -127,8 +127,6 @@ static struct mus_playing_t
     int         handle;
 } mus_playing;
 
-EXTERN_CVAR(co_globalsound)
-EXTERN_CVAR(co_zdoomsound)
 EXTERN_CVAR(snd_musicsystem)
 
 size_t numChannels;
@@ -200,34 +198,6 @@ void S_NoiseDebug()
         }
     }
     */
-}
-
-//
-// S_UseMap8Volume
-//
-// Determines if it is appropriate to use the special ExM8 attentuation
-// based on the current map number and the status of co_level8soundfeature
-// [ML] Now based on whether co_zdoomsound is on or it's a multiplayer not-coop game
-//
-static bool S_UseMap8Volume()
-{
-    if (co_zdoomsound || (multiplayer && sv_gametype != GM_COOP))
-        return false;
-
-    if (gameinfo.flags & GI_MAPxx)
-    {
-        // Doom2 style map naming (MAPxy)
-        if (level.mapname[3] == '0' && level.mapname[4] == '8')
-            return true;
-    }
-    else
-    {
-        // Doom1 style map naming (ExMy)
-        if (level.mapname[3] == '8')
-            return true;
-    }
-
-    return false;
 }
 
 //
@@ -442,9 +412,6 @@ static void AdjustSoundParamsDoom(const AActor *listener, fixed_t x, fixed_t y, 
     static const fixed_t S_CLOSE_DIST    = 200 * FRACUNIT;
     fixed_t              approx_dist     = P_AproxDistance(listener->x - x, listener->y - y);
 
-    if (S_UseMap8Volume())
-        approx_dist = MIN(approx_dist, S_CLIPPING_DIST);
-
     if (approx_dist > S_CLIPPING_DIST)
     {
         *vol = 0;
@@ -458,12 +425,6 @@ static void AdjustSoundParamsDoom(const AActor *listener, fixed_t x, fixed_t y, 
     else
     {
         float attenuation = FIXED2FLOAT(FixedDiv(S_CLIPPING_DIST - approx_dist, S_CLIPPING_DIST - S_CLOSE_DIST));
-
-        // HACKY STUFF: We want to leave the attenuation, but not to make everything LOUDER.
-        // On MAP 8, Doom makes a minimum volume of sounds which is 15/128 (0.192).
-        // We then set that value as the strict minimum for those maps.
-        if (S_UseMap8Volume() && attenuation < 0.192)
-            attenuation = 0.192;
 
         *vol = snd_sfxvolume * attenuation;
 
@@ -490,10 +451,7 @@ static bool AdjustSoundParams(const AActor *listener, fixed_t x, fixed_t y, floa
     if (!listener)
         return false;
 
-    if (co_zdoomsound)
-        AdjustSoundParamsZDoom(listener, x, y, vol, sep);
-    else
-        AdjustSoundParamsDoom(listener, x, y, vol, sep);
+    AdjustSoundParamsZDoom(listener, x, y, vol, sep);
 
     return true;
 }
@@ -806,7 +764,7 @@ void S_Sound(int channel, const char *name, float volume, int attenuation)
 
 void S_Sound(AActor *ent, int channel, const char *name, float volume, int attenuation)
 {
-    if (!co_globalsound && channel == CHAN_ITEM && ent != listenplayer().camera)
+    if (channel == CHAN_ITEM && ent != listenplayer().camera)
         return;
 
     S_StartNamedSound(ent, NULL, 0, 0, channel, name, volume, attenuation, false);

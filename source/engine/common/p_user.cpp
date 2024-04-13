@@ -49,7 +49,6 @@
 EXTERN_CVAR(sv_allowjump)
 EXTERN_CVAR(cl_mouselook)
 EXTERN_CVAR(sv_freelook)
-EXTERN_CVAR(co_zdoomphys)
 EXTERN_CVAR(cl_deathcam)
 EXTERN_CVAR(sv_forcerespawn)
 EXTERN_CVAR(sv_forcerespawntime)
@@ -413,7 +412,7 @@ void P_CalcHeight(player_t *player)
             player->bob = MAXBOB;
     }
 
-    if (player->cheats & CF_NOMOMENTUM || (!co_zdoomphys && !player->mo->onground))
+    if (player->cheats & CF_NOMOMENTUM)
     {
         player->viewz = player->mo->z + VIEWHEIGHT;
 
@@ -589,31 +588,19 @@ void P_MovePlayer(player_t *player)
         if (!mo->onground && !(mo->flags2 & MF2_FLY) && !mo->waterlevel)
         {
             // [RH] allow very limited movement if not on ground.
-            if (co_zdoomphys)
-            {
-                movefactor = FixedMul(movefactor, level.aircontrol);
-                bobfactor  = FixedMul(bobfactor, level.aircontrol);
-            }
-            else
-            {
-                movefactor >>= 8;
-                bobfactor >>= 8;
-            }
+            movefactor = FixedMul(movefactor, level.aircontrol);
+            bobfactor  = FixedMul(bobfactor, level.aircontrol);
         }
         forwardmove = (player->cmd.forwardmove * movefactor) >> 8;
         sidemove    = (player->cmd.sidemove * movefactor) >> 8;
 
-        // [ML] Check for these conditions unless advanced physics is on
-        if (co_zdoomphys || (!co_zdoomphys && (mo->onground || (mo->flags2 & MF2_FLY) || mo->waterlevel)))
+        if (forwardmove)
         {
-            if (forwardmove)
-            {
-                P_ForwardThrust(player, mo->angle, forwardmove);
-            }
-            if (sidemove)
-            {
-                P_SideThrust(player, mo->angle, sidemove);
-            }
+            P_ForwardThrust(player, mo->angle, forwardmove);
+        }
+        if (sidemove)
+        {
+            P_SideThrust(player, mo->angle, sidemove);
         }
 
         if (mo->state == &states[S_PLAY])

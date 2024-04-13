@@ -89,11 +89,6 @@ msecnode_t *sector_list = NULL; // phares 3/16/98
 // [SL] 2012-03-07 - Sectors that can change floor/ceiling height
 std::set<short> movable_sectors;
 
-EXTERN_CVAR(co_fixweaponimpacts)
-EXTERN_CVAR(co_boomphys) // [ML] Roll-up of various compat options
-EXTERN_CVAR(co_zdoomphys)
-EXTERN_CVAR(co_blockmapfix)
-EXTERN_CVAR(co_boomsectortouch)
 EXTERN_CVAR(sv_friendlyfire)
 EXTERN_CVAR(sv_unblockplayers)
 
@@ -141,14 +136,11 @@ BOOL PIT_StompThing(AActor *thing)
         return true;
     }
 
-    if (P_AllowPassover())
-    {
-        // [RH] Z-Check
-        if (tmz > thing->z + thing->height)
-            return true; // overhead
-        if (tmz + tmthing->height < thing->z)
-            return true; // underneath
-    }
+    // [RH] Z-Check
+    if (tmz > thing->z + thing->height)
+        return true; // overhead
+    if (tmz + tmthing->height < thing->z)
+        return true; // underneath
 
     // monsters don't stomp things except on boss level
     if (StompAlwaysFrags)
@@ -562,10 +554,9 @@ static BOOL PIT_CheckThing(AActor *thing)
         return true;
     }
 
-    if (P_AllowPassover())
-        BlockingMobj = thing;
+    BlockingMobj = thing;
 
-    if (P_AllowPassover() && (tmthing->flags2 & MF2_PASSMOBJ))
+    if (tmthing->flags2 & MF2_PASSMOBJ)
     {
         // check if a mobj passed over/under another object
         if (tmthing->z >= thing->z + thing->height || tmthing->z + tmthing->height <= thing->z)
@@ -580,8 +571,7 @@ static BOOL PIT_CheckThing(AActor *thing)
         tmthing->flags &= ~MF_SKULLFLY;
         tmthing->momx = tmthing->momy = tmthing->momz = 0;
         P_SetMobjState(tmthing, tmthing->info->spawnstate);
-        if (P_AllowPassover())
-            BlockingMobj = NULL;
+        BlockingMobj = NULL;
         return false; // stop moving
     }
 
@@ -684,7 +674,7 @@ static BOOL PIT_CheckThing(AActor *thing)
         if (tmthing->player)
             max_z -= 24 * FRACUNIT;
 
-        if (!P_AllowPassover() || thing->z < max_z)
+        if (thing->z < max_z)
             P_TouchSpecialThing(thing, tmthing); // can remove thing
 
         return !solid;
@@ -700,13 +690,11 @@ static BOOL PIT_CheckThing(AActor *thing)
     // Correction of wrong return value with demo_compatibility.
     // There is no more synch on http://www.doomworld.com/sda/dwdemo/w303-115.zip
     // (with correction in setMobjInfoValue)
-    if (demoplayback || !co_boomphys
-        //&& !prboom_comp[PC_TREAT_NO_CLIPPING_THINGS_AS_NOT_BLOCKING].state
-    )
+    if (demoplayback)
         return !(thing->flags & MF_SOLID);
     else
         return !((thing->flags & MF_SOLID && !(thing->flags & MF_NOCLIP)) &&
-                 (tmthing->flags & MF_SOLID || (demoplayback || !co_boomphys)));
+                 (tmthing->flags & MF_SOLID || (demoplayback)));
 }
 
 // This routine checks for Lost Souls trying to be spawned		// phares
@@ -893,7 +881,7 @@ bool P_CheckPosition(AActor *thing, fixed_t x, fixed_t y)
 
     BlockingMobj = NULL;
 
-    if (P_AllowPassover() && !spectator)
+    if (!spectator)
     {
         if (thing->player) // [RH] Fake taller height to catch stepping up into things.
             thing->height += 24 * FRACUNIT;
@@ -981,10 +969,7 @@ bool P_CheckPosition(AActor *thing, fixed_t x, fixed_t y)
             if (!P_BlockLinesIterator(bx, by, PIT_CheckLine))
                 return false;
 
-    if (P_AllowPassover())
-        return (BlockingMobj = thingblocker) == NULL;
-
-    return true;
+    return (BlockingMobj = thingblocker) == NULL;
 }
 
 //
@@ -1130,7 +1115,7 @@ BOOL P_TryMove(AActor *thing, fixed_t x, fixed_t y,
             return false;
         }
 
-        if (!P_AllowPassover() || !(tmthing->flags2 & MF2_PASSMOBJ))
+        if (!(tmthing->flags2 & MF2_PASSMOBJ))
             return false;
     }
 
@@ -1169,14 +1154,14 @@ BOOL P_TryMove(AActor *thing, fixed_t x, fixed_t y,
                 P_CheckPushLines(thing);
                 return false;
             }
-            else if (co_fixweaponimpacts && thing->flags & MF_MISSILE && tmfloorz > testz)
+            else if (thing->flags & MF_MISSILE && tmfloorz > testz)
             {
                 // [SL] 2011-09-16 - Fix the vanilla Doom bug that allows
                 // missiles to climb stairs.
                 P_CheckPushLines(thing);
                 return false;
             }
-            else if (P_AllowPassover() && testz < tmfloorz)
+            else if (testz < tmfloorz)
             {
                 // [RH] Check to make sure there's nothing in the way for the step up
                 fixed_t savedz = thing->z;
@@ -1192,7 +1177,7 @@ BOOL P_TryMove(AActor *thing, fixed_t x, fixed_t y,
         }
 
         // killough 3/15/98: Allow certain objects to drop off
-        if (!(P_AllowDropOff() && dropoff) && !(thing->flags & (MF_DROPOFF | MF_FLOAT | MF_MISSILE)) &&
+        if (!(dropoff) && !(thing->flags & (MF_DROPOFF | MF_FLOAT | MF_MISSILE)) &&
             tmfloorz - tmdropoffz > 24 * FRACUNIT && !(thing->flags2 & MF2_BLASTED))
         { // Can't move over a dropoff unless it's been blasted
             return false;
@@ -1204,7 +1189,7 @@ BOOL P_TryMove(AActor *thing, fixed_t x, fixed_t y,
             return false;                // too big a step up for bouncers under gravity
 
         // killough 11/98: prevent falling objects from going up too many steps
-        if (co_zdoomphys && thing->oflags & MFO_FALLING &&
+        if (thing->oflags & MFO_FALLING &&
             tmfloorz - testz > FixedMul(thing->momx, thing->momx) + FixedMul(thing->momy, thing->momy))
         {
             return false;
@@ -1404,7 +1389,7 @@ BOOL P_ThingHeightClip(AActor *thing)
     bool onfloor = (thing->z <= thing->floorz);
 
     AActor *underthing = P_CheckOnmobj(thing);
-    bool    onthing    = P_AllowPassover() && underthing && underthing->z < thing->z;
+    bool    onthing    = underthing && underthing->z < thing->z;
 
     // calculate new floorz/ceilingz, etc
     P_CheckPosition(thing, thing->x, thing->y);
@@ -1688,7 +1673,7 @@ BOOL PTR_SlideTraverse(intercept_t *in)
     {
         goto isblocking; // too big a step up
     }
-    else if (co_zdoomphys && slidemo->z < openbottom)
+    else if (slidemo->z < openbottom)
     {
         // [RH] Check to make sure there's nothing in the way for the step up
         fixed_t savedz = slidemo->z;
@@ -1959,7 +1944,7 @@ BOOL PTR_AimTraverse(intercept_t *in)
 //
 bool P_ShootLine(intercept_t *in)
 {
-    bool    precise = (co_fixweaponimpacts != 0);
+    bool    precise = true;
     line_t *li      = in->d.line;
 
     if (!in->isaline)
@@ -2814,11 +2799,10 @@ void P_UseLines(player_t *player)
         if (foundline)
             spac |= SECSPAC_UseWall;
         if ((!sec->SecActTarget || !A_TriggerAction(sec->SecActTarget, usething, spac)) &&
-            (co_boomphys && !P_PathTraverse(x1, y1, x2, y2, PT_ADDLINES, PTR_NoWayTraverse)))
+            (!P_PathTraverse(x1, y1, x2, y2, PT_ADDLINES, PTR_NoWayTraverse)))
         {
             // This added test makes the "oof" sound work on 2s lines -- killough:
             // [ML] It also apparently allows additional silent bfg tricks not present in vanilla...
-            // [ML] co_boomlinecheck now part of co_boomphys
             UV_SoundAvoidPlayer(usething, CHAN_VOICE, "player/male/grunt1", ATTN_NORM);
         }
     }
@@ -2836,7 +2820,7 @@ static float   bombdistancefloat;
 static bool    DamageSource;
 static int     bombmod;
 
-// [RH] Damage scale to apply to thing that shot the missile. (co_zdoomphys)
+// [RH] Damage scale to apply to thing that shot the missile.
 static float selfthrustscale;
 
 CVAR_FUNC_IMPL(sv_splashfactor)
@@ -3038,41 +3022,32 @@ void P_RadiusAttack(AActor *spot, AActor *source, int damage, int distance, bool
     }
 
     // decide which radius attack function to use
-    BOOL (*pAttackFunc)(AActor *) = co_zdoomphys ? PIT_ZDoomRadiusAttack : PIT_DoomRadiusAttack;
+    BOOL (*pAttackFunc)(AActor *) = PIT_ZDoomRadiusAttack;
 
-    if (co_blockmapfix)
+    // [SL] 2012-12-03 - An actor can get radius
+    // damage more than once since an actor can be in more than one block.
+    // So we make a list of unique actors in the surrounding blocks and
+    // then call the radius attack function once for each actor.
+
+    std::set<AActor *> actorset;
+    for (int y = yl; y <= yh; y++)
     {
-        // [SL] 2012-12-03 - With co_blockmapfix, an actor can get radius
-        // damage more than once since an actor can be in more than one block.
-        // So we make a list of unique actors in the surrounding blocks and
-        // then call the radius attack function once for each actor.
-
-        std::set<AActor *> actorset;
-        for (int y = yl; y <= yh; y++)
+        for (int x = xl; x <= xh; x++)
         {
-            for (int x = xl; x <= xh; x++)
+            AActor *mobj = blocklinks[y * bmapwidth + x];
+            while (mobj)
             {
-                AActor *mobj = blocklinks[y * bmapwidth + x];
-                while (mobj)
-                {
-                    actorset.insert(mobj);
-                    mobj = mobj->bmapnode.Next(x, y);
-                }
+                actorset.insert(mobj);
+                mobj = mobj->bmapnode.Next(x, y);
             }
         }
-
-        std::set<AActor *>::iterator itr = actorset.begin();
-        while (itr != actorset.end())
-        {
-            pAttackFunc(*itr);
-            ++itr;
-        }
     }
-    else
+
+    std::set<AActor *>::iterator itr = actorset.begin();
+    while (itr != actorset.end())
     {
-        for (int y = yl; y <= yh; y++)
-            for (int x = xl; x <= xh; x++)
-                P_BlockThingsIterator(x, y, pAttackFunc);
+        pAttackFunc(*itr);
+        ++itr;
     }
 }
 
@@ -3173,44 +3148,31 @@ bool P_ChangeSector(sector_t *sector, int crunch)
     nofit       = false;
     crushchange = crunch;
 
-    // [ML] co_boomsectortouch now part of co_boomphys
-    if (co_boomphys)
-    {
-        msecnode_t *n;
+    msecnode_t *n;
 
-        // killough 4/4/98: scan list front-to-back until empty or exhausted,
-        // restarting from beginning after each thing is processed. Avoids
-        // crashes, and is sure to examine all things in the sector, and only
-        // the things which are in the sector, until a steady-state is reached.
-        // Things can arbitrarily be inserted and removed and it won't mess up.
-        //
-        // killough 4/7/98: simplified to avoid using complicated counter
+    // killough 4/4/98: scan list front-to-back until empty or exhausted,
+    // restarting from beginning after each thing is processed. Avoids
+    // crashes, and is sure to examine all things in the sector, and only
+    // the things which are in the sector, until a steady-state is reached.
+    // Things can arbitrarily be inserted and removed and it won't mess up.
+    //
+    // killough 4/7/98: simplified to avoid using complicated counter
 
-        // Mark all things invalid
+    // Mark all things invalid
 
-        for (n = sector->touching_thinglist; n; n = n->m_snext)
-            n->visited = false;
+    for (n = sector->touching_thinglist; n; n = n->m_snext)
+        n->visited = false;
 
-        do
-            for (n = sector->touching_thinglist; n; n = n->m_snext)         // go through list
-                if (!n->visited)                                            // unprocessed thing found
-                {
-                    n->visited = true;                                      // mark thing as processed
-                    if (n->m_thing && !(n->m_thing->flags & MF_NOBLOCKMAP)) // [Blair] Add nullcheck here
-                        PIT_ChangeSector(n->m_thing);                       // for clients that aren't updated yet.
-                    break;                                                  // exit and start over
-                }
-        while (n); // repeat from scratch until all things left are marked valid
-    }
-    else
-    {
-        int x, y;
-
-        // re-check heights for all things near the moving sector
-        for (x = sector->blockbox[BOXLEFT]; x <= sector->blockbox[BOXRIGHT]; x++)
-            for (y = sector->blockbox[BOXBOTTOM]; y <= sector->blockbox[BOXTOP]; y++)
-                P_BlockThingsIterator(x, y, PIT_ChangeSector);
-    }
+    do
+        for (n = sector->touching_thinglist; n; n = n->m_snext)         // go through list
+            if (!n->visited)                                            // unprocessed thing found
+            {
+                n->visited = true;                                      // mark thing as processed
+                if (n->m_thing && !(n->m_thing->flags & MF_NOBLOCKMAP)) // [Blair] Add nullcheck here
+                    PIT_ChangeSector(n->m_thing);                       // for clients that aren't updated yet.
+                break;                                                  // exit and start over
+            }
+    while (n); // repeat from scratch until all things left are marked valid
 
     return nofit;
 }

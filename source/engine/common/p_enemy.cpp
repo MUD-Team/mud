@@ -42,10 +42,6 @@
 
 EXTERN_CVAR(sv_allowexit)
 EXTERN_CVAR(sv_fastmonsters)
-EXTERN_CVAR(co_zdoomphys)
-EXTERN_CVAR(co_novileghosts)
-EXTERN_CVAR(co_zdoomsound)
-EXTERN_CVAR(co_removesoullimit)
 
 enum dirtype_t
 {
@@ -201,13 +197,10 @@ BOOL P_CheckMeleeRange(AActor *actor)
         return true;
 
     // [RH] Don't melee things too far above or below actor.
-    if (P_AllowPassover())
-    {
-        if (pl->z > actor->z + actor->height)
-            return false;
-        if (pl->z + pl->height < actor->z)
-            return false;
-    }
+    if (pl->z > actor->z + actor->height)
+        return false;
+    if (pl->z + pl->height < actor->z)
+        return false;
 
     if (!P_CheckSight(actor, pl))
         return false;
@@ -299,7 +292,7 @@ BOOL P_Move(AActor *actor)
 
     // [RH] Instead of yanking non-floating monsters to the ground,
     // let gravity drop them down, unless they're moving down a step.
-    if (co_zdoomphys && !(actor->flags & MF_NOGRAVITY) && actor->z > actor->floorz && !(actor->flags2 & MF2_ONMOBJ))
+    if (!(actor->flags & MF_NOGRAVITY) && actor->z > actor->floorz && !(actor->flags2 & MF2_ONMOBJ))
     {
         if (actor->z > actor->floorz + 24 * FRACUNIT)
         {
@@ -384,9 +377,6 @@ BOOL P_Move(AActor *actor)
     {
         actor->flags &= ~MF_INFLOAT;
     }
-
-    if (!co_zdoomphys && !(actor->flags & MF_FLOAT))
-        actor->z = actor->floorz;
 
     return true;
 }
@@ -858,10 +848,7 @@ seeyou:
                 sound[strlen(sound) - 1] = '1';
         }
 
-        if (!co_zdoomsound && (actor->flags2 & MF2_BOSS || actor->flags3 & MF3_FULLVOLSOUNDS))
-            S_Sound(CHAN_VOICE, sound, 1, ATTN_NORM);
-        else
-            S_Sound(actor, CHAN_VOICE, sound, 1, ATTN_NORM);
+        S_Sound(actor, CHAN_VOICE, sound, 1, ATTN_NORM);
     }
 
     if (actor->target)
@@ -1480,16 +1467,8 @@ void A_VileChase(AActor *actor)
 
                     P_SetMobjState(corpsehit, info->raisestate, true);
 
-                    // [Nes] - Classic demo compatability: Ghost monster bug.
-                    if ((co_novileghosts))
-                    {
-                        corpsehit->height = P_ThingInfoHeight(info); // [RH] Use real mobj height
-                        corpsehit->radius = info->radius;            // [RH] Use real radius
-                    }
-                    else
-                    {
-                        corpsehit->height <<= 2;
-                    }
+                    corpsehit->height = P_ThingInfoHeight(info); // [RH] Use real mobj height
+                    corpsehit->radius = info->radius;            // [RH] Use real radius
 
                     corpsehit->flags  = info->flags;
                     corpsehit->health = info->spawnhealth;
@@ -2080,16 +2059,8 @@ bool P_HealCorpse(AActor *actor, int radius, int healstate, int healsound)
 
                     P_SetMobjState(corpsehit, info->raisestate, true);
 
-                    // [Nes] - Classic demo compatability: Ghost monster bug.
-                    if ((co_novileghosts))
-                    {
-                        corpsehit->height = P_ThingInfoHeight(info); // [RH] Use real mobj height
-                        corpsehit->radius = info->radius;            // [RH] Use real radius
-                    }
-                    else
-                    {
-                        corpsehit->height <<= 2;
-                    }
+                    corpsehit->height = P_ThingInfoHeight(info); // [RH] Use real mobj height
+                    corpsehit->radius = info->radius;            // [RH] Use real radius
 
                     corpsehit->flags  = info->flags;
                     corpsehit->health = info->spawnhealth;
@@ -2394,11 +2365,6 @@ void A_PainShootSkull(AActor *actor, angle_t angle)
             count++;
     }
 
-    // if there are already 20 skulls on the level,
-    // don't spit another one
-    // co_removesoullimit removes the standard limit
-    if (count > 20 && !co_removesoullimit)
-        return;
     // multiplayer retains a hard limit of 128
     if (multiplayer && count > 128)
         return;
@@ -2495,10 +2461,7 @@ void A_Scream(AActor *actor)
         sound[strlen(sound) - 1] = P_Random(actor) % 2 + '1';
     }
 
-    if (!co_zdoomsound && (actor->flags2 & MF2_BOSS || actor->flags3 & MF3_FULLVOLSOUNDS))
-        S_Sound(CHAN_VOICE, sound, 1, ATTN_NORM);
-    else
-        S_Sound(actor, CHAN_VOICE, sound, 1, ATTN_NORM);
+    S_Sound(actor, CHAN_VOICE, sound, 1, ATTN_NORM);
 }
 
 void A_XScream(AActor *actor)

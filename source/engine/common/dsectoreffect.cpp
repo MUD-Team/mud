@@ -26,8 +26,6 @@
 #include "odamex.h"
 #include "p_local.h"
 
-EXTERN_CVAR(co_boomphys) // [ML] Roll-up of various compat options
-
 IMPLEMENT_SERIAL(DSectorEffect, DThinker)
 
 DSectorEffect::DSectorEffect()
@@ -162,15 +160,6 @@ DMover::EResult DMover::MovePlane(fixed_t speed, fixed_t dest, int crush, int fl
             {
                 P_ChangeFloorHeight(m_Sector, -speed);
                 flag = P_ChangeSector(m_Sector, crush);
-                // comp_floors: co_boomsectortouch enables Boom behaviour which
-                // allows floor to lower when actors on it are stuck in ceiling
-                // [ML] Now part of co_boomphys
-                if (flag == true && !co_boomphys)
-                {
-                    P_ChangeFloorHeight(m_Sector, speed); // should be lastpos
-                    P_ChangeSector(m_Sector, crush);
-                    return crushed;
-                }
             }
             break;
 
@@ -180,13 +169,9 @@ DMover::EResult DMover::MovePlane(fixed_t speed, fixed_t dest, int crush, int fl
             // comp_floors: jff 02/04/98 keep floor from moving thru ceilings
             // co_boomsectortouch enables Boom behaviour where a rising floor
             // is prevented from moving higher than the ceiling above it
-            // [ML] Now part of co_boomphys
-            if (co_boomphys)
-            {
-                fixed_t h = P_CeilingHeight(m_Sector);
-                if (dest > h) // floor is trying to rise through ceiling
-                    dest = h;
-            }
+            fixed_t h = P_CeilingHeight(m_Sector);
+            if (dest > h) // floor is trying to rise through ceiling
+                dest = h;
 
             if (lastpos + speed > dest)
             {
@@ -209,9 +194,6 @@ DMover::EResult DMover::MovePlane(fixed_t speed, fixed_t dest, int crush, int fl
                     // comp_floors: jff 1/25/98 fix floor crusher
                     // co_boomsectortouch enables Boom behaviour where rising
                     // floor holds in place until victim moves or is crushed
-                    // [ML] Now part of co_boomphys
-                    if (!hexencrush && crush > NO_CRUSH && !co_boomphys)
-                        return crushed;
                     P_ChangeFloorHeight(m_Sector, -speed);
                     P_ChangeSector(m_Sector, crush);
                     return crushed;
@@ -231,8 +213,7 @@ DMover::EResult DMover::MovePlane(fixed_t speed, fixed_t dest, int crush, int fl
             // comp_floors: jff 02/04/98 keep ceiling from moving thru floors
             // co_boomsectortouch enables Boom behaviour where a lowering
             // ceiling is prevented from moving lower than the floor below it
-            // [ML] Now part of co_boomphys
-            if (co_boomphys)
+            if (true)
             {
                 fixed_t h = P_FloorHeight(m_Sector);
                 if (dest < h) // ceiling is trying to lower through floor

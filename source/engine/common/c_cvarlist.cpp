@@ -276,51 +276,6 @@ CVAR_RANGE(sv_countdown, "5",
            "warmup or restarting the game.",
            CVARTYPE_BYTE, CVAR_SERVERARCHIVE | CVAR_LATCH | CVAR_NOENABLEDISABLE, 0.0f, 60.0f)
 
-// Compatibility options
-// ---------------------------------
-
-// Fixes to Vanilla
-//------------------------------
-CVAR(co_realactorheight, "0", "Enable/Disable infinitely tall actors", CVARTYPE_BOOL,
-     CVAR_ARCHIVE | CVAR_SERVERINFO | CVAR_LATCH)
-
-CVAR(co_nosilentspawns, "0", "Turns off the west-facing silent spawns vanilla bug", CVARTYPE_BOOL,
-     CVAR_ARCHIVE | CVAR_SERVERINFO)
-
-CVAR(co_fixweaponimpacts, "0", "Corrected behavior for impact of projectiles and bullets on surfaces", CVARTYPE_BOOL,
-     CVAR_ARCHIVE | CVAR_SERVERINFO)
-
-CVAR(co_blockmapfix, "0", "Fix the blockmap collision bug", CVARTYPE_BOOL, CVAR_ARCHIVE | CVAR_SERVERINFO | CVAR_LATCH)
-
-// Boom-compatibility changes
-//------------------------------
-CVAR(co_boomphys, "0",
-     "Use a finer-grained, faster, and more accurate test for actors, "
-     "sectors and lines",
-     CVARTYPE_BOOL, CVAR_ARCHIVE | CVAR_SERVERINFO)
-
-CVAR(co_allowdropoff, "0", "Allow monsters can get pushed or thrusted off of ledges", CVARTYPE_BOOL,
-     CVAR_ARCHIVE | CVAR_SERVERINFO | CVAR_LATCH)
-
-CVAR(co_novileghosts, "0",
-     "Disables vanilla's ghost monster quirk that lets Arch-viles resurrect crushed monsters as unshootable ghosts",
-     CVARTYPE_BOOL, CVAR_ARCHIVE | CVAR_SERVERINFO | CVAR_LATCH)
-
-CVAR(co_removesoullimit, "0", "Allows pain elementals to still spawn lost souls if more than 20 are present",
-     CVARTYPE_BOOL, CVAR_ARCHIVE | CVAR_SERVERINFO)
-
-// ZDoom-compatibility changes
-//------------------------------
-CVAR(co_zdoomphys, "0", "Enable/disable ZDoom-based gravity and physics interactions", CVARTYPE_BOOL,
-     CVAR_ARCHIVE | CVAR_SERVERINFO)
-
-CVAR(co_zdoomsound, "0", "Enable sound attenuation curve + attenuation of switch sounds with distance", CVARTYPE_BOOL,
-     CVAR_ARCHIVE | CVAR_SERVERINFO)
-
-CVAR(co_fineautoaim, "0", "Increase precision of vertical auto-aim", CVARTYPE_BOOL, CVAR_ARCHIVE | CVAR_SERVERINFO)
-
-CVAR(co_globalsound, "0", "Make pickup sounds global", CVARTYPE_BOOL, CVAR_ARCHIVE | CVAR_SERVERINFO)
-
 // Client options
 // ---------------------
 

@@ -30,9 +30,6 @@
 #include "r_data.h"
 #include "r_state.h"
 
-EXTERN_CVAR(co_blockmapfix)
-EXTERN_CVAR(co_zdoomphys)
-
 //
 //
 // P_PointOnSide
@@ -101,14 +98,6 @@ void AActor::ActorBlockMapListNode::Link()
     int right  = (actor->x + actor->radius - bmaporgx) >> MAPBLOCKSHIFT;
     int top    = (actor->y - actor->radius - bmaporgy) >> MAPBLOCKSHIFT;
     int bottom = (actor->y + actor->radius - bmaporgy) >> MAPBLOCKSHIFT;
-
-    if (!co_blockmapfix)
-    {
-        // originally Doom only used the block containing the center point
-        // of the actor even if the actor overlapped into other blocks
-        top = bottom = (actor->y - bmaporgy) >> MAPBLOCKSHIFT;
-        left = right = (actor->x - bmaporgx) >> MAPBLOCKSHIFT;
-    }
 
     // do not ignore actors only *partially* outside blockmap
     // e.g. do not ignore an actor just because its left edge is off the left
@@ -207,9 +196,6 @@ void AActor::ActorBlockMapListNode::clear()
 
 size_t AActor::ActorBlockMapListNode::getIndex(int bmx, int bmy)
 {
-    if (!co_blockmapfix)
-        return 0;
-
     // range check
     if (bmx < originx || bmx > originx + blockcntx - 1 || bmy < originy || bmy > originy + blockcnty - 1)
         return 0;
@@ -266,26 +252,8 @@ fixed_t P_AproxDistance2(AActor *a, AActor *b)
 //
 int P_PointOnLineSide(fixed_t x, fixed_t y, const line_t *line)
 {
-    if (co_zdoomphys)
-    {
-        // Make use of vector cross product
-        return int64_t(y - line->v1->y) * int64_t(line->dx) + int64_t(line->v1->x - x) * int64_t(line->dy) >= 0;
-    }
-    else
-    {
-        if (!line->dx)
-        {
-            return (x <= line->v1->x) ? (line->dy > 0) : (line->dy < 0);
-        }
-        else if (!line->dy)
-        {
-            return (y <= line->v1->y) ? (line->dx < 0) : (line->dx > 0);
-        }
-        else
-        {
-            return FixedMul(line->dy >> FRACBITS, x - line->v1->x) <= FixedMul(y - line->v1->y, line->dx >> FRACBITS);
-        }
-    }
+    // Make use of vector cross product
+    return int64_t(y - line->v1->y) * int64_t(line->dx) + int64_t(line->v1->x - x) * int64_t(line->dy) >= 0;
 }
 
 //
@@ -340,37 +308,8 @@ int P_BoxOnLineSide(const fixed_t *tmbox, const line_t *ld)
 //
 int P_PointOnDivlineSide(fixed_t x, fixed_t y, const divline_t *line)
 {
-    if (co_zdoomphys)
-    {
-        // Make use of vector cross product
-        return int64_t(y - line->y) * int64_t(line->dx) + int64_t(line->x - x) * int64_t(line->dy) >= 0;
-    }
-    else
-    {
-        if (!line->dx)
-        {
-            return (x <= line->x) ? (line->dy > 0) : (line->dy < 0);
-        }
-        else if (!line->dy)
-        {
-            return (y <= line->y) ? (line->dx < 0) : (line->dx > 0);
-        }
-        else
-        {
-            fixed_t dx = (x - line->x);
-            fixed_t dy = (y - line->y);
-
-            // try to quickly decide by looking at sign bits
-            if ((line->dy ^ line->dx ^ dx ^ dy) & 0x80000000)
-            { // (left is negative)
-                return ((line->dy ^ dx) & 0x80000000) ? 1 : 0;
-            }
-            else
-            { // if (left >= right), return 1, 0 otherwise
-                return FixedMul(dy >> 8, line->dx >> 8) >= FixedMul(line->dy >> 8, dx >> 8);
-            }
-        }
-    }
+    // Make use of vector cross product
+    return int64_t(y - line->y) * int64_t(line->dx) + int64_t(line->x - x) * int64_t(line->dy) >= 0;
 }
 
 //
@@ -391,31 +330,15 @@ void P_MakeDivline(const line_t *li, divline_t *dl)
 //
 fixed_t P_InterceptVector(const divline_t *v2, const divline_t *v1)
 {
-    if (co_zdoomphys)
-    {
-        // [RH] Use 64 bit ints, so long divlines don't overflow
-        int64_t den = (int64_t(v1->dy) * int64_t(v2->dx) - int64_t(v1->dx) * int64_t(v2->dy)) >> FRACBITS;
+    // [RH] Use 64 bit ints, so long divlines don't overflow
+    int64_t den = (int64_t(v1->dy) * int64_t(v2->dx) - int64_t(v1->dx) * int64_t(v2->dy)) >> FRACBITS;
 
-        if (den == 0)
-            return 0; // parallel
+    if (den == 0)
+        return 0; // parallel
 
-        int64_t num = int64_t(v1->x - v2->x) * int64_t(v1->dy) + int64_t(v2->y - v1->y) * int64_t(v1->dx);
+    int64_t num = int64_t(v1->x - v2->x) * int64_t(v1->dy) + int64_t(v2->y - v1->y) * int64_t(v1->dx);
 
-        return (fixed_t)(num / den);
-    }
-    else
-    {
-        fixed_t den = FixedMul(v1->dy >> 8, v2->dx) - FixedMul(v1->dx >> 8, v2->dy);
-
-        if (den == 0)
-            return 0;
-
-        fixed_t num = FixedMul((v1->x - v2->x) >> 8, v1->dy) + FixedMul((v2->y - v1->y) >> 8, v1->dx);
-
-        fixed_t frac = FixedDiv(num, den);
-
-        return frac;
-    }
+    return (fixed_t)(num / den);
 }
 
 //
@@ -664,8 +587,7 @@ BOOL P_BlockLinesIterator(int x, int y, BOOL (*func)(line_t *))
     // referencing linedef 0). Using this first entry (as vanilla Doom does) can
     // cause hitscan weapons to erroneously hit the first linedef entry regardless
     // of where that linedef is located in relation to the block.
-    if (co_blockmapfix)
-        ++list;
+    ++list;
 
     for (; *list != -1; list++)
     {

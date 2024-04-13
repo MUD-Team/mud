@@ -47,9 +47,6 @@ level_locals_t level; // info about current level
 level_pwad_info_t g_EmptyLevel;
 cluster_info_t    g_EmptyCluster;
 
-EXTERN_CVAR(co_allowdropoff)
-EXTERN_CVAR(co_realactorheight)
-
 //
 // LevelInfos methods
 //
@@ -954,7 +951,6 @@ BEGIN_COMMAND(mapinfo)
     flags += (info.flags & LEVEL_DEFINEDINMAPINFO ? " DEFINEDINMAPINFO" : "");
     flags += (info.flags & LEVEL_CHANGEMAPCHEAT ? " CHANGEMAPCHEAT" : "");
     flags += (info.flags & LEVEL_VISITED ? " VISITED" : "");
-    flags += (info.flags & LEVEL_COMPAT_DROPOFF ? "COMPAT_DROPOFF" : "");
 
     if (flags.length() > 0)
     {
@@ -1035,20 +1031,6 @@ ClusterInfos &getClusterInfos()
 {
     static ClusterInfos ci(NULL);
     return ci;
-}
-
-// P_AllowDropOff()
-bool P_AllowDropOff()
-{
-    return level.flags & LEVEL_COMPAT_DROPOFF || co_allowdropoff;
-}
-
-bool P_AllowPassover()
-{
-    if (level.flags & LEVEL_COMPAT_NOPASSOVER)
-        return false;
-
-    return co_realactorheight;
 }
 
 VERSION_CONTROL(g_level_cpp, "$Id: 353def779a2a58b9830d1a1f580b0cdad155b2a2 $")

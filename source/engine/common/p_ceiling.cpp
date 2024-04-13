@@ -29,8 +29,6 @@
 #include "s_sndseq.h"
 #include "s_sound.h"
 
-EXTERN_CVAR(co_boomphys)
-
 extern bool predicting;
 
 void               P_ResetTransferSpecial(newspecial_s *newspecial);
@@ -559,7 +557,7 @@ BOOL P_SpawnZDoomCeiling(DCeiling::ECeiling type, line_t *line, int tag, fixed_t
 
     // check if a manual trigger, if so do just the sector on the backside
     //
-    if (co_boomphys && tag == 0)
+    if (tag == 0)
     {
         if (!line || !(sec = line->backsector))
             return rtn;
@@ -587,7 +585,7 @@ BOOL P_SpawnZDoomCeiling(DCeiling::ECeiling type, line_t *line, int tag, fixed_t
         // if ceiling already moving, don't start a second function on it
         if (P_CeilingActive(sec))
         {
-            if (co_boomphys && manual)
+            if (manual)
                 return false;
             else
                 continue;
@@ -815,7 +813,7 @@ BOOL EV_DoCeiling(DCeiling::ECeiling type, line_t *line, int tag, fixed_t speed,
 
     // check if a manual trigger, if so do just the sector on the backside
     //
-    if (co_boomphys && tag == 0)
+    if (tag == 0)
     {
         if (!line || !(sec = line->backsector))
             return rtn;
@@ -843,7 +841,7 @@ BOOL EV_DoCeiling(DCeiling::ECeiling type, line_t *line, int tag, fixed_t speed,
         // if ceiling already moving, don't start a second function on it
         if (sec->ceilingdata)
         {
-            if (co_boomphys && manual)
+            if (manual)
                 return false;
             else
                 continue;
