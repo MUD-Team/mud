@@ -60,9 +60,6 @@ CVAR(sv_allowcheats, "0", "Allow usage of cheats in all game modes", CVARTYPE_BO
 CVAR(sv_allowexit, "1", "Allow use of Exit switch/teleports in all game modes", CVARTYPE_BOOL,
      CVAR_SERVERARCHIVE | CVAR_SERVERINFO)
 
-CVAR(sv_allowjump, "0", "Allows players to jump when set in all game modes", CVARTYPE_BOOL,
-     CVAR_SERVERARCHIVE | CVAR_SERVERINFO)
-
 CVAR(sv_doubleammo, "0", "Give double ammo regardless of difficulty", CVARTYPE_BOOL,
      CVAR_SERVERARCHIVE | CVAR_SERVERINFO)
 
@@ -71,8 +68,6 @@ CVAR_RANGE(sv_weapondamage, "1.0", "Amount to multiply player weapon damage by",
 
 CVAR_FUNC_DECL(sv_forcewater, "0", "Makes water more realistic (boom maps at the moment)", CVARTYPE_BOOL,
                CVAR_SERVERARCHIVE | CVAR_SERVERINFO | CVAR_NOENABLEDISABLE)
-
-CVAR(sv_freelook, "0", "Allow Looking up and down", CVARTYPE_BOOL, CVAR_SERVERARCHIVE | CVAR_SERVERINFO)
 
 CVAR(sv_allowtargetnames, "0", "When set, names of players appear in the FOV", CVARTYPE_BOOL,
      CVAR_SERVERARCHIVE | CVAR_SERVERINFO)

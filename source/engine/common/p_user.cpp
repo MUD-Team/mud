@@ -46,9 +46,7 @@
 // 16 pixels of bob
 #define MAXBOB 0x100000
 
-EXTERN_CVAR(sv_allowjump)
 EXTERN_CVAR(cl_mouselook)
-EXTERN_CVAR(sv_freelook)
 EXTERN_CVAR(cl_deathcam)
 EXTERN_CVAR(sv_forcerespawn)
 EXTERN_CVAR(sv_forcerespawntime)
@@ -470,37 +468,29 @@ void P_CalcHeight(player_t *player)
 //
 void P_PlayerLookUpDown(player_t *p)
 {
-    // [RH] Look up/down stuff
-    if (!sv_freelook && (!p->spectator))
-    {
-        p->mo->pitch = 0;
-    }
-    else
-    {
-        int look = p->cmd.pitch << 16;
+    int look = p->cmd.pitch << 16;
 
-        // The player's view pitch is clamped between -32 and +56 degrees,
-        // which translates to about half a screen height up and (more than)
-        // one full screen height down from straight ahead when view panning
-        // is used.
-        if (look)
-        {
-            if (look == INT_MIN)
-            { // center view
-                p->mo->pitch = 0;
-            }
-            else if (look > 0)
-            { // look up
-                p->mo->pitch -= look;
-                if (p->mo->pitch < -ANG(32))
-                    p->mo->pitch = -ANG(32);
-            }
-            else
-            { // look down
-                p->mo->pitch -= look;
-                if (p->mo->pitch > ANG(56))
-                    p->mo->pitch = ANG(56);
-            }
+    // The player's view pitch is clamped between -32 and +56 degrees,
+    // which translates to about half a screen height up and (more than)
+    // one full screen height down from straight ahead when view panning
+    // is used.
+    if (look)
+    {
+        if (look == INT_MIN)
+        { // center view
+            p->mo->pitch = 0;
+        }
+        else if (look > 0)
+        { // look up
+            p->mo->pitch -= look;
+            if (p->mo->pitch < -ANG(32))
+                p->mo->pitch = -ANG(32);
+        }
+        else
+        { // look down
+            p->mo->pitch -= look;
+            if (p->mo->pitch > ANG(56))
+                p->mo->pitch = ANG(56);
         }
     }
 }
@@ -630,7 +620,7 @@ void P_MovePlayer(player_t *player)
         {
             player->mo->momz = 3 * FRACUNIT;
         }
-        else if (sv_allowjump && player->mo->onground && !player->jumpTics)
+        else if (player->mo->onground && !player->jumpTics)
         {
             player->mo->momz += 8 * FRACUNIT;
 

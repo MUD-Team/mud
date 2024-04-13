@@ -221,8 +221,6 @@ EXTERN_CVAR(sv_maxcorpses)
 // Action rules
 EXTERN_CVAR(sv_allowexit)
 EXTERN_CVAR(sv_fragexitswitch)
-EXTERN_CVAR(sv_allowjump)
-EXTERN_CVAR(sv_freelook)
 EXTERN_CVAR(sv_infiniteammo)
 
 // Teamplay/CTF
@@ -3204,9 +3202,6 @@ void SV_ProcessPlayerCmd(player_t &player)
 #endif
 
         netcmd->toPlayer(&player);
-
-        if (!sv_freelook)
-            player.mo->pitch = 0;
 
         // Apply this ticcmd using the game logic
         if (gamestate == GS_LEVEL)

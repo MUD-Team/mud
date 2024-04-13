@@ -58,11 +58,6 @@ const static levelFlags_t LEVEL_EVENLIGHTING     = BIT(11);
 
 const static levelFlags_t LEVEL_SNDSEQTOTALCTRL   = BIT(12);
 const static levelFlags_t LEVEL_FORCENOSKYSTRETCH = BIT(13);
-const static levelFlags_t LEVEL_JUMP_NO           = BIT(14);
-const static levelFlags_t LEVEL_JUMP_YES          = BIT(15);
-
-const static levelFlags_t LEVEL_FREELOOK_NO       = BIT(16);
-const static levelFlags_t LEVEL_FREELOOK_YES      = BIT(17);
 
 // Automatically start lightning
 const static levelFlags_t LEVEL_STARTLIGHTNING = BIT(24);

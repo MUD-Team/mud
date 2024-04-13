@@ -255,7 +255,6 @@ EXTERN_CVAR(sv_infiniteammo)
 EXTERN_CVAR(sv_nomonsters)
 EXTERN_CVAR(sv_fastmonsters)
 EXTERN_CVAR(sv_allowexit)
-EXTERN_CVAR(sv_allowjump)
 EXTERN_CVAR(sv_allowredscreen)
 EXTERN_CVAR(sv_scorelimit)
 EXTERN_CVAR(sv_itemsrespawn)
@@ -263,7 +262,6 @@ EXTERN_CVAR(sv_allowcheats)
 EXTERN_CVAR(sv_allowtargetnames)
 EXTERN_CVAR(sv_keepkeys)
 EXTERN_CVAR(cl_mouselook)
-EXTERN_CVAR(sv_freelook)
 EXTERN_CVAR(cl_disconnectalert)
 EXTERN_CVAR(waddirs)
 
@@ -377,8 +375,6 @@ void CL_QuitNetGame2(const netQuitReason_e reason, const char *file, const int l
     network_game            = false;
     simulated_connection    = false; // Ch0wW : don't block people connect to a server after playing a demo
 
-    sv_freelook       = 1;
-    sv_allowjump      = 1;
     sv_allowexit      = 1;
     sv_allowredscreen = 1;
 

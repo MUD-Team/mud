@@ -50,8 +50,6 @@ EXTERN_CVAR(sv_infiniteammo)
 EXTERN_CVAR(sv_nomonsters)
 EXTERN_CVAR(sv_monstersrespawn)
 EXTERN_CVAR(sv_fastmonsters)
-EXTERN_CVAR(sv_allowjump)
-EXTERN_CVAR(sv_freelook)
 EXTERN_CVAR(sv_waddownload)
 EXTERN_CVAR(sv_emptyreset)
 EXTERN_CVAR(sv_fragexitswitch)
@@ -225,8 +223,6 @@ void SV_SendServerInfo()
     MSG_WriteBool(&ml_message, (sv_nomonsters ? true : false));
     MSG_WriteBool(&ml_message, (sv_monstersrespawn ? true : false));
     MSG_WriteBool(&ml_message, (sv_fastmonsters ? true : false));
-    MSG_WriteBool(&ml_message, (sv_allowjump ? true : false));
-    MSG_WriteBool(&ml_message, (sv_freelook ? true : false));
     MSG_WriteBool(&ml_message, (sv_waddownload ? true : false));
     MSG_WriteBool(&ml_message, (sv_emptyreset ? true : false));
     MSG_WriteBool(&ml_message, false); // used to be sv_cleanmaps

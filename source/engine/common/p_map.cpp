@@ -2174,8 +2174,6 @@ BOOL PTR_ShootTraverse(intercept_t *in)
     return false;
 }
 
-EXTERN_CVAR(sv_freelook)
-
 //
 // P_AimLineAttack
 //

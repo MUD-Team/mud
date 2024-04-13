@@ -135,8 +135,6 @@ enum demoversion_t
 
 EXTERN_CVAR(sv_nomonsters)
 EXTERN_CVAR(sv_fastmonsters)
-EXTERN_CVAR(sv_freelook)
-EXTERN_CVAR(sv_allowjump)
 EXTERN_CVAR(cl_run)
 EXTERN_CVAR(hud_mousegraph)
 EXTERN_CVAR(cl_predictpickup)
@@ -436,7 +434,7 @@ void G_BuildTiccmd(ticcmd_t *cmd)
     }
 
     // Joystick analog look -- Hyper_Eye
-    if (joy_freelook && sv_freelook || consoleplayer().spectator)
+    if (joy_freelook || consoleplayer().spectator)
     {
         if (joy_invert)
             look += (int)(((float)joylook / (float)SHRT_MAX) * lookspeed[speed]);
@@ -659,7 +657,7 @@ void G_AddViewPitch(int pitch)
     if (invertmouse)
         pitch = -pitch;
 
-    if ((Actions[ACTION_MLOOK]) || (cl_mouselook && sv_freelook) || consoleplayer().spectator)
+    if ((Actions[ACTION_MLOOK]) || (cl_mouselook) || consoleplayer().spectator)
     {
         localview.pitch += pitch << 16;
         localview.setpitch = true;

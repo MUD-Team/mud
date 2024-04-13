@@ -145,8 +145,6 @@ END_COMMAND(wad)
 
 EXTERN_CVAR(sv_allowexit)
 EXTERN_CVAR(sv_nomonsters)
-EXTERN_CVAR(sv_freelook)
-EXTERN_CVAR(sv_allowjump)
 
 //
 // G_DoNewGame

@@ -50,7 +50,6 @@ EXTERN_CVAR(sv_timelimit)
 EXTERN_CVAR(sv_keepkeys)
 EXTERN_CVAR(sv_sharekeys)
 EXTERN_CVAR(sv_fastmonsters)
-EXTERN_CVAR(sv_freelook)
 EXTERN_CVAR(sv_teamsinplay)
 
 gameaction_t gameaction;
