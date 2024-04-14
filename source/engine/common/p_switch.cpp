@@ -34,7 +34,6 @@
 #include "w_wad.h"
 #include "z_zone.h"
 
-EXTERN_CVAR(co_zdoomsound)
 extern int numtextures;
 
 //
@@ -322,18 +321,9 @@ void P_ChangeSwitchTexture(line_t *line, int useAgain, bool playsound)
 
         if (playsound)
         {
-            if (co_zdoomsound)
-            {
-                // [SL] 2011-05-27 - Play at a normal volume in the center
-                // of the switch's linedef
-                S_Sound(x, y, CHAN_BODY, sound, 1, ATTN_NORM);
-            }
-            else
-            {
-                // [SL] 2011-05-16 - Reverted the code to play the sound at full
-                // volume anywhere on the map to emulate vanilla doom behavior
-                S_Sound(CHAN_BODY, sound, 1, ATTN_NONE);
-            }
+            // [SL] 2011-05-27 - Play at a normal volume in the center
+            // of the switch's linedef
+            S_Sound(x, y, CHAN_BODY, sound, 1, ATTN_NORM);
         }
 
         if (useAgain)
@@ -402,20 +392,12 @@ void DActiveButton::RunThink()
             break;
         }
 
-        if (co_zdoomsound)
-        {
-            // [SL] 2011-05-27 - Play at a normal volume in the center of the
-            //  switch's linedef
-            fixed_t x = m_Line->v1->x + (m_Line->dx >> 1);
-            fixed_t y = m_Line->v1->y + (m_Line->dy >> 1);
-            S_Sound(x, y, CHAN_BODY, "switches/normbutn", 1, ATTN_NORM);
-        }
-        else
-        {
-            // [SL] 2011-05-16 - Changed to play the switch resetting sound at the
-            // map location 0,0 to emulate the bug in vanilla doom
-            S_Sound(0, 0, CHAN_BODY, "switches/normbutn", 1, ATTN_NORM);
-        }
+        // [SL] 2011-05-27 - Play at a normal volume in the center of the
+        //  switch's linedef
+        fixed_t x = m_Line->v1->x + (m_Line->dx >> 1);
+        fixed_t y = m_Line->v1->y + (m_Line->dy >> 1);
+        S_Sound(x, y, CHAN_BODY, "switches/normbutn", 1, ATTN_NORM);
+        
         Destroy();
         m_Line->switchactive = false;
     }

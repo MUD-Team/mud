@@ -31,8 +31,6 @@
 void               P_ResetTransferSpecial(newspecial_s *newspecial);
 const unsigned int P_ResetSectorTransferFlags(const unsigned int flags);
 
-EXTERN_CVAR(co_boomphys)
-
 extern bool predicting;
 
 // ============================================================================
@@ -898,7 +896,7 @@ BOOL EV_DoFloor(DFloor::EFloor floortype, line_t *line, int tag, fixed_t speed, 
     BOOL      manual = false;
 
     // check if a manual trigger; if so do just the sector on the backside
-    if (co_boomphys && tag == 0)
+    if (tag == 0)
     {
         if (!line || !(sec = line->backsector))
             return rtn;
@@ -916,7 +914,7 @@ BOOL EV_DoFloor(DFloor::EFloor floortype, line_t *line, int tag, fixed_t speed, 
         // ALREADY MOVING?	IF SO, KEEP GOING...
         if (sec->floordata || (demoplayback && sec->ceilingdata))
         {
-            if (co_boomphys && manual)
+            if (manual)
                 return false;
             else
                 continue;
@@ -984,7 +982,7 @@ BOOL EV_DoGenFloor(line_t *line)
         // ALREADY MOVING?	IF SO, KEEP GOING...
         if (sec->floordata)
         {
-            if (co_boomphys && manual)
+            if (manual)
                 return false;
             else
                 continue;
@@ -1012,7 +1010,7 @@ BOOL EV_DoZDoomFloor(DFloor::EFloor floortype, line_t *line, int tag, fixed_t sp
     height *= FRACUNIT;
 
     // check if a manual trigger; if so do just the sector on the backside
-    if (co_boomphys && tag == 0)
+    if (tag == 0)
     {
         if (!line || !(sec = line->backsector))
             return rtn;
@@ -1030,7 +1028,7 @@ BOOL EV_DoZDoomFloor(DFloor::EFloor floortype, line_t *line, int tag, fixed_t sp
         // ALREADY MOVING?	IF SO, KEEP GOING...
         if (sec->floordata)
         {
-            if (co_boomphys && manual)
+            if (manual)
                 return false;
             else
                 continue;

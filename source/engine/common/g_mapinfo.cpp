@@ -1471,10 +1471,6 @@ template <> struct MapInfoDataSetter<level_pwad_info_t>
         ENTRY4("evenlighting", &MIType_SetFlag, &ref.flags, LEVEL_EVENLIGHTING)
         ENTRY4("noautosequences", &MIType_SetFlag, &ref.flags, LEVEL_SNDSEQTOTALCTRL)
         ENTRY4("forcenoskystretch", &MIType_SetFlag, &ref.flags, LEVEL_FORCENOSKYSTRETCH)
-        ENTRY5("allowfreelook", &MIType_SCFlags, &ref.flags, LEVEL_FREELOOK_YES, ~LEVEL_FREELOOK_NO)
-        ENTRY5("nofreelook", &MIType_SCFlags, &ref.flags, LEVEL_FREELOOK_NO, ~LEVEL_FREELOOK_YES)
-        ENTRY5("allowjump", &MIType_SCFlags, &ref.flags, LEVEL_JUMP_YES, ~LEVEL_JUMP_NO)
-        ENTRY5("nojump", &MIType_SCFlags, &ref.flags, LEVEL_JUMP_NO, ~LEVEL_JUMP_YES)
         ENTRY2("cdtrack", &MIType_EatNext)
         ENTRY2("cd_start_track", &MIType_EatNext)
         ENTRY2("cd_end1_track", &MIType_EatNext)
@@ -1499,11 +1495,11 @@ template <> struct MapInfoDataSetter<level_pwad_info_t>
         ENTRY2("translator", &MIType_EatNext)
         ENTRY3("compat_shorttex", &MIType_CompatFlag, &ref.flags)     // todo: not implemented
         ENTRY3("compat_limitpain", &MIType_CompatFlag, &ref.flags)    // todo: not implemented
-        ENTRY4("compat_dropoff", &MIType_CompatFlag, &ref.flags, LEVEL_COMPAT_DROPOFF)
+        ENTRY3("compat_dropoff", &MIType_CompatFlag, &ref.flags)      // removed - Dasho
         ENTRY3("compat_trace", &MIType_CompatFlag, &ref.flags)        // todo: not implemented
         ENTRY3("compat_boomscroll", &MIType_CompatFlag, &ref.flags)   // todo: not implemented
         ENTRY3("compat_sectorsounds", &MIType_CompatFlag, &ref.flags) // todo: not implemented
-        ENTRY4("compat_nopassover", &MIType_CompatFlag, &ref.flags, LEVEL_COMPAT_NOPASSOVER)
+        ENTRY3("compat_nopassover", &MIType_CompatFlag, &ref.flags)   // removed - Dasho
         ENTRY3("compat_invisibility", &MIType_CompatFlag, &ref.flags) // todo: not implemented
     }
 };

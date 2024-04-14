@@ -31,8 +31,6 @@
 #include "s_sndseq.h"
 #include "s_sound.h"
 
-EXTERN_CVAR(co_zdoomsound)
-
 extern bool predicting;
 
 void P_SetDoorDestroy(DDoor *door)
@@ -300,13 +298,6 @@ void DDoor::PlayDoorSound()
             snd = "doors/dr1_clos";
         break;
     case finished:
-        // [SL] 2011-06-10 - emulate vanilla Doom bug that plays the
-        // blazing-door sound twice: when the door begins to close
-        // and when the door finishes closing.
-        if (!IsBlazingDoor(this) || co_zdoomsound)
-            return;
-        snd = "doors/dr2_clos";
-        break;
     default:
         return;
     }

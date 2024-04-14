@@ -45,9 +45,7 @@ void A_FireRailgun(AActor *mo);
 void M_LogWDLEvent(int mod);
 
 EXTERN_CVAR(sv_infiniteammo)
-EXTERN_CVAR(sv_freelook)
 EXTERN_CVAR(sv_allowpwo)
-EXTERN_CVAR(co_fineautoaim)
 EXTERN_CVAR(cl_centerbobonfire)
 
 const char *weaponnames[] = {"Fist",       "Pistol",  "Shotgun",  "Chaingun",     "Rocket Launcher",
@@ -1198,14 +1196,11 @@ fixed_t P_BulletSlope(AActor *mo)
     angle_t an = mo->angle;
 
     // [AM] Refactored autoaim into a single function.
-    if (co_fineautoaim)
-        bulletslope = P_AutoAimLineAttack(mo, an, 1 << 26, 10, 16 * 64 * FRACUNIT);
-    else
-        bulletslope = P_AutoAimLineAttack(mo, an, 1 << 26, 1, 16 * 64 * FRACUNIT);
+    bulletslope = P_AutoAimLineAttack(mo, an, 1 << 26, 10, 16 * 64 * FRACUNIT);
 
     // If a target was not found, or one was found, but outside the
     // player's autoaim range, use the actor's pitch for the slope.
-    if (sv_freelook && (!linetarget || // target not found, or:
+    if ((!linetarget || // target not found, or:
                         (mo->player && // target found but outside of player's autoaim range
                          abs(bulletslope - pitchslope) >= mo->player->userinfo.aimdist)))
     {

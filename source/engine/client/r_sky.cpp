@@ -39,7 +39,6 @@ extern int    *texturewidthmask;
 extern fixed_t FocalLengthX;
 extern fixed_t freelookviewheight;
 
-EXTERN_CVAR(sv_freelook)
 EXTERN_CVAR(cl_mouselook)
 EXTERN_CVAR(r_skypalette)
 
@@ -146,7 +145,7 @@ void R_InitSkyMap()
     {
         skytexturemid = 200 / 2 * FRACUNIT;
         skystretch =
-            (r_stretchsky == 1) || consoleplayer().spectator || (r_stretchsky == 2 && sv_freelook && cl_mouselook);
+            (r_stretchsky == 1) || consoleplayer().spectator || (r_stretchsky == 2 && cl_mouselook);
     }
     else
     {

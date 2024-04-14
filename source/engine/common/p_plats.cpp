@@ -31,8 +31,6 @@
 // From sv_main.cpp
 void SV_BroadcastSector(int sectornum);
 
-EXTERN_CVAR(co_boomphys)
-
 extern bool predicting;
 
 void P_SetPlatDestroy(DPlat *plat)
@@ -472,7 +470,7 @@ BOOL EV_DoPlat(int tag, line_t *line, DPlat::EPlatType type, fixed_t height, int
 
     // [RH] If tag is zero, use the sector on the back side
     //		of the activating line (if any).
-    if (co_boomphys && tag == 0)
+    if (tag == 0)
     {
         if (!line || !(sec = line->backsector))
             return false;
@@ -502,7 +500,7 @@ BOOL EV_DoPlat(int tag, line_t *line, DPlat::EPlatType type, fixed_t height, int
     manual_plat:
         if (sec->floordata)
         {
-            if (co_boomphys && manual)
+            if (manual)
                 return false;
             else
                 continue;
@@ -566,7 +564,7 @@ BOOL EV_DoGenLift(line_t *line)
         sec = &sectors[secnum];
         if (sec->floordata)
         {
-            if (co_boomphys && manual)
+            if (manual)
                 return false;
             else
                 continue;

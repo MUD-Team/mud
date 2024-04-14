@@ -45,8 +45,6 @@ fixed_t   t2y;
 int sightcounts[2];
 int sightcounts2[3];
 
-EXTERN_CVAR(co_zdoomphys)
-
 /*
 ==============
 =
@@ -853,10 +851,7 @@ static bool P_CheckSightDoom(fixed_t x1, fixed_t y1, fixed_t z1, fixed_t h1, fix
 
 bool P_CheckSight(const AActor *t1, const AActor *t2)
 {
-    if (co_zdoomphys || map_format.getZDoom())
-        return P_CheckSightZDoom(t1, t2);
-    else
-        return P_CheckSightDoom(t1, t2);
+    return P_CheckSightZDoom(t1, t2);
 }
 
 //
@@ -895,10 +890,7 @@ bool P_CheckSightEdgesDoom(const AActor *t1, const AActor *t2, float radius_boos
 
 bool P_CheckSightEdges(const AActor *t1, const AActor *t2, float radius_boost)
 {
-    if (co_zdoomphys || map_format.getZDoom())
-        return P_CheckSightEdgesZDoom(t1, t2, radius_boost);
-    else
-        return P_CheckSightEdgesDoom(t1, t2, radius_boost);
+    return P_CheckSightEdgesZDoom(t1, t2, radius_boost);
 }
 
 //

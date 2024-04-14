@@ -47,9 +47,6 @@ level_locals_t level; // info about current level
 level_pwad_info_t g_EmptyLevel;
 cluster_info_t    g_EmptyCluster;
 
-EXTERN_CVAR(co_allowdropoff)
-EXTERN_CVAR(co_realactorheight)
-
 //
 // LevelInfos methods
 //
@@ -686,8 +683,6 @@ extern dyncolormap_t NormalLight;
 
 EXTERN_CVAR(sv_gravity)
 EXTERN_CVAR(sv_aircontrol)
-EXTERN_CVAR(sv_allowjump)
-EXTERN_CVAR(sv_freelook)
 
 void G_InitLevelLocals()
 {
@@ -800,23 +795,6 @@ void G_InitLevelLocals()
     if (!::level.skypic2[0])
     {
         ::level.skypic2 = ::level.skypic.c_str();
-    }
-
-    if (::level.flags & LEVEL_JUMP_YES)
-    {
-        sv_allowjump = 1;
-    }
-    if (::level.flags & LEVEL_JUMP_NO)
-    {
-        sv_allowjump = 0.0;
-    }
-    if (::level.flags & LEVEL_FREELOOK_YES)
-    {
-        sv_freelook = 1;
-    }
-    if (::level.flags & LEVEL_FREELOOK_NO)
-    {
-        sv_freelook = 0.0;
     }
 
     //	memset (level.vars, 0, sizeof(level.vars));
@@ -943,10 +921,6 @@ BEGIN_COMMAND(mapinfo)
     flags += (info.flags & LEVEL_EVENLIGHTING ? " EVENLIGHTING" : "");
     flags += (info.flags & LEVEL_SNDSEQTOTALCTRL ? " SNDSEQTOTALCTRL" : "");
     flags += (info.flags & LEVEL_FORCENOSKYSTRETCH ? " FORCENOSKYSTRETCH" : "");
-    flags += (info.flags & LEVEL_JUMP_NO ? " JUMP_NO" : "");
-    flags += (info.flags & LEVEL_JUMP_YES ? " JUMP_YES" : "");
-    flags += (info.flags & LEVEL_FREELOOK_NO ? " FREELOOK_NO" : "");
-    flags += (info.flags & LEVEL_FREELOOK_YES ? " FREELOOK_YES" : "");
     flags += (info.flags & LEVEL_STARTLIGHTNING ? " STARTLIGHTNING" : "");
     flags += (info.flags & LEVEL_FILTERSTARTS ? " FILTERSTARTS" : "");
     flags += (info.flags & LEVEL_LOBBYSPECIAL ? " LOBBYSPECIAL" : "");
@@ -954,7 +928,6 @@ BEGIN_COMMAND(mapinfo)
     flags += (info.flags & LEVEL_DEFINEDINMAPINFO ? " DEFINEDINMAPINFO" : "");
     flags += (info.flags & LEVEL_CHANGEMAPCHEAT ? " CHANGEMAPCHEAT" : "");
     flags += (info.flags & LEVEL_VISITED ? " VISITED" : "");
-    flags += (info.flags & LEVEL_COMPAT_DROPOFF ? "COMPAT_DROPOFF" : "");
 
     if (flags.length() > 0)
     {
@@ -1035,20 +1008,6 @@ ClusterInfos &getClusterInfos()
 {
     static ClusterInfos ci(NULL);
     return ci;
-}
-
-// P_AllowDropOff()
-bool P_AllowDropOff()
-{
-    return level.flags & LEVEL_COMPAT_DROPOFF || co_allowdropoff;
-}
-
-bool P_AllowPassover()
-{
-    if (level.flags & LEVEL_COMPAT_NOPASSOVER)
-        return false;
-
-    return co_realactorheight;
 }
 
 VERSION_CONTROL(g_level_cpp, "$Id: 353def779a2a58b9830d1a1f580b0cdad155b2a2 $")

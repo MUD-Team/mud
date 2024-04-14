@@ -1833,6 +1833,7 @@ static void CL_ServerSettings(const odaproto::svc::ServerSettings *msg)
     }
 
     // Nes - update the skies in case sv_freelook is changed.
+    // Do we need this now that (allowing) freelook is unconditional? - Dasho
     R_InitSkyMap();
 }
 

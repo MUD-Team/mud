@@ -46,10 +46,7 @@
 // 16 pixels of bob
 #define MAXBOB 0x100000
 
-EXTERN_CVAR(sv_allowjump)
 EXTERN_CVAR(cl_mouselook)
-EXTERN_CVAR(sv_freelook)
-EXTERN_CVAR(co_zdoomphys)
 EXTERN_CVAR(cl_deathcam)
 EXTERN_CVAR(sv_forcerespawn)
 EXTERN_CVAR(sv_forcerespawntime)
@@ -413,7 +410,7 @@ void P_CalcHeight(player_t *player)
             player->bob = MAXBOB;
     }
 
-    if (player->cheats & CF_NOMOMENTUM || (!co_zdoomphys && !player->mo->onground))
+    if (player->cheats & CF_NOMOMENTUM)
     {
         player->viewz = player->mo->z + VIEWHEIGHT;
 
@@ -471,37 +468,29 @@ void P_CalcHeight(player_t *player)
 //
 void P_PlayerLookUpDown(player_t *p)
 {
-    // [RH] Look up/down stuff
-    if (!sv_freelook && (!p->spectator))
-    {
-        p->mo->pitch = 0;
-    }
-    else
-    {
-        int look = p->cmd.pitch << 16;
+    int look = p->cmd.pitch << 16;
 
-        // The player's view pitch is clamped between -32 and +56 degrees,
-        // which translates to about half a screen height up and (more than)
-        // one full screen height down from straight ahead when view panning
-        // is used.
-        if (look)
-        {
-            if (look == INT_MIN)
-            { // center view
-                p->mo->pitch = 0;
-            }
-            else if (look > 0)
-            { // look up
-                p->mo->pitch -= look;
-                if (p->mo->pitch < -ANG(32))
-                    p->mo->pitch = -ANG(32);
-            }
-            else
-            { // look down
-                p->mo->pitch -= look;
-                if (p->mo->pitch > ANG(56))
-                    p->mo->pitch = ANG(56);
-            }
+    // The player's view pitch is clamped between -32 and +56 degrees,
+    // which translates to about half a screen height up and (more than)
+    // one full screen height down from straight ahead when view panning
+    // is used.
+    if (look)
+    {
+        if (look == INT_MIN)
+        { // center view
+            p->mo->pitch = 0;
+        }
+        else if (look > 0)
+        { // look up
+            p->mo->pitch -= look;
+            if (p->mo->pitch < -ANG(32))
+                p->mo->pitch = -ANG(32);
+        }
+        else
+        { // look down
+            p->mo->pitch -= look;
+            if (p->mo->pitch > ANG(56))
+                p->mo->pitch = ANG(56);
         }
     }
 }
@@ -589,31 +578,19 @@ void P_MovePlayer(player_t *player)
         if (!mo->onground && !(mo->flags2 & MF2_FLY) && !mo->waterlevel)
         {
             // [RH] allow very limited movement if not on ground.
-            if (co_zdoomphys)
-            {
-                movefactor = FixedMul(movefactor, level.aircontrol);
-                bobfactor  = FixedMul(bobfactor, level.aircontrol);
-            }
-            else
-            {
-                movefactor >>= 8;
-                bobfactor >>= 8;
-            }
+            movefactor = FixedMul(movefactor, level.aircontrol);
+            bobfactor  = FixedMul(bobfactor, level.aircontrol);
         }
         forwardmove = (player->cmd.forwardmove * movefactor) >> 8;
         sidemove    = (player->cmd.sidemove * movefactor) >> 8;
 
-        // [ML] Check for these conditions unless advanced physics is on
-        if (co_zdoomphys || (!co_zdoomphys && (mo->onground || (mo->flags2 & MF2_FLY) || mo->waterlevel)))
+        if (forwardmove)
         {
-            if (forwardmove)
-            {
-                P_ForwardThrust(player, mo->angle, forwardmove);
-            }
-            if (sidemove)
-            {
-                P_SideThrust(player, mo->angle, sidemove);
-            }
+            P_ForwardThrust(player, mo->angle, forwardmove);
+        }
+        if (sidemove)
+        {
+            P_SideThrust(player, mo->angle, sidemove);
         }
 
         if (mo->state == &states[S_PLAY])
@@ -643,7 +620,7 @@ void P_MovePlayer(player_t *player)
         {
             player->mo->momz = 3 * FRACUNIT;
         }
-        else if (sv_allowjump && player->mo->onground && !player->jumpTics)
+        else if (player->mo->onground && !player->jumpTics)
         {
             player->mo->momz += 8 * FRACUNIT;
 

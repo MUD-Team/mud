@@ -106,8 +106,6 @@ EXTERN_CVAR(sv_allowexit)
 EXTERN_CVAR(sv_nomonsters)
 EXTERN_CVAR(sv_monstersrespawn)
 EXTERN_CVAR(sv_fastmonsters)
-EXTERN_CVAR(sv_freelook)
-EXTERN_CVAR(sv_allowjump)
 EXTERN_CVAR(sv_allowredscreen)
 EXTERN_CVAR(snd_sfxvolume)   // maximum volume for sound
 EXTERN_CVAR(snd_musicvolume) // maximum volume for music
@@ -831,8 +829,6 @@ void D_DoomMain()
         serverside = true;
 
         // Enable serverside settings to make them fully client-controlled.
-        sv_freelook       = 1;
-        sv_allowjump      = 1;
         sv_allowexit      = 1;
         sv_allowredscreen = 1;
 

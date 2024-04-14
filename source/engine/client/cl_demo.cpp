@@ -1025,8 +1025,6 @@ void NetDemo::writeLauncherSequence(buf_t *netbuffer)
     MSG_WriteBool(netbuffer, false); // sv_nomonsters
     MSG_WriteBool(netbuffer, false); // sv_monstersrespawn
     MSG_WriteBool(netbuffer, false); // sv_fastmonsters
-    MSG_WriteBool(netbuffer, false); // sv_allowjump
-    MSG_WriteBool(netbuffer, false); // sv_freelook
     MSG_WriteBool(netbuffer, false); // sv_waddownload
     MSG_WriteBool(netbuffer, false); // sv_emptyreset
     MSG_WriteBool(netbuffer, false); // sv_cleanmaps
