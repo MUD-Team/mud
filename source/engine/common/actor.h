@@ -23,6 +23,8 @@
 
 #pragma once
 
+#include <string.h>
+
 #include <map>
 #include <vector>
 
