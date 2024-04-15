@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.25)
 if ("${CMAKE_TOOLCHAIN_FILE}" MATCHES "vcpkg.cmake")
     if (CMAKE_HOST_UNIX)
         include ("vcpkg_triplets/vcpkg-triplets-linux.cmake")
+    elseif ("${CMAKE_GENERATOR}" MATCHES "MinGW Makefiles") # for some reason the regular (MINGW) CMake check fails here - Dasho
+        include ("vcpkg_triplets/vcpkg-triplets-mingw.cmake")
     else()
         include ("vcpkg_triplets/vcpkg-triplets-windows.cmake")
     endif()
@@ -29,7 +31,7 @@ if (MUD_PROFILING)
   add_definitions(-DMUD_PROFILING -DTRACY_ENABLE -DTRACY_CALLSTACK)
 endif()
 
-if (WIN32)
+if (WIN32 AND NOT MINGW)
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")    
     set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>")
     
@@ -48,7 +50,7 @@ if (WIN32)
     add_definitions("/wd4244 /wd4267")
     # Unreferenced formal parameter, and there are many of these
     add_definitions("/wd4100")
-else()
+elseif(NOT MINGW)
 
     add_definitions(-DUNIX)
     

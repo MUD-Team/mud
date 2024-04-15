@@ -23,6 +23,8 @@
 
 #pragma once
 
+#include <string.h>
+
 #include "doomtype.h"
 #include "huffman.h"
 
