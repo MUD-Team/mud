@@ -46,7 +46,6 @@ class DArgs : public DObject
 
     void  AppendArg(const char *arg);
     void  SetArgs(unsigned int argc, char **argv);
-    void  SetArgs(const char *cmdline);
     DArgs GatherFiles(const char *param) const;
     void  SetArg(unsigned int argnum, const char *arg);
 

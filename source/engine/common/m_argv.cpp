@@ -26,8 +26,15 @@
 #include <algorithm>
 
 #include "cmdlib.h"
+#include "i_system.h"
 #include "m_fileio.h"
 #include "odamex.h"
+#include "win32inc.h"
+#ifdef _WIN32
+// Need for wide string arg stuff - Dasho
+// Must go after win32inc.h...should we just throw it in there?
+#include <shellapi.h>
+#endif
 
 IMPLEMENT_CLASS(DArgs, DObject)
 
@@ -43,11 +50,6 @@ DArgs::DArgs(unsigned int argc, char **argv)
 
 DArgs::DArgs(const DArgs &other) : args(other.args)
 {
-}
-
-DArgs::DArgs(const char *cmdline)
-{
-    SetArgs(cmdline);
 }
 
 DArgs::~DArgs()
@@ -71,6 +73,34 @@ void DArgs::SetArgs(unsigned argc, char **argv)
     CopyArgs(argc, argv);
 }
 
+// For Windows, we need to get the wide string version of the arguments
+// to properly convert paths passed via -file, etc to UTF-8 - Dasho
+#ifdef _WIN32
+void DArgs::CopyArgs(unsigned argc, char **argv)
+{
+    if (!argv || !argc)
+        return;
+
+    int       win_argc = 0;
+    unsigned    i;
+    wchar_t **win_argv = CommandLineToArgvW(GetCommandLineW(), &win_argc);
+
+    if (!win_argv)
+        I_FatalError("Could not retrieve command line arguments!\n");
+
+    args.resize(win_argc);
+
+    for (i = 0; i < win_argc; i++)
+    {
+        if (win_argv[i] == NULL)
+            I_FatalError("Error parsing command line arguments!\n");
+        args[i].resize(wcslen(win_argv[i]) * 2);
+        PHYSFS_utf8FromUtf16((const PHYSFS_uint16 *)win_argv[i], (char *)args[i].data(), args[i].size());
+    }
+
+    LocalFree(win_argv);
+}
+#else
 void DArgs::CopyArgs(unsigned argc, char **argv)
 {
     args.clear();
@@ -84,6 +114,7 @@ void DArgs::CopyArgs(unsigned argc, char **argv)
         if (argv[i])
             args[i] = argv[i];
 }
+#endif
 
 void DArgs::FlushArgs()
 {
@@ -217,113 +248,6 @@ DArgs DArgs::GatherFiles(const char *param) const
     }
 
     return out;
-}
-
-void DArgs::SetArgs(const char *cmdline)
-{
-    char  *outputline, *q;
-    char **outputargv;
-    int    outputargc;
-
-    args.clear();
-
-    if (!cmdline)
-        return;
-
-    while (*cmdline && isspace(*cmdline))
-        cmdline++;
-
-    if (!*cmdline)
-        return;
-
-    outputline = (char *)Malloc((strlen(cmdline) + 1) * sizeof(char));
-    outputargv = (char **)Malloc(((strlen(cmdline) + 1) / 2) * sizeof(char *));
-
-    const char *p = cmdline;
-    q             = outputline;
-    outputargv[0] = NULL;
-    outputargc    = 1;
-
-    while (*p)
-    {
-        int quote;
-
-        while (*p && isspace(*p))
-            p++;
-
-        if (!*p)
-            break;
-
-        outputargv[outputargc] = q;
-        outputargc++;
-        quote = 0;
-
-        while (*p)
-        {
-            if (!quote && isspace(*p))
-                break;
-
-            if (*p == '\\' || *p == '\"')
-            {
-                int slashes = 0, quotes = 0;
-
-                while (*p == '\\')
-                {
-                    slashes++;
-                    p++;
-                }
-
-                while (*p == '"')
-                {
-                    quotes++;
-                    p++;
-                }
-
-                if (!quotes)
-                    while (slashes--)
-                        *q++ = '\\';
-                else
-                {
-                    while (slashes >= 2)
-                    {
-                        slashes -= 2;
-                        *q++ = '\\';
-                    }
-
-                    if (slashes)
-                    {
-                        quotes--;
-                        *q = '\"';
-                    }
-
-                    if (quotes > 0)
-                    {
-                        if (!quote)
-                        {
-                            quotes--;
-                            quote = 1;
-                        }
-
-                        for (int i = 3; i <= quotes + 1; i += 3)
-                            *q++ = '\"';
-
-                        quote = (quotes % 3 == 0);
-                    }
-                }
-            }
-            else
-                *q++ = *p++;
-        }
-
-        *q++ = '\0';
-    }
-
-    CopyArgs(outputargc, outputargv);
-
-    M_Free(outputargv);
-    M_Free(outputline);
-
-    return;
 }
 
 //
