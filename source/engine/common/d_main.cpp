@@ -296,30 +296,40 @@ std::string D_CleanseFileName(const std::string &filename, const std::string &ex
 //
 // Tries to find an IWAD from a set of known IWAD file names.
 //
+// Note; this function will likely evolve to search the /assets search
+// path for a game manifest or something - Dasho
 static bool FindIWAD(OResFile &out)
 {
-    // Search for a pre-defined IWAD from the list above
-    std::vector<OString> filenames = W_GetIWADFilenames();
-    for (std::vector<OString>::const_iterator it = filenames.begin(); it != filenames.end(); ++it)
-    {
-        // Construct a file.
-        OWantFile   wantfile;
-        std::string filename = it->c_str();
-        if (!OWantFile::make(wantfile, filename))
-        {
-            continue;
-        }
+    char **rc = PHYSFS_enumerateFiles("/");
+    char **i;
+    bool found_iwad = false;
 
+    if (rc == NULL)
+        return false;
+
+    for (i = rc; *i != NULL; i++)
+    {
+        std::string ext;
+        if (!M_ExtractFileExtension(*i, ext))
+            continue;
+        if (stricmp(ext.c_str(), "wad") != 0)
+            continue;
+        OWantFile wantfile;
+        if (!OWantFile::make(wantfile, *i))
+            continue;
         // Resolve the file.
         if (!M_ResolveWantedFile(out, wantfile))
-        {
             continue;
+        if (W_IsIWAD(out))
+        {
+            found_iwad = true;
+            break;
         }
-
-        return W_IsIWAD(out);
     }
 
-    return false;
+    PHYSFS_freeList(rc);
+
+    return found_iwad;
 }
 
 /**
