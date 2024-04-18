@@ -24,7 +24,9 @@
 #include <map>
 
 #include "gi.h"
+#include "i_system.h"
 #include "odamex.h"
+#include "m_fileio.h"
 #include "p_lnspec.h"
 #include "p_local.h"
 #include "p_mapformat.h"
@@ -88,7 +90,27 @@ static int  numswitches;
 //		MAXSWITCHES limit.
 void P_InitSwitchList(void)
 {
-    byte *alphSwitchList = (byte *)W_CacheLumpName("SWITCHES", PU_STATIC);
+    if (!M_FileExists("lumps/SWITCHES.lmp"))
+        I_FatalError("Missing lumps/SWITCHES.lmp");    
+
+    PHYSFS_File *rawswitches = PHYSFS_openRead("lumps/SWITCHES.lmp");
+
+    if (rawswitches == NULL)
+    {
+        I_FatalError("Error opening lumps/SWITCHES.lmp"); 
+    }
+
+    byte *alphSwitchList = new byte[PHYSFS_fileLength(rawswitches)];
+
+    if (PHYSFS_readBytes(rawswitches, alphSwitchList, PHYSFS_fileLength(rawswitches)) != PHYSFS_fileLength(rawswitches))
+    {
+        PHYSFS_close(rawswitches);
+        delete[] alphSwitchList;
+        I_FatalError("Error reading lumps/SWITCHES.lmp"); 
+    }
+    
+    PHYSFS_close(rawswitches);
+
     byte *list_p;
     int   i;
 
@@ -121,7 +143,7 @@ void P_InitSwitchList(void)
         switchlist[i] = -1;
     }
 
-    Z_Free(alphSwitchList);
+    delete[] alphSwitchList;
 }
 
 void P_DestroyButtonThinkers()

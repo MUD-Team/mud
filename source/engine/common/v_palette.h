@@ -77,7 +77,7 @@ argb_t alphablend1a(const argb_t from, const argb_t to, const int toa);
 // 0 <=   toa <= 256
 argb_t alphablend2a(const argb_t from, const int froma, const argb_t to, const int toa);
 
-void V_InitPalette(const char *lumpname);
+void V_InitPalette(const char *filename);
 
 const palette_t *V_GetDefaultPalette();
 const palette_t *V_GetGamePalette();

@@ -32,6 +32,7 @@
 #include "i_sdl.h"
 #include "i_system.h"
 #include "m_argv.h"
+#include "m_fileio.h"
 #include "m_misc.h"
 #include "odamex.h"
 #include "w_wad.h"
@@ -198,21 +199,40 @@ static void getsfx(sfxinfo_struct *sfx)
     Uint32     new_size = 0;
     Mix_Chunk *chunk;
 
-    if (sfx->lumpnum == -1)
+    if (sfx->filename == NULL)
         return;
 
-    Uint8 *data = (Uint8 *)W_CacheLumpNum(sfx->lumpnum, PU_STATIC);
+    // Just deal with uppercase exported lump names with .lmp extension while testing - Dasho
+    std::string sfxfile = StdStringToUpper(sfx->filename);
+    sfxfile = StrFormat("sounds/%s.lmp", sfxfile.c_str());
+    
+    if (!M_FileExists(sfxfile))
+        return;
 
-    // [Russell] - ICKY QUICKY HACKY SPACKY *I HATE THIS SOUND MANAGEMENT SYSTEM!*
-    // get the lump size, shouldn't this be filled in elsewhere?
-    sfx->length = W_LumpLength(sfx->lumpnum);
+    PHYSFS_File *sfxraw = PHYSFS_openRead(sfxfile.c_str());
+
+    if (!sfxraw)
+        return;
+
+    unsigned int sfxlength = PHYSFS_fileLength(sfxraw);
+
+    sfx->length = sfxlength;
+
+    Uint8 *data = new Uint8[sfxlength];
+
+    if (PHYSFS_readBytes(sfxraw, data, sfxlength) != sfxlength)
+    {
+        delete[] data;
+        PHYSFS_close(sfxraw);
+        return;
+    }
 
     // [Russell] is it not a doom sound lump?
     if (((data[1] << 8) | data[0]) != 3)
     {
         chunk            = (Mix_Chunk *)Z_Malloc(sizeof(Mix_Chunk), PU_STATIC, NULL);
         chunk->allocated = 1;
-        if (sfx->length < 8) // too short to be anything of interest
+        if (sfxlength < 8) // too short to be anything of interest
         {
             // Let's hope SDL_Mixer checks alen before dereferencing abuf!
             chunk->abuf = NULL;
@@ -220,14 +240,15 @@ static void getsfx(sfxinfo_struct *sfx)
         }
         else
         {
-            chunk->abuf = perform_sdlmix_conv(data, sfx->length, &new_size);
+            chunk->abuf = perform_sdlmix_conv(data, sfxlength, &new_size);
             chunk->alen = new_size;
         }
         chunk->volume = MIX_MAX_VOLUME;
 
         sfx->data = chunk;
 
-        Z_ChangeTag(data, PU_CACHE);
+        delete[] data;
+        PHYSFS_close(sfxraw);
 
         return;
     }
@@ -254,7 +275,8 @@ static void getsfx(sfxinfo_struct *sfx)
     ExpandSoundData((byte *)data + 8, samplerate, 8, length, chunk);
     sfx->data = chunk;
 
-    Z_ChangeTag(data, PU_CACHE);
+    delete[] data;
+    PHYSFS_close(sfxraw);
 }
 
 //
@@ -362,7 +384,7 @@ void I_LoadSound(sfxinfo_struct *sfx)
 
     if (!sfx->data)
     {
-        DPrintf("loading sound \"%s\" (%d)\n", sfx->name, sfx->lumpnum);
+        DPrintf("loading sound \"%s\" (%s)\n", sfx->name, sfx->filename);
         getsfx(sfx);
     }
 }

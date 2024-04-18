@@ -1687,27 +1687,18 @@ void G_DoPlayDemo(bool justStreamInput)
     gameaction = ga_nothing;
     int bytelen;
 
-    int demolump = W_CheckNumForName(defdemoname.c_str());
-    if (demolump != -1)
+    // [RH] Allow for demos not loaded as lumps
+    std::string found = StrFormat("lumps/%s.lmp", ::defdemoname.c_str());
+    if (!M_FileExists(found))
     {
-        demobuffer = demo_p = (byte *)W_CacheLumpNum(demolump, PU_STATIC);
-        bytelen             = W_LumpLength(demolump);
+        Printf(PRINT_WARNING, "Could not find demo %s\n", ::defdemoname.c_str());
+        gameaction = ga_fullconsole;
+        return;
     }
-    else
-    {
-        // [RH] Allow for demos not loaded as lumps
-        std::string found = M_FindUserFileName(::defdemoname, ".lmp");
-        if (found.empty())
-        {
-            Printf(PRINT_WARNING, "Could not find demo %s\n", ::defdemoname.c_str());
-            gameaction = ga_fullconsole;
-            return;
-        }
-        ::defdemoname = found;
+    ::defdemoname = found;
 
-        bytelen = M_ReadFile(defdemoname, &demobuffer);
-        demo_p  = demobuffer;
-    }
+    bytelen = M_ReadFile(defdemoname, &demobuffer);
+    demo_p  = demobuffer;
 
     demo_e = demo_p + bytelen;
 

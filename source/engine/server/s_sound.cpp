@@ -254,28 +254,15 @@ int S_FindSound(const char *logicalname)
     return i;
 }
 
-int S_FindSoundByLump(int lump)
+int S_FindSoundByFilename(const char *filename)
 {
-    if (lump != -1)
+    if (filename != NULL)
     {
         for (unsigned i = 0; i < S_sfx.size(); i++)
-            if (S_sfx[i].lumpnum == lump)
+            if (S_sfx[i].filename != NULL && strcmp(S_sfx[i].filename, filename) == 0)
                 return i;
     }
     return -1;
-}
-
-int S_AddSoundLump(const char *logicalname, int lump)
-{
-    S_sfx.push_back(sfxinfo_t());
-    sfxinfo_t &new_sfx = S_sfx[S_sfx.size() - 1];
-
-    // logicalname MUST be < MAX_SNDNAME chars long
-    strcpy(new_sfx.name, logicalname);
-    new_sfx.data    = NULL;
-    new_sfx.link    = sfxinfo_t::NO_LINK;
-    new_sfx.lumpnum = lump;
-    return S_sfx.size() - 1;
 }
 
 void S_ClearSoundLumps()
@@ -298,23 +285,21 @@ int FindSoundTentative(const char *name)
     int id = FindSoundNoHash(name);
     if (id == S_sfx.size())
     {
-        id = S_AddSoundLump(name, -1);
+        id = S_AddSound(name, NULL);
     }
     return id;
 }
 
-int S_AddSound(const char *logicalname, const char *lumpname)
+int S_AddSound(const char *logicalname, const char *filename)
 {
     int sfxid = FindSoundNoHash(logicalname);
-
-    const int lump = lumpname ? W_CheckNumForName(lumpname) : -1;
 
     // Otherwise, prepare a new one.
     if (sfxid != S_sfx.size())
     {
         sfxinfo_t &sfx = S_sfx[sfxid];
 
-        sfx.lumpnum = lump;
+        strcpy(sfx.filename, filename);
         sfx.link    = sfxinfo_t::NO_LINK;
         if (sfx.israndom)
         {
@@ -323,7 +308,17 @@ int S_AddSound(const char *logicalname, const char *lumpname)
         }
     }
     else
-        sfxid = S_AddSoundLump(logicalname, lump);
+    {
+        S_sfx.push_back(sfxinfo_t());
+        sfxinfo_t &new_sfx = S_sfx[S_sfx.size() - 1];
+
+        // logicalname MUST be < MAX_SNDNAME chars long
+        strcpy(new_sfx.name, logicalname);
+        new_sfx.data    = NULL;
+        new_sfx.link    = sfxinfo_t::NO_LINK;
+        strcpy(new_sfx.filename, filename);
+        sfxid = S_sfx.size() - 1;
+    }
 
     return sfxid;
 }
@@ -336,7 +331,6 @@ void S_AddRandomSound(int owner, std::vector<int> &list)
 }
 
 // S_ParseSndInfo
-// Parses all loaded SNDINFO lumps.
 void S_ParseSndInfo()
 {
     S_ClearSoundLumps();

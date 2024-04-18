@@ -152,7 +152,7 @@ void D_Init()
         Printf("Z_Init: Using native allocator with OZone bookkeeping.\n");
 
     // Load palette and set up colormaps
-    V_InitPalette("PLAYPAL");
+    V_InitPalette("PLAYPAL.pal");
     R_InitColormaps();
 
     // [RH] Initialize localizable strings.
@@ -224,8 +224,6 @@ void D_DoomMain()
     unsigned int p;
 
     gamestate = GS_STARTUP;
-
-    W_SetupFileIdentifiers();
 
     // [RH] Initialize items. Still only used for the give command. :-(
     InitItems();

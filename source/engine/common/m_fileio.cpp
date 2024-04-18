@@ -91,20 +91,6 @@ std::string M_GetUserFileName(const std::string &file)
 }
 
 /**
- * @brief Expand "~" into the user's home directory.
- */
-void M_ExpandHomeDir(std::string &path)
-{
-    if (!path.length())
-        return;
-
-    if (path[0] != '~')
-        return;
-
-    path = M_GetHomeDir() + path.substr(1);
-}
-
-/**
  * @brief Check for the existence of a file in a user directory that might
  *       or might not have an extension.
  *
@@ -578,11 +564,6 @@ std::string M_GetWriteDir()
 #else
     return PHYSFS_getPrefDir("MUD Team", "MUD Server"); // subject to change - Dasho
 #endif
-}
-
-std::string M_GetHomeDir()
-{
-    return PHYSFS_getUserDir();
 }
 
 VERSION_CONTROL(m_fileio_cpp, "$Id: 4796a2c0595492f47c301b9c1c77867a74ae0895 $")

@@ -106,7 +106,7 @@ bool OTransferInfo::hydrate(CURL *curl)
         return false;
 
     double speed;
-    if (curl_easy_getinfo(curl, CURLINFO_SPEED_DOWNLOAD, &speed) != CURLE_OK)
+    if (curl_easy_getinfo(curl, CURLINFO_SPEED_DOWNLOAD_T, &speed) != CURLE_OK)
         return false;
 
     const char *url;
@@ -327,7 +327,7 @@ bool OTransfer::start()
     curl_easy_setopt(m_curl, CURLOPT_FOLLOWLOCATION, 1L);
     curl_easy_setopt(m_curl, CURLOPT_CONNECTTIMEOUT, 5L);
     curl_easy_setopt(m_curl, CURLOPT_NOPROGRESS, 0L); // turns on xferinfo
-    curl_easy_setopt(m_curl, CURLOPT_PROGRESSFUNCTION, OTransfer::curlProgress);
+    curl_easy_setopt(m_curl, CURLOPT_XFERINFOFUNCTION, OTransfer::curlProgress);
     curl_easy_setopt(m_curl, CURLOPT_PROGRESSDATA, this);
     curl_easy_setopt(m_curl, CURLOPT_HEADERFUNCTION, curlHeader);
     curl_easy_setopt(m_curl, CURLOPT_USERAGENT, ::ODAMEX_USERAGENT);
@@ -418,16 +418,9 @@ bool OTransfer::tick()
     PHYSFS_close(m_file);
     m_file = NULL;
 
-    // Verify that the file is what the server wants and is not a renamed
-    // commercial IWAD.
+    // Verify that the file is what the server wants
     OMD5Hash actualHash = W_MD5(m_filePart);
-    if (W_IsFilehashCommercialIWAD(actualHash))
-    {
-        remove(m_filePart.c_str());
-        m_errorProc("Accidentally downloaded a commercial IWAD - file removed");
-        return false;
-    }
-    else if (!m_expectHash.empty() && m_expectHash != actualHash)
+    if (!m_expectHash.empty() && m_expectHash != actualHash)
     {
         remove(m_filePart.c_str());
         m_errorProc("Downloaded file is not the same as the server's file - file removed");

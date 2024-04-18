@@ -452,7 +452,7 @@ void V_Init()
     if (!I_VideoInitialized())
         I_FatalError("Failed to initialize display");
 
-    V_InitPalette("PLAYPAL");
+    V_InitPalette("PLAYPAL.pal");
 
     if (realcolormaps.colormap)
         Z_Free(realcolormaps.colormap);

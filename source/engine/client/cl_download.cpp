@@ -169,18 +169,6 @@ bool CL_StartDownload(const Websites &urls, const OWantFile &filename, unsigned 
         return false;
     }
 
-    if (W_IsFilenameCommercialIWAD(filename.getBasename()))
-    {
-        Printf(PRINT_WARNING, "Refusing to download commercial IWAD file.\n");
-        return false;
-    }
-
-    if (W_IsFilehashCommercialIWAD(filename.getWantedMD5()))
-    {
-        Printf(PRINT_WARNING, "Refusing to download renamed commercial IWAD file.\n");
-        return false;
-    }
-
     // Add a slash to the end of the base sites.
     ::dlstate.checkurls = checkurls;
 

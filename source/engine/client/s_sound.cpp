@@ -31,6 +31,7 @@
 #include "gi.h"
 #include "i_music.h"
 #include "i_sound.h"
+#include "i_system.h"
 #include "i_video.h"
 #include "m_alloc.h"
 #include "m_fileio.h"
@@ -94,7 +95,97 @@ cvar_t noisedebug("noise", "0", "", CVARTYPE_BOOL, 0);
 static channel_t *Channel;
 
 // For ZDoom sound curve
-static byte *SoundCurve;
+static constexpr byte SoundCurve[] = {
+    127, 125, 124, 123, 122, 121, 121, 120, 120, 119, 119, 118, 118, 117, 117, 117, 116, 116, 116, 115, 115, 115, 114,
+    114, 114, 113, 113, 113, 113, 112, 112, 112, 112, 111, 111, 111, 111, 110, 110, 110, 110, 109, 109, 109, 109, 109,
+    108, 108, 108, 108, 108, 107, 107, 107, 107, 107, 106, 106, 106, 106, 106, 105, 105, 105, 105, 105, 105, 104, 104,
+    104, 104, 104, 104, 103, 103, 103, 103, 103, 103, 102, 102, 102, 102, 102, 102, 101, 101, 101, 101, 101, 101, 101,
+    100, 100, 100, 100, 100, 100, 100, 99,  99,  99,  99,  99,  99,  99,  98,  98,  98,  98,  98,  98,  98,  97,  97,
+    97,  97,  97,  97,  97,  97,  96,  96,  96,  96,  96,  96,  96,  96,  95,  95,  95,  95,  95,  95,  95,  95,  94,
+    94,  94,  94,  94,  94,  94,  94,  94,  93,  93,  93,  93,  93,  93,  93,  93,  92,  92,  92,  92,  92,  92,  92,
+    92,  92,  91,  91,  91,  91,  91,  91,  91,  91,  91,  90,  90,  90,  90,  90,  90,  90,  90,  90,  90,  89,  89,
+    89,  89,  89,  89,  89,  89,  89,  88,  88,  88,  88,  88,  88,  88,  88,  88,  88,  87,  87,  87,  87,  87,  87,
+    87,  87,  87,  87,  87,  86,  86,  86,  86,  86,  86,  86,  86,  86,  86,  85,  85,  85,  85,  85,  85,  85,  85,
+    85,  85,  85,  84,  84,  84,  84,  84,  84,  84,  84,  84,  84,  84,  83,  83,  83,  83,  83,  83,  83,  83,  83,
+    83,  83,  82,  82,  82,  82,  82,  82,  82,  82,  82,  82,  82,  81,  81,  81,  81,  81,  81,  81,  81,  81,  81,
+    81,  81,  80,  80,  80,  80,  80,  80,  80,  80,  80,  80,  80,  80,  79,  79,  79,  79,  79,  79,  79,  79,  79,
+    79,  79,  79,  78,  78,  78,  78,  78,  78,  78,  78,  78,  78,  78,  78,  77,  77,  77,  77,  77,  77,  77,  77,
+    77,  77,  77,  77,  77,  76,  76,  76,  76,  76,  76,  76,  76,  76,  76,  76,  76,  76,  75,  75,  75,  75,  75,
+    75,  75,  75,  75,  75,  75,  75,  75,  74,  74,  74,  74,  74,  74,  74,  74,  74,  74,  74,  74,  74,  74,  73,
+    73,  73,  73,  73,  73,  73,  73,  73,  73,  73,  73,  73,  72,  72,  72,  72,  72,  72,  72,  72,  72,  72,  72,
+    72,  72,  72,  71,  71,  71,  71,  71,  71,  71,  71,  71,  71,  71,  71,  71,  71,  70,  70,  70,  70,  70,  70,
+    70,  70,  70,  70,  70,  70,  70,  70,  70,  69,  69,  69,  69,  69,  69,  69,  69,  69,  69,  69,  69,  69,  69,
+    69,  68,  68,  68,  68,  68,  68,  68,  68,  68,  68,  68,  68,  68,  68,  67,  67,  67,  67,  67,  67,  67,  67,
+    67,  67,  67,  67,  67,  67,  67,  67,  66,  66,  66,  66,  66,  66,  66,  66,  66,  66,  66,  66,  66,  66,  66,
+    65,  65,  65,  65,  65,  65,  65,  65,  65,  65,  65,  65,  65,  65,  65,  65,  64,  64,  64,  64,  64,  64,  64,
+    64,  64,  64,  64,  64,  64,  64,  64,  64,  63,  63,  63,  63,  63,  63,  63,  63,  63,  63,  63,  63,  63,  63,
+    63,  63,  62,  62,  62,  62,  62,  62,  62,  62,  62,  62,  62,  62,  62,  62,  62,  62,  61,  61,  61,  61,  61,
+    61,  61,  61,  61,  61,  61,  61,  61,  61,  61,  61,  61,  60,  60,  60,  60,  60,  60,  60,  60,  60,  60,  60,
+    60,  60,  60,  60,  60,  60,  59,  59,  59,  59,  59,  59,  59,  59,  59,  59,  59,  59,  59,  59,  59,  59,  59,
+    58,  58,  58,  58,  58,  58,  58,  58,  58,  58,  58,  58,  58,  58,  58,  58,  58,  58,  57,  57,  57,  57,  57,
+    57,  57,  57,  57,  57,  57,  57,  57,  57,  57,  57,  57,  56,  56,  56,  56,  56,  56,  56,  56,  56,  56,  56,
+    56,  56,  56,  56,  56,  56,  56,  55,  55,  55,  55,  55,  55,  55,  55,  55,  55,  55,  55,  55,  55,  55,  55,
+    55,  55,  55,  54,  54,  54,  54,  54,  54,  54,  54,  54,  54,  54,  54,  54,  54,  54,  54,  54,  54,  53,  53,
+    53,  53,  53,  53,  53,  53,  53,  53,  53,  53,  53,  53,  53,  53,  53,  53,  53,  52,  52,  52,  52,  52,  52,
+    52,  52,  52,  52,  52,  52,  52,  52,  52,  52,  52,  52,  52,  51,  51,  51,  51,  51,  51,  51,  51,  51,  51,
+    51,  51,  51,  51,  51,  51,  51,  51,  51,  50,  50,  50,  50,  50,  50,  50,  50,  50,  50,  50,  50,  50,  50,
+    50,  50,  50,  50,  50,  49,  49,  49,  49,  49,  49,  49,  49,  49,  49,  49,  49,  49,  49,  49,  49,  49,  49,
+    49,  49,  48,  48,  48,  48,  48,  48,  48,  48,  48,  48,  48,  48,  48,  48,  48,  48,  48,  48,  48,  48,  47,
+    47,  47,  47,  47,  47,  47,  47,  47,  47,  47,  47,  47,  47,  47,  47,  47,  47,  47,  47,  46,  46,  46,  46,
+    46,  46,  46,  46,  46,  46,  46,  46,  46,  46,  46,  46,  46,  46,  46,  46,  46,  45,  45,  45,  45,  45,  45,
+    45,  45,  45,  45,  45,  45,  45,  45,  45,  45,  45,  45,  45,  45,  44,  44,  44,  44,  44,  44,  44,  44,  44,
+    44,  44,  44,  44,  44,  44,  44,  44,  44,  44,  44,  44,  43,  43,  43,  43,  43,  43,  43,  43,  43,  43,  43,
+    43,  43,  43,  43,  43,  43,  43,  43,  43,  43,  43,  42,  42,  42,  42,  42,  42,  42,  42,  42,  42,  42,  42,
+    42,  42,  42,  42,  42,  42,  42,  42,  42,  41,  41,  41,  41,  41,  41,  41,  41,  41,  41,  41,  41,  41,  41,
+    41,  41,  41,  41,  41,  41,  41,  41,  40,  40,  40,  40,  40,  40,  40,  40,  40,  40,  40,  40,  40,  40,  40,
+    40,  40,  40,  40,  40,  40,  40,  39,  39,  39,  39,  39,  39,  39,  39,  39,  39,  39,  39,  39,  39,  39,  39,
+    39,  39,  39,  39,  39,  39,  38,  38,  38,  38,  38,  38,  38,  38,  38,  38,  38,  38,  38,  38,  38,  38,  38,
+    38,  38,  38,  38,  38,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,
+    37,  37,  37,  37,  37,  36,  36,  36,  36,  36,  36,  36,  36,  36,  36,  36,  36,  36,  36,  36,  36,  36,  36,
+    36,  36,  36,  36,  36,  35,  35,  35,  35,  35,  35,  35,  35,  35,  35,  35,  35,  35,  35,  35,  35,  35,  35,
+    35,  35,  35,  35,  35,  34,  34,  34,  34,  34,  34,  34,  34,  34,  34,  34,  34,  34,  34,  34,  34,  34,  34,
+    34,  34,  34,  34,  34,  34,  33,  33,  33,  33,  33,  33,  33,  33,  33,  33,  33,  33,  33,  33,  33,  33,  33,
+    33,  33,  33,  33,  33,  33,  33,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  31,  31,  31,  31,  31,  31,  31,  31,  31,  31,  31,  31,  31,  31,  31,
+    31,  31,  31,  31,  31,  31,  31,  31,  31,  30,  30,  30,  30,  30,  30,  30,  30,  30,  30,  30,  30,  30,  30,
+    30,  30,  30,  30,  30,  30,  30,  30,  30,  30,  29,  29,  29,  29,  29,  29,  29,  29,  29,  29,  29,  29,  29,
+    29,  29,  29,  29,  29,  29,  29,  29,  29,  29,  29,  29,  28,  28,  28,  28,  28,  28,  28,  28,  28,  28,  28,
+    28,  28,  28,  28,  28,  28,  28,  28,  28,  28,  28,  28,  28,  28,  27,  27,  27,  27,  27,  27,  27,  27,  27,
+    27,  27,  27,  27,  27,  27,  27,  27,  27,  27,  27,  27,  27,  27,  27,  27,  26,  26,  26,  26,  26,  26,  26,
+    26,  26,  26,  26,  26,  26,  26,  26,  26,  26,  26,  26,  26,  26,  26,  26,  26,  26,  26,  25,  25,  25,  25,
+    25,  25,  25,  25,  25,  25,  25,  25,  25,  25,  25,  25,  25,  25,  25,  25,  25,  25,  25,  25,  25,  24,  24,
+    24,  24,  24,  24,  24,  24,  24,  24,  24,  24,  24,  24,  24,  24,  24,  24,  24,  24,  24,  24,  24,  24,  24,
+    24,  23,  23,  23,  23,  23,  23,  23,  23,  23,  23,  23,  23,  23,  23,  23,  23,  23,  23,  23,  23,  23,  23,
+    23,  23,  23,  23,  23,  22,  22,  22,  22,  22,  22,  22,  22,  22,  22,  22,  22,  22,  22,  22,  22,  22,  22,
+    22,  22,  22,  22,  22,  22,  22,  22,  21,  21,  21,  21,  21,  21,  21,  21,  21,  21,  21,  21,  21,  21,  21,
+    21,  21,  21,  21,  21,  21,  21,  21,  21,  21,  21,  21,  20,  20,  20,  20,  20,  20,  20,  20,  20,  20,  20,
+    20,  20,  20,  20,  20,  20,  20,  20,  20,  20,  20,  20,  20,  20,  20,  20,  19,  19,  19,  19,  19,  19,  19,
+    19,  19,  19,  19,  19,  19,  19,  19,  19,  19,  19,  19,  19,  19,  19,  19,  19,  19,  19,  19,  18,  18,  18,
+    18,  18,  18,  18,  18,  18,  18,  18,  18,  18,  18,  18,  18,  18,  18,  18,  18,  18,  18,  18,  18,  18,  18,
+    18,  18,  17,  17,  17,  17,  17,  17,  17,  17,  17,  17,  17,  17,  17,  17,  17,  17,  17,  17,  17,  17,  17,
+    17,  17,  17,  17,  17,  17,  16,  16,  16,  16,  16,  16,  16,  16,  16,  16,  16,  16,  16,  16,  16,  16,  16,
+    16,  16,  16,  16,  16,  16,  16,  16,  16,  16,  16,  15,  15,  15,  15,  15,  15,  15,  15,  15,  15,  15,  15,
+    15,  15,  15,  15,  15,  15,  15,  15,  15,  15,  15,  15,  15,  15,  15,  15,  15,  14,  14,  14,  14,  14,  14,
+    14,  14,  14,  14,  14,  14,  14,  14,  14,  14,  14,  14,  14,  14,  14,  14,  14,  14,  14,  14,  14,  14,  13,
+    13,  13,  13,  13,  13,  13,  13,  13,  13,  13,  13,  13,  13,  13,  13,  13,  13,  13,  13,  13,  13,  13,  13,
+    13,  13,  13,  13,  13,  12,  12,  12,  12,  12,  12,  12,  12,  12,  12,  12,  12,  12,  12,  12,  12,  12,  12,
+    12,  12,  12,  12,  12,  12,  12,  12,  12,  12,  12,  11,  11,  11,  11,  11,  11,  11,  11,  11,  11,  11,  11,
+    11,  11,  11,  11,  11,  11,  11,  11,  11,  11,  11,  11,  11,  11,  11,  11,  11,  10,  10,  10,  10,  10,  10,
+    10,  10,  10,  10,  10,  10,  10,  10,  10,  10,  10,  10,  10,  10,  10,  10,  10,  10,  10,  10,  10,  10,  10,
+    10,  9,   9,   9,   9,   9,   9,   9,   9,   9,   9,   9,   9,   9,   9,   9,   9,   9,   9,   9,   9,   9,   9,
+    9,   9,   9,   9,   9,   9,   9,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,
+    8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   7,   7,   7,   7,   7,   7,   7,   7,   7,
+    7,   7,   7,   7,   7,   7,   7,   7,   7,   7,   7,   7,   7,   7,   7,   7,   7,   7,   7,   7,   7,   7,   6,
+    6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,
+    6,   6,   6,   6,   6,   6,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5,
+    5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   4,   4,   4,   4,   4,   4,   4,   4,   4,
+    4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   3,
+    3,   3,   3,   3,   3,   3,   3,   3,   3,   3,   3,   3,   3,   3,   3,   3,   3,   3,   3,   3,   3,   3,   3,
+    3,   3,   3,   3,   3,   3,   3,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,
+    2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   1,   1,   1,   1,   1,   1,   1,
+    1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,
+    1,
+};
 
 // Maximum volume of a sound effect.
 CVAR_FUNC_IMPL(snd_sfxvolume)
@@ -212,8 +303,6 @@ static void S_StopChannel(unsigned int cnum);
 //
 void S_Init(float sfxVolume, float musicVolume)
 {
-    SoundCurve = (byte *)W_CacheLumpNum(W_GetNumForName("SNDCURVE"), PU_STATIC);
-
     // [RH] Read in sound sequences
     NumSequences = 0;
     S_ParseSndSeq();
@@ -240,8 +329,7 @@ void S_Init(float sfxVolume, float musicVolume)
  */
 void S_Deinit()
 {
-    ::SoundCurve = NULL;
-    ::Channel    = NULL;
+    ::Channel = NULL;
 }
 
 //
@@ -393,54 +481,6 @@ static void AdjustSoundParamsZDoom(const AActor *listener, fixed_t x, fixed_t y,
 }
 
 //
-// S_AdjustSoundParamsDoom
-//
-// Changes volume and stereo-separation from the norm of a sound effect to
-// be played. If the sound is not audible, returns false.
-//
-// joek - from Choco Doom
-//
-// [SL] 2011-05-26 - Changed function parameters to accept x, y instead
-// of a fixed_t* for the sound origin
-//
-// [AM] We always play sounds now - even if they're out of range, since we
-//      might step back in range during the sound.
-//
-static void AdjustSoundParamsDoom(const AActor *listener, fixed_t x, fixed_t y, float *vol, int *sep)
-{
-    static const fixed_t S_CLIPPING_DIST = 1200 * FRACUNIT;
-    static const fixed_t S_CLOSE_DIST    = 200 * FRACUNIT;
-    fixed_t              approx_dist     = P_AproxDistance(listener->x - x, listener->y - y);
-
-    if (approx_dist > S_CLIPPING_DIST)
-    {
-        *vol = 0;
-        *sep = NORM_SEP;
-    }
-    else if (approx_dist < S_CLOSE_DIST)
-    {
-        *vol = snd_sfxvolume;
-        *sep = NORM_SEP;
-    }
-    else
-    {
-        float attenuation = FIXED2FLOAT(FixedDiv(S_CLIPPING_DIST - approx_dist, S_CLIPPING_DIST - S_CLOSE_DIST));
-
-        *vol = snd_sfxvolume * attenuation;
-
-        // angle of source to listener
-        angle_t angle = R_PointToAngle2(listener->x, listener->y, x, y);
-        if (angle > listener->angle)
-            angle = angle - listener->angle;
-        else
-            angle = angle + (0xffffffff - listener->angle);
-
-        // stereo separation
-        *sep = NORM_SEP - (FixedMul(S_STEREO_SWING, finesine[angle >> ANGLETOFINESHIFT]) >> FRACBITS);
-    }
-}
-
-//
 // S_AdjustSoundParams
 //
 static bool AdjustSoundParams(const AActor *listener, fixed_t x, fixed_t y, float *vol, int *sep)
@@ -558,9 +598,9 @@ static void S_StartSound(fixed_t *pt, fixed_t x, fixed_t y, int channel, int sfx
     }
 
     // check for bogus sound lump
-    if (sfxinfo->lumpnum < 0 || sfxinfo->lumpnum > static_cast<int>(numlumps))
+    if (sfxinfo->filename == NULL)
     {
-        DPrintf("Bad sfx lump #: %d\n", sfxinfo->lumpnum);
+        DPrintf("No filename for sfx: %s\n", sfxinfo->name);
         return;
     }
 
@@ -574,7 +614,7 @@ static void S_StartSound(fixed_t *pt, fixed_t x, fixed_t y, int channel, int sfx
         y = pt[1];
     }
 
-    if (sfxinfo->lumpnum == sfx_empty)
+    if (sfx_id == sfx_empty)
         return;
 
     int sep;
@@ -1015,11 +1055,9 @@ void S_StartMusic(const char *m_id)
     S_ChangeMusic(m_id, false);
 }
 
-// [RH] S_ChangeMusic() now accepts the name of the music lump.
-// It's up to the caller to figure out what that name is.
 void S_ChangeMusic(std::string musicname, int looping)
 {
-    // [SL] Avoid caching music lumps if we're not playing music
+    // [SL] Avoid caching music if we're not playing music
     if (snd_musicsystem == MS_NONE)
         return;
 
@@ -1035,20 +1073,15 @@ void S_ChangeMusic(std::string musicname, int looping)
 
     byte  *data   = NULL;
     size_t length = 0;
-    PHYSFS_File  *f;
+    // just test the name + .mid for now - Dasho
+    // StrUpper while dealing with Freedoom lumps - remove eventually
+    std::string  musicpath = StrFormat("music/%s.mid", StdStringToUpper(musicname.c_str()).c_str());
+    PHYSFS_File *f         = PHYSFS_openRead(musicpath.c_str());
 
-    if (!(f = PHYSFS_openRead(musicname.c_str())))
+    if (f == NULL)
     {
-        int lumpnum;
-        if ((lumpnum = W_CheckNumForName(musicname.c_str())) == -1)
-        {
-            Printf(PRINT_HIGH, "Music lump \"%s\" not found\n", musicname.c_str());
-            return;
-        }
-
-        data   = static_cast<byte *>(W_CacheLumpNum(lumpnum, PU_CACHE));
-        length = W_LumpLength(lumpnum);
-        I_PlaySong(data, length, (looping != 0));
+        Printf(PRINT_HIGH, "Music track \"%s\" not found\n", musicpath.c_str());
+        return;
     }
     else
     {
@@ -1056,7 +1089,6 @@ void S_ChangeMusic(std::string musicname, int looping)
         data                = static_cast<byte *>(Malloc(length));
         const size_t result = PHYSFS_readBytes(f, data, length);
         PHYSFS_close(f);
-
         if (result == length)
             I_PlaySong(data, length, (looping != 0));
         M_Free(data);
@@ -1125,28 +1157,15 @@ int S_FindSound(const char *logicalname)
     return i;
 }
 
-int S_FindSoundByLump(int lump)
+int S_FindSoundByFilename(const char *filename)
 {
-    if (lump != -1)
+    if (filename != NULL)
     {
         for (unsigned i = 0; i < S_sfx.size(); i++)
-            if (S_sfx[i].lumpnum == lump)
+            if (S_sfx[i].filename != NULL && strcmp(S_sfx[i].filename, filename) == 0)
                 return i;
     }
     return -1;
-}
-
-int S_AddSoundLump(const char *logicalname, int lump)
-{
-    S_sfx.push_back(sfxinfo_t());
-    sfxinfo_t &new_sfx = S_sfx[S_sfx.size() - 1];
-
-    // logicalname MUST be < MAX_SNDNAME chars long
-    strcpy(new_sfx.name, logicalname);
-    new_sfx.data    = NULL;
-    new_sfx.link    = sfxinfo_t::NO_LINK;
-    new_sfx.lumpnum = lump;
-    return S_sfx.size() - 1;
 }
 
 void S_ClearSoundLumps()
@@ -1169,24 +1188,23 @@ int FindSoundTentative(const char *name)
     int id = FindSoundNoHash(name);
     if (id == S_sfx.size())
     {
-        id = S_AddSoundLump(name, -1);
+        id = S_AddSound(name, NULL);
     }
     return id;
 }
 
-int S_AddSound(const char *logicalname, const char *lumpname)
+int S_AddSound(const char *logicalname, const char *filename)
 {
     int sfxid = FindSoundNoHash(logicalname);
-
-    const int lump = lumpname ? W_CheckNumForName(lumpname) : -1;
 
     // Otherwise, prepare a new one.
     if (sfxid != S_sfx.size())
     {
         sfxinfo_t &sfx = S_sfx[sfxid];
 
-        sfx.lumpnum = lump;
-        sfx.link    = sfxinfo_t::NO_LINK;
+        if (filename != NULL)
+            strcpy(sfx.filename, filename);
+        sfx.link = sfxinfo_t::NO_LINK;
         if (sfx.israndom)
         {
             S_rnd.erase(sfxid);
@@ -1194,7 +1212,18 @@ int S_AddSound(const char *logicalname, const char *lumpname)
         }
     }
     else
-        sfxid = S_AddSoundLump(logicalname, lump);
+    {
+        S_sfx.push_back(sfxinfo_t());
+        sfxinfo_t &new_sfx = S_sfx[S_sfx.size() - 1];
+
+        // logicalname MUST be < MAX_SNDNAME chars long
+        strcpy(new_sfx.name, logicalname);
+        new_sfx.data = NULL;
+        new_sfx.link = sfxinfo_t::NO_LINK;
+        if (filename != NULL)
+            strcpy(new_sfx.filename, filename);
+        sfxid = S_sfx.size() - 1;
+    }
 
     return sfxid;
 }
@@ -1207,22 +1236,35 @@ void S_AddRandomSound(int owner, std::vector<int> &list)
 }
 
 // S_ParseSndInfo
-// Parses all loaded SNDINFO lumps.
+// Parses SNDINFO.txt
 void S_ParseSndInfo()
 {
     S_ClearSoundLumps();
 
-    int lump = -1;
-    while ((lump = W_FindLump("SNDINFO", lump)) != -1)
+    if (M_FileExists("lumps/SNDINFO.txt"))
     {
-        char *buffer = static_cast<char *>(W_CacheLumpNum(lump, PU_CACHE));
+        PHYSFS_File *rawinfo = PHYSFS_openRead("lumps/SNDINFO.txt");
+
+        if (rawinfo == NULL)
+            I_FatalError("Error opening lumps/SNDINFO.txt file");
+
+        std::string buffer;
+        buffer.resize(PHYSFS_fileLength(rawinfo));
+
+        if (PHYSFS_readBytes(rawinfo, (void *)buffer.data(), buffer.size()) != buffer.size())
+        {
+            PHYSFS_close(rawinfo);
+            I_FatalError("Error reading lumps/SNDINFO.txt file");
+        }
+
+        PHYSFS_close(rawinfo);
 
         const OScannerConfig config = {
             "SNDINFO", // lumpName
             true,      // semiComments
             true,      // cComments
         };
-        OScanner os = OScanner::openBuffer(config, buffer, buffer + W_LumpLength(lump));
+        OScanner os = OScanner::openBuffer(config, buffer.data(), buffer.data() + buffer.size());
 
         while (os.scan())
         {
@@ -1392,9 +1434,9 @@ void S_ParseSndInfo()
     }
     S_HashSounds();
 
-    sfx_empty = W_CheckNumForName("dsempty");
-    sfx_noway = S_FindSoundByLump(W_CheckNumForName("dsnoway"));
-    sfx_oof   = S_FindSoundByLump(W_CheckNumForName("dsoof"));
+    sfx_empty = S_FindSoundByFilename("dsempty");
+    sfx_noway = S_FindSoundByFilename("dsnoway");
+    sfx_oof   = S_FindSoundByFilename("dsoof");
 }
 
 static void SetTicker(int *tics, AmbientSound *ambient)
@@ -1488,14 +1530,10 @@ void S_ActivateAmbient(AActor *origin, int ambient)
 
 BEGIN_COMMAND(snd_soundlist)
 {
-    char lumpname[9];
-
-    lumpname[8] = 0;
     for (unsigned i = 0; i < S_sfx.size(); i++)
-        if (S_sfx[i].lumpnum != -1)
+        if (S_sfx[i].filename != NULL)
         {
-            strncpy(lumpname, lumpinfo[S_sfx[i].lumpnum].name, 8);
-            Printf(PRINT_HIGH, "%3d. %s (%s)\n", i + 1, S_sfx[i].name, lumpname);
+            Printf(PRINT_HIGH, "%3d. %s (%s)\n", i + 1, S_sfx[i].name, S_sfx[i].filename);
         }
         else
             Printf(PRINT_HIGH, "%3d. %s **not present**\n", i + 1, S_sfx[i].name);
