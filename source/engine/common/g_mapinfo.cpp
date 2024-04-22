@@ -24,6 +24,7 @@
 #include "gstrings.h"
 #include "i_system.h"
 #include "infomap.h"
+#include "m_fileio.h"
 #include "odamex.h"
 #include "oscanner.h"
 #include "p_mapformat.h"
@@ -315,11 +316,7 @@ int ParseStandardUmapInfoProperty(OScanner &os, level_pwad_info_t *mape)
     else if (!stricmp(pname.c_str(), "music"))
     {
         MustGet<OLumpName>(os);
-        const std::string musicname = os.getToken();
-        if (W_CheckNumForName(musicname.c_str()) != -1)
-        {
-            mape->music = musicname;
-        }
+        mape->music = os.getToken();
     }
     else if (!stricmp(pname.c_str(), "endpic"))
     {
@@ -396,10 +393,7 @@ int ParseStandardUmapInfoProperty(OScanner &os, level_pwad_info_t *mape)
     else if (!stricmp(pname.c_str(), "intermusic"))
     {
         MustGet<OLumpName>(os);
-        const std::string musicname = os.getToken();
-
-        if (W_CheckNumForName(musicname.c_str()) != -1)
-            mape->intermusic = musicname;
+        mape->intermusic = os.getToken();
     }
     else if (!stricmp(pname.c_str(), "episode"))
     {
@@ -511,18 +505,34 @@ void MapNameToLevelNum(level_pwad_info_t &info)
     }
 }
 
-void ParseUMapInfoLump(int lump, const char *lumpname)
+void ParseUMapInfoFile(const char *filename)
 {
     LevelInfos &levels = getLevelInfos();
 
-    const char *buffer = static_cast<char *>(W_CacheLumpNum(lump, PU_STATIC));
+    std::string filepath = StrFormat("lumps/%s.dat", filename);
+
+    PHYSFS_File *rawinfo = PHYSFS_openRead(filepath.c_str());
+
+    if (rawinfo == NULL)
+        I_FatalError("Error opening %s umapinfo file", filepath.c_str());
+
+    std::string buffer;
+    buffer.resize(PHYSFS_fileLength(rawinfo));
+
+    if (PHYSFS_readBytes(rawinfo, (void *)buffer.data(), buffer.size()) != buffer.size())
+    {
+        PHYSFS_close(rawinfo);
+        I_FatalError("Error reading %s umapinfo file", filepath.c_str());
+    }
+
+    PHYSFS_close(rawinfo);
 
     const OScannerConfig config = {
-        lumpname, // lumpName
+        filename, // lumpName
         false,    // semiComments
         true,     // cComments
     };
-    OScanner os = OScanner::openBuffer(config, buffer, buffer + W_LumpLength(lump));
+    OScanner os = OScanner::openBuffer(config, buffer.data(), buffer.data() + buffer.size());
 
     while (os.scan())
     {
@@ -917,17 +927,11 @@ void MIType_MusicLumpName(OScanner &os, bool doEquals, void *data, unsigned int 
         // with a D_, so we must add it.
         char lumpname[9];
         snprintf(lumpname, ARRAY_LENGTH(lumpname), "D_%s", s.c_str());
-        if (W_CheckNumForName(lumpname) != -1)
-        {
-            *static_cast<OLumpName *>(data) = lumpname;
-        }
+        *static_cast<OLumpName *>(data) = lumpname;
     }
     else
     {
-        if (W_CheckNumForName(musicname.c_str()) != -1)
-        {
-            *static_cast<OLumpName *>(data) = musicname;
-        }
+        *static_cast<OLumpName *>(data) = musicname;
     }
 }
 
@@ -1309,17 +1313,32 @@ bool InterpretLines(const std::string &name, std::vector<mline_t> &lines)
 {
     lines.clear();
 
-    const int lump = W_FindLump(name.c_str(), 0);
-    if (lump != -1)
-    {
-        const char *buffer = static_cast<char *>(W_CacheLumpNum(lump, PU_STATIC));
+    std::string filepath = StrFormat("lumps/%s.dat", name.c_str());
 
+    PHYSFS_File *rawinfo = PHYSFS_openRead(filepath.c_str());
+
+    if (rawinfo == NULL)
+        I_FatalError("Error opening %s mapinfo file", filepath.c_str());
+
+    std::string buffer;
+    buffer.resize(PHYSFS_fileLength(rawinfo));
+
+    if (PHYSFS_readBytes(rawinfo, (void *)buffer.data(), buffer.size()) != buffer.size())
+    {
+        PHYSFS_close(rawinfo);
+        I_FatalError("Error reading %s mapinfo file", filepath.c_str());
+    }
+
+    PHYSFS_close(rawinfo);
+
+    if (!buffer.empty())
+    {
         const OScannerConfig config = {
             name.c_str(), // lumpName
             false,        // semiComments
             true,         // cComments
         };
-        OScanner os = OScanner::openBuffer(config, buffer, buffer + W_LumpLength(lump));
+        OScanner os = OScanner::openBuffer(config, buffer.data(), buffer.data() + buffer.size());
 
         while (os.scan())
         {
@@ -1870,21 +1889,37 @@ template <> struct MapInfoDataSetter<automap_dummy>
     }
 };
 
-void ParseMapInfoLump(int lump, const char *lumpname)
+static void ParseMapInfoFile(const char *filename)
 {
     LevelInfos   &levels   = getLevelInfos();
     ClusterInfos &clusters = getClusterInfos();
 
     level_pwad_info_t defaultinfo;
 
-    const char *buffer = static_cast<char *>(W_CacheLumpNum(lump, PU_STATIC));
+    std::string filepath = StrFormat("lumps/%s.dat", filename);
+
+    PHYSFS_File *rawinfo = PHYSFS_openRead(filepath.c_str());
+
+    if (rawinfo == NULL)
+        I_FatalError("Error opening %s mapinfo file", filepath.c_str());
+
+    std::string buffer;
+    buffer.resize(PHYSFS_fileLength(rawinfo));
+
+    if (PHYSFS_readBytes(rawinfo, (void *)buffer.data(), buffer.size()) != buffer.size())
+    {
+        PHYSFS_close(rawinfo);
+        I_FatalError("Error reading %s mapinfo file", filepath.c_str());
+    }
+
+    PHYSFS_close(rawinfo);
 
     const OScannerConfig config = {
-        lumpname, // lumpName
+        filename, // lumpName
         true,     // semiComments
         true,     // cComments
     };
-    OScanner os = OScanner::openBuffer(config, buffer, buffer + W_LumpLength(lump));
+    OScanner os = OScanner::openBuffer(config, buffer.data(), buffer.data() + buffer.size());
 
     while (os.scan())
     {
@@ -2035,7 +2070,7 @@ void ParseMapInfoLump(int lump, const char *lumpname)
 
 //
 // G_ParseMapInfo
-// Parses the MAPINFO lumps of all loaded WADs and generates
+// Parses the MAPINFO lumps of all loaded files and generates
 // data for wadlevelinfos and wadclusterinfos.
 //
 void G_ParseMapInfo()
@@ -2046,10 +2081,7 @@ void G_ParseMapInfo()
     // Reset skill definitions
     skillnum = 0;
 
-    // if (gamemission != heretic)
-    {
-        ParseMapInfoLump(W_GetNumForName("_DCOMNFO"), "_DCOMNFO");
-    }
+    ParseMapInfoFile("_DCOMNFO");
 
     switch (gamemission)
     {
@@ -2061,21 +2093,6 @@ void G_ParseMapInfo()
     case commercial_freedoom:
     case commercial_hacx:
         baseinfoname = "_D2NFO";
-        if (gamemode == commercial_bfg)
-        {
-            lump = W_GetNumForName(baseinfoname);
-            ParseMapInfoLump(lump, baseinfoname);
-            baseinfoname = "_BFGNFO";
-        }
-        break;
-    case pack_tnt:
-        baseinfoname = "_TNTNFO";
-        break;
-    case pack_plut:
-        baseinfoname = "_PLUTNFO";
-        break;
-    case chex:
-        baseinfoname = "_CHEXNFO";
         break;
     case none:
     default:
@@ -2083,25 +2100,22 @@ void G_ParseMapInfo()
         break;
     }
 
-    lump = W_GetNumForName(baseinfoname);
-    ParseMapInfoLump(lump, baseinfoname);
+    ParseMapInfoFile(baseinfoname);
 
     bool found_mapinfo = false;
-    lump               = -1;
-    while ((lump = W_FindLump("UMAPINFO", lump)) != -1)
+    if (M_FileExists("lumps/UMAPINFO.dat"))
     {
         found_mapinfo = true;
-        ParseUMapInfoLump(lump, "UMAPINFO");
+        ParseUMapInfoFile("UMAPINFO");
     }
 
     // If UMAPINFO exists, we don't parse a normal MAPINFO
     if (found_mapinfo == true)
         return;
 
-    lump = -1;
-    while ((lump = W_FindLump("MAPINFO", lump)) != -1)
+    if (M_FileExists("lumps/MAPINFO.dat"))
     {
-        ParseMapInfoLump(lump, "MAPINFO");
+        ParseMapInfoFile("MAPINFO");
     }
 
     if (episodenum == 0)

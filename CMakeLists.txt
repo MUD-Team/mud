@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.25)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
 if ("${CMAKE_TOOLCHAIN_FILE}" MATCHES "vcpkg.cmake")
     if (CMAKE_HOST_UNIX)
         include ("vcpkg_triplets/vcpkg-triplets-linux.cmake")

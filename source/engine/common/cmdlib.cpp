@@ -364,7 +364,7 @@ FORMAT_PRINTF(2, 3) void STACK_ARGS StrFormat(std::string &out, const char *fmt,
 //
 // A quick and dirty std::string formatting that uses snprintf under the covers.
 //
-FORMAT_PRINTF(2, 3) std::string STACK_ARGS StrFormat(const char *fmt, ...)
+FORMAT_PRINTF(1, 2) std::string STACK_ARGS StrFormat(const char *fmt, ...)
 {
     va_list va;
     va_start(va, fmt);
@@ -691,14 +691,14 @@ static int _isspace(int c)
 // Trim whitespace from the start of a string
 std::string &TrimStringStart(std::string &s)
 {
-    s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::function<int(int)>(_isspace))));
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not_fn(std::function<int(int)>(_isspace))));
     return s;
 }
 
 // Trim whitespace from the end of a string
 std::string &TrimStringEnd(std::string &s)
 {
-    s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::function<int(int)>(_isspace))).base(), s.end());
+    s.erase(std::find_if(s.rbegin(), s.rend(), std::not_fn(std::function<int(int)>(_isspace))).base(), s.end());
     return s;
 }
 

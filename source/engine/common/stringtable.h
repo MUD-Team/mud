@@ -66,7 +66,7 @@ class StringTable
     bool canSetPassString(int pass, const std::string &name) const;
     void clearStrings();
     void loadLanguage(const char *code, bool exactMatch, int pass, char *lump, size_t lumpLen);
-    void loadStringsLump(const int lump, const char *lumpname, const bool engOnly);
+    void loadStringsFile(const char *filename, const bool engOnly);
     void prepareIndexes();
     void replaceEscapes(std::string &str);
 

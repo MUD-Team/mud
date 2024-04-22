@@ -217,12 +217,28 @@ void StringTable::loadLanguage(const char *code, bool exactMatch, int pass, char
     }
 }
 
-void StringTable::loadStringsLump(const int lump, const char *lumpname, const bool engOnly)
+void StringTable::loadStringsFile(const char *filename, const bool engOnly)
 {
     // Can't use Z_Malloc this early, so we use raw new/delete.
-    size_t len          = W_LumpLength(lump);
+    std::string filepath = StrFormat("lumps/%s.txt", filename);
+
+    PHYSFS_File *rawlang = PHYSFS_openRead(filepath.c_str());
+
+    if (rawlang == NULL)
+        I_FatalError("Error opening %s language file", filepath.c_str());
+
+    size_t len          = PHYSFS_fileLength(rawlang);
     char  *languageLump = new char[len + 1];
-    W_ReadLump(lump, languageLump);
+
+    if (PHYSFS_readBytes(rawlang, languageLump, len) != len)
+    {
+        PHYSFS_close(rawlang);
+        delete[] languageLump;
+        I_FatalError("Error reading %s language file", filepath.c_str());
+    }
+
+    PHYSFS_close(rawlang);
+
     languageLump[len] = '\0';
 
     // String replacement pass.  Strings in an later pass can be replaced
@@ -331,20 +347,14 @@ bool StringTable::hasString(const OString &name) const
 }
 
 //
-// Load strings from all LANGUAGE lumps in all loaded WAD files.
+// Load strings from lumps/LANGUAGE.txt (for now - Dasho)
 //
 void StringTable::loadStrings(const bool engOnly)
 {
     clearStrings();
     prepareIndexes();
 
-    int lump = -1;
-
-    lump = -1;
-    while ((lump = W_FindLump("LANGUAGE", lump)) != -1)
-    {
-        loadStringsLump(lump, "LANGUAGE", engOnly);
-    }
+    loadStringsFile("LANGUAGE", engOnly);
 }
 
 //

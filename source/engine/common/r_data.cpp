@@ -31,6 +31,7 @@
 
 #include "cmdlib.h"
 #include "i_system.h"
+#include "m_fileio.h"
 #include "odamex.h"
 #include "r_local.h"
 #include "r_sky.h"
@@ -772,17 +773,29 @@ shademap_t realcolormaps;
 
 void R_ForceDefaultColormap(const char *name)
 {
-    const byte *data = (byte *)W_CacheLumpName(name, PU_CACHE);
-    memcpy(realcolormaps.colormap, data, (NUMCOLORMAPS + 1) * 256);
+    std::string cmapfile = StrFormat("lumps/%s.cmp", name);
 
-#if 0
-	// Setup shademap to mirror colormapped colors:
-	for (int m = 0; m < (NUMCOLORMAPS+1); ++m)
-		for (int c = 0; c < 256; ++c)
-			realcolormaps.shademap[m*256+c] = V_Palette.shade(realcolormaps.colormap[m*256+c]);
-#else
+    if (M_FileExists(cmapfile))
+    {
+        PHYSFS_File *rawcmap = PHYSFS_openRead(cmapfile.c_str());
+        if (rawcmap == NULL)
+            I_FatalError("Error opening %s colormap file", cmapfile.c_str());
+        if (PHYSFS_fileLength(rawcmap) < ((NUMCOLORMAPS + 1) * 256))
+        {
+            PHYSFS_close(rawcmap);
+            I_FatalError("Malformed %s colormap file (too short)", cmapfile.c_str());
+        }
+        if (PHYSFS_readBytes(rawcmap, realcolormaps.colormap, (NUMCOLORMAPS + 1) * 256) != (NUMCOLORMAPS + 1) * 256)
+        {
+            PHYSFS_close(rawcmap);
+            I_FatalError("Error loading %s colormap file", cmapfile.c_str());
+        }
+        PHYSFS_close(rawcmap);
+    }
+    else
+        I_FatalError("Missing %s colormap file", cmapfile.c_str());
+
     BuildDefaultShademap(V_GetDefaultPalette(), realcolormaps);
-#endif
 
     fakecmaps[0].name        = StdStringToUpper(name, 8); // denis - todo - string limit?
     fakecmaps[0].blend_color = argb_t(0, 255, 255, 255);

@@ -94,7 +94,7 @@ template <typename VT, int N = 16> class SArray
     typedef generic_iterator<const VT, const SArrayType> const_iterator;
 
     template <typename IVT, typename ISAT>
-    class generic_iterator : public std::iterator<std::forward_iterator_tag, SArray>
+    class generic_iterator
     {
       private:
         // typedef for easier-to-read code
@@ -102,6 +102,12 @@ template <typename VT, int N = 16> class SArray
         typedef generic_iterator<const IVT, const ISAT> ConstThisClass;
 
       public:
+        using iterator_category = std::forward_iterator_tag;
+        using value_type = SArray;
+        using difference_type = std::ptrdiff_t;
+        using pointer = SArray*;
+        using reference = SArray&;
+
         generic_iterator(ISAT &sarray) : mSArray(sarray), mSlot(NOT_FOUND)
         {
         }

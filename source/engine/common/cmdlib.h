@@ -94,7 +94,7 @@ typedef std::vector<std::string> StringTokens;
 StringTokens                     TokenizeString(const std::string &str, const std::string &delim);
 
 FORMAT_PRINTF(2, 3) void STACK_ARGS StrFormat(std::string &out, const char *fmt, ...);
-FORMAT_PRINTF(2, 3) std::string STACK_ARGS StrFormat(const char *fmt, ...);
+FORMAT_PRINTF(1, 2) std::string STACK_ARGS StrFormat(const char *fmt, ...);
 void STACK_ARGS VStrFormat(std::string &out, const char *fmt, va_list va);
 std::string STACK_ARGS VStrFormat(const char *fmt, va_list va);
 

@@ -59,8 +59,6 @@
 #include "svc_map.h"
 #include "v_textcolors.h"
 
-extern bool missingCommercialIWAD;
-
 // Extern data from other files.
 
 EXTERN_CVAR(cl_autorecord)
@@ -777,13 +775,6 @@ static void CL_LoadMap(const odaproto::svc::LoadMap *msg)
 
     if (!missingfiles.empty())
     {
-        if (::missingCommercialIWAD)
-        {
-            Printf(PRINT_WARNING, "Server requires commercial IWAD that was not found.\n");
-            CL_QuitNetGame(NQ_DISCONNECT);
-            return;
-        }
-
         OWantFile missing_file = missingfiles.front();
         CL_QuitAndTryDownload(missing_file);
         return;

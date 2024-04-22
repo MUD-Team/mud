@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
         ::Args.SetArgs(argc, argv);
 
         if (PHYSFS_init(::Args.GetArg(0)) == 0)
-            I_FatalError("Could not initialize PHYSFS:\n%s\n", PHYSFS_getLastError());
+            I_FatalError("Could not initialize PHYSFS:\n%d\n", PHYSFS_getLastErrorCode());
 
         PHYSFS_setWriteDir(M_GetWriteDir().c_str());
         // Ensure certain directories exist in the write folder
@@ -113,7 +113,8 @@ int main(int argc, char *argv[])
         PHYSFS_mount(M_GetBinaryDir().c_str(), NULL, 0);
         PHYSFS_mount(M_GetWriteDir().c_str(), NULL, 0);
 
-        PHYSFS_mount(M_GetBinaryDir().append("assets").append(PATHSEP).append("core").c_str(), NULL, 0);
+        PHYSFS_mount(M_GetBinaryDir().append("assets").append(PATHSEP).append("core").append(PATHSEP).append("common").c_str(), NULL, 0);
+        PHYSFS_mount(M_GetBinaryDir().append("assets").append(PATHSEP).append("core").append(PATHSEP).append("client").c_str(), NULL, 0);
         PHYSFS_mount(M_GetWriteDir().append("assets").append(PATHSEP).append("downloads").c_str(), NULL, 0);
 
         if (::Args.CheckParm("--version"))

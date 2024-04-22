@@ -55,171 +55,12 @@
 
 OResFiles  wadfiles;
 OWantFiles missingfiles;
-bool       missingCommercialIWAD = false;
 
 bool        lastWadRebootSuccess = true;
 extern bool step_mode;
 
 bool  capfps = true;
 float maxfps = 35.0f;
-
-#if defined(_WIN32)
-
-typedef struct
-{
-    HKEY        root;
-    const char *path;
-    const char *value;
-} registry_value_t;
-
-static const char *uninstaller_string = "\\uninstl.exe /S ";
-
-// Keys installed by the various CD editions.  These are actually the
-// commands to invoke the uninstaller and look like this:
-//
-// C:\Program Files\Path\uninstl.exe /S C:\Program Files\Path
-//
-// With some munging we can find where Doom was installed.
-
-// [AM] From the persepctive of a 64-bit executable, 32-bit registry keys are
-//      located in a different spot.
-#if _WIN64
-#define SOFTWARE_KEY "Software\\Wow6432Node"
-#else
-#define SOFTWARE_KEY "Software"
-#endif
-
-static registry_value_t uninstall_values[] = {
-    // Ultimate Doom, CD version (Depths of Doom trilogy)
-    {
-        HKEY_LOCAL_MACHINE,
-        SOFTWARE_KEY "\\Microsoft\\Windows\\CurrentVersion\\"
-                     "Uninstall\\Ultimate Doom for Windows 95",
-        "UninstallString",
-    },
-
-    // Doom II, CD version (Depths of Doom trilogy)
-    {
-        HKEY_LOCAL_MACHINE,
-        SOFTWARE_KEY "\\Microsoft\\Windows\\CurrentVersion\\"
-                     "Uninstall\\Doom II for Windows 95",
-        "UninstallString",
-    },
-
-    // Final Doom
-    {
-        HKEY_LOCAL_MACHINE,
-        SOFTWARE_KEY "\\Microsoft\\Windows\\CurrentVersion\\"
-                     "Uninstall\\Final Doom for Windows 95",
-        "UninstallString",
-    },
-
-    // Shareware version
-    {
-        HKEY_LOCAL_MACHINE,
-        SOFTWARE_KEY "\\Microsoft\\Windows\\CurrentVersion\\"
-                     "Uninstall\\Doom Shareware for Windows 95",
-        "UninstallString",
-    },
-};
-
-// Value installed by the Collector's Edition when it is installed
-static registry_value_t collectors_edition_value = {
-    HKEY_LOCAL_MACHINE,
-    SOFTWARE_KEY "\\Activision\\DOOM Collector's Edition\\v1.0",
-    "INSTALLPATH",
-};
-
-// Subdirectories of the above install path, where IWADs are installed.
-static const char *collectors_edition_subdirs[] = {
-    "Doom2",
-    "Final Doom",
-    "Ultimate Doom",
-};
-
-// Location where Steam is installed
-static registry_value_t steam_install_location = {
-    HKEY_LOCAL_MACHINE,
-    SOFTWARE_KEY "\\Valve\\Steam",
-    "InstallPath",
-};
-
-// Subdirs of the steam install directory where IWADs are found
-static const char *steam_install_subdirs[] = {
-    "steamapps\\common\\doom 2\\base",
-    "steamapps\\common\\Doom 2\\masterbase",
-    "steamapps\\common\\final doom\\base",
-    "steamapps\\common\\Doom 2\\finaldoombase",
-    "steamapps\\common\\ultimate doom\\base",
-    "steamapps\\common\\DOOM 3 BFG Edition\\base\\wads",
-    "steamapps\\common\\master levels of doom\\master\\wads", // Let Odamex find the Master Levels pwads too
-};
-
-static char *GetRegistryString(registry_value_t *reg_val)
-{
-    HKEY  key     = 0;
-    DWORD len     = 0;
-    DWORD valtype = 0;
-    char *result  = 0;
-
-    // Open the key (directory where the value is stored)
-
-    if (RegOpenKeyEx(reg_val->root, reg_val->path, 0, KEY_READ, &key) != ERROR_SUCCESS)
-    {
-        return NULL;
-    }
-
-    result = NULL;
-
-    // Find the type and length of the string, and only accept strings.
-
-    if (RegQueryValueEx(key, reg_val->value, NULL, &valtype, NULL, &len) == ERROR_SUCCESS && valtype == REG_SZ)
-    {
-        // Allocate a buffer for the value and read the value
-        result = static_cast<char *>(malloc(len));
-
-        if (RegQueryValueEx(key, reg_val->value, NULL, &valtype, (unsigned char *)result, &len) != ERROR_SUCCESS)
-        {
-            free(result);
-            result = NULL;
-        }
-    }
-
-    // Close the key
-
-    RegCloseKey(key);
-
-    return result;
-}
-
-#endif
-
-//
-// D_AddSearchDir
-// denis - Split a new directory string using the separator and append results to the output
-//
-void D_AddSearchDir(std::vector<std::string> &dirs, const char *dir, const char separator)
-{
-    if (!dir)
-        return;
-
-    // search through dwd
-    std::stringstream ss(dir);
-    std::string       segment;
-
-    while (!ss.eof())
-    {
-        std::getline(ss, segment, separator);
-
-        if (!segment.length())
-            continue;
-
-        M_ExpandHomeDir(segment);
-        segment = M_CleanPath(segment);
-
-        dirs.push_back(segment);
-    }
-}
 
 //
 // D_GetTitleString
@@ -371,84 +212,6 @@ static void LoadResolvedFiles(const OResFiles &newwadfiles)
     ::GStrings.loadStrings(false);
 }
 
-/**
- * @brief Print a warning that occurrs when the user has an IWAD that's a
- *        different version than the one we want.
- *
- * @param wanted The IWAD that we wanted.
- * @return True if we emitted an commercial IWAD warning.
- */
-static bool CommercialIWADWarning(const OWantFile &wanted)
-{
-    const OMD5Hash &hash = wanted.getWantedMD5();
-    if (hash.empty())
-    {
-        // No MD5 means there is no error we can reasonably display.
-        return false;
-    }
-
-    const fileIdentifier_t *info = W_GameInfo(wanted.getWantedMD5());
-    if (!info)
-    {
-        // No GameInfo means that we're not dealing with a WAD we recognize.
-        return false;
-    }
-
-    if (!info->mIsCommercial)
-    {
-        // Not commercial means that we should treat the IWAD like any other
-        // WAD, with no special callout.
-        return false;
-    }
-
-    Printf("Odamex attempted to load\n> %s.\n\n", info->mIdName.c_str());
-
-    // Try to find an IWAD file with a matching name in the user's directories.
-    OWantFile sameNameWant;
-    OWantFile::make(sameNameWant, wanted.getBasename());
-    OResFile   sameNameRes;
-    const bool resolved = M_ResolveWantedFile(sameNameRes, sameNameWant);
-    if (!resolved)
-    {
-        Printf("Odamex could not find the data file for this game in any of the locations "
-               "it searches for WAD files.  If you know you have %s on your hard drive, you "
-               "can add that path to the 'waddirs' cvar so Odamex can find it.\n\n",
-               wanted.getBasename().c_str());
-    }
-    else
-    {
-        const fileIdentifier_t *curInfo = W_GameInfo(sameNameRes.getMD5());
-        if (curInfo)
-        {
-            // Found a file, but it's the wrong version.
-            Printf("Odamex found a possible data file, but it's the wrong version.\n> "
-                   "%s\n> %s\n\n",
-                   curInfo->mIdName.c_str(), sameNameRes.getFullpath().c_str());
-        }
-        else
-        {
-            // Found a file, but it's not recognized at all.
-            Printf("Odamex found a possible data file, but Odamex does not recognize "
-                   "it.\n> %s\n\n",
-                   sameNameRes.getFullpath().c_str());
-        }
-
-#ifdef _WIN32
-        Printf("You can use a tool such as Omniscient "
-               "<https://drinkybird.net/doom/omniscient> to patch your way to the "
-               "correct version of the data file.\n");
-#else
-        Printf("You can use a tool such as xdelta3 <http://xdelta.org/> paried with IWAD "
-               "patches located on Github <https://github.com/Doom-Utils/iwad-patches> "
-               "to patch your way to the correct version of the data file.\n");
-#endif
-    }
-
-    Printf("If you do not own this game, consider purchasing it on Steam, GOG, or other "
-           "digital storefront.\n\n");
-    return true;
-}
-
 //
 // D_LoadResourceFiles
 //
@@ -463,7 +226,6 @@ void D_LoadResourceFiles(const OWantFiles &newwadfiles)
     OResFile next_iwad;
 
     ::missingfiles.clear();
-    ::missingCommercialIWAD = false;
 
     // Resolve wanted wads.
     OResFiles resolved_wads;
@@ -473,13 +235,6 @@ void D_LoadResourceFiles(const OWantFiles &newwadfiles)
         OResFile file;
         if (!M_ResolveWantedFile(file, *it))
         {
-            // Give more useful information when trying to load an IWAD.
-            const bool isCommercial = CommercialIWADWarning(*it);
-            if (isCommercial && !::missingCommercialIWAD)
-            {
-                ::missingCommercialIWAD = true;
-            }
-
             ::missingfiles.push_back(*it);
             Printf(PRINT_WARNING, "Could not resolve resource file \"%s\".", it->getWantedPath().c_str());
             continue;
@@ -519,12 +274,6 @@ void D_LoadResourceFiles(const OWantFiles &newwadfiles)
             next_iwad     = possible_iwad;
             got_next_iwad = true;
             resolved_wads.erase(resolved_wads.begin());
-            if (W_IsIWADDeprecated(next_iwad))
-            {
-                Printf_Bold("WARNING: IWAD %s is outdated. Please update it to the "
-                            "latest version.\n",
-                            next_iwad.getBasename().c_str());
-            }
         }
     }
 

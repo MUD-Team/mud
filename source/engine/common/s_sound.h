@@ -138,7 +138,8 @@ struct sfxinfo_struct
         NO_LINK = 0xffffffff
     };
 
-    int          lumpnum;     // lump number of sfx
+    // fix this to use arbitrary length filenames - Dasho
+    char        filename[MAX_SNDNAME + 1]; // filename of sfx
     unsigned int ms;          // [RH] length of sfx in milliseconds
     unsigned int next, index; // [RH] For hashing
     unsigned int frequency;   // [RH] Preferred playback rate
@@ -251,9 +252,8 @@ void S_ParseSndInfo();
 
 void S_HashSounds();
 int  S_FindSound(const char *logicalname);
-int  S_FindSoundByLump(int lump);
-int  S_AddSound(const char *logicalname, const char *lumpname); // Add sound by lumpname
-int  S_AddSoundLump(char *logicalname, int lump);               // Add sound by lump index
+int  S_FindSoundByFilename(const char *filename);
+int  S_AddSound(const char *logicalname, const char *filename);
 void S_AddRandomSound(int owner, std::vector<int> &list);
 void S_ClearSoundLumps();
 

@@ -592,8 +592,6 @@ void D_DoomMain()
     C_InitConsole();
     atterm(C_ShutdownConsole);
 
-    W_SetupFileIdentifiers();
-
     // [RH] Initialize items. Still only used for the give command. :-(
     InitItems();
     // Initialize all extra frames

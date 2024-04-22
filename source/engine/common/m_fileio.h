@@ -32,7 +32,6 @@
 extern std::ofstream LOG;
 extern std::ifstream CON;
 
-void        M_ExpandHomeDir(std::string &path);
 std::string M_FindUserFileName(const std::string &file, const char *ext);
 void        M_FixPathSep(std::string &path);
 
@@ -60,14 +59,6 @@ std::string M_CleanPath(std::string path);
  * @brief Get the directory of the Odamex binary.
  */
 std::string M_GetBinaryDir();
-
-/**
- * @brief Get the home directory of the passed user - or the current user.
- *
- * @param user Name of the user to look up, or blank if no user.
- * @return
- */
-std::string M_GetHomeDir();
 
 /**
  * @brief Get the directory that files such as game config and screenshots

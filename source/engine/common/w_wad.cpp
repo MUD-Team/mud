@@ -69,8 +69,6 @@ const size_t HANDLE_GEN_BITS = 3;
 
 void **lumpcache;
 
-static unsigned stdisk_lumpnum;
-
 //
 // W_LumpNameHash
 //
@@ -584,8 +582,6 @@ void W_InitMultipleFiles(const OResFiles &files)
 
     // killough 1/31/98: initialize lump hash table
     W_HashLumps();
-
-    stdisk_lumpnum = W_GetNumForName("STDISK");
 }
 
 /**
@@ -712,8 +708,7 @@ void W_ReadLump(unsigned int lump, void *dest)
 
     l = lumpinfo + lump;
 
-    if (lump != stdisk_lumpnum)
-        I_BeginRead();
+    I_BeginRead();
 
     PHYSFS_seek(l->handle, l->position);
     c = PHYSFS_readBytes(l->handle, dest, l->size);
@@ -721,8 +716,7 @@ void W_ReadLump(unsigned int lump, void *dest)
     if (PHYSFS_eof(l->handle))
         I_Error("W_ReadLump: only read %i of %i on lump %i", c, l->size, lump);
 
-    if (lump != stdisk_lumpnum)
-        I_EndRead();
+    I_EndRead();
 }
 
 //
