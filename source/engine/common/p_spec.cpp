@@ -524,8 +524,8 @@ static void P_InitAnimDefs()
                     os.mustScan();
                     if (os.compareTokenNoCase("flat"))
                     {
-                        os.mustScan();
-                        flatwarp[R_FlatNumForName(os.getToken().c_str())] = true;
+                        //os.mustScan();
+                        //flatwarp[R_FlatNumForName(os.getToken().c_str())] = true;
                     }
                     else if (os.compareTokenNoCase("texture"))
                     {
@@ -2127,6 +2127,9 @@ void P_CollectSecretVanilla(sector_t *sector, player_t *player)
 
 void P_UpdateSpecials(void)
 {
+    texturemanager.updateAnimatedTextures();
+
+    /*
     anim_t *anim;
     int     i;
 
@@ -2173,6 +2176,7 @@ void P_UpdateSpecials(void)
             }
         }
     }
+    */
 
     // [ML] 5/11/06 - Remove sky scrolling ability
 }

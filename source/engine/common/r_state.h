@@ -45,11 +45,6 @@ extern int firstflat;
 extern int numflats;
 
 // for global animation
-extern bool  *flatwarp;
-extern byte **warpedflats;
-extern int   *flatwarpedwhen;
-extern int   *flattranslation;
-
 extern int *texturetranslation;
 
 // Sprite....

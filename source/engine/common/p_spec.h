@@ -31,6 +31,7 @@
 #include "d_player.h"
 #include "dsectoreffect.h"
 #include "r_state.h"
+#include "res_texture.h"
 
 typedef struct movingsector_s
 {
@@ -1068,7 +1069,7 @@ class DCeiling : public DMovingCeiling
     int         m_Direction; // 1 = up, 0 = waiting, -1 = down
 
     // [RH] Need these for BOOM-ish transferring ceilings
-    int   m_Texture;
+    texhandle_t   m_Texture;
     short m_NewSpecial;
     DWORD m_NewFlags;
     short m_NewDamageRate;
@@ -1206,7 +1207,7 @@ class DFloor : public DMovingFloor
     short       m_NewDamageRate;
     byte        m_NewLeakRate;
     byte        m_NewDmgInterval;
-    short       m_Texture;
+    texhandle_t       m_Texture;
     fixed_t     m_FloorDestHeight;
     fixed_t     m_Speed;
 

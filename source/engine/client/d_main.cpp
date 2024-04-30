@@ -64,6 +64,7 @@
 #include "p_setup.h"
 #include "r_local.h"
 #include "r_sky.h"
+#include "res_texture.h"
 #include "s_sound.h"
 #include "stats.h"
 #include "v_video.h"
@@ -474,9 +475,9 @@ void D_Init()
     // Load palette and set up colormaps
     V_Init();
 
-    //	if (first_time)
-    //		Printf(PRINT_HIGH, "Res_InitTextureManager: Init image resource management.\n");
-    //	Res_InitTextureManager();
+    if (first_time)
+    	Printf(PRINT_HIGH, "Res_InitTextureManager: Init image resource management.\n");
+    Res_InitTextureManager();
 
     // init the renderer
     if (first_time)
@@ -557,7 +558,7 @@ void STACK_ARGS D_Shutdown()
 
     R_Shutdown();
 
-    //	Res_ShutdownTextureManager();
+    Res_ShutdownTextureManager();
 
     //	R_ShutdownColormaps();
 

@@ -9,7 +9,7 @@ file(GLOB SERVER_SOURCES *.cpp *.h)
 
 get_target_property(COMMON_SOURCES engine-common INTERFACE_SOURCES)
 
-include_directories(./ ../common)
+include_directories(./ ../common ../../libraries/physfs ../../libraries/stb)
 
 add_executable(mud-server ${COMMON_SOURCES} ${SERVER_SOURCES})
 

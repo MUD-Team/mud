@@ -29,6 +29,7 @@
 #include "doomtype.h"
 #include "dthinker.h"
 #include "m_fixed.h"
+#include "res_texture.h"
 
 // Silhouette, needed for clipping Segs (mainly)
 // and sprites representing things.
@@ -178,8 +179,8 @@ struct sector_s
 {
     fixed_t      floorheight;
     fixed_t      ceilingheight;
-    short        floorpic;
-    short        ceilingpic;
+    texhandle_t  floorpic;
+    texhandle_t  ceilingpic;
     short        lightlevel;
     short        special;
     short        tag;
@@ -742,7 +743,7 @@ struct visplane_s
 
     plane_t secplane;
 
-    int     picnum;
+    texhandle_t     picnum;
     int     lightlevel;
     fixed_t xoffs, yoffs; // killough 2/28/98: Support scrolling flats
     int     minx;

@@ -34,6 +34,7 @@
 #include "doomdata.h"
 #include "doomtype.h"
 #include "g_level.h"
+#include "res_texture.h"
 
 // ------------------------
 // Command line parameters.
@@ -165,7 +166,7 @@ EXTERN_CVAR(mouse_sensitivity) // removeme // ?
 // Needed to store the number of the dummy sky flat.
 // Used for rendering,
 //	as well as tracking projectiles etc.
-extern int skyflatnum;
+extern texhandle_t skyflatnum;
 
 // ---- [RH] ----
 EXTERN_CVAR(developer) // removeme

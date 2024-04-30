@@ -48,6 +48,7 @@
 #include "p_unlag.h"
 #include "r_data.h"
 #include "r_sky.h"
+#include "res_texture.h"
 #include "s_sound.h"
 #include "sv_main.h"
 #include "sv_maplist.h"
@@ -767,7 +768,7 @@ void G_DoLoadLevel(int position)
     //	a flat. The data is in the WAD only because
     //	we look for an actual index, instead of simply
     //	setting one.
-    skyflatnum = R_FlatNumForName(SKYFLATNAME);
+    skyflatnum = texturemanager.getHandle(SKYFLATNAME, Texture::TEX_FLAT);
 
     // DOOM determines the sky texture to be used
     // depending on the current episode, and the game version.

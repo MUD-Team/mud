@@ -225,15 +225,15 @@ class FArchive
     {
         return operator<<((BYTE)b);
     }
+    inline FArchive &operator<<(unsigned int i) // also texhandle_t - Dasho
+    {
+        return operator<<((DWORD)i);
+    }
 
 #ifdef _WIN32
     inline FArchive &operator<<(int i)
     {
         return operator<<((SDWORD)i);
-    }
-    inline FArchive &operator<<(unsigned int i)
-    {
-        return operator<<((DWORD)i);
     }
 #endif
 
@@ -295,6 +295,13 @@ class FArchive
     {
         return ReadObject(object, RUNTIME_CLASS(DObject));
     }
+    inline FArchive &operator>>(unsigned int &i) // also texhandle_t - Dasho
+    {
+        DWORD in;
+        operator>>(in);
+        i = (unsigned int)in;
+        return *this;
+    }
 
 #ifdef _WIN32
     inline FArchive &operator>>(int &i)
@@ -302,13 +309,6 @@ class FArchive
         DWORD in;
         operator>>(in);
         i = (int)in;
-        return *this;
-    }
-    inline FArchive &operator>>(unsigned int &i)
-    {
-        DWORD in;
-        operator>>(in);
-        i = (unsigned int)in;
         return *this;
     }
 #endif
