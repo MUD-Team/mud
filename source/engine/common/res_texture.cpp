@@ -1140,26 +1140,34 @@ void TextureManager::cacheFlat(texhandle_t handle)
         I_FatalError("TexureManager::cacheFlat: %s is not square!\n", mFlatFilenames[filenum-1].c_str());
     }
 
-    // if grayscale/paletted, convert to RGB/RGBA
-    if (bpp == 1 || bpp == 2)
-        need_bpp = bpp + 2;
-
-    uint8_t *decoded_img = stbi_load_from_memory(filedata, filelen, &width, &height, &bpp, need_bpp);
-
-    if (!decoded_img)
+    if (!clientside)
     {
+        Texture *texture = createTexture(handle, width, height);
         delete[] filedata;
         PHYSFS_close(rawflat);
-        I_FatalError("TexureManager::cacheFlat: Error decoding %s\n", mFlatFilenames[filenum-1].c_str());
     }
-
-    if (need_bpp)
-        bpp = need_bpp;
-
-    Texture *texture = createTexture(handle, width, height);
-
-    if (clientside)
+    else
     {
+        // if grayscale/paletted, convert to RGB/RGBA
+        if (bpp == 1 || bpp == 2)
+            need_bpp = bpp + 2;
+
+        uint8_t *decoded_img = stbi_load_from_memory(filedata, filelen, &width, &height, &bpp, need_bpp);
+
+        if (!decoded_img)
+        {
+            delete[] filedata;
+            PHYSFS_close(rawflat);
+            I_FatalError("TexureManager::cacheFlat: Error decoding %s\n", mFlatFilenames[filenum-1].c_str());
+        }
+
+        if (need_bpp)
+            bpp = need_bpp;
+
+        unsigned int pixel_step = width * bpp;
+
+        Texture *texture = createTexture(handle, width, height);
+
         memset(texture->mData, 0, width * height);
         memset(texture->mMask, 0, width * height);
 
@@ -1167,8 +1175,7 @@ void TextureManager::cacheFlat(texhandle_t handle)
         {
             byte *dest = texture->mData + x;
             byte *mask = texture->mMask + x;
-            uint8_t *pixel = decoded_img+ x * bpp;
-            unsigned int pixel_step = width * bpp;
+            uint8_t *pixel = decoded_img + x * bpp;
 
             for (unsigned int y = 0; y < height; y++)
             {
@@ -1183,11 +1190,13 @@ void TextureManager::cacheFlat(texhandle_t handle)
                 pixel += pixel_step;
             }
         }
+        
         texture->mHasMask = (memchr(texture->mMask, 0, width * height) != NULL);
+
+        delete[] filedata;
+        stbi_image_free(decoded_img);
+        PHYSFS_close(rawflat);
     }
-    delete[] filedata;
-    stbi_image_free(decoded_img);
-    PHYSFS_close(rawflat);
 }
 
 //
