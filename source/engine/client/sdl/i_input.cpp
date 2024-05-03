@@ -341,7 +341,7 @@ static bool I_CanGrab()
         return false;
 
     // If playing the game, always grab
-    //if (gamestate == GS_LEVEL)
+    // if (gamestate == GS_LEVEL)
     //    return true;
 
     return true;
@@ -941,10 +941,21 @@ bool I_TranslateSDLEvent(const SDL_Event &sdl, event_t &event)
         return TranslateSDLKeyboardEvent(sdl, event);
     }
 
-    if (sdl.type == SDL_MOUSEMOTION || sdl.type == SDL_MOUSEBUTTONUP || sdl.type == SDL_MOUSEBUTTONDOWN || sdl.type == SDL_MOUSEWHEEL)
+    if (sdl.type == SDL_MOUSEMOTION || sdl.type == SDL_MOUSEBUTTONUP || sdl.type == SDL_MOUSEBUTTONDOWN ||
+        sdl.type == SDL_MOUSEWHEEL)
     {
         return TranslateSDLMouseEvent(sdl, event);
     }
 
     return false;
+}
+
+void I_SetRelativeMouseMode(bool relative)
+{
+    if (!input_subsystem)
+    {
+        return;
+    }
+    
+    SDL_SetRelativeMouseMode(relative ? SDL_TRUE : SDL_FALSE);
 }

@@ -6,6 +6,7 @@
 
 #include "../../ui/private/ui_render.h"
 #include "lua_client_private.h"
+#include "../../sdl/i_input.h"
 
 class LuaUI
 {
@@ -16,13 +17,15 @@ class LuaUI
 
         luabridge::getGlobalNamespace(L)
             .beginNamespace("mud")
-            .beginClass<LuaUI>("UI")
-            .addConstructor<void()>()
+            .beginNamespace("ui")
             .addFunction(
-                "begin_frame", +[](LuaUI *) { ((UIRenderInterface *)Rml::GetRenderInterface())->BeginFrame(); })
+                "set_relative_mouse", +[](bool relative) { I_SetRelativeMouseMode(relative); })
+
             .addFunction(
-                "end_frame", +[](LuaUI *) { ((UIRenderInterface *)Rml::GetRenderInterface())->EndFrame(); })
-            .endClass()
+                "begin_frame", +[]() { ((UIRenderInterface *)Rml::GetRenderInterface())->BeginFrame(); })
+            .addFunction(
+                "end_frame", +[]() { ((UIRenderInterface *)Rml::GetRenderInterface())->EndFrame(); })
+            .endNamespace()
             .endNamespace();
     }
 };

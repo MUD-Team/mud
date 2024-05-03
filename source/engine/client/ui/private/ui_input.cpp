@@ -32,8 +32,7 @@ void UIInput::processEvents()
     }
 
     Rml::Element *focus = context->GetFocusElement();
-	Rml::Element *hover = context->GetHoverElement();
-
+	
     if (focus && rmlui_dynamic_cast<ElementPlayerView *>(focus))
     {
 		event_t mouse_move_event(ev_mouse);

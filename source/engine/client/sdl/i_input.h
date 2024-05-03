@@ -236,6 +236,7 @@ class IInputSubsystem
 typedef OHashTable<int, std::string> KeyNameTable;
 extern KeyNameTable                  key_names;
 
+void I_SetRelativeMouseMode(bool relative);
 void I_PostInputEvent(event_t& event);
 void I_HandleInputEvents();
 bool I_TranslateSDLEvent(const SDL_Event& sdl, event_t& event);
