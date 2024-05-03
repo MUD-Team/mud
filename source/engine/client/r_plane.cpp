@@ -280,7 +280,7 @@ static visplane_t *new_visplane(unsigned hash)
 //
 // killough 2/28/98: Add offsets
 //
-visplane_t *R_FindPlane(plane_t secplane, int picnum, int lightlevel, fixed_t xoffs, fixed_t yoffs, fixed_t xscale,
+visplane_t *R_FindPlane(plane_t secplane, texhandle_t picnum, int lightlevel, fixed_t xoffs, fixed_t yoffs, fixed_t xscale,
                         fixed_t yscale, angle_t angle)
 {
     visplane_t *check;
@@ -597,14 +597,11 @@ void R_DrawPlanes(void)
             }
             else
             {
-                // regular flat
-                int useflatnum = flattranslation[pl->picnum < numflats ? pl->picnum : 0];
-
                 dspan.color += 4; // [RH] color if r_drawflat is 1
-                dspan.source = (byte *)W_CacheLumpNum(firstflat + useflatnum, PU_STATIC);
+                dspan.source = texturemanager.getTexture(pl->picnum)->getData();
 
                 // [RH] warp a flat if desired
-                if (flatwarp[useflatnum])
+                /*if (flatwarp[useflatnum])
                 {
                     if (warpedflats[useflatnum] && flatwarpedwhen[useflatnum] == level.time)
                     {
@@ -644,7 +641,7 @@ void R_DrawPlanes(void)
                         Z_ChangeTag(dspan.source, PU_CACHE);
                         dspan.source = warped;
                     }
-                }
+                }*/
 
                 pl->top[pl->maxx + 1] = viewheight;
                 pl->top[pl->minx - 1] = viewheight;
@@ -653,8 +650,6 @@ void R_DrawPlanes(void)
                     R_DrawLevelPlane(pl);
                 else
                     R_DrawSlopedPlane(pl);
-
-                Z_ChangeTag(dspan.source, PU_CACHE);
             }
         }
     }

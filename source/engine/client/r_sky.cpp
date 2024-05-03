@@ -33,6 +33,7 @@
 #include "r_data.h"
 #include "r_draw.h"
 #include "r_main.h"
+#include "res_texture.h"
 #include "w_wad.h"
 
 extern int    *texturewidthmask;
@@ -45,7 +46,7 @@ EXTERN_CVAR(r_skypalette)
 //
 // sky mapping
 //
-int     skyflatnum;
+texhandle_t     skyflatnum;
 int     sky1texture, sky2texture;
 fixed_t skytexturemid;
 fixed_t skyscale;

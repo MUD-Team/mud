@@ -256,9 +256,13 @@ class TextureManager
     void        cacheSprite(texhandle_t handle);
 
     // flats
-    texhandle_t getFlatHandle(unsigned int lumpnum);
     texhandle_t getFlatHandle(const OString &name);
     void        cacheFlat(texhandle_t handle);
+    // lookup table to translate flat name to index in PHYSFS enumerated
+    // images from the /flats search path
+    typedef OHashTable<OString, unsigned int> EnumeratedFlatsMap;
+    EnumeratedFlatsMap                        mEnumeratedFlatsMap;
+    std::vector<std::string>                  mFlatFilenames;
 
     // wall textures
     texhandle_t getWallTextureHandle(unsigned int lumpnum);
@@ -279,10 +283,6 @@ class TextureManager
     typedef OHashTable<texhandle_t, Texture *> HandleMap;
     typedef std::pair<texhandle_t, Texture *>  HandleMapPair;
     HandleMap                                  mHandleMap;
-
-    // lookup table to translate flatnum to mTextures index
-    unsigned int mFirstFlatLumpNum;
-    unsigned int mLastFlatLumpNum;
 
     // definitions for texture composition
     struct texdefpatch_t

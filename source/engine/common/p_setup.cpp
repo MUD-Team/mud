@@ -316,8 +316,8 @@ void P_LoadSectors(int lump)
     {
         ss->floorheight   = LESHORT(ms->floorheight) << FRACBITS;
         ss->ceilingheight = LESHORT(ms->ceilingheight) << FRACBITS;
-        ss->floorpic      = (short)R_FlatNumForName(ms->floorpic);
-        ss->ceilingpic    = (short)R_FlatNumForName(ms->ceilingpic);
+        ss->floorpic      = texturemanager.getHandle(ms->floorpic, Texture::TEX_FLAT);
+        ss->ceilingpic    = texturemanager.getHandle(ms->ceilingpic, Texture::TEX_FLAT);
         ss->lightlevel    = LESHORT(ms->lightlevel);
         originalLightLevels.push_back(LESHORT(ms->lightlevel));
         ss->special            = LESHORT(ms->special);

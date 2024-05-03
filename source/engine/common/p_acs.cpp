@@ -1499,13 +1499,13 @@ int DLevelScript::ThingCount(int type, int tid)
 
 void DLevelScript::ChangeFlat(int tag, int name, bool floorOrCeiling)
 {
-    int         flat, secnum = -1;
+    int         secnum = -1;
     const char *flatname = level.behavior->LookupString(name);
 
     if (flatname == NULL)
         return;
 
-    flat = R_FlatNumForName(flatname);
+    const texhandle_t flat = texturemanager.getHandle(flatname, Texture::TEX_FLAT);
 
     while ((secnum = P_FindSectorFromTag(tag, secnum)) >= 0)
     {

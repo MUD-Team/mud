@@ -30,17 +30,16 @@
 
 #include "cmdlib.h"
 #include "i_system.h"
+#include "m_fileio.h"
 #include "m_memio.h"
 #include "m_random.h"
 #include "odamex.h"
 #include "oscanner.h"
 #include "r_state.h"
-#ifdef CLIENT_APP
 #define STBI_ONLY_PNG
 #define STBI_NO_STDIO
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
-#endif
 #include "tables.h"
 #include "v_video.h"
 #include "w_wad.h"
@@ -397,8 +396,45 @@ void TextureManager::startup()
     clear();
 
     // initialize the FLATS data
-    mFirstFlatLumpNum = W_GetNumForName("F_START") + 1;
-    mLastFlatLumpNum  = W_GetNumForName("F_END") - 1;
+    char **rc = PHYSFS_enumerateFiles("flats");
+    char **i;
+
+    if (rc == NULL)
+        I_FatalError("TextureManager::startup: No flats found in /flats!\n");
+
+    for (i = rc; *i != NULL; i++)
+    {
+        std::string ext;
+        if (!M_ExtractFileExtension(*i, ext))
+            continue;
+        if (stricmp(ext.c_str(), "png") != 0)
+            continue;
+        // Test PNG header - Dasho
+        PHYSFS_File *pngcheck = PHYSFS_openRead(StrFormat("flats/%s", *i).c_str());
+        if (pngcheck == NULL)
+            continue;
+        if (PHYSFS_fileLength(pngcheck) < 6) // not even big enough for PNG header
+            continue;
+        uint8_t header[6];
+        if (PHYSFS_readBytes(pngcheck, header, 6) != 6)
+        {
+            PHYSFS_close(pngcheck);
+            continue;
+        }
+        if (header[0] == 0x89 && header[1] == 'P' && header[2] == 'N' && header[3] == 'G' && header[4] == 0x0D &&
+            header[5] == 0x0A)
+        {
+            // valid PNG header, add it
+            std::string base;
+            M_ExtractFileBase(*i, base);
+            mFlatFilenames.push_back(StrFormat("flats/%s", *i));
+            mEnumeratedFlatsMap[OString(StdStringToUpper(base, 8))] = mFlatFilenames.size();
+        }
+        PHYSFS_close(pngcheck);
+    }
+
+    PHYSFS_freeList(rc);
+
 
     // initialize the PNAMES mapping to map an index in PNAMES to a WAD lump number
     readPNamesDirectory();
@@ -494,122 +530,131 @@ void TextureManager::readPNamesDirectory()
 //
 void TextureManager::readAnimDefLump()
 {
-    int lump = -1;
+    PHYSFS_File *rawinfo = PHYSFS_openRead("lumps/ANIMDEFS.txt");
 
-    while ((lump = W_FindLump("ANIMDEFS", lump)) != -1)
+    if (rawinfo == NULL)
+        return;
+
+    std::string buffer;
+    buffer.resize(PHYSFS_fileLength(rawinfo));
+
+    if (PHYSFS_readBytes(rawinfo, (void *)buffer.data(), buffer.size()) != buffer.size())
     {
-        const char *buffer = static_cast<char *>(W_CacheLumpNum(lump, PU_STATIC));
+        PHYSFS_close(rawinfo);
+        return;
+    }
 
-        OScannerConfig config = {
-            "ANIMDEFS", // lumpName
-            false,      // semiComments
-            true,       // cComments
-        };
-        OScanner os = OScanner::openBuffer(config, buffer, buffer + W_LumpLength(lump));
+    PHYSFS_close(rawinfo);
 
-        while (os.scan())
+    OScannerConfig config = {
+        "ANIMDEFS", // lumpName
+        false,      // semiComments
+        true,       // cComments
+    };
+    OScanner os = OScanner::openBuffer(config, buffer.data(), buffer.data() + buffer.size());
+
+    while (os.scan())
+    {
+        if (os.compareToken("flat") || os.compareToken("texture"))
         {
+            anim_t anim;
+
+            Texture::TextureSourceType texture_type = Texture::TEX_WALLTEXTURE;
+            if (os.compareToken("flat"))
+                texture_type = Texture::TEX_FLAT;
+
+            os.mustScan();
+            anim.basepic = texturemanager.getHandle(os.getToken(), texture_type);
+
+            anim.curframe  = 0;
+            anim.numframes = 0;
+            memset(anim.speedmin, 1, anim_t::MAX_ANIM_FRAMES * sizeof(*anim.speedmin));
+            memset(anim.speedmax, 1, anim_t::MAX_ANIM_FRAMES * sizeof(*anim.speedmax));
+
+            while (os.scan())
+            {
+                if (!os.compareToken("pic"))
+                {
+                    os.unScan();
+                    break;
+                }
+
+                if ((unsigned)anim.numframes == anim_t::MAX_ANIM_FRAMES)
+                    os.error("Animation has too many frames");
+
+                byte min = 1, max = 1;
+
+                os.mustScanInt();
+                const int frame = os.getTokenInt();
+                os.mustScan();
+                if (os.compareToken("tics"))
+                {
+                    os.mustScanInt();
+                    min = max = clamp(os.getTokenInt(), 0, 255);
+                }
+                else if (os.compareToken("rand"))
+                {
+                    os.mustScanInt();
+                    min = MAX(os.getTokenInt(), 0);
+                    os.mustScanInt();
+                    max = MIN(os.getTokenInt(), 255);
+                    if (min > max)
+                        min = max = 1;
+                }
+                else
+                {
+                    os.error("Must specify a duration for animation frame");
+                }
+
+                anim.speedmin[anim.numframes] = min;
+                anim.speedmax[anim.numframes] = max;
+                anim.framepic[anim.numframes] = frame + anim.basepic - 1;
+                anim.numframes++;
+            }
+
+            anim.countdown = anim.speedmin[0];
+
+            if (anim.basepic != TextureManager::NOT_FOUND_TEXTURE_HANDLE &&
+                anim.basepic != TextureManager::NO_TEXTURE_HANDLE)
+                mAnimDefs.push_back(anim);
+        }
+        else if (os.compareToken("switch")) // Don't support switchdef yet...
+        {
+            // P_ProcessSwitchDef();
+            // os.error("switchdef not supported.");
+        }
+        else if (os.compareToken("warp"))
+        {
+            os.mustScan();
             if (os.compareToken("flat") || os.compareToken("texture"))
             {
-                anim_t anim;
-
                 Texture::TextureSourceType texture_type = Texture::TEX_WALLTEXTURE;
                 if (os.compareToken("flat"))
                     texture_type = Texture::TEX_FLAT;
 
                 os.mustScan();
-                anim.basepic = texturemanager.getHandle(os.getToken(), texture_type);
 
-                anim.curframe  = 0;
-                anim.numframes = 0;
-                memset(anim.speedmin, 1, anim_t::MAX_ANIM_FRAMES * sizeof(*anim.speedmin));
-                memset(anim.speedmax, 1, anim_t::MAX_ANIM_FRAMES * sizeof(*anim.speedmax));
+                const texhandle_t texhandle = texturemanager.getHandle(os.getToken(), texture_type);
+                if (texhandle == TextureManager::NOT_FOUND_TEXTURE_HANDLE ||
+                    texhandle == TextureManager::NO_TEXTURE_HANDLE)
+                    continue;
 
-                while (os.scan())
-                {
-                    if (!os.compareToken("pic"))
-                    {
-                        os.unScan();
-                        break;
-                    }
+                warp_t warp;
 
-                    if ((unsigned)anim.numframes == anim_t::MAX_ANIM_FRAMES)
-                        os.error("Animation has too many frames");
+                // backup the original texture
+                warp.original_texture = getTexture(texhandle);
 
-                    byte min = 1, max = 1;
+                const int width  = 1 << warp.original_texture->getWidthBits();
+                const int height = 1 << warp.original_texture->getHeightBits();
 
-                    os.mustScanInt();
-                    const int frame = os.getTokenInt();
-                    os.mustScan();
-                    if (os.compareToken("tics"))
-                    {
-                        os.mustScanInt();
-                        min = max = clamp(os.getTokenInt(), 0, 255);
-                    }
-                    else if (os.compareToken("rand"))
-                    {
-                        os.mustScanInt();
-                        min = MAX(os.getTokenInt(), 0);
-                        os.mustScanInt();
-                        max = MIN(os.getTokenInt(), 255);
-                        if (min > max)
-                            min = max = 1;
-                    }
-                    else
-                    {
-                        os.error("Must specify a duration for animation frame");
-                    }
+                // create a new texture of the same size for the warped image
+                warp.warped_texture = createTexture(texhandle, width, height);
 
-                    anim.speedmin[anim.numframes] = min;
-                    anim.speedmax[anim.numframes] = max;
-                    anim.framepic[anim.numframes] = frame + anim.basepic - 1;
-                    anim.numframes++;
-                }
-
-                anim.countdown = anim.speedmin[0];
-
-                if (anim.basepic != TextureManager::NOT_FOUND_TEXTURE_HANDLE &&
-                    anim.basepic != TextureManager::NO_TEXTURE_HANDLE)
-                    mAnimDefs.push_back(anim);
+                mWarpDefs.push_back(warp);
             }
-            else if (os.compareToken("switch")) // Don't support switchdef yet...
+            else
             {
-                // P_ProcessSwitchDef();
-                // os.error("switchdef not supported.");
-            }
-            else if (os.compareToken("warp"))
-            {
-                os.mustScan();
-                if (os.compareToken("flat") || os.compareToken("texture"))
-                {
-                    Texture::TextureSourceType texture_type = Texture::TEX_WALLTEXTURE;
-                    if (os.compareToken("flat"))
-                        texture_type = Texture::TEX_FLAT;
-
-                    os.mustScan();
-
-                    const texhandle_t texhandle = texturemanager.getHandle(os.getToken(), texture_type);
-                    if (texhandle == TextureManager::NOT_FOUND_TEXTURE_HANDLE ||
-                        texhandle == TextureManager::NO_TEXTURE_HANDLE)
-                        continue;
-
-                    warp_t warp;
-
-                    // backup the original texture
-                    warp.original_texture = getTexture(texhandle);
-
-                    const int width  = 1 << warp.original_texture->getWidthBits();
-                    const int height = 1 << warp.original_texture->getHeightBits();
-
-                    // create a new texture of the same size for the warped image
-                    warp.warped_texture = createTexture(texhandle, width, height);
-
-                    mWarpDefs.push_back(warp);
-                }
-                else
-                {
-                    os.error("Unknown error reading in ANIMDEFS");
-                }
+                os.error("Unknown error reading in ANIMDEFS");
             }
         }
     }
@@ -643,18 +688,13 @@ void TextureManager::readAnimDefLump()
 //
 void TextureManager::readAnimatedLump()
 {
-    int lumpnum = W_CheckNumForName("ANIMATED");
-    if (lumpnum == -1)
+    byte *filedata = NULL;
+    int filelen = M_ReadFile("lumps/ANIMATED.lmp", &filedata);
+
+    if (filelen <= 0 || filedata == NULL)
         return;
 
-    size_t lumplen = W_LumpLength(lumpnum);
-    if (lumplen == 0)
-        return;
-
-    byte *lumpdata = new byte[lumplen];
-    W_ReadLump(lumpnum, lumpdata);
-
-    for (byte *ptr = lumpdata; *ptr != 255; ptr += 23)
+    for (byte *ptr = filedata; *ptr != 255; ptr += 23)
     {
         anim_t anim;
 
@@ -691,7 +731,7 @@ void TextureManager::readAnimatedLump()
         mAnimDefs.push_back(anim);
     }
 
-    delete[] lumpdata;
+    Z_Free(filedata);
 }
 
 //
@@ -1043,28 +1083,13 @@ void TextureManager::cacheSprite(texhandle_t handle)
 //
 // TextureManager::getFlatHandle
 //
-// Returns the handle for the flat with the given WAD lump number.
+// Returns the handle for the flat with the given name.
 //
-texhandle_t TextureManager::getFlatHandle(unsigned int lumpnum)
-{
-    const unsigned int flatcount = mLastFlatLumpNum - mFirstFlatLumpNum + 1;
-    const unsigned int flatnum   = lumpnum - mFirstFlatLumpNum;
-
-    // flatnum > number of flats in the WAD file?
-    if (flatnum >= flatcount)
-        return NOT_FOUND_TEXTURE_HANDLE;
-
-    if (W_LumpLength(lumpnum) == 0)
-        return NOT_FOUND_TEXTURE_HANDLE;
-
-    return (texhandle_t)flatnum | FLAT_HANDLE_MASK;
-}
-
 texhandle_t TextureManager::getFlatHandle(const OString &name)
 {
-    int lumpnum = W_CheckNumForName(name.c_str(), ns_flats);
-    if (lumpnum >= 0)
-        return getFlatHandle(lumpnum);
+    EnumeratedFlatsMap::const_iterator it = mEnumeratedFlatsMap.find(name);
+    if (it != mEnumeratedFlatsMap.end())
+        return (texhandle_t)it->second | FLAT_HANDLE_MASK;
     return NOT_FOUND_TEXTURE_HANDLE;
 }
 
@@ -1076,33 +1101,101 @@ texhandle_t TextureManager::getFlatHandle(const OString &name)
 //
 void TextureManager::cacheFlat(texhandle_t handle)
 {
-    // should we check that the handle is valid for a flat?
+    unsigned int filenum = (handle & ~FLAT_HANDLE_MASK);
 
-    unsigned int lumpnum = (handle & ~FLAT_HANDLE_MASK) + mFirstFlatLumpNum;
-    unsigned int lumplen = W_LumpLength(lumpnum);
+    if (filenum-1 >= mFlatFilenames.size())
+            I_FatalError("TextureManager::cacheFlat: Invalid handle %d requested (%d is highest valid handle)\n", filenum-1, mFlatFilenames.size()-1);
 
-    int width, height;
+    PHYSFS_File *rawflat = PHYSFS_openRead(mFlatFilenames[filenum-1].c_str());
 
-    if (lumplen == 64 * 64)
-        width = height = 64;
-    else if (lumplen == 128 * 128)
-        width = height = 128;
-    else if (lumplen == 256 * 256)
-        width = height = 256;
-    else
-        width = height = Log2(sqrt((double)lumplen)); // probably not pretty...
+    if (rawflat == NULL)
+        I_FatalError("TextureManager::cacheFlat: Error opening %s\n", mFlatFilenames[filenum-1].c_str());
 
-    Texture *texture = createTexture(handle, width, height);
+    unsigned int filelen = PHYSFS_fileLength(rawflat);
 
-    if (clientside)
+    byte *filedata = new byte[filelen];
+    if (PHYSFS_readBytes(rawflat, filedata, filelen) != filelen)
     {
-        byte *lumpdata = new byte[lumplen];
-        W_ReadLump(lumpnum, lumpdata);
+        delete[] filedata;
+        PHYSFS_close(rawflat);
+        I_FatalError("TexureManager::cacheFlat: Error reading %s\n", mFlatFilenames[filenum-1].c_str());
+    }
 
-        // convert the row-major flat lump to into column-major
-        Res_TransposeImage(texture->mData, lumpdata, width, height);
+    int height = 0;
+    int width = 0;
+    int bpp = 0;
+    int need_bpp = 0;
 
-        delete[] lumpdata;
+    if (!stbi_info_from_memory(filedata, filelen, &width, &height, &bpp))
+    {
+        delete[] filedata;
+        PHYSFS_close(rawflat);
+        I_FatalError("TexureManager::cacheFlat: %s is malformed!\n", mFlatFilenames[filenum-1].c_str());
+    }
+
+    if (width != height)
+    {
+        delete[] filedata;
+        PHYSFS_close(rawflat);
+        I_FatalError("TexureManager::cacheFlat: %s is not square!\n", mFlatFilenames[filenum-1].c_str());
+    }
+
+    if (!clientside)
+    {
+        Texture *texture = createTexture(handle, width, height);
+        delete[] filedata;
+        PHYSFS_close(rawflat);
+    }
+    else
+    {
+        // if grayscale/paletted, convert to RGB/RGBA
+        if (bpp == 1 || bpp == 2)
+            need_bpp = bpp + 2;
+
+        uint8_t *decoded_img = stbi_load_from_memory(filedata, filelen, &width, &height, &bpp, need_bpp);
+
+        if (!decoded_img)
+        {
+            delete[] filedata;
+            PHYSFS_close(rawflat);
+            I_FatalError("TexureManager::cacheFlat: Error decoding %s\n", mFlatFilenames[filenum-1].c_str());
+        }
+
+        if (need_bpp)
+            bpp = need_bpp;
+
+        unsigned int pixel_step = width * bpp;
+
+        Texture *texture = createTexture(handle, width, height);
+
+        memset(texture->mData, 0, width * height);
+        memset(texture->mMask, 0, width * height);
+
+        for (unsigned int x = 0; x < width; x++)
+        {
+            byte *dest = texture->mData + x;
+            byte *mask = texture->mMask + x;
+            uint8_t *pixel = decoded_img + x * bpp;
+
+            for (unsigned int y = 0; y < height; y++)
+            {
+                argb_t color(bpp == 4 ? *(pixel+3) : 255, *pixel, *(pixel+1), *(pixel+2));
+
+                *mask = color.geta() != 0;
+                if (*mask)
+                    *dest = V_BestColor(V_GetDefaultPalette()->basecolors, color);
+
+                dest += width;
+                mask += width;
+                pixel += pixel_step;
+            }
+        }
+        
+        texture->mHasMask = (memchr(texture->mMask, 0, width * height) != NULL);
+
+        delete[] filedata;
+        stbi_image_free(decoded_img);
+        PHYSFS_close(rawflat);
     }
 }
 
@@ -1381,9 +1474,7 @@ texhandle_t TextureManager::getHandle(unsigned int lumpnum, Texture::TextureSour
 {
     texhandle_t handle = NOT_FOUND_TEXTURE_HANDLE;
 
-    if (type == Texture::TEX_FLAT)
-        handle = getFlatHandle(lumpnum);
-    else if (type == Texture::TEX_PATCH)
+    if (type == Texture::TEX_PATCH)
         handle = getPatchHandle(lumpnum);
     else if (type == Texture::TEX_SPRITE)
         handle = getSpriteHandle(lumpnum);
@@ -1393,8 +1484,6 @@ texhandle_t TextureManager::getHandle(unsigned int lumpnum, Texture::TextureSour
         handle = getPNGTextureHandle(lumpnum);
 
     // not found? check elsewhere
-    if (handle == NOT_FOUND_TEXTURE_HANDLE && type != Texture::TEX_FLAT)
-        handle = getFlatHandle(lumpnum);
     if (handle == NOT_FOUND_TEXTURE_HANDLE && type != Texture::TEX_WALLTEXTURE)
         handle = getWallTextureHandle(lumpnum);
 

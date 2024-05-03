@@ -54,6 +54,7 @@
 #include "p_mobj.h"
 #include "r_sky.h"
 #include "r_state.h"
+#include "res_texture.h"
 #include "s_sound.h"
 #include "server.pb.h"
 #include "svc_map.h"
@@ -1271,12 +1272,12 @@ static void CL_FireWeapon(const odaproto::svc::FireWeapon *msg)
 //
 static void CL_UpdateSector(const odaproto::svc::UpdateSector *msg)
 {
-    int     sectornum     = msg->sectornum();
-    fixed_t floorheight   = msg->sector().floor_height();
-    fixed_t ceilingheight = msg->sector().ceiling_height();
-    int     floorpic      = msg->sector().floorpic();
-    int     ceilingpic    = msg->sector().ceilingpic();
-    int     special       = msg->sector().special();
+    int         sectornum     = msg->sectornum();
+    fixed_t     floorheight   = msg->sector().floor_height();
+    fixed_t     ceilingheight = msg->sector().ceiling_height();
+    texhandle_t floorpic      = msg->sector().floorpic();
+    texhandle_t ceilingpic    = msg->sector().ceilingpic();
+    int         special       = msg->sector().special();
 
     if (!::sectors || sectornum < 0 || sectornum >= ::numsectors)
         return;
@@ -1285,14 +1286,7 @@ static void CL_UpdateSector(const odaproto::svc::UpdateSector *msg)
     P_SetCeilingHeight(sector, ceilingheight);
     P_SetFloorHeight(sector, floorheight);
 
-    if (floorpic >= ::numflats)
-        floorpic = ::numflats;
-
     sector->floorpic = floorpic;
-
-    if (ceilingpic >= ::numflats)
-        ceilingpic = ::numflats;
-
     sector->ceilingpic = ceilingpic;
     sector->special    = special;
     sector->moveable   = true;

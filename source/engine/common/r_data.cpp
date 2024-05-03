@@ -71,11 +71,6 @@ fixed_t          *texturescalex;
 fixed_t          *texturescaley;
 
 // for global animation
-bool  *flatwarp;
-byte **warpedflats;
-int   *flatwarpedwhen;
-int   *flattranslation;
-
 int *texturetranslation;
 
 //
@@ -699,45 +694,6 @@ void R_InitTextures(void)
 }
 
 //
-// R_InitFlats
-//
-void R_InitFlats(void)
-{
-    int i;
-
-    firstflat = W_GetNumForName("F_START") + 1;
-    lastflat  = W_GetNumForName("F_END") - 1;
-
-    if (firstflat >= lastflat)
-        I_Error("no flats");
-
-    numflats = lastflat - firstflat + 1;
-
-    delete[] flattranslation;
-
-    // Create translation table for global animation.
-    flattranslation = new int[numflats + 1];
-
-    for (i = 0; i < numflats; i++)
-        flattranslation[i] = i;
-
-    delete[] flatwarp;
-
-    flatwarp = new bool[numflats + 1];
-    memset(flatwarp, 0, sizeof(bool) * (numflats + 1));
-
-    delete[] warpedflats;
-
-    warpedflats = new byte *[numflats + 1];
-    memset(warpedflats, 0, sizeof(byte *) * (numflats + 1));
-
-    delete[] flatwarpedwhen;
-
-    flatwarpedwhen = new int[numflats + 1];
-    memset(flatwarpedwhen, 0xff, sizeof(int) * (numflats + 1));
-}
-
-//
 // R_InitSpriteLumps
 // Finds the width and hoffset of all sprites in the wad,
 //	so the sprite does not need to be cached completely
@@ -972,7 +928,6 @@ int R_ColormapForBlend(const argb_t blend_color)
 void R_InitData()
 {
     R_InitTextures();
-    R_InitFlats();
     R_InitSpriteLumps();
 
     // haleyjd 01/28/10: also initialize tantoangle_acc table
@@ -1079,14 +1034,12 @@ void R_PrecacheLevel(void)
     }
 
     // Precache flats.
-    memset(hitlist, 0, numflats);
 
     for (i = numsectors - 1; i >= 0; i--)
-        hitlist[sectors[i].floorpic] = hitlist[sectors[i].ceilingpic] = 1;
-
-    for (i = numflats - 1; i >= 0; i--)
-        if (hitlist[i])
-            W_CacheLumpNum(firstflat + i, PU_CACHE);
+    {
+        texturemanager.getTexture(sectors[i].floorpic);
+        texturemanager.getTexture(sectors[i].ceilingpic);
+    }
 
     // Precache textures.
     memset(hitlist, 0, numtextures);
