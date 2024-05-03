@@ -113,8 +113,6 @@ void G_Ticker(void)
         case ga_loadgame:
         case ga_savegame:
         case ga_screenshot:
-        case ga_fullconsole:
-        case ga_victory:
             gameaction = ga_nothing;
             break;
 

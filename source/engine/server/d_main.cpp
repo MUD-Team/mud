@@ -93,7 +93,6 @@ extern dyncolormap_t NormalLight;
 BOOL        devparm;                       // started game with -devparm
 char        startmap[8];
 event_t     events[MAXEVENTS];
-gamestate_t wipegamestate = GS_DEMOSCREEN; // can be -1 to force a wipe
 
 std::string LOG_FILE;
 

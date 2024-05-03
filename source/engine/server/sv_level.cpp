@@ -532,7 +532,7 @@ void G_ExitLevel(int position, int drawscores)
     if (drawscores)
         SV_DrawScores();
 
-    gamestate = GS_INTERMISSION;
+    gamestate = GS_NONE;
     mapchange = TICRATE * sv_intermissionlimit; // wait n seconds, default 10
 
     secretexit = false;
@@ -551,7 +551,7 @@ void G_SecretExitLevel(int position, int drawscores)
     if (drawscores)
         SV_DrawScores();
 
-    gamestate = GS_INTERMISSION;
+    gamestate = GS_NONE;
     mapchange = TICRATE * sv_intermissionlimit; // wait n seconds, defaults to 10
 
     // IF NO WOLF3D LEVELS, NO SECRET EXIT!

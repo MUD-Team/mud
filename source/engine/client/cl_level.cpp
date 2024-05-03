@@ -53,6 +53,7 @@
 #include "w_wad.h"
 #include "wi_stuff.h"
 #include "z_zone.h"
+#include "script/lua_client_public.h"
 
 #define lioffset(x) offsetof(level_pwad_info_t, x)
 #define cioffset(x) offsetof(cluster_info_t, x)
@@ -604,6 +605,8 @@ void G_DoLoadLevel(int position)
     P_DoDeferedScripts();                // [RH] Do script actions that were triggered on another map.
 
     ::levelstate.reset();
+
+    LUA_CallGlobalClientFunction("On_Map_Loaded");
 }
 
 //

@@ -842,8 +842,8 @@ void G_Ticker(void)
 
             CL_ParseCommands();
 
-            if (gameaction == ga_nothing) 
-                return;
+//            if (gameaction == ga_fullconsole) 
+//                return;
         }
 
         if (!(gametic % TICRATE))

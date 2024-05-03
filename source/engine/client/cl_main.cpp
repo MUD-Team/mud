@@ -1362,7 +1362,7 @@ bool CL_PrepareConnect()
 
         for (l = 0; l < 3; l++)
             MSG_ReadShort();
-        for (l = 0; l < 14; l++)
+        for (l = 0; l < 12; l++)
             MSG_ReadBool();
         for (l = 0; l < playercount; l++)
         {
@@ -1479,8 +1479,10 @@ bool CL_Connect()
     }
     CL_ParseCommands();
 
-    if (gameaction == ga_nothing) // Host_EndGame was called
+    /*
+    if (gameaction == ga_fullconsole) // Host_EndGame was called
         return false;
+    */
 
     D_SetupUserInfo();
 

@@ -33,7 +33,7 @@
 
 // [Russell] - default master list
 // This is here for complete master redundancy, including domain name failure
-static const char *def_masterlist[] = {"master1.odamex.net", "voxelsoft.com", NULL};
+static const char *def_masterlist[] = {NULL};
 
 class masterserver
 {

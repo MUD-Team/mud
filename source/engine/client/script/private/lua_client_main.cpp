@@ -116,3 +116,9 @@ void LUA_Display()
 {
     LUA_CallGlobalFunction(clientState, "Display");
 }
+
+
+void LUA_CallGlobalClientFunction(const char* function_name)
+{
+    LUA_CallGlobalFunction(clientState, function_name);
+}
