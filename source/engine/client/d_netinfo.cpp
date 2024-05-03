@@ -203,7 +203,7 @@ void D_SetupUserInfo(void)
     coninfo->color[3] = color.getb();
 
     // update color translation
-    if (!demoplayback && !connected)
+    if (!connected)
         R_BuildPlayerTranslation(consoleplayer_id, color);
 }
 

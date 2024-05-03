@@ -121,11 +121,6 @@ extern level_locals_t level;
 // Disable save/end game?
 extern BOOL usergame;
 
-extern BOOL demoplayback;
-
-// Quit after playing a demo from cmdline.
-extern BOOL singledemo;
-
 extern gamestate_t gamestate;
 
 //-----------------------------

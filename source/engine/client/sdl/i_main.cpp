@@ -113,9 +113,13 @@ int main(int argc, char *argv[])
         PHYSFS_mount(M_GetBinaryDir().c_str(), NULL, 0);
         PHYSFS_mount(M_GetWriteDir().c_str(), NULL, 0);
 
+        PHYSFS_mount(M_GetBinaryDir().append("assets").append(PATHSEP).append("core").c_str(), NULL, 0);
         PHYSFS_mount(M_GetBinaryDir().append("assets").append(PATHSEP).append("core").append(PATHSEP).append("common").c_str(), NULL, 0);
         PHYSFS_mount(M_GetBinaryDir().append("assets").append(PATHSEP).append("core").append(PATHSEP).append("client").c_str(), NULL, 0);
         PHYSFS_mount(M_GetWriteDir().append("assets").append(PATHSEP).append("downloads").c_str(), NULL, 0);
+
+        // TODO: configurable with -game and root config json
+        PHYSFS_mount(M_GetBinaryDir().append("assets").append(PATHSEP).append("example").c_str(), NULL, 0);
 
         if (::Args.CheckParm("--version"))
         {

@@ -177,8 +177,8 @@ void R_ExitLevel();
 // Called by M_Responder.
 void R_SetViewSize(int blocks);
 
-class IWindowSurface;
-IWindowSurface *R_GetRenderingSurface();
+class IRenderSurface;
+IRenderSurface *R_GetRenderingSurface();
 
 bool R_BorderVisible();
 bool R_StatusBarVisible();

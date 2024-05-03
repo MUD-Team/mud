@@ -162,12 +162,9 @@ void R_ForceViewWindowResize()
 //
 // Returns a pointer to the surface that the rendered scene is drawn on.
 //
-IWindowSurface *R_GetRenderingSurface()
+IRenderSurface *R_GetRenderingSurface()
 {
-    if ((vid_320x200 || vid_640x400) && I_GetEmulatedSurface() != NULL)
-        return I_GetEmulatedSurface();
-    else
-        return I_GetPrimarySurface();
+    return IRenderSurface::getCurrentRenderSurface();
 }
 
 //
@@ -818,7 +815,7 @@ void R_SetupFrame(player_t *player)
 
             // use colormap lumps in 8bpp mode instead of blends
             int colormap_num = 0;
-            // if (I_GetPrimarySurface()->getBitsPerPixel() == 8)
+            // if (IRenderSurface::getCurrentRenderSurface()->getBitsPerPixel() == 8)
             //     colormap_num = R_ColormapForBlend(new_sector_blend_color);
 
             NormalLight.maps = shaderef_t(&realcolormaps, (NUMCOLORMAPS + 1) * colormap_num);
@@ -1012,7 +1009,7 @@ void R_RenderPlayerView(player_t *player)
 
     R_ResetDrawFuncs();
 
-    IWindowSurface *surface = R_GetRenderingSurface();
+    IRenderSurface *surface = R_GetRenderingSurface();
 
     // [SL] fill the screen with a blinking solid color to make HOM more visible
     if (r_flashhom)
@@ -1052,7 +1049,7 @@ void R_RenderPlayerView(player_t *player)
         r_dimpatchD(surface, V_GammaCorrect(blend_color), blend_alpha, viewwindowx, viewwindowy, viewwidth, viewheight);
     }
 
-    R_EndInterpolation();
+    R_EndInterpolation();    
 }
 
 //
@@ -1140,11 +1137,8 @@ int R_ViewWindowY(int width, int height)
 //
 static void R_InitViewWindow()
 {
-    IWindowSurface *surface       = R_GetRenderingSurface();
+    IRenderSurface *surface       = R_GetRenderingSurface();
     int             surface_width = surface->getWidth(), surface_height = surface->getHeight();
-
-    // using a 320x200/640x400 surface or video mode
-    bool protected_res = vid_320x200 || vid_640x400 || I_IsProtectedResolution(I_GetVideoWidth(), I_GetVideoHeight());
 
     surface->lock();
 
@@ -1166,10 +1160,7 @@ static void R_InitViewWindow()
 
     // calculate the vertical stretching factor to emulate 320x200
     // it's a 5:4 ratio = (320 / 200) / (4 / 3)
-    if (protected_res)
-        yaspectmul = FRACUNIT;
-    else
-        yaspectmul = 320 * 3 * FRACUNIT / (200 * 4);
+    yaspectmul = 320 * 3 * FRACUNIT / (200 * 4);
 
     // Calculate FieldOfView and CorrectFieldOfView
     float desired_fov = 90.0f;
@@ -1205,10 +1196,7 @@ static void R_InitViewWindow()
     //      generate a corrected 4:3 screen width based on our
     //      height, then generate the x-scale based on that.
     int cswidth, crvwidth;
-    if (protected_res)
-        cswidth = 320 * surface_height / 200;
-    else
-        cswidth = 4 * surface_height / 3;
+    cswidth = 4 * surface_height / 3;
 
     if (setblocks < 10)
         crvwidth = ((setblocks * cswidth) / 10) & ~15;

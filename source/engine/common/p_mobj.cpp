@@ -2540,10 +2540,6 @@ void P_SpawnMapThing(mapthing2_t *mthing, int position)
     // count deathmatch start positions
     if (mthing->type == 11 || (!sv_teamspawns && mthing->type >= 5080 && mthing->type <= 5082))
     {
-        // [Nes] Maximum vanilla demo starts are fixed at 10.
-        if (DeathMatchStarts.size() >= 10 && demoplayback)
-            return;
-
         M_LogWDLPlayerSpawn(mthing);
         DeathMatchStarts.push_back(*mthing);
         return;

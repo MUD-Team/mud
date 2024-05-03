@@ -156,7 +156,7 @@ void cvar_t::ForceSet(const char *valstr)
     // [SL] 2013-04-16 - Latched CVARs do not change values until the next map.
     // Servers and single-player games should abide by this behavior but
     // multiplayer clients should just do what the server tells them.
-    if (m_Flags & CVAR_LATCH && serverside && (gamestate == GS_LEVEL || gamestate == GS_INTERMISSION))
+    if (m_Flags & CVAR_LATCH && serverside && (gamestate == GS_LEVEL))
     {
         m_Flags |= CVAR_MODIFIED;
         if (valstr)

@@ -26,7 +26,6 @@
 #include <stdlib.h>
 
 #include "c_dispatch.h"
-#include "cl_demo.h"
 #include "cl_responderkeys.h"
 #include "cmdlib.h"
 #include "d_player.h"
@@ -36,8 +35,6 @@
 #include "m_ostring.h"
 #include "odamex.h"
 #include "physfs.h"
-
-extern NetDemo netdemo;
 
 /* Most of these bindings are equivalent
  * to the original DOOM's keymappings.
@@ -81,13 +78,6 @@ OBinding DefaultBindings[] = {
     {"home", "ready"},          {"end", "spectate"},
     {"m", "changeteams"},       {NULL, NULL}};
 
-/* Special bindings when it comes
- * to Odamex's demo playbacking.
- */
-OBinding DefaultNetDemoBindings[] = {
-    {"leftarrow", "netrew"}, {"rightarrow", "netff"}, {"uparrow", "netprevmap"}, {"downarrow", "netnextmap"},
-    {"space", "netpause"},   {"pgup", "netprotoup"},  {"pgdn", "netprotodown"},  {NULL, NULL}};
-
 /* Special bindings for the automap
  */
 OBinding DefaultAutomapBindings[] = {{"g", "am_grid"},
@@ -105,7 +95,7 @@ OBinding DefaultAutomapBindings[] = {{"g", "am_grid"},
                                      {"0", "am_big"},
                                      {NULL, NULL}};
 
-OKeyBindings Bindings, DoubleBindings, AutomapBindings, NetDemoBindings;
+OKeyBindings Bindings, DoubleBindings, AutomapBindings;
 
 struct KeyState
 {
@@ -192,55 +182,22 @@ void OKeyBindings::SetBinds(const OBinding *binds)
 }
 
 //
-// C_DoNetDemoKey
-//
-// [SL] 2012-03-29 - Handles the hard-coded key bindings used during
-// NetDemo playback.  Returns false if the key pressed is not
-// bound to any netdemo command.
-//
-bool C_DoNetDemoKey(event_t *ev)
-{
-    if (!netdemo.isPlaying() && !netdemo.isPaused())
-        return false;
-
-    std::string *binding;
-
-    if (ev->type != ev_keydown && ev->type != ev_keyup)
-        return false;
-
-    binding = &NetDemoBindings.Binds[ev->data1];
-
-    // hardcode the pause key to also control netpause
-    if (iequals(Bindings.Binds[ev->data1], "pause"))
-        binding = &NetDemoBindings.Binds[I_GetKeyFromName("space")];
-
-    // nothing bound to this key specific to netdemos?
-    if (binding->empty())
-        return false;
-
-    if (ev->type == ev_keydown)
-        AddCommandString(*binding, ev->data1);
-
-    return true;
-}
-
-//
 // C_DoSpectatorKey
 //
 // [SL] 2012-09-14 - Handles the hard-coded key bindings used while spectating
-// or during NetDemo playback.  Returns false if the key pressed is not
+// Returns false if the key pressed is not
 // bound to any spectating command such as spynext.
 //
 bool C_DoSpectatorKey(event_t *ev)
 {
     if (G_IsLivesGame())
     {
-        if (!consoleplayer().spectator && consoleplayer().lives > 0 && !netdemo.isPlaying() && !netdemo.isPaused())
+        if (!consoleplayer().spectator && consoleplayer().lives > 0)
             return false;
     }
     else
     {
-        if (!consoleplayer().spectator && !netdemo.isPlaying() && !netdemo.isPaused())
+        if (!consoleplayer().spectator)
             return false;
     }
 
@@ -497,7 +454,6 @@ void C_BindingsInit(void)
     Bindings.SetBindingType("bind");
     DoubleBindings.SetBindingType("doublebind");
     AutomapBindings.SetBindingType("ambind");
-    NetDemoBindings.SetBindingType("netdemobind");
 }
 
 // Bind default bindings
@@ -505,7 +461,6 @@ void C_BindDefaults(void)
 {
     Bindings.SetBinds(DefaultBindings);
     AutomapBindings.SetBinds(DefaultAutomapBindings);
-    NetDemoBindings.SetBinds(DefaultNetDemoBindings);
 }
 
 // Bind command
@@ -586,35 +541,6 @@ BEGIN_COMMAND(unambind)
     }
 }
 END_COMMAND(unambind)
-
-// NetDemoBind command
-BEGIN_COMMAND(netdemobind)
-{
-    AutomapBindings.BindAKey(argc, argv, "Current netdemomap bindings: ");
-}
-END_COMMAND(netdemobind)
-
-BEGIN_COMMAND(unnetdemobind)
-{
-    if (argc < 2)
-    {
-        Printf(PRINT_WARNING, "Unbinds a netdemo key. \"all\" unbinds every existing netdemo key.\n");
-        Printf(PRINT_WARNING, "Usage: unnetdemobind <key>\n");
-        return;
-    }
-
-    if (argc > 1)
-    {
-
-        std::string lostr = StdStringToLower(argv[1]);
-
-        if (iequals(lostr, "all"))
-            NetDemoBindings.UnbindAll();
-        else
-            NetDemoBindings.UnbindKey(argv[1]);
-    }
-}
-END_COMMAND(unnetdemobind)
 
 // Other commands
 BEGIN_COMMAND(binddefaults)

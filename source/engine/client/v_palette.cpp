@@ -1817,89 +1817,6 @@ BEGIN_COMMAND(testcolor)
 END_COMMAND(testcolor)
 
 //
-// V_DoPaletteEffects
-//
-// Handles changing the palette or the blend_color global based on damage
-// the player has taken, any power-ups, or environment such as deep water.
-//
-void V_DoPaletteEffects()
-{
-    IWindowSurface *primary_surface = I_GetPrimarySurface();
-
-    player_t *plyr = &displayplayer();
-
-    fargb_t blend(0.0f, 0.0f, 0.0f, 0.0f);
-
-    V_AddBlend(blend, R_GetSectorBlend());
-    V_AddBlend(blend, plyr->blend_color);
-
-    float greendamagecolor;
-    float reddamagecolor;
-
-    if (gamemode == retail_chex)
-    {
-        reddamagecolor   = 0.0f;
-        greendamagecolor = 255.0f / 255.0f;
-    }
-    else
-    {
-        reddamagecolor   = 255.0f / 255.0f;
-        greendamagecolor = 0.0f;
-    }
-
-    // red tint for pain / berzerk power
-    if (plyr->damagecount || plyr->powers[pw_strength])
-    {
-        float red_amount = (float)plyr->damagecount;
-        if (!multiplayer || sv_allowredscreen)
-            red_amount *= r_painintensity;
-
-        // slowly fade the berzerk out
-        if (plyr->powers[pw_strength])
-            red_amount = MAX(red_amount, 12.0f - float(plyr->powers[pw_strength]) / 64.0f);
-
-        if (red_amount > 0.0f)
-        {
-            red_amount  = MIN(red_amount, 56.0f);
-            float alpha = (red_amount + 8.0f) / 72.0f;
-
-            static const float red   = reddamagecolor;
-            static const float green = greendamagecolor;
-            static const float blue  = 0.0f;
-            V_AddBlend(blend, fargb_t(alpha, red, green, blue));
-        }
-    }
-
-    // yellow tint for item pickup
-    if (plyr->bonuscount)
-    {
-        float bonus_amount = (float)plyr->bonuscount;
-        if (bonus_amount > 0.0f)
-        {
-            bonus_amount = MIN(bonus_amount, 24.0f);
-            float alpha  = (bonus_amount + 8.0f) / 64.0f;
-
-            static const float red   = 215.0f / 255.0f;
-            static const float green = 186.0f / 255.0f;
-            static const float blue  = 69.0f / 255.0f;
-            V_AddBlend(blend, fargb_t(alpha, red, green, blue));
-        }
-    }
-
-    // green tint for radiation suit
-    if (plyr->powers[pw_ironfeet] > 4 * 32 || plyr->powers[pw_ironfeet] & 8)
-    {
-        static const float alpha = 1.0f / 8.0f;
-        static const float red   = 0.0f;
-        static const float green = 255.0f / 255.0f;
-        static const float blue  = 0.0f;
-        V_AddBlend(blend, fargb_t(alpha, red, green, blue));
-    }
-
-    V_SetBlend(blend);
-}
-
-//
 // V_ResetPalette
 //
 // Resets the palette back to the default palette.
@@ -1908,8 +1825,6 @@ void V_ResetPalette()
 {
     if (I_VideoInitialized())
     {
-        game_palette = default_palette;
-        I_SetPalette(game_palette.colors);
         fargb_t blend(0.0f, 0.0f, 0.0f, 0.0f);
         V_SetBlend(blend);
     }

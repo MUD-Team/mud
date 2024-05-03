@@ -8,17 +8,19 @@ add_definitions(-DODAMEX_NO_GITVER)
 
 file(GLOB CLIENT_SOURCES *.cpp *.h)
 file(GLOB CLIENT_SDL_SOURCES sdl/*.cpp sdl/*.h)
+file(GLOB CLIENT_UI_SOURCES ui/private/*.cpp)
+file(GLOB CLIENT_SCRIPT_SOURCES script/private/*.cpp)
 
 get_target_property(COMMON_SOURCES engine-common INTERFACE_SOURCES)
 
 # Client includes
-include_directories(./ ./sdl ../common ../../libraries/physfs ../../libraries/stb)
+include_directories(./ ./sdl ./ui ../common ../../libraries/physfs ../../libraries/stb)
 
-add_executable(mud-client WIN32 ${CLIENT_SOURCES} ${CLIENT_SDL_SOURCES} ${COMMON_SOURCES})
+add_executable(mud-client WIN32 ${CLIENT_SOURCES} ${CLIENT_UI_SOURCES} ${CLIENT_SCRIPT_SOURCES} ${CLIENT_SDL_SOURCES} ${COMMON_SOURCES})
 set_target_properties(mud-client PROPERTIES DEBUG_POSTFIX "_DEBUG")
 set_target_properties(mud-client PROPERTIES RELWITHDEBINFO_POSTFIX "_RELWITHDEBINFO")
 
-set (MUD_CLIENT_LIBRARIES minilzo physfs-static)
+set (MUD_CLIENT_LIBRARIES minilzo physfs-static lua luabridge)
 
 if (MUD_PROFILING)
   set (MUD_CLIENT_LIBRARIES ${MUD_CLIENT_LIBRARIES} tracy)
@@ -28,7 +30,8 @@ if (WIN32)
     set (MUD_CLIENT_LIBRARIES "${MUD_CLIENT_LIBRARIES}" Shlwapi)
 endif()
 
-target_link_libraries(mud-client PRIVATE mudproto ${MUD_CLIENT_LIBRARIES} CURL::libcurl JsonCpp::JsonCpp protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite
+
+target_link_libraries(mud-client PRIVATE mudproto ${MUD_CLIENT_LIBRARIES} RmlCore RmlDebugger RmlLua CURL::libcurl JsonCpp::JsonCpp protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite
                       $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
                       $<IF:$<TARGET_EXISTS:SDL2_mixer::SDL2_mixer>,SDL2_mixer::SDL2_mixer,SDL2_mixer::SDL2_mixer-static>
                       $<IF:$<TARGET_EXISTS:fluidlite::fluidlite>,fluidlite::fluidlite,fluidlite::fluidlite-static>)

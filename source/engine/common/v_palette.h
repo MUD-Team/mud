@@ -114,8 +114,6 @@ void V_SetBlend(const argb_t color);
 // even if the blend hasn't changed.
 void V_ForceBlend(const argb_t color);
 
-void V_DoPaletteEffects();
-
 void V_ResetPalette();
 
 // Colorspace conversion RGB <-> HSV

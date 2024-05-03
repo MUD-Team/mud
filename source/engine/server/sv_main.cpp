@@ -627,7 +627,7 @@ void SV_GetPackets()
         if (!validplayer(player)) // no client with net_from address
         {
             // apparently, someone is trying to connect
-            if (gamestate == GS_LEVEL || gamestate == GS_INTERMISSION)
+            if (gamestate == GS_LEVEL)
                 SV_ConnectClient();
 
             continue;
@@ -1896,10 +1896,12 @@ void SV_ConnectClient2(player_t &player)
     MSG_WriteSVC(&player.client.reliablebuf, SVC_LoadMap(::wadfiles, level.mapname.c_str(), level.time));
 
     // [SL] 2011-12-07 - Force the player to jump to intermission if not in a level
+    /*
     if (gamestate == GS_INTERMISSION)
     {
         MSG_WriteSVC(&cl->reliablebuf, odaproto::svc::ExitLevel());
     }
+    */
 
     G_DoReborn(player);
     SV_ClientFullUpdate(player);
@@ -3980,21 +3982,6 @@ static void TimeCheck()
     }
 }
 
-static void IntermissionTimeCheck()
-{
-    level.inttimeleft = mapchange / TICRATE;
-
-    // [SL] 2011-10-25 - Send the clients the remaining time (measured in seconds)
-    // [ML] 2012-2-1 - Copy it for intermission fun
-    if (P_AtInterval(1 * TICRATE)) // every second
-    {
-        for (Players::iterator it = players.begin(); it != players.end(); ++it)
-        {
-            MSG_WriteSVC(&(it->client.netbuf), SVC_IntTimeLeft(level.inttimeleft));
-        }
-    }
-}
-
 //
 // SV_GameTics
 //
@@ -4010,10 +3997,7 @@ void SV_GameTics(void)
         TimeCheck();
         Vote_Runtic();
         break;
-    case GS_INTERMISSION:
-        IntermissionTimeCheck();
-        break;
-
+        
     default:
         break;
     }

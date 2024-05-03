@@ -32,8 +32,6 @@
 void G_DeathMatchSpawnPlayer(player_t &player);
 void G_DoReborn(player_t &player);
 
-void G_DeferedPlayDemo(const char *demo, bool bIsSingleDemo = false);
-
 // Can be called by the startup code or M_Responder,
 // calls P_SetupLevel or W_EnterWorld.
 void G_LoadGame(char *name);
@@ -43,15 +41,6 @@ void G_DoLoadGame(void);
 // Called by M_Responder.
 void G_BuildSaveName(std::string &name, int slot);
 void G_SaveGame(int slot, char *description);
-
-bool G_RecordDemo(const std::string &mapname, const std::string &basedemoname);
-
-void G_PlayDemo(char *name);
-void G_DoPlayDemo(bool justStreamInput = false);
-void G_TimeDemo(const char *name);
-void G_TestDemo(const char *name);
-BOOL G_CheckDemoStatus(void);
-void G_CleanupDemo();
 
 void G_WorldDone(void);
 
@@ -67,5 +56,3 @@ void G_AddViewPitch(int pitch);
 bool G_ShouldIgnoreMouseInput();
 
 extern int mapchange;
-
-extern bool timingdemo;

@@ -1,0 +1,62 @@
+<rml>
+
+    <head>
+        <link type="text/rcss" href="common.rcss" />
+        <style>
+            body {
+                display: block;
+                width: 100%;
+                height: 100%;
+                position: relative;
+            }
+
+            .center {
+                position: relative;
+                display: block;
+                margin: auto;
+                width: 50%;
+                height: 100%;
+            }
+
+            .center-menu {                
+                text-align: center;
+                position: absolute;
+                top: 25%;                
+            }
+
+            div.button {
+                display: block;
+                width: 128dp;
+                font-size: 18dp;
+                line-height: 20dp;
+                text-align: center;
+                border-width: 1px;
+                margin-right: 3dp;
+                border-color: #666;
+                background-color: #aaa;
+                color: #111;
+                padding: 16dp;
+
+            }
+
+            div.button:hover {
+                border-color: #ddd;
+            }
+
+            div.button:active {
+                border-color: #fff;
+            }
+        </style>
+
+    </head>
+
+    <body>
+        <div class="center">
+            <div class="center-menu">
+                <div style="font-size: 48dp;font-weight: 800; color:#d39266;">MUD</div>
+                <div id="new_game" class="button" style="margin: 16dp auto;" onclick="On_New_Game()">New Game</div>
+                <div id="quit" class="button" style="margin: 16dp auto;" onclick="mud.add_command('quit')">Quit</div>
+            </div>
+        </div>
+    </body>
+</rml>

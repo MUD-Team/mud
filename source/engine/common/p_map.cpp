@@ -690,11 +690,7 @@ static BOOL PIT_CheckThing(AActor *thing)
     // Correction of wrong return value with demo_compatibility.
     // There is no more synch on http://www.doomworld.com/sda/dwdemo/w303-115.zip
     // (with correction in setMobjInfoValue)
-    if (demoplayback)
-        return !(thing->flags & MF_SOLID);
-    else
-        return !((thing->flags & MF_SOLID && !(thing->flags & MF_NOCLIP)) &&
-                 (tmthing->flags & MF_SOLID || (demoplayback)));
+    return !((thing->flags & MF_SOLID && !(thing->flags & MF_NOCLIP)) && (tmthing->flags & MF_SOLID));
 }
 
 // This routine checks for Lost Souls trying to be spawned		// phares
@@ -1588,9 +1584,9 @@ void P_HitSlideLine(line_t *ld)
             tmxmove = -tmxmove / 2; // absorb half the momentum
             tmymove /= 2;
             UV_SoundAvoidPlayer(slidemo, CHAN_VOICE, "player/male/grunt1", ATTN_IDLE);
-        }                           //   |
-        else                        // phares
-            tmxmove = 0;            // no more movement in the X direction
+        } //   |
+        else             // phares
+            tmxmove = 0; // no more movement in the X direction
         return;
     }
 
@@ -1621,7 +1617,7 @@ void P_HitSlideLine(line_t *ld)
         moveangle >>= ANGLETOFINESHIFT;
         tmxmove = FixedMul(movelen, finecosine[moveangle]);
         tmymove = FixedMul(movelen, finesine[moveangle]);
-    }    //   ^
+    } //   ^
     else //   |
     {    // phares
         if (deltaangle > ANG180)
@@ -3014,7 +3010,7 @@ void P_RadiusAttack(AActor *spot, AActor *source, int damage, int distance, bool
     bombmod           = mod;
 
     // [Blair] Prevent crash from barrels hit by crushers
-    if (!demoplayback && bombsource == NULL && bombspot != NULL)
+    if (bombsource == NULL && bombspot != NULL)
     {
         bombsource = bombspot;
     }
@@ -3084,13 +3080,6 @@ BOOL PIT_ChangeSector(AActor *thing)
     if (thing->health <= 0)
     {
         P_SetMobjState(thing, S_GIBS);
-
-        // [Nes] - Classic demo compatability: Ghost monster bug.
-        if ((demoplayback))
-        {
-            thing->height = 0;
-            thing->radius = 0;
-        }
 
         // keep checking
         return true;

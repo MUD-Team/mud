@@ -95,7 +95,7 @@ weaponstate_t P_GetWeaponState(player_t *player);
 void P_FallingDamage(AActor *ent);
 void P_PlayerThink(player_t *player);
 bool P_AreTeammates(player_t &a, player_t &b);
-bool P_CanSpy(player_t &viewer, player_t &other, bool demo = false);
+bool P_CanSpy(player_t &viewer, player_t &other);
 
 //
 // P_MOBJ

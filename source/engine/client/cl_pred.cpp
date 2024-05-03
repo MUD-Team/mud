@@ -21,7 +21,6 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "cl_demo.h"
 #include "cl_main.h"
 #include "d_player.h"
 #include "odamex.h"
@@ -245,7 +244,7 @@ void CL_PredictWorld(void)
 
     player_t *p = &consoleplayer();
 
-    if (!validplayer(*p) || !p->mo || noservermsgs || netdemo.isPaused())
+    if (!validplayer(*p) || !p->mo || noservermsgs)
         return;
 
     // tenatively tell the netgraph that our prediction was successful

@@ -49,7 +49,7 @@ enum EWindowMode
 class IVideoMode;
 class IVideoCapabilities;
 class IWindow;
-class IWindowSurface;
+class IRenderSurface;
 
 void            I_InitHardware();
 void STACK_ARGS I_ShutdownHardware();
@@ -60,13 +60,9 @@ void I_SetVideoMode(const IVideoMode &video_mode);
 const IVideoCapabilities *I_GetVideoCapabilities();
 int                       I_GetMonitorCount();
 IWindow                  *I_GetWindow();
-IWindowSurface           *I_GetPrimarySurface();
 
-IWindowSurface *I_GetEmulatedSurface();
-void            I_BlitEmulatedSurface();
-
-IWindowSurface *I_AllocateSurface(int width, int height, int bpp);
-void            I_FreeSurface(IWindowSurface *&surface);
+IRenderSurface *I_AllocateSurface(int width, int height, int bpp);
+void            I_FreeSurface(IRenderSurface *&surface);
 
 int I_GetVideoWidth();
 int I_GetVideoHeight();
@@ -75,12 +71,8 @@ int I_GetVideoBitDepth();
 int I_GetSurfaceWidth();
 int I_GetSurfaceHeight();
 
-bool I_IsProtectedResolution(const IWindowSurface *surface = I_GetPrimarySurface());
-bool I_IsProtectedResolution(int width, int height);
+bool I_IsWideResolution();
 bool I_IsWideResolution(int width, int height);
-bool I_IsWideResolution(const IWindowSurface *surface = I_GetPrimarySurface());
-
-void I_SetPalette(const argb_t *palette);
 
 void I_BeginUpdate();
 void I_FinishUpdate();
@@ -93,7 +85,6 @@ void I_SetWindowIcon();
 std::string I_GetVideoModeString(const IVideoMode &mode);
 std::string I_GetVideoDriverName();
 
-const PixelFormat *I_Get8bppPixelFormat();
 const PixelFormat *I_Get32bppPixelFormat();
 
 // ****************************************************************************
@@ -293,14 +284,13 @@ class IDummyVideoCapabilities : public IVideoCapabilities
 //
 // ============================================================================
 
-class IWindowSurface
+class IRenderSurface
 {
   public:
-    IWindowSurface();
-    IWindowSurface(uint16_t width, uint16_t height, const PixelFormat *format, void *buffer = NULL, uint16_t pitch = 0);
-    IWindowSurface(IWindowSurface *base_surface, uint16_t width, uint16_t height);
+    IRenderSurface();
+    IRenderSurface(uint16_t width, uint16_t height, const PixelFormat *format, void *buffer = NULL, uint16_t pitch = 0);
 
-    ~IWindowSurface();
+    ~IRenderSurface();
 
     inline const uint8_t *getBuffer() const
     {
@@ -309,7 +299,7 @@ class IWindowSurface
 
     inline uint8_t *getBuffer()
     {
-        return const_cast<uint8_t *>(static_cast<const IWindowSurface &>(*this).getBuffer());
+        return const_cast<uint8_t *>(static_cast<const IRenderSurface &>(*this).getBuffer());
     }
 
     inline const uint8_t *getBuffer(uint16_t x, uint16_t y) const
@@ -319,7 +309,7 @@ class IWindowSurface
 
     inline uint8_t *getBuffer(uint16_t x, uint16_t y)
     {
-        return const_cast<uint8_t *>(static_cast<const IWindowSurface &>(*this).getBuffer(x, y));
+        return const_cast<uint8_t *>(static_cast<const IRenderSurface &>(*this).getBuffer(x, y));
     }
 
     inline uint16_t getWidth() const
@@ -357,19 +347,6 @@ class IWindowSurface
         return &mPixelFormat;
     }
 
-    void setPalette(const argb_t *palette)
-    {
-        mPalette = palette;
-    }
-
-    const argb_t *getPalette() const
-    {
-        return mPalette;
-    }
-
-    void blit(const IWindowSurface *source, int srcx, int srcy, int srcw, int srch, int destx, int desty, int destw,
-              int desth);
-
     void clear();
 
     inline void lock()
@@ -384,10 +361,19 @@ class IWindowSurface
         assert(mLocks >= 0 && mLocks < 100);
     }
 
+    static IRenderSurface* getCurrentRenderSurface() 
+    {
+        return mCurrentRenderSurface;
+    }
+    static void setCurrentRenderSurface(IRenderSurface* surface)
+    {
+        mCurrentRenderSurface = surface;
+    }
+
   private:
     // disable copy constructor and assignment operator
-    IWindowSurface(const IWindowSurface &);
-    IWindowSurface &operator=(const IWindowSurface &);
+    IRenderSurface(const IRenderSurface &);
+    IRenderSurface &operator=(const IRenderSurface &);
 
     uint8_t *mSurfaceBuffer;
     bool     mOwnsSurfaceBuffer;
@@ -403,91 +389,8 @@ class IWindowSurface
     uint16_t mPitchInPixels; // mPitch / mPixelFormat.getBytesPerPixel()
 
     int16_t mLocks;
-};
 
-// ============================================================================
-//
-// IWindowSurfaceManager
-//
-// Helper class for IWindow to encapsulate the creation of a IWindowSurface
-// primary surface and to assist in using it to refresh the window.
-//
-// ============================================================================
-
-class IWindowSurfaceManager
-{
-  public:
-    virtual ~IWindowSurfaceManager()
-    {
-    }
-
-    virtual const IWindowSurface *getWindowSurface() const = 0;
-
-    virtual IWindowSurface *getWindowSurface()
-    {
-        return const_cast<IWindowSurface *>(static_cast<const IWindowSurfaceManager &>(*this).getWindowSurface());
-    }
-
-    virtual void lockSurface()
-    {
-    }
-    virtual void unlockSurface()
-    {
-    }
-
-    virtual void startRefresh()
-    {
-    }
-    virtual void finishRefresh()
-    {
-    }
-};
-
-// ============================================================================
-//
-// IDummyWindowSurfaceManager interface & implementation
-//
-// Blank implementation of IWindowSurfaceManager
-//
-// ============================================================================
-
-class IDummyWindowSurfaceManager : public IWindowSurfaceManager
-{
-  public:
-    IDummyWindowSurfaceManager()
-    {
-        mSurface = I_AllocateSurface(320, 200, 8);
-    }
-
-    virtual ~IDummyWindowSurfaceManager()
-    {
-        delete mSurface;
-    }
-
-    virtual const IWindowSurface *getWindowSurface() const
-    {
-        return mSurface;
-    }
-
-    virtual void lockSurface()
-    {
-        mSurface->lock();
-    }
-
-    virtual void unlockSurface()
-    {
-        mSurface->unlock();
-    }
-
-    virtual void startRefresh()
-    {
-    }
-    virtual void finishRefresh()
-    {
-    }
-
-  private:
-    IWindowSurface *mSurface;
+    static IRenderSurface* mCurrentRenderSurface;
 };
 
 // ****************************************************************************
@@ -507,32 +410,13 @@ class IWindow
     {
     }
 
-    virtual const IWindowSurface *getPrimarySurface() const = 0;
+    virtual uint16_t getWidth() const = 0;
 
-    virtual IWindowSurface *getPrimarySurface()
-    {
-        return const_cast<IWindowSurface *>(static_cast<const IWindow &>(*this).getPrimarySurface());
-    }
+    virtual uint16_t getHeight() const = 0;
 
-    virtual uint16_t getWidth() const
-    {
-        return getPrimarySurface()->getWidth();
-    }
+    virtual uint8_t getBitsPerPixel() const = 0;
 
-    virtual uint16_t getHeight() const
-    {
-        return getPrimarySurface()->getHeight();
-    }
-
-    virtual uint8_t getBitsPerPixel() const
-    {
-        return getPrimarySurface()->getBitsPerPixel();
-    }
-
-    virtual int getBytesPerPixel() const
-    {
-        return getPrimarySurface()->getBytesPerPixel();
-    }
+    virtual int getBytesPerPixel() const = 0;
 
     virtual const IVideoMode &getVideoMode() const = 0;
 
@@ -561,13 +445,6 @@ class IWindow
 
     virtual bool setMode(const IVideoMode &video_mode) = 0;
 
-    virtual void lockSurface()
-    {
-    }
-    virtual void unlockSurface()
-    {
-    }
-
     virtual void enableRefresh()
     {
     }
@@ -594,15 +471,6 @@ class IWindow
         return "";
     }
 
-    virtual void setPalette(const argb_t *palette)
-    {
-        getPrimarySurface()->setPalette(palette);
-    }
-
-    virtual const argb_t *getPalette() const
-    {
-        return getPrimarySurface()->getPalette();
-    }
 };
 
 // ============================================================================
@@ -618,8 +486,8 @@ class IDummyWindow : public IWindow
 {
   public:
     IDummyWindow()
-        : IWindow(), mPrimarySurface(NULL), mVideoMode(320, 200, 8, WINDOW_Windowed),
-          mPixelFormat(8, 0, 0, 0, 0, 0, 0, 0, 0)
+        : IWindow(), mPrimarySurface(NULL), mVideoMode(320, 200, 32, WINDOW_Windowed),
+          mPixelFormat(32, 0, 0, 0, 0, 0, 0, 0, 0)
     {
     }
 
@@ -628,9 +496,24 @@ class IDummyWindow : public IWindow
         delete mPrimarySurface;
     }
 
-    virtual const IWindowSurface *getPrimarySurface() const
+    virtual uint16_t getWidth() const
     {
-        return mPrimarySurface;
+        return getPrimarySurface()->getWidth();
+    }
+
+    virtual uint16_t getHeight() const
+    {
+        return getPrimarySurface()->getHeight();
+    }
+
+    virtual uint8_t getBitsPerPixel() const
+    {
+        return getPrimarySurface()->getBitsPerPixel();
+    }
+
+    virtual int getBytesPerPixel() const
+    {
+        return getPrimarySurface()->getBytesPerPixel();
     }
 
     virtual const IVideoMode &getVideoMode() const
@@ -674,7 +557,17 @@ class IDummyWindow : public IWindow
     IDummyWindow(const IDummyWindow &);
     IDummyWindow &operator=(const IDummyWindow &);
 
-    IWindowSurface *mPrimarySurface;
+    virtual const IRenderSurface *getPrimarySurface() const
+    {
+        return mPrimarySurface;
+    }
+
+    virtual IRenderSurface *getPrimarySurface()
+    {
+        return const_cast<IRenderSurface *>(static_cast<const IDummyWindow &>(*this).getPrimarySurface());
+    }
+
+    IRenderSurface *mPrimarySurface;
 
     IVideoMode  mVideoMode;
     PixelFormat mPixelFormat;

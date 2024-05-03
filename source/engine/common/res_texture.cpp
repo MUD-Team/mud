@@ -36,7 +36,6 @@
 #include "odamex.h"
 #include "oscanner.h"
 #include "r_state.h"
-#define STBI_ONLY_PNG
 #define STBI_NO_STDIO
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"

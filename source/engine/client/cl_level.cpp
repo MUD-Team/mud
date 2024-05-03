@@ -53,6 +53,7 @@
 #include "w_wad.h"
 #include "wi_stuff.h"
 #include "z_zone.h"
+#include "script/lua_client_public.h"
 
 #define lioffset(x) offsetof(level_pwad_info_t, x)
 #define cioffset(x) offsetof(cluster_info_t, x)
@@ -97,7 +98,6 @@ static char d_mapname[9];
 
 void G_DeferedInitNew(const char *mapname)
 {
-    G_CleanupDemo();
     strncpy(d_mapname, mapname, 8);
     gameaction = ga_newgame;
 }
@@ -130,8 +130,6 @@ BEGIN_COMMAND(wad) // denis - changes wads
         S_ResumeSound();
     }
 
-    C_HideConsole();
-
     std::string str = JoinStrings(VectorArgs(argc, argv), " ");
     G_LoadWadString(str);
 
@@ -153,13 +151,6 @@ EXTERN_CVAR(sv_nomonsters)
 //
 void G_DoNewGame(void)
 {
-    if (demoplayback)
-    {
-        cvar_t::C_RestoreCVars();
-        demoplayback = false;
-        D_SetupUserInfo();
-    }
-
     CL_QuitNetGame(NQ_SILENT);
 
     multiplayer = false;
@@ -231,7 +222,7 @@ void G_InitNew(const char *mapname)
         {
             for (i = 0; i < NUMSTATES; i++)
             {
-                if (states[i].flags & STATEF_SKILL5FAST && (states[i].tics != 1 || demoplayback))
+                if (states[i].flags & STATEF_SKILL5FAST && (states[i].tics != 1))
                     states[i].tics >>= 1; // don't change 1->0 since it causes cycles
             }
 
@@ -372,7 +363,7 @@ void G_DoCompleted(void)
 
         if (!level.endpic.empty() && level.flags & LEVEL_NOINTERMISSION)
         {
-            gameaction = ga_victory;
+            gameaction = ga_nothing;
             return;
         }
         if (secretexit)
@@ -457,7 +448,7 @@ void G_DoCompleted(void)
         {
             if (level.flags & LEVEL_NOINTERMISSION && strnicmp(level.nextmap.c_str(), "EndGame", 7) == 0)
             {
-                if (!multiplayer || demoplayback)
+                if (!multiplayer)
                 {
                     // Normal progression
                     G_WorldDone();
@@ -473,7 +464,7 @@ void G_DoCompleted(void)
         }
     }
 
-    gamestate  = GS_INTERMISSION;
+    gamestate  = GS_NONE;
     viewactive = false;
 
     WI_Start(&wminfo);
@@ -497,19 +488,9 @@ void G_DoLoadLevel(int position)
 
     G_InitLevelLocals();
 
-    Printf_Bold("\n\35\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36"
-                "\36\36\36\36\36\36\36\36\36\36\36\36\37\n"
-                "%s: \"%s\"\n\n",
-                level.mapname.c_str(), level.level_name);
-
-    const bool demoscreen = (gamestate == GS_DEMOSCREEN);
+    Printf_Bold("%s: \"%s\"\n\n", level.mapname.c_str(), level.level_name);
 
     gamestate = GS_LEVEL;
-
-    // [SL] Hide the console unless this is just part of the demo loop
-    // It's annoying to have the console close every time a new demo starts...
-    if (!demoscreen)
-        C_HideConsole();
 
     // [SL] clear the saved sector data from the last level
     R_ResetInterpolation();
@@ -619,24 +600,13 @@ void G_DoLoadLevel(int position)
     mousex = mousey = 0;
     sendpause = sendsave = paused = sendcenterview = false;
 
-    if (timingdemo)
-    {
-        static BOOL firstTime = true;
-
-        if (firstTime)
-        {
-            starttime = I_MSTime();
-            firstTime = false;
-        }
-    }
-
     level.starttime = I_MSTime() * TICRATE / 1000;
     G_UnSnapshotLevel(!savegamerestore); // [RH] Restore the state of the level.
     P_DoDeferedScripts();                // [RH] Do script actions that were triggered on another map.
 
     ::levelstate.reset();
 
-    C_FlushDisplay();
+    LUA_CallGlobalClientFunction("On_Map_Loaded");
 }
 
 //

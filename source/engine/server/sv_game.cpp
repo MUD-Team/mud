@@ -56,9 +56,8 @@ gameaction_t gameaction;
 gamestate_t  gamestate = GS_STARTUP;
 
 BOOL paused;
-BOOL sendpause;         // send a pause event next tic
+BOOL sendpause; // send a pause event next tic
 
-bool timingdemo;        // FIXME : delete this variable for odasrv ?
 BOOL viewactive;
 
 BOOL network_game;      // Describes if a network game is being played
@@ -70,10 +69,6 @@ player_t nullplayer;    // The null player
 byte consoleplayer_id;  // player taking events and displaying
 byte displayplayer_id;  // view being displayed
 int  gametic;
-
-PHYSFS_File *recorddemo_fp;    // Ch0wW : Keeping this for future serverside demo-recording.
-BOOL  demoplayback;     // FIXME : remove this serverside !
-int   demostartgametic; // FIXME : remove this serverside !
 
 wbstartstruct_t wminfo; // parms for world map / intermission
 
@@ -117,10 +112,7 @@ void G_Ticker(void)
         // Useless ones from client ? Kick them out.
         case ga_loadgame:
         case ga_savegame:
-        case ga_playdemo:
         case ga_screenshot:
-        case ga_fullconsole:
-        case ga_victory:
             gameaction = ga_nothing;
             break;
 
@@ -151,24 +143,7 @@ void G_Ticker(void)
     {
     case GS_LEVEL:
         P_Ticker();
-        break;
-
-    case GS_INTERMISSION: {
-        mapchange--; // denis - todo - check if all players are ready, proceed immediately
-        if (!mapchange)
-        {
-            G_ChangeMap();
-        }
-        // Doom episodes 1-4 end with no intermission, but in
-        // multiplayer games we still want to pause on the ending
-        // screen.
-        else if (level.flags & LEVEL_NOINTERMISSION && strnicmp(level.nextmap.c_str(), "EndGame", 7) != 0)
-        {
-            G_ChangeMap();
-        }
-        break;
-    }
-    break;
+        break;        
 
     default:
         break;

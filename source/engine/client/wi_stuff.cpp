@@ -332,11 +332,9 @@ static lumpHandle_t lnames[2];
 static int         lnamewidths[2];
 static const char *lnametexts[2];
 
-static IWindowSurface *background_surface;
-
 EXTERN_CVAR(sv_maxplayers)
 EXTERN_CVAR(wi_oldintermission)
-EXTERN_CVAR(cl_autoscreenshot)
+
 //
 // CODE
 //
@@ -349,11 +347,8 @@ EXTERN_CVAR(cl_autoscreenshot)
 //
 static int WI_GetWidth()
 {
-    const int surface_width  = I_GetPrimarySurface()->getWidth();
-    const int surface_height = I_GetPrimarySurface()->getHeight();
-
-    if (I_IsProtectedResolution(I_GetVideoWidth(), I_GetVideoHeight()))
-        return surface_width;
+    const int surface_width  = IRenderSurface::getCurrentRenderSurface()->getWidth();
+    const int surface_height = IRenderSurface::getCurrentRenderSurface()->getHeight();
 
     if (surface_width * 3 >= surface_height * 4)
         return surface_height * 4 / 3;
@@ -369,37 +364,14 @@ static int WI_GetWidth()
 //
 static int WI_GetHeight()
 {
-    const int surface_width  = I_GetPrimarySurface()->getWidth();
-    const int surface_height = I_GetPrimarySurface()->getHeight();
-
-    if (I_IsProtectedResolution(I_GetVideoWidth(), I_GetVideoHeight()))
-        return surface_height;
+    const int surface_width  = IRenderSurface::getCurrentRenderSurface()->getWidth();
+    const int surface_height = IRenderSurface::getCurrentRenderSurface()->getHeight();
 
     if (surface_width * 3 >= surface_height * 4)
         return surface_height;
     else
         return surface_width * 3 / 4;
 }
-
-// slam background
-// UNUSED static unsigned char *background=0;
-
-void WI_slamBackground()
-{
-    IWindowSurface *primary_surface = I_GetPrimarySurface();
-    primary_surface->clear(); // ensure black background in matted modes
-
-    background_surface->lock();
-
-    const int destw = WI_GetWidth(), desth = WI_GetHeight();
-
-    primary_surface->blit(background_surface, 0, 0, background_surface->getWidth(), background_surface->getHeight(),
-                          (primary_surface->getWidth() - destw) / 2, (primary_surface->getHeight() - desth) / 2, destw,
-                          desth);
-
-    background_surface->unlock();
-}
-
 
 int WI_MapToIndex(char *map)
 {
@@ -484,8 +456,6 @@ void WI_updateAnimatedBack()
 void WI_End()
 {
     WI_unloadData();
-
-    I_FreeSurface(background_surface);
 }
 
 void WI_initNoState()
@@ -902,17 +872,10 @@ void WI_Ticker()
     case StatCount:
         if (multiplayer)
         {
-            if (demoplayback)
-            {
+            if (sv_gametype == 0 && wi_oldintermission && P_NumPlayersInGame() < 5)
                 WI_updateNetgameStats();
-            }
             else
-            {
-                if (sv_gametype == 0 && wi_oldintermission && P_NumPlayersInGame() < 5)
-                    WI_updateNetgameStats();
-                else
-                    WI_updateNoState();
-            }
+                WI_updateNoState();
         }
         else
             WI_updateStats();
@@ -925,13 +888,6 @@ void WI_Ticker()
     case NoState:
         WI_updateNoState();
         break;
-    }
-
-    // [ML] If cl_autoscreenshot is on, take a screenshot 3 seconds
-    //		after the level end. (Multiplayer only)
-    if (cl_autoscreenshot && multiplayer && bcnt == (3 * TICRATE))
-    {
-        AddCommandString("screenshot");
     }
 }
 
@@ -979,7 +935,6 @@ void WI_loadData()
 
     // background
     const patch_t *bg_patch = W_CachePatch(name);
-    background_surface      = I_AllocateSurface(bg_patch->width(), bg_patch->height(), 8);
 
     for (int i = 0, j; i < 2; i++)
     {

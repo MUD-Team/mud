@@ -1267,13 +1267,6 @@ void A_Tracer(AActor *actor)
     //
     // [RH] level.time is always 0-based, so nothing special to do here.
 
-    // denis - demogametic must be 0-based, but from start of entire demo,
-    // not just this level!
-    extern int demostartgametic;
-    int        demogametic = gametic - demostartgametic;
-    if (demogametic & 3)
-        return;
-
     // spawn a puff of smoke behind the rocket
     if (serverside)
     {

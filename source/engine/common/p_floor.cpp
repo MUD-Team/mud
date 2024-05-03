@@ -912,7 +912,7 @@ BOOL EV_DoFloor(DFloor::EFloor floortype, line_t *line, int tag, fixed_t speed, 
 
     manual_floor:
         // ALREADY MOVING?	IF SO, KEEP GOING...
-        if (sec->floordata || (demoplayback && sec->ceilingdata))
+        if (sec->floordata)
         {
             if (manual)
                 return false;

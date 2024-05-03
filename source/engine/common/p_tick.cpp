@@ -29,6 +29,8 @@
 #include "p_local.h"
 #include "p_unlag.h"
 
+static bool pticker_paused = false;
+
 //
 // P_AtInterval
 //
@@ -52,7 +54,7 @@ void P_Ticker(void)
 
 #ifdef CLIENT_APP
     // Game pauses when in the menu and not online/demo
-    if (!multiplayer && !demoplayback && (ConsoleState == c_down || ConsoleState == c_falling) &&
+    if (!multiplayer && pticker_paused &&
         players.begin()->viewz != 1)
         return;
 #endif
@@ -91,4 +93,7 @@ void P_Ticker(void)
     level.time++;
 }
 
-VERSION_CONTROL(p_tick_cpp, "$Id: e5a964ece3084c3116a9f341c095514725d86842 $")
+void P_Ticker_Pause(bool paused)
+{
+    pticker_paused = paused;
+}

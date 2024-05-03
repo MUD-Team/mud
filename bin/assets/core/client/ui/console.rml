@@ -1,0 +1,16 @@
+<rml>
+    <head>
+        <link type="text/rcss" href="common.rcss" />
+        <link type="text/rcss" href="console.rcss" />
+    </head>
+    <body>
+        <console>
+            <div id="content">
+                No messages in log.
+            </div>
+            <div>
+                <textarea id="console-input"></textarea>
+            </div>
+        </console>
+    </body>
+</rml>

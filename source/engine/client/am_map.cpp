@@ -25,7 +25,6 @@
 
 #include "c_bind.h"
 #include "c_dispatch.h"
-#include "cl_demo.h"
 #include "g_gametype.h"
 #include "g_skill.h"
 #include "gi.h"
@@ -229,8 +228,6 @@ static mpoint_t     markpoints[AM_NUMMARKPOINTS]; // where the points are
 static int          markpointnum = 0;             // next point to be assigned
 
 static bool stopped = true;
-
-extern NetDemo netdemo;
 
 void AM_clearMarks();
 void AM_addMark();
@@ -1490,8 +1487,7 @@ void AM_drawPlayers()
         am_color_t color;
 
         if (!(it->ingame()) || !p->mo ||
-            (((G_IsFFAGame() && p != &conplayer) || (G_IsTeamGame() && p->userinfo.team != conplayer.userinfo.team)) &&
-             !(netdemo.isPlaying() || netdemo.isPaused()) && !demoplayback && !(conplayer.spectator)) ||
+            (((G_IsFFAGame() && p != &conplayer) || (G_IsTeamGame() && p->userinfo.team != conplayer.userinfo.team)) && !(conplayer.spectator)) ||
             p->spectator)
         {
             continue;
@@ -1500,28 +1496,6 @@ void AM_drawPlayers()
         if (p->powers[pw_invisibility])
         {
             color = gameinfo.currentAutomapColors.AlmostBackground;
-        }
-        else if (demoplayback)
-        {
-            const argb_t *palette = V_GetDefaultPalette()->colors;
-
-            switch (it->id)
-            {
-            case 1:
-                color = AM_GetColorFromString(palette, "00 FF 00");
-                break;
-            case 2:
-                color = AM_GetColorFromString(palette, "60 60 B0");
-                break;
-            case 3:
-                color = AM_GetColorFromString(palette, "B0 B0 30");
-                break;
-            case 4:
-                color = AM_GetColorFromString(palette, "C0 00 00");
-                break;
-            default:
-                break;
-            }
         }
         else
         {
@@ -1696,7 +1670,7 @@ void AM_Drawer()
     if (!AM_ClassicAutomapVisible() && !AM_OverlayAutomapVisible())
         return;
 
-    IWindowSurface *surface       = I_GetPrimarySurface();
+    IWindowSurface *surface       = IRenderSurface::getCurrentRenderSurface();
     const int       surface_width = surface->getWidth(), surface_height = surface->getHeight();
 
     fb = surface->getBuffer();

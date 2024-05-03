@@ -266,7 +266,7 @@ void P_SwitchWeapon(player_t *player)
 {
     const byte *prefs;
 
-    if ((multiplayer && !sv_allowpwo) || demoplayback)
+    if ((multiplayer && !sv_allowpwo))
         prefs = UserInfo::weapon_prefs_default;
     else
         prefs = player->userinfo.weapon_prefs;
@@ -352,7 +352,7 @@ weapontype_t P_GetNextWeapon(player_t *player, bool forward)
 bool P_CheckSwitchWeapon(player_t *player, weapontype_t weapon)
 {
     // Always switch - vanilla Doom behavior
-    if ((multiplayer && !sv_allowpwo) || player->userinfo.switchweapon == WPSW_ALWAYS || demoplayback)
+    if ((multiplayer && !sv_allowpwo) || player->userinfo.switchweapon == WPSW_ALWAYS)
     {
         return true;
     }

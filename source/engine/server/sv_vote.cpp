@@ -950,9 +950,8 @@ bool Vote::ev_tic()
     // Check to see if the vote has passed.
     this->result = this->check();
 
-    // Run tic-specific vote functions.  Also interrupt if we're in
-    // intermission or on a new map.
-    if (gamestate == GS_INTERMISSION || level.time == 1 || !this->tic())
+    // Run tic-specific vote functions.  Also interrupt if we're on a new map.
+    if (level.time == 1 || !this->tic())
     {
         this->result = VOTE_INTERRUPT;
     }
@@ -1081,13 +1080,6 @@ void SV_Callvote(player_t &player)
     if (!player.ingame())
     {
         SV_PlayerPrintf(PRINT_HIGH, player.id, "You can't callvote until you're in the game.\n");
-        return;
-    }
-
-    // Is the server in intermission?
-    if (gamestate == GS_INTERMISSION)
-    {
-        SV_PlayerPrintf(PRINT_HIGH, player.id, "You can't callvote while the server is in intermission.\n");
         return;
     }
 

@@ -1,0 +1,9 @@
+{
+    "workspace.library" : ["script/definiitons"],
+    "diagnostics.globals": [
+        "dbg",
+        "mud",
+        "jit",
+        "__lua_debugger_source"        
+    ]
+}

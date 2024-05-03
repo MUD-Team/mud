@@ -306,7 +306,7 @@ void R_DrawSlopeSpanD_SSE2(void)
     }
 }
 
-void r_dimpatchD_SSE2(IWindowSurface *surface, argb_t color, int alpha, int x1, int y1, int w, int h)
+void r_dimpatchD_SSE2(IRenderSurface *surface, argb_t color, int alpha, int x1, int y1, int w, int h)
 {
     int surface_pitch_pixels = surface->getPitchInPixels();
     int line_inc             = surface_pitch_pixels - w;

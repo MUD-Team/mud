@@ -31,6 +31,7 @@
 #include "i_sdl.h"
 #include "i_video.h"
 #include "odamex.h"
+#include "ui/ui_public.h"
 
 static const int MAX_SDL_EVENTS_PER_TIC = 8192;
 
@@ -263,6 +264,8 @@ void ISDL20KeyboardInputDevice::gatherEvents()
     SDL_Event sdl_ev;
     while (SDL_PeepEvents(&sdl_ev, 1, SDL_GETEVENT, SDL_KEYDOWN, SDL_TEXTINPUT))
     {
+        UI_PostEvent(sdl_ev);
+        /*
         // Process SDL_KEYDOWN / SDL_KEYUP events. SDL_TEXTINPUT events will
         // be implicitly ignored unless handled below.
         if (sdl_ev.type == SDL_KEYDOWN || sdl_ev.type == SDL_KEYUP)
@@ -316,6 +319,7 @@ void ISDL20KeyboardInputDevice::gatherEvents()
             if (ev.data1)
                 mEvents.push(ev);
         }
+        */
     }
 }
 
@@ -409,7 +413,7 @@ void ISDL20MouseInputDevice::resume()
 {
     mActive = true;
     reset();
-    SDL_SetRelativeMouseMode(SDL_TRUE);
+    // SDL_SetRelativeMouseMode(SDL_TRUE);
     SDL_EventState(SDL_MOUSEMOTION, SDL_ENABLE);
     SDL_EventState(SDL_MOUSEBUTTONDOWN, SDL_ENABLE);
     SDL_EventState(SDL_MOUSEBUTTONUP, SDL_ENABLE);
@@ -437,21 +441,28 @@ void ISDL20MouseInputDevice::gatherEvents()
     // [SL] accumulate the total mouse movement over all events polled
     // and post one aggregate mouse movement event to Doom's event queue
     // after all are polled.
-    event_t movement_event(ev_mouse);
+    // event_t movement_event(ev_mouse);
 
     while ((num_events =
                 SDL_PeepEvents(sdl_events, MAX_SDL_EVENTS_PER_TIC, SDL_GETEVENT, SDL_MOUSEMOTION, SDL_MOUSEMOTION)))
-    {
+    {        
         for (int i = 0; i < num_events; i++)
-        {
-            const SDL_Event &sdl_ev = sdl_events[i];
+        {                    
+            UI_PostEvent(sdl_events[i]);
+
+            //const SDL_Event &sdl_ev = sdl_events[i];
+            /*
             movement_event.data2 += sdl_ev.motion.xrel;
             movement_event.data3 -= sdl_ev.motion.yrel;
+            */
         }
+        
     }
 
+    /*
     if (movement_event.data2 || movement_event.data3)
         mEvents.push(movement_event);
+    */
 
     // Retrieve mouse button and wheel events from SDL and post
     // as separate events to Doom's event queue.
@@ -460,6 +471,9 @@ void ISDL20MouseInputDevice::gatherEvents()
     {
         for (int i = 0; i < num_events; i++)
         {
+            UI_PostEvent(sdl_events[i]);
+            
+            /*
             event_t ev;
 
             const SDL_Event &sdl_ev = sdl_events[i];
@@ -495,6 +509,7 @@ void ISDL20MouseInputDevice::gatherEvents()
 
             if (ev.data1)
                 mEvents.push(ev);
+            */
         }
     }
 }

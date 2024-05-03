@@ -15,12 +15,17 @@ endif()
 
 project(MUD VERSION 0.1)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
 find_package(CURL REQUIRED)
 find_package(jsoncpp CONFIG REQUIRED)
 find_package(protobuf CONFIG REQUIRED)
 find_package(SDL2 CONFIG REQUIRED)
 find_package(SDL2_mixer CONFIG REQUIRED)
 find_package(fluidlite CONFIG REQUIRED)
+find_package(Freetype REQUIRED)
+find_package(Lua REQUIRED)
 
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/bin )
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_SOURCE_DIR}/bin )

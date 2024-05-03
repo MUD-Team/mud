@@ -71,8 +71,6 @@ EXTERN_CVAR(cl_autorecord_horde)
 EXTERN_CVAR(cl_chatsounds)
 EXTERN_CVAR(cl_connectalert)
 EXTERN_CVAR(cl_disconnectalert)
-EXTERN_CVAR(cl_netdemoname)
-EXTERN_CVAR(cl_splitnetdemos)
 EXTERN_CVAR(cl_team)
 EXTERN_CVAR(hud_revealsecrets)
 EXTERN_CVAR(mute_enemies)
@@ -80,7 +78,6 @@ EXTERN_CVAR(mute_spectators)
 EXTERN_CVAR(show_messages)
 
 extern std::string                                     digest;
-extern bool                                            forcenetdemosplit;
 extern int                                             last_svgametic;
 extern int                                             last_player_update;
 extern NetCommand                                      localcmds[MAXSAVETICS];
@@ -92,7 +89,6 @@ void        CL_CheckDisplayPlayer(void);
 void        CL_ClearPlayerJustTeleported(player_t *player);
 void        CL_ClearSectorSnapshots();
 player_t   &CL_FindPlayer(size_t id);
-std::string CL_GenerateNetDemoFileName(const std::string &filename = cl_netdemoname.cstring());
 bool        CL_PlayerJustTeleported(player_t *player);
 void        CL_QuitAndTryDownload(const OWantFile &missing_file);
 void        CL_ResyncWorldIndex();
@@ -738,13 +734,6 @@ static void CL_DisconnectClient(const odaproto::svc::DisconnectClient *msg)
 static void CL_LoadMap(const odaproto::svc::LoadMap *msg)
 {
     ClientReplay::getInstance().reset();
-    bool splitnetdemo   = (netdemo.isRecording() && ::cl_splitnetdemos) || ::forcenetdemosplit;
-    ::forcenetdemosplit = false;
-
-    // am_cheating = 0;
-
-    if (splitnetdemo)
-        netdemo.stopRecording();
 
     size_t     wadcount = msg->wadnames_size();
     OWantFiles newwadfiles;
@@ -803,44 +792,6 @@ static void CL_LoadMap(const odaproto::svc::LoadMap *msg)
     ::last_svgametic = 0;
 
     gameaction = ga_nothing;
-
-    // Autorecord netdemo or continue recording in a new file
-    if (!(netdemo.isPlaying() || netdemo.isRecording() || netdemo.isPaused()))
-    {
-        std::string filename;
-
-        bool isFFA  = sv_gametype == GM_DM && !G_IsDuelGame();
-        bool isDuel = sv_gametype == GM_DM && G_IsDuelGame();
-
-        bool bCanAutorecord = (sv_gametype == GM_COOP && cl_autorecord_coop) || (isFFA && cl_autorecord_deathmatch) ||
-                              (isDuel && cl_autorecord_duel) || (sv_gametype == GM_TEAMDM && cl_autorecord_teamdm) ||
-                              (G_IsHordeMode() && cl_autorecord_horde);
-
-        size_t param = Args.CheckParm("-netrecord");
-        if (param && Args.GetArg(param + 1))
-            filename = Args.GetArg(param + 1);
-
-        if (((splitnetdemo || cl_autorecord) && bCanAutorecord) || param)
-        {
-            if (filename.empty())
-                filename = CL_GenerateNetDemoFileName();
-            else
-                filename = CL_GenerateNetDemoFileName(filename);
-
-            // NOTE(jsd): Presumably a warning is already printed.
-            if (filename.empty())
-            {
-                netdemo.stopRecording();
-                return;
-            }
-
-            netdemo.startRecording(filename);
-        }
-    }
-
-    // write the map index to the netdemo
-    if (netdemo.isRecording())
-        netdemo.writeMapChange();
 }
 
 static void CL_ConsolePlayer(const odaproto::svc::ConsolePlayer *msg)
@@ -1618,9 +1569,6 @@ static void CL_ExitLevel(const odaproto::svc::ExitLevel *msg)
     gameaction = ga_completed;
 
     ClientReplay::getInstance().reset();
-
-    if (netdemo.isRecording())
-        netdemo.writeIntermission();
 }
 
 static void CL_TouchSpecial(const odaproto::svc::TouchSpecial *msg)
@@ -1844,7 +1792,7 @@ static void CL_ConnectClient(const odaproto::svc::ConnectClient *msg)
 // Print a message in the middle of the screen
 static void CL_MidPrint(const odaproto::svc::MidPrint *msg)
 {
-    C_MidPrint(msg->message().c_str(), NULL, msg->time());
+    //C_MidPrint(msg->message().c_str(), NULL, msg->time());
 }
 
 //
@@ -2055,10 +2003,6 @@ static void CL_ResetMap(const odaproto::svc::ResetMap *msg)
     // You don't get to keep cards.  This isn't communicated anywhere else.
     if (sv_gametype == GM_COOP)
         P_ClearPlayerCards(consoleplayer());
-
-    // write the map index to the netdemo
-    if (netdemo.isRecording() && recv_full_update)
-        netdemo.writeMapChange();
 }
 
 static void CL_PlayerQueuePos(const odaproto::svc::PlayerQueuePos *msg)
@@ -2583,64 +2527,6 @@ static void CL_HordeInfo(const odaproto::svc::HordeInfo *msg)
     P_SetHordeInfo(info);
 }
 
-static void CL_NetdemoCap(const odaproto::svc::NetdemoCap *msg)
-{
-    player_t *clientPlayer = &consoleplayer();
-    fixed_t   x, y, z;
-    fixed_t   momx, momy, momz;
-    fixed_t   pitch, viewz, viewheight, deltaviewheight;
-    angle_t   angle;
-    int       jumpTics, reactiontime;
-    byte      waterlevel;
-
-    clientPlayer->cmd.clear();
-    clientPlayer->cmd.unserialize(msg->player_cmd());
-
-    waterlevel                  = msg->actor().waterlevel();
-    x                           = msg->actor().pos().x();
-    y                           = msg->actor().pos().y();
-    z                           = msg->actor().pos().z();
-    momx                        = msg->actor().mom().x();
-    momy                        = msg->actor().mom().y();
-    momz                        = msg->actor().mom().z();
-    angle                       = msg->actor().angle();
-    pitch                       = msg->actor().pitch();
-    viewz                       = msg->player().viewz();
-    viewheight                  = msg->player().viewheight();
-    deltaviewheight             = msg->player().deltaviewheight();
-    jumpTics                    = msg->player().jumptics();
-    reactiontime                = msg->actor().reactiontime();
-    clientPlayer->readyweapon   = static_cast<weapontype_t>(msg->player().readyweapon());
-    clientPlayer->pendingweapon = static_cast<weapontype_t>(msg->player().pendingweapon());
-
-    if (clientPlayer->mo)
-    {
-        clientPlayer->mo->x            = x;
-        clientPlayer->mo->y            = y;
-        clientPlayer->mo->z            = z;
-        clientPlayer->mo->momx         = momx;
-        clientPlayer->mo->momy         = momy;
-        clientPlayer->mo->momz         = momz;
-        clientPlayer->mo->angle        = angle;
-        clientPlayer->mo->pitch        = pitch;
-        clientPlayer->viewz            = viewz;
-        clientPlayer->viewheight       = viewheight;
-        clientPlayer->deltaviewheight  = deltaviewheight;
-        clientPlayer->jumpTics         = jumpTics;
-        clientPlayer->mo->reactiontime = reactiontime;
-        clientPlayer->mo->waterlevel   = waterlevel;
-    }
-}
-
-static void CL_NetDemoStop(const odaproto::svc::NetDemoStop *msg)
-{
-    ::netdemo.stopPlaying();
-}
-
-static void CL_NetDemoLoadSnap(const odaproto::svc::NetDemoLoadSnap *msg)
-{
-    AddCommandString("netprevmap");
-}
 
 //-----------------------------------------------------------------------------
 // Everything below this line is not a message parsing funciton.
@@ -2815,9 +2701,6 @@ parseError_e CL_ParseCommand()
 		SV_MSG(svc_maplist_index, CL_MaplistIndex, odaproto::svc::MaplistIndex);
 		SV_MSG(svc_toast, CL_Toast, odaproto::svc::Toast);
 		SV_MSG(svc_hordeinfo, CL_HordeInfo, odaproto::svc::HordeInfo);
-		SV_MSG(svc_netdemocap, CL_NetdemoCap, odaproto::svc::NetdemoCap);
-		SV_MSG(svc_netdemostop, CL_NetDemoStop, odaproto::svc::NetDemoStop);
-		SV_MSG(svc_netdemoloadsnap, CL_NetDemoLoadSnap, odaproto::svc::NetDemoLoadSnap);
         /* clang-format on */
     default:
         return PERR_UNKNOWN_HEADER;

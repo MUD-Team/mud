@@ -29,3 +29,5 @@
 void P_Ticker(void);
 
 bool P_AtInterval(int interval);
+
+void P_Ticker_Pause(bool paused);

@@ -647,21 +647,3 @@ message HordeInfo
 	int32 wave_start_health = 10;
 	uint64 define_id = 11;
 }
-
-// svc_netdemocap
-message NetdemoCap
-{
-	bytes player_cmd = 1;
-	Player player = 2;
-	Actor actor = 3;
-}
-
-// svc_netdemostop
-message NetDemoStop
-{
-}
-
-// svc_netdemoloadsnap
-message NetDemoLoadSnap
-{
-}

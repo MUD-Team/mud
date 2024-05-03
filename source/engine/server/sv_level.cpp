@@ -432,7 +432,7 @@ void G_InitNew(const char *mapname)
         {
             for (i = 0; i < NUMSTATES; i++)
             {
-                if (states[i].flags & STATEF_SKILL5FAST && (states[i].tics != 1 || demoplayback))
+                if (states[i].flags & STATEF_SKILL5FAST && (states[i].tics != 1))
                     states[i].tics >>= 1; // don't change 1->0 since it causes cycles
             }
 
@@ -504,7 +504,6 @@ void G_InitNew(const char *mapname)
     multiplayer = true;
 
     paused       = false;
-    demoplayback = false;
     viewactive   = true;
 
     // Make a copy of our previous winner so we can service the queue properly
@@ -533,7 +532,7 @@ void G_ExitLevel(int position, int drawscores)
     if (drawscores)
         SV_DrawScores();
 
-    gamestate = GS_INTERMISSION;
+    gamestate = GS_NONE;
     mapchange = TICRATE * sv_intermissionlimit; // wait n seconds, default 10
 
     secretexit = false;
@@ -552,7 +551,7 @@ void G_SecretExitLevel(int position, int drawscores)
     if (drawscores)
         SV_DrawScores();
 
-    gamestate = GS_INTERMISSION;
+    gamestate = GS_NONE;
     mapchange = TICRATE * sv_intermissionlimit; // wait n seconds, defaults to 10
 
     // IF NO WOLF3D LEVELS, NO SECRET EXIT!

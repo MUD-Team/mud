@@ -47,7 +47,7 @@ void        I_CloseJoystick();
 std::string I_GetKeyName(int key);
 int         I_GetKeyFromName(const std::string &name);
 
-void I_GetEvents(bool mouseOnly);
+void I_GetEvents();
 
 // ============================================================================
 //
@@ -128,6 +128,13 @@ class IInputSubsystem
     virtual void enableTextEntry();
     virtual void disableTextEntry();
 
+    void postEvent(event_t& event)
+    {
+        if (mRepeating)
+            addToEventRepeaters(event);
+
+        mEvents.push(event);
+    }
     virtual void flushInput()
     {
         event_t dummy_event;
@@ -228,3 +235,8 @@ class IInputSubsystem
 
 typedef OHashTable<int, std::string> KeyNameTable;
 extern KeyNameTable                  key_names;
+
+void I_PostInputEvent(event_t& event);
+void I_HandleInputEvents();
+bool I_TranslateSDLEvent(const SDL_Event& sdl, event_t& event);
+

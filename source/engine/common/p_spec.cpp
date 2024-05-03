@@ -734,7 +734,7 @@ bool P_CheckTag(line_t *line)
     default:
         break;
     }
-    if (!demoplayback && line->special >= GenCrusherBase && line->special <= GenEnd)
+    if (line->special >= GenCrusherBase && line->special <= GenEnd)
     {
         if ((line->special & 6) != 6) // e6y //jff 2/27/98 all non-manual
             return false;             // generalized types require tag
@@ -1552,7 +1552,7 @@ bool P_CanUnlockZDoomDoor(player_t *player, zdoom_lock_t lock, bool remote)
 
         if (msg != NULL)
         {
-            C_MidPrint(GStrings(*msg), player);
+            //C_MidPrint(GStrings(*msg), player);
         }
     }
 
@@ -1704,7 +1704,7 @@ bool P_CanUnlockGenDoor(line_t *line, player_t *player)
 
         if (msg != NULL)
         {
-            C_MidPrint(GStrings(*msg), player);
+            //C_MidPrint(GStrings(*msg), player);
         }
     }
 
@@ -1808,8 +1808,8 @@ BOOL P_CheckKeys(player_t *p, card_t lock, BOOL remote)
         else
             UV_SoundAvoidPlayer(p->mo, CHAN_VOICE, "player/male/grunt1", ATTN_NORM);
 
-        if (msg != NULL)
-            C_MidPrint(GStrings(*msg), p);
+        //if (msg != NULL)
+        //    C_MidPrint(GStrings(*msg), p);
     }
 
     return false;
@@ -2109,8 +2109,10 @@ void P_CollectSecretCommon(sector_t *sector, player_t *player)
     SV_UpdateSecret(*sector, *player); // Update the sector to all clients so that they
                                        // don't discover an already found secret.
 #else
+/*
     if (player->mo == consoleplayer().camera)
         C_RevealSecret(); // Display the secret revealed message
+*/
 #endif
 }
 

@@ -877,9 +877,6 @@ static void InitNetMessageFormats()
     SVC_INFO(svc_executelinespecial);
     SVC_INFO(svc_executeacsspecial);
     SVC_INFO(svc_thinkerupdate);
-    SVC_INFO(svc_netdemocap);
-    SVC_INFO(svc_netdemostop);
-    SVC_INFO(svc_netdemoloadsnap);
     SVC_INFO(svc_vote_update);
     SVC_INFO(svc_maplist);
     SVC_INFO(svc_maplist_update);
