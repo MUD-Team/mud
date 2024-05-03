@@ -9,7 +9,7 @@
 	</head>
 	<body>
 		<panel data-model="player_view">
-			<playerview style="display: block; width: 100%; height: 100%;" />
+			<playerview id="player_view" style="display: block; width: 100%; height: 100%;" />
 			<!--<input type="range" name="Resolution" min="1" max="10" step="1" data-value="resolution"/>-->
 		</panel>
 	</body>

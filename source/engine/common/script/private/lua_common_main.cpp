@@ -15,6 +15,7 @@ class LuaCommonMain
             .addFunction(
                 "add_command", +[](const std::string &command) { AddCommandString(command); })
             .addProperty("paused", &paused)
+            .addProperty("gamestate", &gamestate)
             .endNamespace();
     }
 };

@@ -398,7 +398,7 @@ void ISDL20MouseInputDevice::pause()
     SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE);
     SDL_EventState(SDL_MOUSEBUTTONDOWN, SDL_IGNORE);
     SDL_EventState(SDL_MOUSEBUTTONUP, SDL_IGNORE);
-    SDL_SetRelativeMouseMode(SDL_FALSE);
+    //SDL_SetRelativeMouseMode(SDL_FALSE);
 }
 
 //
@@ -413,7 +413,7 @@ void ISDL20MouseInputDevice::resume()
 {
     mActive = true;
     reset();
-    // SDL_SetRelativeMouseMode(SDL_TRUE);
+    //SDL_SetRelativeMouseMode(SDL_TRUE);
     SDL_EventState(SDL_MOUSEMOTION, SDL_ENABLE);
     SDL_EventState(SDL_MOUSEBUTTONDOWN, SDL_ENABLE);
     SDL_EventState(SDL_MOUSEBUTTONUP, SDL_ENABLE);
