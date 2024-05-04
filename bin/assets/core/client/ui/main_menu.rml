@@ -18,10 +18,10 @@
                 height: 100%;
             }
 
-            .center-menu {                
+            .center-menu {
                 text-align: center;
                 position: absolute;
-                top: 25%;                
+                top: 25%;
             }
 
             div.button {
@@ -55,6 +55,7 @@
             <div class="center-menu">
                 <div style="font-size: 48dp;font-weight: 800; color:#d39266;">MUD</div>
                 <div id="new_game" class="button" style="margin: 16dp auto;" onclick="On_New_Game()">New Game</div>
+                <div id="quit" class="button" style="margin: 16dp auto;" onclick="On_Options_Menu()">Options</div>
                 <div id="quit" class="button" style="margin: 16dp auto;" onclick="mud.add_command('quit')">Quit</div>
             </div>
         </div>

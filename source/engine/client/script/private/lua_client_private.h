@@ -4,3 +4,4 @@
 void LUA_OpenClientVideo(lua_State* L);
 void LUA_OpenClientUI(lua_State *L);
 void LUA_OpenClientGame(lua_State *L);
+void LUA_OpenClientOptions(lua_State *L);

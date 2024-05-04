@@ -90,6 +90,7 @@ void LUA_OpenClientState()
 
     LuaClientMain::open(clientState);
 
+    LUA_OpenClientOptions(clientState);
     LUA_OpenClientVideo(clientState);
     LUA_OpenClientUI(clientState);
     LUA_OpenClientGame(clientState);
