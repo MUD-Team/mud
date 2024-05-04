@@ -1,6 +1,6 @@
 body
 {
-	font-family: rmlui-debugger-font;
+	font-family: Russo One;
 	z-index: 1000000;
 	font-size: 13dp;
 	line-height: 1.4;

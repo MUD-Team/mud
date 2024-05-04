@@ -86,6 +86,9 @@ void V_AdjustVideoMode()
 
         // Recalculate various view parameters.
         R_ForceViewWindowResize();
+
+        void UI_OnResize();
+        UI_OnResize();
     }
 }
 

@@ -3,6 +3,7 @@
 local console = require("./console")
 local main_menu = require("./main_menu")
 local player_view = require("./player_view")
+local options = require("./options")
 
 local video = mud.video
 local ui = mud.ui
@@ -11,6 +12,7 @@ local play_context = rmlui:CreateContext("play", Vector2i.new(video.width, video
 
 console.load(play_context)
 main_menu.load(play_context)
+options.load(play_context)
 player_view.load(play_context)
 
 local begin_frame = function()

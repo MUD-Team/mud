@@ -285,7 +285,7 @@ CVAR_RANGE(cl_predictsectors, "1",
 
 CVAR(cl_predictpickup, "1", "Predict weapon pickups", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
 
-CVAR_RANGE(cl_movebob, "1.0", "Adjust weapon and movement bobbing", CVARTYPE_FLOAT,
+CVAR_RANGE(cl_movebob, "0.0", "Adjust weapon and movement bobbing", CVARTYPE_FLOAT,
            CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE, 0.0f, 1.0f)
 
 CVAR(cl_centerbobonfire, "0", "Centers the weapon bobbing when firing a weapon", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)

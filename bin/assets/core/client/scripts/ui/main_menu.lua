@@ -1,5 +1,4 @@
 local menu_document;
-local menu_context;
 local menu_shown
 
 local function show(shown)
@@ -25,8 +24,7 @@ local function on_key_up(ev)
     end
 end
 
-local function load(context)
-    menu_context = context
+local function load(context)    
     menu_document = context:LoadDocument("main_menu.rml")
     menu_document:PushToBack() -- so plays well with debugger
     show(true)

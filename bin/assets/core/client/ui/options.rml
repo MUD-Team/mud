@@ -1,0 +1,138 @@
+<rml>
+
+    <head>
+        <link type="text/rcss" href="style.rcss" />
+        <style>
+            .option {
+                display: inline-block;
+            }
+
+            tab {
+                margin: 8dp
+            }
+
+            .option {
+                font-weight: 800;
+                display: flex;
+                flex-shrink: 0;
+                justify-content: flex-start;
+                align-items: center;
+                padding-left: 16dp;
+                height: 48dp
+            }
+
+            tr {
+                border: 2dp #999;
+
+            }
+
+            td {
+                border-right: 2dp #999;
+            }
+
+            panel {
+                padding: 16dp
+            }
+
+            button {
+                margin-top: 18dp;
+                font-size: 18dp;
+                font-weight: 800;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div>
+            <tabset id="menu">
+                <tab>Display</tab>
+                <panel id="display" data-model="display_options">
+                    <table>
+                        <tr>
+                            <td>
+                                <div class="option">
+                                    <div>Display Resolution</div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="option">
+                                    <div>
+                                        <select data-value="current_mode">
+                                            <option data-for="mode : modes" data-value="mode.id"
+                                                data-if-selected="current_mode == mode.id">{{mode.width}} x
+                                                {{mode.height}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="option">
+
+                                </div>
+                            </td>
+
+                        </tr>
+                    </table>
+                </panel>
+                <tab>Sound</tab>
+                <panel id="sound" data-model="sound_options">
+                    <table>
+                        <tr>
+                            <td>
+                                <div class="option">
+                                    <div>Music Volume</div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="option">
+                                    <input type="range" min="0" max="1" step="0.05" data-value="music_volume" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="option">
+                                    <div>Sound Effects Volume</div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="option">
+                                    <input type="range" min="0" max="1" step="0.05" data-value="sfx_volume" />
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </panel>
+                <tab>Input</tab>
+                <panel id="input" data-model="input_options">
+                    <table>
+                        <tr>
+                            <td>
+                                <div class="option">
+                                    <div>Mouse Look</div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="option">
+                                    <input type="checkbox" name="mouselook" value="true" data-checked="mouselook" />
+                                </div>
+                            </td>
+                            <td>
+                                <div class="option">
+                                    <div>{{mouselook_help}}</div>
+                                </div>
+                            </td>
+
+                        </tr>
+                    </table>
+                </panel>
+
+            </tabset>
+            <div
+                style="display: flex; justify-content: center; align-items: center; flex-direction: column; padding-top: 24dp; ">
+                <button style="width: 120dp;" onclick="On_Options_Applied()">Apply</button>
+                <button style="width: 120dp;" onclick="On_Options_Back()">Main Menu</button>
+            </div>
+        </div>
+    </body>
+</rml>
