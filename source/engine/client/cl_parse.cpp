@@ -98,7 +98,7 @@ void        P_DestroyButtonThinkers();
 void        P_ExplodeMissile(AActor *mo);
 void        P_PlayerLeavesGame(player_s *player);
 void        P_SetPsprite(player_t *player, int position, statenum_t stnum);
-void        P_SetButtonTexture(line_t *line, short texture);
+void        P_SetButtonTexture(line_t *line, texhandle_t texture);
 
 /**
  * @brief Unpack a bitfield into an array of booleans.

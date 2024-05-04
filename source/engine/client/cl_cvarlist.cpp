@@ -316,7 +316,7 @@ CVAR_FUNC_DECL(mouse_type, "1", "Use vanilla Doom or ZDoom mouse sensitivity sca
 CVAR_RANGE(mouse_sensitivity, "1.0", "Overall mouse sensitivity", CVARTYPE_FLOAT,
            CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE, 0.0f, 100.0f)
 
-CVAR_FUNC_DECL(cl_mouselook, "0", "Look up or down with mouse", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
+CVAR_FUNC_DECL(cl_mouselook, "1", "Look up or down with mouse", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
 
 CVAR_RANGE(m_pitch, "1.0", "Vertical mouse sensitivity", CVARTYPE_FLOAT, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE,
            0.0f, 100.0f)

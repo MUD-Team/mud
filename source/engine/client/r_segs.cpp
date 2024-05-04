@@ -47,9 +47,9 @@ static BOOL markfloor;   // False if the back side is the same plane.
 static BOOL markceiling;
 static BOOL maskedtexture;
 static bool didsolidcol;
-static int  toptexture;
-static int  bottomtexture;
-static int  midtexture;
+static texhandle_t  toptexture;
+static texhandle_t  bottomtexture;
+static texhandle_t  midtexture;
 
 int *walllights;
 
@@ -93,9 +93,9 @@ static tallpost_t **masked_midposts;
 //
 // Scales a value by the horizontal scaling value for texnum
 //
-static inline fixed_t R_TexScaleX(fixed_t x, int texnum)
+static inline fixed_t R_TexScaleX(fixed_t x, texhandle_t texnum)
 {
-    return FixedMul(x, texturescalex[texnum]);
+    return FixedMul(x, texturemanager.getTexture(texnum)->getScaleX());
 }
 
 //
@@ -103,9 +103,9 @@ static inline fixed_t R_TexScaleX(fixed_t x, int texnum)
 //
 // Scales a value by the vertical scaling value for texnum
 //
-static inline fixed_t R_TexScaleY(fixed_t y, int texnum)
+static inline fixed_t R_TexScaleY(fixed_t y, texhandle_t texnum)
 {
-    return FixedMul(y, texturescaley[texnum]);
+    return FixedMul(y, texturemanager.getTexture(texnum)->getScaleY());
 }
 
 //
@@ -113,9 +113,9 @@ static inline fixed_t R_TexScaleY(fixed_t y, int texnum)
 //
 // Scales a value by the inverse of the horizontal scaling value for texnum
 //
-static inline fixed_t R_TexInvScaleX(fixed_t x, int texnum)
+static inline fixed_t R_TexInvScaleX(fixed_t x, texhandle_t texnum)
 {
-    return FixedDiv(x, texturescalex[texnum]);
+    return FixedDiv(x, texturemanager.getTexture(texnum)->getScaleX());
 }
 
 //
@@ -123,9 +123,9 @@ static inline fixed_t R_TexInvScaleX(fixed_t x, int texnum)
 //
 // Scales a value by the inverse of the vertical scaling value for texnum
 //
-static inline fixed_t R_TexInvScaleY(fixed_t y, int texnum)
+static inline fixed_t R_TexInvScaleY(fixed_t y, texhandle_t texnum)
 {
-    return FixedDiv(y, texturescaley[texnum]);
+    return FixedDiv(y, texturemanager.getTexture(texnum)->getScaleY());
 }
 
 //
@@ -458,7 +458,7 @@ void R_RenderSolidSegRange(int start, int stop)
 
         rw_light = initial_light;
 
-        dcol.textureheight = textureheight[midtexture];
+        dcol.textureheight = texturemanager.getTexture(midtexture)->getFracHeight();
         dcol.texturemid    = rw_midtexturemid;
 
         R_RenderColumnRange(start, stop, walltopf, lower, midposts, SolidColumnBlaster, true, columnmethod);
@@ -480,7 +480,7 @@ void R_RenderSolidSegRange(int start, int stop)
                 lower[x]    = walltopb[x] - 1;
             }
 
-            dcol.textureheight = textureheight[toptexture];
+            dcol.textureheight = texturemanager.getTexture(toptexture)->getFracHeight();
             dcol.texturemid    = rw_toptexturemid;
 
             R_RenderColumnRange(start, stop, walltopf, lower, topposts, SolidColumnBlaster, true, columnmethod);
@@ -504,7 +504,7 @@ void R_RenderSolidSegRange(int start, int stop)
                 lower[x]       = wallbottomf[x] - 1;
             }
 
-            dcol.textureheight = textureheight[bottomtexture];
+            dcol.textureheight = texturemanager.getTexture(bottomtexture)->getFracHeight();
             dcol.texturemid    = rw_bottomtexturemid;
 
             R_RenderColumnRange(start, stop, wallbottomb, lower, bottomposts, SolidColumnBlaster, true, columnmethod);
@@ -576,8 +576,8 @@ void R_RenderMaskedSegRange(drawseg_t *ds, int x1, int x2)
     frontsector = curline->frontsector;
     backsector  = curline->backsector;
 
-    int     texnum    = texturetranslation[curline->sidedef->midtexture];
-    fixed_t texheight = R_TexScaleY(textureheight[texnum], texnum);
+    texhandle_t     texnum    = curline->sidedef->midtexture;
+    fixed_t texheight = R_TexScaleY(texturemanager.getTexture(texnum)->getFracHeight(), texnum);
 
     // find texture positioning
     if (curline->linedef->flags & ML_DONTPEGBOTTOM)
@@ -657,9 +657,9 @@ void R_PrepWall(fixed_t px1, fixed_t py1, fixed_t px2, fixed_t py2, fixed_t dist
     if (width <= 0)
         return;
 
-    int toptexture    = texturetranslation[curline->sidedef->toptexture];
-    int midtexture    = texturetranslation[curline->sidedef->midtexture];
-    int bottomtexture = texturetranslation[curline->sidedef->bottomtexture];
+    texhandle_t toptexture    = curline->sidedef->toptexture;
+    texhandle_t midtexture    = curline->sidedef->midtexture;
+    texhandle_t bottomtexture = curline->sidedef->bottomtexture;
 
     // determine which vertex of the linedef should be used for texture alignment
     vertex_t *v1;
@@ -810,13 +810,13 @@ void R_StoreWallRange(int start, int stop)
 
     // calculate texture boundaries
     //	and decide if floor / ceiling marks are needed
-    midtexture = toptexture = bottomtexture = maskedtexture = 0;
+    midtexture = toptexture = bottomtexture = maskedtexture = TextureManager::NO_TEXTURE_HANDLE;
     ds_p->midposts                                          = NULL;
 
     if (!backsector)
     {
         // single sided line
-        midtexture = texturetranslation[sidedef->midtexture];
+        midtexture = sidedef->midtexture;
 
         // a single sided line is terminal, so it must mark ends
         markfloor = markceiling = true;
@@ -824,7 +824,7 @@ void R_StoreWallRange(int start, int stop)
         if (linedef->flags & ML_DONTPEGBOTTOM)
         {
             // bottom of texture at bottom
-            fixed_t texheight = R_TexScaleY(textureheight[midtexture], midtexture);
+            fixed_t texheight = R_TexScaleY(texturemanager.getTexture(midtexture)->getFracHeight(), midtexture);
             rw_midtexturemid  = P_FloorHeight(frontsector) - viewz + texheight;
         }
         else
@@ -934,7 +934,7 @@ void R_StoreWallRange(int start, int stop)
         if (rw_hashigh)
         {
             // top texture
-            toptexture = texturetranslation[sidedef->toptexture];
+            toptexture = sidedef->toptexture;
             if (linedef->flags & ML_DONTPEGTOP)
             {
                 // top of texture at top
@@ -944,7 +944,7 @@ void R_StoreWallRange(int start, int stop)
             else
             {
                 // bottom of texture
-                fixed_t texheight = R_TexScaleY(textureheight[toptexture], toptexture);
+                fixed_t texheight = R_TexScaleY(texturemanager.getTexture(toptexture)->getFracHeight(), toptexture);
                 rw_toptexturemid  = P_CeilingHeight(backsector) - viewz + texheight;
             }
         }
@@ -952,7 +952,7 @@ void R_StoreWallRange(int start, int stop)
         if (rw_haslow)
         {
             // bottom texture
-            bottomtexture = texturetranslation[sidedef->bottomtexture];
+            bottomtexture = sidedef->bottomtexture;
 
             if (linedef->flags & ML_DONTPEGBOTTOM)
             {
@@ -975,7 +975,7 @@ void R_StoreWallRange(int start, int stop)
         if (sidedef->midtexture)
         {
             // masked midtexture
-            maskedtexture  = texturetranslation[sidedef->midtexture];
+            maskedtexture  = sidedef->midtexture;
             ds_p->midposts = masked_midposts = masked_midposts_pool.alloc(count) - start;
         }
 
@@ -998,7 +998,7 @@ void R_StoreWallRange(int start, int stop)
     if (curline->linedef->special == spe)
     {
         rw_scale = ds_p->scale1 = ds_p->scale2 = rw_scalestep = ds_p->light = rw_light = 0;
-        midtexture = toptexture = bottomtexture = maskedtexture = 0;
+        midtexture = toptexture = bottomtexture = maskedtexture = TextureManager::NO_TEXTURE_HANDLE;
 
         for (int n = start; n <= stop; n++)
             walltopf[n] = wallbottomf[n] = centery;

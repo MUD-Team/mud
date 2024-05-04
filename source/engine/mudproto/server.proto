@@ -340,7 +340,7 @@ message Switch
 	bool switch_active = 2;
 	uint32 special = 3;
 	uint32 state = 4;
-	int32 button_texture = 5;
+	uint32 button_texture = 5;
 	uint32 timer = 6;
 }
 
@@ -460,9 +460,9 @@ message LineSideUpdate
 	int32 linenum = 1;
 	int32 side = 2;
 	uint32 changes = 3; // bitfield
-	int32 toptexture = 4;
-	int32 midtexture = 5;
-	int32 bottomtexture = 6;
+	uint32 toptexture = 4;
+	uint32 midtexture = 5;
+	uint32 bottomtexture = 6;
 }
 
 // svc_mobjstate

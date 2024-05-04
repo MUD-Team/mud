@@ -47,6 +47,7 @@
 #include "md5.h"
 #include "odamex.h"
 #include "physfs.h"
+#include "r_data.h"
 #include "w_wad.h"
 #include "z_zone.h"
 
@@ -808,9 +809,6 @@ void *W_CacheLumpName(const char *name, const zoneTag_e tag)
     return W_CacheLumpNum(W_GetNumForName(name), tag);
 }
 
-size_t R_CalculateNewPatchSize(patch_t *patch, size_t length);
-void   R_ConvertPatch(patch_t *rawpatch, patch_t *newpatch, const unsigned int lumpnum);
-
 //
 // W_CachePatch
 //
@@ -840,7 +838,7 @@ patch_t *W_CachePatch(unsigned lumpnum, const zoneTag_e tag)
             patch_t *newpatch  = (patch_t *)lumpcache[lumpnum];
             *((unsigned char *)lumpcache[lumpnum] + newlumplen) = 0;
 
-            R_ConvertPatch(newpatch, rawpatch, lumpnum);
+            R_ConvertPatch(newpatch, rawpatch);
         }
         else
         {

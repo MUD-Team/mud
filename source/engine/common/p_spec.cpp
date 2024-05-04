@@ -469,8 +469,6 @@ static void P_SpawnFriction(); // phares 3/16/98
 static void P_SpawnPushers();  // phares 3/20/98
 static void P_SpawnExtra();
 
-static void ParseAnim(OScanner &os, byte istex);
-
 //
 //		Animating line specials
 //
@@ -478,183 +476,6 @@ static void ParseAnim(OScanner &os, byte istex);
 
 // extern	short	numlinespecials;
 // extern	line_t* linespeciallist[MAXLINEANIMS];
-
-//
-// [RH] P_InitAnimDefs
-//
-// This uses a Hexen ANIMDEFS lump to define the animation sequences
-//
-static void P_InitAnimDefs()
-{
-    // [DE] this hacky try/catch is here so WADs with ZDoom ANIMDEFS extensions
-    // don't crash for now. Once TextureManager is fully implemented I'll just
-    // implement the extensions properly there
-    try
-    {
-        int lump = -1;
-
-        while ((lump = W_FindLump("ANIMDEFS", lump)) != -1)
-        {
-            const char *buffer = static_cast<char *>(W_CacheLumpNum(lump, PU_STATIC));
-
-            OScannerConfig config = {
-                "ANIMDEFS", // lumpName
-                false,      // semiComments
-                true,       // cComments
-            };
-            OScanner os = OScanner::openBuffer(config, buffer, buffer + W_LumpLength(lump));
-
-            while (os.scan())
-            {
-                if (os.compareTokenNoCase("flat"))
-                {
-                    ParseAnim(os, false);
-                }
-                else if (os.compareTokenNoCase("texture"))
-                {
-                    ParseAnim(os, true);
-                }
-                else if (os.compareTokenNoCase("switch")) // Don't support switchdef yet...
-                {
-                    // P_ProcessSwitchDef();
-                    // os.error("switchdef not supported.");
-                }
-                else if (os.compareTokenNoCase("warp"))
-                {
-                    os.mustScan();
-                    if (os.compareTokenNoCase("flat"))
-                    {
-                        //os.mustScan();
-                        //flatwarp[R_FlatNumForName(os.getToken().c_str())] = true;
-                    }
-                    else if (os.compareTokenNoCase("texture"))
-                    {
-                        // TODO: Make texture warping work with wall textures
-                        os.mustScan();
-                        R_TextureNumForName(os.getToken().c_str());
-                    }
-                    else
-                    {
-                        os.error("Unknown error reading in ANIMDEFS");
-                    }
-                }
-            }
-        }
-    }
-    catch (CRecoverableError &)
-    {
-    }
-}
-
-static void ParseAnim(OScanner &os, byte istex)
-{
-    anim_t  sink;
-    anim_t *place;
-
-    os.mustScan();
-    const short picnum = istex ? R_CheckTextureNumForName(os.getToken().c_str())
-                               : W_CheckNumForName(os.getToken().c_str(), ns_flats) - firstflat;
-
-    if (picnum == -1)
-    { // Base pic is not present, so skip this definition
-        place = &sink;
-    }
-    else
-    {
-        for (place = anims; place < lastanim; place++)
-        {
-            if (place->basepic == picnum && place->istexture == istex)
-            {
-                break;
-            }
-        }
-        if (place == lastanim)
-        {
-            lastanim++;
-            if (lastanim > anims + maxanims)
-            {
-                const size_t newmax = maxanims ? maxanims * 2 : MAXANIMS;
-                anims               = static_cast<anim_t *>(Realloc(anims, newmax * sizeof(*anims)));
-                place               = anims + maxanims;
-                lastanim            = place + 1;
-                maxanims            = newmax;
-            }
-        }
-        // no decals on animating textures by default
-        // if (istex)
-        //{
-        //	texturenodecals[picnum] = 1;
-        //}
-    }
-
-    place->uniqueframes = true;
-    place->curframe     = 0;
-    place->numframes    = 0;
-    place->basepic      = picnum;
-    place->istexture    = istex;
-    memset(place->speedmin, 1, MAX_ANIM_FRAMES * sizeof(*place->speedmin));
-    memset(place->speedmax, 1, MAX_ANIM_FRAMES * sizeof(*place->speedmax));
-
-    while (os.scan())
-    {
-        /*if (os.compareTokenNoCase("allowdecals"))
-        {
-            if (istex && picnum >= 0)
-            {
-                texturenodecals[picnum] = 0;
-            }
-            continue;
-        }
-        else*/
-        if (!os.compareTokenNoCase("pic"))
-        {
-            os.unScan();
-            break;
-        }
-
-        if (place->numframes == MAX_ANIM_FRAMES)
-        {
-            os.error("Animation has too many frames");
-        }
-
-        byte min = 1;
-        byte max = 1;
-
-        os.mustScanInt();
-        const int frame = os.getTokenInt();
-        os.mustScan();
-        if (os.compareToken("tics"))
-        {
-            os.mustScanInt();
-            min = max = clamp(os.getTokenInt(), 0, 255);
-        }
-        else if (os.compareToken("rand"))
-        {
-            os.mustScanInt();
-            int num = os.getTokenInt();
-            min     = num >= 0 ? num : 0;
-            os.mustScanInt();
-            num = os.getTokenInt();
-            max = num <= 255 ? num : 255;
-        }
-        else
-        {
-            os.error("Must specify a duration for animation frame");
-        }
-
-        place->speedmin[place->numframes] = min;
-        place->speedmax[place->numframes] = max;
-        place->framepic[place->numframes] = frame + picnum - 1;
-        place->numframes++;
-    }
-
-    if (place->numframes < 2)
-    {
-        os.error("Animation needs at least 2 frames");
-    }
-
-    place->countdown = place->speedmin[0];
-}
 
 //
 // P_CheckTag()
@@ -742,111 +563,6 @@ bool P_CheckTag(line_t *line)
             return true;
     }
     return false; // zero tag not allowed
-}
-
-/*
- *P_InitPicAnims
- *
- *Load the table of animation definitions, checking for existence of
- *the start and end of each frame. If the start doesn't exist the sequence
- *is skipped, if the last doesn't exist, BOOM exits.
- *
- *Wall/Flat animation sequences, defined by name of first and last frame,
- *The full animation sequence is given using all lumps between the start
- *and end entry, in the order found in the WAD file.
- *
- *This routine modified to read its data from a predefined lump or
- *PWAD lump called ANIMATED rather than a static table in this module to
- *allow wad designers to insert or modify animation sequences.
- *
- *Lump format is an array of byte packed animdef_t structures, terminated
- *by a structure with istexture == -1. The lump can be generated from a
- *text source file using SWANTBLS.EXE, distributed with the BOOM utils.
- *The standard list of switches and animations is contained in the example
- *source text file DEFSWANI.DAT also in the BOOM util distribution.
- *
- *[RH] Rewritten to support BOOM ANIMATED lump but also make absolutely
- *no assumptions about how the compiler packs the animdefs array.
- *
- */
-void P_InitPicAnims(void)
-{
-    byte *animdefs, *anim_p;
-
-    // denis - allow reinitialisation
-    if (anims)
-    {
-        M_Free(anims);
-        lastanim = 0;
-        maxanims = 0;
-    }
-
-    // [RH] Load an ANIMDEFS lump first
-    P_InitAnimDefs();
-
-    if (W_CheckNumForName("ANIMATED") == -1)
-        return;
-
-    animdefs = (byte *)W_CacheLumpName("ANIMATED", PU_STATIC);
-
-    // Init animation
-
-    for (anim_p = animdefs; *anim_p != 255; anim_p += 23)
-    {
-        // 1/11/98 killough -- removed limit by array-doubling
-        if (lastanim >= anims + maxanims)
-        {
-            size_t newmax = maxanims ? maxanims * 2 : MAXANIMS;
-            anims         = (anim_t *)Realloc(anims, newmax * sizeof(*anims)); // killough
-            lastanim      = anims + maxanims;
-            maxanims      = newmax;
-        }
-
-        if (*anim_p /* .istexture */ & 1)
-        {
-            // different episode ?
-            if (R_CheckTextureNumForName(anim_p + 10 /* .startname */) == -1 ||
-                R_CheckTextureNumForName(anim_p + 1 /* .endname */) == -1)
-                continue;
-
-            lastanim->basepic   = R_TextureNumForName(anim_p + 10 /* .startname */);
-            lastanim->numframes = R_TextureNumForName(anim_p + 1 /* .endname */) - lastanim->basepic + 1;
-            /*if (*anim_p & 2)
-            { // [RH] Bit 1 set means allow decals on walls with this texture
-                texturenodecals[lastanim->basepic] = 0;
-            }
-            else
-            {
-                texturenodecals[lastanim->basepic] = 1;
-            }*/
-        }
-        else
-        {
-            if (W_CheckNumForName((char *)anim_p + 10 /* .startname */, ns_flats) == -1 ||
-                W_CheckNumForName((char *)anim_p + 1 /* .startname */, ns_flats) == -1)
-                continue;
-
-            lastanim->basepic   = R_FlatNumForName(anim_p + 10 /* .startname */);
-            lastanim->numframes = R_FlatNumForName(anim_p + 1 /* .endname */) - lastanim->basepic + 1;
-        }
-
-        lastanim->istexture    = *anim_p /* .istexture */;
-        lastanim->uniqueframes = false;
-        lastanim->curframe     = 0;
-
-        if (lastanim->numframes < 2)
-            Printf(PRINT_WARNING, "P_InitPicAnims: bad cycle from %s to %s", anim_p + 10 /* .startname */,
-                   anim_p + 1 /* .endname */);
-
-        lastanim->speedmin[0] = lastanim->speedmax[0] = lastanim->countdown =
-            /* .speed */
-            (anim_p[19] << 0) | (anim_p[20] << 8) | (anim_p[21] << 16) | (anim_p[22] << 24);
-
-        lastanim->countdown--;
-
-        lastanim++;
-    }
-    Z_Free(animdefs);
 }
 
 //
@@ -1192,12 +908,12 @@ fixed_t P_FindShortestTextureAround(sector_t *sec)
         if (sec->lines[i]->flags & ML_TWOSIDED)
         {
             side = &sides[(sec->lines[i])->sidenum[0]];
-            if (side->bottomtexture >= 0 && textureheight[side->bottomtexture] < minsize)
-                minsize = textureheight[side->bottomtexture];
+            if (side->bottomtexture >= 0 && texturemanager.getTexture(side->bottomtexture)->getFracHeight() < minsize)
+                minsize = texturemanager.getTexture(side->bottomtexture)->getFracHeight();
 
             side = &sides[(sec->lines[i])->sidenum[1]];
-            if (side->bottomtexture >= 0 && textureheight[side->bottomtexture] < minsize)
-                minsize = textureheight[side->bottomtexture];
+            if (side->bottomtexture >= 0 && texturemanager.getTexture(side->bottomtexture)->getFracHeight() < minsize)
+                minsize = texturemanager.getTexture(side->bottomtexture)->getFracHeight();
         }
     }
     return minsize;
@@ -1225,12 +941,12 @@ fixed_t P_FindShortestUpperAround(sector_t *sec)
         if (sec->lines[i]->flags & ML_TWOSIDED)
         {
             side = &sides[(sec->lines[i])->sidenum[0]];
-            if (side->toptexture >= 0 && textureheight[side->toptexture] < minsize)
-                minsize = textureheight[side->toptexture];
+            if (side->toptexture >= 0 && texturemanager.getTexture(side->toptexture)->getFracHeight() < minsize)
+                minsize = texturemanager.getTexture(side->toptexture)->getFracHeight();
 
             side = &sides[(sec->lines[i])->sidenum[1]];
-            if (side->toptexture >= 0 && textureheight[side->toptexture] < minsize)
-                minsize = textureheight[side->toptexture];
+            if (side->toptexture >= 0 && texturemanager.getTexture(side->toptexture)->getFracHeight() < minsize)
+                minsize = texturemanager.getTexture(side->toptexture)->getFracHeight();
         }
     }
     return minsize;
@@ -2130,56 +1846,6 @@ void P_CollectSecretVanilla(sector_t *sector, player_t *player)
 void P_UpdateSpecials(void)
 {
     texturemanager.updateAnimatedTextures();
-
-    /*
-    anim_t *anim;
-    int     i;
-
-    // ANIMATE FLATS AND TEXTURES GLOBALLY
-    // [RH] Changed significantly to work with ANIMDEFS lumps
-    for (anim = anims; anim < lastanim; anim++)
-    {
-        if (--anim->countdown == 0)
-        {
-            int speedframe;
-
-            anim->curframe = (anim->numframes) ? (anim->curframe + 1) % anim->numframes : 0;
-
-            speedframe = (anim->uniqueframes) ? anim->curframe : 0;
-
-            if (anim->speedmin[speedframe] == anim->speedmax[speedframe])
-                anim->countdown = anim->speedmin[speedframe];
-            else
-                anim->countdown =
-                    M_Random() % (anim->speedmax[speedframe] - anim->speedmin[speedframe]) + anim->speedmin[speedframe];
-        }
-
-        if (anim->uniqueframes)
-        {
-            int pic = anim->framepic[anim->curframe];
-
-            if (anim->istexture)
-                for (i = 0; i < anim->numframes; i++)
-                    texturetranslation[anim->framepic[i]] = pic;
-            else
-                for (i = 0; i < anim->numframes; i++)
-                    flattranslation[anim->framepic[i]] = pic;
-        }
-        else
-        {
-            for (i = anim->basepic; i < anim->basepic + anim->numframes; i++)
-            {
-                int pic = anim->basepic + (anim->curframe + i) % anim->numframes;
-
-                if (anim->istexture)
-                    texturetranslation[i] = pic;
-                else
-                    flattranslation[i] = pic;
-            }
-        }
-    }
-    */
-
     // [ML] 5/11/06 - Remove sky scrolling ability
 }
 

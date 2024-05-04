@@ -47,7 +47,7 @@ EXTERN_CVAR(r_skypalette)
 // sky mapping
 //
 texhandle_t     skyflatnum;
-int     sky1texture, sky2texture;
+texhandle_t     sky1texture, sky2texture;
 fixed_t skytexturemid;
 fixed_t skyscale;
 int     skystretch;
@@ -127,20 +127,17 @@ void R_InitSkyMap()
 {
     fixed_t fskyheight;
 
-    if (textureheight == NULL)
-        return;
-
     // [SL] 2011-11-30 - Don't run if we don't know what sky texture to use
     if (gamestate != GS_LEVEL)
         return;
 
-    if (sky2texture && textureheight[sky1texture] != textureheight[sky2texture])
+    if (sky2texture && texturemanager.getTexture(sky1texture)->getFracHeight() != texturemanager.getTexture(sky2texture)->getFracHeight())
     {
         Printf(PRINT_HIGH, "\x1f+Both sky textures must be the same height.\x1f-\n");
         sky2texture = sky1texture;
     }
 
-    fskyheight = textureheight[sky1texture];
+    fskyheight = texturemanager.getTexture(sky1texture)->getFracHeight();
 
     if (fskyheight <= (128 << FRACBITS))
     {
@@ -168,9 +165,9 @@ void R_InitSkyMap()
     // The Heretic sky map is 256*200*4 maps.
     sky1shift = 22 + skystretch - 16;
     sky2shift = 22 + skystretch - 16;
-    if (texturewidthmask[sky1texture] >= 127)
+    if (texturemanager.getTexture(sky1texture)->getWidthMask() >= 127)
         sky1shift -= skystretch;
-    if (texturewidthmask[sky2texture] >= 127)
+    if (texturemanager.getTexture(sky2texture)->getWidthMask() >= 127)
         sky2shift -= skystretch;
 
     R_InitXToViewAngle();
@@ -210,7 +207,7 @@ void R_RenderSkyRange(visplane_t *pl)
     MUD_ZoneScoped;
 
     int     columnmethod = 2;
-    int     skytex;
+    texhandle_t     skytex;
     fixed_t front_offset = 0;
     angle_t skyflip      = 0;
 
@@ -234,7 +231,7 @@ void R_RenderSkyRange(visplane_t *pl)
         const side_t *side = *line->sidenum + sides;
 
         // Texture comes from upper texture of reference sidedef
-        skytex = texturetranslation[side->toptexture];
+        skytex = side->toptexture;
 
         // Horizontal offset is turned into an angle offset,
         // to allow sky rotation as well as careful positioning.
@@ -259,7 +256,7 @@ void R_RenderSkyRange(visplane_t *pl)
 
     dcol.iscale        = skyiscale >> skystretch;
     dcol.texturemid    = skytexturemid;
-    dcol.textureheight = textureheight[skytex];
+    dcol.textureheight = texturemanager.getTexture(skytex)->getFracHeight();
     skyplane           = pl;
 
     // set up the appropriate colormap for the sky

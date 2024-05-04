@@ -17,3 +17,5 @@ void UI_SetMode(uint16_t width, uint16_t height, const PixelFormat *format, ISDL
 void UI_PostEvent(SDL_Event &ev);
 
 void UI_LoadCore();
+
+void UI_OnResize();

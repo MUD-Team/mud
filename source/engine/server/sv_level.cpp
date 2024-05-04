@@ -774,11 +774,11 @@ void G_DoLoadLevel(int position)
     // [RH] Fetch sky parameters from level_locals_t.
     // [ML] 5/11/06 - remove sky2 remenants
     // [SL] 2012-03-19 - Add sky2 back
-    sky1texture = R_TextureNumForName(level.skypic.c_str());
+    sky1texture = texturemanager.getHandle(level.skypic.c_str(), Texture::TEX_TEXTURE);
     if (!level.skypic2.empty())
-        sky2texture = R_TextureNumForName(level.skypic2.c_str());
+        sky2texture = texturemanager.getHandle(level.skypic2.c_str(), Texture::TEX_TEXTURE);
     else
-        sky2texture = 0;
+        sky2texture = TextureManager::NO_TEXTURE_HANDLE;
 
     for (Players::iterator it = players.begin(); it != players.end(); ++it)
     {

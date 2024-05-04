@@ -4,10 +4,10 @@
 
 #include <RmlUi/Core.h>
 #include <RmlUi/Debugger.h>
+#include <i_video.h>
 
 #include "c_dispatch.h"
 #include "ui_mud_plugin.h"
-
 
 Rml::UniquePtr<UI> UI::mInstance;
 
@@ -63,7 +63,6 @@ bool UI::initInstance()
 
 void UI::loadCoreFonts()
 {
-    /*
     const Rml::String directory = "fonts/";
 
     struct FontFace
@@ -72,13 +71,11 @@ void UI::loadCoreFonts()
         bool        fallback_face;
     };
     FontFace font_faces[] = {
-        {"LatoLatin-Regular.ttf", false},    {"LatoLatin-Italic.ttf", false}, {"LatoLatin-Bold.ttf", false},
-        {"LatoLatin-BoldItalic.ttf", false}, {"NotoEmoji-Regular.ttf", true},
+        {"MUD-RussoOne.ttf", true},
     };
 
     for (const FontFace &face : font_faces)
         Rml::LoadFontFace(directory + face.filename, face.fallback_face);
-    */
 }
 
 void UI::postEvent(SDL_Event &ev)
@@ -115,6 +112,18 @@ void UI_PostEvent(SDL_Event &ev)
     UI::postEvent(ev);
 }
 
+void UI_OnResize()
+{
+    Rml::Context *context = Rml::GetContext("play");
+    if (context)
+    {
+        int width  = I_GetVideoWidth();
+        int height = I_GetVideoHeight();
+
+        context->SetDimensions(Rml::Vector2i(width, height));
+    }
+}
+
 void UI_ToggleDebug()
 {
     Rml::Context *context = Rml::GetContext("play");
@@ -122,7 +131,7 @@ void UI_ToggleDebug()
     {
         return;
     }
-        
+
     Rml::Debugger::SetVisible(!Rml::Debugger::IsVisible());
 }
 

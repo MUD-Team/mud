@@ -1666,7 +1666,8 @@ void DLevelScript::ACS_SoundSequence(int *args, byte argCount)
 
 void DLevelScript::SetLineTexture(int lineid, int side, int position, int name)
 {
-    int         texture, linenum = -1;
+    texhandle_t texture; 
+    int linenum = -1;
     const char *texname = level.behavior->LookupString(name);
 
     if (texname == NULL)
@@ -1681,7 +1682,7 @@ void DLevelScript::SetLineTexture(int lineid, int side, int position, int name)
 
     side = (side) ? 1 : 0;
 
-    texture = R_TextureNumForName(texname);
+    texture = texturemanager.getHandle(texname, Texture::TEX_TEXTURE);
 
     while ((linenum = P_FindLineFromID(lineid, linenum)) >= 0)
     {
