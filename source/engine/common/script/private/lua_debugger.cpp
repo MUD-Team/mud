@@ -34,7 +34,7 @@
 static int luaopen_debugger(lua_State *lua)
 {
 
-	std::string debugger_file = "common/scripts/debugger.lua";
+	std::string debugger_file = "script/libraries/debugger.lua";
     PHYSFS_File *fp = PHYSFS_openRead(debugger_file.c_str());
     if (!fp)
     {

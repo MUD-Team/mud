@@ -1,0 +1,18 @@
+{
+  "name": "mud",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "tstl",
+    "dev": "tstl --watch"
+  },
+  "author": "",
+  "license": "GPL-3.0-or-later",
+  "devDependencies": {
+    "@typescript-to-lua/language-extensions": "^1.19.0",
+    "lua-types": "^2.13.1",
+    "typescript": "^5.4.2",
+    "typescript-to-lua": "^1.25.1"
+  }
+}

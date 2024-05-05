@@ -171,19 +171,28 @@ static int LUA_LuaRequire(lua_State *L)
 {
     const char *name = luaL_checkstring(L, 1);
 
+    // special case for TypeScriptToLua bundle
+    if (!strcmp("lualib_bundle", name))
+    {
+        name = "script/lualib_bundle";
+    }
+
     if (!requirePaths.size())
     {
         I_Error("Lua Loader has no require paths");
     }
 
-    std::string path = M_CleanPath(requirePaths.back() + name);
+    std::string path = M_CleanPath(/*requirePaths.back()*/ std::string("script/") + name);
+    std::replace(path.begin(), path.end(), '.', '/');
+    std::replace(path.begin(), path.end(), '\\', '/');
+
     std::string ext;
     M_ExtractFileExtension(path, ext);
     if (ext != "lua")
     {
         path.append(".lua");
     }
-    std::replace(path.begin(), path.end(), '\\', '/');
+
     if (!PHYSFS_exists(path.c_str()))
     {
         path = std::string(name) + ".lua";
