@@ -359,9 +359,6 @@ BOOL P_CheckKeys(player_t *p, card_t lock, BOOL remote);
 //		it returns true, and the player is allowed to live.
 BOOL CheckIfExitIsGood(AActor *self);
 
-// at game start
-void P_InitPicAnims(void);
-
 // [Blair] ZDoom sector specials
 void P_SpawnZDoomSectorSpecials(void);
 
@@ -679,7 +676,7 @@ void P_InitSwitchList();
 
 void P_ProcessSwitchDef();
 
-short P_GetButtonTexture(line_t *line);
+texhandle_t P_GetButtonTexture(line_t *line);
 bool  P_GetButtonInfo(line_t *line, unsigned &state, unsigned &time);
 bool  P_SetButtonInfo(line_t *line, unsigned state, unsigned time);
 

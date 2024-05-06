@@ -295,9 +295,9 @@ struct side_s
 
     // Texture indices.
     // We do not maintain names here.
-    short toptexture;
-    short bottomtexture;
-    short midtexture;
+    texhandle_t toptexture;
+    texhandle_t bottomtexture;
+    texhandle_t midtexture;
 
     // Sector the SideDef is facing.
     sector_t *sector;
@@ -596,6 +596,8 @@ typedef drawseg_s drawseg_t;
 // textures from the TEXTURE1/2 lists of patches.
 struct patch_s
 {
+  friend class TextureManager;
+
   private:
     short _width;      // bounding box size
     short _height;
@@ -669,7 +671,8 @@ struct vissprite_s
 
     fixed_t depth;
     fixed_t texturemid;
-    int     patch;
+    texhandle_t tex_id;
+    patch_t *tex_patch = NULL;
 
     // for color translation and shadow draw,
     //  maxbright frames as well
@@ -710,7 +713,7 @@ struct spriteframe_s
     bool rotate;
 
     // Lump to use for view angles 0-15.
-    short lump[16];
+    texhandle_t texes[16];
 
     // Flip bit (1 = flip) to use for view angles 0-15.
     byte flip[16];

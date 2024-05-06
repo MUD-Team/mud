@@ -1054,7 +1054,7 @@ void P_SetTransferHeightBlends(side_t *sd, const mapsidedef_t *msd)
     // for each of the texture tiers (bottom, middle, and top)
     for (int i = 0; i < 3; i++)
     {
-        short      *texture_num;
+        texhandle_t      *texture_num;
         argb_t     *blend_color;
         const char *texture_name;
 
@@ -1078,7 +1078,7 @@ void P_SetTransferHeightBlends(side_t *sd, const mapsidedef_t *msd)
         }
 
         *blend_color = argb_t(0, 255, 255, 255);
-        *texture_num = 0;
+        *texture_num = TextureManager::NO_TEXTURE_HANDLE;
 
         int colormap_index = R_ColormapNumForName(texture_name);
         if (colormap_index != 0)
@@ -1087,10 +1087,10 @@ void P_SetTransferHeightBlends(side_t *sd, const mapsidedef_t *msd)
         }
         else
         {
-            *texture_num = R_CheckTextureNumForName(texture_name);
-            if (*texture_num == -1)
+            *texture_num = texturemanager.getHandle(texture_name, Texture::TEX_TEXTURE);
+            if (*texture_num == TextureManager::NOT_FOUND_TEXTURE_HANDLE)
             {
-                *texture_num = 0;
+                *texture_num = TextureManager::NO_TEXTURE_HANDLE;
                 if (strnicmp(texture_name, "WATERMAP", 8) == 0)
                     *blend_color = argb_t(0x80, 0, 0x4F, 0xA5);
                 else
@@ -1102,16 +1102,16 @@ void P_SetTransferHeightBlends(side_t *sd, const mapsidedef_t *msd)
 
 //
 
-void SetTextureNoErr(short *texture, unsigned int *color, char *name)
+void SetTextureNoErr(texhandle_t *texture, unsigned int *color, char *name)
 {
-    if ((*texture = R_CheckTextureNumForName(name)) == -1)
+    if ((*texture = texturemanager.getHandle(name, Texture::TEX_TEXTURE)) == TextureManager::NOT_FOUND_TEXTURE_HANDLE)
     {
         char  name2[9];
         char *stop;
         strncpy(name2, name, 8);
         name2[8] = 0;
         *color   = strtoul(name2, &stop, 16);
-        *texture = 0;
+        *texture = TextureManager::NO_TEXTURE_HANDLE;
     }
 }
 
@@ -1943,8 +1943,7 @@ void P_SetupLevel(const char *lumpname, int position)
 void P_Init(void)
 {
     P_InitSwitchList();
-    P_InitPicAnims();
-    R_InitSprites(sprnames);
+    R_InitSprites();
     InitTeamInfo();
 }
 

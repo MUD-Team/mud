@@ -27,6 +27,7 @@
 #include <math.h>
 
 #include <algorithm>
+#include <unordered_map>
 
 #include "cmdlib.h"
 #include "i_system.h"
@@ -35,6 +36,7 @@
 #include "m_random.h"
 #include "odamex.h"
 #include "oscanner.h"
+#include "r_sprites.h"
 #include "r_state.h"
 #define STBI_NO_STDIO
 #define STB_IMAGE_IMPLEMENTATION
@@ -42,6 +44,18 @@
 #include "tables.h"
 #include "v_video.h"
 #include "w_wad.h"
+
+// patch conversion structs
+struct texpost_t
+{
+    uint8_t         row_off;
+    std::vector<uint8_t> pixels;
+};
+
+struct texcolumn_t
+{
+    std::vector<texpost_t> posts;
+};
 
 TextureManager texturemanager;
 
@@ -53,142 +67,6 @@ void Res_InitTextureManager()
 void Res_ShutdownTextureManager()
 {
     texturemanager.shutdown();
-}
-
-//
-// Res_DrawPatchIntoTexture
-//
-// Draws a lump in patch_t format into a Texture at the given offset.
-//
-static void Res_DrawPatchIntoTexture(Texture *texture, const byte *lumpdata, int xoffs, int yoffs)
-{
-    int texwidth   = texture->getWidth();
-    int texheight  = texture->getHeight();
-    int patchwidth = LESHORT(*(short *)(lumpdata + 0));
-
-    const int *colofs = (int *)(lumpdata + 8);
-
-    int x1 = MAX(xoffs, 0);
-    int x2 = MIN(xoffs + patchwidth - 1, texwidth - 1);
-
-    for (int x = x1; x <= x2; x++)
-    {
-        int abstopdelta = 0;
-
-        const byte *post = lumpdata + LELONG(colofs[x - xoffs]);
-        while (*post != 0xFF)
-        {
-            int posttopdelta = *(post + 0);
-            int postlength   = *(post + 1);
-
-            // handle DeePsea tall patches where topdelta is treated as a relative
-            // offset instead of an absolute offset
-            if (posttopdelta <= abstopdelta)
-                abstopdelta += posttopdelta;
-            else
-                abstopdelta = posttopdelta;
-
-            int topoffset = yoffs + abstopdelta;
-            int y1        = MAX(topoffset, 0);
-            int y2        = MIN(topoffset + postlength - 1, texheight - 1);
-
-            if (y1 <= y2)
-            {
-                byte       *dest   = texture->getData() + texheight * x + y1;
-                const byte *source = post + 3;
-                memcpy(dest, source, y2 - y1 + 1);
-
-                // set up the mask
-                byte *mask = texture->getMaskData() + texheight * x + y1;
-                memset(mask, 1, y2 - y1 + 1);
-            }
-
-            post += postlength + 4;
-        }
-    }
-}
-
-//
-// Res_CopySubimage
-//
-// Copies a portion of source_texture and draws it into dest_texture.
-// The source subimage is scaled to fit the dimensions of the destination
-// texture.
-//
-// Note: no clipping is performed so it is possible to read past the
-// end of the source texture.
-//
-void Res_CopySubimage(Texture *dest_texture, const Texture *source_texture, int dx1, int dy1, int dx2, int dy2, int sx1,
-                      int sy1, int sx2, int sy2)
-{
-    const int destwidth  = dx2 - dx1 + 1;
-    const int destheight = dy2 - dy1 + 1;
-
-    const int sourcewidth  = sx2 - sx1 + 1;
-    const int sourceheight = sy2 - sy1 + 1;
-
-    const fixed_t xstep = FixedDiv(sourcewidth << FRACBITS, destwidth << FRACBITS) + 1;
-    const fixed_t ystep = FixedDiv(sourceheight << FRACBITS, destheight << FRACBITS) + 1;
-
-    int   dest_offset = dx1 * dest_texture->getHeight() + dy1;
-    byte *dest        = dest_texture->getData() + dest_offset;
-    byte *dest_mask   = dest_texture->getMaskData() + dest_offset;
-
-    fixed_t xfrac = 0;
-    for (int xcount = destwidth; xcount > 0; xcount--)
-    {
-        int         source_offset = (sx1 + (xfrac >> FRACBITS)) * source_texture->getHeight() + sy1;
-        const byte *source        = source_texture->getData() + source_offset;
-        const byte *source_mask   = source_texture->getMaskData() + source_offset;
-
-        fixed_t yfrac = 0;
-        for (int ycount = destheight; ycount > 0; ycount--)
-        {
-            *dest++      = source[yfrac >> FRACBITS];
-            *dest_mask++ = source_mask[yfrac >> FRACBITS];
-            yfrac += ystep;
-        }
-
-        dest += dest_texture->getHeight() - destheight;
-        dest_mask += dest_texture->getHeight() - destheight;
-
-        xfrac += xstep;
-    }
-
-    // copy the source texture's offset info
-    int xoffs = FixedDiv(source_texture->getOffsetX() << FRACBITS, xstep) >> FRACBITS;
-    int yoffs = FixedDiv(source_texture->getOffsetY() << FRACBITS, ystep) >> FRACBITS;
-    dest_texture->setOffsetX(xoffs);
-    dest_texture->setOffsetY(yoffs);
-}
-
-//
-// Res_TransposeImage
-//
-// Converts an image buffer from row-major format to column-major format.
-//
-void Res_TransposeImage(byte *dest, const byte *source, int width, int height)
-{
-    for (int x = 0; x < width; x++)
-    {
-        const byte *source_column = source + x;
-
-        for (int y = 0; y < height; y++)
-        {
-            *dest = *source_column;
-            source_column += width;
-            dest++;
-        }
-    }
-}
-
-//
-// Res_LoadTexture
-//
-const Texture *Res_LoadTexture(const char *name)
-{
-    texhandle_t texhandle = texturemanager.getHandle(name, Texture::TEX_PATCH);
-    return texturemanager.getTexture(texhandle);
 }
 
 //
@@ -286,13 +164,6 @@ Texture::Texture() : mHandle(TextureManager::NO_TEXTURE_HANDLE)
     init(0, 0);
 }
 
-size_t Texture::calculateSize(int width, int height)
-{
-    return sizeof(Texture)   // header
-           + width * height  // mData
-           + width * height; // mMask
-}
-
 //
 // Texture::init
 //
@@ -302,26 +173,16 @@ void Texture::init(int width, int height)
 {
     mWidth      = width;
     mHeight     = height;
-    mWidthBits  = Log2(width);
-    mHeightBits = Log2(height);
+    mFracHeight = height << FRACBITS;
+    int j = 0;
+    for (j = 1; j * 2 <= width; j <<= 1)
+            ;
+    mWidthMask = j - 1;
     mOffsetX    = 0;
     mOffsetY    = 0;
     mScaleX     = FRACUNIT;
     mScaleY     = FRACUNIT;
-    mHasMask    = false;
-
-    if (clientside)
-    {
-        // mData follows the header in memory
-        mData = (byte *)((byte *)this + sizeof(*this));
-        // mMask follows mData
-        mMask = (byte *)(mData) + sizeof(byte) * width * height;
-    }
-    else
-    {
-        mData = NULL;
-        mMask = NULL;
-    }
+    mData = NULL;
 }
 
 // ============================================================================
@@ -330,12 +191,8 @@ void Texture::init(int width, int height)
 //
 // ============================================================================
 
-// define GARBAGE_TEXTURE_HANDLE to be the first wall texture (AASTINKY)
-const texhandle_t TextureManager::GARBAGE_TEXTURE_HANDLE = TextureManager::WALLTEXTURE_HANDLE_MASK;
-
 TextureManager::TextureManager()
-    : mHandleMap(2048), mPNameLookup(NULL), mTextureNameTranslationMap(512), mFreeCustomHandlesHead(0),
-      mFreeCustomHandlesTail(TextureManager::MAX_CUSTOM_HANDLES)
+    : mHandleMap(2048)
 {
 }
 
@@ -354,31 +211,22 @@ void TextureManager::clear()
     // free normal textures
     for (HandleMap::iterator it = mHandleMap.begin(); it != mHandleMap.end(); ++it)
         if (it->second)
-            Z_Free((void *)it->second);
+        {
+           delete[] it->second->mData;
+           delete it->second;
+        }
 
     mHandleMap.clear();
-
-    // free all custom texture handles
-    mFreeCustomHandlesHead = 0;
-    mFreeCustomHandlesTail = TextureManager::MAX_CUSTOM_HANDLES - 1;
-    for (unsigned int i = mFreeCustomHandlesHead; i <= mFreeCustomHandlesTail; i++)
-        mFreeCustomHandles[i] = CUSTOM_HANDLE_MASK | i;
-
-    delete[] mPNameLookup;
-    mPNameLookup = NULL;
-
-    for (size_t i = 0; i < mTextureDefinitions.size(); i++)
-        delete[] (byte *)mTextureDefinitions[i];
-    mTextureDefinitions.clear();
-
-    mTextureNameTranslationMap.clear();
 
     mAnimDefs.clear();
 
     // free warping original texture (not stored in mHandleMap)
     for (size_t i = 0; i < mWarpDefs.size(); i++)
         if (mWarpDefs[i].original_texture)
-            Z_Free((void *)mWarpDefs[i].original_texture);
+        {
+            delete[] mWarpDefs[i].original_texture->mData;
+            delete mWarpDefs[i].original_texture;
+        }
 
     mWarpDefs.clear();
 }
@@ -427,20 +275,118 @@ void TextureManager::startup()
             std::string base;
             M_ExtractFileBase(*i, base);
             mFlatFilenames.push_back(StrFormat("flats/%s", *i));
-            mEnumeratedFlatsMap[OString(StdStringToUpper(base, 8))] = mFlatFilenames.size();
+            mEnumeratedFlatMap[OString(StdStringToUpper(base, 8))] = mFlatFilenames.size();
         }
         PHYSFS_close(pngcheck);
     }
 
     PHYSFS_freeList(rc);
 
+    // initialize the TEXTURES data
+    rc = PHYSFS_enumerateFiles("textures");
+    i;
 
-    // initialize the PNAMES mapping to map an index in PNAMES to a WAD lump number
-    readPNamesDirectory();
+    if (rc == NULL)
+        I_FatalError("TextureManager::startup: No textures found in /textures!\n");
 
-    // initialize the TEXTURE1 & TEXTURE2 data
-    addTextureDirectory("TEXTURE1");
-    addTextureDirectory("TEXTURE2");
+    for (i = rc; *i != NULL; i++)
+    {
+        std::string ext;
+        if (!M_ExtractFileExtension(*i, ext))
+            continue;
+        if (stricmp(ext.c_str(), "png") != 0)
+            continue;
+        // Test PNG header - Dasho
+        PHYSFS_File *pngcheck = PHYSFS_openRead(StrFormat("textures/%s", *i).c_str());
+        if (pngcheck == NULL)
+            continue;
+        if (PHYSFS_fileLength(pngcheck) < 6) // not even big enough for PNG header
+            continue;
+        uint8_t header[6];
+        if (PHYSFS_readBytes(pngcheck, header, 6) != 6)
+        {
+            PHYSFS_close(pngcheck);
+            continue;
+        }
+        if (header[0] == 0x89 && header[1] == 'P' && header[2] == 'N' && header[3] == 'G' && header[4] == 0x0D &&
+            header[5] == 0x0A)
+        {
+            // valid PNG header, add it
+            std::string base;
+            M_ExtractFileBase(*i, base);
+            mTextureFilenames.push_back(StrFormat("textures/%s", *i));
+            mEnumeratedTextureMap[OString(StdStringToUpper(base, 8))] = mTextureFilenames.size();
+        }
+        PHYSFS_close(pngcheck);
+    }
+
+    PHYSFS_freeList(rc);
+
+    // initialize the SRPITES data
+	for (numsprites = 0; sprnames[numsprites]; numsprites++)
+		;
+
+	if (!numsprites)
+		return;
+
+	sprites = (spritedef_t *)Z_Malloc(numsprites * sizeof(*sprites), PU_STATIC, NULL);
+
+    rc = PHYSFS_enumerateFiles("sprites");
+
+    if (rc == NULL)
+        I_FatalError("R_InitSpriteDefs: No sprites found in /sprites!\n");
+
+    std::unordered_multimap<std::string, std::string> sprite_files;
+
+    for (i = rc; *i != NULL; i++)
+    {
+        std::string base;
+        M_ExtractFileBase(*i, base);
+		// This requirement will eventually go away when we figure out how to handle
+		// arbitrarily-long sprite names - Dasho
+        if (!(base.size() == 6 || base.size() == 8))
+            continue;
+        StdStringToUpper(base);
+        sprite_files.emplace(base.substr(0, 4), StrFormat("%s", *i));
+    }
+
+    PHYSFS_freeList(rc);
+
+	for (int i = 0; i < numsprites; i++)
+	{
+		memset(sprtemp, -1, sizeof(sprtemp));
+		maxframe = -1;
+
+		for (int frame = 0; frame < MAX_SPRITE_FRAMES; frame++)
+			for (int r = 0; r < 8; r++)
+				sprtemp[frame].texes[r] = TextureManager::NO_TEXTURE_HANDLE;
+
+        std::string actor_id = sprnames[i];
+
+        auto sprites = sprite_files.equal_range(actor_id);
+        for (auto file = sprites.first; file != sprites.second; ++file)
+        {
+            std::string base;
+            M_ExtractFileBase(file->second, base);
+            StdStringToUpper(base);
+            // Base should already be guaranteed 6 or 8 in length if we are here
+            uint32_t frame = base[4] - 'A';
+			uint32_t rotation = base[5] - '0';
+            texturemanager.mSpriteFilenames.push_back(StrFormat("sprites/%s", file->second.c_str()));
+			texhandle_t tex_id = texturemanager.mSpriteFilenames.size() | 0x00040000ul; // Sprite Handle Mask
+            texturemanager.mEnumeratedSpriteMap[base] = tex_id;
+			R_InstallSpriteTex(tex_id, frame, rotation, false);
+            // can frame can be flipped?
+            if (base.size() == 8)
+            {
+                frame = base[6] - 'A';
+                rotation = base[7] - '0';
+                R_InstallSpriteTex(tex_id, frame, rotation, true);
+            }
+        }
+
+		R_InstallSprite(sprnames[i], i);
+	}
 
     generateNotFoundTexture();
 
@@ -489,40 +435,6 @@ void TextureManager::precache()
 }
 
 //
-// TextureManager::readPNamesDirectory
-//
-void TextureManager::readPNamesDirectory()
-{
-    int    lumpnum = W_GetNumForName("PNAMES");
-    size_t lumplen = W_LumpLength(lumpnum);
-
-    byte *lumpdata = new byte[lumplen];
-    W_ReadLump(lumpnum, lumpdata);
-
-    int num_pname_mappings = LELONG(*((int *)(lumpdata + 0)));
-    mPNameLookup           = new int[num_pname_mappings];
-
-    for (int i = 0; i < num_pname_mappings; i++)
-    {
-        const char *lumpname = (const char *)(lumpdata + 4 + 8 * i);
-        mPNameLookup[i]      = W_CheckNumForName(lumpname);
-
-        // killough 4/17/98:
-        // Some wads use sprites as wall patches, so repeat check and
-        // look for sprites this time, but only if there were no wall
-        // patches found. This is the same as allowing for both, except
-        // that wall patches always win over sprites, even when they
-        // appear first in a wad. This is a kludgy solution to the wad
-        // lump namespace problem.
-
-        if (mPNameLookup[i] == -1)
-            mPNameLookup[i] = W_CheckNumForName(lumpname, ns_sprites);
-    }
-
-    delete[] lumpdata;
-}
-
-//
 // TextureManager::readAnimDefLump
 //
 // [RH] This uses a Hexen ANIMDEFS lump to define the animation sequences.
@@ -558,7 +470,7 @@ void TextureManager::readAnimDefLump()
         {
             anim_t anim;
 
-            Texture::TextureSourceType texture_type = Texture::TEX_WALLTEXTURE;
+            Texture::TextureSourceType texture_type = Texture::TEX_TEXTURE;
             if (os.compareToken("flat"))
                 texture_type = Texture::TEX_FLAT;
 
@@ -627,7 +539,7 @@ void TextureManager::readAnimDefLump()
             os.mustScan();
             if (os.compareToken("flat") || os.compareToken("texture"))
             {
-                Texture::TextureSourceType texture_type = Texture::TEX_WALLTEXTURE;
+                Texture::TextureSourceType texture_type = Texture::TEX_TEXTURE;
                 if (os.compareToken("flat"))
                     texture_type = Texture::TEX_FLAT;
 
@@ -643,8 +555,8 @@ void TextureManager::readAnimDefLump()
                 // backup the original texture
                 warp.original_texture = getTexture(texhandle);
 
-                const int width  = 1 << warp.original_texture->getWidthBits();
-                const int height = 1 << warp.original_texture->getHeightBits();
+                const int width  = warp.original_texture->getWidth();
+                const int height = warp.original_texture->getHeight();
 
                 // create a new texture of the same size for the warped image
                 warp.warped_texture = createTexture(texhandle, width, height);
@@ -697,7 +609,7 @@ void TextureManager::readAnimatedLump()
     {
         anim_t anim;
 
-        Texture::TextureSourceType texture_type = *(ptr + 0) == 1 ? Texture::TEX_WALLTEXTURE : Texture::TEX_FLAT;
+        Texture::TextureSourceType texture_type = *(ptr + 0) == 1 ? Texture::TEX_TEXTURE : Texture::TEX_FLAT;
 
         const char *startname = (const char *)(ptr + 10);
         const char *endname   = (const char *)(ptr + 1);
@@ -801,6 +713,7 @@ void TextureManager::generateNotFoundTexture()
         const argb_t     color2(0, 255, 255); // yellow
         const palindex_t color1_index = V_BestColor(V_GetDefaultPalette()->basecolors, color1);
         const palindex_t color2_index = V_BestColor(V_GetDefaultPalette()->basecolors, color2);
+        texture->mData = new byte[width * height];
 
         for (int x = 0; x < width / 2; x++)
         {
@@ -816,126 +729,6 @@ void TextureManager::generateNotFoundTexture()
 }
 
 //
-// TextureManager::addTextureDirectory
-//
-// Requires that the PNAMES lump has been read and processed.
-//
-void TextureManager::addTextureDirectory(const char *lumpname)
-{
-    //
-    // Texture definition.
-    // Each texture is composed of one or more patches,
-    // with patches being lumps stored in the WAD.
-    // The lumps are referenced by number, and patched
-    // into the rectangular texture space using origin
-    // and possibly other attributes.
-    //
-    struct mappatch_t
-    {
-        short originx;
-        short originy;
-        short patch;
-        short stepdir;
-        short colormap;
-    };
-
-    //
-    // Texture definition.
-    // A DOOM wall texture is a list of patches
-    // which are to be combined in a predefined order.
-    //
-    struct maptexture_t
-    {
-        char       name[8];
-        WORD       masked;             // [RH] Unused
-        BYTE       scalex;             // [RH] Scaling (8 is normal)
-        BYTE       scaley;             // [RH] Same as above
-        short      width;
-        short      height;
-        byte       columndirectory[4]; // OBSOLETE
-        short      patchcount;
-        mappatch_t patches[1];
-    };
-
-    int lumpnum = W_CheckNumForName(lumpname);
-    if (lumpnum == -1)
-    {
-        if (iequals("TEXTURE1", lumpname))
-            I_Error("Res_InitTextures: TEXTURE1 lump not found");
-        return;
-    }
-
-    size_t lumplen = W_LumpLength(lumpnum);
-    if (lumplen == 0)
-        return;
-
-    byte *lumpdata = new byte[lumplen];
-    W_ReadLump(lumpnum, lumpdata);
-
-    int *texoffs = (int *)(lumpdata + 4);
-
-    int count = LELONG(*((int *)(lumpdata + 0)));
-    for (int i = 0; i < count; i++)
-    {
-        maptexture_t *mtexdef = (maptexture_t *)((byte *)lumpdata + LELONG(texoffs[i]));
-        OString       uname(StdStringToUpper(mtexdef->name, 8));
-
-        // [SL] If there are duplicated texture names, the first instance takes precedence.
-        // Are there any ports besides ZDoom that handle duplicated texture names?
-        if (mTextureNameTranslationMap.find(uname) == mTextureNameTranslationMap.end())
-        {
-            size_t    texdefsize = sizeof(texdef_t) + sizeof(texdefpatch_t) * (SAFESHORT(mtexdef->patchcount) - 1);
-            texdef_t *texdef     = (texdef_t *)(new byte[texdefsize]);
-
-            texdef->width      = SAFESHORT(mtexdef->width);
-            texdef->height     = SAFESHORT(mtexdef->height);
-            texdef->patchcount = SAFESHORT(mtexdef->patchcount);
-            texdef->scalex     = mtexdef->scalex;
-            texdef->scaley     = mtexdef->scaley;
-
-            mappatch_t    *mpatch = &mtexdef->patches[0];
-            texdefpatch_t *patch  = &texdef->patches[0];
-
-            for (int j = 0; j < texdef->patchcount; j++, mpatch++, patch++)
-            {
-                patch->originx = LESHORT(mpatch->originx);
-                patch->originy = LESHORT(mpatch->originy);
-                patch->patch   = mPNameLookup[LESHORT(mpatch->patch)];
-                if (patch->patch == -1)
-                    Printf(PRINT_WARNING, "Res_InitTextures: Missing patch in texture %s\n", uname.c_str());
-            }
-
-            mTextureDefinitions.push_back(texdef);
-            mTextureNameTranslationMap[uname] = mTextureDefinitions.size() - 1;
-        }
-    }
-
-    delete[] lumpdata;
-}
-
-//
-// TextureManager::createCustomHandle
-//
-// Generates a valid handle that can be used by the engine to denote certain
-// properties for a wall or ceiling or floor. For instance, a special use
-// handle can be used to denote that a ceiling should be rendered with SKY2.
-//
-texhandle_t TextureManager::createCustomHandle()
-{
-    if (mFreeCustomHandlesTail <= mFreeCustomHandlesHead)
-        return TextureManager::NOT_FOUND_TEXTURE_HANDLE;
-    return mFreeCustomHandles[mFreeCustomHandlesHead++ % MAX_CUSTOM_HANDLES];
-}
-
-//
-// TextureManager::freeCustomHandle
-//
-void TextureManager::freeCustomHandle(texhandle_t texhandle)
-{
-    mFreeCustomHandles[mFreeCustomHandlesTail++ % MAX_CUSTOM_HANDLES] = texhandle;
-}
-
-//
 // TextureManager::createTexture
 //
 // Allocates memory for a new texture and returns a pointer to it. The texture
@@ -946,10 +739,7 @@ Texture *TextureManager::createTexture(texhandle_t texhandle, int width, int hei
     width  = std::min<int>(width, Texture::MAX_TEXTURE_WIDTH);
     height = std::min<int>(height, Texture::MAX_TEXTURE_HEIGHT);
 
-    // server shouldn't allocate memory for texture data, only the header
-    size_t texture_size = clientside ? Texture::calculateSize(width, height) : sizeof(Texture);
-
-    Texture *texture = (Texture *)Z_Malloc(texture_size, PU_STATIC, NULL);
+    Texture *texture = new Texture;
     texture->init(width, height);
 
     texture->mHandle = texhandle;
@@ -976,9 +766,8 @@ void TextureManager::freeTexture(texhandle_t texhandle)
         const Texture *texture = it->second;
         if (texture != NULL)
         {
-            Z_Free((void *)texture);
-            if (texhandle & CUSTOM_HANDLE_MASK)
-                freeCustomHandle(texhandle);
+            delete[] texture->mData;
+            delete texture;
         }
 
         mHandleMap.erase(it);
@@ -986,88 +775,15 @@ void TextureManager::freeTexture(texhandle_t texhandle)
 }
 
 //
-// TextureManager::getPatchHandle
-//
-// Returns the handle for the patch with the given WAD lump number.
-//
-texhandle_t TextureManager::getPatchHandle(unsigned int lumpnum)
-{
-    if (lumpnum >= numlumps)
-        return NOT_FOUND_TEXTURE_HANDLE;
-
-    if (W_LumpLength(lumpnum) == 0)
-        return NOT_FOUND_TEXTURE_HANDLE;
-
-    return (texhandle_t)lumpnum | PATCH_HANDLE_MASK;
-}
-
-texhandle_t TextureManager::getPatchHandle(const OString &name)
-{
-    int lumpnum = W_CheckNumForName(name.c_str());
-    if (lumpnum >= 0)
-        return getPatchHandle(lumpnum);
-    return NOT_FOUND_TEXTURE_HANDLE;
-}
-
-//
-// TextureManger::cachePatch
-//
-void TextureManager::cachePatch(texhandle_t handle)
-{
-    unsigned int lumpnum = handle & ~(PATCH_HANDLE_MASK | SPRITE_HANDLE_MASK);
-
-    unsigned int lumplen  = W_LumpLength(lumpnum);
-    byte        *lumpdata = new byte[lumplen];
-    W_ReadLump(lumpnum, lumpdata);
-
-    int width   = LESHORT(*(short *)(lumpdata + 0));
-    int height  = LESHORT(*(short *)(lumpdata + 2));
-    int offsetx = LESHORT(*(short *)(lumpdata + 4));
-    int offsety = LESHORT(*(short *)(lumpdata + 6));
-
-    Texture *texture  = createTexture(handle, width, height);
-    texture->mOffsetX = offsetx;
-    texture->mOffsetY = offsety;
-
-    if (clientside)
-    {
-        // TODO: remove this once proper masking is in place
-        memset(texture->mData, 0, width * height);
-
-        // initialize the mask to entirely transparent
-        memset(texture->mMask, 0, width * height);
-
-        Res_DrawPatchIntoTexture(texture, lumpdata, 0, 0);
-        texture->mHasMask = (memchr(texture->mMask, 0, width * height) != NULL);
-    }
-
-    delete[] lumpdata;
-}
-
-//
 // TextureManager::getSpriteHandle
 //
-// Returns the handle for the sprite with the given WAD lump number.
+// Returns the handle for the sprite with the given name.
 //
-texhandle_t TextureManager::getSpriteHandle(unsigned int lumpnum)
-{
-    if (lumpnum >= numlumps)
-        return NOT_FOUND_TEXTURE_HANDLE;
-
-    if (W_LumpLength(lumpnum) == 0)
-        return NOT_FOUND_TEXTURE_HANDLE;
-
-    return (texhandle_t)lumpnum | SPRITE_HANDLE_MASK;
-}
-
 texhandle_t TextureManager::getSpriteHandle(const OString &name)
 {
-    int lumpnum = W_CheckNumForName(name.c_str(), ns_sprites);
-    if (lumpnum >= 0)
-        return getSpriteHandle(lumpnum);
-    lumpnum = W_CheckNumForName(name.c_str());
-    if (lumpnum >= 0)
-        return getSpriteHandle(lumpnum);
+    EnumeratedSpriteMap::const_iterator it = mEnumeratedSpriteMap.find(name);
+    if (it != mEnumeratedSpriteMap.end())
+        return (texhandle_t)it->second | SPRITE_HANDLE_MASK;
     return NOT_FOUND_TEXTURE_HANDLE;
 }
 
@@ -1076,7 +792,263 @@ texhandle_t TextureManager::getSpriteHandle(const OString &name)
 //
 void TextureManager::cacheSprite(texhandle_t handle)
 {
-    cachePatch(handle);
+    unsigned int filenum = (handle & ~SPRITE_HANDLE_MASK);
+
+    if (filenum-1 >= mSpriteFilenames.size())
+            I_FatalError("TextureManager::cacheSprite: Invalid handle %d requested (%d is highest valid handle)\n", filenum-1, mSpriteFilenames.size()-1);
+
+    PHYSFS_File *rawsprite = PHYSFS_openRead(mSpriteFilenames[filenum-1].c_str());
+
+    if (rawsprite == NULL)
+        I_FatalError("TextureManager::cacheSprite: Error opening %s\n", mSpriteFilenames[filenum-1].c_str());
+
+    unsigned int filelen = PHYSFS_fileLength(rawsprite);
+
+    byte *filedata = new byte[filelen];
+    if (PHYSFS_readBytes(rawsprite, filedata, filelen) != filelen)
+    {
+        delete[] filedata;
+        PHYSFS_close(rawsprite);
+        I_FatalError("TexureManager::cacheSprite: Error reading %s\n", mSpriteFilenames[filenum-1].c_str());
+    }
+
+    int height = 0;
+    int width = 0;
+    int bpp = 0;
+
+    if (!stbi_info_from_memory(filedata, filelen, &width, &height, &bpp))
+    {
+        delete[] filedata;
+        PHYSFS_close(rawsprite);
+        I_FatalError("TexureManager::cacheSprite: %s is malformed!\n", mSpriteFilenames[filenum-1].c_str());
+    }
+
+    if (!clientside)
+    {
+        Texture *texture = createTexture(handle, width, height);
+        delete[] filedata;
+        PHYSFS_close(rawsprite);
+    }
+    else
+    {
+        int need_bpp = 0;
+
+        // if grayscale/paletted, convert to RGB/RGBA
+        if (bpp == 1 || bpp == 2)
+            need_bpp = bpp + 2;
+
+        uint8_t *decoded_img = stbi_load_from_memory(filedata, filelen, &width, &height, &bpp, need_bpp);
+
+        if (!decoded_img)
+        {
+            delete[] filedata;
+            PHYSFS_close(rawsprite);
+            I_FatalError("TexureManager::cacheSprite: Error decoding %s\n", mSpriteFilenames[filenum-1].c_str());
+        }
+
+        if (need_bpp)
+            bpp = need_bpp;
+
+        Texture *texture = createTexture(handle, width, height);
+
+        // temporary PNG grAb chunk check
+        int i = 0;
+        int j = 0;
+        for (; i<filelen && j<5; i++)
+        {
+            static byte pgs[5] = { 0x08, 'g', 'r', 'A', 'b' };
+            if (filedata[i] == pgs[j])
+                j++;
+            else
+                j = 0;
+        }
+        if (j == 5)
+        {
+            int x, y;
+            memcpy(&x, &filedata[i], 4);
+            i+=4;
+            memcpy(&y, &filedata[i], 4);
+            x = BELONG(x);
+            y = BELONG(y);
+            texture->setOffsetX(x);
+            texture->setOffsetY(y);
+        }
+
+        delete[] filedata;
+
+        // Convert image to column/post structure
+        std::vector<texcolumn_t> columns;
+        int pixel_step = bpp * width;
+
+        // Go through columns
+        uint32_t offset = 0;
+        for (int c = 0; c < width; c++)
+        {
+            texcolumn_t col;
+            texpost_t   post;
+            post.row_off   = 0;
+            bool ispost    = false;
+            bool first_254 = true; // First 254 pixels should use absolute offsets
+            uint8_t *pixel = decoded_img + c * bpp;
+
+            offset          = c;
+            uint8_t row_off = 0;
+            for (int r = 0; r < height; r++)
+            {
+                // For vanilla-compatible dimensions, use a split at 128 to prevent tiling.
+                if (height < 256)
+                {
+                    if (row_off == 128)
+                    {
+                        // Finish current post if any
+                        if (ispost)
+                        {
+                            col.posts.push_back(post);
+                            post.pixels.clear();
+                            ispost = false;
+                        }
+                    }
+                }
+
+                // Taller images cannot be expressed without tall patch support.
+                // If we're at offset 254, create a dummy post for tall doom gfx support
+                else if (row_off == 254)
+                {
+                    // Finish current post if any
+                    if (ispost)
+                    {
+                        col.posts.push_back(post);
+                        post.pixels.clear();
+                        ispost = false;
+                    }
+
+                    // Begin relative offsets
+                    first_254 = false;
+
+                    // Create dummy post
+                    post.row_off = 254;
+                    col.posts.push_back(post);
+
+                    // Clear post
+                    row_off = 0;
+                    ispost  = false;
+                }
+
+                argb_t color(bpp == 4 ? *(pixel+3) : 255, *pixel, *(pixel+1), *(pixel+2));
+
+                // If the current pixel is not transparent, add it to the current post
+                if (color.geta() != 0)
+                {
+                    // If we're not currently building a post, begin one and set its offset
+                    if (!ispost)
+                    {
+                        // Set offset
+                        post.row_off = row_off;
+
+                        // Reset offset if we're in relative offsets mode
+                        if (!first_254)
+                            row_off = 0;
+
+                        // Start post
+                        ispost = true;
+                    }
+
+                    // Add the pixel to the post
+                    post.pixels.push_back(V_BestColor(V_GetDefaultPalette()->basecolors, color));
+                }
+                else if (ispost)
+                {
+                    // If the current pixel is transparent and we are currently building
+                    // a post, add the current post to the list and clear it
+                    col.posts.push_back(post);
+                    post.pixels.clear();
+                    ispost = false;
+                }
+
+                // Go to next row
+                offset += width;
+                pixel += pixel_step;
+                row_off++;
+            }
+
+            // If the column ended with a post, add it
+            if (ispost)
+                col.posts.push_back(post);
+
+            // Add the column data
+            columns.push_back(col);
+
+            // Go to next column
+            offset++;
+        }
+
+        stbi_image_free(decoded_img);
+        PHYSFS_close(rawsprite);
+
+        // Write doom gfx data to output
+        MEMFILE *newpatch = mem_fopen_write();
+
+        // Setup header
+		mem_fwrite(&width, 2, 1, newpatch);
+		mem_fwrite(&height, 2, 1, newpatch);
+		mem_fwrite(&texture->mOffsetX, 2, 1, newpatch);
+		mem_fwrite(&texture->mOffsetY, 2, 1, newpatch);
+
+        // Write dummy column offsets for now
+        std::vector<uint32_t> col_offsets(columns.size());
+        mem_fwrite(col_offsets.data(), columns.size() * 4, 1, newpatch);
+
+        // Write columns
+        for (size_t c = 0; c < columns.size(); c++)
+        {
+            // Record column offset
+            col_offsets[c] = mem_ftell(newpatch);
+
+            // Determine column size (in bytes)
+            uint32_t col_size = 0;
+            for (auto& post : columns[c].posts)
+                col_size += post.pixels.size() + 4;
+
+            // Write column posts
+            for (auto& post : columns[c].posts)
+            {
+                // Write row offset
+                mem_fwrite(&post.row_off, 1, 1, newpatch);
+
+                // Write no. of pixels
+                uint8_t npix = post.pixels.size();
+                mem_fwrite(&npix, 1, 1, newpatch);
+
+                // Write unused byte
+                uint8_t temp = (npix > 0) ? post.pixels[0] : 0;
+                mem_fwrite(&temp, 1, 1, newpatch);
+
+                // Write pixels
+                for (auto& pixel : post.pixels)
+                    mem_fwrite(&pixel, 1, 1, newpatch);
+
+                // Write unused byte
+                temp = (npix > 0) ? post.pixels.back() : 0;
+                mem_fwrite(&temp, 1, 1, newpatch);
+            }
+
+            // Write '255' row to signal end of column
+            uint8_t temp = 255;
+            mem_fwrite(&temp, 1, 1, newpatch);
+        }
+
+        // Now we write column offsets
+        mem_fseek(newpatch, 8, MEM_SEEK_SET);
+        mem_fwrite(col_offsets.data(), columns.size() * 4, 1, newpatch);
+
+        byte *newnewpatch = new byte[R_CalculateNewPatchSize((patch_t*)mem_fgetbuf(newpatch), mem_fsize(newpatch))+1];
+
+        R_ConvertPatch((patch_t *)newnewpatch, (patch_t *)mem_fgetbuf(newpatch));
+
+        mem_fclose(newpatch);
+
+        texture->mData = newnewpatch;
+    }
 }
 
 //
@@ -1086,8 +1058,8 @@ void TextureManager::cacheSprite(texhandle_t handle)
 //
 texhandle_t TextureManager::getFlatHandle(const OString &name)
 {
-    EnumeratedFlatsMap::const_iterator it = mEnumeratedFlatsMap.find(name);
-    if (it != mEnumeratedFlatsMap.end())
+    EnumeratedFlatMap::const_iterator it = mEnumeratedFlatMap.find(name);
+    if (it != mEnumeratedFlatMap.end())
         return (texhandle_t)it->second | FLAT_HANDLE_MASK;
     return NOT_FOUND_TEXTURE_HANDLE;
 }
@@ -1166,31 +1138,25 @@ void TextureManager::cacheFlat(texhandle_t handle)
         unsigned int pixel_step = width * bpp;
 
         Texture *texture = createTexture(handle, width, height);
-
+        texture->mData = new byte[width * height];
         memset(texture->mData, 0, width * height);
-        memset(texture->mMask, 0, width * height);
 
         for (unsigned int x = 0; x < width; x++)
         {
             byte *dest = texture->mData + x;
-            byte *mask = texture->mMask + x;
             uint8_t *pixel = decoded_img + x * bpp;
 
             for (unsigned int y = 0; y < height; y++)
             {
                 argb_t color(bpp == 4 ? *(pixel+3) : 255, *pixel, *(pixel+1), *(pixel+2));
 
-                *mask = color.geta() != 0;
-                if (*mask)
+                if (color.geta() != 0)
                     *dest = V_BestColor(V_GetDefaultPalette()->basecolors, color);
 
                 dest += width;
-                mask += width;
                 pixel += pixel_step;
             }
         }
-        
-        texture->mHasMask = (memchr(texture->mMask, 0, width * height) != NULL);
 
         delete[] filedata;
         stbi_image_free(decoded_img);
@@ -1199,223 +1165,282 @@ void TextureManager::cacheFlat(texhandle_t handle)
 }
 
 //
-// TextureManager::getWallTextureHandle
+// TextureManager::getTextureHandle
 //
-// Returns the handle for the wall texture with the given WAD lump number.
+// Returns the handle for the texture with the given name.
 //
-texhandle_t TextureManager::getWallTextureHandle(unsigned int texdef_handle)
+texhandle_t TextureManager::getTextureHandle(const OString &name)
 {
-    // texdef_handle > number of wall textures in the WAD file?
-    if (texdef_handle >= mTextureDefinitions.size())
-        return NOT_FOUND_TEXTURE_HANDLE;
-
-    return (texhandle_t)texdef_handle | WALLTEXTURE_HANDLE_MASK;
-}
-
-texhandle_t TextureManager::getWallTextureHandle(const OString &name)
-{
-    TextureNameTranslationMap::const_iterator it = mTextureNameTranslationMap.find(name);
-    if (it != mTextureNameTranslationMap.end())
-        return getWallTextureHandle(it->second);
+    EnumeratedTextureMap::const_iterator it = mEnumeratedTextureMap.find(name);
+    if (it != mEnumeratedTextureMap.end())
+        return (texhandle_t)it->second | TEXTURE_HANDLE_MASK;
     return NOT_FOUND_TEXTURE_HANDLE;
 }
 
 //
-// TextureManager::cacheWallTexture
+// TextureManager::cacheTexture
 //
 // Composes a wall texture from a set of patches loaded from the WAD file.
 //
-void TextureManager::cacheWallTexture(texhandle_t handle)
+void TextureManager::cacheTexture(texhandle_t handle)
 {
-    // should we check that the handle is valid for a wall texture?
+    unsigned int filenum = (handle & ~TEXTURE_HANDLE_MASK);
 
-    texdef_t *texdef = mTextureDefinitions[handle & ~WALLTEXTURE_HANDLE_MASK];
+    if (filenum-1 >= mTextureFilenames.size())
+            I_FatalError("TextureManager::cacheTexture: Invalid handle %d requested (%d is highest valid handle)\n", filenum-1, mTextureFilenames.size()-1);
 
-    int width  = texdef->width;
-    int height = texdef->height;
+    PHYSFS_File *rawtex = PHYSFS_openRead(mTextureFilenames[filenum-1].c_str());
 
-    Texture *texture = createTexture(handle, width, height);
-    if (texdef->scalex)
-        texture->mScaleX = texdef->scalex << (FRACBITS - 3);
-    if (texdef->scaley)
-        texture->mScaleY = texdef->scaley << (FRACBITS - 3);
+    if (rawtex == NULL)
+        I_FatalError("TextureManager::cacheTexture: Error opening %s\n", mTextureFilenames[filenum-1].c_str());
 
-    if (clientside)
+    unsigned int filelen = PHYSFS_fileLength(rawtex);
+
+    byte *filedata = new byte[filelen];
+    if (PHYSFS_readBytes(rawtex, filedata, filelen) != filelen)
     {
-        // TODO: remove this once proper masking is in place
-        memset(texture->mData, 0, width * height);
-
-        // initialize the mask to entirely transparent
-        memset(texture->mMask, 0, width * height);
-
-        // compose the texture out of a set of patches
-        for (int i = 0; i < texdef->patchcount; i++)
-        {
-            texdefpatch_t *texdefpatch = &texdef->patches[i];
-
-            if (texdefpatch->patch == -1) // not found ?
-                continue;
-
-            unsigned int lumplen  = W_LumpLength(texdefpatch->patch);
-            byte        *lumpdata = new byte[lumplen];
-            W_ReadLump(texdefpatch->patch, lumpdata);
-            Res_DrawPatchIntoTexture(texture, lumpdata, texdefpatch->originx, texdefpatch->originy);
-
-            delete[] lumpdata;
-        }
-
-        texture->mHasMask = (memchr(texture->mMask, 0, width * height) != NULL);
+        delete[] filedata;
+        PHYSFS_close(rawtex);
+        I_FatalError("TexureManager::cacheTexture: Error reading %s\n", mTextureFilenames[filenum-1].c_str());
     }
-}
-
-//
-// TextureManager::getRawTextureHandle
-//
-// Returns the handle for the raw image with the given WAD lump number.
-//
-texhandle_t TextureManager::getRawTextureHandle(unsigned int lumpnum)
-{
-    if (lumpnum >= numlumps)
-        return NOT_FOUND_TEXTURE_HANDLE;
-
-    if (W_LumpLength(lumpnum) == 0)
-        return NOT_FOUND_TEXTURE_HANDLE;
-    return (texhandle_t)lumpnum | RAW_HANDLE_MASK;
-}
-
-texhandle_t TextureManager::getRawTextureHandle(const OString &name)
-{
-    int lumpnum = W_CheckNumForName(name.c_str());
-    if (lumpnum >= 0)
-        return getRawTextureHandle(lumpnum);
-    return NOT_FOUND_TEXTURE_HANDLE;
-}
-
-//
-// TextureManager::cacheRawTexture
-//
-// Converts a linear 320x200 block of pixels into a Texture
-//
-void TextureManager::cacheRawTexture(texhandle_t handle)
-{
-    const int width  = 320;
-    const int height = 200;
-
-    Texture *texture = createTexture(handle, width, height);
-
-    if (clientside)
-    {
-        unsigned int lumpnum = (handle & ~RAW_HANDLE_MASK);
-        unsigned int lumplen = W_LumpLength(lumpnum);
-
-        byte *lumpdata = new byte[lumplen];
-        W_ReadLump(lumpnum, lumpdata);
-
-        // convert the row-major flat lump to into column-major
-        Res_TransposeImage(texture->mData, lumpdata, width, height);
-
-        delete[] lumpdata;
-    }
-}
-
-//
-// TextureManager::getPNGTextureHandle
-//
-// Returns the handle for the PNG format image with the given WAD lump number.
-//
-texhandle_t TextureManager::getPNGTextureHandle(unsigned int lumpnum)
-{
-    if (lumpnum >= numlumps)
-        return NOT_FOUND_TEXTURE_HANDLE;
-
-    if (W_LumpLength(lumpnum) == 0)
-        return NOT_FOUND_TEXTURE_HANDLE;
-    return (texhandle_t)lumpnum | PNG_HANDLE_MASK;
-}
-
-texhandle_t TextureManager::getPNGTextureHandle(const OString &name)
-{
-    int lumpnum = W_CheckNumForName(name.c_str());
-    if (lumpnum >= 0)
-        return getPNGTextureHandle(lumpnum);
-    return NOT_FOUND_TEXTURE_HANDLE;
-}
-
-//
-// TextureManager::cachePNGTexture
-//
-// Converts a linear PNG format image into a Texture.
-//
-void TextureManager::cachePNGTexture(texhandle_t handle)
-{
-#ifdef CLIENT_APP
-    byte       *lumpdata = NULL;
-
-    unsigned int lumpnum = (handle & ~PNG_HANDLE_MASK);
-    unsigned int lumplen = W_LumpLength(lumpnum);
-
-    char lumpname[9];
-    W_GetLumpName(lumpname, lumpnum);
-
-    lumpdata = new byte[lumplen];
-    W_ReadLump(lumpnum, lumpdata);
 
     int height = 0;
     int width = 0;
     int bpp = 0;
 
-    uint8_t *decoded_img = stbi_load_from_memory(lumpdata, lumplen, &width, &height, &bpp, 0);
-
-    if (!decoded_img)
+    if (!stbi_info_from_memory(filedata, filelen, &width, &height, &bpp))
     {
-        delete[] lumpdata;
-        return;
+        delete[] filedata;
+        PHYSFS_close(rawtex);
+        I_FatalError("TexureManager::cacheTexture: %s is malformed!\n", mTextureFilenames[filenum-1].c_str());
     }
 
-    // if grayscale, convert to RGB/RGBA
-    if (decoded_img != nullptr && (bpp == 1 || bpp == 2))
+    if (!clientside)
     {
-        stbi_image_free(decoded_img);
-
-        // bpp 1 = grayscale, so force RGB
-        // bpp 2 = grayscale + alpha, so force RGBA
-        int new_bpp = bpp + 2;
-
-        decoded_img = stbi_load_from_memory(lumpdata, lumplen, &width, &height, &bpp, new_bpp);
-
-        bpp = new_bpp;
+        Texture *texture = createTexture(handle, width, height);
+        delete[] filedata;
+        PHYSFS_close(rawtex);
     }
-
-    Texture *texture = createTexture(handle, width, height);
-    memset(texture->mData, 0, width * height);
-    memset(texture->mMask, 0, width * height);
-
-    for (unsigned int y = 0; y < height; y++)
+    else
     {
-        byte *dest = texture->mData + y;
-        byte *mask = texture->mMask + y;
-        uint8_t *pixel = decoded_img+(y*width*bpp);
+        int need_bpp = 0;
 
-        for (unsigned int x = 0; x < width; x++)
+        // if grayscale/paletted, convert to RGB/RGBA
+        if (bpp == 1 || bpp == 2)
+            need_bpp = bpp + 2;
+
+        uint8_t *decoded_img = stbi_load_from_memory(filedata, filelen, &width, &height, &bpp, need_bpp);
+
+        if (!decoded_img)
         {
-            argb_t color(*pixel, *(pixel+1), *(pixel+2), bpp == 4 ? *(pixel+3) : 0);
-
-            *mask = color.geta() != 0;
-            if (*mask)
-                *dest = V_BestColor(V_GetDefaultPalette()->basecolors, color);
-
-            dest += height;
-            mask += height;
-
-            pixel += bpp;
+            delete[] filedata;
+            PHYSFS_close(rawtex);
+            I_FatalError("TexureManager::cacheTexture: Error decoding %s\n", mTextureFilenames[filenum-1].c_str());
         }
+
+        if (need_bpp)
+            bpp = need_bpp;
+
+        Texture *texture = createTexture(handle, width, height);
+
+        // temporary PNG grAb chunk check
+        int i = 0;
+        int j = 0;
+        for (; i<filelen && j<5; i++)
+        {
+            static byte pgs[5] = { 0x08, 'g', 'r', 'A', 'b' };
+            if (filedata[i] == pgs[j])
+                j++;
+            else
+                j = 0;
+        }
+        if (j == 5)
+        {
+            int x, y;
+            memcpy(&x, &filedata[i], 4);
+            i+=4;
+            memcpy(&y, &filedata[i], 4);
+            x = BELONG(x);
+            y = BELONG(y);
+            texture->setOffsetX(x);
+            texture->setOffsetY(y);
+        }
+
+        delete[] filedata;
+
+        // Convert image to column/post structure
+        std::vector<texcolumn_t> columns;
+        int pixel_step = bpp * width;
+
+        // Go through columns
+        uint32_t offset = 0;
+        for (int c = 0; c < width; c++)
+        {
+            texcolumn_t col;
+            texpost_t   post;
+            post.row_off   = 0;
+            bool ispost    = false;
+            bool first_254 = true; // First 254 pixels should use absolute offsets
+            uint8_t *pixel = decoded_img + c * bpp;
+
+            offset          = c;
+            uint8_t row_off = 0;
+            for (int r = 0; r < height; r++)
+            {
+                // For vanilla-compatible dimensions, use a split at 128 to prevent tiling.
+                if (height < 256)
+                {
+                    if (row_off == 128)
+                    {
+                        // Finish current post if any
+                        if (ispost)
+                        {
+                            col.posts.push_back(post);
+                            post.pixels.clear();
+                            ispost = false;
+                        }
+                    }
+                }
+
+                // Taller images cannot be expressed without tall patch support.
+                // If we're at offset 254, create a dummy post for tall doom gfx support
+                else if (row_off == 254)
+                {
+                    // Finish current post if any
+                    if (ispost)
+                    {
+                        col.posts.push_back(post);
+                        post.pixels.clear();
+                        ispost = false;
+                    }
+
+                    // Begin relative offsets
+                    first_254 = false;
+
+                    // Create dummy post
+                    post.row_off = 254;
+                    col.posts.push_back(post);
+
+                    // Clear post
+                    row_off = 0;
+                    ispost  = false;
+                }
+
+                argb_t color(bpp == 4 ? *(pixel+3) : 255, *pixel, *(pixel+1), *(pixel+2));
+
+                // If the current pixel is not transparent, add it to the current post
+                if (color.geta() != 0)
+                {
+                    // If we're not currently building a post, begin one and set its offset
+                    if (!ispost)
+                    {
+                        // Set offset
+                        post.row_off = row_off;
+
+                        // Reset offset if we're in relative offsets mode
+                        if (!first_254)
+                            row_off = 0;
+
+                        // Start post
+                        ispost = true;
+                    }
+
+                    // Add the pixel to the post
+                    post.pixels.push_back(V_BestColor(V_GetDefaultPalette()->basecolors, color));
+                }
+                else if (ispost)
+                {
+                    // If the current pixel is transparent and we are currently building
+                    // a post, add the current post to the list and clear it
+                    col.posts.push_back(post);
+                    post.pixels.clear();
+                    ispost = false;
+                }
+
+                // Go to next row
+                offset += width;
+                pixel += pixel_step;
+                row_off++;
+            }
+
+            // If the column ended with a post, add it
+            if (ispost)
+                col.posts.push_back(post);
+
+            // Add the column data
+            columns.push_back(col);
+
+            // Go to next column
+            offset++;
+        }
+
+        stbi_image_free(decoded_img);
+        PHYSFS_close(rawtex);
+
+        // Write doom gfx data to output
+        MEMFILE *newpatch = mem_fopen_write();
+
+        // Setup header
+		mem_fwrite(&width, 2, 1, newpatch);
+		mem_fwrite(&height, 2, 1, newpatch);
+		mem_fwrite(&texture->mOffsetX, 2, 1, newpatch);
+		mem_fwrite(&texture->mOffsetY, 2, 1, newpatch);
+
+        // Write dummy column offsets for now
+        std::vector<uint32_t> col_offsets(columns.size());
+        mem_fwrite(col_offsets.data(), columns.size() * 4, 1, newpatch);
+
+        // Write columns
+        for (size_t c = 0; c < columns.size(); c++)
+        {
+            // Record column offset
+            col_offsets[c] = mem_ftell(newpatch);
+
+            // Determine column size (in bytes)
+            uint32_t col_size = 0;
+            for (auto& post : columns[c].posts)
+                col_size += post.pixels.size() + 4;
+
+            // Write column posts
+            for (auto& post : columns[c].posts)
+            {
+                // Write row offset
+                mem_fwrite(&post.row_off, 1, 1, newpatch);
+
+                // Write no. of pixels
+                uint8_t npix = post.pixels.size();
+                mem_fwrite(&npix, 1, 1, newpatch);
+
+                // Write unused byte
+                uint8_t temp = (npix > 0) ? post.pixels[0] : 0;
+                mem_fwrite(&temp, 1, 1, newpatch);
+
+                // Write pixels
+                for (auto& pixel : post.pixels)
+                    mem_fwrite(&pixel, 1, 1, newpatch);
+
+                // Write unused byte
+                temp = (npix > 0) ? post.pixels.back() : 0;
+                mem_fwrite(&temp, 1, 1, newpatch);
+            }
+
+            // Write '255' row to signal end of column
+            uint8_t temp = 255;
+            mem_fwrite(&temp, 1, 1, newpatch);
+        }
+
+        // Now we write column offsets
+        mem_fseek(newpatch, 8, MEM_SEEK_SET);
+        mem_fwrite(col_offsets.data(), columns.size() * 4, 1, newpatch);
+
+        byte *newnewpatch = new byte[R_CalculateNewPatchSize((patch_t*)mem_fgetbuf(newpatch), mem_fsize(newpatch))+1];
+
+        R_ConvertPatch((patch_t *)newnewpatch, (patch_t *)mem_fgetbuf(newpatch));
+
+        mem_fclose(newpatch);
+
+        texture->mData = newnewpatch;
     }
-
-    texture->mHasMask = (memchr(texture->mMask, 0, width * height) != NULL);
-
-    delete[] lumpdata;
-    stbi_image_free(decoded_img);
-#endif // CLIENT_APP
 }
 
 //
@@ -1428,7 +1453,7 @@ texhandle_t TextureManager::getHandle(const OString &name, Texture::TextureSourc
     OString uname(StdStringToUpper(name));
 
     // sidedefs with the '-' texture indicate there should be no texture used
-    if (uname[0] == '-' && type == Texture::TEX_WALLTEXTURE)
+    if (uname[0] == '-' && type == Texture::TEX_TEXTURE)
         return NO_TEXTURE_HANDLE;
 
     texhandle_t handle = NOT_FOUND_TEXTURE_HANDLE;
@@ -1436,22 +1461,10 @@ texhandle_t TextureManager::getHandle(const OString &name, Texture::TextureSourc
     // check for the texture in the default location specified by type
     if (type == Texture::TEX_FLAT)
         handle = getFlatHandle(uname);
-    else if (type == Texture::TEX_WALLTEXTURE)
-        handle = getWallTextureHandle(uname);
-    else if (type == Texture::TEX_PATCH)
-        handle = getPatchHandle(uname);
+    else if (type == Texture::TEX_TEXTURE)
+        handle = getTextureHandle(uname);
     else if (type == Texture::TEX_SPRITE)
         handle = getSpriteHandle(uname);
-    else if (type == Texture::TEX_RAW)
-        handle = getRawTextureHandle(uname);
-    else if (type == Texture::TEX_PNG)
-        handle = getPNGTextureHandle(uname);
-
-    // not found? check elsewhere
-    if (handle == NOT_FOUND_TEXTURE_HANDLE && type != Texture::TEX_FLAT)
-        handle = getFlatHandle(uname);
-    if (handle == NOT_FOUND_TEXTURE_HANDLE && type != Texture::TEX_WALLTEXTURE)
-        handle = getWallTextureHandle(uname);
 
     return handle;
 }
@@ -1469,26 +1482,6 @@ texhandle_t TextureManager::getHandle(const char *name, Texture::TextureSourceTy
     return getHandle(uname, type);
 }
 
-texhandle_t TextureManager::getHandle(unsigned int lumpnum, Texture::TextureSourceType type)
-{
-    texhandle_t handle = NOT_FOUND_TEXTURE_HANDLE;
-
-    if (type == Texture::TEX_PATCH)
-        handle = getPatchHandle(lumpnum);
-    else if (type == Texture::TEX_SPRITE)
-        handle = getSpriteHandle(lumpnum);
-    else if (type == Texture::TEX_RAW)
-        handle = getRawTextureHandle(lumpnum);
-    else if (type == Texture::TEX_PNG)
-        handle = getPNGTextureHandle(lumpnum);
-
-    // not found? check elsewhere
-    if (handle == NOT_FOUND_TEXTURE_HANDLE && type != Texture::TEX_WALLTEXTURE)
-        handle = getWallTextureHandle(lumpnum);
-
-    return handle;
-}
-
 //
 // TextureManager::getTexture
 //
@@ -1502,16 +1495,10 @@ const Texture *TextureManager::getTexture(texhandle_t handle)
     {
         if (handle & FLAT_HANDLE_MASK)
             cacheFlat(handle);
-        else if (handle & WALLTEXTURE_HANDLE_MASK)
-            cacheWallTexture(handle);
-        else if (handle & PATCH_HANDLE_MASK)
-            cachePatch(handle);
+        else if (handle & TEXTURE_HANDLE_MASK)
+            cacheTexture(handle);
         else if (handle & SPRITE_HANDLE_MASK)
             cacheSprite(handle);
-        else if (handle & RAW_HANDLE_MASK)
-            cacheRawTexture(handle);
-        else if (handle & PNG_HANDLE_MASK)
-            cachePNGTexture(handle);
 
         texture = mHandleMap[handle];
     }

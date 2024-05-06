@@ -402,9 +402,9 @@ odaproto::svc::LoadMap SVC_LoadMap(const OResFiles &wadnames, const std::string 
 {
     odaproto::svc::LoadMap msg;
 
-    // send list of wads (skip over wadnames[0] == odamex.wad)
-    size_t wadcount = wadnames.size() - 1;
-    for (size_t i = 1; i < wadcount + 1; i++)
+    // send list of wads
+    size_t wadcount = wadnames.size();
+    for (size_t i = 1; i < wadcount; i++)
     {
         odaproto::svc::LoadMap_Resource *wad = msg.add_wadnames();
         wad->set_name(wadnames[i].getBasename());

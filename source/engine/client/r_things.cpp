@@ -189,14 +189,16 @@ void R_DrawVisSprite(vissprite_t *vis, int x1, int x2)
     if (vis->spectator)
         return;
 
-    if (vis->patch == NO_PARTICLE)
+    if (vis->tex_id == NO_PARTICLE)
     {
         R_DrawParticle(vis);
         return;
     }
 
     // [AM] Ensure that we're not going to fall off the side of the patch.
-    const short patchWidth = W_CachePatch(vis->patch, PU_CACHE)->width();
+    if (vis->tex_patch == NULL)
+        vis->tex_patch = (patch_t *)texturemanager.getTexture(vis->tex_id)->getData();
+    const short patchWidth = vis->tex_patch->width();
     const int   start      = vis->startfrac >> FRACBITS;
     if (start < 0 || start > patchWidth)
     {
@@ -263,7 +265,7 @@ void R_DrawVisSprite(vissprite_t *vis, int x1, int x2)
     fixed_t colfrac = vis->startfrac;
     for (int x = vis->x1; x <= vis->x2; x++)
     {
-        spriteposts[x] = R_GetPatchColumn(vis->patch, colfrac >> FRACBITS);
+        spriteposts[x] = R_GetPatchColumn(vis->tex_patch, colfrac >> FRACBITS);
         colfrac += vis->xiscale;
     }
 
@@ -463,7 +465,7 @@ void R_ProjectSprite(AActor *thing, int fakeside)
 {
     spritedef_t   *sprdef;
     spriteframe_t *sprframe;
-    int            lump;
+    texhandle_t    tex_id;
     unsigned int   rot;
     bool           flip;
 
@@ -525,22 +527,15 @@ void R_ProjectSprite(AActor *thing, int fakeside)
         const angle_t ang = R_PointToAngle(thingx, thingy);
 
         // choose a different rotation based on player view
-        if (sprframe->lump[0] == sprframe->lump[1])
-        {
-            rot = (ang - thing->angle + (angle_t)(ANG45 / 2) * 9) >> 28;
-        }
-        else
-        {
-            rot = (ang - thing->angle + (angle_t)(ANG45 / 2) * 9 - (angle_t)(ANG180 / 16)) >> 28;
-        }
+        rot = (R_PointToAngle(thingx, thingy) - thing->angle + (unsigned)(ANG45/2)*9) >> 29;
 
-        lump = sprframe->lump[rot];
+        tex_id = sprframe->texes[rot];
         flip = static_cast<bool>(sprframe->flip[rot]);
     }
     else
     {
         // use single rotation for all views
-        lump = sprframe->lump[rot = 0];
+        tex_id = sprframe->texes[rot = 0];
         flip = static_cast<bool>(sprframe->flip[0]);
     }
 
@@ -551,7 +546,7 @@ void R_ProjectSprite(AActor *thing, int fakeside)
     fixed_t   topoffs  = sprframe->topoffset[rot];
     fixed_t   sideoffs = sprframe->offset[rot];
 
-    patch_t *patch  = W_CachePatch(lump);
+    patch_t *patch  = (patch_t *)texturemanager.getTexture(tex_id)->getData();
     fixed_t  height = patch->height() << FRACBITS;
     fixed_t  width  = patch->width() << FRACBITS;
 
@@ -565,7 +560,8 @@ void R_ProjectSprite(AActor *thing, int fakeside)
     vis->spectator    = thing->oflags & MFO_SPECTATOR;
     vis->translation  = thing->translation; // [RH] thing translation table
     vis->translucency = thing->translucency;
-    vis->patch        = lump;
+    vis->tex_id       = tex_id;
+    vis->tex_patch    = patch;
     vis->mo           = thing;
 
     // get light level
@@ -647,7 +643,7 @@ void R_DrawPSprite(pspdef_t *psp, unsigned flags)
     int            x2;
     spritedef_t   *sprdef;
     spriteframe_t *sprframe;
-    int            lump;
+    texhandle_t    tex_id;
     BOOL           flip;
     vissprite_t   *vis;
     vissprite_t    avis;
@@ -674,7 +670,7 @@ void R_DrawPSprite(pspdef_t *psp, unsigned flags)
 #endif
     sprframe = &sprdef->spriteframes[psp->state->frame & FF_FRAMEMASK];
 
-    lump = sprframe->lump[0];
+    tex_id = sprframe->texes[0];
     flip = static_cast<BOOL>(sprframe->flip[0]);
 
     if (sprframe->width[0] == SPRITE_NEEDS_INFO)
@@ -732,7 +728,7 @@ void R_DrawPSprite(pspdef_t *psp, unsigned flags)
     if (vis->x1 > x1)
         vis->startfrac += vis->xiscale * (vis->x1 - x1);
 
-    vis->patch = lump;
+    vis->tex_id = tex_id;
 
     if (fixedlightlev)
     {
@@ -1114,7 +1110,7 @@ void R_ProjectParticle(particle_t *particle, const sector_t *sector, int fakesid
 
     vis->translation = translationref_t();
     vis->startfrac   = particle->color;
-    vis->patch       = NO_PARTICLE;
+    vis->tex_id      = NO_PARTICLE;
     vis->mobjflags   = particle->trans;
     vis->mo          = NULL;
     vis->spectator   = false;

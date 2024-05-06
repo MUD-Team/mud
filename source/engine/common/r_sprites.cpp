@@ -25,6 +25,7 @@
 
 #include "i_system.h"
 #include "m_alloc.h"
+#include "m_fileio.h"
 #include "odamex.h"
 #include "s_sound.h"
 #include "v_video.h"
@@ -47,13 +48,13 @@ void R_CacheSprite(spritedef_t *sprite)
     DPrintf("cache sprite %s\n", sprite - sprites < NUMSPRITES ? sprnames[sprite - sprites] : "");
     for (int i = 0; i < sprite->numframes; i++)
     {
-        for (int r = 0; r < 16; r++)
+        for (int r = 0; r < 8; r++)
         {
             if (sprite->spriteframes[i].width[r] == SPRITE_NEEDS_INFO)
             {
-                if (sprite->spriteframes[i].lump[r] == -1)
+                if (sprite->spriteframes[i].texes[r] == TextureManager::NO_TEXTURE_HANDLE)
                     I_Error("Sprite %d, rotation %d has no lump", i, r);
-                patch_t *patch                       = W_CachePatch(sprite->spriteframes[i].lump[r]);
+                patch_t *patch                       = (patch_t *)texturemanager.getTexture(sprite->spriteframes[i].texes[r])->getData();
                 sprite->spriteframes[i].width[r]     = patch->width() << FRACBITS;
                 sprite->spriteframes[i].offset[r]    = patch->leftoffset() << FRACBITS;
                 sprite->spriteframes[i].topoffset[r] = patch->topoffset() << FRACBITS;
@@ -63,182 +64,99 @@ void R_CacheSprite(spritedef_t *sprite)
 }
 
 //
-// R_InstallSpriteLump
+// R_InstallSpriteTex
 // Local function for R_InitSprites.
 //
 // [RH] Removed checks for coexistance of rotation 0 with other
 //		rotations and made it look more like BOOM's version.
 //
-static void R_InstallSpriteLump(int lump, unsigned frame, unsigned rot, BOOL flipped)
+void R_InstallSpriteTex(const texhandle_t tex_id, unsigned frame, unsigned rot, bool flipped)
 {
-    unsigned rotation;
+	if (frame >= MAX_SPRITE_FRAMES || rot > 8)
+		I_FatalError ("R_InstallSpriteTex: Bad frame characters in resource ID %i", (int)tex_id);
 
-    if (rot <= 9)
-        rotation = rot;
-    else
-        rotation = (rot >= 17) ? rot - 7 : 17;
+	if (static_cast<int>(frame) > maxframe)
+		maxframe = frame;
 
-    if (frame >= MAX_SPRITE_FRAMES || rotation > 16)
-        I_FatalError("R_InstallSpriteLump: Bad frame characters in lump %i", lump);
-
-    if (static_cast<int>(frame) > maxframe)
-        maxframe = frame;
-
-    if (rotation == 0)
-    {
-        // the lump should be used for all rotations
+	if (rot == 0)
+	{
+		// the resource should be used for all rotations
         // false=0, true=1, but array initialised to -1
         // allows doom to have a "no value set yet" boolean value!
-        for (int r = 14; r >= 0; r -= 2)
-        {
-            if (sprtemp[frame].lump[r] == -1)
-            {
-                sprtemp[frame].lump[r]  = static_cast<short>(lump);
-                sprtemp[frame].flip[r]  = static_cast<byte>(flipped);
-                sprtemp[frame].rotate   = false;
-                sprtemp[frame].width[r] = SPRITE_NEEDS_INFO;
-            }
-        }
-
-        return;
-    }
-
-    rotation = (rotation <= 8 ? (rotation - 1) * 2 : (rotation - 9) * 2 + 1);
-
-    if (sprtemp[frame].lump[rotation] == -1)
-    {
-        // the lump is only used for one rotation
-        sprtemp[frame].lump[rotation]  = static_cast<short>(lump);
-        sprtemp[frame].flip[rotation]  = static_cast<byte>(flipped);
-        sprtemp[frame].rotate          = true;
-        sprtemp[frame].width[rotation] = SPRITE_NEEDS_INFO;
-    }
+		for (int r = 7; r >= 0; r--)
+		{
+			if (sprtemp[frame].texes[r] == TextureManager::NO_TEXTURE_HANDLE)
+			{
+				sprtemp[frame].texes[r] = tex_id;
+				sprtemp[frame].flip[r] = (byte)flipped;
+				sprtemp[frame].rotate = false;
+				sprtemp[frame].width[r] = SPRITE_NEEDS_INFO;
+			}
+		}
+		
+		return;
+	}
+	else if (sprtemp[frame].texes[--rot] == TextureManager::NO_TEXTURE_HANDLE)
+	{
+		// the lump is only used for one rotation
+		sprtemp[frame].texes[rot] = tex_id;
+		sprtemp[frame].flip[rot] = (byte)flipped;
+		sprtemp[frame].rotate = true;
+		sprtemp[frame].width[rot] = SPRITE_NEEDS_INFO;
+	}
 }
 
 // [RH] Seperated out of R_InitSpriteDefs()
-static void R_InstallSprite(const char *name, int num)
+void R_InstallSprite(const char* name, int num)
 {
-    if (maxframe == -1)
-    {
-        sprites[num].numframes = 0;
-        return;
-    }
+	char sprname[5];
+	int frame;
 
-    char sprname[5];
-    strncpy(sprname, name, 4);
-    sprname[4] = 0;
+	if (maxframe == -1)
+	{
+		sprites[num].numframes = 0;
+		return;
+	}
 
-    maxframe++;
+	strncpy(sprname, name, 4);
+	sprname[4] = 0;
 
-    for (int frame = 0; frame < maxframe; frame++)
-    {
-        switch (static_cast<int>(sprtemp[frame].rotate))
-        {
-        case -1:
-            // no rotations were found for that frame at all
-            I_FatalError("R_InstallSprite: No patches found for %s frame %c", sprname, frame + 'A');
-            break;
+	maxframe++;
 
-        case 0:
-            // only the first rotation is needed
-            break;
+	for (frame = 0; frame < maxframe; frame++)
+	{
+		switch ((int)sprtemp[frame].rotate)
+		{
+		case -1:
+			// no rotations were found for that frame at all
+			I_FatalError("R_InstallSprite: No patches found for %s frame %c", sprname,
+			             frame + 'A');
+			break;
 
-        case 1:
-            // must have all 16 frames
-            {
-                for (int rotation = 0; rotation < 16; rotation += 2)
-                {
-                    if (sprtemp[frame].lump[rotation + 1] == -1)
-                    {
-                        sprtemp[frame].lump[rotation + 1]  = sprtemp[frame].lump[rotation];
-                        sprtemp[frame].flip[rotation + 1]  = sprtemp[frame].flip[rotation];
-                        sprtemp[frame].width[rotation + 1] = SPRITE_NEEDS_INFO;
-                    }
+		case 0:
+			// only the first rotation is needed
+			break;
 
-                    if (sprtemp[frame].lump[rotation] == -1)
-                    {
-                        sprtemp[frame].lump[rotation]  = sprtemp[frame].lump[rotation + 1];
-                        sprtemp[frame].flip[rotation]  = sprtemp[frame].flip[rotation + 1];
-                        sprtemp[frame].width[rotation] = SPRITE_NEEDS_INFO;
-                    }
-                }
+		case 1:
+			// must have all 8 frames
+			{
+				for (int rotation = 0; rotation < 8; rotation++)
+				{
+					if (sprtemp[frame].texes[rotation] == TextureManager::NO_TEXTURE_HANDLE)
+						I_FatalError(
+						    "R_InstallSprite: Sprite %s frame %c is missing rotations",
+						    sprname, frame + 'A');
+				}
+			}
+			break;
+		}
+	}
 
-                for (int rotation = 0; rotation < 16; ++rotation)
-                {
-                    if (sprtemp[frame].lump[rotation] == -1)
-                    {
-                        I_FatalError("R_InstallSprite: Sprite %s frame %c is missing rotations", sprname, frame + 'A');
-                    }
-                }
-            }
-            break;
-        }
-    }
-
-    // allocate space for the frames present and copy sprtemp to it
-    sprites[num].numframes    = maxframe;
-    sprites[num].spriteframes = (spriteframe_t *)Z_Malloc(maxframe * sizeof(spriteframe_t), PU_STATIC, NULL);
-    memcpy(sprites[num].spriteframes, sprtemp, maxframe * sizeof(spriteframe_t));
-}
-
-//
-// R_InitSpriteDefs
-// Pass a null terminated list of sprite names
-//	(4 chars exactly) to be used.
-// Builds the sprite rotation matrices to account
-//	for horizontally flipped sprites.
-// Will report an error if the lumps are inconsistant.
-// Only called at startup.
-//
-// Sprite lump names are 4 characters for the actor,
-//	a letter for the frame, and a number for the rotation.
-// A sprite that is flippable will have an additional
-//	letter/number appended.
-// The rotation character can be 0 to signify no rotations.
-//
-static void R_InitSpriteDefs(const char **namelist)
-{
-    // count the number of sprite names
-    for (numsprites = 0; namelist[numsprites]; numsprites++)
-        ;
-
-    if (!numsprites)
-        return;
-
-    sprites = (spritedef_t *)Z_Malloc(numsprites * sizeof(*sprites), PU_STATIC, NULL);
-
-    // scan all the lump names for each of the names,
-    //	noting the highest frame letter.
-    // Just compare 4 characters as ints
-    for (int i = 0; i < numsprites; i++)
-    {
-        memset(sprtemp, -1, sizeof(sprtemp));
-
-        for (int i = 0; i < MAX_SPRITE_FRAMES; i++)
-        {
-            sprtemp[i].rotate = false;
-        }
-
-        maxframe          = -1;
-        const int intname = *(int *)namelist[i];
-
-        // scan the lumps,
-        //	filling in the frames for whatever is found
-        for (int l = lastspritelump; l >= firstspritelump; l--)
-        {
-            if (*(int *)lumpinfo[l].name == intname)
-            {
-                R_InstallSpriteLump(l,
-                                    lumpinfo[l].name[4] - 'A', // denis - fixme - security
-                                    lumpinfo[l].name[5] - '0', false);
-
-                if (lumpinfo[l].name[6])
-                    R_InstallSpriteLump(l, lumpinfo[l].name[6] - 'A', lumpinfo[l].name[7] - '0', true);
-            }
-        }
-
-        R_InstallSprite(namelist[i], i);
-    }
+	// allocate space for the frames present and copy sprtemp to it
+	sprites[num].numframes = maxframe;
+	sprites[num].spriteframes =
+	    (spriteframe_t*)Z_Malloc(maxframe * sizeof(spriteframe_t), PU_STATIC, NULL);
+	memcpy(sprites[num].spriteframes, sprtemp, maxframe * sizeof(spriteframe_t));
 }
 
 //
@@ -252,7 +170,7 @@ vissprite_t *lastvissprite;
 // R_InitSprites
 // Called at program start.
 //
-void R_InitSprites(const char **namelist)
+void R_InitSprites()
 {
     MaxVisSprites = 128; // [RH] This is the initial default value. It grows as needed.
 
@@ -260,8 +178,6 @@ void R_InitSprites(const char **namelist)
 
     vissprites    = (vissprite_t *)Malloc(MaxVisSprites * sizeof(vissprite_t));
     lastvissprite = &vissprites[MaxVisSprites];
-
-    R_InitSpriteDefs(namelist);
 }
 
 VERSION_CONTROL(r_sprites_cpp, "$Id: 875d809dc604f6d3d7e5cfe89d80c1206cb918c2 $")
