@@ -1,4 +1,5 @@
 
+import {test} from "./test"
 
 let menu_document: RmlElementDocument;
 let menu_shown: boolean;
@@ -18,6 +19,11 @@ function show(shown: boolean) {
     } else {
         mud.p_ticker_pause(false)
     }
+}
+
+function render()
+{
+    mud.ui.react.render(menu_document, menu_document.GetElementById("react-root"), test);
 }
 
 function on_key_up(ev: any) {
@@ -49,5 +55,6 @@ function On_New_Game() {
 export default {
     show: show,
     load: load,
-    on_map_loaded: on_map_loaded
+    on_map_loaded: on_map_loaded,
+    render: render
 }

@@ -6,5 +6,7 @@ vcpkg_installed
 *.WAD
 *.wad
 
+bin/assets/core/script/**/*.lua
+
 
 freedoom2*

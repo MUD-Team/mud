@@ -8,12 +8,15 @@
 #include "lua_client_private.h"
 #include "../../sdl/i_input.h"
 
+#include "lua_client_ui_react_plugin.h"
+
 class LuaUI
 {
   public:
     static void open(lua_State *L)
     {
         Rml::Lua::Initialise(L);
+        Rml::RegisterPlugin(new MUDReactPlugin(L));
 
         luabridge::getGlobalNamespace(L)
             .beginNamespace("mud")

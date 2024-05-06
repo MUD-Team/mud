@@ -1,4 +1,5 @@
 
+import "./mudReact"
 
 import console from "./console"
 import main_menu from "./main_menu"
@@ -16,6 +17,7 @@ options.load(play_context)
 player_view.load(play_context)
 
 function begin_frame() {
+    main_menu.render()
     ui.begin_frame()
     play_context.Update()
 }
