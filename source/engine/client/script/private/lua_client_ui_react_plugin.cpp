@@ -2,7 +2,9 @@
 #include "lua_client_ui_react_plugin.h"
 
 #include <RmlUi/Core/ElementDocument.h>
+#include <RmlUi/Core/ElementText.h>
 #include <i_system.h>
+
 
 static lua_State *g_L = nullptr;
 
@@ -31,7 +33,7 @@ int MUDReactPlugin::GetEventClasses()
     return EVT_ELEMENT;
 }
 
-void MUDReactPlugin::ProcessElement(Rml::Element* parent, DeferredElement *deferred, DeferredElement *cached)
+void MUDReactPlugin::ProcessElement(Rml::Element *parent, DeferredElement *deferred, DeferredElement *cached)
 {
     Rml::Element *curElement    = nullptr;
     Rml::Element *cachedElement = cached ? (Rml::Element *)cached->element : nullptr;
@@ -39,6 +41,11 @@ void MUDReactPlugin::ProcessElement(Rml::Element* parent, DeferredElement *defer
     if (cached && cached->element && cached->type == deferred->type && cached->key == deferred->key)
     {
         curElement = (Rml::Element *)cached->element;
+    }
+    else if (cached && cached->element && cached->type == "#text" && deferred->type == "#text")
+    {
+        curElement = (Rml::Element *)cached->element;
+        ((Rml::ElementText *)cachedElement)->SetText(deferred->text);
     }
 
     if (!curElement)
@@ -63,9 +70,9 @@ void MUDReactPlugin::ProcessElement(Rml::Element* parent, DeferredElement *defer
             I_Error("MUD React: Unable to create deferred element");
         }
 
-        if (cachedElement) 
+        if (cachedElement)
         {
-            Rml::Element* child = cachedElement->GetFirstChild();
+            Rml::Element *child = cachedElement->GetFirstChild();
             while (child)
             {
                 Rml::ElementPtr c = cachedElement->RemoveChild(child);
@@ -80,7 +87,7 @@ void MUDReactPlugin::ProcessElement(Rml::Element* parent, DeferredElement *defer
         else
         {
             parent->AppendChild(std::move(nelement));
-        }        
+        }
     }
     else
     {
