@@ -275,15 +275,13 @@ bool W_IsKnownIWAD(const OWantFile &file)
 //
 // Right now we only want to test with a singular IWAD
 // while we migrate from the WAD format altogether. 
-// Assume anything ending in .wad besides odamex.wad is the IWAD - Dasho
+// Assume anything ending in .wad is the IWAD - Dasho
 bool W_IsIWAD(const OResFile &file)
 {
     std::string ext;
     if (!M_ExtractFileExtension(file.getBasename(), ext))
         return false;
     if (ext != "wad")
-        return false;
-    if (file.getBasename() == "odamex.wad")
         return false;
     return true;
 }

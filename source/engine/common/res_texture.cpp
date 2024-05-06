@@ -1238,12 +1238,35 @@ void TextureManager::cacheTexture(texhandle_t handle)
             I_FatalError("TexureManager::cacheTexture: Error decoding %s\n", mTextureFilenames[filenum-1].c_str());
         }
 
-        delete[] filedata;
-
         if (need_bpp)
             bpp = need_bpp;
 
         Texture *texture = createTexture(handle, width, height);
+
+        // temporary PNG grAb chunk check
+        int i = 0;
+        int j = 0;
+        for (; i<filelen && j<5; i++)
+        {
+            static byte pgs[5] = { 0x08, 'g', 'r', 'A', 'b' };
+            if (filedata[i] == pgs[j])
+                j++;
+            else
+                j = 0;
+        }
+        if (j == 5)
+        {
+            int x, y;
+            memcpy(&x, &filedata[i], 4);
+            i+=4;
+            memcpy(&y, &filedata[i], 4);
+            x = BELONG(x);
+            y = BELONG(y);
+            texture->setOffsetX(x);
+            texture->setOffsetY(y);
+        }
+
+        delete[] filedata;
 
         // Convert image to column/post structure
         std::vector<texcolumn_t> columns;

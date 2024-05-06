@@ -197,7 +197,7 @@ static void LoadResolvedFiles(const OResFiles &newwadfiles)
     // set the window title based on which IWAD we're using
     I_SetTitleString(D_GetTitleString().c_str());
 
-    ::modifiedgame = (::wadfiles.size() > 2); // more than odamex.wad and IWAD?
+    ::modifiedgame = (::wadfiles.size() > 1); // more than the IWAD?
 
     if (::modifiedgame && (::gameinfo.flags & GI_SHAREWARE))
     {
@@ -222,7 +222,6 @@ static void LoadResolvedFiles(const OResFiles &newwadfiles)
 //
 void D_LoadResourceFiles(const OWantFiles &newwadfiles)
 {
-    OResFile odamex_wad;
     OResFile next_iwad;
 
     ::missingfiles.clear();
@@ -240,26 +239,6 @@ void D_LoadResourceFiles(const OWantFiles &newwadfiles)
             continue;
         }
         resolved_wads.push_back(file);
-    }
-
-    // ODAMEX.WAD //
-
-    if (::wadfiles.empty())
-    {
-        // If we don't have odamex.wad, resolve it now.
-        OWantFile want_odamex;
-        OWantFile::make(want_odamex, "odamex.wad");
-        if (!M_ResolveWantedFile(odamex_wad, want_odamex))
-        {
-            I_FatalError("Could not resolve \"%s\".  Please ensure this file is "
-                         "someplace where Odamex can find it.\n",
-                         want_odamex.getBasename().c_str());
-        }
-    }
-    else
-    {
-        // We already have odamex.wad, just make a copy of it.
-        odamex_wad = ::wadfiles.at(0);
     }
 
     // IWAD //
@@ -298,7 +277,6 @@ void D_LoadResourceFiles(const OWantFiles &newwadfiles)
                      "one IWAD is someplace where Odamex can find it.\n");
     }
 
-    resolved_wads.insert(resolved_wads.begin(), odamex_wad);
     resolved_wads.insert(resolved_wads.begin() + 1, next_iwad);
     LoadResolvedFiles(resolved_wads);
 }
@@ -323,11 +301,11 @@ static bool CheckWantedMatchesLoaded(const OWantFiles &newwadfiles)
         return false;
     }
 
-    // Check WAD hashes - with an offset because you can't replace odamex.wad.
+    // Check WAD hashes
     for (OWantFiles::const_iterator it = newwadfiles.begin(); it != newwadfiles.end(); ++it)
     {
         size_t idx = it - newwadfiles.begin();
-        if (it->getWantedMD5() != ::wadfiles.at(idx + 1).getMD5())
+        if (it->getWantedMD5() != ::wadfiles.at(idx).getMD5())
         {
             return false;
         }

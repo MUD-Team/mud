@@ -120,10 +120,9 @@ bool Maplist::insert(const size_t &position, maplist_entry_t &maplist_entry)
         if (position == 0)
         {
             // Nothing is 'above us' to yoink from, so just use the currently
-            // loaded WAD files.  Add one to the beginning of wadfiles, since
-            // position 0 stores odamex.wad.
+            // loaded WAD files.
             maplist_entry.wads.clear();
-            for (OResFiles::const_iterator it = ::wadfiles.begin() + 1; it != ::wadfiles.end(); ++it)
+            for (OResFiles::const_iterator it = ::wadfiles.begin(); it != ::wadfiles.end(); ++it)
             {
                 size_t idx = it - ::wadfiles.begin();
                 maplist_entry.wads.push_back(it->getBasename());
