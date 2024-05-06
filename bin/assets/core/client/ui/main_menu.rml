@@ -52,7 +52,7 @@
     </head>
 
     <body>
-        <div id="react-root" key="__key_mud_root"></div>
+        <div style="padding-left: 128dp; padding-top: 128dp;" id="react-root"></div>
         <div class="center">
             <div class="center-menu">
                 <div style="font-size: 48dp;font-weight: 800; color:#d39266;">MUD</div>

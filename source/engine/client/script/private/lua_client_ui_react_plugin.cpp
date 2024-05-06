@@ -5,7 +5,6 @@
 #include <RmlUi/Core/ElementText.h>
 #include <i_system.h>
 
-
 static lua_State *g_L = nullptr;
 
 MUDReactPlugin *MUDReactPlugin::mInstance = nullptr;
@@ -136,8 +135,28 @@ MUDReactPlugin::DeferredElement MUDReactPlugin::DeferCreateElement()
 
     if (type.isFunction())
     {
-        luabridge::LuaResult result = type.call();
-        return defer;
+        luabridge::LuaResult result = type.call();        
+        if (result.hasFailed())
+        {
+            I_Error("MUD React: %s", result.errorMessage().c_str());
+        }
+        if (result.size() != 1)
+        {
+            I_Error("MUD React: Functional component returned %u values", result.size());
+        }
+        if (!result[0].isUserdata())
+        {
+            I_Error("MUD React: Functional component returned non-user data: %s", result[0].tostring());
+        }
+
+        DeferredElement *d = result[0].cast<DeferredElement *>().valueOr(nullptr);
+
+        if (!d)
+        {
+            I_Error("MUD React: Functional component could't get DeferredElement");
+        }
+    
+        return *d;
     }
 
     if (type.isString())

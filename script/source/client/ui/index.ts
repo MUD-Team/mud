@@ -1,6 +1,4 @@
 
-import "./mudReact"
-
 import console from "./console"
 import main_menu from "./main_menu"
 import player_view from "./player_view"
