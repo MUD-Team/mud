@@ -101,6 +101,7 @@ declare const rmlui: {
 
 declare namespace JSX {
     interface IntrinsicElements {
-        div: any
+        div: any,
+        button: any
     }
 }

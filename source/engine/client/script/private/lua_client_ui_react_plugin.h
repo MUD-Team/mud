@@ -12,6 +12,29 @@ class MUDReactPlugin : public Rml::Plugin
     ~MUDReactPlugin();
 
   private:
+    struct CacheElement
+    {
+        CacheElement()
+        {
+            Clear();
+        }
+
+        void Clear()
+        {
+            type.clear();
+            key.clear();
+            children.clear();
+            element   = nullptr;
+            parent = nullptr;
+        }
+
+        std::string               type;
+        std::string               key;
+        Rml::Element             *parent;
+        Rml::Element             *element;
+        std::vector<CacheElement> children;
+    };
+
     struct DeferredElement
     {
         DeferredElement()
@@ -21,18 +44,20 @@ class MUDReactPlugin : public Rml::Plugin
 
         void Clear()
         {
-            type = "Invalid";
+            type.clear();
             key.clear();
             text.clear();
             children.clear();
-            element = nullptr;
+            element   = nullptr;
+            renderKey = -1;
         }
 
         std::string                  type;
         std::string                  key;
         std::string                  text;
-        void                        *element;
+        Rml::Element                *element;
         std::vector<DeferredElement> children;
+        int                          renderKey;
     };
 
     int GetEventClasses() override;
@@ -45,7 +70,9 @@ class MUDReactPlugin : public Rml::Plugin
 
     void OnElementDestroy(Rml::Element *element) override;
 
-    void ProcessElement(Rml::Element* parent, DeferredElement* deferred, DeferredElement* cached);
+    void EnumerateElements(CacheElement *cache, Rml::Element *element);
+
+    void ProcessElement(DeferredElement *deferred, Rml::Element *parent, CacheElement *cache);
 
     DeferredElement DeferCreateElement();
 
@@ -57,7 +84,7 @@ class MUDReactPlugin : public Rml::Plugin
     Rml::Element         *mRenderParent;
 
     DeferredElement mDeferred;
-    DeferredElement mCache;
+    int             mCurrentRenderKey;
 
     std::set<std::string> mKnownTypes;
 
