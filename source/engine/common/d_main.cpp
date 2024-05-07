@@ -181,15 +181,15 @@ static bool FindIWAD(OResFile &out)
  */
 static void LoadResolvedFiles(const OResFiles &newwadfiles)
 {
-    if (newwadfiles.size() < 2)
+    if (newwadfiles.size() < 1)
     {
-        I_FatalError("Tried to load resources without an ODAMEX.WAD or an IWAD.");
+        I_FatalError("Tried to load resources without an IWAD.");
     }
 
     ::wadfiles   = newwadfiles;
 
     // Now scan the contents of the IWAD to determine which one it is
-    W_ConfigureGameInfo(::wadfiles.at(1));
+    W_ConfigureGameInfo(::wadfiles.at(0));
 
     // print info about the IWAD to the console
     D_PrintIWADIdentity();
@@ -198,11 +198,6 @@ static void LoadResolvedFiles(const OResFiles &newwadfiles)
     I_SetTitleString(D_GetTitleString().c_str());
 
     ::modifiedgame = (::wadfiles.size() > 1); // more than the IWAD?
-
-    if (::modifiedgame && (::gameinfo.flags & GI_SHAREWARE))
-    {
-        I_FatalError("\nYou cannot load additional WADs with the shareware version. Register!");
-    }
 
     W_InitMultipleFiles(::wadfiles);
 
@@ -256,14 +251,6 @@ void D_LoadResourceFiles(const OWantFiles &newwadfiles)
         }
     }
 
-    if (!got_next_iwad && ::wadfiles.size() >= 2)
-    {
-        // Reuse the old IWAD.  As an optimization, assume that the location
-        // of the IWAD has not changed on disk.
-        next_iwad     = ::wadfiles.at(1);
-        got_next_iwad = true;
-    }
-
     if (!got_next_iwad)
     {
         // Not provided an IWAD filename and an IWAD is not currently loaded?
@@ -277,7 +264,7 @@ void D_LoadResourceFiles(const OWantFiles &newwadfiles)
                      "one IWAD is someplace where Odamex can find it.\n");
     }
 
-    resolved_wads.insert(resolved_wads.begin() + 1, next_iwad);
+    resolved_wads.insert(resolved_wads.begin(), next_iwad);
     LoadResolvedFiles(resolved_wads);
 }
 
