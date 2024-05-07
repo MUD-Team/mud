@@ -91,7 +91,7 @@
  * _Huffman_InitBitstream() - Initialize a bitstream.
  *************************************************************************/
 
-void huffman::_Huffman_InitBitstream(huff_bitstream_t *stream, unsigned char *buf)
+void huffman::_Huffman_InitBitstream(huff_bitstream_t *stream, uint8_t *buf)
 {
     stream->BytePtr = buf;
     stream->BitPos  = 0;
@@ -101,10 +101,10 @@ void huffman::_Huffman_InitBitstream(huff_bitstream_t *stream, unsigned char *bu
  * _Huffman_ReadBit() - Read one bit from a bitstream.
  *************************************************************************/
 
-unsigned int huffman::_Huffman_ReadBit(huff_bitstream_t *stream)
+uint32_t huffman::_Huffman_ReadBit(huff_bitstream_t *stream)
 {
-    unsigned int   x, bit;
-    unsigned char *buf;
+    uint32_t   x, bit;
+    uint8_t *buf;
 
     /* Get current stream state */
     buf = stream->BytePtr;
@@ -129,10 +129,10 @@ unsigned int huffman::_Huffman_ReadBit(huff_bitstream_t *stream)
  * _Huffman_Read8Bits() - Read eight bits from a bitstream.
  *************************************************************************/
 
-unsigned int huffman::_Huffman_Read8Bits(huff_bitstream_t *stream)
+uint32_t huffman::_Huffman_Read8Bits(huff_bitstream_t *stream)
 {
-    unsigned int   x, bit;
-    unsigned char *buf;
+    uint32_t   x, bit;
+    uint8_t *buf;
 
     /* Get current stream state */
     buf = stream->BytePtr;
@@ -152,11 +152,11 @@ unsigned int huffman::_Huffman_Read8Bits(huff_bitstream_t *stream)
  * _Huffman_WriteBits() - Write bits to a bitstream.
  *************************************************************************/
 
-void huffman::_Huffman_WriteBits(huff_bitstream_t *stream, unsigned int x, unsigned int bits)
+void huffman::_Huffman_WriteBits(huff_bitstream_t *stream, uint32_t x, uint32_t bits)
 {
-    unsigned int   bit, count;
-    unsigned char *buf;
-    unsigned int   mask;
+    uint32_t   bit, count;
+    uint8_t *buf;
+    uint32_t   mask;
 
     /* Get current stream state */
     buf = stream->BytePtr;
@@ -184,9 +184,9 @@ void huffman::_Huffman_WriteBits(huff_bitstream_t *stream, unsigned int x, unsig
  * _Huffman_Hist() - Calculate (sorted) histogram for a block of data.
  *************************************************************************/
 
-void huffman::_Huffman_Hist(unsigned char *in, huff_sym_t *sym, unsigned int size)
+void huffman::_Huffman_Hist(uint8_t *in, huff_sym_t *sym, uint32_t size)
 {
-    unsigned char *in_end = in + size;
+    uint8_t *in_end = in + size;
 
     /* Build histogram */
     while (in != in_end)
@@ -213,9 +213,9 @@ void huffman::_Huffman_Hist(unsigned char *in, huff_sym_t *sym, unsigned int siz
  * in a look-up-table (a symbol array).
  *************************************************************************/
 
-void huffman::_Huffman_StoreTree(huff_encodenode_t *node, huff_sym_t *sym, unsigned int code, unsigned int bits)
+void huffman::_Huffman_StoreTree(huff_encodenode_t *node, huff_sym_t *sym, uint32_t code, uint32_t bits)
 {
-    unsigned int sym_idx;
+    uint32_t sym_idx;
 
     /* Is this a leaf node? */
     if (node->Symbol >= 0)
@@ -247,7 +247,7 @@ void huffman::_Huffman_StoreTree(huff_encodenode_t *node, huff_sym_t *sym, unsig
 huffman::huff_encodenode_t *huffman::_Huffman_MakeTree(huff_sym_t *sym, huff_encodenode_t *nodes)
 {
     huff_encodenode_t *node_1, *node_2, *new_root;
-    unsigned int       k, num_symbols, nodes_left, next_idx;
+    uint32_t       k, num_symbols, nodes_left, next_idx;
 
     /* Initialize all leaf nodes */
     num_symbols = 0;
@@ -326,12 +326,12 @@ huffman::huff_encodenode_t *huffman::_Huffman_MakeTree(huff_sym_t *sym, huff_enc
  * The function returns the size of the compressed data.
  *************************************************************************/
 
-bool huffman::Huffman_Compress_Using_Histogram(unsigned char *in, size_t insize, unsigned char *out, size_t &outsize,
+bool huffman::Huffman_Compress_Using_Histogram(uint8_t *in, size_t insize, uint8_t *out, size_t &outsize,
                                                huff_sym_t *sym)
 {
     huff_sym_t       tmp;
     huff_bitstream_t stream;
-    unsigned int     k, swaps, symbol;
+    uint32_t     k, swaps, symbol;
 
     /* Do we have anything to compress? */
     if (insize < 1)
@@ -360,7 +360,7 @@ bool huffman::Huffman_Compress_Using_Histogram(unsigned char *in, size_t insize,
     } while (swaps);
 
     // Init useful pointer for bounds check
-    unsigned char *out_end = out + outsize;
+    uint8_t *out_end = out + outsize;
 
     /* Encode input stream */
     for (k = 0; k < insize; ++k)
@@ -379,7 +379,7 @@ bool huffman::Huffman_Compress_Using_Histogram(unsigned char *in, size_t insize,
 
     if (stream.BitPos > 0)
     {
-        unsigned int left = 8 - stream.BitPos;
+        uint32_t left = 8 - stream.BitPos;
 
         // Write a terminator that will throw decompressor off the tree
         for (k = 0; k < 256; ++k)
@@ -407,7 +407,7 @@ bool huffman::Huffman_Compress_Using_Histogram(unsigned char *in, size_t insize,
  *  outsize - Number of output bytes.
  *************************************************************************/
 
-bool huffman::Huffman_Uncompress_Using_Tree(unsigned char *in, size_t insize, unsigned char *out, size_t &outsize,
+bool huffman::Huffman_Uncompress_Using_Tree(uint8_t *in, size_t insize, uint8_t *out, size_t &outsize,
                                             huff_encodenode_t *root)
 {
     huff_bitstream_t stream;
@@ -420,9 +420,9 @@ bool huffman::Huffman_Uncompress_Using_Tree(unsigned char *in, size_t insize, un
     }
 
     // Prepare useful pointers
-    unsigned char *in_end  = in + insize;
-    unsigned char *out_end = out + outsize;
-    unsigned char *buf     = out;
+    uint8_t *in_end  = in + insize;
+    uint8_t *out_end = out + outsize;
+    uint8_t *buf     = out;
 
     /* Initialize bitstream */
     _Huffman_InitBitstream(&stream, in);
@@ -458,7 +458,7 @@ bool huffman::Huffman_Uncompress_Using_Tree(unsigned char *in, size_t insize, un
             return false;
 
         /* We found the matching leaf node and have the symbol */
-        *buf++ = (unsigned char)node->Symbol;
+        *buf++ = (uint8_t)node->Symbol;
     }
 
     outsize = buf - out;
@@ -487,14 +487,14 @@ void huffman::reset()
 }
 
 // Analyse some raw data and add it to the compression statistics
-void huffman::extend(unsigned char *data, size_t insize)
+void huffman::extend(uint8_t *data, size_t insize)
 {
     _Huffman_Hist(data, sym, insize);
     fresh_histogram = true;
 }
 
 // Compress a chunk of data using only previously generated stats
-bool huffman::compress(unsigned char *in_data, size_t in_len, unsigned char *out_data, size_t &out_len)
+bool huffman::compress(uint8_t *in_data, size_t in_len, uint8_t *out_data, size_t &out_len)
 {
     if (fresh_histogram)
     {
@@ -506,7 +506,7 @@ bool huffman::compress(unsigned char *in_data, size_t in_len, unsigned char *out
 }
 
 // Decompress a chunk of data using only previously generated stats
-bool huffman::decompress(unsigned char *in_data, size_t in_len, unsigned char *out_data, size_t &out_len)
+bool huffman::decompress(uint8_t *in_data, size_t in_len, uint8_t *out_data, size_t &out_len)
 {
     if (fresh_histogram)
     {
@@ -527,7 +527,7 @@ huffman::huffman()
 // Huffman Server
 //
 
-bool huffman_server::packet_sent(unsigned int id, unsigned char *in_data, size_t len)
+bool huffman_server::packet_sent(uint32_t id, uint8_t *in_data, size_t len)
 {
     // already sent a packet, expecting one back
     // though if missed_packets is large, we should probably re-negotiate
@@ -545,7 +545,7 @@ bool huffman_server::packet_sent(unsigned int id, unsigned char *in_data, size_t
     return true;
 }
 
-void huffman_server::packet_acked(unsigned int id)
+void huffman_server::packet_acked(uint32_t id)
 {
     // looking for a reply?
     if (!awaiting_ack)
@@ -573,7 +573,7 @@ void huffman_server::packet_acked(unsigned int id)
 // Huffman Client
 //
 
-void huffman_client::ack_sent(unsigned char *in_data, size_t len)
+void huffman_client::ack_sent(uint8_t *in_data, size_t len)
 {
     // update the codec only one ack at a time
     if (awaiting_ackack)
@@ -585,7 +585,7 @@ void huffman_client::ack_sent(unsigned char *in_data, size_t len)
     awaiting_ackack = true;
 }
 
-huffman &huffman_client::codec_for_received(unsigned char id)
+huffman &huffman_client::codec_for_received(uint8_t id)
 {
     // if got a shiny new packet with a different codec
     // and was expecting there to be one

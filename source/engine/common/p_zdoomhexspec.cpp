@@ -74,7 +74,7 @@ bool P_CrossZDoomSpecialLine(line_t *line, int side, AActor *thing, bool bossact
     return false;
 }
 
-bool P_ActivateZDoomLine(line_t *line, AActor *mo, int side, unsigned int activationType)
+bool P_ActivateZDoomLine(line_t *line, AActor *mo, int side, uint32_t activationType)
 {
     bool buttonSuccess;
 
@@ -104,7 +104,7 @@ bool P_ActivateZDoomLine(line_t *line, AActor *mo, int side, unsigned int activa
     return buttonSuccess;
 }
 
-const LineActivationType P_LineActivationTypeForSPACFlag(const unsigned int activationType)
+const LineActivationType P_LineActivationTypeForSPACFlag(const uint32_t activationType)
 {
     if (activationType & (ML_SPAC_CROSS | ML_SPAC_MCROSS | ML_SPAC_PCROSS | ML_SPAC_CROSSTHROUGH))
         return LineCross;
@@ -123,9 +123,9 @@ void P_CollectSecretZDoom(sector_t *sector, player_t *player)
     P_CollectSecretCommon(sector, player);
 }
 
-bool P_TestActivateZDoomLine(line_t *line, AActor *mo, int side, unsigned int activationType)
+bool P_TestActivateZDoomLine(line_t *line, AActor *mo, int side, uint32_t activationType)
 {
-    unsigned int lineActivation;
+    uint32_t lineActivation;
 
     lineActivation = line->flags & ML_SPAC_MASK;
 
@@ -597,7 +597,7 @@ void P_SpawnZDoomSectorSpecial(sector_t *sector)
         // [RH] Try for normal Hexen scroller
         if (sector->special >= Scroll_North_Slow && sector->special <= Scroll_SouthWest_Fast)
         {
-            static signed char hexenScrollies[24][2] = {{0, 1},   {0, 2},   {0, 4},   {-1, 0}, {-2, 0}, {-4, 0},
+            static int8_t hexenScrollies[24][2] = {{0, 1},   {0, 2},   {0, 4},   {-1, 0}, {-2, 0}, {-4, 0},
                                                         {0, -1},  {0, -2},  {0, -4},  {1, 0},  {2, 0},  {4, 0},
                                                         {1, 1},   {2, 2},   {4, 4},   {-1, 1}, {-2, 2}, {-4, 4},
                                                         {-1, -1}, {-2, -2}, {-4, -4}, {1, -1}, {2, -2}, {4, -4}};
@@ -972,7 +972,7 @@ void P_PostProcessZDoomSidedefSpecial(side_t *sd, mapsidedef_t *msd, sector_t *s
         // upper "texture" is light color
         // lower "texture" is fog color
         {
-            unsigned int color = 0xffffff, fog = 0x000000;
+            uint32_t color = 0xffffff, fog = 0x000000;
 
             SetTextureNoErr(&sd->bottomtexture, &fog, msd->bottomtexture);
             SetTextureNoErr(&sd->toptexture, &color, msd->toptexture);
@@ -1012,16 +1012,16 @@ void P_PostProcessZDoomSidedefSpecial(side_t *sd, mapsidedef_t *msd, sector_t *s
     }
 }
 
-bool P_ExecuteZDoomLineSpecial(int special, short *args, line_t *line, int side, AActor *mo)
+bool P_ExecuteZDoomLineSpecial(int special, int16_t *args, line_t *line, int side, AActor *mo)
 {
     return LineSpecials[special](line, mo, args[0], args[1], args[2], args[3], args[4]);
 }
 
-const unsigned int P_TranslateZDoomLineFlags(const unsigned int flags)
+const uint32_t P_TranslateZDoomLineFlags(const uint32_t flags)
 {
-    unsigned int result = flags & 0x1ff;
+    uint32_t result = flags & 0x1ff;
 
-    const unsigned int spac_to_flags[8] = {
+    const uint32_t spac_to_flags[8] = {
         ML_SPAC_CROSS, ML_SPAC_USE,    ML_SPAC_MCROSS,           ML_SPAC_IMPACT,
         ML_SPAC_PUSH,  ML_SPAC_PCROSS, ML_SPAC_USE | ML_PASSUSE, ML_SPAC_IMPACT | ML_SPAC_PCROSS};
 
@@ -1061,11 +1061,11 @@ void P_PostProcessZDoomLinedefSpecial(line_t *line)
 #else
                           // [RH] Second arg controls how opaque it is.
         if (!line->args[0])
-            line->lucency = (byte)line->args[1];
+            line->lucency = (uint8_t)line->args[1];
         else
             for (j = 0; j < numlines; j++)
                 if (lines[j].id == line->args[0])
-                    lines[j].lucency = (byte)line->args[1];
+                    lines[j].lucency = (uint8_t)line->args[1];
 #endif
         line->special = 0;
         break;

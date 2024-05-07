@@ -100,8 +100,8 @@ bool P_CanSpy(player_t &viewer, player_t &other);
 //
 // P_MOBJ
 //
-#define ONFLOORZ   MIN_INT
-#define ONCEILINGZ MAX_INT
+#define ONFLOORZ   INT32_MIN
+#define ONCEILINGZ INT32_MAX
 
 // Time interval for item respawning.
 #define ITEMQUESIZE 128
@@ -131,10 +131,10 @@ bool P_HitFloor(AActor *thing);
 extern int       SpawnableThings[];
 extern const int NumSpawnableThings;
 
-BOOL P_Thing_Spawn(int tid, int type, angle_t angle, BOOL fog);
-BOOL P_Thing_Projectile(int tid, int type, angle_t angle, fixed_t speed, fixed_t vspeed, BOOL gravity);
-BOOL P_ActivateMobj(AActor *mobj, AActor *activator);
-BOOL P_DeactivateMobj(AActor *mobj);
+bool P_Thing_Spawn(int tid, int type, angle_t angle, bool fog);
+bool P_Thing_Projectile(int tid, int type, angle_t angle, fixed_t speed, fixed_t vspeed, bool gravity);
+bool P_ActivateMobj(AActor *mobj, AActor *activator);
+bool P_DeactivateMobj(AActor *mobj);
 
 //
 // P_ENEMY
@@ -162,18 +162,18 @@ typedef struct
 typedef struct
 {
     fixed_t frac; // along trace line
-    BOOL    isaline;
+    bool    isaline;
     union {
         AActor *thing;
         line_t *line;
     } d;
 } intercept_t;
 
-#define MAX_INTERCEPTS 128
+#define INT32_MAXERCEPTS 128
 
 extern TArray<intercept_t> intercepts;
 
-typedef BOOL (*traverser_t)(intercept_t *in);
+typedef bool (*traverser_t)(intercept_t *in);
 
 subsector_t *P_PointInSubsector(fixed_t x, fixed_t y);
 fixed_t      P_AproxDistance(fixed_t dx, fixed_t dy);
@@ -195,10 +195,10 @@ extern fixed_t openbottom;
 extern fixed_t openrange;
 extern fixed_t lowfloor;
 
-void P_LineOpening(const line_t *linedef, fixed_t x, fixed_t y, fixed_t refx = MIN_FIXED, fixed_t refy = 0);
+void P_LineOpening(const line_t *linedef, fixed_t x, fixed_t y, fixed_t refx = INT32_MIN, fixed_t refy = 0);
 
-BOOL P_BlockLinesIterator(int x, int y, BOOL (*func)(line_t *));
-BOOL P_BlockThingsIterator(int x, int y, BOOL (*func)(AActor *), AActor *start = NULL);
+bool P_BlockLinesIterator(int x, int y, bool (*func)(line_t *));
+bool P_BlockThingsIterator(int x, int y, bool (*func)(AActor *), AActor *start = NULL);
 
 #define PT_ADDLINES  1
 #define PT_ADDTHINGS 2
@@ -206,7 +206,7 @@ BOOL P_BlockThingsIterator(int x, int y, BOOL (*func)(AActor *), AActor *start =
 
 extern divline_t trace;
 
-BOOL P_PathTraverse(fixed_t x1, fixed_t y1, fixed_t x2, fixed_t y2, int flags, BOOL (*trav)(intercept_t *));
+bool P_PathTraverse(fixed_t x1, fixed_t y1, fixed_t x2, fixed_t y2, int flags, bool (*trav)(intercept_t *));
 
 // [ML] 2/1/10: Break out P_PointToAngle from R_PointToAngle2 (from EE)
 angle_t P_PointToAngle(fixed_t xo, fixed_t yo, fixed_t x, fixed_t y);
@@ -217,7 +217,7 @@ angle_t P_PointToAngle(fixed_t xo, fixed_t yo, fixed_t x, fixed_t y);
 
 // If "floatok" true, move would be ok
 // if within "tmfloorz - tmceilingz".
-extern BOOL        floatok;
+extern bool        floatok;
 extern fixed_t     tmfloorz;
 extern fixed_t     tmceilingz;
 extern msecnode_t *sector_list;  // phares 3/16/98
@@ -233,14 +233,14 @@ extern line_t *ceilingline;
 void    P_TestActorMovement(AActor *mo, fixed_t tryx, fixed_t tryy, fixed_t tryz, fixed_t &destx, fixed_t &desty,
                             fixed_t &destz);
 bool    P_TestMobjZ(AActor *actor);
-BOOL    P_TestMobjLocation(AActor *mobj);
+bool    P_TestMobjLocation(AActor *mobj);
 bool    P_CheckPosition(AActor *thing, fixed_t x, fixed_t y);
 AActor *P_CheckOnmobj(AActor *thing);
 void    P_FakeZMovement(AActor *mo);
 bool    P_CheckSlopeWalk(AActor *actor, fixed_t &xmove, fixed_t &ymove);
-BOOL    P_TryMove(AActor *thing, fixed_t x, fixed_t y, bool dropoff, bool onfloor = false);
-BOOL    P_TeleportMove(AActor *thing, fixed_t x, fixed_t y, fixed_t z,
-                       BOOL telefrag); // [RH] Added z and telefrag parameters
+bool    P_TryMove(AActor *thing, fixed_t x, fixed_t y, bool dropoff, bool onfloor = false);
+bool    P_TeleportMove(AActor *thing, fixed_t x, fixed_t y, fixed_t z,
+                       bool telefrag); // [RH] Added z and telefrag parameters
 void    P_SlideMove(AActor *mo);
 bool    P_CheckSight(const AActor *t1, const AActor *t2);
 void    P_UseLines(player_t *player);
@@ -296,13 +296,13 @@ void P_DelSeclist(msecnode_t *);                        // phares 3/16/98
 void P_CreateSecNodeList(AActor *, fixed_t, fixed_t);   // phares 3/14/98
 int  P_GetMoveFactor(const AActor *mo, int *frictionp); // phares  3/6/98
 int  P_GetFriction(const AActor *mo, int *frictionfactor);
-BOOL Check_Sides(AActor *, int, int);                   // phares
+bool Check_Sides(AActor *, int, int);                   // phares
 
 //
 // P_SETUP
 //
-extern byte    *rejectmatrix; // for fast sight rejection
-extern BOOL     rejectempty;
+extern uint8_t    *rejectmatrix; // for fast sight rejection
+extern bool     rejectempty;
 extern int     *blockmaplump; // offsets in blockmap are from here
 extern int     *blockmap;
 extern int      bmapwidth;
@@ -311,7 +311,7 @@ extern fixed_t  bmaporgx;
 extern fixed_t  bmaporgy;     // origin of block map
 extern AActor **blocklinks;   // for thing chains
 
-extern std::set<short> movable_sectors;
+extern std::set<int16_t> movable_sectors;
 
 //
 // P_INTER
@@ -373,11 +373,11 @@ typedef enum
 
 inline FArchive &operator<<(FArchive &arc, podoortype_t type)
 {
-    return arc << (BYTE)type;
+    return arc << (uint8_t)type;
 }
 inline FArchive &operator>>(FArchive &arc, podoortype_t &out)
 {
-    BYTE in;
+    uint8_t in;
     arc >> in;
     out = (podoortype_t)in;
     return arc;
@@ -406,7 +406,7 @@ class DRotatePoly : public DPolyAction
     void RunThink();
 
   protected:
-    friend BOOL EV_RotatePoly(line_t *line, int polyNum, int speed, int byteAngle, int direction, BOOL overRide);
+    friend bool EV_RotatePoly(line_t *line, int polyNum, int speed, int byteAngle, int direction, bool overRide);
 
   private:
     DRotatePoly();
@@ -425,7 +425,7 @@ class DMovePoly : public DPolyAction
     fixed_t m_xSpeed; // for sliding walls
     fixed_t m_ySpeed;
 
-    friend BOOL EV_MovePoly(line_t *line, int polyNum, int speed, angle_t angle, fixed_t dist, BOOL overRide);
+    friend bool EV_MovePoly(line_t *line, int polyNum, int speed, angle_t angle, fixed_t dist, bool overRide);
 };
 
 class DPolyDoor : public DMovePoly
@@ -443,7 +443,7 @@ class DPolyDoor : public DMovePoly
     podoortype_t m_Type;
     bool         m_Close;
 
-    friend BOOL EV_OpenPolyDoor(line_t *line, int polyNum, int speed, angle_t angle, int delay, int distance,
+    friend bool EV_OpenPolyDoor(line_t *line, int polyNum, int speed, angle_t angle, int delay, int distance,
                                 podoortype_t type);
 
   private:
@@ -457,8 +457,8 @@ typedef struct polyspawns_s
     struct polyspawns_s *next;
     fixed_t              x;
     fixed_t              y;
-    short                angle;
-    short                type;
+    int16_t                angle;
+    int16_t                type;
 } polyspawns_t;
 
 enum
@@ -480,10 +480,10 @@ extern polyobj_t    *polyobjs;   // list of all poly-objects on the level
 extern int           po_NumPolyobjs;
 extern polyspawns_t *polyspawns; // [RH] list of polyobject things to spawn
 
-BOOL PO_MovePolyobj(int num, int x, int y);
-BOOL PO_RotatePolyobj(int num, angle_t angle);
+bool PO_MovePolyobj(int num, int x, int y);
+bool PO_RotatePolyobj(int num, angle_t angle);
 void PO_Init(void);
-BOOL PO_Busy(int polyobj);
+bool PO_Busy(int polyobj);
 
 bool P_CheckFov(AActor *t1, AActor *t2, angle_t fov);
 bool P_IsFriendlyThing(AActor *actor, AActor *friendshiptest);

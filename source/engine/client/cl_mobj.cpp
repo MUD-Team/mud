@@ -61,7 +61,7 @@ void P_SpawnPlayer(player_t &player, mapthing2_t *mthing)
     if (!player.ingame())
         return;
 
-    byte playerstate = player.playerstate;
+    uint8_t playerstate = player.playerstate;
 
     if (player.doreborn)
     {

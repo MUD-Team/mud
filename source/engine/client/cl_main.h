@@ -30,7 +30,7 @@
 #include "r_defs.h"
 
 extern netadr_t serveraddr;
-extern BOOL     connected;
+extern bool     connected;
 extern int      connecttimeout;
 
 extern bool noservermsgs;

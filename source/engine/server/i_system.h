@@ -43,7 +43,7 @@ enum
     LANGIDX_SysPreferred,
     LANGIDX_SysDefault
 };
-extern DWORD LanguageIDs[4];
+extern uint32_t LanguageIDs[4];
 extern void  SetLanguageIDs();
 
 void I_BeginRead(void);
@@ -83,7 +83,7 @@ void addterm(void(STACK_ARGS *func)(void), const char *name);
 #define atterm(t) addterm(t, #t)
 
 // Print a console string
-void I_PrintStr(int x, const char *str, int count, BOOL scroll);
+void I_PrintStr(int x, const char *str, int count, bool scroll);
 
 // Set the title string of the startup window
 void I_SetTitleString(const char *title);
@@ -99,25 +99,3 @@ void I_Yield(void);
 extern char DoomStartupTitle[256];
 
 void I_FinishClockCalibration();
-
-// Directory searching routines
-
-typedef struct
-{
-    int             count;
-    struct dirent **namelist;
-    int             current;
-} findstate_t;
-
-long I_FindFirst(char *filespec, findstate_t *fileinfo);
-int  I_FindNext(long handle, findstate_t *fileinfo);
-int  I_FindClose(long handle);
-int  I_FindAttr(findstate_t *fileinfo);
-
-#define I_FindName(a) ((a)->namelist[(a)->current]->d_name)
-
-#define FA_RDONLY 1
-#define FA_HIDDEN 2
-#define FA_SYSTEM 4
-#define FA_DIREC  8
-#define FA_ARCH   16

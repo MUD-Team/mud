@@ -160,7 +160,7 @@ class OZone
         if (ptr == NULL)
         {
             // Don't format these bytes, the byte formatter allocates.
-            I_Error("%s: Could not allocate %" PRI_SIZE_PREFIX "u bytes at %s:%i.", __FUNCTION__, size,
+            I_Error("%s: Could not allocate %zu bytes at %s:%i.", __FUNCTION__, size,
                     info.shortFile(), info.line);
         }
 
@@ -168,7 +168,7 @@ class OZone
         MemoryBlockInfo block;
         block.tag  = tag;
         block.user = static_cast<void **>(user);
-        block.size = size > MAX_UINT ? MAX_UINT : static_cast<uint32_t>(size);
+        block.size = size > UINT32_MAX ? UINT32_MAX : static_cast<uint32_t>(size);
 
         // Store the allocating function.  12 byte overhead per allocation,
         // but the information we get while debugging is priceless.
@@ -254,12 +254,12 @@ class OZone
         for (MemoryBlockTable::iterator it = m_heap.begin(); it != m_heap.end(); ++it)
         {
             total += it->second.size;
-            Printf("0x%p | size:%" PRIuSIZE " tag:%s user:0x%p %s:%d\n", it->first, it->second.size,
+            Printf("0x%p | size:%zu tag:%s user:0x%p %s:%d\n", it->first, it->second.size,
                    TagStr(it->second.tag), it->second.user, it->second.fileLine.shortFile(), it->second.fileLine.line);
         }
 
         std::string buf;
-        Printf("  allocation count: %" PRIuSIZE "\n", m_heap.size());
+        Printf("  allocation count: %zu\n", m_heap.size());
 
         StrFormatBytes(buf, total);
         Printf("  allocs size: %s\n", buf.c_str());
@@ -337,7 +337,7 @@ void Z_DumpHeap(const zoneTag_e lowtag, const zoneTag_e hightag)
 
 BEGIN_COMMAND(dumpheap)
 {
-    int lo = MIN_INT, hi = MAX_INT;
+    int lo = INT32_MIN, hi = INT32_MAX;
 
     if (argc >= 2)
     {

@@ -32,7 +32,7 @@
 #include "w_wad.h"
 #include "z_zone.h"
 
-#define SPRITE_NEEDS_INFO MAX_INT
+#define SPRITE_NEEDS_INFO INT32_MAX
 
 //
 // INITIALIZATION FUNCTIONS
@@ -70,7 +70,7 @@ void R_CacheSprite(spritedef_t *sprite)
 // [RH] Removed checks for coexistance of rotation 0 with other
 //		rotations and made it look more like BOOM's version.
 //
-void R_InstallSpriteTex(const texhandle_t tex_id, unsigned frame, unsigned rot, bool flipped)
+void R_InstallSpriteTex(const texhandle_t tex_id, uint32_t frame, uint32_t rot, bool flipped)
 {
 	if (frame >= MAX_SPRITE_FRAMES || rot > 8)
 		I_FatalError ("R_InstallSpriteTex: Bad frame characters in resource ID %i", (int)tex_id);
@@ -88,7 +88,7 @@ void R_InstallSpriteTex(const texhandle_t tex_id, unsigned frame, unsigned rot, 
 			if (sprtemp[frame].texes[r] == TextureManager::NO_TEXTURE_HANDLE)
 			{
 				sprtemp[frame].texes[r] = tex_id;
-				sprtemp[frame].flip[r] = (byte)flipped;
+				sprtemp[frame].flip[r] = (uint8_t)flipped;
 				sprtemp[frame].rotate = false;
 				sprtemp[frame].width[r] = SPRITE_NEEDS_INFO;
 			}
@@ -100,7 +100,7 @@ void R_InstallSpriteTex(const texhandle_t tex_id, unsigned frame, unsigned rot, 
 	{
 		// the lump is only used for one rotation
 		sprtemp[frame].texes[rot] = tex_id;
-		sprtemp[frame].flip[rot] = (byte)flipped;
+		sprtemp[frame].flip[rot] = (uint8_t)flipped;
 		sprtemp[frame].rotate = true;
 		sprtemp[frame].width[rot] = SPRITE_NEEDS_INFO;
 	}

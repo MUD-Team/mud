@@ -39,7 +39,7 @@
 #include "w_wad.h"
 #include "z_zone.h"
 
-static constexpr byte x11r6rgb[] = {
+static constexpr uint8_t x11r6rgb[] = {
     33,  32,  36,  88,  67,  111, 110, 115, 111, 114, 116, 105, 117, 109, 58,  32,  114, 103, 98,  46,  116, 120, 116,
     44,  118, 32,  49,  48,  46,  52,  49,  32,  57,  52,  47,  48,  50,  47,  50,  48,  32,  49,  56,  58,  51,  57,
     58,  51,  54,  32,  114, 119, 115, 32,  69,  120, 112, 32,  36,  13,  10,  13,  10,  50,  53,  53,  32,  50,  53,
@@ -886,11 +886,11 @@ translationref_t::translationref_t(const translationref_t &other)
 {
 }
 
-translationref_t::translationref_t(const byte *table) : m_table(table), m_player_id(-1)
+translationref_t::translationref_t(const uint8_t *table) : m_table(table), m_player_id(-1)
 {
 }
 
-translationref_t::translationref_t(const byte *table, const int player_id) : m_table(table), m_player_id(player_id)
+translationref_t::translationref_t(const uint8_t *table, const int player_id) : m_table(table), m_player_id(player_id)
 {
 }
 
@@ -962,7 +962,7 @@ shaderef_t::shaderef_t(const shademap_t *const colors, const int mapnum) : m_col
 //
 // ----------------------------------------------------------------------------
 
-byte gammatable[256];
+uint8_t gammatable[256];
 
 enum
 {
@@ -986,7 +986,7 @@ class GammaStrategy
     virtual float min() const                                        = 0;
     virtual float max() const                                        = 0;
     virtual float increment(float level) const                       = 0;
-    virtual void  generateGammaTable(byte *table, float level) const = 0;
+    virtual void  generateGammaTable(uint8_t *table, float level) const = 0;
 };
 
 class DoomGammaStrategy : public GammaStrategy
@@ -1010,7 +1010,7 @@ class DoomGammaStrategy : public GammaStrategy
         return level;
     }
 
-    void generateGammaTable(byte *table, float level) const
+    void generateGammaTable(uint8_t *table, float level) const
     {
         // [SL] Use vanilla Doom's gamma table
         //
@@ -1024,7 +1024,7 @@ class DoomGammaStrategy : public GammaStrategy
         const double exp     = 1.0 - 0.125 * level;
 
         for (int i = 0; i < 256; i++)
-            table[i] = (byte)(0.5 + basefac * pow(double(i) + 1.0, exp));
+            table[i] = (uint8_t)(0.5 + basefac * pow(double(i) + 1.0, exp));
     }
 };
 
@@ -1049,7 +1049,7 @@ class ZDoomGammaStrategy : public GammaStrategy
         return level;
     }
 
-    void generateGammaTable(byte *table, float level) const
+    void generateGammaTable(uint8_t *table, float level) const
     {
         // [SL] Use ZDoom 1.22 gamma correction
 
@@ -1059,7 +1059,7 @@ class ZDoomGammaStrategy : public GammaStrategy
         double invgamma = 1.0 / level;
 
         for (int i = 0; i < 256; i++)
-            table[i] = (byte)(255.0 * pow(double(i) / 255.0, invgamma));
+            table[i] = (uint8_t)(255.0 * pow(double(i) / 255.0, invgamma));
     }
 };
 
@@ -1185,7 +1185,7 @@ void V_RestoreScreenPalette()
 //
 palindex_t V_BestColor(const argb_t *palette_colors, int r, int g, int b)
 {
-    int bestdistortion = MAX_INT;
+    int bestdistortion = INT32_MAX;
     int bestcolor      = 0; /// let any color go to 0 as a last resort
 
     for (int i = 0; i < 256; i++)
@@ -1223,7 +1223,7 @@ palindex_t V_BestColor(const argb_t *palette_colors, argb_t color)
 //
 void V_ClosestColors(const argb_t *palette_colors, palindex_t &color1, palindex_t &color2)
 {
-    int bestdistortion = MAX_INT;
+    int bestdistortion = INT32_MAX;
 
     color1 = color2 = 0; // go to color 0 as a last resort
 
@@ -1483,11 +1483,11 @@ void BuildDefaultColorAndShademap(const palette_t *pal, shademap_t &maps)
     {
         for (int c = 0; c < 256; c++)
         {
-            unsigned int r =
+            uint32_t r =
                 (palette[c].getr() * (NUMCOLORMAPS - i) + fadecolor.getr() * i + NUMCOLORMAPS / 2) / NUMCOLORMAPS;
-            unsigned int g =
+            uint32_t g =
                 (palette[c].getg() * (NUMCOLORMAPS - i) + fadecolor.getg() * i + NUMCOLORMAPS / 2) / NUMCOLORMAPS;
-            unsigned int b =
+            uint32_t b =
                 (palette[c].getb() * (NUMCOLORMAPS - i) + fadecolor.getb() * i + NUMCOLORMAPS / 2) / NUMCOLORMAPS;
 
             argb_t color(255, r, g, b);
@@ -1525,11 +1525,11 @@ void BuildDefaultShademap(const palette_t *pal, shademap_t &maps)
     {
         for (int c = 0; c < 256; c++)
         {
-            unsigned int r =
+            uint32_t r =
                 (palette[c].getr() * (NUMCOLORMAPS - i) + fadecolor.getr() * i + NUMCOLORMAPS / 2) / NUMCOLORMAPS;
-            unsigned int g =
+            uint32_t g =
                 (palette[c].getg() * (NUMCOLORMAPS - i) + fadecolor.getg() * i + NUMCOLORMAPS / 2) / NUMCOLORMAPS;
-            unsigned int b =
+            uint32_t b =
                 (palette[c].getb() * (NUMCOLORMAPS - i) + fadecolor.getb() * i + NUMCOLORMAPS / 2) / NUMCOLORMAPS;
 
             argb_t color(255, r, g, b);
@@ -1747,16 +1747,16 @@ static void BuildColoredLights(shademap_t *maps, const int lr, const int lg, con
     const argb_t *palette_colors = V_GetDefaultPalette()->basecolors;
 
     // build normal (but colored) light mappings
-    for (unsigned int l = 0; l < NUMCOLORMAPS; l++)
+    for (uint32_t l = 0; l < NUMCOLORMAPS; l++)
     {
         // Build the colormap and shademap:
         palindex_t *colormap = maps->colormap + 256 * l;
         argb_t     *shademap = maps->shademap + 256 * l;
-        for (unsigned int c = 0; c < 256; c++)
+        for (uint32_t c = 0; c < 256; c++)
         {
-            unsigned int r = (palette_colors[c].getr() * (NUMCOLORMAPS - l) + fr * l + NUMCOLORMAPS / 2) / NUMCOLORMAPS;
-            unsigned int g = (palette_colors[c].getg() * (NUMCOLORMAPS - l) + fg * l + NUMCOLORMAPS / 2) / NUMCOLORMAPS;
-            unsigned int b = (palette_colors[c].getb() * (NUMCOLORMAPS - l) + fb * l + NUMCOLORMAPS / 2) / NUMCOLORMAPS;
+            uint32_t r = (palette_colors[c].getr() * (NUMCOLORMAPS - l) + fr * l + NUMCOLORMAPS / 2) / NUMCOLORMAPS;
+            uint32_t g = (palette_colors[c].getg() * (NUMCOLORMAPS - l) + fg * l + NUMCOLORMAPS / 2) / NUMCOLORMAPS;
+            uint32_t b = (palette_colors[c].getb() * (NUMCOLORMAPS - l) + fb * l + NUMCOLORMAPS / 2) / NUMCOLORMAPS;
             argb_t       color(255, r * lr / 255, g * lg / 255, b * lb / 255);
 
             shademap[c] = V_GammaCorrect(color);

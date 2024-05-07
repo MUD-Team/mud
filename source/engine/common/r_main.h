@@ -34,7 +34,7 @@
 // killough 10/98: special mask indicates sky flat comes from sidedef
 #define PL_SKYFLAT (0x80000000)
 
-BOOL R_AlignFlat(int linenum, int side, int fc);
+bool R_AlignFlat(int linenum, int side, int fc);
 
 extern int negonearray[MAXWIDTH];
 extern int viewheightarray[MAXWIDTH];
@@ -99,7 +99,7 @@ extern int scalelightfixed[MAXLIGHTSCALE];
 extern int zlight[LIGHTLEVELS][MAXLIGHTZ];
 
 extern int        extralight;
-extern BOOL       foggy;
+extern bool       foggy;
 extern int        fixedlightlev;
 extern shaderef_t fixedcolormap;
 
@@ -197,7 +197,7 @@ void R_SetLucentDrawFuncs();
 void R_SetTranslatedDrawFuncs();
 void R_SetTranslatedLucentDrawFuncs();
 
-inline byte shaderef_t::ramp() const
+inline uint8_t shaderef_t::ramp() const
 {
     if (m_mapnum >= NUMCOLORMAPS)
         return 0;
@@ -208,7 +208,7 @@ inline byte shaderef_t::ramp() const
 
 extern argb_t translationRGB[MAXPLAYERS + 1][16];
 
-inline argb_t shaderef_t::tlate(const translationref_t &translation, const byte c) const
+inline argb_t shaderef_t::tlate(const translationref_t &translation, const uint8_t c) const
 {
     const palindex_t range_start = 0x70;
     const palindex_t range_stop  = 0x7F;
@@ -241,17 +241,17 @@ inline argb_t shaderef_t::tlate(const translationref_t &translation, const byte 
     // Find the shading for the custom player colors:
     argb_t trancolor = translationRGB[pid][c - range_start];
 
-    unsigned int r = (trancolor.getr() * lightcolor.getr() * (NUMCOLORMAPS - m_mapnum) / 255 +
+    uint32_t r = (trancolor.getr() * lightcolor.getr() * (NUMCOLORMAPS - m_mapnum) / 255 +
                       fadecolor.getr() * m_mapnum + NUMCOLORMAPS / 2) /
                      NUMCOLORMAPS;
-    unsigned int g = (trancolor.getg() * lightcolor.getg() * (NUMCOLORMAPS - m_mapnum) / 255 +
+    uint32_t g = (trancolor.getg() * lightcolor.getg() * (NUMCOLORMAPS - m_mapnum) / 255 +
                       fadecolor.getg() * m_mapnum + NUMCOLORMAPS / 2) /
                      NUMCOLORMAPS;
-    unsigned int b = (trancolor.getb() * lightcolor.getb() * (NUMCOLORMAPS - m_mapnum) / 255 +
+    uint32_t b = (trancolor.getb() * lightcolor.getb() * (NUMCOLORMAPS - m_mapnum) / 255 +
                       fadecolor.getb() * m_mapnum + NUMCOLORMAPS / 2) /
                      NUMCOLORMAPS;
 
     return argb_t(gammatable[r], gammatable[g], gammatable[b]);
 }
 
-void R_DrawLine(const v3fixed_t *inpt1, const v3fixed_t *inpt2, byte color);
+void R_DrawLine(const v3fixed_t *inpt1, const v3fixed_t *inpt2, uint8_t color);

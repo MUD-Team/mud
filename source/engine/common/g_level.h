@@ -84,7 +84,7 @@ struct level_info_t
     OLumpName     mapname;
     int           levelnum;
     std::string   level_name;
-    byte          level_fingerprint[16];
+    uint8_t          level_fingerprint[16];
     OLumpName     pname;
     OLumpName     nextmap;
     OLumpName     secretmap;
@@ -109,28 +109,13 @@ struct level_info_t
     }
 };
 
-// struct that contains a FarmHash 128-bit fingerprint.
-struct fhfprint_s
-{
-    byte fingerprint[16];
-
-    fhfprint_s() : fingerprint()
-    {
-        ArrayInit(fingerprint, 0);
-    }
-    bool operator==(const fhfprint_s &other)
-    {
-        return fingerprint == other.fingerprint;
-    }
-};
-
 struct level_pwad_info_t
 {
     // level_info_t
     OLumpName     mapname;
     int           levelnum;
     std::string   level_name;
-    byte          level_fingerprint[16];
+    uint8_t          level_fingerprint[16];
     OLumpName     pname;
     OLumpName     nextmap;
     OLumpName     secretmap;
@@ -149,8 +134,8 @@ struct level_pwad_info_t
     // the channel layout be platform neutral in case the pixel format changes
     // after the level has been loaded (eg, toggling full-screen on certain OSX version).
     // The color channels are ordered: A, R, G, B
-    byte fadeto_color[4];
-    byte outsidefog_color[4];
+    uint8_t fadeto_color[4];
+    uint8_t outsidefog_color[4];
 
     OLumpName fadetable;
     OLumpName skypic2;
@@ -243,28 +228,28 @@ struct level_locals_t
     int          time;
     int          starttime;
     int          partime;
-    unsigned int inttimeleft;
+    uint32_t inttimeleft;
 
     level_info_t *info;
     int           cluster;
     int           levelnum;
     char          level_name[64]; // the descriptive name (Outer Base, etc)
-    byte level_fingerprint[16]; // [Blair] 128-bit FarmHash fingerprint generated for the level to describe it uniquely
+    uint8_t level_fingerprint[16]; // [Blair] 128-bit FarmHash fingerprint generated for the level to describe it uniquely
                                 // so it can besingled out if it's out of its host wad, like in a compilation wad.
                                 // Contains a 16-byte array.
     OLumpName mapname;          // the server name (base1, etc)
     OLumpName nextmap;          // go here when sv_fraglimit is hit
     OLumpName secretmap;        // map to go to when used secret exit
 
-    DWORD flags;
+    uint32_t flags;
 
     // [SL] use 4 bytes for color types instead of argb_t so that the struct
     // can consist of only plain-old-data types. It is also important to have
     // the channel layout be platform neutral in case the pixel format changes
     // after the level has been loaded (eg, toggling full-screen on certain OSX version).
     // The color channels are ordered: A, R, G, B
-    byte fadeto_color[4];     // The color the palette fades to (usually black)
-    byte outsidefog_color[4]; // The fog for sectors with sky ceilings
+    uint8_t fadeto_color[4];     // The color the palette fades to (usually black)
+    uint8_t outsidefog_color[4]; // The fog for sectors with sky ceilings
 
     OLumpName music;
     OLumpName skypic;
@@ -286,7 +271,7 @@ struct level_locals_t
 
     // The following are all used for ACS scripting
     FBehavior *behavior;
-    SDWORD     vars[NUM_MAPVARS];
+    int32_t     vars[NUM_MAPVARS];
 
     // The following are used for UMAPINFO
     OLumpName exitpic;
@@ -312,8 +297,8 @@ const static clusterFlags_t CLUSTER_EXITTEXTISLUMP = BIT(1);
 struct bossaction_t
 {
     int   type;
-    short special;
-    short tag;
+    int16_t special;
+    int16_t tag;
 
     bossaction_t() : type(MT_NULL), special(), tag()
     {
@@ -384,7 +369,7 @@ class ClusterInfos
 extern int ACS_WorldVars[NUM_WORLDVARS];
 extern int ACS_GlobalVars[NUM_GLOBALVARS];
 
-extern BOOL savegamerestore;
+extern bool savegamerestore;
 
 void G_InitNew(const char *mapname);
 void G_ChangeMap();

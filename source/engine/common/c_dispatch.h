@@ -156,13 +156,13 @@ enum
     NUM_ACTIONS
 };
 
-extern byte Actions[NUM_ACTIONS];
+extern uint8_t Actions[NUM_ACTIONS];
 
 struct ActionBits
 {
-    unsigned int key;
+    uint32_t key;
     int          index;
     char         name[12];
 };
 
-extern unsigned int MakeKey(const char *s);
+extern uint32_t MakeKey(const char *s);

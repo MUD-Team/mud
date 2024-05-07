@@ -29,8 +29,8 @@
 
 typedef struct
 {
-    byte *source;
-    byte *destination;
+    uint8_t *source;
+    uint8_t *destination;
 
     int pitch_in_pixels;
 
@@ -58,8 +58,8 @@ extern "C" drawcolumn_t dcol;
 
 typedef struct
 {
-    byte *source;
-    byte *destination;
+    uint8_t *source;
+    uint8_t *destination;
 
     int pitch_in_pixels;
 
@@ -171,8 +171,8 @@ extern void (*R_DrawSpanD)(void);
 extern void (*R_DrawSlopeSpanD)(void);
 extern void (*r_dimpatchD)(IRenderSurface *surface, argb_t color, int alpha, int x1, int y1, int w, int h);
 
-extern byte   bosstable[256];
-extern byte  *translationtables;
+extern uint8_t   bosstable[256];
+extern uint8_t  *translationtables;
 extern argb_t translationRGB[MAXPLAYERS + 1][16];
 
 enum

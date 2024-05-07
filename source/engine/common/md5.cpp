@@ -394,7 +394,7 @@ std::string MD5SUM(const void *in, size_t size)
     md5_state_t state;
     md5_init(&state);
 
-    md5_append(&state, (const unsigned char *)in, size);
+    md5_append(&state, (const uint8_t *)in, size);
 
     md5_byte_t digest[16];
     md5_finish(&state, digest);
@@ -402,7 +402,7 @@ std::string MD5SUM(const void *in, size_t size)
     std::stringstream hash;
 
     for (int i = 0; i < 16; i++)
-        hash << std::setw(2) << std::setfill('0') << std::hex << std::uppercase << (short)digest[i];
+        hash << std::setw(2) << std::setfill('0') << std::hex << std::uppercase << (int16_t)digest[i];
 
     return hash.str();
 }

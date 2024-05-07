@@ -38,10 +38,10 @@
 #define ALTIVEC_ALIGNED(x) x __attribute__((aligned(16)))
 
 // Useful vector shorthand typedefs:
-typedef vector signed char    vs8;
-typedef vector unsigned char  vu8;
-typedef vector unsigned short vu16;
-typedef vector unsigned int   vu32;
+typedef vector int8_t    vs8;
+typedef vector uint8_t  vu8;
+typedef vector uint16_t vu16;
+typedef vector uint32_t   vu32;
 
 //
 // R_GetBytesUntilAligned

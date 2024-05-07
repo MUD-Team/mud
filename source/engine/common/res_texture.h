@@ -30,7 +30,7 @@
 #include "m_fixed.h"
 #include "m_ostring.h"
 
-typedef unsigned int texhandle_t;
+typedef uint32_t texhandle_t;
 
 class Texture;
 class TextureManager;
@@ -64,15 +64,15 @@ class Texture
         TEX_TEXTURE
     } TextureSourceType;
 
-    static const unsigned int MAX_TEXTURE_WIDTH  = 2048;
-    static const unsigned int MAX_TEXTURE_HEIGHT = 2048;
+    static const uint32_t MAX_TEXTURE_WIDTH  = 2048;
+    static const uint32_t MAX_TEXTURE_HEIGHT = 2048;
 
     texhandle_t getHandle() const
     {
         return mHandle;
     }
 
-    byte *getData() const
+    uint8_t *getData() const
     {
         return mData;
     }
@@ -139,16 +139,16 @@ class Texture
     fixed_t mScaleX;
     fixed_t mScaleY;
 
-    unsigned short mWidth;
-    unsigned short mHeight;
+    uint16_t mWidth;
+    uint16_t mHeight;
 
     fixed_t mFracHeight;
     int mWidthMask;
 
-    short mOffsetX;
-    short mOffsetY;
+    int16_t mOffsetX;
+    int16_t mOffsetY;
 
-    byte *mData;
+    uint8_t *mData;
 };
 
 // ============================================================================
@@ -192,9 +192,9 @@ class TextureManager
     static const texhandle_t NOT_FOUND_TEXTURE_HANDLE = 0x1;
 
   private:
-    static const unsigned int FLAT_HANDLE_MASK        = 0x00020000ul;
-    static const unsigned int SPRITE_HANDLE_MASK      = 0x00040000ul;
-    static const unsigned int TEXTURE_HANDLE_MASK     = 0x00080000ul;
+    static const uint32_t FLAT_HANDLE_MASK        = 0x00020000ul;
+    static const uint32_t SPRITE_HANDLE_MASK      = 0x00040000ul;
+    static const uint32_t TEXTURE_HANDLE_MASK     = 0x00080000ul;
 
     // initialization routines
     void clear();
@@ -205,21 +205,21 @@ class TextureManager
     // sprites
     texhandle_t getSpriteHandle(const OString &name);
     void        cacheSprite(texhandle_t handle);
-    typedef OHashTable<OString, unsigned int> EnumeratedSpriteMap;
+    typedef OHashTable<OString, uint32_t> EnumeratedSpriteMap;
     EnumeratedSpriteMap                       mEnumeratedSpriteMap;
     std::vector<std::string>                  mSpriteFilenames;
 
     // flats
     texhandle_t getFlatHandle(const OString &name);
     void        cacheFlat(texhandle_t handle);
-    typedef OHashTable<OString, unsigned int> EnumeratedFlatMap;
+    typedef OHashTable<OString, uint32_t> EnumeratedFlatMap;
     EnumeratedFlatMap                         mEnumeratedFlatMap;
     std::vector<std::string>                  mFlatFilenames;
 
     // wall textures
     texhandle_t getTextureHandle(const OString &name);
     void        cacheTexture(texhandle_t handle);
-    typedef OHashTable<OString, unsigned int> EnumeratedTextureMap;
+    typedef OHashTable<OString, uint32_t> EnumeratedTextureMap;
     EnumeratedTextureMap                      mEnumeratedTextureMap;
     std::vector<std::string>                  mTextureFilenames;
 
@@ -231,13 +231,13 @@ class TextureManager
     // animated textures
     struct anim_t
     {
-        static const unsigned int MAX_ANIM_FRAMES = 32;
+        static const uint32_t MAX_ANIM_FRAMES = 32;
         texhandle_t               basepic;
-        short                     numframes;
-        byte                      countdown;
-        byte                      curframe;
-        byte                      speedmin[MAX_ANIM_FRAMES];
-        byte                      speedmax[MAX_ANIM_FRAMES];
+        int16_t                     numframes;
+        uint8_t                      countdown;
+        uint8_t                      curframe;
+        uint8_t                      speedmin[MAX_ANIM_FRAMES];
+        uint8_t                      speedmax[MAX_ANIM_FRAMES];
         texhandle_t               framepic[MAX_ANIM_FRAMES];
     };
 

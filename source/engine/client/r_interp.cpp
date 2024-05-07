@@ -27,7 +27,7 @@
 #include "p_local.h"
 #include "r_state.h"
 
-typedef std::pair<fixed_t, unsigned int> fixed_uint_pair;
+typedef std::pair<fixed_t, uint32_t> fixed_uint_pair;
 
 static std::vector<fixed_uint_pair> prev_ceilingheight;
 static std::vector<fixed_uint_pair> saved_ceilingheight;
@@ -96,7 +96,7 @@ void R_BeginInterpolation(fixed_t amount)
         for (std::vector<fixed_uint_pair>::const_iterator ceiling_it = prev_ceilingheight.begin();
              ceiling_it != prev_ceilingheight.end(); ++ceiling_it)
         {
-            unsigned int secnum = ceiling_it->second;
+            uint32_t secnum = ceiling_it->second;
             sector_t    *sector = &sectors[secnum];
 
             fixed_t old_value = ceiling_it->first;
@@ -111,7 +111,7 @@ void R_BeginInterpolation(fixed_t amount)
         for (std::vector<fixed_uint_pair>::const_iterator floor_it = prev_floorheight.begin();
              floor_it != prev_floorheight.end(); ++floor_it)
         {
-            unsigned int secnum = floor_it->second;
+            uint32_t secnum = floor_it->second;
             sector_t    *sector = &sectors[secnum];
 
             fixed_t old_value = floor_it->first;

@@ -60,7 +60,7 @@ static player_t nullplayer; // used to indicate 'player not found' when searchin
 EXTERN_CVAR(sv_allowmovebob)
 EXTERN_CVAR(cl_movebob)
 
-player_t &idplayer(byte id)
+player_t &idplayer(uint8_t id)
 {
     // Put a cached lookup mechanism in here.
 
@@ -132,7 +132,7 @@ void P_ClearPlayerPowerups(player_t &p)
  * @param wins True if a player's wins should be cleared as well - should
  *             usually be True unless it's a reset across rounds.
  */
-void P_ClearPlayerScores(player_t &p, byte flags)
+void P_ClearPlayerScores(player_t &p, uint8_t flags)
 {
     if (flags & SCORES_CLEAR_WINS)
         p.roundwins = 0;
@@ -717,7 +717,7 @@ void P_DeathThink(player_t *player)
 
         angle_t delta = angle - player->mo->angle;
 
-        if (delta < ANG5 || delta > (unsigned)-ANG5)
+        if (delta < ANG5 || delta > (uint32_t)-ANG5)
             player->mo->angle = angle;
         else
         {

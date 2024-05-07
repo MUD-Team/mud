@@ -120,7 +120,7 @@ int lightscaleymul;
 int extralight;
 
 // [RH] ignore extralight and fullbright
-BOOL foggy;
+bool foggy;
 
 static bool setsizeneeded = true;
 int         setblocks;
@@ -478,9 +478,9 @@ bool R_CheckProjectionY(int &y1, int &y2)
 //
 // R_DrawPixel
 //
-static inline void R_DrawPixel(int x, int y, byte color)
+static inline void R_DrawPixel(int x, int y, uint8_t color)
 {
-    byte *dest = dcol.destination + y * dcol.pitch_in_pixels + x;
+    uint8_t *dest = dcol.destination + y * dcol.pitch_in_pixels + x;
     *dest      = color;
 }
 
@@ -489,7 +489,7 @@ static inline void R_DrawPixel(int x, int y, byte color)
 //
 // Draws a colored line between the two endpoints given in world coordinates.
 //
-void R_DrawLine(const v3fixed_t *inpt1, const v3fixed_t *inpt2, byte color)
+void R_DrawLine(const v3fixed_t *inpt1, const v3fixed_t *inpt2, uint8_t color)
 {
     // convert from world-space to camera-space
     v3fixed_t pt1, pt2;

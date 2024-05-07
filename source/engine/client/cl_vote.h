@@ -32,13 +32,13 @@ class VoteState
     bool          visible;
     vote_result_t result;
     std::string   votestring;
-    short         countdown;
-    QWORD         countdown_ms;
-    byte          yes;
-    byte          yes_needed;
-    byte          no;
-    byte          no_needed;
-    byte          abs;
+    int16_t         countdown;
+    uint64_t         countdown_ms;
+    uint8_t          yes;
+    uint8_t          yes_needed;
+    uint8_t          no;
+    uint8_t          no_needed;
+    uint8_t          abs;
 
   public:
     VoteState() : visible(false){};

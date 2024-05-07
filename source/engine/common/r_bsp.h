@@ -36,12 +36,12 @@ extern line_t   *linedef;
 extern sector_t *frontsector;
 extern sector_t *backsector;
 
-extern BOOL skymap;
+extern bool skymap;
 
 extern drawseg_t *drawsegs;
 extern drawseg_t *ds_p;
 
-extern byte solidcol[MAXWIDTH];
+extern uint8_t solidcol[MAXWIDTH];
 
 typedef void (*drawfunc_t)(int start, int stop);
 

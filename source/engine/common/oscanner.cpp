@@ -371,7 +371,7 @@ int OScanner::getTokenInt() const
 
     if (str == "MAXINT")
     {
-        return MAX_INT; // INT32_MAX;
+        return INT32_MAX; // INT32_MAX;
     }
 
     const int num = strtol(str.c_str(), &stopper, 0);

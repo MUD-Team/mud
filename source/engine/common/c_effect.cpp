@@ -248,7 +248,7 @@ void P_ThinkParticles(void)
     prev = NULL;
     while (i != NO_PARTICLE)
     {
-        byte oldtrans;
+        uint8_t oldtrans;
 
         particle = Particles + i;
         i        = particle->next;

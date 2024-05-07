@@ -23,6 +23,8 @@
 
 #pragma once
 
+#include <stdint.h>
+
 //
 // CHEAT SEQUENCE PACKAGE
 //
@@ -31,16 +33,16 @@
 
 struct cheatseq_t
 {
-    unsigned char *Sequence;
-    unsigned char *Pos;
-    unsigned char  DontCheck;
-    unsigned char  CurrentArg;
-    unsigned char  Args[2];
+    uint8_t *Sequence;
+    uint8_t *Pos;
+    uint8_t  DontCheck;
+    uint8_t  CurrentArg;
+    uint8_t  Args[2];
     bool (*Handler)(cheatseq_t *);
 };
 
 // keycheat handlers
-bool CHEAT_AddKey(cheatseq_t *cheat, unsigned char key, bool *eat);
+bool CHEAT_AddKey(cheatseq_t *cheat, uint8_t key, bool *eat);
 
 bool CHEAT_AutoMap(cheatseq_t *cheat);
 bool CHEAT_ChangeLevel(cheatseq_t *cheat);

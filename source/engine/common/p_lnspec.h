@@ -499,9 +499,9 @@ typedef enum
 // Line special translation structure
 typedef struct
 {
-    unsigned int flags;
-    short        newspecial;
-    short        args[5];
+    uint32_t flags;
+    int16_t        newspecial;
+    int16_t        args[5];
 } xlat_t;
 
 #define TAG 123 // Special value that gets replaced with the line tag
@@ -516,18 +516,18 @@ typedef struct
 struct line_s;
 class AActor;
 
-typedef BOOL (*lnSpecFunc)(struct line_s *line, class AActor *activator, int arg1, int arg2, int arg3, int arg4,
+typedef bool (*lnSpecFunc)(struct line_s *line, class AActor *activator, int arg1, int arg2, int arg3, int arg4,
                            int arg5);
 
 extern lnSpecFunc LineSpecials[283];
 
-BOOL EV_CeilingCrushStop(int tag);
+bool EV_CeilingCrushStop(int tag);
 void EV_StopPlat(int tag);
-BOOL EV_DoZDoomDonut(int tag, line_t *line, fixed_t pillarspeed, fixed_t slimespeed);
-BOOL EV_ZDoomCeilingCrushStop(int tag, bool remove);
-BOOL EV_CompatibleTeleport(int tag, line_t *line, int side, AActor *thing, int flags);
+bool EV_DoZDoomDonut(int tag, line_t *line, fixed_t pillarspeed, fixed_t slimespeed);
+bool EV_ZDoomCeilingCrushStop(int tag, bool remove);
+bool EV_CompatibleTeleport(int tag, line_t *line, int side, AActor *thing, int flags);
 
-bool P_LineSpecialMovesSector(short special);
+bool P_LineSpecialMovesSector(int16_t special);
 bool P_CanActivateSpecials(AActor *mo, line_t *line);
 bool P_ActorInSpecialSector(AActor *actor);
 void P_DestroyScrollerThinkers();

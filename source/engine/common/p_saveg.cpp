@@ -106,7 +106,7 @@ void P_SerializeWorld(FArchive &arc)
         for (i = 0, li = lines; i < numlines; i++, li++)
         {
             arc << li->flags << li->special << li->lucency << li->id << li->args[0] << li->args[1] << li->args[2]
-                << li->args[3] << li->args[4] << (WORD)0;
+                << li->args[3] << li->args[4] << (uint16_t)0;
 
             for (j = 0; j < 2; j++)
             {
@@ -139,7 +139,7 @@ void P_SerializeWorld(FArchive &arc)
                 sec->heightsec >> sec->floorlightsec >> sec->ceilinglightsec >> sec->bottommap >> sec->midmap >>
                 sec->topmap >> sec->gravity >> sec->damageamount >> sec->damageinterval >> sec->leakrate >> sec->mod;
 
-            byte   color_values[4];
+            uint8_t   color_values[4];
             argb_t lightcolor, fadecolor;
 
             arc >> color_values[0] >> color_values[1] >> color_values[2] >> color_values[3];
@@ -170,7 +170,7 @@ void P_SerializeWorld(FArchive &arc)
         // do lines
         for (i = 0, li = lines; i < numlines; i++, li++)
         {
-            WORD dummy;
+            uint16_t dummy;
             arc >> li->flags >> li->special >> li->lucency >> li->id >> li->args[0] >> li->args[1] >> li->args[2] >>
                 li->args[3] >> li->args[4] >> dummy;
 

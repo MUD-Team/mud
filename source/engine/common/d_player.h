@@ -110,10 +110,10 @@ class player_s
     }
 
     // player identifier on server
-    byte id;
+    uint8_t id;
 
     // current player state, see playerstate_t
-    byte playerstate;
+    uint8_t playerstate;
 
     AActor::AActorPtr mo;
 
@@ -183,7 +183,7 @@ class player_s
     uint32_t cheats;
 
     // Refired shots are less accurate.
-    short refire;
+    int16_t refire;
 
     // For screen flashing (red or bright).
     int damagecount, bonuscount;
@@ -220,7 +220,7 @@ class player_s
 
     PlayerSnapshotManager snapshots; // Previous player positions
 
-    byte spying;                     // [SL] id of player being spynext'd by this player
+    uint8_t spying;                     // [SL] id of player being spynext'd by this player
     bool spectator;                  // [GhostlyDeath] spectating?
                                      //	bool		deadspectator;			// [tm512] spectating as a dead player?
     int joindelay;                   // Number of tics to delay player from rejoining
@@ -230,16 +230,16 @@ class player_s
     bool ready;                      // [AM] Player is ready.
     int  timeout_ready;              // [AM] Tic when a player last toggled his ready state.
 
-    byte prefcolor[4];               // Nes - Preferred color. Server only.
+    uint8_t prefcolor[4];               // Nes - Preferred color. Server only.
 
     argb_t blend_color;              // blend color for the sector the player is in
     bool   doreborn;
 
-    byte QueuePosition;              // Queue position to join game. 0 means not in queue
+    uint8_t QueuePosition;              // Queue position to join game. 0 means not in queue
 
     // zdoom
     int  hazardcount;
-    byte hazardinterval;
+    uint8_t hazardinterval;
 
     // For flood protection
     struct LastMessage_s
@@ -277,7 +277,7 @@ class player_s
         buf_t reliablebuf;
 
         // protocol version supported by the client
-        short version;
+        int16_t version;
         int   packedversion;
 
         // for reliable protocol
@@ -285,7 +285,7 @@ class player_s
 
         int  sequence;
         int  last_sequence;
-        byte packetnum;
+        uint8_t packetnum;
 
         int rate;
         int reliable_bps;  // bytes per second
@@ -306,7 +306,7 @@ class player_s
           public:
             std::string  name;
             std::string  md5;
-            unsigned int next_offset;
+            uint32_t next_offset;
 
             download_t() : name(""), md5(""), next_offset(0)
             {
@@ -385,7 +385,7 @@ extern Players              players;
 player_t &consoleplayer();
 player_t &displayplayer();
 player_t &listenplayer();
-player_t &idplayer(byte id);
+player_t &idplayer(uint8_t id);
 player_t &nameplayer(const std::string &netname);
 bool      validplayer(player_t &ref);
 
@@ -614,13 +614,13 @@ enum
 
 void   P_ClearPlayerCards(player_t &p);
 void   P_ClearPlayerPowerups(player_t &p);
-void   P_ClearPlayerScores(player_t &p, byte flags);
+void   P_ClearPlayerScores(player_t &p, uint8_t flags);
 size_t P_NumPlayersInGame();
 size_t P_NumReadyPlayersInGame();
 size_t P_NumPlayersOnTeam(team_t team);
 
-extern byte consoleplayer_id;
-extern byte displayplayer_id;
+extern uint8_t consoleplayer_id;
+extern uint8_t displayplayer_id;
 
 //
 
@@ -629,7 +629,7 @@ extern byte displayplayer_id;
 //
 typedef struct wbplayerstruct_s
 {
-    BOOL in; // whether the player is in game
+    bool in; // whether the player is in game
 
     // Player stats, kills, collected items etc.
     int skills;
@@ -660,7 +660,7 @@ typedef struct wbstartstruct_s
     int partime;
 
     // index of this player in game
-    unsigned pnum;
+    uint32_t pnum;
 
     std::vector<wbplayerstruct_s> plyr;
 } wbstartstruct_t;

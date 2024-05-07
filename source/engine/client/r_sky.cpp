@@ -94,13 +94,13 @@ static void R_InitXToViewAngle()
             const fixed_t dfocus    = FocalLengthX >> DBITS;
 
             for (int i = centerx, slope = 0; i <= t; i++, slope += slopestep)
-                xtoviewangle[i] = (angle_t) - (signed)tantoangle[slope >> DBITS];
+                xtoviewangle[i] = (angle_t) - (int32_t)tantoangle[slope >> DBITS];
 
             for (int i = t + 1; i <= viewwidth; i++)
                 xtoviewangle[i] = ANG270 + tantoangle[dfocus / (i - centerx)];
 
             for (int i = 0; i < centerx; i++)
-                xtoviewangle[i] = (angle_t)(-(signed)xtoviewangle[viewwidth - i - 1]);
+                xtoviewangle[i] = (angle_t)(-(int32_t)xtoviewangle[viewwidth - i - 1]);
         }
         else
         {
@@ -224,7 +224,7 @@ void R_RenderSkyRange(visplane_t *pl)
     else
     {
         // MBF's linedef-controlled skies
-        short         picnum = (pl->picnum & ~PL_SKYFLAT) - 1;
+        int16_t         picnum = (pl->picnum & ~PL_SKYFLAT) - 1;
         const line_t *line   = &lines[picnum < numlines ? picnum : 0];
 
         // Sky transferred from first sidedef

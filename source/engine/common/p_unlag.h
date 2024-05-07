@@ -39,17 +39,17 @@ class Unlag
     ~Unlag();
     static Unlag &getInstance(); // returns the instantiated Unlag object
     void          reset();       // called when starting a level
-    void          reconcile(byte player_id);
-    void          restore(byte player_id);
+    void          reconcile(uint8_t player_id);
+    void          restore(uint8_t player_id);
     void          recordPlayerPositions();
     void          recordSectorPositions();
-    void          registerPlayer(byte player_id);
-    void          unregisterPlayer(byte player_id);
+    void          registerPlayer(uint8_t player_id);
+    void          unregisterPlayer(uint8_t player_id);
     void          registerSector(sector_t *sector);
     void          unregisterSector(sector_t *sector);
-    void          setRoundtripDelay(byte player_id, byte svgametic);
-    void          getReconciliationOffset(byte target_id, fixed_t &x, fixed_t &y, fixed_t &z);
-    void          getCurrentPlayerPosition(byte player_id, fixed_t &x, fixed_t &y, fixed_t &z);
+    void          setRoundtripDelay(uint8_t player_id, uint8_t svgametic);
+    void          getReconciliationOffset(uint8_t target_id, fixed_t &x, fixed_t &y, fixed_t &z);
+    void          getCurrentPlayerPosition(uint8_t player_id, fixed_t &x, fixed_t &y, fixed_t &z);
     static bool   enabled();
 
   private:
@@ -57,7 +57,7 @@ class Unlag
 
     typedef struct
     {
-        byte player_id;
+        uint8_t player_id;
 
         // cached pointer to players[n].  Note: this needs to be updated
         // EVERYTIME a player connects or disconnects.
@@ -105,7 +105,7 @@ class Unlag
     bool                             reconciled;
 
     // stores an index into the player_history vector, keyed by player_id
-    std::map<byte, size_t> player_id_map;
+    std::map<uint8_t, size_t> player_id_map;
 
     Unlag() : reconciled(false)
     {
@@ -115,9 +115,9 @@ class Unlag
 
     void movePlayer(player_t *player, fixed_t x, fixed_t y, fixed_t z);
     void moveSector(sector_t *sector, fixed_t ceilingheight, fixed_t floorheight);
-    void reconcilePlayerPositions(byte shooter_id, size_t ticsago);
+    void reconcilePlayerPositions(uint8_t shooter_id, size_t ticsago);
     void reconcileSectorPositions(size_t ticsago);
     void refreshRegisteredPlayers();
 
-    void debugReconciliation(byte shooter_id);
+    void debugReconciliation(uint8_t shooter_id);
 };

@@ -25,4 +25,4 @@
 #pragma once
 
 void SV_SendServerInfo();
-bool SV_IsValidToken(DWORD token);
+bool SV_IsValidToken(uint32_t token);

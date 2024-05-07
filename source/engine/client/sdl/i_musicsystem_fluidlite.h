@@ -38,7 +38,7 @@ class FluidLiteMusicSystem : public MusicSystem
     FluidLiteMusicSystem();
     virtual ~FluidLiteMusicSystem();
 
-    virtual void startSong(byte *data, size_t length, bool loop);
+    virtual void startSong(uint8_t *data, size_t length, bool loop);
     virtual void stopSong();
     virtual void pauseSong();
     virtual void resumeSong();

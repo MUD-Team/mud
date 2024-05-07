@@ -42,11 +42,11 @@ Pool<int>          sprclip_pool(4096);
 
 // killough 1/6/98: replaced globals with statics where appropriate
 
-static BOOL segtextured; // True if any of the segs textures might be visible.
-static BOOL markfloor;   // False if the back side is the same plane.
-static BOOL markceiling;
-static BOOL maskedtexture;
+static bool segtextured; // True if any of the segs textures might be visible.
+static bool markfloor;   // False if the back side is the same plane.
+static bool markceiling;
 static bool didsolidcol;
+static texhandle_t maskedtexture;
 static texhandle_t  toptexture;
 static texhandle_t  bottomtexture;
 static texhandle_t  midtexture;
@@ -179,7 +179,7 @@ static inline void R_BlastMaskedSegColumn(void (*drawfunc)())
     if (post != NULL && spryscale > 0)
     {
         sprtopscreen = centeryfrac - FixedMul(dcol.texturemid, spryscale);
-        dcol.iscale  = 0xffffffffu / (unsigned)spryscale;
+        dcol.iscale  = 0xffffffffu / (uint32_t)spryscale;
 
         while (!post->end())
         {
@@ -233,7 +233,7 @@ static inline void R_BlastSolidSegColumn(void (*drawfunc)())
     if (wallscalex[dcol.x] <= 0)
         return;
 
-    dcol.iscale = 0xffffffffu / unsigned(wallscalex[dcol.x]);
+    dcol.iscale = 0xffffffffu / uint32_t(wallscalex[dcol.x]);
     dcol.source = dcol.post->data();
     // TODO: dcol.texturefrac should take y-scaling of textures into account
     dcol.texturefrac = dcol.texturemid + FixedMul((dcol.yl - centery + 1) << FRACBITS, dcol.iscale);
@@ -988,7 +988,7 @@ void R_StoreWallRange(int start, int stop)
     // height to 0
 
     // [Blair] Ensure Line_Horizon still works in Boom format.
-    short spe;
+    int16_t spe;
 
     if (map_format.getZDoom())
         spe = Line_Horizon;

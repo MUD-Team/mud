@@ -45,10 +45,10 @@ void R_ReinitColormap();
 void R_ForceDefaultColormap(const char *name);
 void R_SetDefaultColormap(const char *name);         // [RH] change normal fadetable
 
-argb_t R_BlendForColormap(unsigned int mapnum);      // [RH] return calculated blend for a colormap
+argb_t R_BlendForColormap(uint32_t mapnum);      // [RH] return calculated blend for a colormap
 int    R_ColormapForBlend(const argb_t blend_color); // [SL] return colormap that has the blend color
 
 extern shademap_t realcolormaps;                     // [RH] make the colormaps externally visible
 extern size_t     numfakecmaps;
 
-unsigned int SlopeDiv(unsigned int num, unsigned int den);
+uint32_t SlopeDiv(uint32_t num, uint32_t den);

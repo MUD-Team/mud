@@ -474,7 +474,7 @@ void EV_LightSetMinNeighbor(int tag)
     while ((s = P_FindSectorFromTag(tag, s)) >= 0)
     {
         int       i;
-        short     level;
+        int16_t     level;
         sector_t *temp, *sector;
 
         sector = &sectors[s];
@@ -495,7 +495,7 @@ void EV_LightSetMaxNeighbor(int tag)
     while ((s = P_FindSectorFromTag(tag, s)) >= 0)
     {
         int       i;
-        short     level;
+        int16_t     level;
         sector_t *temp, *sector;
 
         sector = &sectors[s];

@@ -73,7 +73,7 @@ baseapp_t baseapp = client;
 extern bool step_mode;
 
 // denis - client version (VERSION or other supported)
-short version           = 0;
+int16_t version           = 0;
 int   gameversion       = 0; // GhostlyDeath -- Bigger Game Version
 int   gameversiontosend = 0; // If the server is 0.4, let's fake our client info
 
@@ -95,7 +95,7 @@ bool recv_full_update = false;
 
 std::string connectpasshash = "";
 
-BOOL     connected;
+bool     connected;
 netadr_t serveraddr; // address of a server
 netadr_t lastconaddr;
 
@@ -121,7 +121,7 @@ NetCommand localcmds[MAXSAVETICS];
 std::set<byte> teleported_players;
 
 // [SL] 2012-04-06 - moving sector snapshots received from the server
-std::map<unsigned short, SectorSnapshotManager> sector_snaps;
+std::map<uint16_t, SectorSnapshotManager> sector_snaps;
 
 EXTERN_CVAR(sv_weaponstay)
 EXTERN_CVAR(sv_teamsinplay)
@@ -256,7 +256,7 @@ EXTERN_CVAR(cl_disconnectalert)
 EXTERN_CVAR(waddirs)
 
 void CL_PlayerTimes(void);
-void CL_TryToConnect(DWORD server_token);
+void CL_TryToConnect(uint32_t server_token);
 void CL_Decompress();
 
 bool M_FindFreeName(std::string &filename, const std::string &extension);
@@ -542,10 +542,10 @@ template <class Iterator> void CL_SpyCycle(Iterator begin, Iterator end)
     } while (it != sentinal);
 }
 
-QWORD       nextstep   = 0;
+uint64_t       nextstep   = 0;
 int         canceltics = 0;
 
-void CL_StepTics(unsigned int count)
+void CL_StepTics(uint32_t count)
 {
     DObject::BeginFrame();
 
@@ -615,7 +615,7 @@ void CL_RunTics()
             nextstep = 0;
 
             // debugging output
-            extern unsigned char prndindex;
+            extern uint8_t prndindex;
             if (!(players.empty()) && players.begin()->mo)
                 Printf("level.time %d, prndindex %d, %d %d %d\n", level.time, prndindex, players.begin()->mo->x,
                        players.begin()->mo->y, players.begin()->mo->z);
@@ -1276,7 +1276,7 @@ bool CL_PrepareConnect()
 {
     cvar_t::C_BackupCVars(CVAR_SERVERINFO);
 
-    DWORD server_token = MSG_ReadLong();
+    uint32_t server_token = MSG_ReadLong();
     server_host        = MSG_ReadString();
 
     bool recv_teamplay_stats = 0;
@@ -1545,7 +1545,7 @@ void CL_InitNetwork(void)
     connected = false;
 }
 
-void CL_TryToConnect(DWORD server_token)
+void CL_TryToConnect(uint32_t server_token)
 {
     if (!serveraddr.ip[0])
         return;
@@ -1607,7 +1607,7 @@ void CL_ClearPlayerJustTeleported(player_t *player)
         teleported_players.erase(player->id);
 }
 
-ItemEquipVal P_GiveWeapon(player_t *player, weapontype_t weapon, BOOL dropped);
+ItemEquipVal P_GiveWeapon(player_t *player, weapontype_t weapon, bool dropped);
 
 //
 // CL_ClearSectorSnapshots
@@ -1738,7 +1738,7 @@ void CL_ParseCommands()
                     ptrdiff_t   idx    = it - protos.begin() + 1;
                     std::string svc    = SVCName(it->header);
                     size_t      siz    = it->size;
-                    Printf(PRINT_WARNING, "%c %2" PRIdSIZE " [%s] %" PRIuSIZE "b\n", latest, idx, svc.c_str(), siz);
+                    Printf(PRINT_WARNING, "%c %2zd [%s] %zu b\n", latest, idx, svc.c_str(), siz);
                 }
             }
             else
@@ -1914,7 +1914,7 @@ void WeaponPickupMessage(AActor *toucher, weapontype_t &Weapon)
 
 void CL_RemoveCompletedMovingSectors()
 {
-    std::map<unsigned short, SectorSnapshotManager>::iterator itr;
+    std::map<uint16_t, SectorSnapshotManager>::iterator itr;
     itr = sector_snaps.begin();
 
     while (itr != sector_snaps.end())
@@ -1950,10 +1950,10 @@ void CL_SimulateSectors()
     CL_RemoveCompletedMovingSectors();
 
     // Move sectors
-    std::map<unsigned short, SectorSnapshotManager>::iterator itr;
+    std::map<uint16_t, SectorSnapshotManager>::iterator itr;
     for (itr = sector_snaps.begin(); itr != sector_snaps.end(); ++itr)
     {
-        unsigned short sectornum = itr->first;
+        uint16_t sectornum = itr->first;
         if (sectornum >= numsectors)
             continue;
 

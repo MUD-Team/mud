@@ -34,8 +34,8 @@ ClassInit::ClassInit(TypeInfo *type)
 }
 
 TypeInfo     **TypeInfo::m_Types;
-unsigned short TypeInfo::m_NumTypes;
-unsigned short TypeInfo::m_MaxTypes;
+uint16_t TypeInfo::m_NumTypes;
+uint16_t TypeInfo::m_MaxTypes;
 
 void TypeInfo::RegisterType()
 {
@@ -51,7 +51,7 @@ void TypeInfo::RegisterType()
 
 const TypeInfo *TypeInfo::FindType(const char *name)
 {
-    unsigned short i;
+    uint16_t i;
 
     for (i = 0; i != m_NumTypes; i++)
         if (!strcmp(name, m_Types[i]->Name))

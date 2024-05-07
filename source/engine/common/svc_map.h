@@ -32,5 +32,5 @@ class Descriptor;
 }
 } // namespace google
 
-const google::protobuf::Descriptor *SVC_ResolveHeader(const byte header);
+const google::protobuf::Descriptor *SVC_ResolveHeader(const uint8_t header);
 svc_t                               SVC_ResolveDescriptor(const google::protobuf::Descriptor *desc);

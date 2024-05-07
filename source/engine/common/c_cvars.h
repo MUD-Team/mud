@@ -127,9 +127,9 @@ typedef enum
 class cvar_t
 {
   public:
-    cvar_t(const char *name, const char *def, const char *help, cvartype_t, DWORD flags, float minval = -FLT_MAX,
+    cvar_t(const char *name, const char *def, const char *help, cvartype_t, uint32_t flags, float minval = -FLT_MAX,
            float maxval = FLT_MAX);
-    cvar_t(const char *name, const char *def, const char *help, cvartype_t, DWORD flags, void (*callback)(cvar_t &),
+    cvar_t(const char *name, const char *def, const char *help, cvartype_t, uint32_t flags, void (*callback)(cvar_t &),
            float minval = -FLT_MAX, float maxval = FLT_MAX);
     virtual ~cvar_t();
 
@@ -165,7 +165,7 @@ class cvar_t
     {
         return m_String;
     }
-    unsigned int flags() const
+    uint32_t flags() const
     {
         return m_Flags;
     }
@@ -211,14 +211,14 @@ class cvar_t
     static void EnableNoSet(); // enable the honoring of CVAR_NOSET
     static void EnableCallbacks();
 
-    unsigned int m_Flags;
+    uint32_t m_Flags;
 
     // Writes all cvars that could effect demo sync to *demo_p. These are
     // cvars that have either CVAR_SERVERINFO or CVAR_DEMOSAVE set.
-    static void C_WriteCVars(byte **demo_p, DWORD filter, bool compact = false);
+    static void C_WriteCVars(uint8_t **demo_p, uint32_t filter, bool compact = false);
 
     // Read all cvars from *demo_p and set them appropriately.
-    static void C_ReadCVars(byte **demo_p);
+    static void C_ReadCVars(uint8_t **demo_p);
 
     // Backup cvars for restoration later. Called before connecting to a server
     // or a demo starts playing to save all cvars which could be changed while
@@ -226,7 +226,7 @@ class cvar_t
     // [SL] bitflag can be used to filter which cvars are set to default.
     // The default value for bitflag is 0xFFFFFFFF, which effectively disables
     // the filtering.
-    static void C_BackupCVars(unsigned int bitflag = 0xFFFFFFFF);
+    static void C_BackupCVars(uint32_t bitflag = 0xFFFFFFFF);
 
     // Restore demo cvars. Called after demo playback to restore all cvars
     // that might possibly have been changed during the course of demo playback.
@@ -245,11 +245,11 @@ class cvar_t
     // [SL] bitflag can be used to filter which cvars are set to default.
     // The default value for bitflag is 0xFFFFFFFF, which effectively disables
     // the filtering.
-    static void C_SetCVarsToDefaults(unsigned int bitflag = 0xFFFFFFFF);
+    static void C_SetCVarsToDefaults(uint32_t bitflag = 0xFFFFFFFF);
 
     static bool SetServerVar(const char *name, const char *value);
 
-    static void FilterCompactCVars(TArray<cvar_t *> &cvars, DWORD filter);
+    static void FilterCompactCVars(TArray<cvar_t *> &cvars, uint32_t filter);
 
     // console variable interaction
     static cvar_t *cvar_set(const char *var_name, const char *value);
@@ -279,7 +279,7 @@ class cvar_t
     {
     }
 
-    void InitSelf(const char *name, const char *def, const char *help, cvartype_t, DWORD flags,
+    void InitSelf(const char *name, const char *def, const char *help, cvartype_t, uint32_t flags,
                   void (*callback)(cvar_t &), float minval = -FLT_MAX, float maxval = FLT_MAX);
 
     void (*m_Callback)(cvar_t &);

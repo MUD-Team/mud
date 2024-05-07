@@ -47,7 +47,7 @@ class FStat
     void        dump();
 
   private:
-    QWORD                       last_clock, last_elapsed;
+    uint64_t                       last_clock, last_elapsed;
     std::string                 name;
     static std::vector<FStat *> stats;
 };

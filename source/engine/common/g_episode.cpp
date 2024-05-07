@@ -27,5 +27,5 @@
 
 OLumpName   EpisodeMaps[MAX_EPISODES];
 EpisodeInfo EpisodeInfos[MAX_EPISODES];
-byte        episodenum        = 0;
+uint8_t        episodenum        = 0;
 bool        episodes_modified = false;

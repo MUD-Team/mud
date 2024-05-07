@@ -32,30 +32,30 @@
 struct ticcmd_t
 {
   private:
-    static void readByte(std::string::const_iterator it, byte &b)
+    static void readByte(std::string::const_iterator it, uint8_t &b)
     {
         b = static_cast<uint8_t>(*it);
     }
 
-    static void readShort(std::string::const_iterator it, short &s)
+    static void readShort(std::string::const_iterator it, int16_t &s)
     {
         s = static_cast<uint8_t>(*it);
         s |= static_cast<uint8_t>(*(it + 1)) << 8;
     }
 
-    static void writeByte(std::string::iterator it, byte b)
+    static void writeByte(std::string::iterator it, uint8_t b)
     {
         *it = b;
     }
 
-    static void writeShort(std::string::iterator it, short s)
+    static void writeShort(std::string::iterator it, int16_t s)
     {
         *it       = s & 0xFF;
         *(it + 1) = s >> 8;
     }
 
   public:
-    static const size_t SERIALIZED_SIZE = 2 + sizeof(short) * 5;
+    static const size_t SERIALIZED_SIZE = 2 + sizeof(int16_t) * 5;
 
     ticcmd_t()
     {
@@ -100,13 +100,13 @@ struct ticcmd_t
 
     int tic;     // the client's tic when this cmd was sent
 
-    byte  buttons;
-    short pitch; // up/down. currently just a y-sheering amount
-    short yaw;   // left/right
-    short forwardmove;
-    short sidemove;
-    short upmove;
-    byte  impulse;
+    uint8_t  buttons;
+    int16_t pitch; // up/down. currently just a y-sheering amount
+    int16_t yaw;   // left/right
+    int16_t forwardmove;
+    int16_t sidemove;
+    int16_t upmove;
+    uint8_t  impulse;
 };
 
 #define UCMDF_BUTTONS     0x01
@@ -119,9 +119,9 @@ struct ticcmd_t
 
 inline FArchive &operator<<(FArchive &arc, ticcmd_t &cmd)
 {
-    byte buf[256], *ptr = buf;
+    uint8_t buf[256], *ptr = buf;
 
-    byte flags = 0;
+    uint8_t flags = 0;
 
     if (cmd.buttons)
     {
@@ -164,8 +164,8 @@ inline FArchive &operator<<(FArchive &arc, ticcmd_t &cmd)
         *ptr++ = cmd.impulse;
     }
 
-    byte len = ptr - buf;
-    arc << (byte)(len + 1) << flags;
+    uint8_t len = ptr - buf;
+    arc << (uint8_t)(len + 1) << flags;
     arc.Write(buf, len);
 
     return arc;
@@ -173,9 +173,9 @@ inline FArchive &operator<<(FArchive &arc, ticcmd_t &cmd)
 
 inline FArchive &operator>>(FArchive &arc, ticcmd_t &cmd)
 {
-    byte buf[256], *ptr = buf;
+    uint8_t buf[256], *ptr = buf;
 
-    byte len, flags;
+    uint8_t len, flags;
     arc >> len >> flags;
     arc.Read(buf, len - 1);
 

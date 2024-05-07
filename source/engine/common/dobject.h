@@ -68,20 +68,20 @@ struct TypeInfo
     {
     }
 
-    TypeInfo(const char *inName, const TypeInfo *inParentType, unsigned int inSize)
+    TypeInfo(const char *inName, const TypeInfo *inParentType, uint32_t inSize)
         : Name(inName), ParentType(inParentType), SizeOf(inSize), TypeIndex(0)
     {
     }
-    TypeInfo(const char *inName, const TypeInfo *inParentType, unsigned int inSize, DObject *(*inNew)())
+    TypeInfo(const char *inName, const TypeInfo *inParentType, uint32_t inSize, DObject *(*inNew)())
         : Name(inName), ParentType(inParentType), SizeOf(inSize), CreateNew(inNew), TypeIndex(0)
     {
     }
 
     const char     *Name;
     const TypeInfo *ParentType;
-    unsigned int    SizeOf;
+    uint32_t    SizeOf;
     DObject *(*CreateNew)();
-    unsigned short TypeIndex;
+    uint16_t TypeIndex;
 
     void RegisterType();
 
@@ -103,7 +103,7 @@ struct TypeInfo
 
     static const TypeInfo *FindType(const char *name);
 
-    static unsigned short m_NumTypes, m_MaxTypes;
+    static uint16_t m_NumTypes, m_MaxTypes;
     static TypeInfo     **m_Types;
 };
 
@@ -204,7 +204,7 @@ class DObject
     static void BeginFrame();
     static void EndFrame();
 
-    DWORD ObjectFlags;
+    uint32_t ObjectFlags;
 
     static void STACK_ARGS StaticShutdown();
 

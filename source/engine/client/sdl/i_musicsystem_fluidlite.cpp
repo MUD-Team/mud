@@ -290,7 +290,7 @@ void FluidLiteMusicSystem::setVolume(float volume)
     fluid_synth_set_gain(m_synth, volume);
 }
 
-void FluidLiteMusicSystem::startSong(byte *data, size_t length, bool loop)
+void FluidLiteMusicSystem::startSong(uint8_t *data, size_t length, bool loop)
 {
     if (!isInitialized())
         return;

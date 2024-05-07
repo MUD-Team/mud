@@ -82,8 +82,8 @@ extern int                                             last_svgametic;
 extern int                                             last_player_update;
 extern NetCommand                                      localcmds[MAXSAVETICS];
 extern bool                                            recv_full_update;
-extern std::map<unsigned short, SectorSnapshotManager> sector_snaps;
-extern std::set<byte>                                  teleported_players;
+extern std::map<uint16_t, SectorSnapshotManager> sector_snaps;
+extern std::set<uint8_t>                                  teleported_players;
 
 void        CL_CheckDisplayPlayer(void);
 void        CL_ClearPlayerJustTeleported(player_t *player);
@@ -114,8 +114,8 @@ static void UnpackBoolArray(bool *bools, size_t count, uint32_t in)
 /**
  * @brief Common code for activating a line.
  */
-static void ActivateLine(AActor *mo, line_s *line, byte side, LineActivationType activationType, const bool bossaction,
-                         byte special = 0, int arg0 = 0, int arg1 = 0, int arg2 = 0, int arg3 = 0, int arg4 = 0)
+static void ActivateLine(AActor *mo, line_s *line, uint8_t side, LineActivationType activationType, const bool bossaction,
+                         uint8_t special = 0, int arg0 = 0, int arg1 = 0, int arg2 = 0, int arg3 = 0, int arg4 = 0)
 {
     // [SL] 2012-03-07 - If this is a player teleporting, add this player to
     // the set of recently teleported players.  This is used to flush past
@@ -270,7 +270,7 @@ static void CL_PlayerInfo(const odaproto::svc::PlayerInfo *msg)
  */
 static void CL_MovePlayer(const odaproto::svc::MovePlayer *msg)
 {
-    byte      who = msg->player().playerid();
+    uint8_t      who = msg->player().playerid();
     player_t *p   = &idplayer(who);
 
     fixed_t x = msg->actor().pos().x();
@@ -356,7 +356,7 @@ static void CL_UpdateLocalPlayer(const odaproto::svc::UpdateLocalPlayer *msg)
     fixed_t momy = msg->actor().mom().y();
     fixed_t momz = msg->actor().mom().z();
 
-    byte waterlevel = msg->actor().waterlevel();
+    uint8_t waterlevel = msg->actor().waterlevel();
 
     int            snaptime = ::last_svgametic;
     PlayerSnapshot newsnapshot(snaptime);
@@ -1253,7 +1253,7 @@ static void CL_UpdateSector(const odaproto::svc::UpdateSector *msg)
 //
 static void CL_Print(const odaproto::svc::Print *msg)
 {
-    byte        level = msg->level();
+    uint8_t        level = msg->level();
     const char *str   = msg->message().c_str();
 
     // Disallow getting NORCON messages
@@ -1285,7 +1285,7 @@ static void CL_Print(const odaproto::svc::Print *msg)
 static void CL_PlayerMembers(const odaproto::svc::PlayerMembers *msg)
 {
     player_t &p     = CL_FindPlayer(msg->pid());
-    byte      flags = msg->flags();
+    uint8_t      flags = msg->flags();
 
     if (flags & SVC_PM_SPECTATOR)
     {
@@ -1348,7 +1348,7 @@ static void CL_ActivateLine(const odaproto::svc::ActivateLine *msg)
 {
     int                linenum        = msg->linenum();
     AActor            *mo             = P_FindThingById(msg->activator_netid());
-    byte               side           = msg->side();
+    uint8_t               side           = msg->side();
     LineActivationType activationType = static_cast<LineActivationType>(msg->activation_type());
     const bool         bossaction     = msg->bossaction();
 
@@ -1615,11 +1615,11 @@ static void CL_ForceTeam(const odaproto::svc::ForceTeam *msg)
 static void CL_Switch(const odaproto::svc::Switch *msg)
 {
     int          l            = msg->linenum();
-    byte         switchactive = msg->switch_active();
-    unsigned int special      = msg->special();
-    unsigned int state        = msg->state(); // DActiveButton::EWhere
-    short        texture      = msg->button_texture();
-    unsigned int time         = msg->timer();
+    uint8_t         switchactive = msg->switch_active();
+    uint32_t special      = msg->special();
+    uint32_t state        = msg->state(); // DActiveButton::EWhere
+    int16_t        texture      = msg->button_texture();
+    uint32_t time         = msg->timer();
 
     if (!::lines || l < 0 || l >= ::numlines || state >= 3)
         return;
@@ -1654,8 +1654,8 @@ static void CL_Switch(const odaproto::svc::Switch *msg)
  */
 static void CL_Say(const odaproto::svc::Say *msg)
 {
-    byte        message_visibility = msg->visibility();
-    byte        player_id          = msg->pid();
+    uint8_t        message_visibility = msg->visibility();
+    uint8_t        player_id          = msg->pid();
     const char *message            = msg->message().c_str();
 
     bool filtermessage = false;
@@ -1714,7 +1714,7 @@ static void CL_SecretEvent(const odaproto::svc::SecretEvent *msg)
 {
     player_t &player    = idplayer(msg->pid());
     size_t    sectornum = msg->sectornum();
-    short     special   = msg->sector().special();
+    int16_t     special   = msg->sector().special();
 
     if (!::sectors || sectornum >= numsectors)
         return;
@@ -1804,7 +1804,7 @@ static void CL_MidPrint(const odaproto::svc::MidPrint *msg)
 // [SL] 2011-05-11
 static void CL_ServerGametic(const odaproto::svc::ServerGametic *msg)
 {
-    byte t = msg->tic();
+    uint8_t t = msg->tic();
 
     int newtic = (::last_svgametic & 0xFFFFFF00) + t;
 
@@ -1858,14 +1858,14 @@ static void CL_RailTrail(const odaproto::svc::RailTrail *msg)
 
 static void CL_PlayerState(const odaproto::svc::PlayerState *msg)
 {
-    byte         id          = msg->player().playerid();
+    uint8_t         id          = msg->player().playerid();
     int          health      = msg->player().health();
     int          armortype   = msg->player().armortype();
     int          armorpoints = msg->player().armorpoints();
     int          lives       = msg->player().lives();
     weapontype_t weap        = static_cast<weapontype_t>(msg->player().readyweapon());
 
-    byte           cardByte = msg->player().cards();
+    uint8_t           cardByte = msg->player().cards();
     std::bitset<6> cardBits(cardByte);
 
     int ammo[NUMAMMO];
@@ -1886,7 +1886,7 @@ static void CL_PlayerState(const odaproto::svc::PlayerState *msg)
     {
         if (i < msg->player().psprites_size())
         {
-            unsigned int state = msg->player().psprites().Get(i).statenum();
+            uint32_t state = msg->player().psprites().Get(i).statenum();
             if (state >= NUMSTATES)
             {
                 continue;
@@ -2008,7 +2008,7 @@ static void CL_ResetMap(const odaproto::svc::ResetMap *msg)
 static void CL_PlayerQueuePos(const odaproto::svc::PlayerQueuePos *msg)
 {
     player_t &player   = idplayer(msg->pid());
-    byte      queuePos = msg->queuepos();
+    uint8_t      queuePos = msg->queuepos();
 
     if (player.id == consoleplayer_id)
     {
@@ -2033,8 +2033,8 @@ static void CL_FullUpdateStart(const odaproto::svc::FullUpdateStart *msg)
 static void CL_LineUpdate(const odaproto::svc::LineUpdate *msg)
 {
     int   linenum = msg->linenum();
-    short flags   = msg->flags();
-    byte  lucency = msg->lucency();
+    int16_t flags   = msg->flags();
+    uint8_t  lucency = msg->lucency();
 
     if (linenum < 0 || linenum >= ::numlines)
         return;
@@ -2073,17 +2073,17 @@ static void CL_SectorProperties(const odaproto::svc::SectorProperties *msg)
             sector->lightlevel = msg->sector().lightlevel();
             break;
         case SPC_Color: {
-            byte r           = msg->sector().colormap().color().r();
-            byte g           = msg->sector().colormap().color().g();
-            byte b           = msg->sector().colormap().color().b();
+            uint8_t r           = msg->sector().colormap().color().r();
+            uint8_t g           = msg->sector().colormap().color().g();
+            uint8_t b           = msg->sector().colormap().color().b();
             sector->colormap = GetSpecialLights(r, g, b, sector->colormap->fade.getr(), sector->colormap->fade.getg(),
                                                 sector->colormap->fade.getb());
             break;
         }
         case SPC_Fade: {
-            byte r           = msg->sector().colormap().fade().r();
-            byte g           = msg->sector().colormap().fade().g();
-            byte b           = msg->sector().colormap().fade().b();
+            uint8_t r           = msg->sector().colormap().fade().r();
+            uint8_t g           = msg->sector().colormap().fade().g();
+            uint8_t b           = msg->sector().colormap().fade().b();
             sector->colormap = GetSpecialLights(sector->colormap->color.getr(), sector->colormap->color.getg(),
                                                 sector->colormap->color.getb(), r, g, b);
             break;
@@ -2191,7 +2191,7 @@ static void CL_DamageMobj(const odaproto::svc::DamageMobj *msg)
 
 static void CL_ExecuteLineSpecial(const odaproto::svc::ExecuteLineSpecial *msg)
 {
-    byte    special   = msg->special();
+    uint8_t    special   = msg->special();
     int     linenum   = msg->linenum();
     AActor *activator = P_FindThingById(msg->activator_netid());
     int     arg0      = msg->arg0();
@@ -2212,10 +2212,10 @@ static void CL_ExecuteLineSpecial(const odaproto::svc::ExecuteLineSpecial *msg)
 
 static void CL_ExecuteACSSpecial(const odaproto::svc::ExecuteACSSpecial *msg)
 {
-    byte        special = msg->special();
+    uint8_t        special = msg->special();
     uint32_t    netid   = msg->activator_netid();
     std::string print   = msg->print();
-    byte        count   = msg->args().size();
+    uint8_t        count   = msg->args().size();
 
     int acsArgs[16];
     ArrayInit(acsArgs, 0);
@@ -2325,7 +2325,7 @@ static void CL_ThinkerUpdate(const odaproto::svc::ThinkerUpdate *msg)
         break;
     }
     case odaproto::svc::ThinkerUpdate::kFireFlicker: {
-        short secnum = msg->fire_flicker().sector();
+        int16_t secnum = msg->fire_flicker().sector();
         int   min    = msg->fire_flicker().min_light();
         int   max    = msg->fire_flicker().max_light();
         if (::numsectors <= 0)
@@ -2335,7 +2335,7 @@ static void CL_ThinkerUpdate(const odaproto::svc::ThinkerUpdate *msg)
         break;
     }
     case odaproto::svc::ThinkerUpdate::kFlicker: {
-        short secnum = msg->flicker().sector();
+        int16_t secnum = msg->flicker().sector();
         int   min    = msg->flicker().min_light();
         int   max    = msg->flicker().max_light();
         if (::numsectors <= 0)
@@ -2345,7 +2345,7 @@ static void CL_ThinkerUpdate(const odaproto::svc::ThinkerUpdate *msg)
         break;
     }
     case odaproto::svc::ThinkerUpdate::kLightFlash: {
-        short secnum = msg->light_flash().sector();
+        int16_t secnum = msg->light_flash().sector();
         int   min    = msg->light_flash().min_light();
         int   max    = msg->light_flash().max_light();
         if (::numsectors <= 0)
@@ -2355,7 +2355,7 @@ static void CL_ThinkerUpdate(const odaproto::svc::ThinkerUpdate *msg)
         break;
     }
     case odaproto::svc::ThinkerUpdate::kStrobe: {
-        short secnum = msg->strobe().sector();
+        int16_t secnum = msg->strobe().sector();
         int   min    = msg->strobe().min_light();
         int   max    = msg->strobe().max_light();
         int   dark   = msg->strobe().dark_time();
@@ -2371,7 +2371,7 @@ static void CL_ThinkerUpdate(const odaproto::svc::ThinkerUpdate *msg)
         break;
     }
     case odaproto::svc::ThinkerUpdate::kGlow: {
-        short secnum = msg->glow().sector();
+        int16_t secnum = msg->glow().sector();
         if (::numsectors <= 0)
             break;
         if (secnum < ::numsectors)
@@ -2379,7 +2379,7 @@ static void CL_ThinkerUpdate(const odaproto::svc::ThinkerUpdate *msg)
         break;
     }
     case odaproto::svc::ThinkerUpdate::kGlow2: {
-        short secnum  = msg->glow2().sector();
+        int16_t secnum  = msg->glow2().sector();
         int   start   = msg->glow2().start();
         int   end     = msg->glow2().end();
         int   tics    = msg->glow2().max_tics();
@@ -2391,7 +2391,7 @@ static void CL_ThinkerUpdate(const odaproto::svc::ThinkerUpdate *msg)
         break;
     }
     case odaproto::svc::ThinkerUpdate::kPhased: {
-        short secnum = msg->phased().sector();
+        int16_t secnum = msg->phased().sector();
         int   base   = msg->phased().base_level();
         int   phase  = msg->phased().phase();
         if (::numsectors <= 0)
@@ -2546,7 +2546,7 @@ static void RecordProto(const svc_t header, google::protobuf::Message *msg)
 
     Proto proto;
     proto.header = header;
-    proto.name   = ::svc_info[(byte)header].getName();
+    proto.name   = ::svc_info[(uint8_t)header].getName();
     if (msg)
     {
         proto.size = msg->ByteSizeLong();
@@ -2579,7 +2579,7 @@ const Protos &CL_GetTicProtos()
  * @param size Length of the buffer to parse.
  * @return Error condition, or OK (0) if successful.
  */
-parseError_e CL_ParseMessage(google::protobuf::Message *&out, const byte cmd, const void *buffer, const size_t size)
+parseError_e CL_ParseMessage(google::protobuf::Message *&out, const uint8_t cmd, const void *buffer, const size_t size)
 {
     // A message factory + Descriptor gives us the proper message.
     google::protobuf::MessageFactory   *factory = google::protobuf::MessageFactory::generated_factory();
@@ -2618,7 +2618,7 @@ parseError_e CL_ParseMessage(google::protobuf::Message *&out, const byte cmd, co
 parseError_e CL_ParseCommand()
 {
     // What type of message we have.
-    byte cmd = MSG_ReadByte();
+    uint8_t cmd = MSG_ReadByte();
 
     // Size of the message.
     size_t size = MSG_ReadUnVarint();

@@ -114,10 +114,10 @@ void M_LoadDefaults(void)
 // Reads a file in JSON format
 bool M_ReadJSON(Json::Value &json, const char *filename)
 {
-    byte        *buffer = NULL;
+    uint8_t        *buffer = NULL;
     std::string  data;
     Json::Reader reader;
-    QWORD        length;
+    uint64_t        length;
 
     if (!(M_FileExists(filename)))
         return false;

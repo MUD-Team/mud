@@ -236,7 +236,7 @@ AActor::AActor(fixed_t ix, fixed_t iy, fixed_t iz, mobjtype_t itype)
       rndindex(0), netid(0), tid(0), bmapnode(this), baseline_set(false)
 {
     // Fly!!! fix it in P_RespawnSpecial
-    if ((unsigned int)itype >= NUMMOBJTYPES)
+    if ((uint32_t)itype >= NUMMOBJTYPES)
     {
         I_Error("Tried to spawn actor type %d\n", itype);
     }
@@ -670,7 +670,7 @@ void AActor::RunThink()
             fixed_t   height      = P_HighestHeightOfFloor(sec);
             fixed_t   waterheight = sec->heightsec && P_HighestHeightOfFloor(sec->heightsec) > height
                                         ? P_HighestHeightOfFloor(sec->heightsec)
-                                        : MIN_INT;
+                                        : INT32_MIN;
 
             if ((subsector->sector - sectors) == scroller->GetAffectee())
             {
@@ -797,8 +797,8 @@ void AActor::RunThink()
 
 void AActor::Serialize(FArchive &arc)
 {
-    const DWORD TLATE_NONE = 0xFFFFFFFF;
-    const DWORD TLATE_BOSS = 0xFFFFFFFE;
+    const uint32_t TLATE_NONE = 0xFFFFFFFF;
+    const uint32_t TLATE_BOSS = 0xFFFFFFFE;
 
     Super::Serialize(arc);
     if (arc.IsStoring())
@@ -821,7 +821,7 @@ void AActor::Serialize(FArchive &arc)
             << args[2] << args[3]
             << args[4]
             /*<< goal ? goal->netid : 0*/
-            << (unsigned)0 << translucency << waterlevel << gear;
+            << (uint32_t)0 << translucency << waterlevel << gear;
 
         // NOTE(jsd): This is pretty awful right here:
         //       [AM] I am now part of the problem.
@@ -833,7 +833,7 @@ void AActor::Serialize(FArchive &arc)
             }
             else
             {
-                arc << (DWORD)(translation.getTable() - ::translationtables);
+                arc << (uint32_t)(translation.getTable() - ::translationtables);
             }
         }
         else
@@ -845,8 +845,8 @@ void AActor::Serialize(FArchive &arc)
     }
     else
     {
-        unsigned dummy;
-        unsigned playerid;
+        uint32_t dummy;
+        uint32_t playerid;
         int      newnetid;
         AActor  *tmptracer;
 
@@ -870,7 +870,7 @@ void AActor::Serialize(FArchive &arc)
 
         P_SetThingId(this, newnetid);
 
-        DWORD trans;
+        uint32_t trans;
         arc >> trans;
         if (trans == TLATE_NONE)
         {
@@ -1055,7 +1055,7 @@ static bool P_ExplodeMissileAgainstWall(AActor *mo)
 {
     if (mo->flags & MF_MISSILE)
     {
-        short spe;
+        int16_t spe;
 
         if (map_format.getZDoom())
             spe = Line_Horizon;
@@ -1192,7 +1192,7 @@ static void P_ApplyXYFriction(AActor *mo)
     {
         // if in a walking frame, stop moving
         // killough 10/98: Don't affect main player when voodoo dolls stop:
-        if (mo->player && !P_IsVoodooDoll(mo) && (unsigned)((mo->state - states) - S_PLAY_RUN1) < 4)
+        if (mo->player && !P_IsVoodooDoll(mo) && (uint32_t)((mo->state - states) - S_PLAY_RUN1) < 4)
             P_SetMobjState(mo, S_PLAY);
 
         mo->momx = mo->momy = 0;
@@ -2504,7 +2504,7 @@ size_t P_GetMapThingPlayerNumber(mapthing2_t *mthing)
     return mthing->type <= 4 ? mthing->type - 1 : (mthing->type - 4001 + 4) % MAXPLAYERSTARTS;
 }
 
-int P_IsPickupableThing(short type)
+int P_IsPickupableThing(int16_t type)
 {
     return (type == 82                        // SSG
             || (type >= 2000 && type <= 2050) // weapons, ammo, health, armor, special items

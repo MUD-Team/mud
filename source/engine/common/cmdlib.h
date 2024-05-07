@@ -83,7 +83,7 @@ bool IsHexString(const std::string &str, const size_t len);
 char *COM_Parse(char *data);
 
 extern char com_token[8192];
-extern BOOL com_eof;
+extern bool com_eof;
 
 char *copystring(const char *s);
 

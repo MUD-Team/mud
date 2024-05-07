@@ -38,7 +38,7 @@ extern MusicSystem *musicsystem;
 //
 // ============================================================================
 
-void MusicSystem::startSong(byte *data, size_t length, bool loop)
+void MusicSystem::startSong(uint8_t *data, size_t length, bool loop)
 {
     m_isPlaying = true;
     m_isPaused  = false;

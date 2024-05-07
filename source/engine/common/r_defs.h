@@ -181,12 +181,12 @@ struct sector_s
     fixed_t      ceilingheight;
     texhandle_t  floorpic;
     texhandle_t  ceilingpic;
-    short        lightlevel;
-    short        special;
-    short        tag;
+    int16_t        lightlevel;
+    int16_t        special;
+    int16_t        tag;
     int          nexttag, firsttag; // killough 1/30/98: improves searches for tags.
     bool         secretsector;      // Ch0wW : This is a secret sector !
-    unsigned int flags;             // [Blair] Let's use actual sector flags instead of shoehorning them in special
+    uint32_t flags;             // [Blair] Let's use actual sector flags instead of shoehorning them in special
 
                                     // 0 = untraversed, 1,2 = sndlines -1
     int soundtraversed;
@@ -262,12 +262,12 @@ struct sector_s
     int            damageamount;
     int            damageinterval;
     int            leakrate;
-    short          mod;      // [RH] Means-of-death for applied damage
+    int16_t          mod;      // [RH] Means-of-death for applied damage
     dyncolormap_s *colormap; // [RH] Per-sector colormap
 
     bool alwaysfake;         // [RH] Always apply heightsec modifications?
-    byte waterzone;          // [RH] Sector is underwater?
-    WORD MoreFlags;          // [RH] Misc sector flags
+    uint8_t waterzone;          // [RH] Sector is underwater?
+    uint16_t MoreFlags;          // [RH] Misc sector flags
 
     // [RH] Action specials for sectors. Like Skull Tag, but more
     // flexible in a Bloody way. SecActTarget forms a list of actors
@@ -303,9 +303,9 @@ struct side_s
     sector_t *sector;
 
     // [RH] Bah. Had to add these for BOOM stuff
-    short linenum;
-    short special;
-    short tag;
+    int16_t linenum;
+    int16_t special;
+    int16_t tag;
     int   SidedefChanges;
 };
 typedef side_s side_t;
@@ -321,7 +321,7 @@ typedef enum
     ST_NEGATIVE
 } slopetype_t;
 
-#define R_NOSIDE ((unsigned short)(-1))
+#define R_NOSIDE ((uint16_t)(-1))
 
 struct line_s
 {
@@ -334,13 +334,13 @@ struct line_s
     fixed_t dy;
 
     // Animation related.
-    unsigned int flags;   // [Blair]MBF21 compatibility
-    short        special; // [Blair] Change to short for compatibility
-    byte         lucency; // <--- translucency (0-255/255=opaque)
+    uint32_t flags;   // [Blair]MBF21 compatibility
+    int16_t        special; // [Blair] Change to short for compatibility
+    uint8_t         lucency; // <--- translucency (0-255/255=opaque)
 
     // Visual appearance: SideDefs.
     //  sidenum[1] will be R_NOSIDE if one sided
-    unsigned short sidenum[2];
+    uint16_t sidenum[2];
 
     // Neat. Another bounding box, for the extent
     //  of the LineDef.
@@ -357,8 +357,8 @@ struct line_s
     // if == validcount, already checked
     int validcount;
 
-    short id;      // <--- same as tag or set with Line_SetIdentification
-    short args[5]; // <--- hexen-style arguments
+    int16_t id;      // <--- same as tag or set with Line_SetIdentification
+    int16_t args[5]; // <--- hexen-style arguments
                    //		note that these are shorts in order to support
                    //		the tag parameter from DOOM.
     int  firstid, nextid;
@@ -393,7 +393,7 @@ typedef struct msecnode_s
     msecnode_s *m_tnext;  // next msecnode_t for this thing
     msecnode_s *m_sprev;  // prev msecnode_t for this sector
     msecnode_s *m_snext;  // next msecnode_t for this sector
-    BOOL        visited;  // killough 4/4/98, 4/7/98: used in search algorithms
+    bool        visited;  // killough 4/4/98, 4/7/98: used in search algorithms
 } msecnode_t;
 
 //
@@ -432,7 +432,7 @@ typedef struct FPolyObj
     int       tag;         // reference tag assigned in HereticEd
     int       bbox[4];
     int       validcount;
-    BOOL      crush;       // should the polyobj attempt to crush mobjs?
+    bool      crush;       // should the polyobj attempt to crush mobjs?
     int       seqType;
     fixed_t   size;        // polyobj size (area of POLY_AREAUNIT == size of FRACUNIT)
     DThinker *specialdata; // pointer to a thinker, if the poly is moving
@@ -455,8 +455,8 @@ typedef struct polyblock_s
 typedef struct subsector_s
 {
     sector_t    *sector;
-    unsigned int numlines;
-    unsigned int firstline;
+    uint32_t numlines;
+    uint32_t firstline;
     polyobj_t   *poly;
 } subsector_t;
 
@@ -475,15 +475,15 @@ struct node_s
     fixed_t      dx;
     fixed_t      dy;
     fixed_t      bbox[2][4];  // Bounding box for each child.
-    unsigned int children[2]; // If NF_SUBSECTOR its a subsector.
+    uint32_t children[2]; // If NF_SUBSECTOR its a subsector.
 };
 typedef node_s node_t;
 
 // posts are runs of non masked source pixels
 struct post_t
 {
-    byte topdelta; // -1 is the last post in a column
-    byte length;   // length data bytes follows
+    uint8_t topdelta; // -1 is the last post in a column
+    uint8_t length;   // length data bytes follows
 
     /**
      * @brief Return the post's absolute topdelta accounting for tall
@@ -510,9 +510,9 @@ struct post_t
     /**
      * @brief Return a pointer to post data.
      */
-    byte *data() const
+    uint8_t *data() const
     {
-        return (byte *)(this) + 3;
+        return (uint8_t *)(this) + 3;
     }
 
     /**
@@ -520,7 +520,7 @@ struct post_t
      */
     post_t *next() const
     {
-        return (post_t *)((byte *)this + length + 4);
+        return (post_t *)((uint8_t *)this + length + 4);
     }
 
     /**
@@ -537,20 +537,20 @@ typedef post_t column_t;
 
 struct tallpost_t
 {
-    unsigned short topdelta;
-    unsigned short length;
+    uint16_t topdelta;
+    uint16_t length;
 
     uint32_t size() const
     {
         return length + 4;
     }
-    byte *data() const
+    uint8_t *data() const
     {
-        return (byte *)(this) + 4;
+        return (uint8_t *)(this) + 4;
     }
     tallpost_t *next() const
     {
-        return (tallpost_t *)((byte *)(this) + 4 + length);
+        return (tallpost_t *)((uint8_t *)(this) + 4 + length);
     }
     bool end() const
     {
@@ -599,34 +599,34 @@ struct patch_s
   friend class TextureManager;
 
   private:
-    short _width;      // bounding box size
-    short _height;
-    short _leftoffset; // pixels to the left of origin
-    short _topoffset;  // pixels below the origin
+    int16_t _width;      // bounding box size
+    int16_t _height;
+    int16_t _leftoffset; // pixels to the left of origin
+    int16_t _topoffset;  // pixels below the origin
 
   public:
     int columnofs[8];  // only [width] used
     // the [0] is &columnofs[width]
 
-    short width() const
+    int16_t width() const
     {
         return LESHORT(_width);
     }
-    short height() const
+    int16_t height() const
     {
         return LESHORT(_height);
     }
-    short leftoffset() const
+    int16_t leftoffset() const
     {
         return LESHORT(_leftoffset);
     }
-    short topoffset() const
+    int16_t topoffset() const
     {
         return LESHORT(_topoffset);
     }
     uint32_t *ofs() const
     {
-        return (uint32_t *)((byte *)this + 8);
+        return (uint32_t *)((uint8_t *)this + 8);
     }
     uint32_t datastart() const
     {
@@ -634,11 +634,11 @@ struct patch_s
     }
     post_t *post(const uint32_t ofs)
     {
-        return (post_t *)((byte *)this + ofs);
+        return (post_t *)((uint8_t *)this + ofs);
     }
     tallpost_t *tallpost(const uint32_t ofs)
     {
-        return (tallpost_t *)((byte *)this + ofs);
+        return (tallpost_t *)((uint8_t *)this + ofs);
     }
 };
 typedef patch_s patch_t;
@@ -684,7 +684,7 @@ struct vissprite_s
     translationref_t translation; // [RH] for translation;
     sector_t        *heightsec;   // killough 3/27/98: height sector for underwater/fake ceiling
     fixed_t          translucency;
-    byte             FakeFlat;    // [RH] which side of fake/floor ceiling sprite is on
+    uint8_t             FakeFlat;    // [RH] which side of fake/floor ceiling sprite is on
 
     AActor *mo;
 };
@@ -716,7 +716,7 @@ struct spriteframe_s
     texhandle_t texes[16];
 
     // Flip bit (1 = flip) to use for view angles 0-15.
-    byte flip[16];
+    uint8_t flip[16];
 
     // [RH] Move some data out of spritewidth, spriteoffset,
     //		and spritetopoffset arrays.
@@ -756,8 +756,8 @@ struct visplane_s
     fixed_t    xscale, yscale; // [RH] Support flat scaling
     angle_t    angle;          // [RH] Support flat rotation
 
-    unsigned int *bottom;      // [RH] bottom and top arrays are dynamically
-    unsigned int  pad;         //		allocated immediately after the
-    unsigned int  top[3];      //		visplane.
+    uint32_t *bottom;      // [RH] bottom and top arrays are dynamically
+    uint32_t  pad;         //		allocated immediately after the
+    uint32_t  top[3];      //		visplane.
 };
 typedef visplane_s visplane_t;

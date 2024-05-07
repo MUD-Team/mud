@@ -45,7 +45,7 @@ std::string currentmusic;
 //
 // Determines if a music lump is in the MUS format based on its header.
 //
-bool S_MusicIsMus(byte *data, size_t length)
+bool S_MusicIsMus(uint8_t *data, size_t length)
 {
     if (length > 4 && data[0] == 'M' && data[1] == 'U' && data[2] == 'S' && data[3] == 0x1A)
         return true;
@@ -58,7 +58,7 @@ bool S_MusicIsMus(byte *data, size_t length)
 //
 // Determines if a music lump is in the MIDI format based on its header.
 //
-bool S_MusicIsMidi(byte *data, size_t length)
+bool S_MusicIsMidi(uint8_t *data, size_t length)
 {
     if (length > 4 && data[0] == 'M' && data[1] == 'T' && data[2] == 'h' && data[3] == 'd')
         return true;
@@ -145,7 +145,7 @@ CVAR_FUNC_IMPL(snd_musicsystem)
 // should be used to play the song, based on user preference and the song
 // type.
 //
-static MusicSystemType I_SelectMusicSystem(byte *data, size_t length)
+static MusicSystemType I_SelectMusicSystem(uint8_t *data, size_t length)
 {
     // Always honor the no-music preference
     if (snd_musicsystem == MS_NONE)
@@ -160,7 +160,7 @@ static MusicSystemType I_SelectMusicSystem(byte *data, size_t length)
     return MS_SDLMIXER;
 }
 
-void I_PlaySong(byte *data, size_t length, bool loop)
+void I_PlaySong(uint8_t *data, size_t length, bool loop)
 {
     if (!musicsystem)
         return;

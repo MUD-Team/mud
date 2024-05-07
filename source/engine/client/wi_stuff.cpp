@@ -41,7 +41,7 @@
 #include "w_wad.h"
 #include "z_zone.h"
 
-extern byte *Ranges;
+extern uint8_t *Ranges;
 
 void   WI_unloadData(void);
 size_t P_NumPlayersInGame();
@@ -237,7 +237,7 @@ static char names[NUMEPISODES][NUMMAPS][8] = {{"E1M1", "E1M2", "E1M3", "E1M4", "
 static bool acceleratestage;
 
 // wbs->pnum
-static unsigned me;
+static uint32_t me;
 
 // specifies current state
 static stateenum_t state;
@@ -544,7 +544,7 @@ void WI_initNetgameStats()
 
 void WI_updateNetgameStats()
 {
-    unsigned int i;
+    uint32_t i;
     bool         stillticking;
 
     WI_updateAnimatedBack();

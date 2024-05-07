@@ -36,7 +36,7 @@
 // 		key type,
 //		value type,
 //		hash functor with the following signature (optional):
-//			unsigned int operator()(KT) const;
+//			uint32_t operator()(KT) const;
 //
 // ============================================================================
 
@@ -60,7 +60,7 @@ template <typename KT> struct hashfunc
 // See: http://burtleburtle.net/bob/hash/integer.html
 // ----------------------------------------------------------------------------
 
-static inline unsigned int __hash_jenkins_32bit(unsigned int a)
+static inline uint32_t __hash_jenkins_32bit(uint32_t a)
 {
     a = (a + 0x7ed55d16) + (a << 12);
     a = (a ^ 0xc761c23c) ^ (a >> 19);
@@ -71,7 +71,7 @@ static inline unsigned int __hash_jenkins_32bit(unsigned int a)
     return a;
 }
 
-static inline unsigned int __hash_rot(unsigned int x, unsigned int k)
+static inline uint32_t __hash_rot(uint32_t x, uint32_t k)
 {
     return (x << k) | (x >> (32 - k));
 }
@@ -82,12 +82,12 @@ static inline unsigned int __hash_rot(unsigned int x, unsigned int k)
 // See: http://burtleburtle.net/bob/c/lookup3.c
 // ----------------------------------------------------------------------------
 
-static inline unsigned int __hash_jenkins_64bit(unsigned long long key)
+static inline uint32_t __hash_jenkins_64bit(uint64_t key)
 {
-    unsigned int      *k       = (unsigned int *)&key;
-    const unsigned int initval = 0xABCDEF01; // any random value
+    uint32_t      *k       = (uint32_t *)&key;
+    const uint32_t initval = 0xABCDEF01; // any random value
 
-    unsigned int a, b, c;
+    uint32_t a, b, c;
     a = b = c = 0xDEADBEEF + 8 + initval;
 
     b += k[1];
@@ -111,87 +111,65 @@ static inline unsigned int __hash_jenkins_64bit(unsigned long long key)
     return c;
 }
 
-template <> struct hashfunc<unsigned char>
+template <> struct hashfunc<uint8_t>
 {
-    unsigned int operator()(unsigned char val) const
+    uint32_t operator()(uint8_t val) const
     {
         return __hash_jenkins_32bit(val);
     }
 };
 
-template <> struct hashfunc<signed char>
+template <> struct hashfunc<int8_t>
 {
-    unsigned int operator()(signed char val) const
+    uint32_t operator()(int8_t val) const
     {
         return __hash_jenkins_32bit(val);
     }
 };
 
-template <> struct hashfunc<unsigned short>
+template <> struct hashfunc<uint16_t>
 {
-    unsigned int operator()(unsigned short val) const
+    uint32_t operator()(uint16_t val) const
     {
         return __hash_jenkins_32bit(val);
     }
 };
 
-template <> struct hashfunc<signed short>
+template <> struct hashfunc<int16_t>
 {
-    unsigned int operator()(signed short val) const
+    uint32_t operator()(int16_t val) const
     {
         return __hash_jenkins_32bit(val);
     }
 };
 
-template <> struct hashfunc<unsigned int>
+template <> struct hashfunc<uint32_t>
 {
-    unsigned int operator()(unsigned int val) const
+    uint32_t operator()(uint32_t val) const
     {
         return __hash_jenkins_32bit(val);
     }
 };
 
-template <> struct hashfunc<signed int>
+template <> struct hashfunc<int32_t>
 {
-    unsigned int operator()(signed int val) const
+    uint32_t operator()(int32_t val) const
     {
         return __hash_jenkins_32bit(val);
     }
 };
 
-template <> struct hashfunc<unsigned long>
+template <> struct hashfunc<uint64_t>
 {
-    unsigned int operator()(unsigned long val) const
-    {
-        if (sizeof(unsigned long) == 8)
-            return __hash_jenkins_64bit(val);
-        else
-            return __hash_jenkins_32bit(val);
-    }
-};
-
-template <> struct hashfunc<signed long>
-{
-    unsigned int operator()(signed long val) const
-    {
-        if (sizeof(signed long) == 8)
-            return __hash_jenkins_64bit(val);
-        else
-            return __hash_jenkins_32bit(val);
-    }
-};
-
-template <> struct hashfunc<unsigned long long>
-{
-    unsigned int operator()(unsigned long long val) const
+    uint32_t operator()(uint64_t val) const
     {
         return __hash_jenkins_64bit(val);
     }
 };
 
-template <> struct hashfunc<signed long long>
+template <> struct hashfunc<int64_t>
 {
-    unsigned int operator()(signed long long val) const
+    uint32_t operator()(int64_t val) const
     {
         return __hash_jenkins_64bit(val);
     }
@@ -199,7 +177,7 @@ template <> struct hashfunc<signed long long>
 
 template <> struct hashfunc<void *>
 {
-    unsigned int operator()(void *ptr) const
+    uint32_t operator()(void *ptr) const
     {
         if (sizeof(ptrdiff_t) == 8)
             return __hash_jenkins_64bit((ptrdiff_t)ptr);
@@ -210,7 +188,7 @@ template <> struct hashfunc<void *>
 
 template <> struct hashfunc<const void *>
 {
-    unsigned int operator()(const void *ptr) const
+    uint32_t operator()(const void *ptr) const
     {
         if (sizeof(ptrdiff_t) == 8)
             return __hash_jenkins_64bit((ptrdiff_t)ptr);
@@ -219,9 +197,9 @@ template <> struct hashfunc<const void *>
     }
 };
 
-static inline unsigned int __hash_cstring(const char *str)
+static inline uint32_t __hash_cstring(const char *str)
 {
-    unsigned int val = 0;
+    uint32_t val = 0;
     while (*str != 0)
         val = val * 101 + *str++;
     return val;
@@ -229,7 +207,7 @@ static inline unsigned int __hash_cstring(const char *str)
 
 template <> struct hashfunc<char *>
 {
-    unsigned int operator()(const char *str) const
+    uint32_t operator()(const char *str) const
     {
         return __hash_cstring(str);
     }
@@ -237,7 +215,7 @@ template <> struct hashfunc<char *>
 
 template <> struct hashfunc<const char *>
 {
-    unsigned int operator()(const char *str) const
+    uint32_t operator()(const char *str) const
     {
         return __hash_cstring(str);
     }
@@ -245,7 +223,7 @@ template <> struct hashfunc<const char *>
 
 template <> struct hashfunc<std::string>
 {
-    unsigned int operator()(const std::string &str) const
+    uint32_t operator()(const std::string &str) const
     {
         return __hash_cstring(str.c_str());
     }
@@ -265,13 +243,13 @@ template <typename KT, typename VT, typename HF = hashfunc<KT>> class OHashTable
     typedef std::pair<KT, VT>      HashPairType;
     typedef OHashTable<KT, VT, HF> HashTableType;
 
-    typedef unsigned int      IndexType;
-    static const unsigned int MAX_CAPACITY = 65536;
+    typedef uint32_t      IndexType;
+    static const uint32_t MAX_CAPACITY = 65536;
     static const IndexType    NOT_FOUND    = HashTableType::MAX_CAPACITY;
 
     struct Bucket
     {
-        unsigned int order;
+        uint32_t order;
         HashPairType pair;
     };
 
@@ -373,7 +351,7 @@ template <typename KT, typename VT, typename HF = hashfunc<KT>> class OHashTable
     // OHashTable functions
     // ------------------------------------------------------------------------
 
-    OHashTable(unsigned int size = 256) : mSize(0), mSizeMask(0), mUsed(0), mElements(NULL), mNextOrder(1)
+    OHashTable(uint32_t size = 256) : mSize(0), mSizeMask(0), mUsed(0), mElements(NULL), mNextOrder(1)
     {
         resize(size);
     }
@@ -399,23 +377,23 @@ template <typename KT, typename VT, typename HF = hashfunc<KT>> class OHashTable
         return mUsed == 0;
     }
 
-    unsigned int size() const
+    uint32_t size() const
     {
         return mUsed;
     }
 
-    unsigned int count(const KT &key) const
+    uint32_t count(const KT &key) const
     {
         return emptyBucket(findBucket(key)) ? 0 : 1;
     }
 
     void clear()
     {
-        for (unsigned int i = 0; i < mSize; i++)
+        for (uint32_t i = 0; i < mSize; i++)
             if (!emptyBucket(i))
                 mElements[i].pair = HashPairType();
 
-        for (unsigned int i = 0; i < mSize; i++)
+        for (uint32_t i = 0; i < mSize; i++)
             mElements[i].order = 0;
 
         mUsed      = 0;
@@ -468,7 +446,7 @@ template <typename KT, typename VT, typename HF = hashfunc<KT>> class OHashTable
 
     std::pair<iterator, bool> insert(const HashPairType &hp)
     {
-        unsigned int oldused   = mUsed;
+        uint32_t oldused   = mUsed;
         IndexType    bucketnum = insertElement(hp.first, hp.second);
         return std::pair<iterator, bool>(iterator(bucketnum, this), mUsed > oldused);
     }
@@ -487,7 +465,7 @@ template <typename KT, typename VT, typename HF = hashfunc<KT>> class OHashTable
         eraseBucket(it.mBucketNum);
     }
 
-    unsigned int erase(const KT &key)
+    uint32_t erase(const KT &key)
     {
         IndexType bucketnum = findBucket(key);
         if (emptyBucket(bucketnum))
@@ -511,9 +489,9 @@ template <typename KT, typename VT, typename HF = hashfunc<KT>> class OHashTable
         return mElements[bucketnum].order == 0;
     }
 
-    void resize(unsigned int newsize)
+    void resize(uint32_t newsize)
     {
-        unsigned int oldsize = mSize;
+        uint32_t oldsize = mSize;
 
         // ensure newsize is in a valid range
         if (newsize < 2)
@@ -539,12 +517,12 @@ template <typename KT, typename VT, typename HF = hashfunc<KT>> class OHashTable
         mNextOrder = 1;
 
         // indicate all buckets are empty
-        for (unsigned int i = 0; i < mSize; i++)
+        for (uint32_t i = 0; i < mSize; i++)
             mElements[i].order = 0;
 
         // copy elements to new hashtable
         // TODO: go through iteration list instead
-        for (unsigned int i = 0; i < oldsize; i++)
+        for (uint32_t i = 0; i < oldsize; i++)
             if (oldelements[i].order)
                 insertElement(oldelements[i].pair.first, oldelements[i].pair.second);
 
@@ -611,7 +589,7 @@ template <typename KT, typename VT, typename HF = hashfunc<KT>> class OHashTable
         while (!emptyBucket(bucketnum))
         {
             const KT    &key           = mElements[bucketnum].pair.first;
-            unsigned int order         = mElements[bucketnum].order;
+            uint32_t order         = mElements[bucketnum].order;
             mElements[bucketnum].order = 0;
 
             IndexType new_bucketnum        = findBucket(key);
@@ -627,12 +605,12 @@ template <typename KT, typename VT, typename HF = hashfunc<KT>> class OHashTable
         }
     }
 
-    unsigned int mSize;
-    unsigned int mSizeMask;
-    unsigned int mUsed;
+    uint32_t mSize;
+    uint32_t mSizeMask;
+    uint32_t mUsed;
 
     Bucket      *mElements;
-    unsigned int mNextOrder;
+    uint32_t mNextOrder;
 
     HF mHashFunc; // hash key generation functor
 };

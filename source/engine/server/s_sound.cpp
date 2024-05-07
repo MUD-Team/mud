@@ -212,7 +212,7 @@ std::map<int, std::vector<int>> S_rnd;
 
 static struct AmbientSound
 {
-    unsigned type;                   // type of ambient sound
+    uint32_t type;                   // type of ambient sound
     int      periodmin;              // # of tics between repeats
     int      periodmax;              // max # of tics for random ambients
     float    volume;                 // relative volume of sound
@@ -229,13 +229,13 @@ static struct AmbientSound
 void S_HashSounds()
 {
     // Mark all buckets as empty
-    for (unsigned i = 0; i < S_sfx.size(); i++)
+    for (uint32_t i = 0; i < S_sfx.size(); i++)
         S_sfx[i].index = ~0;
 
     // Now set up the chains
-    for (unsigned i = 0; i < S_sfx.size(); i++)
+    for (uint32_t i = 0; i < S_sfx.size(); i++)
     {
-        const unsigned j = MakeKey(S_sfx[i].name) % static_cast<unsigned>(S_sfx.size() - 1);
+        const uint32_t j = MakeKey(S_sfx[i].name) % static_cast<uint32_t>(S_sfx.size() - 1);
         S_sfx[i].next    = S_sfx[j].index;
         S_sfx[j].index   = i;
     }
@@ -246,7 +246,7 @@ int S_FindSound(const char *logicalname)
     if (S_sfx.empty())
         return -1;
 
-    int i = S_sfx[MakeKey(logicalname) % static_cast<unsigned>(S_sfx.size() - 1)].index;
+    int i = S_sfx[MakeKey(logicalname) % static_cast<uint32_t>(S_sfx.size() - 1)].index;
 
     while ((i != -1) && strnicmp(S_sfx[i].name, logicalname, MAX_SNDNAME))
         i = S_sfx[i].next;
@@ -258,7 +258,7 @@ int S_FindSoundByFilename(const char *filename)
 {
     if (filename != NULL)
     {
-        for (unsigned i = 0; i < S_sfx.size(); i++)
+        for (uint32_t i = 0; i < S_sfx.size(); i++)
             if (S_sfx[i].filename != NULL && strcmp(S_sfx[i].filename, filename) == 0)
                 return i;
     }

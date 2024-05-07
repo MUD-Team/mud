@@ -31,13 +31,13 @@ struct particle_s
     fixed_t x, y, z;
     fixed_t velx, vely, velz;
     fixed_t accx, accy, accz;
-    byte    ttl;
-    byte    trans;
-    byte    size;
-    byte    fade;
+    uint8_t    ttl;
+    uint8_t    trans;
+    uint8_t    size;
+    uint8_t    fade;
     int     color;
-    WORD    next;
-    WORD    nextinsubsector;
+    uint16_t    next;
+    uint16_t    nextinsubsector;
 };
 typedef struct particle_s particle_t;
 
@@ -45,9 +45,9 @@ extern int          NumParticles;
 extern int          ActiveParticles;
 extern int          InactiveParticles;
 extern particle_t  *Particles;
-extern TArray<WORD> ParticlesInSubsec;
+extern TArray<uint16_t> ParticlesInSubsec;
 
-const WORD NO_PARTICLE = 0xffff;
+const uint16_t NO_PARTICLE = 0xffff;
 
 #ifdef _MSC_VER
 __inline particle_t *NewParticle()

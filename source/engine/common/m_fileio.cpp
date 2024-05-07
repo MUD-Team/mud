@@ -144,7 +144,7 @@ void M_FixPathSep(std::string &path)
 // M_FileLength
 //
 // Returns the length of a file using an open descriptor
-SDWORD M_FileLength(PHYSFS_File *f)
+int64_t M_FileLength(PHYSFS_File *f)
 {
     return PHYSFS_fileLength(f);
 }
@@ -186,10 +186,10 @@ bool M_FileExistsExt(const std::string &filename, const char *ext)
 //
 // Writes a buffer to a new file, if it already exists, the file will be
 // erased and recreated with the new contents
-BOOL M_WriteFile(std::string filename, void *source, QWORD length)
+bool M_WriteFile(std::string filename, void *source, uint64_t length)
 {
     PHYSFS_File *handle;
-    QWORD        count;
+    uint64_t        count;
 
     handle = PHYSFS_openWrite(filename.c_str());
 
@@ -216,11 +216,11 @@ BOOL M_WriteFile(std::string filename, void *source, QWORD length)
 //
 // Reads a file, it will allocate storage via Z_Malloc for it and return
 // the buffer and the size.
-QWORD M_ReadFile(std::string filename, BYTE **buffer)
+uint64_t M_ReadFile(std::string filename, uint8_t **buffer)
 {
     PHYSFS_File *handle;
-    QWORD        count, length;
-    BYTE        *buf;
+    uint64_t        count, length;
+    uint8_t        *buf;
 
     handle = PHYSFS_openRead(filename.c_str());
 
@@ -232,7 +232,7 @@ QWORD M_ReadFile(std::string filename, BYTE **buffer)
 
     length = M_FileLength(handle);
 
-    buf   = (BYTE *)Z_Malloc(length, PU_STATIC, NULL);
+    buf   = (uint8_t *)Z_Malloc(length, PU_STATIC, NULL);
     count = PHYSFS_readBytes(handle, buf, length);
     PHYSFS_close(handle);
 
@@ -253,7 +253,7 @@ QWORD M_ReadFile(std::string filename, BYTE **buffer)
 // if_needed detects if an extension is not present in path, if it isn't, it is
 // added.
 // The extension must contain a . at the beginning
-BOOL M_AppendExtension(std::string &filename, std::string extension, bool if_needed)
+bool M_AppendExtension(std::string &filename, std::string extension, bool if_needed)
 {
     M_FixPathSep(filename);
 

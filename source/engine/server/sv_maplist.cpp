@@ -98,7 +98,7 @@ bool Maplist::insert(const size_t &position, maplist_entry_t &maplist_entry)
 {
     // We send the maplist to clients using a short int, so we don't want
     // more maps in the list than the short int can handle.
-    if (this->maplist.size() > (unsigned short)-1)
+    if (this->maplist.size() > (uint16_t)-1)
     {
         this->error = "Maplist is full.";
         return false;
@@ -349,7 +349,7 @@ bool Maplist::get_next_index(size_t &index)
 }
 
 // Maplist version getter
-byte Maplist::get_version()
+uint8_t Maplist::get_version()
 {
     return this->version;
 }
@@ -588,7 +588,7 @@ void SV_MaplistIndex(player_t &player)
     // count = 0: No indexes.
     // count = 1: Next map index.
     // count = 2: Next map & this map indexes.
-    byte   count      = 0;
+    uint8_t   count      = 0;
     size_t this_index = 0, next_index = 0;
     if (Maplist::instance().get_next_index(next_index))
     {

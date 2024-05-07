@@ -46,9 +46,9 @@ Banlist banlist;
 // Constructor
 IPRange::IPRange()
 {
-    for (byte i = 0; i < 4; i++)
+    for (uint8_t i = 0; i < 4; i++)
     {
-        this->ip[i]   = (byte)0;
+        this->ip[i]   = (uint8_t)0;
         this->mask[i] = false;
     }
 }
@@ -56,7 +56,7 @@ IPRange::IPRange()
 // Check a given address against the ip + range in the object.
 bool IPRange::check(const netadr_t &address)
 {
-    for (byte i = 0; i < 4; i++)
+    for (uint8_t i = 0; i < 4; i++)
     {
         if (!(this->ip[i] == address.ip[i] || this->mask[i] == true))
         {
@@ -78,7 +78,7 @@ bool IPRange::check(const std::string &address)
         return false;
     }
 
-    for (byte i = 0; i < 4; i++)
+    for (uint8_t i = 0; i < 4; i++)
     {
         // * means that octet is masked and we will accept any byte
         if (tokens[i].compare("*") == 0)
@@ -87,7 +87,7 @@ bool IPRange::check(const std::string &address)
         }
 
         // Convert string into byte.
-        unsigned short     octet = 0;
+        uint16_t     octet = 0;
         std::istringstream buffer(tokens[i]);
         buffer >> octet;
         if (!buffer)
@@ -107,7 +107,7 @@ bool IPRange::check(const std::string &address)
 // Set the object's range to a specific address.
 void IPRange::set(const netadr_t &address)
 {
-    for (byte i = 0; i < 4; i++)
+    for (uint8_t i = 0; i < 4; i++)
     {
         this->ip[i]   = address.ip[i];
         this->mask[i] = false;
@@ -125,7 +125,7 @@ bool IPRange::set(const std::string &input)
         return false;
     }
 
-    for (byte i = 0; i < 4; i++)
+    for (uint8_t i = 0; i < 4; i++)
     {
         // * means that octet is masked
         if (tokens[i].compare("*") == 0)
@@ -136,7 +136,7 @@ bool IPRange::set(const std::string &input)
         this->mask[i] = false;
 
         // Convert string into byte.
-        unsigned short     octet = 0;
+        uint16_t     octet = 0;
         std::istringstream buffer(tokens[i]);
         buffer >> octet;
         if (!buffer)
@@ -144,7 +144,7 @@ bool IPRange::set(const std::string &input)
             return false;
         }
 
-        this->ip[i] = (byte)octet;
+        this->ip[i] = (uint8_t)octet;
     }
 
     return true;
@@ -155,7 +155,7 @@ std::string IPRange::string()
 {
     std::ostringstream buffer;
 
-    for (byte i = 0; i < 4; i++)
+    for (uint8_t i = 0; i < 4; i++)
     {
         if (mask[i])
         {
@@ -163,7 +163,7 @@ std::string IPRange::string()
         }
         else
         {
-            buffer << (unsigned short)this->ip[i];
+            buffer << (uint16_t)this->ip[i];
         }
 
         if (i < 3)

@@ -20,6 +20,6 @@
 
 #pragma once
 
-extern BOOL HexenHack; // Semi-Hexen-compatibility mode
+extern bool HexenHack; // Semi-Hexen-compatibility mode
 
 void G_ParseMapInfo();

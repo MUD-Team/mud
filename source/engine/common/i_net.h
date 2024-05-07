@@ -316,9 +316,9 @@ class Message;
 
 typedef struct
 {
-    byte           ip[4];
-    unsigned short port;
-    unsigned short pad;
+    uint8_t           ip[4];
+    uint16_t port;
+    uint16_t pad;
 } netadr_t;
 
 extern netadr_t net_from; // address of who sent the packet
@@ -326,7 +326,7 @@ extern netadr_t net_from; // address of who sent the packet
 class buf_t
 {
   public:
-    byte  *data;
+    uint8_t  *data;
     size_t allocsize, cursize, readpos;
     bool   overflowed; // set to true if the buffer size failed
 
@@ -341,9 +341,9 @@ class buf_t
     } seek_loc_t;
 
   public:
-    void WriteByte(byte b)
+    void WriteByte(uint8_t b)
     {
-        byte *buf = SZ_GetSpace(sizeof(b));
+        uint8_t *buf = SZ_GetSpace(sizeof(b));
 
         if (!overflowed)
         {
@@ -351,9 +351,9 @@ class buf_t
         }
     }
 
-    void WriteShort(short s)
+    void WriteShort(int16_t s)
     {
-        byte *buf = SZ_GetSpace(sizeof(s));
+        uint8_t *buf = SZ_GetSpace(sizeof(s));
 
         if (!overflowed)
         {
@@ -364,7 +364,7 @@ class buf_t
 
     void WriteLong(int l)
     {
-        byte *buf = SZ_GetSpace(sizeof(l));
+        uint8_t *buf = SZ_GetSpace(sizeof(l));
 
         if (!overflowed)
         {
@@ -386,7 +386,7 @@ class buf_t
     //
     // https://developers.google.com/protocol-buffers/docs/encoding#varints
     //
-    void WriteUnVarint(unsigned int v)
+    void WriteUnVarint(uint32_t v)
     {
         for (;;)
         {
@@ -419,7 +419,7 @@ class buf_t
         if (c && *c)
         {
             size_t l   = strlen(c);
-            byte  *buf = SZ_GetSpace(l + 1);
+            uint8_t  *buf = SZ_GetSpace(l + 1);
 
             if (!overflowed)
             {
@@ -430,9 +430,9 @@ class buf_t
             WriteByte(0);
     }
 
-    void WriteChunk(const char *c, unsigned l, int startpos = 0)
+    void WriteChunk(const char *c, uint32_t l, int startpos = 0)
     {
-        byte *buf = SZ_GetSpace(l);
+        uint8_t *buf = SZ_GetSpace(l);
 
         if (!overflowed)
         {
@@ -460,7 +460,7 @@ class buf_t
         return data[readpos];
     }
 
-    byte *ReadChunk(size_t size)
+    uint8_t *ReadChunk(size_t size)
     {
         if (readpos + size > cursize)
         {
@@ -481,7 +481,7 @@ class buf_t
         }
         size_t oldpos = readpos;
         readpos += 2;
-        return (short)(data[oldpos] + (data[oldpos + 1] << 8));
+        return (int16_t)(data[oldpos] + (data[oldpos + 1] << 8));
     }
 
     int ReadLong()
@@ -504,11 +504,11 @@ class buf_t
     //
     // https://developers.google.com/protocol-buffers/docs/encoding#varints
     //
-    unsigned int ReadUnVarint()
+    uint32_t ReadUnVarint()
     {
-        unsigned char b;
-        unsigned int  out    = 0;
-        unsigned int  offset = 0;
+        uint8_t b;
+        uint32_t  out    = 0;
+        uint32_t  offset = 0;
 
         for (;;)
         {
@@ -518,7 +518,7 @@ class buf_t
                 return -1;
 
             // Shove the first seven bits into our output variable.
-            out |= (unsigned int)(b & 0x7F) << offset;
+            out |= (uint32_t)(b & 0x7F) << offset;
             offset += 7;
 
             // Is the flag bit set?
@@ -539,7 +539,7 @@ class buf_t
 
     int ReadVarint()
     {
-        unsigned int uv = ReadUnVarint();
+        uint32_t uv = ReadUnVarint();
         if (overflowed)
             return -1;
 
@@ -549,7 +549,7 @@ class buf_t
 
     const char *ReadString()
     {
-        byte *begin = data + readpos;
+        uint8_t *begin = data + readpos;
 
         while (ReadByte() > 0)
             ;
@@ -612,7 +612,7 @@ class buf_t
         return readpos;
     }
 
-    byte *ptr()
+    uint8_t *ptr()
     {
         return data;
     }
@@ -641,8 +641,8 @@ class buf_t
 
     void resize(size_t len, bool clearbuf = true)
     {
-        byte *olddata = data;
-        data          = new byte[len];
+        uint8_t *olddata = data;
+        data          = new uint8_t[len];
         allocsize     = len;
 
         if (!clearbuf)
@@ -666,7 +666,7 @@ class buf_t
         delete[] olddata;
     }
 
-    byte *SZ_GetSpace(size_t length)
+    uint8_t *SZ_GetSpace(size_t length)
     {
         if (cursize + length >= allocsize)
         {
@@ -677,7 +677,7 @@ class buf_t
 #endif
         }
 
-        byte *ret = data + cursize;
+        uint8_t *ret = data + cursize;
         cursize += length;
 
         return ret;
@@ -691,7 +691,7 @@ class buf_t
 
         delete[] data;
 
-        data       = new byte[other.allocsize];
+        data       = new uint8_t[other.allocsize];
         allocsize  = other.allocsize;
         cursize    = other.cursize;
         overflowed = other.overflowed;
@@ -707,11 +707,11 @@ class buf_t
     buf_t() : data(0), allocsize(0), cursize(0), readpos(0), overflowed(false)
     {
     }
-    buf_t(size_t len) : data(new byte[len]), allocsize(len), cursize(0), readpos(0), overflowed(false)
+    buf_t(size_t len) : data(new uint8_t[len]), allocsize(len), cursize(0), readpos(0), overflowed(false)
     {
     }
     buf_t(const buf_t &other)
-        : data(new byte[other.allocsize]), allocsize(other.allocsize), cursize(other.cursize), readpos(other.readpos),
+        : data(new uint8_t[other.allocsize]), allocsize(other.allocsize), cursize(other.cursize), readpos(other.readpos),
           overflowed(other.overflowed)
 
     {
@@ -742,20 +742,20 @@ std::string NET_GetLocalAddress(void);
 
 void SZ_Clear(buf_t *buf);
 void SZ_Write(buf_t *b, const void *data, int length);
-void SZ_Write(buf_t *b, const byte *data, int startpos, int length);
+void SZ_Write(buf_t *b, const uint8_t *data, int startpos, int length);
 
-void MSG_WriteByte(buf_t *b, byte c);
+void MSG_WriteByte(buf_t *b, uint8_t c);
 void MSG_WriteMarker(buf_t *b, svc_t c);
 void MSG_WriteMarker(buf_t *b, clc_t c);
-void MSG_WriteShort(buf_t *b, short c);
+void MSG_WriteShort(buf_t *b, int16_t c);
 void MSG_WriteLong(buf_t *b, int c);
-void MSG_WriteUnVarint(buf_t *b, unsigned int uv);
+void MSG_WriteUnVarint(buf_t *b, uint32_t uv);
 void MSG_WriteVarint(buf_t *b, int v);
 void MSG_WriteBool(buf_t *b, bool);
 void MSG_WriteFloat(buf_t *b, float);
 void MSG_WriteString(buf_t *b, const char *s);
 void MSG_WriteHexString(buf_t *b, const char *s);
-void MSG_WriteChunk(buf_t *b, const void *p, unsigned l);
+void MSG_WriteChunk(buf_t *b, const void *p, uint32_t l);
 void MSG_WriteSVC(buf_t *b, const google::protobuf::Message &msg);
 void MSG_BroadcastSVC(const clientBuf_e buf, const google::protobuf::Message &msg, const int skipPlayer = -1);
 
@@ -766,7 +766,7 @@ int          MSG_ReadByte(void);
 void        *MSG_ReadChunk(const size_t &size);
 int          MSG_ReadShort(void);
 int          MSG_ReadLong(void);
-unsigned int MSG_ReadUnVarint();
+uint32_t MSG_ReadUnVarint();
 int          MSG_ReadVarint();
 bool         MSG_ReadBool(void);
 float        MSG_ReadFloat(void);

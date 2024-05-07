@@ -133,7 +133,7 @@ static int WeaponTypeFromChar(const char ch)
     else if (ch == 'X' || ch == 'x')
         return NUMWEAPONS;
 
-    return MIN_INT; // best chance of loud and obvious crash
+    return INT32_MIN; // best chance of loud and obvious crash
 }
 
 /**
@@ -251,7 +251,7 @@ static bool InvSetReadyWeapon(spawnInventory_t &inv, const std::string &value)
         return false;
 
     int weap = WeaponTypeFromChar(value.at(0));
-    if (weap == MIN_INT)
+    if (weap == INT32_MIN)
         return false;
 
     inv.readyweapon = static_cast<weapontype_t>(weap);
@@ -272,7 +272,7 @@ static bool InvSetWeapons(spawnInventory_t &inv, const std::string &value)
     for (std::string::const_iterator it = value.begin(); it != value.end(); ++it)
     {
         int owned = WeaponTypeFromChar(*it);
-        if (owned == MIN_INT)
+        if (owned == INT32_MIN)
             return false;
 
         newowned[owned] = true;

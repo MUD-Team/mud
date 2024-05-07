@@ -42,7 +42,7 @@ DArgs::DArgs()
 {
 }
 
-DArgs::DArgs(unsigned int argc, char **argv)
+DArgs::DArgs(uint32_t argc, char **argv)
 {
     if (argv)
         CopyArgs(argc, argv);
@@ -68,7 +68,7 @@ const char *DArgs::operator[](size_t n)
     return GetArg(n);
 }
 
-void DArgs::SetArgs(unsigned argc, char **argv)
+void DArgs::SetArgs(uint32_t argc, char **argv)
 {
     CopyArgs(argc, argv);
 }
@@ -76,13 +76,13 @@ void DArgs::SetArgs(unsigned argc, char **argv)
 // For Windows, we need to get the wide string version of the arguments
 // to properly convert paths passed via -file, etc to UTF-8 - Dasho
 #ifdef _WIN32
-void DArgs::CopyArgs(unsigned argc, char **argv)
+void DArgs::CopyArgs(uint32_t argc, char **argv)
 {
     if (!argv || !argc)
         return;
 
     int       win_argc = 0;
-    unsigned    i;
+    uint32_t    i;
     wchar_t **win_argv = CommandLineToArgvW(GetCommandLineW(), &win_argc);
 
     if (!win_argv)
@@ -101,7 +101,7 @@ void DArgs::CopyArgs(unsigned argc, char **argv)
     LocalFree(win_argv);
 }
 #else
-void DArgs::CopyArgs(unsigned argc, char **argv)
+void DArgs::CopyArgs(uint32_t argc, char **argv)
 {
     args.clear();
 
@@ -110,7 +110,7 @@ void DArgs::CopyArgs(unsigned argc, char **argv)
 
     args.resize(argc);
 
-    for (unsigned i = 0; i < argc; i++)
+    for (uint32_t i = 0; i < argc; i++)
         if (argv[i])
             args[i] = argv[i];
 }
@@ -322,7 +322,7 @@ void M_FindResponseFile(void)
             delete[] file;
 
             // DISPLAY ARGS
-            Printf("%" PRIuSIZE " command-line args:\n", Args.NumArgs());
+            Printf("%zu command-line args:\n", Args.NumArgs());
             for (size_t k = 1; k < Args.NumArgs(); k++)
                 Printf(PRINT_HIGH, "%s\n", Args.GetArg(k));
 

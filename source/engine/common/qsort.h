@@ -64,13 +64,13 @@
  * Several ready-to-use examples:
  *
  * Sorting array of integers:
- * void int_qsort(int *arr, unsigned n) {
+ * void int_qsort(int *arr, uint32_t n) {
  * #define int_lt(a,b) ((*a)<(*b))
  *   QSORT(int, arr, n, int_lt);
  * }
  *
  * Sorting array of string pointers:
- * void str_qsort(char *arr[], unsigned n) {
+ * void str_qsort(char *arr[], uint32_t n) {
  * #define str_lt(a,b) (strcmp((*a),(*b)) < 0)
  *   QSORT(char*, arr, n, str_lt);
  * }
@@ -81,7 +81,7 @@
  *   int key;
  *   ...
  * };
- * void elt_qsort(struct elt *arr, unsigned n) {
+ * void elt_qsort(struct elt *arr, uint32_t n) {
  * #define elt_lt(a,b) ((a)->key < (b)->key)
  *  QSORT(struct elt, arr, n, elt_lt);
  * }
@@ -105,10 +105,10 @@ typedef struct {
 
 /* The next 4 #defines implement a very fast in-line stack abstraction. */
 /* The stack needs log (total_elements) entries (we could even subtract
-   log(MAX_THRESH)).  Since total_elements has type unsigned, we get as
+   log(MAX_THRESH)).  Since total_elements has type uint32_t, we get as
    upper bound for log (total_elements):
-   bits per byte (CHAR_BIT) * sizeof(unsigned).  */
-#define _QSORT_STACK_SIZE           (8 * sizeof(unsigned))
+   bits per byte (CHAR_BIT) * sizeof(uint32_t).  */
+#define _QSORT_STACK_SIZE           (8 * sizeof(uint32_t))
 #define _QSORT_PUSH(top, low, high) (((top->_lo = (low)), (top->_hi = (high)), ++top))
 #define _QSORT_POP(low, high, top)  ((--top, (low = top->_lo), (high = top->_hi)))
 #define _QSORT_STACK_NOT_EMPTY      (_stack < _top)
@@ -141,7 +141,7 @@ typedef struct {
 #define QSORT(QSORT_TYPE, QSORT_BASE, QSORT_NELT, QSORT_LT)                                                            \
     {                                                                                                                  \
         QSORT_TYPE *const _base  = (QSORT_BASE);                                                                       \
-        const unsigned    _elems = (QSORT_NELT);                                                                       \
+        const uint32_t    _elems = (QSORT_NELT);                                                                       \
         QSORT_TYPE        _hold;                                                                                       \
                                                                                                                        \
         /* Don't declare two variables of type QSORT_TYPE in a single                                                  \

@@ -63,7 +63,7 @@ typedef int SOCKET;
 #define SETSOCKOPTCAST(x) ((const void *)(x))
 #endif
 
-unsigned int inet_socket;
+uint32_t inet_socket;
 int          localport;
 netadr_t     net_from; // address of who sent the packet
 
@@ -335,7 +335,7 @@ void SZ_Write(buf_t *b, const void *data, int length)
     b->WriteChunk((const char *)data, length);
 }
 
-void SZ_Write(buf_t *b, const byte *data, int startpos, int length)
+void SZ_Write(buf_t *b, const uint8_t *data, int startpos, int length)
 {
     b->WriteChunk((const char *)data, length, startpos);
 }
@@ -365,17 +365,17 @@ void MSG_WriteMarker(buf_t *b, clc_t c)
 {
     if (simulated_connection)
         return;
-    b->WriteByte((byte)c);
+    b->WriteByte((uint8_t)c);
 }
 
-void MSG_WriteByte(buf_t *b, byte c)
+void MSG_WriteByte(buf_t *b, uint8_t c)
 {
     if (simulated_connection)
         return;
-    b->WriteByte((byte)c);
+    b->WriteByte((uint8_t)c);
 }
 
-void MSG_WriteChunk(buf_t *b, const void *p, unsigned l)
+void MSG_WriteChunk(buf_t *b, const void *p, uint32_t l)
 {
     if (simulated_connection)
         return;
@@ -487,7 +487,7 @@ void MSG_WriteLong(buf_t *b, int c)
     b->WriteLong(c);
 }
 
-void MSG_WriteUnVarint(buf_t *b, unsigned int uv)
+void MSG_WriteUnVarint(buf_t *b, uint32_t uv)
 {
     if (simulated_connection)
         return;
@@ -539,7 +539,7 @@ void MSG_WriteString(buf_t *b, const char *s)
     b->WriteString(s);
 }
 
-unsigned int toInt(char c)
+uint32_t toInt(char c)
 {
     if (c >= '0' && c <= '9')
         return c - '0';
@@ -556,7 +556,7 @@ unsigned int toInt(char c)
 // Converts a hexidecimal string to its binary representation
 void MSG_WriteHexString(buf_t *b, const char *s)
 {
-    byte output[255];
+    uint8_t output[255];
 
     // Nothing to write?
     if (!(s && (*s)))
@@ -578,7 +578,7 @@ void MSG_WriteHexString(buf_t *b, const char *s)
         output[i] = (char)(16 * toInt(s[2 * i]) + toInt(s[2 * i + 1]));
     }
 
-    MSG_WriteByte(b, (byte)numdigits);
+    MSG_WriteByte(b, (uint8_t)numdigits);
 
     MSG_WriteChunk(b, output, numdigits);
 }
@@ -627,7 +627,7 @@ bool MSG_DecompressMinilzo()
 
     lzo_uint newlen = net_message.maxsize();
 
-    unsigned int r =
+    uint32_t r =
         lzo1x_decompress_safe(net_message.ptr() + net_message.BytesRead(), left, decompressed.ptr(), &newlen, NULL);
 
     if (r != LZO_E_OK)
@@ -735,7 +735,7 @@ int MSG_ReadLong(void)
     return net_message.ReadLong();
 }
 
-unsigned int MSG_ReadUnVarint()
+uint32_t MSG_ReadUnVarint()
 {
     return net_message.ReadUnVarint();
 }

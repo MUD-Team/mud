@@ -32,7 +32,7 @@
 extern bool predicting;
 
 void               P_ResetTransferSpecial(newspecial_s *newspecial);
-const unsigned int P_ResetSectorTransferFlags(const unsigned int flags);
+const uint32_t P_ResetSectorTransferFlags(const uint32_t flags);
 
 //
 // CEILINGS
@@ -502,9 +502,9 @@ void P_ActivateInStasisCeiling(int tag)
     }
 }
 
-BOOL EV_ZDoomCeilingCrushStop(int tag, bool remove)
+bool EV_ZDoomCeilingCrushStop(int tag, bool remove)
 {
-    BOOL                       rtn = false;
+    bool                       rtn = false;
     DCeiling                  *scan;
     TThinkerIterator<DCeiling> iterator;
 
@@ -529,10 +529,10 @@ BOOL EV_ZDoomCeilingCrushStop(int tag, bool remove)
     return rtn;
 }
 
-BOOL P_SpawnZDoomCeiling(DCeiling::ECeiling, line_t *, int, fixed_t, fixed_t, fixed_t, int, int, int, crushmode_e);
+bool P_SpawnZDoomCeiling(DCeiling::ECeiling, line_t *, int, fixed_t, fixed_t, fixed_t, int, int, int, crushmode_e);
 
-BOOL EV_DoZDoomCeiling(DCeiling::ECeiling type, line_t *line, byte tag, fixed_t speed, fixed_t speed2, fixed_t height,
-                       int crush, byte silent, int change, crushmode_e crushmode)
+bool EV_DoZDoomCeiling(DCeiling::ECeiling type, line_t *line, uint8_t tag, fixed_t speed, fixed_t speed2, fixed_t height,
+                       int crush, uint8_t silent, int change, crushmode_e crushmode)
 {
     return P_SpawnZDoomCeiling(type, line, tag, speed, speed2, height, crush, silent, change, crushmode);
 }
@@ -541,14 +541,14 @@ BOOL EV_DoZDoomCeiling(DCeiling::ECeiling type, line_t *line, byte tag, fixed_t 
 // P_SpawnZDoomCeiling
 // Move a ceiling up/down and all around!
 //
-BOOL P_SpawnZDoomCeiling(DCeiling::ECeiling type, line_t *line, int tag, fixed_t speed, fixed_t speed2, fixed_t height,
+bool P_SpawnZDoomCeiling(DCeiling::ECeiling type, line_t *line, int tag, fixed_t speed, fixed_t speed2, fixed_t height,
                          int crush, int silent, int change, crushmode_e crushmode)
 {
     int       secnum;
-    BOOL      rtn;
+    bool      rtn;
     sector_t *sec;
     DCeiling *ceiling;
-    BOOL      manual     = false;
+    bool      manual     = false;
     fixed_t   targheight = 0;
 
     height *= FRACUNIT;
@@ -799,14 +799,14 @@ BOOL P_SpawnZDoomCeiling(DCeiling::ECeiling type, line_t *line, int tag, fixed_t
 // Move a ceiling up/down and all around!
 //
 // [RH] Added tag, speed, speed2, height, crush, silent, change params
-BOOL EV_DoCeiling(DCeiling::ECeiling type, line_t *line, int tag, fixed_t speed, fixed_t speed2, fixed_t height,
+bool EV_DoCeiling(DCeiling::ECeiling type, line_t *line, int tag, fixed_t speed, fixed_t speed2, fixed_t height,
                   bool crush, int silent, int change)
 {
     int       secnum;
-    BOOL      rtn;
+    bool      rtn;
     sector_t *sec;
     DCeiling *ceiling;
-    BOOL      manual     = false;
+    bool      manual     = false;
     fixed_t   targheight = 0;
 
     rtn = false;
@@ -1050,15 +1050,15 @@ BOOL EV_DoCeiling(DCeiling::ECeiling type, line_t *line, int tag, fixed_t speed,
 // jff 02/04/98 Added this routine (and file) to handle generalized
 // floor movers using bit fields in the line special type.
 //
-BOOL EV_DoGenCeiling(line_t *line)
+bool EV_DoGenCeiling(line_t *line)
 {
     int       secnum;
-    BOOL      rtn;
-    BOOL      manual;
+    bool      rtn;
+    bool      manual;
     fixed_t   targheight;
     sector_t *sec;
     DCeiling *ceiling;
-    unsigned  value = (unsigned)line->special - GenCeilingBase;
+    uint32_t  value = (uint32_t)line->special - GenCeilingBase;
 
     // parse the bit fields in the line's special type
 
@@ -1120,15 +1120,15 @@ BOOL EV_DoGenCeiling(line_t *line)
 // jff 02/04/98 Added this routine (and file) to handle generalized
 // floor movers using bit fields in the line special type.
 //
-BOOL EV_DoGenCrusher(line_t *line)
+bool EV_DoGenCrusher(line_t *line)
 {
     int       secnum;
-    BOOL      rtn;
-    BOOL      manual;
+    bool      rtn;
+    bool      manual;
     fixed_t   targheight;
     sector_t *sec;
     DCeiling *ceiling;
-    unsigned  value = (unsigned)line->special - GenCrusherBase;
+    uint32_t  value = (uint32_t)line->special - GenCrusherBase;
 
     // parse the bit fields in the line's special type
 
@@ -1182,9 +1182,9 @@ BOOL EV_DoGenCrusher(line_t *line)
 // Stop a ceiling from crushing!
 // [RH] Passed a tag instead of a line and rewritten to use list
 //
-BOOL EV_CeilingCrushStop(int tag)
+bool EV_CeilingCrushStop(int tag)
 {
-    BOOL                       rtn = false;
+    bool                       rtn = false;
     DCeiling                  *scan;
     TThinkerIterator<DCeiling> iterator;
 

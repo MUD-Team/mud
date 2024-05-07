@@ -52,11 +52,11 @@ size_t R_CalculateNewPatchSize(patch_t *patch, size_t length)
         return 0;
 
     // sanity check to see if the postofs array fits in the patch lump
-    if (length < patch->width() * sizeof(unsigned int))
+    if (length < patch->width() * sizeof(uint32_t))
         return 0;
 
     int           numposts = 0, numpixels = 0;
-    unsigned int *postofs = (unsigned int *)((byte *)patch + 8);
+    uint32_t *postofs = (uint32_t *)((uint8_t *)patch + 8);
 
     for (int i = 0; i < patch->width(); i++)
     {
@@ -66,7 +66,7 @@ size_t R_CalculateNewPatchSize(patch_t *patch, size_t length)
         if (ofs >= length)
             return 0;
 
-        post_t *post = (post_t *)((byte *)patch + ofs);
+        post_t *post = (post_t *)((uint8_t *)patch + ofs);
 
         while (post->topdelta != 0xFF)
         {
@@ -75,7 +75,7 @@ size_t R_CalculateNewPatchSize(patch_t *patch, size_t length)
 
             numposts++;
             numpixels += post->length;
-            post = (post_t *)((byte *)post + post->length + 4);
+            post = (post_t *)((uint8_t *)post + post->length + 4);
         }
     }
 
@@ -163,7 +163,7 @@ void R_ConvertPatch(patch_t *newpatch, patch_t *rawpatch)
 //
 tallpost_t *R_GetPatchColumn(patch_t *patch, int colnum)
 {
-    return (tallpost_t *)((byte *)patch + LELONG(patch->columnofs[colnum]));
+    return (tallpost_t *)((uint8_t *)patch + LELONG(patch->columnofs[colnum]));
 }
 
 //
@@ -175,7 +175,7 @@ tallpost_t *R_GetTextureColumn(texhandle_t texnum, int colnum)
     colnum &= tex->getWidthMask();
     patch_t *texpatch = (patch_t *)tex->getData();
 
-    return (tallpost_t *)((byte *)texpatch + LELONG(texpatch->columnofs[colnum]));
+    return (tallpost_t *)((uint8_t *)texpatch + LELONG(texpatch->columnofs[colnum]));
 }
 
 struct FakeCmap
@@ -285,7 +285,7 @@ void R_InitColormaps()
         numfakecmaps = lastfakecmap - firstfakecmap;
     }
 
-    realcolormaps.colormap = (byte *)Z_Malloc(256 * (NUMCOLORMAPS + 1) * numfakecmaps, PU_STATIC, 0);
+    realcolormaps.colormap = (uint8_t *)Z_Malloc(256 * (NUMCOLORMAPS + 1) * numfakecmaps, PU_STATIC, 0);
     realcolormaps.shademap = (argb_t *)Z_Malloc(256 * sizeof(argb_t) * (NUMCOLORMAPS + 1) * numfakecmaps, PU_STATIC, 0);
 
     delete[] fakecmaps;
@@ -297,12 +297,12 @@ void R_InitColormaps()
     {
         const palette_t *pal = V_GetDefaultPalette();
 
-        for (unsigned i = ++firstfakecmap, j = 1; j < numfakecmaps; i++, j++)
+        for (uint32_t i = ++firstfakecmap, j = 1; j < numfakecmaps; i++, j++)
         {
             if (W_LumpLength(i) >= (NUMCOLORMAPS + 1) * 256)
             {
-                byte   *map      = (byte *)W_CacheLumpNum(i, PU_CACHE);
-                byte   *colormap = realcolormaps.colormap + (NUMCOLORMAPS + 1) * 256 * j;
+                uint8_t   *map      = (uint8_t *)W_CacheLumpNum(i, PU_CACHE);
+                uint8_t   *colormap = realcolormaps.colormap + (NUMCOLORMAPS + 1) * 256 * j;
                 argb_t *shademap = realcolormaps.shademap + (NUMCOLORMAPS + 1) * 256 * j;
 
                 // Copy colormap data:
@@ -361,7 +361,7 @@ int R_ColormapNumForName(const char *name)
 // Returns a blend value to approximate the given colormap index number.
 // Invalid values return the color white with 0% opacity.
 //
-argb_t R_BlendForColormap(unsigned int index)
+argb_t R_BlendForColormap(uint32_t index)
 {
     if (index > 0 && index < numfakecmaps)
         return fakecmaps[index].blend_color;
@@ -376,7 +376,7 @@ argb_t R_BlendForColormap(unsigned int index)
 //
 int R_ColormapForBlend(const argb_t blend_color)
 {
-    for (unsigned int i = 1; i < numfakecmaps; i++)
+    for (uint32_t i = 1; i < numfakecmaps; i++)
         if (fakecmaps[i].blend_color == blend_color)
             return i;
     return 0;
@@ -433,7 +433,7 @@ void R_PrecacheLevel(void)
     texturemanager.getTexture(sky2texture);
 
     // Precache sprites
-    byte *hitlist = new byte[numsprites];
+    uint8_t *hitlist = new uint8_t[numsprites];
     memset(hitlist, 0, numsprites);
 
     {
@@ -455,9 +455,9 @@ void R_PrecacheLevel(void)
 
 // Utility function,
 //	called by R_PointToAngle.
-unsigned int SlopeDiv(unsigned int num, unsigned int den)
+uint32_t SlopeDiv(uint32_t num, uint32_t den)
 {
-    unsigned int ans;
+    uint32_t ans;
 
     if (den < 512)
         return SLOPERANGE;

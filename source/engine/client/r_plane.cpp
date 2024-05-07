@@ -66,7 +66,7 @@ visplane_t *skyplane;
 // Empirically verified to be fairly uniform:
 
 #define visplane_hash(picnum, lightlevel, secplane)                                                                    \
-    ((unsigned)((picnum) * 3 + (lightlevel) + (secplane.d) * 7) & (MAXVISPLANES - 1))
+    ((uint32_t)((picnum) * 3 + (lightlevel) + (secplane.d) * 7) & (MAXVISPLANES - 1))
 
 //
 // Clip values are the solid pixel bounding the range.
@@ -224,7 +224,7 @@ void R_MapLevelPlane(int y, int x1, int x2)
     else
     {
         // Determine lighting based on the span's distance from the viewer.
-        unsigned int index = distance >> LIGHTZSHIFT;
+        uint32_t index = distance >> LIGHTZSHIFT;
 
         if (index >= MAXLIGHTZ)
             index = MAXLIGHTZ - 1;
@@ -259,7 +259,7 @@ void R_ClearPlanes(void)
 // [RH] top and bottom buffers get allocated immediately
 //		after the visplane.
 //
-static visplane_t *new_visplane(unsigned hash)
+static visplane_t *new_visplane(uint32_t hash)
 {
     visplane_t *check = freetail;
 
@@ -284,7 +284,7 @@ visplane_t *R_FindPlane(plane_t secplane, texhandle_t picnum, int lightlevel, fi
                         fixed_t yscale, angle_t angle)
 {
     visplane_t *check;
-    unsigned    hash;                                // killough
+    uint32_t    hash;                                // killough
 
     if (picnum == skyflatnum || picnum & PL_SKYFLAT) // killough 10/98
         lightlevel = 0;                              // most skies map together
@@ -351,7 +351,7 @@ visplane_t *R_CheckPlane(visplane_t *pl, int start, int stop)
         intrh  = stop;
     }
 
-    for (x = intrl; x <= intrh && pl->top[x] == (unsigned int)viewheight; x++)
+    for (x = intrl; x <= intrh && pl->top[x] == (uint32_t)viewheight; x++)
         ;
 
     if (x > intrh)
@@ -363,7 +363,7 @@ visplane_t *R_CheckPlane(visplane_t *pl, int start, int stop)
     else
     {
         // make a new visplane
-        unsigned    hash   = visplane_hash(pl->picnum, pl->lightlevel, pl->secplane);
+        uint32_t    hash   = visplane_hash(pl->picnum, pl->lightlevel, pl->secplane);
         visplane_t *new_pl = new_visplane(hash);
 
         new_pl->secplane   = pl->secplane;
@@ -390,10 +390,10 @@ void R_MakeSpans(visplane_t *pl, void (*spanfunc)(int, int, int))
 {
     for (int x = pl->minx; x <= pl->maxx + 1; x++)
     {
-        unsigned int t1 = pl->top[x - 1];
-        unsigned int b1 = pl->bottom[x - 1];
-        unsigned int t2 = pl->top[x];
-        unsigned int b2 = pl->bottom[x];
+        uint32_t t1 = pl->top[x - 1];
+        uint32_t b1 = pl->bottom[x - 1];
+        uint32_t t2 = pl->top[x];
+        uint32_t b2 = pl->bottom[x];
 
         for (; t1 < t2 && t1 <= b1; t1++)
             spanfunc(t1, spanstart[t1], x - 1);
@@ -714,7 +714,7 @@ bool R_PlaneInitData(IRenderSurface *surface)
 //
 // R_AlignFlat
 //
-BOOL R_AlignFlat(int linenum, int side, int fc)
+bool R_AlignFlat(int linenum, int side, int fc)
 {
     line_t   *line = lines + linenum;
     sector_t *sec  = side ? line->backsector : line->frontsector;

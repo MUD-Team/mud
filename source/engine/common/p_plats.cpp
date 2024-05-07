@@ -459,14 +459,14 @@ DPlat *DPlat::Clone(sector_t *sec) const
 //	[RH] Changed amount to height and added delay,
 //		 lip, change, tag, and speed parameters.
 //
-BOOL EV_DoPlat(int tag, line_t *line, DPlat::EPlatType type, fixed_t height, int speed, int delay, fixed_t lip,
+bool EV_DoPlat(int tag, line_t *line, DPlat::EPlatType type, fixed_t height, int speed, int delay, fixed_t lip,
                int change)
 {
     DPlat    *plat;
     int       secnum;
     sector_t *sec;
     int       rtn    = false;
-    BOOL      manual = false;
+    bool      manual = false;
 
     // [RH] If tag is zero, use the sector on the back side
     //		of the activating line (if any).
@@ -529,14 +529,14 @@ BOOL EV_DoPlat(int tag, line_t *line, DPlat::EPlatType type, fixed_t height, int
     return rtn;
 }
 
-BOOL EV_DoGenLift(line_t *line)
+bool EV_DoGenLift(line_t *line)
 {
     DPlat    *plat;
     int       secnum;
     sector_t *sec;
-    BOOL      rtn    = false;
-    BOOL      manual = false;
-    unsigned  value  = (unsigned)line->special - GenLiftBase;
+    bool      rtn    = false;
+    bool      manual = false;
+    uint32_t  value  = (uint32_t)line->special - GenLiftBase;
 
     int Targ = (value & LiftTarget) >> LiftTargetShift;
     int Dely = (value & LiftDelay) >> LiftDelayShift;

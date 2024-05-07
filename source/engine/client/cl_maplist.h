@@ -49,8 +49,8 @@ class MaplistCache
     size_t                            next_index;
     size_t                            size;
     maplist_status_t                  status;
-    QWORD                             timeout;
-    byte                              valid_indexes;
+    uint64_t                             timeout;
+    uint8_t                              valid_indexes;
     void                              check_complete(void);
     void                              invalidate(void);
     bool                              query(maplist_qrows_t &result);

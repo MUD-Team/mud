@@ -98,7 +98,7 @@ fixed_t P_CalculateWeaponBobX(player_t *player, float scale_amount)
 
     if (weaponstate == readystate)
     {
-        unsigned int angle_index = (128 * level.time) & FINEMASK;
+        uint32_t angle_index = (128 * level.time) & FINEMASK;
         return center_sx + scale_amount * FixedMul(player->bob, finecosine[angle_index]);
     }
 
@@ -133,7 +133,7 @@ fixed_t P_CalculateWeaponBobY(player_t *player, float scale_amount)
 
     if (weaponstate == readystate)
     {
-        unsigned int angle_index = ((128 * level.time) & FINEMASK) & (FINEANGLES / 2 - 1);
+        uint32_t angle_index = ((128 * level.time) & FINEMASK) & (FINEANGLES / 2 - 1);
         return center_sy + scale_amount * FixedMul(player->bob, finesine[angle_index]);
     }
 
@@ -264,7 +264,7 @@ bool P_EnoughAmmo(player_t *player, weapontype_t weapon, bool switching = false)
 //
 void P_SwitchWeapon(player_t *player)
 {
-    const byte *prefs;
+    const uint8_t *prefs;
 
     if ((multiplayer && !sv_allowpwo))
         prefs = UserInfo::weapon_prefs_default;
@@ -369,7 +369,7 @@ bool P_CheckSwitchWeapon(player_t *player, weapontype_t weapon)
         return true;
 
     // Use player's weapon preferences
-    byte *prefs = player->userinfo.weapon_prefs;
+    uint8_t *prefs = player->userinfo.weapon_prefs;
     if (prefs[weapon] > prefs[currentweapon])
     {
         if (player->userinfo.switchweapon == WPSW_PWO_ALT && player->cmd.buttons & BT_ATTACK)
@@ -386,7 +386,7 @@ bool P_CheckSwitchWeapon(player_t *player, weapontype_t weapon)
 // Returns true if there is enough ammo to shoot.
 // If not, selects the next weapon to use.
 //
-BOOL P_CheckAmmo(player_t *player)
+bool P_CheckAmmo(player_t *player)
 {
     if (P_EnoughAmmo(player, player->readyweapon))
         return true;

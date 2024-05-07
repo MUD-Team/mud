@@ -62,7 +62,7 @@ static int     ls_y; // Lost Soul position for Lost Soul checks		// phares
 
 // If "floatok" true, move would be ok
 // if within "tmfloorz - tmceilingz".
-BOOL floatok;
+bool floatok;
 
 fixed_t   tmfloorz;
 fixed_t   tmceilingz;
@@ -87,7 +87,7 @@ AActor *BlockingMobj;
 msecnode_t *sector_list = NULL; // phares 3/16/98
 
 // [SL] 2012-03-07 - Sectors that can change floor/ceiling height
-std::set<short> movable_sectors;
+std::set<int16_t> movable_sectors;
 
 EXTERN_CVAR(sv_friendlyfire)
 EXTERN_CVAR(sv_unblockplayers)
@@ -104,9 +104,9 @@ CVAR_FUNC_IMPL(sv_gravity)
 //
 // PIT_StompThing
 //
-static BOOL StompAlwaysFrags;
+static bool StompAlwaysFrags;
 
-BOOL PIT_StompThing(AActor *thing)
+bool PIT_StompThing(AActor *thing)
 {
     fixed_t blockdist;
 
@@ -165,7 +165,7 @@ BOOL PIT_StompThing(AActor *thing)
 //		move was made, so the height checking I added for 1.13 could
 //		potentially erroneously indicate the move was okay if the thing
 //		was being teleported between two non-overlapping height ranges.
-BOOL P_TeleportMove(AActor *thing, fixed_t x, fixed_t y, fixed_t z, BOOL telefrag)
+bool P_TeleportMove(AActor *thing, fixed_t x, fixed_t y, fixed_t z, bool telefrag)
 {
     int xl;
     int xh;
@@ -340,7 +340,7 @@ static void CheckForPushSpecial(line_t *line, int side, AActor *mobj)
 }
 
 static // killough 3/26/98: make static
-    BOOL
+    bool
     PIT_CrossLine(line_t *ld)
 {
     if (!(ld->flags & ML_TWOSIDED) || (ld->flags & (ML_BLOCKING | ML_BLOCKMONSTERS | ML_BLOCKEVERYTHING)))
@@ -357,7 +357,7 @@ static // killough 3/26/98: make static
 //
 
 static // killough 3/26/98: make static
-    BOOL
+    bool
     PIT_CheckLine(line_t *ld)
 {
     if (tmbbox[BOXRIGHT] <= ld->bbox[BOXLEFT] || tmbbox[BOXLEFT] >= ld->bbox[BOXRIGHT] ||
@@ -529,7 +529,7 @@ static bool P_ProjectileImmune(AActor *target, AActor *source)
                 mobjinfo[target->type].projectile_group == mobjinfo[source->type].projectile_group));
 }
 
-static BOOL PIT_CheckThing(AActor *thing)
+static bool PIT_CheckThing(AActor *thing)
 {
     bool solid = thing->flags & MF_SOLID;
 
@@ -706,7 +706,7 @@ static BOOL PIT_CheckThing(AActor *thing)
 // sides of the blocking line. If so, return true, otherwise
 // false.
 
-BOOL Check_Sides(AActor *actor, int x, int y)
+bool Check_Sides(AActor *actor, int x, int y)
 {
     int bx, by, xl, xh, yl, yh;
 
@@ -745,7 +745,7 @@ BOOL Check_Sides(AActor *actor, int x, int y)
 //
 //---------------------------------------------------------------------------
 
-BOOL PIT_CheckOnmobjZ(AActor *thing)
+bool PIT_CheckOnmobjZ(AActor *thing)
 {
     if (!(thing->flags & MF_SOLID))
         return true;
@@ -790,7 +790,7 @@ BOOL PIT_CheckOnmobjZ(AActor *thing)
 // Returns true if the mobj is not blocked by anything at its current
 // location, otherwise returns false.
 //
-BOOL P_TestMobjLocation(AActor *mobj)
+bool P_TestMobjLocation(AActor *mobj)
 {
     int flags = mobj->flags;
     mobj->flags &= ~MF_PICKUP;
@@ -1086,7 +1086,7 @@ void P_CheckPushLines(AActor *thing)
 // Attempt to move to a new position,
 // crossing special lines unless MF_TELEPORT is set.
 //
-BOOL P_TryMove(AActor *thing, fixed_t x, fixed_t y,
+bool P_TryMove(AActor *thing, fixed_t x, fixed_t y,
                bool dropoff,                     // killough 3/15/98: allow dropoff as option
                bool onfloor)                     // [RH] Let P_TryMove keep the thing on the floor
 {
@@ -1262,7 +1262,7 @@ BOOL P_TryMove(AActor *thing, fixed_t x, fixed_t y,
 // so balancing is possible.
 //
 
-static BOOL PIT_ApplyTorque(line_t *ld)
+static bool PIT_ApplyTorque(line_t *ld)
 {
     if (ld->backsector && // If thing touches two-sided pivot linedef
         tmbbox[BOXRIGHT] > ld->bbox[BOXLEFT] && tmbbox[BOXLEFT] < ld->bbox[BOXRIGHT] &&
@@ -1377,7 +1377,7 @@ void P_ApplyTorque(AActor *mo)
 // the z will be set to the lowest value
 // and false will be returned.
 //
-BOOL P_ThingHeightClip(AActor *thing)
+bool P_ThingHeightClip(AActor *thing)
 {
     if (!thing)
         return true;
@@ -1546,7 +1546,7 @@ void P_HitSlideLine(line_t *ld)
 
     fixed_t movelen;
     fixed_t newlen;
-    BOOL    icyfloor; // is floor icy?							// phares
+    bool    icyfloor; // is floor icy?							// phares
                       //   |
     // Under icy conditions, if the angle of approach to the wall	//   V
     // is more than 45 degrees, then you'll bounce and lose half
@@ -1637,7 +1637,7 @@ void P_HitSlideLine(line_t *ld)
 //
 // PTR_SlideTraverse
 //
-BOOL PTR_SlideTraverse(intercept_t *in)
+bool PTR_SlideTraverse(intercept_t *in)
 {
     line_t *li;
 
@@ -1838,7 +1838,7 @@ static fixed_t bottomslope;
 // PTR_AimTraverse
 // Sets linetaget and aimslope when a target is aimed at.
 //
-BOOL PTR_AimTraverse(intercept_t *in)
+bool PTR_AimTraverse(intercept_t *in)
 {
     line_t *li;
     AActor *th;
@@ -1949,7 +1949,7 @@ bool P_ShootLine(intercept_t *in)
     if (li->special)
         P_ShootSpecialLine(shootthing, li);
 
-    short spe;
+    int16_t spe;
     if (map_format.getZDoom())
         spe = Line_Horizon;
     else
@@ -1977,9 +1977,9 @@ bool P_ShootLine(intercept_t *in)
     }
 
     fixed_t ceilingheight1 = P_CeilingHeight(crossx, crossy, sec1);
-    fixed_t ceilingheight2 = sec2 ? P_CeilingHeight(crossx, crossy, sec2) : MAX_INT;
+    fixed_t ceilingheight2 = sec2 ? P_CeilingHeight(crossx, crossy, sec2) : INT32_MAX;
     fixed_t floorheight1   = P_FloorHeight(crossx, crossy, sec1);
-    fixed_t floorheight2   = sec2 ? P_FloorHeight(crossx, crossy, sec2) : MAX_INT;
+    fixed_t floorheight2   = sec2 ? P_FloorHeight(crossx, crossy, sec2) : INT32_MAX;
 
     // position the destination for the bullet puff a bit closer
     fixed_t frac = in->frac - FixedDiv(4 * FRACUNIT, attackrange);
@@ -2066,7 +2066,7 @@ bool P_ShootLine(intercept_t *in)
 //
 // PTR_ShootTraverse
 //
-BOOL PTR_ShootTraverse(intercept_t *in)
+bool PTR_ShootTraverse(intercept_t *in)
 {
     fixed_t x, y, z;
     fixed_t frac;
@@ -2195,12 +2195,12 @@ fixed_t P_AimLineAttack(AActor *t1, angle_t angle, fixed_t distance)
     if (topangle <= ANG360 - ANG180)
         topslope = finetangent[FINEANGLES / 2 - 1];
     else
-        topslope = finetangent[FINEANGLES / 4 - ((signed)topangle >> ANGLETOFINESHIFT)];
+        topslope = finetangent[FINEANGLES / 4 - ((int32_t)topangle >> ANGLETOFINESHIFT)];
 
     if (bottomangle >= ANG180)
         bottomslope = finetangent[0];
     else
-        bottomslope = finetangent[FINEANGLES / 4 - ((signed)bottomangle >> ANGLETOFINESHIFT)];
+        bottomslope = finetangent[FINEANGLES / 4 - ((int32_t)bottomangle >> ANGLETOFINESHIFT)];
 
     attackrange = distance;
     linetarget  = NULL;
@@ -2334,7 +2334,7 @@ static struct SRailHit
 }                *RailHits;
 static v3double_t RailEnd;
 
-BOOL PTR_RailTraverse(intercept_t *in)
+bool PTR_RailTraverse(intercept_t *in)
 {
     fixed_t x;
     fixed_t y;
@@ -2551,7 +2551,7 @@ void P_RailAttack(AActor *source, int damage, int offset)
 fixed_t CameraX, CameraY, CameraZ;
 #define CAMERA_DIST 0x1000 // Minimum distance between camera and walls
 
-BOOL PTR_CameraTraverse(intercept_t *in)
+bool PTR_CameraTraverse(intercept_t *in)
 {
     fixed_t z;
     fixed_t frac;
@@ -2676,7 +2676,7 @@ void P_AimCamera(AActor *t1)
 AActor *usething;
 bool    foundline;
 
-BOOL PTR_UseTraverse(intercept_t *in)
+bool PTR_UseTraverse(intercept_t *in)
 {
     if (!in->isaline)
         I_Error("PTR_UseTraverse: non-line intercept\n");
@@ -2740,7 +2740,7 @@ BOOL PTR_UseTraverse(intercept_t *in)
 // by Lee Killough
 //
 
-BOOL PTR_NoWayTraverse(intercept_t *in)
+bool PTR_NoWayTraverse(intercept_t *in)
 {
     if (!in->isaline)
         I_Error("PTR_NoWayTraverse: non-line intercept\n");
@@ -2835,7 +2835,7 @@ static bool P_SplashImmune(AActor *target, AActor *spot)
         mobjinfo[target->type].splash_group == mobjinfo[spot->type].splash_group;
 }
 
-static BOOL PIT_DoomRadiusAttack(AActor *thing)
+static bool PIT_DoomRadiusAttack(AActor *thing)
 {
     if (!serverside || !(thing->flags & (MF_SHOOTABLE | MF_BOUNCES)))
         return true;
@@ -2889,7 +2889,7 @@ static BOOL PIT_DoomRadiusAttack(AActor *thing)
 // "bombsource" is the creature that caused the explosion at "bombspot".
 // [RH] Now it knows about vertical distances and can thrust things vertically, too.
 //
-static BOOL PIT_ZDoomRadiusAttack(AActor *thing)
+static bool PIT_ZDoomRadiusAttack(AActor *thing)
 {
     if (!serverside || !(thing->flags & (MF_SHOOTABLE | MF_BOUNCES)))
         return true;
@@ -3016,7 +3016,7 @@ void P_RadiusAttack(AActor *spot, AActor *source, int damage, int distance, bool
     }
 
     // decide which radius attack function to use
-    BOOL (*pAttackFunc)(AActor *) = PIT_ZDoomRadiusAttack;
+    bool (*pAttackFunc)(AActor *) = PIT_ZDoomRadiusAttack;
 
     // [SL] 2012-12-03 - An actor can get radius
     // damage more than once since an actor can be in more than one block.
@@ -3064,7 +3064,7 @@ bool nofit;
 //
 // PIT_ChangeSector
 //
-BOOL PIT_ChangeSector(AActor *thing)
+bool PIT_ChangeSector(AActor *thing)
 {
     if (P_ThingHeightClip(thing))
     {
@@ -3310,7 +3310,7 @@ void P_DelSeclist(msecnode_t *node)
 // at this location, so don't bother with checking impassable or
 // blocking lines.
 
-BOOL PIT_GetSectors(line_t *ld)
+bool PIT_GetSectors(line_t *ld)
 {
     if (tmbbox[BOXRIGHT] <= ld->bbox[BOXLEFT] || tmbbox[BOXLEFT] >= ld->bbox[BOXRIGHT] ||
         tmbbox[BOXTOP] <= ld->bbox[BOXBOTTOM] || tmbbox[BOXBOTTOM] >= ld->bbox[BOXTOP])
@@ -3462,7 +3462,7 @@ bool P_IsPlaneLevel(const plane_t *plane)
 fixed_t P_PlaneZ(fixed_t x, fixed_t y, const plane_t *plane)
 {
     if (!plane)
-        return MAX_INT;
+        return INT32_MAX;
 
     // Is the plane level?  (Z value is constant for entire plane)
     if (P_IsPlaneLevel(plane))
@@ -3474,7 +3474,7 @@ fixed_t P_PlaneZ(fixed_t x, fixed_t y, const plane_t *plane)
 double P_PlaneZ(double x, double y, const plane_t *plane)
 {
     if (!plane)
-        return MAX_INT / 65536.0;
+        return INT32_MAX / 65536.0;
 
     static const double m = 1.0 / (65536.0 * 65536.0);
 
@@ -3495,12 +3495,12 @@ double P_PlaneZ(double x, double y, const plane_t *plane)
 // Note that there is no check made to ensure the point (x, y) is actually
 // within the subsector.
 //
-// MAX_INT is returned if the point is not within any sector.
+// INT32_MAX is returned if the point is not within any sector.
 //
 fixed_t P_FloorHeight(fixed_t x, fixed_t y, const sector_t *sector)
 {
     if (!sector && !(sector = P_PointInSubsector(x, y)->sector))
-        return MAX_INT;
+        return INT32_MAX;
 
     return P_PlaneZ(x, y, &sector->floorplane);
 }
@@ -3510,13 +3510,13 @@ fixed_t P_FloorHeight(const AActor *mo)
     if (mo && mo->subsector && mo->subsector->sector)
         return P_PlaneZ(mo->x, mo->y, &mo->subsector->sector->floorplane);
     else
-        return MAX_INT;
+        return INT32_MAX;
 }
 
 fixed_t P_FloorHeight(const sector_t *sector)
 {
     if (!sector)
-        return MAX_INT;
+        return INT32_MAX;
 
     const plane_t *plane = &sector->floorplane;
     return P_PlaneZ(plane->texx, plane->texy, plane);
@@ -3532,12 +3532,12 @@ fixed_t P_FloorHeight(const sector_t *sector)
 // Note that there is no check made to ensure the point (x, y) is actually
 // within the subsector.
 //
-// MAX_INT is returned if the point is not within any sector.
+// INT32_MAX is returned if the point is not within any sector.
 //
 fixed_t P_CeilingHeight(fixed_t x, fixed_t y, const sector_t *sector)
 {
     if (!sector && !(sector = P_PointInSubsector(x, y)->sector))
-        return MAX_INT;
+        return INT32_MAX;
 
     return P_PlaneZ(x, y, &sector->ceilingplane);
 }
@@ -3547,13 +3547,13 @@ fixed_t P_CeilingHeight(const AActor *mo)
     if (mo && mo->subsector && mo->subsector->sector)
         return P_PlaneZ(mo->x, mo->y, &mo->subsector->sector->ceilingplane);
     else
-        return MAX_INT;
+        return INT32_MAX;
 }
 
 fixed_t P_CeilingHeight(const sector_t *sector)
 {
     if (!sector)
-        return MAX_INT;
+        return INT32_MAX;
 
     const plane_t *plane = &sector->ceilingplane;
     return P_PlaneZ(plane->texx, plane->texy, plane);
@@ -3566,13 +3566,13 @@ fixed_t P_CeilingHeight(const sector_t *sector)
 // at lineorg and is along the direction of linedir.
 //
 // If the line does not intersect the plane, it must be parallel to the surface
-// of the plane.  In that case, a vector with the value MAX_INT for all
+// of the plane.  In that case, a vector with the value INT32_MAX for all
 // components is returned.
 //
 v3fixed_t P_LinePlaneIntersection(const plane_t *plane, const v3fixed_t &lineorg, const v3fixed_t &linedir)
 {
     v3fixed_t pt;
-    M_SetVec3Fixed(&pt, MAX_INT, MAX_INT, MAX_INT); // marks as invalid
+    M_SetVec3Fixed(&pt, INT32_MAX, INT32_MAX, INT32_MAX); // marks as invalid
 
     if (!plane)                                     // sanity check
         return pt;
@@ -3683,7 +3683,7 @@ void P_SetFloorHeight(sector_t *sector, fixed_t value)
 //
 fixed_t P_LowestHeightOfCeiling(sector_t *sector)
 {
-    fixed_t height = MAX_INT;
+    fixed_t height = INT32_MAX;
     if (!sector)
         return height;
 
@@ -3709,7 +3709,7 @@ fixed_t P_LowestHeightOfCeiling(sector_t *sector)
 //
 fixed_t P_LowestHeightOfFloor(sector_t *sector)
 {
-    fixed_t height = MAX_INT;
+    fixed_t height = INT32_MAX;
     if (!sector)
         return height;
 
@@ -3735,7 +3735,7 @@ fixed_t P_LowestHeightOfFloor(sector_t *sector)
 //
 fixed_t P_HighestHeightOfCeiling(sector_t *sector)
 {
-    fixed_t height = MIN_INT;
+    fixed_t height = INT32_MIN;
     if (!sector)
         return height;
 
@@ -3761,7 +3761,7 @@ fixed_t P_HighestHeightOfCeiling(sector_t *sector)
 //
 fixed_t P_HighestHeightOfFloor(sector_t *sector)
 {
-    fixed_t height = MIN_INT;
+    fixed_t height = INT32_MIN;
     if (!sector)
         return height;
 

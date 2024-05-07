@@ -41,8 +41,8 @@ extern dyncolormap_t NormalLight;
 
 // [Russell] - Server expects these to exist
 // [Russell] - Doesn't get used serverside
-byte *translationtables;
-byte  bosstable[256];
+uint8_t *translationtables;
+uint8_t  bosstable[256];
 
 fixed_t FocalLengthX;
 fixed_t FocalLengthY;
@@ -102,13 +102,13 @@ int lightscaleymul;
 int extralight;
 
 // [RH] ignore extralight and fullbright
-BOOL foggy;
+bool foggy;
 
 fixed_t freelookviewheight;
 
 fixed_t render_lerp_amount;
 
-unsigned int R_OldBlend = ~0;
+uint32_t R_OldBlend = ~0;
 
 void (*colfunc)(void);
 void (*basecolfunc)(void);

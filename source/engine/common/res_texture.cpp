@@ -490,10 +490,10 @@ void TextureManager::readAnimDefLump()
                     break;
                 }
 
-                if ((unsigned)anim.numframes == anim_t::MAX_ANIM_FRAMES)
+                if ((uint32_t)anim.numframes == anim_t::MAX_ANIM_FRAMES)
                     os.error("Animation has too many frames");
 
-                byte min = 1, max = 1;
+                uint8_t min = 1, max = 1;
 
                 os.mustScanInt();
                 const int frame = os.getTokenInt();
@@ -599,13 +599,13 @@ void TextureManager::readAnimDefLump()
 //
 void TextureManager::readAnimatedLump()
 {
-    byte *filedata = NULL;
+    uint8_t *filedata = NULL;
     int filelen = M_ReadFile("lumps/ANIMATED.lmp", &filedata);
 
     if (filelen <= 0 || filedata == NULL)
         return;
 
-    for (byte *ptr = filedata; *ptr != 255; ptr += 23)
+    for (uint8_t *ptr = filedata; *ptr != 255; ptr += 23)
     {
         anim_t anim;
 
@@ -713,7 +713,7 @@ void TextureManager::generateNotFoundTexture()
         const argb_t     color2(0, 255, 255); // yellow
         const palindex_t color1_index = V_BestColor(V_GetDefaultPalette()->basecolors, color1);
         const palindex_t color2_index = V_BestColor(V_GetDefaultPalette()->basecolors, color2);
-        texture->mData = new byte[width * height];
+        texture->mData = new uint8_t[width * height];
 
         for (int x = 0; x < width / 2; x++)
         {
@@ -792,7 +792,7 @@ texhandle_t TextureManager::getSpriteHandle(const OString &name)
 //
 void TextureManager::cacheSprite(texhandle_t handle)
 {
-    unsigned int filenum = (handle & ~SPRITE_HANDLE_MASK);
+    uint32_t filenum = (handle & ~SPRITE_HANDLE_MASK);
 
     if (filenum-1 >= mSpriteFilenames.size())
             I_FatalError("TextureManager::cacheSprite: Invalid handle %d requested (%d is highest valid handle)\n", filenum-1, mSpriteFilenames.size()-1);
@@ -802,9 +802,9 @@ void TextureManager::cacheSprite(texhandle_t handle)
     if (rawsprite == NULL)
         I_FatalError("TextureManager::cacheSprite: Error opening %s\n", mSpriteFilenames[filenum-1].c_str());
 
-    unsigned int filelen = PHYSFS_fileLength(rawsprite);
+    uint32_t filelen = PHYSFS_fileLength(rawsprite);
 
-    byte *filedata = new byte[filelen];
+    uint8_t *filedata = new uint8_t[filelen];
     if (PHYSFS_readBytes(rawsprite, filedata, filelen) != filelen)
     {
         delete[] filedata;
@@ -856,7 +856,7 @@ void TextureManager::cacheSprite(texhandle_t handle)
         int j = 0;
         for (; i<filelen && j<5; i++)
         {
-            static byte pgs[5] = { 0x08, 'g', 'r', 'A', 'b' };
+            static uint8_t pgs[5] = { 0x08, 'g', 'r', 'A', 'b' };
             if (filedata[i] == pgs[j])
                 j++;
             else
@@ -1041,7 +1041,7 @@ void TextureManager::cacheSprite(texhandle_t handle)
         mem_fseek(newpatch, 8, MEM_SEEK_SET);
         mem_fwrite(col_offsets.data(), columns.size() * 4, 1, newpatch);
 
-        byte *newnewpatch = new byte[R_CalculateNewPatchSize((patch_t*)mem_fgetbuf(newpatch), mem_fsize(newpatch))+1];
+        uint8_t *newnewpatch = new uint8_t[R_CalculateNewPatchSize((patch_t*)mem_fgetbuf(newpatch), mem_fsize(newpatch))+1];
 
         R_ConvertPatch((patch_t *)newnewpatch, (patch_t *)mem_fgetbuf(newpatch));
 
@@ -1072,7 +1072,7 @@ texhandle_t TextureManager::getFlatHandle(const OString &name)
 //
 void TextureManager::cacheFlat(texhandle_t handle)
 {
-    unsigned int filenum = (handle & ~FLAT_HANDLE_MASK);
+    uint32_t filenum = (handle & ~FLAT_HANDLE_MASK);
 
     if (filenum-1 >= mFlatFilenames.size())
             I_FatalError("TextureManager::cacheFlat: Invalid handle %d requested (%d is highest valid handle)\n", filenum-1, mFlatFilenames.size()-1);
@@ -1082,9 +1082,9 @@ void TextureManager::cacheFlat(texhandle_t handle)
     if (rawflat == NULL)
         I_FatalError("TextureManager::cacheFlat: Error opening %s\n", mFlatFilenames[filenum-1].c_str());
 
-    unsigned int filelen = PHYSFS_fileLength(rawflat);
+    uint32_t filelen = PHYSFS_fileLength(rawflat);
 
-    byte *filedata = new byte[filelen];
+    uint8_t *filedata = new uint8_t[filelen];
     if (PHYSFS_readBytes(rawflat, filedata, filelen) != filelen)
     {
         delete[] filedata;
@@ -1135,18 +1135,18 @@ void TextureManager::cacheFlat(texhandle_t handle)
         if (need_bpp)
             bpp = need_bpp;
 
-        unsigned int pixel_step = width * bpp;
+        uint32_t pixel_step = width * bpp;
 
         Texture *texture = createTexture(handle, width, height);
-        texture->mData = new byte[width * height];
+        texture->mData = new uint8_t[width * height];
         memset(texture->mData, 0, width * height);
 
-        for (unsigned int x = 0; x < width; x++)
+        for (uint32_t x = 0; x < width; x++)
         {
-            byte *dest = texture->mData + x;
+            uint8_t *dest = texture->mData + x;
             uint8_t *pixel = decoded_img + x * bpp;
 
-            for (unsigned int y = 0; y < height; y++)
+            for (uint32_t y = 0; y < height; y++)
             {
                 argb_t color(bpp == 4 ? *(pixel+3) : 255, *pixel, *(pixel+1), *(pixel+2));
 
@@ -1184,7 +1184,7 @@ texhandle_t TextureManager::getTextureHandle(const OString &name)
 //
 void TextureManager::cacheTexture(texhandle_t handle)
 {
-    unsigned int filenum = (handle & ~TEXTURE_HANDLE_MASK);
+    uint32_t filenum = (handle & ~TEXTURE_HANDLE_MASK);
 
     if (filenum-1 >= mTextureFilenames.size())
             I_FatalError("TextureManager::cacheTexture: Invalid handle %d requested (%d is highest valid handle)\n", filenum-1, mTextureFilenames.size()-1);
@@ -1194,9 +1194,9 @@ void TextureManager::cacheTexture(texhandle_t handle)
     if (rawtex == NULL)
         I_FatalError("TextureManager::cacheTexture: Error opening %s\n", mTextureFilenames[filenum-1].c_str());
 
-    unsigned int filelen = PHYSFS_fileLength(rawtex);
+    uint32_t filelen = PHYSFS_fileLength(rawtex);
 
-    byte *filedata = new byte[filelen];
+    uint8_t *filedata = new uint8_t[filelen];
     if (PHYSFS_readBytes(rawtex, filedata, filelen) != filelen)
     {
         delete[] filedata;
@@ -1248,7 +1248,7 @@ void TextureManager::cacheTexture(texhandle_t handle)
         int j = 0;
         for (; i<filelen && j<5; i++)
         {
-            static byte pgs[5] = { 0x08, 'g', 'r', 'A', 'b' };
+            static uint8_t pgs[5] = { 0x08, 'g', 'r', 'A', 'b' };
             if (filedata[i] == pgs[j])
                 j++;
             else
@@ -1433,7 +1433,7 @@ void TextureManager::cacheTexture(texhandle_t handle)
         mem_fseek(newpatch, 8, MEM_SEEK_SET);
         mem_fwrite(col_offsets.data(), columns.size() * 4, 1, newpatch);
 
-        byte *newnewpatch = new byte[R_CalculateNewPatchSize((patch_t*)mem_fgetbuf(newpatch), mem_fsize(newpatch))+1];
+        uint8_t *newnewpatch = new uint8_t[R_CalculateNewPatchSize((patch_t*)mem_fgetbuf(newpatch), mem_fsize(newpatch))+1];
 
         R_ConvertPatch((patch_t *)newnewpatch, (patch_t *)mem_fgetbuf(newpatch));
 

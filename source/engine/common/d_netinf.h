@@ -72,12 +72,12 @@ struct UserInfo
     team_t         team; // [Toke - Teams]
     fixed_t        aimdist;
     bool           predict_weapons;
-    byte           color[4];
+    uint8_t           color[4];
     gender_t       gender;
     weaponswitch_t switchweapon;
-    byte           weapon_prefs[NUMWEAPONS];
+    uint8_t           weapon_prefs[NUMWEAPONS];
 
-    static const byte weapon_prefs_default[NUMWEAPONS];
+    static const uint8_t weapon_prefs_default[NUMWEAPONS];
 
     UserInfo() : team(TEAM_NONE), aimdist(0), predict_weapons(true), gender(GENDER_MALE), switchweapon(WPSW_ALWAYS)
     {
@@ -95,7 +95,7 @@ void D_SetupUserInfo(void);
 void D_UserInfoChanged(cvar_t *info);
 
 void D_SendServerInfoChange(const cvar_t *cvar, const char *value);
-void D_DoServerInfoChange(byte **stream);
+void D_DoServerInfoChange(uint8_t **stream);
 
-void D_WriteUserInfoStrings(int player, byte **stream, bool compact = false);
-void D_ReadUserInfoStrings(int player, byte **stream, bool update);
+void D_WriteUserInfoStrings(int player, uint8_t **stream, bool compact = false);
+void D_ReadUserInfoStrings(int player, uint8_t **stream, bool update);

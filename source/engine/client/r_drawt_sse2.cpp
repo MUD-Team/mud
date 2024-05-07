@@ -70,15 +70,15 @@ void R_DrawSpanD_SSE2(void)
     dsfixed_t ustep = dspan.ystep;
     dsfixed_t vstep = dspan.xstep;
 
-    const byte *source = dspan.source;
+    const uint8_t *source = dspan.source;
     argb_t     *dest   = (argb_t *)dspan.destination + dspan.y * dspan.pitch_in_pixels + dspan.x1;
 
     shaderef_t colormap = dspan.colormap;
 
     const int texture_width_bits = 6, texture_height_bits = 6;
 
-    const unsigned int umask = ((1 << texture_width_bits) - 1) << texture_height_bits;
-    const unsigned int vmask = (1 << texture_height_bits) - 1;
+    const uint32_t umask = ((1 << texture_width_bits) - 1) << texture_height_bits;
+    const uint32_t vmask = (1 << texture_height_bits) - 1;
     // TODO: don't shift the values of ufrac and vfrac by 10 in R_MapLevelPlane
     const int ushift = FRACBITS - texture_height_bits + 10;
     const int vshift = FRACBITS + 10;
@@ -94,7 +94,7 @@ void R_DrawSpanD_SSE2(void)
     while (align--)
     {
         // Current texture index in u,v.
-        const unsigned int spot = ((ufrac >> ushift) & umask) | ((vfrac >> vshift) & vmask);
+        const uint32_t spot = ((ufrac >> ushift) & umask) | ((vfrac >> vshift) & vmask);
 
         // Lookup pixel from flat texture tile,
         //  re-index using light/colormap.
@@ -126,13 +126,13 @@ void R_DrawSpanD_SSE2(void)
         __m128i       u      = _mm_and_si128(_mm_srli_epi32(mufrac, ushift), mumask);
         __m128i       v      = _mm_and_si128(_mm_srli_epi32(mvfrac, vshift), mvmask);
         __m128i       mspots = _mm_or_si128(u, v);
-        unsigned int *spots  = (unsigned int *)&mspots;
+        uint32_t *spots  = (uint32_t *)&mspots;
 
         // get the color of the pixels at each of the spots
-        byte pixel0 = source[spots[0]];
-        byte pixel1 = source[spots[1]];
-        byte pixel2 = source[spots[2]];
-        byte pixel3 = source[spots[3]];
+        uint8_t pixel0 = source[spots[0]];
+        uint8_t pixel1 = source[spots[1]];
+        uint8_t pixel2 = source[spots[2]];
+        uint8_t pixel3 = source[spots[3]];
 
         const __m128i finalColors = _mm_setr_epi32(colormap.shade(pixel0), colormap.shade(pixel1),
                                                    colormap.shade(pixel2), colormap.shade(pixel3));
@@ -188,7 +188,7 @@ void R_DrawSlopeSpanD_SSE2(void)
     argb_t *dest = (argb_t *)dspan.destination + dspan.y * dspan.pitch_in_pixels + dspan.x1;
 
     // texture data
-    byte *src = (byte *)dspan.source;
+    uint8_t *src = (uint8_t *)dspan.source;
 
     int ltindex = 0; // index into the lighting table
 

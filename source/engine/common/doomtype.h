@@ -58,9 +58,6 @@
 typedef int BOOL;
 #endif
 
-typedef unsigned char byte;
-typedef unsigned int  uint;
-
 #if defined(_MSC_VER) || defined(__WATCOMC__)
 #define STACK_ARGS __cdecl
 #else
@@ -73,81 +70,10 @@ typedef unsigned int  uint;
 #include <limits.h>
 #endif
 
-#if defined(__GNUC__) && !defined(OSF1)
-#define __int64 long long
-#endif
-
-#ifdef OSF1
-#define __int64 long
-#endif
-
-#if (defined _MSC_VER)
-#if !defined(__clang__)
-#define DBL_EPSILON 2.2204460492503131e-016
-#define FLT_EPSILON 1.192092896e-07F
-#endif
-
-#define PRI_SIZE_PREFIX "I"
-#else
-#include <float.h>
-
-#define PRI_SIZE_PREFIX "z"
-#endif
-
-// Format constants for ssize_t/size_t.
-
-#define PRIdSIZE PRI_SIZE_PREFIX "d"
-#define PRIiSIZE PRI_SIZE_PREFIX "i"
-#define PRIuSIZE PRI_SIZE_PREFIX "u"
-#define PRIoSIZE PRI_SIZE_PREFIX "o"
-#define PRIxSIZE PRI_SIZE_PREFIX "x"
-#define PRIXSIZE PRI_SIZE_PREFIX "X"
-
 #ifdef UNIX
 #define stricmp  strcasecmp
 #define strnicmp strncasecmp
 #endif
-
-#ifndef MIN_SHORT
-#define MIN_SHORT ((short)0x8000)
-#endif
-#ifndef MAX_SHORT
-#define MAX_SHORT ((short)0x7fff)
-#endif
-
-#ifndef MIN_INT
-#define MIN_INT ((int)0x80000000)
-#endif
-#ifndef MAX_INT
-#define MAX_INT (0x7fffffff)
-#endif
-
-#ifndef MAX_UINT
-#define MAX_UINT (0xffffffff)
-#endif
-
-#define MIN_FIXED (signed)(0x80000000)
-#define MAX_FIXED (signed)(0x7fffffff)
-
-typedef unsigned char BYTE;
-typedef signed char   SBYTE;
-
-typedef unsigned short WORD;
-typedef signed short   SWORD;
-
-// denis - todo - this 64 bit fix conflicts with windows' idea of long
-#ifndef _WIN32
-typedef unsigned int DWORD;
-typedef signed int   SDWORD;
-#else
-typedef unsigned long DWORD;
-typedef signed long   SDWORD;
-#endif
-
-typedef unsigned __int64 QWORD;
-typedef signed __int64   SQWORD;
-
-typedef DWORD BITFIELD;
 
 typedef uint64_t dtime_t;
 
@@ -570,14 +496,14 @@ class translationref_t
     translationref_t(const palindex_t *table);
     translationref_t(const palindex_t *table, const int player_id);
 
-    palindex_t        tlate(const byte c) const;
+    palindex_t        tlate(const uint8_t c) const;
     int               getPlayerID() const;
     const palindex_t *getTable() const;
 
     operator bool() const;
 };
 
-forceinline palindex_t translationref_t::tlate(const byte c) const
+forceinline palindex_t translationref_t::tlate(const uint8_t c) const
 {
 #if ODAMEX_DEBUG
     if (m_table == NULL)
@@ -591,7 +517,7 @@ forceinline int translationref_t::getPlayerID() const
     return m_player_id;
 }
 
-forceinline const byte *translationref_t::getTable() const
+forceinline const uint8_t *translationref_t::getTable() const
 {
     return m_table;
 }
@@ -605,7 +531,7 @@ typedef struct
 {
     palindex_t *colormap;  // Colormap for 8-bit
     argb_t     *shademap;  // ARGB8888 values for 32-bit
-    byte        ramp[256]; // Light fall-off as a function of distance
+    uint8_t        ramp[256]; // Light fall-off as a function of distance
                            // Light levels: 0 = black, 255 = full bright.
                            // Distance:     0 = near,  255 = far.
 } shademap_t;
@@ -635,13 +561,13 @@ struct shaderef_t
 
     shaderef_t with(const int mapnum) const;
 
-    palindex_t        index(const byte c) const;
-    argb_t            shade(const byte c) const;
+    palindex_t        index(const uint8_t c) const;
+    argb_t            shade(const uint8_t c) const;
     const shademap_t *map() const;
     int               mapnum() const;
-    byte              ramp() const;
+    uint8_t              ramp() const;
 
-    argb_t tlate(const translationref_t &translation, const byte c) const;
+    argb_t tlate(const translationref_t &translation, const uint8_t c) const;
 
     bool operator==(const shaderef_t &other) const;
 };
@@ -699,49 +625,49 @@ forceinline bool shaderef_t::operator==(const shaderef_t &other) const
 // NOTE(jsd): Constructors are implemented in "v_palette.cpp"
 
 // rt_rawcolor does no color mapping and only uses the default palette.
-template <typename pixel_t> static forceinline pixel_t rt_rawcolor(const shaderef_t &pal, const byte c);
+template <typename pixel_t> static forceinline pixel_t rt_rawcolor(const shaderef_t &pal, const uint8_t c);
 
 // rt_mapcolor does color mapping.
-template <typename pixel_t> static forceinline pixel_t rt_mapcolor(const shaderef_t &pal, const byte c);
+template <typename pixel_t> static forceinline pixel_t rt_mapcolor(const shaderef_t &pal, const uint8_t c);
 
 // rt_tlatecolor does color mapping and translation.
 template <typename pixel_t>
-static forceinline pixel_t rt_tlatecolor(const shaderef_t &pal, const translationref_t &translation, const byte c);
+static forceinline pixel_t rt_tlatecolor(const shaderef_t &pal, const translationref_t &translation, const uint8_t c);
 
 // rt_blend2 does alpha blending between two colors.
 template <typename pixel_t>
 static forceinline pixel_t rt_blend2(const pixel_t bg, const int bga, const pixel_t fg, const int fga);
 
-template <> forceinline palindex_t rt_rawcolor<palindex_t>(const shaderef_t &pal, const byte c)
+template <> forceinline palindex_t rt_rawcolor<palindex_t>(const shaderef_t &pal, const uint8_t c)
 {
     // NOTE(jsd): For rawcolor we do no index.
     return (c);
 }
 
-template <> forceinline argb_t rt_rawcolor<argb_t>(const shaderef_t &pal, const byte c)
+template <> forceinline argb_t rt_rawcolor<argb_t>(const shaderef_t &pal, const uint8_t c)
 {
     return pal.shade(c);
 }
 
-template <> forceinline palindex_t rt_mapcolor<palindex_t>(const shaderef_t &pal, const byte c)
+template <> forceinline palindex_t rt_mapcolor<palindex_t>(const shaderef_t &pal, const uint8_t c)
 {
     return pal.index(c);
 }
 
-template <> forceinline argb_t rt_mapcolor<argb_t>(const shaderef_t &pal, const byte c)
+template <> forceinline argb_t rt_mapcolor<argb_t>(const shaderef_t &pal, const uint8_t c)
 {
     return pal.shade(c);
 }
 
 template <>
 forceinline palindex_t rt_tlatecolor<palindex_t>(const shaderef_t &pal, const translationref_t &translation,
-                                                 const byte c)
+                                                 const uint8_t c)
 {
     return translation.tlate(pal.index(c));
 }
 
 template <>
-forceinline argb_t rt_tlatecolor<argb_t>(const shaderef_t &pal, const translationref_t &translation, const byte c)
+forceinline argb_t rt_tlatecolor<argb_t>(const shaderef_t &pal, const translationref_t &translation, const uint8_t c)
 {
     return pal.tlate(translation, c);
 }

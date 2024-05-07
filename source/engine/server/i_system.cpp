@@ -75,7 +75,7 @@ const size_t min_heapsize = 8;
 // The size we got back from I_ZoneBase in megabytes
 size_t got_heapsize = 0;
 
-DWORD LanguageIDs[4];
+uint32_t LanguageIDs[4];
 
 //
 // I_MegabytesToBytes
@@ -342,7 +342,7 @@ void STACK_ARGS I_Quit(void)
 //
 // I_Error
 //
-BOOL gameisdead;
+bool gameisdead;
 
 #define MAX_ERRORTEXT 1024
 
@@ -350,7 +350,7 @@ void STACK_ARGS call_terms(void);
 
 void STACK_ARGS I_FatalError(const char *error, ...)
 {
-    static BOOL alreadyThrown = false;
+    static bool alreadyThrown = false;
     gameisdead                = true;
 
     if (!alreadyThrown) // ignore all but the first message -- killough
@@ -402,7 +402,7 @@ void I_SetTitleString(const char *title)
         DoomStartupTitle[i] = title[i] | 0x80;
 }
 
-void I_PrintStr(int xp, const char *cp, int count, BOOL scroll)
+void I_PrintStr(int xp, const char *cp, int count, bool scroll)
 {
     char string[4096];
 
@@ -413,29 +413,6 @@ void I_PrintStr(int xp, const char *cp, int count, BOOL scroll)
 
     fputs(string, stdout);
     fflush(stdout);
-}
-
-// static const char *pattern; // [DL] todo - remove
-// static findstate_t *findstates[8]; // [DL] todo - remove
-
-long I_FindFirst(char *filespec, findstate_t *fileinfo)
-{
-    return 0;
-}
-
-int I_FindNext(long handle, findstate_t *fileinfo)
-{
-    return 0;
-}
-
-int I_FindClose(long handle)
-{
-    return 0;
-}
-
-int I_FindAttr(findstate_t *fileinfo)
-{
-    return 0;
 }
 
 //
@@ -449,7 +426,7 @@ std::string I_ConsoleInput(void)
     // denis - todo - implement this properly!!!
     static char  text[1024]   = {0};
     static char  buffer[1024] = {0};
-    unsigned int len          = strlen(buffer);
+    uint32_t len          = strlen(buffer);
 
     if (ShutdownNow())
         return "quit";

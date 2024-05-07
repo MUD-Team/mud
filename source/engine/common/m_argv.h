@@ -37,7 +37,7 @@ class DArgs : public DObject
   public:
     DArgs();
     DArgs(const DArgs &args);
-    DArgs(unsigned int argc, char **argv);
+    DArgs(uint32_t argc, char **argv);
     DArgs(const char *cmdline);
     ~DArgs();
 
@@ -45,9 +45,9 @@ class DArgs : public DObject
     const char *operator[](size_t n);
 
     void  AppendArg(const char *arg);
-    void  SetArgs(unsigned int argc, char **argv);
+    void  SetArgs(uint32_t argc, char **argv);
     DArgs GatherFiles(const char *param) const;
-    void  SetArg(unsigned int argnum, const char *arg);
+    void  SetArg(uint32_t argnum, const char *arg);
 
     // Returns the position of the given parameter
     // in the arg list (0 if not found).
@@ -61,7 +61,7 @@ class DArgs : public DObject
   private:
     std::vector<std::string> args;
 
-    void CopyArgs(unsigned int argc, char **argv);
+    void CopyArgs(uint32_t argc, char **argv);
 };
 
 extern DArgs Args;

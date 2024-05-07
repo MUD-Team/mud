@@ -39,7 +39,7 @@ enum
     LANGIDX_SysPreferred,
     LANGIDX_SysDefault
 };
-extern DWORD LanguageIDs[4];
+extern uint32_t LanguageIDs[4];
 extern void  SetLanguageIDs();
 
 void I_BeginRead(void);
@@ -89,7 +89,7 @@ void addterm(void(STACK_ARGS *func)(void), const char *name);
 void I_PaintConsole(void);
 
 // Print a console string
-void I_PrintStr(int x, const char *str, int count, BOOL scroll);
+void I_PrintStr(int x, const char *str, int count, bool scroll);
 
 // Set the title string of the startup window
 void I_SetTitleString(const char *title);
@@ -115,20 +115,3 @@ std::string I_GetClipboardText();
  * @param message Contents of the message box.
  */
 void I_ErrorMessageBox(const char *message);
-
-// Directory searching routines
-
-typedef struct _finddata_t findstate_t;
-
-long I_FindFirst(char *filespec, findstate_t *fileinfo);
-int  I_FindNext(long handle, findstate_t *fileinfo);
-int  I_FindClose(long handle);
-
-#define I_FindName(a) ((a)->name)
-#define I_FindAttr(a) ((a)->attrib)
-
-#define FA_RDONLY _A_RDONLY
-#define FA_HIDDEN _A_HIDDEN
-#define FA_SYSTEM _A_SYSTEM
-#define FA_DIREC  _A_SUBDIR
-#define FA_ARCH   _A_ARCH

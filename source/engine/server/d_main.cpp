@@ -86,11 +86,11 @@ extern gameinfo_t CommercialGameInfo;
 extern gameinfo_t RetailBFGGameInfo;
 extern gameinfo_t CommercialBFGGameInfo;
 
-extern BOOL          gameisdead;
+extern bool          gameisdead;
 extern DThinker      ThinkerCap;
 extern dyncolormap_t NormalLight;
 
-BOOL        devparm;                       // started game with -devparm
+bool        devparm;                       // started game with -devparm
 char        startmap[8];
 event_t     events[MAXEVENTS];
 
@@ -224,7 +224,7 @@ void D_Init_DEHEXTRA_Frames(void);
 //
 void D_DoomMain()
 {
-    unsigned int p;
+    uint32_t p;
 
     gamestate = GS_STARTUP;
 

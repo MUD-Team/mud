@@ -39,8 +39,8 @@
 
 typedef struct
 {
-    byte offset;
-    byte size;
+    uint8_t offset;
+    uint8_t size;
     char tl[8];
     char t[8];
     char tr[8];

@@ -32,7 +32,7 @@
 #include "p_local.h"
 #include "sv_main.h"
 
-QWORD I_MSTime(void);
+uint64_t I_MSTime(void);
 
 EXTERN_CVAR(log_packetdebug)
 #ifdef SIMULATE_LATENCY
@@ -66,7 +66,7 @@ static void CompressPacket(buf_t &send, const size_t reserved, client_t *cl)
     plain.setcursize(send.size());
     memcpy(plain.ptr(), send.ptr(), send.size());
 
-    byte method = 0;
+    uint8_t method = 0;
     if (MSG_CompressMinilzo(send, reserved, 0))
     {
         // Successful compression, set the compression flag bit.
@@ -74,7 +74,7 @@ static void CompressPacket(buf_t &send, const size_t reserved, client_t *cl)
     }
 
     send.ptr()[PACKET_FLAG_INDEX] |= method;
-    DPrintf("CompressPacket %x " PRIuSIZE "\n", method, send.size());
+    DPrintf("CompressPacket %x %zu\n", method, send.size());
 }
 
 #ifdef SIMULATE_LATENCY

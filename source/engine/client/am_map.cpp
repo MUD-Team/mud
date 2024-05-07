@@ -190,7 +190,7 @@ static int f_w;
 static int f_h;
 static int f_p;               // [RH] # of bytes from start of a line to start of next
 
-static byte *fb;              // pseudo-frame buffer
+static uint8_t *fb;              // pseudo-frame buffer
 static int   amclock;
 
 static mpoint_t m_paninc;     // how far the window pans each tic (map coords)
@@ -282,7 +282,7 @@ END_COMMAND(am_big)
 BEGIN_COMMAND(am_togglefollow)
 {
     am_followplayer = !am_followplayer;
-    f_oldloc.x      = MAX_INT;
+    f_oldloc.x      = INT32_MAX;
     Printf(PRINT_HIGH, "%s\n", am_followplayer ? GStrings(AMSTR_FOLLOWON) : GStrings(AMSTR_FOLLOWOFF));
 }
 END_COMMAND(am_togglefollow)
@@ -369,8 +369,8 @@ void AM_addMark()
 //
 void AM_findMinMaxBoundaries()
 {
-    M_SetVec2Fixed(&min, MAX_INT, MAX_INT);
-    M_SetVec2Fixed(&max, -MAX_INT, -MAX_INT);
+    M_SetVec2Fixed(&min, INT32_MAX, INT32_MAX);
+    M_SetVec2Fixed(&max, -INT32_MAX, -INT32_MAX);
 
     for (int i = 0; i < numvertexes; i++)
     {
@@ -403,7 +403,7 @@ void AM_changeWindowLoc()
     if (m_paninc.x || m_paninc.y)
     {
         am_followplayer.Set(0.0f);
-        f_oldloc.x = MAX_INT;
+        f_oldloc.x = INT32_MAX;
     }
 
     M_AddVec2Fixed(&m_ll, &m_paninc, &m_ll);
@@ -455,7 +455,7 @@ void AM_initVariables()
 
     automapactive = true;
 
-    f_oldloc.x = MAX_INT;
+    f_oldloc.x = INT32_MAX;
     amclock    = 0;
 
     M_SetVec2Fixed(&m_wh, FTOM(I_GetSurfaceWidth()), FTOM(I_GetSurfaceHeight()));
@@ -817,7 +817,7 @@ END_COMMAND(togglemap)
 //
 // Handle events (user inputs) in automap mode
 //
-BOOL AM_Responder(event_t *ev)
+bool AM_Responder(event_t *ev)
 {
     if (automapactive && (ev->type == ev_keydown || ev->type == ev_keyup))
     {

@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
             }
         }
 
-        unsigned int sdl_flags = SDL_INIT_TIMER;
+        uint32_t sdl_flags = SDL_INIT_TIMER;
 
 #ifdef _MSC_VER
         // [SL] per the SDL documentation, SDL's parachute, used to cleanup

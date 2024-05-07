@@ -31,7 +31,7 @@
 
 // The default preference ordering when the player runs out of one type of ammo.
 // Vanilla Doom compatible.
-const byte UserInfo::weapon_prefs_default[NUMWEAPONS] = {
+const uint8_t UserInfo::weapon_prefs_default[NUMWEAPONS] = {
     0, // wp_fist
     4, // wp_pistol
     5, // wp_shotgun
@@ -150,7 +150,7 @@ static cvar_t *weaponpref_cvar_map[NUMWEAPONS] = {&cl_weaponpref_fst, &cl_weapon
 //
 void D_PrepareWeaponPreferenceUserInfo()
 {
-    byte *prefs = consoleplayer().userinfo.weapon_prefs;
+    uint8_t *prefs = consoleplayer().userinfo.weapon_prefs;
 
     for (size_t i = 0; i < NUMWEAPONS; i++)
     {
@@ -231,9 +231,9 @@ FArchive &operator<<(FArchive &arc, UserInfo &info)
 
     // [SL] use place-holders for deprecated client options
     // so old save games and netdemos continue to function
-    unsigned int skin        = 0;
+    uint32_t skin        = 0;
     bool         unlag       = true;
-    byte         update_rate = 0;
+    uint8_t         update_rate = 0;
     arc << skin;
     arc << unlag;
     arc << update_rate;
@@ -261,9 +261,9 @@ FArchive &operator>>(FArchive &arc, UserInfo &info)
 
     // [SL] use place-holders for deprecated client options
     // so old save games and netdemos continue to function.
-    unsigned int skin;
+    uint32_t skin;
     bool         unlag;
-    byte         update_rate;
+    uint8_t         update_rate;
     arc >> skin;
     arc >> unlag;
     arc >> update_rate;
