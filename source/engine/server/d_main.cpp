@@ -154,6 +154,8 @@ void D_Init()
     V_InitPalette("PLAYPAL.pal");
     R_InitColormaps();
 
+    Res_InitTextureManager();
+
     // [RH] Initialize localizable strings.
     ::GStrings.loadStrings(false);
 
@@ -198,6 +200,8 @@ void STACK_ARGS D_Shutdown()
     W_Close();
 
     R_ShutdownColormaps();
+
+    Res_ShutdownTextureManager();
 
     // reset the Zone memory manager
     Z_Close();
