@@ -526,7 +526,7 @@ class MidiSequencer
 
   private:
     //! SMF format identifier.
-    unsigned m_midi_smf_format;
+    uint32_t m_midi_smf_format;
     //! Loop points format
     LoopFormat m_midi_loop_format;
 
@@ -708,7 +708,7 @@ class MidiSequencer
      * @param trigger Value of the event which triggered this callback.
      * @param track Identifier of the track which triggered this callback.
      */
-    typedef void (*TriggerHandler)(void *userdata, unsigned trigger, size_t track);
+    typedef void (*TriggerHandler)(void *userdata, uint32_t trigger, size_t track);
 
     //! Handler of callback trigger events
     TriggerHandler m_midi_trigger_handler;
@@ -968,7 +968,7 @@ class MidiSequencer
  * @brief Utility function to read Big-Endian integer from raw binary data
  * @param buffer Pointer to raw binary buffer
  * @param nbytes Count of bytes to parse integer
- * @return Extracted unsigned integer
+ * @return Extracted uint32_teger
  */
 static inline uint64_t readIntBigEndian(const void *buffer, size_t nbytes)
 {
@@ -985,7 +985,7 @@ static inline uint64_t readIntBigEndian(const void *buffer, size_t nbytes)
  * @brief Utility function to read Little-Endian integer from raw binary data
  * @param buffer Pointer to raw binary buffer
  * @param nbytes Count of bytes to parse integer
- * @return Extracted unsigned integer
+ * @return Extracted uint32_teger
  */
 static inline uint64_t readIntLittleEndian(const void *buffer, size_t nbytes)
 {
@@ -1018,7 +1018,7 @@ static inline uint64_t readVariableLengthValue(const uint8_t **ptr, const uint8_
     {
         if (*ptr >= end)
             return 2;
-        unsigned char byte = *((*ptr)++);
+        uint8_t byte = *((*ptr)++);
         result             = (result << 7) + (byte & 0x7F);
         if (!(byte & 0x80))
             break;
@@ -1769,7 +1769,7 @@ void MidiSequencer::buildTimeline(const std::vector<MidiEvent> &tempos, uint64_t
     /********************************************************************************/
     if (!m_midi_loop.m_invalid_loop && !m_midi_current_position.track.empty())
     {
-        unsigned     caughLoopStart = 0;
+        uint32_t     caughLoopStart = 0;
         bool         scanDone       = false;
         const size_t ctrack_count   = m_midi_current_position.track.size();
         Position     rowPosition(m_midi_current_position);
@@ -1851,11 +1851,11 @@ bool MidiSequencer::processEvents(bool is_seek)
     const size_t   track_count = m_midi_current_position.track.size();
     const Position rowBeginPosition(m_midi_current_position);
     bool           doLoopJump             = false;
-    unsigned       caughLoopStart         = 0;
-    unsigned       caughLoopStackStart    = 0;
-    unsigned       caughLoopStackEnds     = 0;
+    uint32_t       caughLoopStart         = 0;
+    uint32_t       caughLoopStackStart    = 0;
+    uint32_t       caughLoopStackEnds     = 0;
     double         caughLoopStackEndsTime = 0.0;
-    unsigned       caughLoopStackBreaks   = 0;
+    uint32_t       caughLoopStackBreaks   = 0;
 
     for (size_t tk = 0; tk < track_count; ++tk)
     {
@@ -2088,7 +2088,7 @@ MidiSequencer::MidiEvent MidiSequencer::parseEvent(const uint8_t **pptr, const u
         return evt;
     }
 
-    unsigned char byte = *(ptr++);
+    uint8_t byte = *(ptr++);
     bool          ok   = false;
 
     if (byte == MidiEvent::EVENT_SYSEX || byte == MidiEvent::EVENT_SYSEX2) // Ignore SysEx
@@ -2512,7 +2512,7 @@ void MidiSequencer::handleEvent(size_t track, const MidiSequencer::MidiEvent &ev
         if (evtype == MidiEvent::EVENT_SUB_CALLBACK_TRIGGER)
         {
             if (m_midi_trigger_handler)
-                m_midi_trigger_handler(m_midi_trigger_userdata, (unsigned)(data[0]), track);
+                m_midi_trigger_handler(m_midi_trigger_userdata, (uint32_t)(data[0]), track);
             return;
         }
 
@@ -2829,7 +2829,7 @@ bool MidiSequencer::_ParseSmf(MEMFILE *mfr)
     char                              headerBuf[headerSize] = "";
     size_t                            fsize                 = 0;
     size_t                            deltaTicks = 192, TrackCount = 1;
-    unsigned                          smfFormat = 0;
+    uint32_t                          smfFormat = 0;
     std::vector<std::vector<uint8_t>> rawTrackData;
 
     fsize = mem_fread(headerBuf, headerSize, 1, mfr) * headerSize;
@@ -2849,7 +2849,7 @@ bool MidiSequencer::_ParseSmf(MEMFILE *mfr)
         return false;
     }
 
-    smfFormat  = (unsigned)(readIntBigEndian(headerBuf + 8, 2));
+    smfFormat  = (uint32_t)(readIntBigEndian(headerBuf + 8, 2));
     TrackCount = (size_t)(readIntBigEndian(headerBuf + 10, 2));
     deltaTicks = (size_t)(readIntBigEndian(headerBuf + 12, 2));
 

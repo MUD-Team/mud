@@ -30,7 +30,7 @@
 class player_s;
 typedef player_s player_t;
 
-static const short CENTERVIEW = -32768;
+static const int16_t CENTERVIEW = -32768;
 //
 // NetCommand
 //
@@ -90,7 +90,7 @@ class NetCommand
     {
         return mWorldIndex;
     }
-    byte getButtons() const
+    uint8_t getButtons() const
     {
         return mButtons;
     }
@@ -102,27 +102,27 @@ class NetCommand
     {
         return mPitch;
     }
-    short getForwardMove() const
+    int16_t getForwardMove() const
     {
         return mForwardMove;
     }
-    short getSideMove() const
+    int16_t getSideMove() const
     {
         return mSideMove;
     }
-    short getUpMove() const
+    int16_t getUpMove() const
     {
         return mUpMove;
     }
-    byte getImpulse() const
+    uint8_t getImpulse() const
     {
         return mImpulse;
     }
-    short getDeltaYaw() const
+    int16_t getDeltaYaw() const
     {
         return mDeltaYaw;
     }
-    short getDeltaPitch() const
+    int16_t getDeltaPitch() const
     {
         return mDeltaPitch;
     }
@@ -137,7 +137,7 @@ class NetCommand
         mWorldIndex = val;
     }
 
-    void setButtons(byte val)
+    void setButtons(uint8_t val)
     {
         updateFields(CMD_BUTTONS, val);
         mButtons = val;
@@ -155,37 +155,37 @@ class NetCommand
         mPitch = val;
     }
 
-    void setForwardMove(short val)
+    void setForwardMove(int16_t val)
     {
         updateFields(CMD_FORWARD, val);
         mForwardMove = val;
     }
 
-    void setSideMove(short val)
+    void setSideMove(int16_t val)
     {
         updateFields(CMD_SIDE, val);
         mSideMove = val;
     }
 
-    void setUpMove(short val)
+    void setUpMove(int16_t val)
     {
         updateFields(CMD_UP, val);
         mUpMove = val;
     }
 
-    void setImpulse(byte val)
+    void setImpulse(uint8_t val)
     {
         updateFields(CMD_IMPULSE, val);
         mImpulse = val;
     }
 
-    void setDeltaYaw(short val)
+    void setDeltaYaw(int16_t val)
     {
         updateFields(CMD_DELTAYAW, val);
         mDeltaYaw = val;
     }
 
-    void setDeltaPitch(short val)
+    void setDeltaPitch(int16_t val)
     {
         updateFields(CMD_DELTAPITCH, val);
         mDeltaPitch = val;
@@ -212,15 +212,15 @@ class NetCommand
     int     mTic;
     int     mWorldIndex;
     int     mFields;
-    byte    mButtons;
+    uint8_t    mButtons;
     fixed_t mAngle;
     fixed_t mPitch;
-    short   mForwardMove;
-    short   mSideMove;
-    short   mUpMove;
-    byte    mImpulse;
-    short   mDeltaYaw;
-    short   mDeltaPitch;
+    int16_t   mForwardMove;
+    int16_t   mSideMove;
+    int16_t   mUpMove;
+    uint8_t    mImpulse;
+    int16_t   mDeltaYaw;
+    int16_t   mDeltaPitch;
 
     int getSerializedFields();
 

@@ -54,7 +54,7 @@ fixed_t pspritexiscale;
 int *spritelights;
 
 #define MAX_SPRITE_FRAMES 29 // [RH] Macro-ized as in BOOM.
-#define SPRITE_NEEDS_INFO MAX_INT
+#define SPRITE_NEEDS_INFO INT32_MAX
 
 EXTERN_CVAR(r_drawplayersprites)
 EXTERN_CVAR(r_softinvulneffect)
@@ -74,7 +74,7 @@ extern int         NumParticles;
 extern int         ActiveParticles;
 extern int         InactiveParticles;
 extern particle_t *Particles;
-TArray<WORD>       ParticlesInSubsec;
+TArray<uint16_t>       ParticlesInSubsec;
 
 //
 // GAME FUNCTIONS
@@ -198,7 +198,7 @@ void R_DrawVisSprite(vissprite_t *vis, int x1, int x2)
     // [AM] Ensure that we're not going to fall off the side of the patch.
     if (vis->tex_patch == NULL)
         vis->tex_patch = (patch_t *)texturemanager.getTexture(vis->tex_id)->getData();
-    const short patchWidth = vis->tex_patch->width();
+    const int16_t patchWidth = vis->tex_patch->width();
     const int   start      = vis->startfrac >> FRACBITS;
     if (start < 0 || start > patchWidth)
     {
@@ -256,7 +256,7 @@ void R_DrawVisSprite(vissprite_t *vis, int x1, int x2)
     else if (translated)
         R_SetTranslatedDrawFuncs();
 
-    dcol.iscale     = 0xffffffffu / (unsigned)vis->yscale;
+    dcol.iscale     = 0xffffffffu / (uint32_t)vis->yscale;
     dcol.texturemid = vis->texturemid;
     spryscale       = vis->yscale;
     sprtopscreen    = centeryfrac - FixedMul(dcol.texturemid, spryscale);
@@ -396,7 +396,7 @@ static vissprite_t *R_GenerateVisSprite(const sector_t *sector, int fakeside, fi
 void R_DrawHitBox(AActor *thing)
 {
     v3fixed_t  vertices[8];
-    const byte color = 0x80;
+    const uint8_t color = 0x80;
 
     // bottom front left
     vertices[0].x = thing->x - thing->radius;
@@ -466,7 +466,7 @@ void R_ProjectSprite(AActor *thing, int fakeside)
     spritedef_t   *sprdef;
     spriteframe_t *sprframe;
     texhandle_t    tex_id;
-    unsigned int   rot;
+    uint32_t   rot;
     bool           flip;
 
     if (!thing)
@@ -502,7 +502,7 @@ void R_ProjectSprite(AActor *thing, int fakeside)
     }
 
 #ifdef RANGECHECK
-    if (static_cast<unsigned>(thing->sprite) >= static_cast<unsigned>(numsprites))
+    if (static_cast<uint32_t>(thing->sprite) >= static_cast<uint32_t>(numsprites))
     {
         DPrintf("R_ProjectSprite: invalid sprite number %i\n", thing->sprite);
         return;
@@ -527,7 +527,7 @@ void R_ProjectSprite(AActor *thing, int fakeside)
         const angle_t ang = R_PointToAngle(thingx, thingy);
 
         // choose a different rotation based on player view
-        rot = (R_PointToAngle(thingx, thingy) - thing->angle + (unsigned)(ANG45/2)*9) >> 29;
+        rot = (R_PointToAngle(thingx, thingy) - thing->angle + (uint32_t)(ANG45/2)*9) >> 29;
 
         tex_id = sprframe->texes[rot];
         flip = static_cast<bool>(sprframe->flip[rot]);
@@ -636,7 +636,7 @@ fixed_t P_CalculateWeaponBobY(player_t *player, float scale_amount);
 //
 // R_DrawPSprite
 //
-void R_DrawPSprite(pspdef_t *psp, unsigned flags)
+void R_DrawPSprite(pspdef_t *psp, uint32_t flags)
 {
     fixed_t        tx;
     int            x1;
@@ -644,7 +644,7 @@ void R_DrawPSprite(pspdef_t *psp, unsigned flags)
     spritedef_t   *sprdef;
     spriteframe_t *sprframe;
     texhandle_t    tex_id;
-    BOOL           flip;
+    bool           flip;
     vissprite_t   *vis;
     vissprite_t    avis;
 
@@ -654,7 +654,7 @@ void R_DrawPSprite(pspdef_t *psp, unsigned flags)
 
     // decide which patch to use
 #ifdef RANGECHECK
-    if ((unsigned)psp->state->sprite >= (unsigned)numsprites)
+    if ((uint32_t)psp->state->sprite >= (uint32_t)numsprites)
     {
         DPrintf("R_DrawPSprite: invalid sprite number %i\n", psp->state->sprite);
         return;
@@ -671,7 +671,7 @@ void R_DrawPSprite(pspdef_t *psp, unsigned flags)
     sprframe = &sprdef->spriteframes[psp->state->frame & FF_FRAMEMASK];
 
     tex_id = sprframe->texes[0];
-    flip = static_cast<BOOL>(sprframe->flip[0]);
+    flip = static_cast<bool>(sprframe->flip[0]);
 
     if (sprframe->width[0] == SPRITE_NEEDS_INFO)
         R_CacheSprite(sprdef); // [RH] speeds up game startup time

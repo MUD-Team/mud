@@ -61,7 +61,7 @@ extern "C"
     drawspan_t   dspan;
 }
 
-byte *viewimage;
+uint8_t *viewimage;
 
 extern "C"
 {
@@ -200,11 +200,11 @@ algorithm that uses RGB tables.
 //
 // ============================================================================
 
-byte        *translationtables;
+uint8_t        *translationtables;
 argb_t       translationRGB[MAXPLAYERS + 1][16];
-byte        *Ranges;
-static byte *translationtablesmem = NULL;
-byte         bosstable[256];
+uint8_t        *Ranges;
+static uint8_t *translationtablesmem = NULL;
+uint8_t         bosstable[256];
 
 static void R_BuildFontTranslation(int color_num, argb_t start_color, argb_t end_color)
 {
@@ -312,7 +312,7 @@ static void R_BuildFontTranslation(int color_num, argb_t start_color, argb_t end
  * @param top Top channel value.
  * @return Filtered value.
  */
-static byte SoftLight(const byte bot, const byte top)
+static uint8_t SoftLight(const uint8_t bot, const uint8_t top)
 {
     const float a   = bot / 255.f;
     const float b   = top / 255.f;
@@ -343,11 +343,11 @@ void R_InitTranslationTables()
         ::bosstable[i] = V_BestColor(V_GetDefaultPalette()->basecolors, mul);
     }
 
-    translationtablesmem = new byte[256 * (MAXPLAYERS + 3 + 22) + 255]; // denis - fixme - magic numbers?
+    translationtablesmem = new uint8_t[256 * (MAXPLAYERS + 3 + 22) + 255]; // denis - fixme - magic numbers?
 
     // [Toke - fix13]
     // denis - cleaned this up somewhat
-    translationtables = (byte *)(((ptrdiff_t)translationtablesmem + 255) & ~255);
+    translationtables = (uint8_t *)(((ptrdiff_t)translationtablesmem + 255) & ~255);
 
     // [RH] Each player now gets their own translation table
     //		(soon to be palettes). These are set up during
@@ -449,7 +449,7 @@ void R_CopyTranslationRGB(int fromplayer, int toplayer)
 void R_BuildPlayerTranslation(int player, argb_t dest_color)
 {
     const palette_t *pal   = V_GetDefaultPalette();
-    byte            *table = &translationtables[player * 256];
+    uint8_t            *table = &translationtables[player * 256];
 
     fahsv_t hsv_temp = V_RGBtoHSV(dest_color);
     float   h = hsv_temp.geth(), s = hsv_temp.gets(), v = hsv_temp.getv();
@@ -912,7 +912,7 @@ class DirectFunc
     {
     }
 
-    forceinline void operator()(byte c, argb_t *dest) const
+    forceinline void operator()(uint8_t c, argb_t *dest) const
     {
         *dest = basecolormap.shade(c);
     }
@@ -928,7 +928,7 @@ class DirectColormapFunc
     {
     }
 
-    forceinline void operator()(byte c, argb_t *dest) const
+    forceinline void operator()(uint8_t c, argb_t *dest) const
     {
         *dest = colormap.shade(c);
     }
@@ -944,7 +944,7 @@ class DirectFuzzyFunc
     {
     }
 
-    forceinline void operator()(byte c, argb_t *dest) const
+    forceinline void operator()(uint8_t c, argb_t *dest) const
     {
         argb_t work = dest[fuzztable.getValue()];
         *dest       = work - ((work >> 2) & 0x3f3f3f);
@@ -965,7 +965,7 @@ class DirectTranslucentColormapFunc
         calculate_alpha(drawspan.translevel);
     }
 
-    forceinline void operator()(byte c, argb_t *dest) const
+    forceinline void operator()(uint8_t c, argb_t *dest) const
     {
         argb_t fg = colormap.shade(c);
         argb_t bg = *dest;
@@ -992,7 +992,7 @@ class DirectTranslatedColormapFunc
     {
     }
 
-    forceinline void operator()(byte c, argb_t *dest) const
+    forceinline void operator()(uint8_t c, argb_t *dest) const
     {
         *dest = colormap.tlate(translation, c);
     }
@@ -1010,7 +1010,7 @@ class DirectTranslatedTranslucentColormapFunc
     {
     }
 
-    forceinline void operator()(byte c, argb_t *dest) const
+    forceinline void operator()(uint8_t c, argb_t *dest) const
     {
         tlatefunc(translation.tlate(c), dest);
     }
@@ -1027,7 +1027,7 @@ class DirectSlopeColormapFunc
     {
     }
 
-    forceinline void operator()(byte c, argb_t *dest)
+    forceinline void operator()(uint8_t c, argb_t *dest)
     {
         *dest = colormap->shade(c);
         colormap++;

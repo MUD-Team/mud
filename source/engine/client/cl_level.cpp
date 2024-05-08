@@ -82,10 +82,10 @@ int ACS_GlobalVars[NUM_GLOBALVARS];
 FLZOMemFile *reset_snapshot = NULL;
 
 extern bool r_underwater;
-BOOL        savegamerestore;
+bool        savegamerestore;
 
 extern int  mousex, mousey, joyforward, joystrafe, joyturn, joylook, Impulse;
-extern BOOL sendpause, sendsave, sendcenterview;
+extern bool sendpause, sendsave, sendcenterview;
 
 bool isFast = false;
 
@@ -285,7 +285,7 @@ void G_InitNew(const char *mapname)
 //
 // G_DoCompleted
 //
-BOOL        secretexit;
+bool        secretexit;
 static int  startpos; // [RH] Support for multiple starts per level
 
 // [RH] The position parameter to these next three functions should

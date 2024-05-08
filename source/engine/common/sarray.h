@@ -66,7 +66,7 @@
 //
 // ============================================================================
 
-typedef unsigned int SArrayId;
+typedef uint32_t SArrayId;
 
 // ----------------------------------------------------------------------------
 // SArray interface & inline implementation
@@ -76,7 +76,7 @@ template <typename VT, int N = 16> class SArray
 {
   private:
     typedef SArray<VT, N> SArrayType;
-    typedef unsigned int  SlotNumber;
+    typedef uint32_t  SlotNumber;
 
     struct ItemRecord
     {
@@ -161,20 +161,20 @@ template <typename VT, int N = 16> class SArray
             return temp.operator++();
         }
 
-        inline ThisClass &operator+=(unsigned int n)
+        inline ThisClass &operator+=(uint32_t n)
         {
             while (n--)
                 operator++();
             return *this;
         }
 
-        inline ThisClass operator+(unsigned int n) const
+        inline ThisClass operator+(uint32_t n) const
         {
             generic_iterator temp(*this);
             return temp.operator+=(n);
         }
 
-        inline IVT &operator[](unsigned int n)
+        inline IVT &operator[](uint32_t n)
         {
             generic_iterator temp(operator+(n));
             return temp.operator*();
@@ -218,7 +218,7 @@ template <typename VT, int N = 16> class SArray
     //
     // Initializes the container to the specified size.
     //
-    SArray(unsigned int size) : mItemRecords(NULL), mSize(0)
+    SArray(uint32_t size) : mItemRecords(NULL), mSize(0)
     {
         clear();
         resize(size > MAX_SIZE ? MAX_SIZE : size);
@@ -280,7 +280,7 @@ template <typename VT, int N = 16> class SArray
         srand(time(NULL));
         mIdKey = MIN_KEY + (rand() % (MAX_KEY - MIN_KEY));
 
-        for (unsigned int i = 0; i < mSize; i++)
+        for (uint32_t i = 0; i < mSize; i++)
             mItemRecords[i].mId = NOT_FOUND;
     }
 
@@ -534,7 +534,7 @@ template <typename VT, int N = 16> class SArray
     //
     // Resizes the storage array mItemReocrds to the new specified size.
     //
-    inline void resize(unsigned int newsize)
+    inline void resize(uint32_t newsize)
     {
         assert(newsize > mSize);
         assert(newsize <= MAX_SIZE);
@@ -649,7 +649,7 @@ template <typename VT, int N = 16> class SArray
         // need to resize?
         if (mUsed == mSize)
         {
-            unsigned int newsize = 2 * mSize > MAX_SIZE ? MAX_SIZE : 2 * mSize;
+            uint32_t newsize = 2 * mSize > MAX_SIZE ? MAX_SIZE : 2 * mSize;
             // is it full and not able to be resized?
             assert(mSize != newsize);
             if (mSize == newsize)
@@ -708,23 +708,23 @@ template <typename VT, int N = 16> class SArray
         mIdKey      = other.mIdKey;
     }
 
-    static const unsigned int SLOT_BITS = N;
-    static const unsigned int KEY_BITS  = 32 - SLOT_BITS;
-    static const unsigned int MAX_SIZE  = 1 << SLOT_BITS;
+    static const uint32_t SLOT_BITS = N;
+    static const uint32_t KEY_BITS  = 32 - SLOT_BITS;
+    static const uint32_t MAX_SIZE  = 1 << SLOT_BITS;
 
-    static const unsigned int MIN_KEY = 2;
-    static const unsigned int MAX_KEY = (1 << KEY_BITS) - 1;
+    static const uint32_t MIN_KEY = 2;
+    static const uint32_t MAX_KEY = (1 << KEY_BITS) - 1;
 
-    static const unsigned int MIN_SLOT  = 0;
-    static const unsigned int MAX_SLOT  = (1 << SLOT_BITS) - 1;
-    static const unsigned int SLOT_MASK = (1 << SLOT_BITS) - 1;
+    static const uint32_t MIN_SLOT  = 0;
+    static const uint32_t MAX_SLOT  = (1 << SLOT_BITS) - 1;
+    static const uint32_t SLOT_MASK = (1 << SLOT_BITS) - 1;
 
-    static const unsigned int NOT_FOUND = (1 << SLOT_BITS) | MAX_SLOT;
+    static const uint32_t NOT_FOUND = (1 << SLOT_BITS) | MAX_SLOT;
 
     ItemRecord  *mItemRecords;
-    unsigned int mSize;
-    unsigned int mUsed;
+    uint32_t mSize;
+    uint32_t mUsed;
     SlotNumber   mNextUnused;
     SlotNumber   mFreeHead;
-    unsigned int mIdKey;
+    uint32_t mIdKey;
 };

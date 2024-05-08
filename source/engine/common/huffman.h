@@ -39,16 +39,16 @@ class huffman
     // Structures
     struct huff_bitstream_t
     {
-        unsigned char *BytePtr;
-        unsigned int   BitPos;
+        uint8_t *BytePtr;
+        uint32_t   BitPos;
     };
 
     struct huff_sym_t
     {
         int          Symbol;
-        unsigned int Count;
-        unsigned int Code;
-        unsigned int Bits;
+        uint32_t Count;
+        uint32_t Code;
+        uint32_t Bits;
     };
 
     struct huff_encodenode_t
@@ -60,7 +60,7 @@ class huffman
 
     // Histogram of character frequency
     huff_sym_t   sym[256];
-    unsigned int total_count;
+    uint32_t total_count;
 
     // Flag to indicate that tree needs rebuilding
     bool fresh_histogram;
@@ -70,17 +70,17 @@ class huffman
     huff_encodenode_t  nodes[511];
     huff_encodenode_t *root;
 
-    void               _Huffman_InitBitstream(huff_bitstream_t *stream, unsigned char *buf);
-    unsigned int       _Huffman_ReadBit(huff_bitstream_t *stream);
-    unsigned int       _Huffman_Read8Bits(huff_bitstream_t *stream);
-    void               _Huffman_WriteBits(huff_bitstream_t *stream, unsigned int x, unsigned int bits);
-    void               _Huffman_Hist(unsigned char *in, huff_sym_t *sym, unsigned int size);
+    void               _Huffman_InitBitstream(huff_bitstream_t *stream, uint8_t *buf);
+    uint32_t       _Huffman_ReadBit(huff_bitstream_t *stream);
+    uint32_t       _Huffman_Read8Bits(huff_bitstream_t *stream);
+    void               _Huffman_WriteBits(huff_bitstream_t *stream, uint32_t x, uint32_t bits);
+    void               _Huffman_Hist(uint8_t *in, huff_sym_t *sym, uint32_t size);
     huff_encodenode_t *_Huffman_MakeTree(huff_sym_t *sym, huff_encodenode_t *nodes);
-    void _Huffman_StoreTree(huff_encodenode_t *node, huff_sym_t *sym, unsigned int code, unsigned int bits);
+    void _Huffman_StoreTree(huff_encodenode_t *node, huff_sym_t *sym, uint32_t code, uint32_t bits);
 
-    bool Huffman_Compress_Using_Histogram(unsigned char *in, size_t insize, unsigned char *out, size_t &outsize,
+    bool Huffman_Compress_Using_Histogram(uint8_t *in, size_t insize, uint8_t *out, size_t &outsize,
                                           huff_sym_t *sym);
-    bool Huffman_Uncompress_Using_Tree(unsigned char *in, size_t insize, unsigned char *out, size_t &outsize,
+    bool Huffman_Uncompress_Using_Tree(uint8_t *in, size_t insize, uint8_t *out, size_t &outsize,
                                        huff_encodenode_t *tree_root);
 
   public:
@@ -88,13 +88,13 @@ class huffman
     void reset();
 
     // Analyse some raw data and add it to the compression statistics
-    void extend(unsigned char *data, size_t len);
+    void extend(uint8_t *data, size_t len);
 
     // Compress a chunk of data using only previously generated stats
-    bool compress(unsigned char *in_data, size_t in_len, unsigned char *out_data, size_t &out_len);
+    bool compress(uint8_t *in_data, size_t in_len, uint8_t *out_data, size_t &out_len);
 
     // Decompress a chunk of data using only previously generated stats
-    bool decompress(unsigned char *in_data, size_t in_len, unsigned char *out_data, size_t &out_len);
+    bool decompress(uint8_t *in_data, size_t in_len, uint8_t *out_data, size_t &out_len);
 
     // For debugging, this count can be used to see if two codecs have had the same length input
     int get_count()
@@ -119,9 +119,9 @@ class huffman_server
     huffman alpha, beta, tmpcodec;
     bool    active_codec;
 
-    unsigned int last_packet_id, last_ack_id;
+    uint32_t last_packet_id, last_ack_id;
 
-    unsigned int missed_acks;
+    uint32_t missed_acks;
 
     bool awaiting_ack;
 
@@ -130,13 +130,13 @@ class huffman_server
     {
         return active_codec ? alpha : beta;
     }
-    unsigned char get_codec_id()
+    uint8_t get_codec_id()
     {
         return active_codec ? 1 : 0;
     }
 
-    bool packet_sent(unsigned int id, unsigned char *in_data, size_t len);
-    void packet_acked(unsigned int id);
+    bool packet_sent(uint32_t id, uint8_t *in_data, size_t len);
+    void packet_acked(uint32_t id);
 
     huffman_server() : active_codec(0), last_packet_id(0), last_ack_id(0), missed_acks(0), awaiting_ack(false)
     {
@@ -159,8 +159,8 @@ class huffman_client
   public:
     void reset();
 
-    void     ack_sent(unsigned char *in_data, size_t len);
-    huffman &codec_for_received(unsigned char id);
+    void     ack_sent(uint8_t *in_data, size_t len);
+    huffman &codec_for_received(uint8_t id);
 
     huffman_client()
     {

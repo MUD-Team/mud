@@ -56,23 +56,23 @@ class DActiveButton : public DThinker
     };
 
     DActiveButton();
-    DActiveButton(line_t *, EWhere, texhandle_t tex, SDWORD time, fixed_t x, fixed_t y);
+    DActiveButton(line_t *, EWhere, texhandle_t tex, int32_t time, fixed_t x, fixed_t y);
 
     void RunThink();
 
     line_t     *m_Line;
     EWhere      m_Where;
     texhandle_t m_Texture;
-    SDWORD      m_Timer;
+    int32_t      m_Timer;
     fixed_t     m_X, m_Y; // Location of timer sound
 
     friend FArchive &operator<<(FArchive &arc, EWhere where)
     {
-        return arc << (BYTE)where;
+        return arc << (uint8_t)where;
     }
     friend FArchive &operator>>(FArchive &arc, EWhere &out)
     {
-        BYTE in;
+        uint8_t in;
         arc >> in;
         out = (EWhere)in;
         return arc;
@@ -100,7 +100,7 @@ void P_InitSwitchList(void)
         I_FatalError("Error opening lumps/SWITCHES.lmp"); 
     }
 
-    byte *alphSwitchList = new byte[PHYSFS_fileLength(rawswitches)];
+    uint8_t *alphSwitchList = new uint8_t[PHYSFS_fileLength(rawswitches)];
 
     if (PHYSFS_readBytes(rawswitches, alphSwitchList, PHYSFS_fileLength(rawswitches)) != PHYSFS_fileLength(rawswitches))
     {
@@ -111,7 +111,7 @@ void P_InitSwitchList(void)
     
     PHYSFS_close(rawswitches);
 
-    byte *list_p;
+    uint8_t *list_p;
     int   i;
 
     for (i = 0, list_p = alphSwitchList; list_p[18] || list_p[19]; list_p += 20, i++)
@@ -237,7 +237,7 @@ void P_SetButtonTexture(line_t *line, texhandle_t texture)
 }
 
 // denis - query button
-bool P_GetButtonInfo(line_t *line, unsigned &state, unsigned &time)
+bool P_GetButtonInfo(line_t *line, uint32_t &state, uint32_t &time)
 {
     DActiveButton                  *button;
     TThinkerIterator<DActiveButton> iterator;
@@ -256,7 +256,7 @@ bool P_GetButtonInfo(line_t *line, unsigned &state, unsigned &time)
     return false;
 }
 
-bool P_SetButtonInfo(line_t *line, unsigned state, unsigned time)
+bool P_SetButtonInfo(line_t *line, uint32_t state, uint32_t time)
 {
     DActiveButton                  *button;
     TThinkerIterator<DActiveButton> iterator;
@@ -279,7 +279,7 @@ void P_UpdateButtons(client_t *cl)
 {
     DActiveButton                  *button;
     TThinkerIterator<DActiveButton> iterator;
-    std::map<unsigned, bool>        actedlines;
+    std::map<uint32_t, bool>        actedlines;
 
     // See if button is already pressed
     while ((button = iterator.Next()))
@@ -287,8 +287,8 @@ void P_UpdateButtons(client_t *cl)
         if (button->m_Line == NULL)
             continue;
 
-        unsigned l     = button->m_Line - lines;
-        unsigned state = 0, timer = 0;
+        uint32_t l     = button->m_Line - lines;
+        uint32_t state = 0, timer = 0;
 
         state = button->m_Where;
         timer = button->m_Timer;
@@ -370,7 +370,7 @@ DActiveButton::DActiveButton()
     m_Y       = 0;
 }
 
-DActiveButton::DActiveButton(line_t *line, EWhere where, texhandle_t texture, SDWORD time, fixed_t x, fixed_t y)
+DActiveButton::DActiveButton(line_t *line, EWhere where, texhandle_t texture, int32_t time, fixed_t x, fixed_t y)
 {
     m_Line    = line;
     m_Where   = where;

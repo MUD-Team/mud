@@ -52,11 +52,11 @@ void A_ForceWeaponFire(AActor *mo, weapontype_t weapon, int tic);
 
 inline FArchive &operator<<(FArchive &arc, psprnum_t i)
 {
-    return arc << (BYTE)i;
+    return arc << (uint8_t)i;
 }
 inline FArchive &operator>>(FArchive &arc, psprnum_t &out)
 {
-    BYTE in;
+    uint8_t in;
     arc >> in;
     out = (psprnum_t)in;
     return arc;

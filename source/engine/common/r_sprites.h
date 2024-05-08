@@ -43,5 +43,5 @@ extern vissprite_t *lastvissprite;
 
 void R_CacheSprite(spritedef_t *sprite);
 void R_InitSprites();
-void R_InstallSpriteTex(const texhandle_t tex_id, unsigned frame, unsigned rot, bool flipped);
+void R_InstallSpriteTex(const texhandle_t tex_id, uint32_t frame, uint32_t rot, bool flipped);
 void R_InstallSprite(const char* name, int num);

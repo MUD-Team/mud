@@ -90,7 +90,7 @@ static bool ConvertibleRatio(int freq1, int freq2)
 
 // Generic sound expansion function for any sample rate
 
-static void ExpandSoundData(byte *data, int samplerate, int bits, int length, Mix_Chunk *destination)
+static void ExpandSoundData(uint8_t *data, int samplerate, int bits, int length, Mix_Chunk *destination)
 {
     Sint16 *expanded    = reinterpret_cast<Sint16 *>(destination->abuf);
     size_t  samplecount = length / (bits / 8);
@@ -214,7 +214,7 @@ static void getsfx(sfxinfo_struct *sfx)
     if (!sfxraw)
         return;
 
-    unsigned int sfxlength = PHYSFS_fileLength(sfxraw);
+    uint32_t sfxlength = PHYSFS_fileLength(sfxraw);
 
     sfx->length = sfxlength;
 
@@ -272,7 +272,7 @@ static void getsfx(sfxinfo_struct *sfx)
     chunk->abuf      = (Uint8 *)Z_Malloc(expanded_length, PU_STATIC, NULL);
     chunk->volume    = MIX_MAX_VOLUME;
 
-    ExpandSoundData((byte *)data + 8, samplerate, 8, length, chunk);
+    ExpandSoundData((uint8_t *)data + 8, samplerate, 8, length, chunk);
     sfx->data = chunk;
 
     delete[] data;

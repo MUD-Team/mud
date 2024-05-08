@@ -26,8 +26,8 @@
 #include "odamex.h"
 
 SkillInfo SkillInfos[MAX_SKILLS];
-byte      skillnum         = 0;
-byte      defaultskillmenu = 2;
+uint8_t      skillnum         = 0;
+uint8_t      defaultskillmenu = 2;
 
 const SkillInfo &G_GetCurrentSkill()
 {

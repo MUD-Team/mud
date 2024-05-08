@@ -44,10 +44,10 @@ typedef enum
 
 struct _MEMFILE
 {
-    unsigned char *buf;
+    uint8_t *buf;
     size_t         buflen;
     size_t         alloced;
-    unsigned int   position;
+    uint32_t   position;
     memfile_mode_t mode;
 };
 
@@ -59,7 +59,7 @@ MEMFILE *mem_fopen_read(void *buf, size_t buflen)
 
     file = (MEMFILE *)Z_Malloc(sizeof(MEMFILE), PU_STATIC, 0);
 
-    file->buf      = (unsigned char *)buf;
+    file->buf      = (uint8_t *)buf;
     file->buflen   = buflen;
     file->position = 0;
     file->mode     = MODE_READ;
@@ -108,7 +108,7 @@ MEMFILE *mem_fopen_write(void)
     file = (MEMFILE *)Z_Malloc(sizeof(MEMFILE), PU_STATIC, 0);
 
     file->alloced  = 1024;
-    file->buf      = (unsigned char *)Z_Malloc(file->alloced, PU_STATIC, 0);
+    file->buf      = (uint8_t *)Z_Malloc(file->alloced, PU_STATIC, 0);
     file->buflen   = 0;
     file->position = 0;
     file->mode     = MODE_WRITE;
@@ -134,9 +134,9 @@ size_t mem_fwrite(const void *ptr, size_t size, size_t nmemb, MEMFILE *stream)
 
     while (bytes > stream->alloced - stream->position)
     {
-        unsigned char *newbuf;
+        uint8_t *newbuf;
 
-        newbuf = (unsigned char *)Z_Malloc(stream->alloced * 2, PU_STATIC, 0);
+        newbuf = (uint8_t *)Z_Malloc(stream->alloced * 2, PU_STATIC, 0);
         memcpy(newbuf, stream->buf, stream->alloced);
         Z_Free(stream->buf);
         stream->buf = newbuf;
@@ -175,9 +175,9 @@ long mem_ftell(MEMFILE *stream)
     return stream->position;
 }
 
-int mem_fseek(MEMFILE *stream, signed long position, mem_rel_t whence)
+int mem_fseek(MEMFILE *stream, int32_t position, mem_rel_t whence)
 {
-    unsigned int newpos;
+    uint32_t newpos;
 
     switch (whence)
     {

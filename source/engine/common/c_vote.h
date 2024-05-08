@@ -68,12 +68,12 @@ struct vote_state_t
 {
     vote_result_t result;
     std::string   votestring;
-    short         countdown;
-    byte          yes;
-    byte          yes_needed;
-    byte          no;
-    byte          no_needed;
-    byte          abs;
+    int16_t         countdown;
+    uint8_t          yes;
+    uint8_t          yes_needed;
+    uint8_t          no;
+    uint8_t          no_needed;
+    uint8_t          abs;
 };
 
 extern const char *vote_type_cmd[];

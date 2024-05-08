@@ -62,7 +62,7 @@ struct SkillInfo
     bool        must_confirm;
     std::string must_confirm_text;
     char        shortcut;
-    byte        text_color[4]; // not implemented
+    uint8_t        text_color[4]; // not implemented
     // SkillActorReplacement replace;	// not implemented
     // SkillActorReplacement replaced;	// not implemented
     float monster_health;  // not implemented
@@ -93,7 +93,7 @@ struct SkillInfo
 };
 
 extern SkillInfo SkillInfos[MAX_SKILLS];
-extern byte      skillnum;
-extern byte      defaultskillmenu;
+extern uint8_t      skillnum;
+extern uint8_t      defaultskillmenu;
 
 const SkillInfo &G_GetCurrentSkill();

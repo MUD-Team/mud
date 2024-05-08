@@ -323,13 +323,13 @@ typedef enum
 
 inline FArchive &operator<<(FArchive &arc, spritenum_t i)
 {
-    DWORD out;
+    uint32_t out;
     out = i;
     return arc << out;
 }
 inline FArchive &operator>>(FArchive &arc, spritenum_t &i)
 {
-    DWORD in;
+    uint32_t in;
     arc >> in;
     i = (spritenum_t)in;
     return arc;
@@ -1466,13 +1466,13 @@ typedef enum
 
 inline FArchive &operator<<(FArchive &arc, statenum_t i)
 {
-    DWORD out;
+    uint32_t out;
     out = i;
     return arc << out;
 }
 inline FArchive &operator>>(FArchive &arc, statenum_t &i)
 {
-    DWORD in;
+    uint32_t in;
     arc >> in;
     i = (statenum_t)in;
     return arc;
@@ -1509,14 +1509,14 @@ extern const char *sprnames[NUMSPRITES + 1];
 inline FArchive &operator<<(FArchive &arc, state_t *state)
 {
     if (state)
-        return arc << (WORD)(state - states);
+        return arc << (uint16_t)(state - states);
     else
-        return arc << (WORD)0xffff;
+        return arc << (uint16_t)0xffff;
 }
 
 inline FArchive &operator>>(FArchive &arc, state_t *&state)
 {
-    WORD ofs;
+    uint16_t ofs;
     arc >> ofs;
     if (ofs == 0xffff)
         state = NULL;
@@ -1851,13 +1851,13 @@ typedef enum
 
 inline FArchive &operator<<(FArchive &arc, mobjtype_t i)
 {
-    DWORD out;
+    uint32_t out;
     out = i;
     return arc << out;
 }
 inline FArchive &operator>>(FArchive &arc, mobjtype_t &i)
 {
-    DWORD in;
+    uint32_t in;
     arc >> in;
     i = (mobjtype_t)in;
     return arc;
@@ -1934,14 +1934,14 @@ extern mobjinfo_t mobjinfo[NUMMOBJTYPES];
 inline FArchive &operator<<(FArchive &arc, mobjinfo_t *info)
 {
     if (info)
-        return arc << (WORD)(info - mobjinfo);
+        return arc << (uint16_t)(info - mobjinfo);
     else
-        return arc << (WORD)0xffff;
+        return arc << (uint16_t)0xffff;
 }
 
 inline FArchive &operator>>(FArchive &arc, mobjinfo_t *&info)
 {
-    WORD ofs;
+    uint16_t ofs;
     arc >> ofs;
     if (ofs == 0xffff)
         info = NULL;

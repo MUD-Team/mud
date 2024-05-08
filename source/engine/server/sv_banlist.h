@@ -32,7 +32,7 @@
 class IPRange
 {
   private:
-    byte ip[4];
+    uint8_t ip[4];
     bool mask[4];
 
   public:

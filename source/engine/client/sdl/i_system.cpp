@@ -40,7 +40,6 @@
 #endif // WIN32
 #ifdef UNIX
 // for getuid and geteuid
-#include <limits.h>
 #include <pwd.h>
 #include <sys/types.h>
 #include <time.h>
@@ -88,7 +87,7 @@ const size_t min_heapsize = 8;
 // The size we got back from I_ZoneBase in megabytes
 size_t got_heapsize = 0;
 
-DWORD LanguageIDs[4];
+uint32_t LanguageIDs[4];
 
 //
 // I_MegabytesToBytes
@@ -392,7 +391,7 @@ void STACK_ARGS I_Quit(void)
 //
 // I_Error
 //
-BOOL gameisdead;
+bool gameisdead;
 
 #define MAX_ERRORTEXT 1024
 
@@ -403,7 +402,7 @@ NORETURN void STACK_ARGS I_FatalError(const char *error, ...)
     char errortext[MAX_ERRORTEXT];
     char messagetext[MAX_ERRORTEXT];
 
-    static BOOL alreadyThrown = false;
+    static bool alreadyThrown = false;
     gameisdead                = true;
 
     if (!alreadyThrown) // ignore all but the first message -- killough
@@ -707,48 +706,6 @@ std::string I_GetClipboardText()
     return "";
 }
 
-void I_PrintStr(int xp, const char *cp, int count, BOOL scroll)
-{
-    // used in the DOS version
-}
-
-#ifdef _WIN32 // denis - fixme - make this work on POSIX
-
-long I_FindFirst(char *filespec, findstate_t *fileinfo)
-{
-    // return _findfirst (filespec, fileinfo);
-    return 0;
-}
-
-int I_FindNext(long handle, findstate_t *fileinfo)
-{
-    // return _findnext (handle, fileinfo);
-    return 0;
-}
-
-int I_FindClose(long handle)
-{
-    // return _findclose (handle);
-    return 0;
-}
-
-#else
-
-long I_FindFirst(char *filespec, findstate_t *fileinfo)
-{
-    return 0;
-}
-int I_FindNext(long handle, findstate_t *fileinfo)
-{
-    return 0;
-}
-int I_FindClose(long handle)
-{
-    return 0;
-}
-
-#endif
-
 //
 // I_ConsoleInput
 //
@@ -759,7 +716,7 @@ std::string I_ConsoleInput(void)
     /* denis - this probably won't work for a gui sdl app. if it does work, please uncomment!
     static char     text[1024] = {0};
     static char     buffer[1024] = {0};
-    unsigned int    len = strlen(buffer);
+    uint32_t    len = strlen(buffer);
 
     while(kbhit() && len < sizeof(text))
     {

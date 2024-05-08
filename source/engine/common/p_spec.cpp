@@ -64,9 +64,9 @@ std::list<movingsector_t> movingsectors;
 bool                      s_SpecialFromServer;
 
 int  P_FindSectorFromLineTag(int tag, int start);
-BOOL EV_DoDoor(DDoor::EVlDoor type, line_t *line, AActor *thing, int tag, int speed, int delay, card_t lock);
+bool EV_DoDoor(DDoor::EVlDoor type, line_t *line, AActor *thing, int tag, int speed, int delay, card_t lock);
 bool P_ShootCompatibleSpecialLine(AActor *thing, line_t *line);
-bool P_ActivateZDoomLine(line_t *line, AActor *mo, int side, unsigned int activationType);
+bool P_ActivateZDoomLine(line_t *line, AActor *mo, int side, uint32_t activationType);
 bool P_UseCompatibleSpecialLine(AActor *thing, line_t *line, int side, bool bossaction);
 
 //
@@ -88,7 +88,7 @@ fixed_t P_ArgsToFixed(fixed_t arg_i, fixed_t arg_f)
     return (arg_i << FRACBITS) + (arg_f << FRACBITS) / 100;
 }
 
-int P_ArgToCrushMode(byte arg, bool slowdown)
+int P_ArgToCrushMode(uint8_t arg, bool slowdown)
 {
     static const crushmode_e map[] = {crushDoom, crushHexen, crushSlowdown};
 
@@ -100,7 +100,7 @@ int P_ArgToCrushMode(byte arg, bool slowdown)
 
 int P_FindSectorFromLineTag(const line_t *line, int start)
 {
-    start = start >= 0 ? sectors[start].nexttag : sectors[(unsigned)line->id % (unsigned)numsectors].firsttag;
+    start = start >= 0 ? sectors[start].nexttag : sectors[(uint32_t)line->id % (uint32_t)numsectors].firsttag;
     while (start >= 0 && sectors[start].tag != line->id)
         start = sectors[start].nexttag;
     return start;
@@ -108,7 +108,7 @@ int P_FindSectorFromLineTag(const line_t *line, int start)
 
 int P_FindLineFromLineTag(const line_t *line, int start)
 {
-    start = start >= 0 ? lines[start].nextid : lines[(unsigned)line->id % (unsigned)numlines].firstid;
+    start = start >= 0 ? lines[start].nextid : lines[(uint32_t)line->id % (uint32_t)numlines].firstid;
     while (start >= 0 && lines[start].id != line->id)
         start = lines[start].nextid;
     return start;
@@ -116,13 +116,13 @@ int P_FindLineFromLineTag(const line_t *line, int start)
 
 int P_FindLineFromTag(int tag, int start)
 {
-    start = start >= 0 ? lines[start].nextid : lines[(unsigned)tag % (unsigned)numlines].firstid;
+    start = start >= 0 ? lines[start].nextid : lines[(uint32_t)tag % (uint32_t)numlines].firstid;
     while (start >= 0 && lines[start].id != tag)
         start = lines[start].nextid;
     return start;
 }
 
-const unsigned int P_ResetSectorTransferFlags(const unsigned int flags)
+const uint32_t P_ResetSectorTransferFlags(const uint32_t flags)
 {
     return (flags & ~SECF_TRANSFERMASK);
 }
@@ -154,20 +154,20 @@ void P_ResetTransferSpecial(newspecial_s *newspecial)
     newspecial->flags          = P_ResetSectorTransferFlags(newspecial->flags);
 }
 
-void P_TransferSectorFlags(unsigned int *dest, unsigned int source)
+void P_TransferSectorFlags(uint32_t *dest, uint32_t source)
 {
     *dest &= ~SECF_TRANSFERMASK;
     *dest |= source & SECF_TRANSFERMASK;
 }
 
-byte P_ArgToChange(byte arg)
+uint8_t P_ArgToChange(uint8_t arg)
 {
-    static const byte ChangeMap[8] = {0, 1, 5, 3, 7, 2, 6, 0};
+    static const uint8_t ChangeMap[8] = {0, 1, 5, 3, 7, 2, 6, 0};
 
     return (arg < 8) ? ChangeMap[arg] : 0;
 }
 
-int P_ArgToCrush(byte arg)
+int P_ArgToCrush(uint8_t arg)
 {
     return (arg > 0) ? arg : NO_CRUSH;
 }
@@ -445,15 +445,15 @@ void DPusher::Serialize(FArchive &arc)
 
 typedef struct
 {
-    short basepic;
-    short numframes;
-    byte  istexture;
-    byte  uniqueframes;
-    byte  countdown;
-    byte  curframe;
-    byte  speedmin[MAX_ANIM_FRAMES];
-    byte  speedmax[MAX_ANIM_FRAMES];
-    short framepic[MAX_ANIM_FRAMES];
+    int16_t basepic;
+    int16_t numframes;
+    uint8_t  istexture;
+    uint8_t  uniqueframes;
+    uint8_t  countdown;
+    uint8_t  curframe;
+    uint8_t  speedmin[MAX_ANIM_FRAMES];
+    uint8_t  speedmax[MAX_ANIM_FRAMES];
+    int16_t framepic[MAX_ANIM_FRAMES];
 } anim_t;
 
 #define MAXANIMS 32 // Really just a starting point
@@ -474,7 +474,7 @@ static void P_SpawnExtra();
 //
 // #define MAXLINEANIMS			64
 
-// extern	short	numlinespecials;
+// extern	int16_t	numlinespecials;
 // extern	line_t* linespeciallist[MAXLINEANIMS];
 
 //
@@ -643,7 +643,7 @@ fixed_t P_FindHighestFloorSurrounding(sector_t *sec)
     int       i;
     line_t   *check;
     sector_t *other;
-    fixed_t   height = MIN_INT;
+    fixed_t   height = INT32_MIN;
 
     for (i = 0; i < sec->linecount; i++)
     {
@@ -679,7 +679,7 @@ fixed_t P_FindNextHighestFloor(sector_t *sec)
 {
     sector_t *other;
     fixed_t   ogheight = P_FloorHeight(sec);
-    fixed_t   height   = MAX_INT;
+    fixed_t   height   = INT32_MAX;
 
     for (int i = 0; i < sec->linecount; i++)
     {
@@ -699,7 +699,7 @@ fixed_t P_FindNextHighestFloor(sector_t *sec)
         }
     }
 
-    if (height == MAX_INT)
+    if (height == INT32_MAX)
         height = ogheight;
 
     return height;
@@ -721,7 +721,7 @@ fixed_t P_FindNextLowestFloor(sector_t *sec)
 {
     sector_t *other;
     fixed_t   ogheight = P_FloorHeight(sec);
-    fixed_t   height   = MIN_INT;
+    fixed_t   height   = INT32_MIN;
 
     for (int i = 0; i < sec->linecount; i++)
     {
@@ -741,7 +741,7 @@ fixed_t P_FindNextLowestFloor(sector_t *sec)
         }
     }
 
-    if (height == MIN_INT)
+    if (height == INT32_MIN)
         height = ogheight;
 
     return height;
@@ -763,7 +763,7 @@ fixed_t P_FindNextLowestCeiling(sector_t *sec)
 {
     sector_t *other;
     fixed_t   ogheight = P_CeilingHeight(sec);
-    fixed_t   height   = MIN_INT;
+    fixed_t   height   = INT32_MIN;
 
     for (int i = 0; i < sec->linecount; i++)
     {
@@ -783,7 +783,7 @@ fixed_t P_FindNextLowestCeiling(sector_t *sec)
         }
     }
 
-    if (height == MIN_INT)
+    if (height == INT32_MIN)
         height = ogheight;
 
     return height;
@@ -805,7 +805,7 @@ fixed_t P_FindNextHighestCeiling(sector_t *sec)
 {
     sector_t *other;
     fixed_t   ogheight = P_CeilingHeight(sec);
-    fixed_t   height   = MAX_INT;
+    fixed_t   height   = INT32_MAX;
 
     for (int i = 0; i < sec->linecount; i++)
     {
@@ -825,7 +825,7 @@ fixed_t P_FindNextHighestCeiling(sector_t *sec)
         }
     }
 
-    if (height == MAX_INT)
+    if (height == INT32_MAX)
         height = ogheight;
 
     return height;
@@ -839,7 +839,7 @@ fixed_t P_FindLowestCeilingSurrounding(sector_t *sec)
     int       i;
     line_t   *check;
     sector_t *other;
-    fixed_t   height = MAX_INT;
+    fixed_t   height = INT32_MAX;
 
     for (i = 0; i < sec->linecount; i++)
     {
@@ -868,7 +868,7 @@ fixed_t P_FindHighestCeilingSurrounding(sector_t *sec)
     int       i;
     line_t   *check;
     sector_t *other;
-    fixed_t   height = MIN_INT;
+    fixed_t   height = INT32_MIN;
 
     for (i = 0; i < sec->linecount; i++)
     {
@@ -899,7 +899,7 @@ fixed_t P_FindHighestCeilingSurrounding(sector_t *sec)
 //
 fixed_t P_FindShortestTextureAround(sector_t *sec)
 {
-    int     minsize = MAX_INT;
+    int     minsize = INT32_MAX;
     side_t *side;
     int     i;
 
@@ -926,13 +926,13 @@ fixed_t P_FindShortestTextureAround(sector_t *sec)
 // linedef bounding the sector.
 //
 // Note: If no upper texture exists 32000*FRACUNIT is returned.
-//       but if compatibility then MAX_INT is returned
+//       but if compatibility then INT32_MAX is returned
 //
 // jff 03/20/98 Add routine to find shortest upper texture
 //
 fixed_t P_FindShortestUpperAround(sector_t *sec)
 {
-    int     minsize = MAX_INT;
+    int     minsize = INT32_MAX;
     side_t *side;
     int     i;
 
@@ -1030,7 +1030,7 @@ sector_t *P_FindModelCeilingSector(fixed_t ceildestheight, sector_t *sec)
 
 int P_FindSectorFromTag(int tag, int start)
 {
-    start = start >= 0 ? sectors[start].nexttag : sectors[(unsigned)tag % (unsigned)numsectors].firsttag;
+    start = start >= 0 ? sectors[start].nexttag : sectors[(uint32_t)tag % (uint32_t)numsectors].firsttag;
     while (start >= 0 && sectors[start].tag != tag)
         start = sectors[start].nexttag;
     return start;
@@ -1040,7 +1040,7 @@ int P_FindSectorFromTag(int tag, int start)
 
 int P_FindLineFromID(int id, int start)
 {
-    start = start >= 0 ? lines[start].nextid : lines[(unsigned)id % (unsigned)numlines].firstid;
+    start = start >= 0 ? lines[start].nextid : lines[(uint32_t)id % (uint32_t)numlines].firstid;
     while (start >= 0 && lines[start].id != id)
         start = lines[start].nextid;
     return start;
@@ -1432,7 +1432,7 @@ bool P_CanUnlockGenDoor(line_t *line, player_t *player)
 //	Returns true if the player has the desired key,
 //	false otherwise.
 
-BOOL P_CheckKeys(player_t *p, card_t lock, BOOL remote)
+bool P_CheckKeys(player_t *p, card_t lock, bool remote)
 {
     if ((lock & 0x7f) == NoKey)
         return true;
@@ -1441,8 +1441,8 @@ BOOL P_CheckKeys(player_t *p, card_t lock, BOOL remote)
         return false;
 
     const OString *msg = NULL;
-    BOOL           bc, rc, yc, bs, rs, ys;
-    BOOL           equiv = lock & 0x80;
+    bool           bc, rc, yc, bs, rs, ys;
+    bool           equiv = lock & 0x80;
 
     lock = (card_t)(lock & 0x7f);
 
@@ -1858,7 +1858,7 @@ CVAR_FUNC_IMPL(sv_forcewater)
     if (gamestate == GS_LEVEL)
     {
         int  i;
-        byte set = var ? 2 : 0;
+        uint8_t set = var ? 2 : 0;
 
         for (i = 0; i < numsectors; i++)
         {
@@ -1910,7 +1910,7 @@ void P_AddSectorSecret(sector_t *sector)
     sector->flags |= SECF_SECRET | SECF_WASSECRET;
 }
 
-void P_SetupSectorDamage(sector_t *sector, short amount, byte interval, byte leakrate, unsigned int flags)
+void P_SetupSectorDamage(sector_t *sector, int16_t amount, uint8_t interval, uint8_t leakrate, uint32_t flags)
 {
     // Only set if damage is not yet initialized.
     if (sector->damageamount)
@@ -2128,7 +2128,7 @@ void DScroller::RunThink()
         height      = P_HighestHeightOfFloor(sec);
         waterheight = sec->heightsec && P_HighestHeightOfFloor(sec->heightsec) > height
                           ? P_HighestHeightOfFloor(sec->heightsec)
-                          : MIN_INT;
+                          : INT32_MIN;
 
         for (node = sec->touching_thinglist; node; node = node->m_snext)
             if (!((thing = node->m_thing)->flags & MF_NOCLIP) &&
@@ -2228,12 +2228,12 @@ static void P_SpawnScrollers(void)
     }
 }
 
-fixed_t P_ArgToSpeed(byte arg)
+fixed_t P_ArgToSpeed(uint8_t arg)
 {
     return (fixed_t)arg * FRACUNIT / 8;
 }
 
-bool P_ArgToCrushType(byte arg)
+bool P_ArgToCrushType(uint8_t arg)
 {
     return arg == 2;
 }
@@ -2434,7 +2434,7 @@ DPusher::DPusher(DPusher::EPusher type, line_t *l, int magnitude, int angle, AAc
 
 DPusher *tmpusher; // pusher structure for blockmap searches
 
-BOOL PIT_PushThing(AActor *thing)
+bool PIT_PushThing(AActor *thing)
 {
     if (thing->player && !(thing->flags & (MF_NOGRAVITY | MF_NOCLIP)))
     {

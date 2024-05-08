@@ -40,7 +40,6 @@
 
 #include "cmdlib.h"
 #include "crc32.h"
-#include "farmhash.h"
 #include "i_system.h"
 #include "m_argv.h"
 #include "m_fileio.h"
@@ -79,9 +78,9 @@ void **lumpcache;
 //
 // [SL] taken from prboom-plus
 //
-unsigned int W_LumpNameHash(const char *s)
+uint32_t W_LumpNameHash(const char *s)
 {
-    unsigned int hash;
+    uint32_t hash;
 
     (void)((hash = toupper(s[0]), s[1]) && (hash = hash * 3 + toupper(s[1]), s[2]) &&
            (hash = hash * 2 + toupper(s[2]), s[3]) && (hash = hash * 2 + toupper(s[3]), s[4]) &&
@@ -98,16 +97,16 @@ unsigned int W_LumpNameHash(const char *s)
 //
 void W_HashLumps(void)
 {
-    for (unsigned int i = 0; i < numlumps; i++)
+    for (uint32_t i = 0; i < numlumps; i++)
         lumpinfo[i].index = -1; // mark slots empty
 
     // Insert nodes to the beginning of each chain, in first-to-last
     // lump order, so that the last lump of a given name appears first
     // in any chain, observing pwad ordering rules. killough
 
-    for (unsigned int i = 0; i < numlumps; i++)
+    for (uint32_t i = 0; i < numlumps; i++)
     {
-        unsigned int j    = W_LumpNameHash(lumpinfo[i].name) % (unsigned int)numlumps;
+        uint32_t j    = W_LumpNameHash(lumpinfo[i].name) % (uint32_t)numlumps;
         lumpinfo[i].next  = lumpinfo[j].index; // Prepend to list
         lumpinfo[j].index = i;
     }
@@ -144,8 +143,8 @@ OCRC32Sum W_CRC32(const std::string &filename)
     if (!fp)
         return rvo;
 
-    unsigned      n = 0;
-    unsigned char buf[file_chunk_size];
+    uint32_t      n = 0;
+    uint8_t buf[file_chunk_size];
     uint32_t      crc = 0;
 
     while ((n = PHYSFS_readBytes(fp, buf, sizeof(buf))))
@@ -177,11 +176,11 @@ OMD5Hash W_MD5(const std::string &filename)
     md5_state_t state;
     md5_init(&state);
 
-    unsigned      n = 0;
-    unsigned char buf[file_chunk_size];
+    uint32_t      n = 0;
+    uint8_t buf[file_chunk_size];
 
     while ((n = PHYSFS_readBytes(fp, buf, sizeof(buf))))
-        md5_append(&state, (unsigned char *)buf, n);
+        md5_append(&state, (uint8_t *)buf, n);
 
     md5_byte_t digest[16];
     md5_finish(&state, digest);
@@ -191,50 +190,10 @@ OMD5Hash W_MD5(const std::string &filename)
     std::stringstream hashStr;
 
     for (int i = 0; i < 16; i++)
-        hashStr << std::setw(2) << std::setfill('0') << std::hex << std::uppercase << (short)digest[i];
+        hashStr << std::setw(2) << std::setfill('0') << std::hex << std::uppercase << (int16_t)digest[i];
 
     OMD5Hash::makeFromHexStr(rvo, hashStr.str());
     return rvo; // bubble up failure
-}
-
-/*
- * @brief Creates a 128-bit fingerprint for a map via FarmHash.
- *
- * However, it encodes the fingerprint into a 16-byte array to be read later.
- *
- * @param lumpdata byte array pointer to the lump (or lumps) that needs to be fingerprinted.
- * @param size of the byte array pointer in bytes.
- * @return fhfprint_s - struct containing 16-byte array of fingerprint.
- */
-fhfprint_s W_FarmHash128(const byte *lumpdata, int length)
-{
-    fhfprint_s fhfngprnt;
-
-    if (!lumpdata)
-        return fhfngprnt;
-
-    util::uint128_t fingerprint128 = util::Fingerprint128((const char *)lumpdata, length);
-
-    // Store the bytes of the hashes in the array.
-    fhfngprnt.fingerprint[0] = fingerprint128.first >> 8 * 0;
-    fhfngprnt.fingerprint[1] = fingerprint128.first >> 8 * 1;
-    fhfngprnt.fingerprint[2] = fingerprint128.first >> 8 * 2;
-    fhfngprnt.fingerprint[3] = fingerprint128.first >> 8 * 3;
-    fhfngprnt.fingerprint[4] = fingerprint128.first >> 8 * 4;
-    fhfngprnt.fingerprint[5] = fingerprint128.first >> 8 * 5;
-    fhfngprnt.fingerprint[6] = fingerprint128.first >> 8 * 6;
-    fhfngprnt.fingerprint[7] = fingerprint128.first >> 8 * 7;
-
-    fhfngprnt.fingerprint[8]  = fingerprint128.second >> 8 * 0;
-    fhfngprnt.fingerprint[9]  = fingerprint128.second >> 8 * 1;
-    fhfngprnt.fingerprint[10] = fingerprint128.second >> 8 * 2;
-    fhfngprnt.fingerprint[11] = fingerprint128.second >> 8 * 3;
-    fhfngprnt.fingerprint[12] = fingerprint128.second >> 8 * 4;
-    fhfngprnt.fingerprint[13] = fingerprint128.second >> 8 * 5;
-    fhfngprnt.fingerprint[14] = fingerprint128.second >> 8 * 6;
-    fhfngprnt.fingerprint[15] = fingerprint128.second >> 8 * 7;
-
-    return fhfngprnt;
 }
 
 //
@@ -335,7 +294,7 @@ void AddFile(const OResFile &file)
         header.infotableofs = LELONG(header.infotableofs);
         size_t length       = header.numlumps * sizeof(filelump_t);
 
-        if (length > (unsigned)M_FileLength(handle))
+        if (length > (uint32_t)M_FileLength(handle))
         {
             Printf(PRINT_WARNING, "\nbad number of lumps for %s\n", filename.c_str());
             PHYSFS_close(handle);
@@ -379,7 +338,7 @@ void AddFile(const OResFile &file)
 //
 //
 
-static BOOL IsMarker(const lumpinfo_t *lump, const char *marker)
+static bool IsMarker(const lumpinfo_t *lump, const char *marker)
 {
     return (lump->namespc == ns_global) &&
            (!strncmp(lump->name, marker, 8) || (*(lump->name) == *marker && !strncmp(lump->name + 1, marker, 7)));
@@ -396,9 +355,9 @@ void W_MergeLumps(const char *start, const char *end, int space)
 {
     char        ustart[8], uend[8];
     lumpinfo_t *newlumpinfos;
-    unsigned    newlumps, oldlumps;
-    BOOL        insideBlock;
-    unsigned    flatHack, i;
+    uint32_t    newlumps, oldlumps;
+    bool        insideBlock;
+    uint32_t    flatHack, i;
 
     strncpy(ustart, start, 8);
     strncpy(uend, end, 8);
@@ -412,7 +371,7 @@ void W_MergeLumps(const char *start, const char *end, int space)
     if (!strcmp("F_START", ustart) && !Args.CheckParm("-noflathack"))
     {
         int      fudge = 0;
-        unsigned start = 0;
+        uint32_t start = 0;
 
         for (i = 0; i < numlumps; i++)
         {
@@ -588,7 +547,7 @@ void W_InitMultipleFiles(const OResFiles &files)
 /**
  * @brief Return a handle for a given lump.
  */
-lumpHandle_t W_LumpToHandle(const unsigned lump)
+lumpHandle_t W_LumpToHandle(const uint32_t lump)
 {
     lumpHandle_t rvo;
     size_t       id = static_cast<size_t>(lump) << HANDLE_GEN_BITS;
@@ -606,7 +565,7 @@ int W_HandleToLump(const lumpHandle_t handle)
     {
         return -1;
     }
-    const unsigned lump = handle.id >> HANDLE_GEN_BITS;
+    const uint32_t lump = handle.id >> HANDLE_GEN_BITS;
     if (lump >= ::numlumps)
     {
         return -1;
@@ -674,7 +633,7 @@ int W_GetNumForName(const char *name, int namespc)
  * @detail You likely only need this for debugging, since a name can be
  *         ambiguous.
  */
-std::string W_LumpName(unsigned lump)
+std::string W_LumpName(uint32_t lump)
 {
     if (lump >= ::numlumps)
         I_Error("%s: %i >= numlumps", __FUNCTION__, lump);
@@ -686,7 +645,7 @@ std::string W_LumpName(unsigned lump)
 // W_LumpLength
 // Returns the buffer size needed to load the given lump.
 //
-unsigned W_LumpLength(unsigned lump)
+uint32_t W_LumpLength(uint32_t lump)
 {
     if (lump >= numlumps)
         I_Error("W_LumpLength: %i >= numlumps", lump);
@@ -699,7 +658,7 @@ unsigned W_LumpLength(unsigned lump)
 // Loads the lump into the given buffer,
 //  which must be >= W_LumpLength().
 //
-void W_ReadLump(unsigned int lump, void *dest)
+void W_ReadLump(uint32_t lump, void *dest)
 {
     int         c;
     lumpinfo_t *l;
@@ -725,10 +684,10 @@ void W_ReadLump(unsigned int lump, void *dest)
 //
 // denis - for wad downloading
 //
-unsigned W_ReadChunk(const char *file, unsigned offs, unsigned len, void *dest, unsigned &filelen)
+uint32_t W_ReadChunk(const char *file, uint32_t offs, uint32_t len, void *dest, uint32_t &filelen)
 {
     PHYSFS_File    *fp   = PHYSFS_openRead(file);
-    unsigned read = 0;
+    uint32_t read = 0;
 
     if (fp)
     {
@@ -747,7 +706,7 @@ unsigned W_ReadChunk(const char *file, unsigned offs, unsigned len, void *dest, 
 //
 // W_CheckLumpName
 //
-bool W_CheckLumpName(unsigned lump, const char *name)
+bool W_CheckLumpName(uint32_t lump, const char *name)
 {
     if (lump >= numlumps)
         return false;
@@ -758,7 +717,7 @@ bool W_CheckLumpName(unsigned lump, const char *name)
 //
 // W_GetLumpName
 //
-void W_GetLumpName(char *to, unsigned lump)
+void W_GetLumpName(char *to, uint32_t lump)
 {
     if (lump >= numlumps)
         *to = 0;
@@ -773,9 +732,9 @@ void W_GetLumpName(char *to, unsigned lump)
 //
 // W_CacheLumpNum
 //
-void *W_CacheLumpNum(unsigned int lump, const zoneTag_e tag)
+void *W_CacheLumpNum(uint32_t lump, const zoneTag_e tag)
 {
-    if ((unsigned)lump >= numlumps)
+    if ((uint32_t)lump >= numlumps)
         I_Error("W_CacheLumpNum: %i >= numlumps", lump);
 
     if (!lumpcache[lump])
@@ -787,10 +746,10 @@ void *W_CacheLumpNum(unsigned int lump, const zoneTag_e tag)
         //		W_CacheLumpNum() and not choke.
 
         // DPrintf("cache miss on lump %i\n",lump);
-        unsigned int lump_length = W_LumpLength(lump);
-        lumpcache[lump]          = (byte *)Z_Malloc(lump_length + 1, tag, &lumpcache[lump]);
+        uint32_t lump_length = W_LumpLength(lump);
+        lumpcache[lump]          = (uint8_t *)Z_Malloc(lump_length + 1, tag, &lumpcache[lump]);
         W_ReadLump(lump, lumpcache[lump]);
-        *((unsigned char *)lumpcache[lump] + lump_length) = 0;
+        *((uint8_t *)lumpcache[lump] + lump_length) = 0;
     }
     else
     {
@@ -816,7 +775,7 @@ void *W_CacheLumpName(const char *name, const zoneTag_e tag)
 // patch from the standard Doom format of posts with 1-byte lengths and offsets
 // to a new format for posts that uses 2-byte lengths and offsets.
 //
-patch_t *W_CachePatch(unsigned lumpnum, const zoneTag_e tag)
+patch_t *W_CachePatch(uint32_t lumpnum, const zoneTag_e tag)
 {
     if (lumpnum >= numlumps)
         I_Error("W_CachePatch: %u >= numlumps", lumpnum);
@@ -824,7 +783,7 @@ patch_t *W_CachePatch(unsigned lumpnum, const zoneTag_e tag)
     if (!lumpcache[lumpnum])
     {
         // temporary storage of the raw patch in the old format
-        byte *rawlumpdata = new byte[W_LumpLength(lumpnum)];
+        uint8_t *rawlumpdata = new uint8_t[W_LumpLength(lumpnum)];
 
         W_ReadLump(lumpnum, rawlumpdata);
         patch_t *rawpatch = (patch_t *)(rawlumpdata);
@@ -834,9 +793,9 @@ patch_t *W_CachePatch(unsigned lumpnum, const zoneTag_e tag)
         if (newlumplen > 0)
         {
             // valid patch
-            lumpcache[lumpnum] = (byte *)Z_Malloc(newlumplen + 1, tag, &lumpcache[lumpnum]);
+            lumpcache[lumpnum] = (uint8_t *)Z_Malloc(newlumplen + 1, tag, &lumpcache[lumpnum]);
             patch_t *newpatch  = (patch_t *)lumpcache[lumpnum];
-            *((unsigned char *)lumpcache[lumpnum] + newlumplen) = 0;
+            *((uint8_t *)lumpcache[lumpnum] + newlumplen) = 0;
 
             R_ConvertPatch(newpatch, rawpatch);
         }

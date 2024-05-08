@@ -70,8 +70,8 @@ EXTERN_CVAR(sv_natport)
 //
 struct token_t
 {
-    DWORD    id;
-    QWORD    issued;
+    uint32_t    id;
+    uint64_t    issued;
     netadr_t from;
 };
 
@@ -81,9 +81,9 @@ static std::vector<token_t> connect_tokens;
 //
 // SV_NewToken
 //
-DWORD SV_NewToken()
+uint32_t SV_NewToken()
 {
-    QWORD now = I_MSTime() * TICRATE / 1000;
+    uint64_t now = I_MSTime() * TICRATE / 1000;
 
     token_t token;
     token.id     = rand() * time(0);
@@ -108,9 +108,9 @@ DWORD SV_NewToken()
 //
 // SV_ValidToken
 //
-bool SV_IsValidToken(DWORD token)
+bool SV_IsValidToken(uint32_t token)
 {
-    QWORD now = I_MSTime() * TICRATE / 1000;
+    uint64_t now = I_MSTime() * TICRATE / 1000;
 
     for (size_t i = 0; i < connect_tokens.size(); i++)
     {
@@ -146,7 +146,7 @@ void SV_SendServerInfo()
 
     MSG_WriteString(&ml_message, (char *)sv_hostname.cstring());
 
-    byte playersingame = 0;
+    uint8_t playersingame = 0;
     for (Players::iterator it = players.begin(); it != players.end(); ++it)
     {
         if (it->ingame())
@@ -244,7 +244,7 @@ void SV_SendServerInfo()
 
     // bond===========================
 
-    MSG_WriteLong(&ml_message, (DWORD)0x01020304);
+    MSG_WriteLong(&ml_message, (uint32_t)0x01020304);
     MSG_WriteShort(&ml_message, sv_maxplayers.asInt());
 
     for (Players::iterator it = players.begin(); it != players.end(); ++it)
@@ -255,7 +255,7 @@ void SV_SendServerInfo()
         }
     }
 
-    MSG_WriteLong(&ml_message, (DWORD)0x01020305);
+    MSG_WriteLong(&ml_message, (uint32_t)0x01020305);
     MSG_WriteShort(&ml_message, strlen(join_password.cstring()) ? 1 : 0);
 
     // GhostlyDeath -- Send Game Version info

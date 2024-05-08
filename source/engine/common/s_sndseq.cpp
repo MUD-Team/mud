@@ -86,7 +86,7 @@ typedef enum
 typedef struct
 {
     const char *name;
-    byte        seqs[4];
+    uint8_t        seqs[4];
 } hexenseq_t;
 
 class DSeqActorNode : public DSeqNode
@@ -212,7 +212,7 @@ static const hexenseq_t HexenSequences[] = {
     }};
 
 static int           SeqTrans[64 * 3];
-static unsigned int *ScriptTemp;
+static uint32_t *ScriptTemp;
 static int           ScriptTempSize;
 
 sndseq_t **Sequences;
@@ -248,7 +248,7 @@ void DSeqNode::Serialize(FArchive &arc)
     Super::Serialize(arc);
     if (arc.IsStoring())
     {
-        arc << (DWORD)SN_GetSequenceOffset(m_Sequence, m_SequencePtr) << m_DelayTics << m_Volume << m_Atten
+        arc << (uint32_t)SN_GetSequenceOffset(m_Sequence, m_SequencePtr) << m_DelayTics << m_Volume << m_Atten
             << S_sfx[m_CurrentSoundID].name << Sequences[m_Sequence]->name << m_Next << m_Prev;
     }
     else
@@ -300,10 +300,10 @@ void DSeqPolyNode::Serialize(FArchive &arc)
 {
     Super::Serialize(arc);
     if (arc.IsStoring())
-        arc << (WORD)(m_Poly - polyobjs);
+        arc << (uint16_t)(m_Poly - polyobjs);
     else
     {
-        WORD ofs;
+        uint16_t ofs;
         arc >> ofs;
         m_Poly = polyobjs + ofs;
     }
@@ -331,7 +331,7 @@ static void VerifySeqPtr(int pos, int need)
     if (pos + need > ScriptTempSize)
     {
         ScriptTempSize *= 2;
-        ScriptTemp = (unsigned int *)Realloc(ScriptTemp, ScriptTempSize * sizeof(*ScriptTemp));
+        ScriptTemp = (uint32_t *)Realloc(ScriptTemp, ScriptTempSize * sizeof(*ScriptTemp));
     }
 }
 
@@ -436,7 +436,7 @@ void S_ParseSndSeq()
 
     memset(SeqTrans, -1, sizeof(SeqTrans));
     name[MAX_SNDNAME] = 0;
-    ScriptTemp        = (unsigned int *)Malloc(MAX_SEQSIZE * sizeof(*ScriptTemp));
+    ScriptTemp        = (uint32_t *)Malloc(MAX_SEQSIZE * sizeof(*ScriptTemp));
     ScriptTempSize    = MAX_SEQSIZE;
 
     int lump = -1;
@@ -856,7 +856,7 @@ void DSeqNode::RunThink()
     case SS_CMD_PLAYLOOP:
         m_CurrentSoundID = GetData(*m_SequencePtr);
         MakeLoopedSound();
-        m_DelayTics = -(signed)GetData(*(m_SequencePtr + 1));
+        m_DelayTics = -(int32_t)GetData(*(m_SequencePtr + 1));
         break;
 
     case SS_CMD_DELAY:
@@ -934,7 +934,7 @@ void SN_StopAllSequences(void)
 //
 //==========================================================================
 
-ptrdiff_t SN_GetSequenceOffset(int sequence, unsigned int *sequencePtr)
+ptrdiff_t SN_GetSequenceOffset(int sequence, uint32_t *sequencePtr)
 {
     return sequencePtr - Sequences[sequence]->script;
 }

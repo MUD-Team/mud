@@ -55,19 +55,19 @@ EXTERN_CVAR(sv_teamsinplay)
 gameaction_t gameaction;
 gamestate_t  gamestate = GS_STARTUP;
 
-BOOL paused;
-BOOL sendpause; // send a pause event next tic
+bool paused;
+bool sendpause; // send a pause event next tic
 
-BOOL viewactive;
+bool viewactive;
 
-BOOL network_game;      // Describes if a network game is being played
-BOOL multiplayer;       // Describes if this is a multiplayer game or not
+bool network_game;      // Describes if a network game is being played
+bool multiplayer;       // Describes if this is a multiplayer game or not
 
 Players  players;       // The player vector, contains all player information
 player_t nullplayer;    // The null player
 
-byte consoleplayer_id;  // player taking events and displaying
-byte displayplayer_id;  // view being displayed
+uint8_t consoleplayer_id;  // player taking events and displaying
+uint8_t displayplayer_id;  // view being displayed
 int  gametic;
 
 wbstartstruct_t wminfo; // parms for world map / intermission
@@ -236,7 +236,7 @@ void P_SpawnPlayer(player_t &player, mapthing2_t *mthing);
 
 bool G_CheckSpot(player_t &player, mapthing2_t *mthing)
 {
-    unsigned an;
+    uint32_t an;
     AActor  *mo;
     fixed_t  xa, ya;
 
@@ -282,7 +282,7 @@ bool G_CheckSpot(player_t &player, mapthing2_t *mthing)
     //	if (!player.spectator && !player.deadspectator)	// ONLY IF THEY ARE NOT A SPECTATOR
     if (!player.spectator) // ONLY IF THEY ARE NOT A SPECTATOR
     {
-        an = (ANG45 * ((unsigned int)mthing->angle / 45)) >> ANGLETOFINESHIFT;
+        an = (ANG45 * ((uint32_t)mthing->angle / 45)) >> ANGLETOFINESHIFT;
         xa = finecosine[an];
         ya = finesine[an];
 
@@ -308,7 +308,7 @@ bool G_CheckSpot(player_t &player, mapthing2_t *mthing)
 static fixed_t PlayersRangeFromSpot(mapthing2_t *spot)
 {
     Players::iterator it;
-    fixed_t           closest = MAX_INT;
+    fixed_t           closest = INT32_MAX;
     fixed_t           distance;
 
     for (it = players.begin(); it != players.end(); ++it)
@@ -502,7 +502,7 @@ void G_DoReborn(player_t &player)
     if (playerstarts.empty())
         I_Error("No player starts");
 
-    unsigned int playernum = player.id - 1;
+    uint32_t playernum = player.id - 1;
 
     if (G_CheckSpot(player, &playerstarts[playernum % playerstarts.size()]))
     {

@@ -144,7 +144,7 @@ void Unlag::moveSector(sector_t *sector, fixed_t ceilingheight, fixed_t floorhei
 // NOTE: ticsago should be > 0 if we're reconciling and not restoring
 //
 
-void Unlag::reconcilePlayerPositions(byte shooter_id, size_t ticsago)
+void Unlag::reconcilePlayerPositions(uint8_t shooter_id, size_t ticsago)
 {
     for (size_t i = 0; i < player_history.size(); i++)
     {
@@ -331,7 +331,7 @@ void Unlag::refreshRegisteredPlayers()
     player_id_map.clear();
     for (size_t i = 0; i < player_history.size(); i++)
     {
-        byte id = player_history[i].player_id;
+        uint8_t id = player_history[i].player_id;
 
         player_history[i].player = &idplayer(id);
         player_id_map[id]        = i;
@@ -345,7 +345,7 @@ void Unlag::refreshRegisteredPlayers()
 // players' positions
 //
 
-void Unlag::registerPlayer(byte player_id)
+void Unlag::registerPlayer(uint8_t player_id)
 {
     if (!Unlag::enabled())
         return;
@@ -372,7 +372,7 @@ void Unlag::registerPlayer(byte player_id)
 // players.erase() to update the pointers to the player objects.
 //
 
-void Unlag::unregisterPlayer(byte player_id)
+void Unlag::unregisterPlayer(uint8_t player_id)
 {
     if (!Unlag::enabled())
         return;
@@ -440,7 +440,7 @@ void Unlag::unregisterSector(sector_t *sector)
 // weapons instead of leading them.
 //
 
-void Unlag::reconcile(byte shooter_id)
+void Unlag::reconcile(uint8_t shooter_id)
 {
     if (!Unlag::enabled())
         return;
@@ -490,7 +490,7 @@ void Unlag::reconcile(byte shooter_id)
 // was called.
 //
 
-void Unlag::restore(byte shooter_id)
+void Unlag::restore(uint8_t shooter_id)
 {
     if (!Unlag::enabled())
         return;
@@ -518,7 +518,7 @@ void Unlag::restore(byte shooter_id)
 // update, which is returned to the server when the client sends a ticcmd
 // that has the attack button pressed.
 
-void Unlag::setRoundtripDelay(byte player_id, byte svgametic)
+void Unlag::setRoundtripDelay(uint8_t player_id, uint8_t svgametic)
 {
     if (!Unlag::enabled())
         return;
@@ -544,7 +544,7 @@ void Unlag::setRoundtripDelay(byte player_id, byte svgametic)
 // Changes the x, y, z parameters to reflect how much a player was moved
 // during reconciliation.
 
-void Unlag::getReconciliationOffset(byte target_id, fixed_t &x, fixed_t &y, fixed_t &z)
+void Unlag::getReconciliationOffset(uint8_t target_id, fixed_t &x, fixed_t &y, fixed_t &z)
 {
     x = y = z = 0;
 
@@ -565,7 +565,7 @@ void Unlag::getReconciliationOffset(byte target_id, fixed_t &x, fixed_t &y, fixe
 // Changes the x, y, z parameters to the position of a player that
 // was saved prior to reconciliation.
 //
-void Unlag::getCurrentPlayerPosition(byte player_id, fixed_t &x, fixed_t &y, fixed_t &z)
+void Unlag::getCurrentPlayerPosition(uint8_t player_id, fixed_t &x, fixed_t &y, fixed_t &z)
 {
     x = y = z = 0;
 
@@ -594,7 +594,7 @@ void Unlag::getCurrentPlayerPosition(byte player_id, fixed_t &x, fixed_t &y, fix
 //
 // Attempts to determine which tic would have been ideal to use for reconciling
 // a target player's position.
-void Unlag::debugReconciliation(byte shooter_id)
+void Unlag::debugReconciliation(uint8_t shooter_id)
 {
     player_t *shooter = &(idplayer(shooter_id));
 
@@ -619,7 +619,7 @@ void Unlag::debugReconciliation(byte shooter_id)
 
             if (deltaangle < 3 * FRACUNIT)
             {
-                DPrintf("Unlag (%03d): would have hit player %d at gametic %d (%" PRIuSIZE " tics ago)\n",
+                DPrintf("Unlag (%03d): would have hit player %d at gametic %d (%zu tics ago)\n",
                         gametic & 0xFF, player_history[i].player->id, (gametic - n) & 0xFF, n);
             }
         }

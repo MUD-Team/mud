@@ -118,7 +118,7 @@ class PlayerBitField
         memset(bitfield, 0, sizeof(bitfield));
     }
 
-    void set(byte id)
+    void set(uint8_t id)
     {
         int bytenum = id >> 3;
         int bitnum  = id & bytemask;
@@ -126,7 +126,7 @@ class PlayerBitField
         bitfield[bytenum] |= (1 << bitnum);
     }
 
-    void unset(byte id)
+    void unset(uint8_t id)
     {
         int bytenum = id >> 3;
         int bitnum  = id & bytemask;
@@ -134,7 +134,7 @@ class PlayerBitField
         bitfield[bytenum] &= ~(1 << bitnum);
     }
 
-    bool get(byte id) const
+    bool get(uint8_t id) const
     {
         int bytenum = id >> 3;
         int bitnum  = id & bytemask;
@@ -143,13 +143,13 @@ class PlayerBitField
     }
 
   private:
-    static const int bytesize = 8 * sizeof(byte);
+    static const int bytesize = 8 * sizeof(uint8_t);
     static const int bytemask = bytesize - 1;
 
     // Hacky way of getting ceil() at compile-time
     static const size_t fieldsize = (MAXPLAYERS + bytemask) / bytesize;
 
-    byte bitfield[fieldsize];
+    uint8_t bitfield[fieldsize];
 };
 
 //
@@ -302,8 +302,8 @@ struct baseline_t
     uint32_t  targetid;
     uint32_t  tracerid;
     int       movecount;
-    byte      movedir;
-    byte      rndindex;
+    uint8_t      movedir;
+    uint8_t      rndindex;
 
     // Flags are a varint, so order from most to least likely.
     static const uint32_t POSX      = BIT(0);
@@ -434,7 +434,7 @@ class AActor : public DThinker
     fixed_t     pitch;
     angle_t     prevpitch;
 
-    DWORD effects; // [RH] see p_effect.h
+    uint32_t effects; // [RH] see p_effect.h
 
                    // Interaction info, by BLOCKMAP.
     // Links in blocks (if needed).
@@ -472,7 +472,7 @@ class AActor : public DThinker
     int         health;
 
     // Movement direction, movement generation (zig-zagging).
-    byte movedir;   // 0-7
+    uint8_t movedir;   // 0-7
     int  movecount; // when 0, select a new dir
     char visdir;
 
@@ -494,15 +494,15 @@ class AActor : public DThinker
     player_s *player;
 
     // Player number last looked for.
-    unsigned int lastlook;
+    uint32_t lastlook;
 
     // For nightmare respawn.
     mapthing2_t spawnpoint;
 
     // Thing being chased/attacked for tracers.
     AActorPtr tracer;
-    byte      special;     // special
-    byte      args[5];     // special arguments
+    uint8_t      special;     // special
+    uint8_t      args[5];     // special arguments
 
     AActor *inext, *iprev; // Links to other mobjs in same bucket
 
@@ -513,8 +513,8 @@ class AActor : public DThinker
     AActorPtr        goal;         // Monster's goal if not chasing anything
     translationref_t translation;  // Translation table (or NULL)
     fixed_t          translucency; // 65536=fully opaque, 0=fully invisible
-    byte             waterlevel;   // 0=none, 1=feet, 2=waist, 3=eyes
-    SWORD            gear;         // killough 11/98: used in torque simulation
+    uint8_t             waterlevel;   // 0=none, 1=feet, 2=waist, 3=eyes
+    int16_t            gear;         // killough 11/98: used in torque simulation
 
     bool onground;                 // NES - Fixes infinite jumping bug like a charm.
     bool on_conveyor;              // Blair - Update items on conveyors more often
@@ -522,10 +522,10 @@ class AActor : public DThinker
     // a linked list of sectors where this object appears
     struct msecnode_s *touching_sectorlist; // phares 3/14/98
 
-    short deadtic;                          // tics after player's death
+    int16_t deadtic;                          // tics after player's death
     int   oldframe;
 
-    unsigned char rndindex; // denis - because everything should have a random number generator, for prediction
+    uint8_t rndindex; // denis - because everything should have a random number generator, for prediction
 
     // ThingIDs
     static void    ClearTIDHashes();
@@ -537,7 +537,7 @@ class AActor : public DThinker
     static AActor *FindGoal(const AActor *first, int tid, int kind);
 
     uint32_t   netid;        // every object has its own netid
-    short      tid;          // thing identifier
+    int16_t      tid;          // thing identifier
     baseline_t baseline;     // Baseline data for mobj sent to clients
     bool       baseline_set; // Have we set our baseline yet?
 

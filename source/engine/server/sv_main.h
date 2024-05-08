@@ -82,10 +82,10 @@ void SV_Suicide(player_t &player);
 void SV_SpawnMobj(AActor *mo);
 void SV_TouchSpecial(AActor *special, player_t *player);
 
-void SV_Sound(AActor *mo, byte channel, const char *name, byte attenuation);
-void SV_Sound(player_t &pl, AActor *mo, const byte channel, const char *name, const byte attenuation);
-void SV_Sound(fixed_t x, fixed_t y, byte channel, const char *name, byte attenuation);
-void SV_SoundTeam(byte channel, const char *name, byte attenuation, int t);
+void SV_Sound(AActor *mo, uint8_t channel, const char *name, uint8_t attenuation);
+void SV_Sound(player_t &pl, AActor *mo, const uint8_t channel, const char *name, const uint8_t attenuation);
+void SV_Sound(fixed_t x, fixed_t y, uint8_t channel, const char *name, uint8_t attenuation);
+void SV_SoundTeam(uint8_t channel, const char *name, uint8_t attenuation, int t);
 
 void SV_MidPrint(const char *msg, player_t *p, int msgtime = 0);
 
@@ -123,9 +123,9 @@ void SV_ClearPlayerQueue();
 
 void SV_UpdateSecretCount(player_t &player);
 void SV_UpdateMonsterRespawnCount();
-void SV_SendExecuteLineSpecial(byte special, line_t *line, AActor *activator, int arg0, int arg1, int arg2, int arg3,
+void SV_SendExecuteLineSpecial(uint8_t special, line_t *line, AActor *activator, int arg0, int arg1, int arg2, int arg3,
                                int arg4);
-void SV_ACSExecuteSpecial(byte special, AActor *activator, const char *print, bool playerOnly,
+void SV_ACSExecuteSpecial(uint8_t special, AActor *activator, const char *print, bool playerOnly,
                           const std::vector<int> &args = std::vector<int>());
 
 bool CompareQueuePosition(const player_t *p1, const player_t *p2);

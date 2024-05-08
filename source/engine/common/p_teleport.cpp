@@ -138,10 +138,10 @@ static AActor *SelectTeleDest(int tid, int tag)
 //
 // TELEPORTATION
 //
-BOOL EV_Teleport(int tid, int tag, int arg0, int side, AActor *thing, int nostop)
+bool EV_Teleport(int tid, int tag, int arg0, int side, AActor *thing, int nostop)
 {
     AActor   *m;
-    unsigned  an;
+    uint32_t  an;
     fixed_t   oldx;
     fixed_t   oldy;
     fixed_t   oldz;
@@ -226,10 +226,10 @@ BOOL EV_Teleport(int tid, int tag, int arg0, int side, AActor *thing, int nostop
 }
 
 // [ML] Original vanilla-style EV_Teleport, based on code from chocolate doom
-BOOL EV_LineTeleport(line_t *line, int side, AActor *thing)
+bool EV_LineTeleport(line_t *line, int side, AActor *thing)
 {
     AActor                  *m;
-    unsigned                 an;
+    uint32_t                 an;
     int                      i;
     int                      tag;
     fixed_t                  oldx;
@@ -326,7 +326,7 @@ BOOL EV_LineTeleport(line_t *line, int side, AActor *thing)
 // [RH] Changed to find destination by tid rather than sector
 //
 
-BOOL EV_SilentTeleport(int tid, int useangle, int tag, int keepheight, line_t *line, int side, AActor *thing)
+bool EV_SilentTeleport(int tid, int useangle, int tag, int keepheight, line_t *line, int side, AActor *thing)
 {
     AActor *m;
 
@@ -404,7 +404,7 @@ BOOL EV_SilentTeleport(int tid, int useangle, int tag, int keepheight, line_t *l
 #define FUDGEFACTOR 10
 
 // [RH] Modified to support different source and destination ids.
-BOOL EV_SilentLineTeleport(line_t *line, int side, AActor *thing, int id, BOOL reverse)
+bool EV_SilentLineTeleport(line_t *line, int side, AActor *thing, int id, bool reverse)
 {
     int     i;
     line_t *l;

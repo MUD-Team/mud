@@ -888,7 +888,7 @@ void P_SerializeHorde(FArchive &arc)
     {
         hordeInfo_t info     = ::g_HordeDirector.serialize();
         const int   state    = info.state;
-        const DWORD defineID = static_cast<DWORD>(info.defineID);
+        const uint32_t defineID = static_cast<uint32_t>(info.defineID);
         arc << state << info.wave << info.waveTime << info.bossTime << defineID << info.spawnedHealth
             << info.killedHealth << info.bossHealth << info.bossDamage << info.waveStartHealth;
     }
@@ -896,7 +896,7 @@ void P_SerializeHorde(FArchive &arc)
     {
         hordeInfo_t info;
         int         state;
-        DWORD       defineID;
+        uint32_t       defineID;
         arc >> state >> info.wave >> info.waveTime >> info.bossTime >> defineID >> info.spawnedHealth >>
             info.killedHealth >> info.bossHealth >> info.bossDamage >> info.waveStartHealth;
         info.state    = static_cast<hordeState_e>(state);

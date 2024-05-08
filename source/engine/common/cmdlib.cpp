@@ -38,7 +38,7 @@
 #include "win32inc.h"
 
 char com_token[8192];
-BOOL com_eof;
+bool com_eof;
 
 char *copystring(const char *s)
 {
@@ -307,7 +307,7 @@ std::string StdStringToUpper(const char *str, size_t n)
 std::vector<std::string> VectorArgs(size_t argc, char **argv)
 {
     std::vector<std::string> arguments(argc - 1);
-    for (unsigned i = 1; i < argc; i++)
+    for (uint32_t i = 1; i < argc; i++)
     {
         arguments[i - 1] = argv[i];
     }
@@ -518,7 +518,7 @@ bool StrToTime(std::string str, time_t &tim)
     }
 
     // Gather tokens from string representation.
-    typedef std::pair<unsigned short, std::string> token_t;
+    typedef std::pair<uint16_t, std::string> token_t;
     typedef std::vector<token_t>                   tokens_t;
     tokens_t                                       tokens;
 
@@ -528,7 +528,7 @@ bool StrToTime(std::string str, time_t &tim)
 
     while (i < size)
     {
-        unsigned short num = 0;
+        uint16_t num = 0;
         std::string    timeword;
 
         // Grab a number.
@@ -866,11 +866,11 @@ double Remap(const double value, const double low1, const double high1, const do
 uint32_t Log2(uint32_t n)
 {
 #define LT(n) n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n
-    static const signed char LogTable256[256] = {
+    static const int8_t LogTable256[256] = {
         -1,    0,     1,     1,     2,     2,     2,     2,     3,     3,     3,     3,     3,     3,     3,    3,
         LT(4), LT(5), LT(5), LT(6), LT(6), LT(6), LT(6), LT(7), LT(7), LT(7), LT(7), LT(7), LT(7), LT(7), LT(7)};
 
-    unsigned int t, tt; // temporaries
+    uint32_t t, tt; // temporaries
 
     if ((tt = (n >> 16)))
         return (t = (tt >> 8)) ? 24 + LogTable256[t] : 16 + LogTable256[tt];
@@ -893,7 +893,7 @@ float NextAfter(const float from, const float to)
     const float y = to;
     union {
         float        f;
-        unsigned int i;
+        uint32_t i;
     } u;
     if (isnan(y) || isnan(x))
         return x + y;

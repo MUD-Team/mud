@@ -480,7 +480,7 @@ void G_SerializeLevel(FArchive &arc, bool hubLoad)
 {
     if (arc.IsStoring())
     {
-        unsigned int playernum = players.size();
+        uint32_t playernum = players.size();
         arc << level.flags << level.fadeto_color[0] << level.fadeto_color[1] << level.fadeto_color[2]
             << level.fadeto_color[3] << level.found_secrets << level.found_items << level.killed_monsters
             << level.gravity << level.aircontrol;
@@ -495,7 +495,7 @@ void G_SerializeLevel(FArchive &arc, bool hubLoad)
     }
     else
     {
-        unsigned int playernum;
+        uint32_t playernum;
         arc >> level.flags >> level.fadeto_color[0] >> level.fadeto_color[1] >> level.fadeto_color[2] >>
             level.fadeto_color[3] >> level.found_secrets >> level.found_items >> level.killed_monsters >>
             level.gravity >> level.aircontrol;
@@ -624,7 +624,7 @@ void P_SerializeACSDefereds(FArchive &arc)
         }
 
         // Signal end of defereds
-        arc << (byte)0;
+        arc << (uint8_t)0;
     }
     else
     {
@@ -679,7 +679,7 @@ EXTERN_CVAR(sv_aircontrol)
 
 void G_InitLevelLocals()
 {
-    byte old_fadeto_color[4];
+    uint8_t old_fadeto_color[4];
     memcpy(old_fadeto_color, level.fadeto_color, 4);
 
     R_ExitLevel();
@@ -839,7 +839,7 @@ BEGIN_COMMAND(mapinfo)
     LevelInfos &levels = getLevelInfos();
     if (stricmp(argv[1], "size") == 0)
     {
-        Printf(PRINT_HIGH, "%" PRIuSIZE " maps found\n", levels.size());
+        Printf(PRINT_HIGH, "%zu maps found\n", levels.size());
         return;
     }
 

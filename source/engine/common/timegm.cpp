@@ -33,9 +33,11 @@
 
 #ifdef _WIN32
 
+#include <stdint.h>
+
 #include <ctime>
 
-static int is_leap(unsigned y)
+static int is_leap(uint32_t y)
 {
     y += 1900;
     return (y % 4) == 0 && ((y % 100) != 0 || (y % 400) == 0);
@@ -43,7 +45,7 @@ static int is_leap(unsigned y)
 
 time_t timegm(struct tm *tm)
 {
-    static const unsigned ndays[2][12] = {{31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31},
+    static const uint32_t ndays[2][12] = {{31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31},
                                           {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}};
     time_t                res          = 0;
     int                   i;

@@ -91,7 +91,7 @@ extern int mapchange;
 
 bool step_mode = false;
 
-std::set<byte> free_player_ids;
+std::set<uint8_t> free_player_ids;
 
 bool keysfound[NUMCARDS]; // Ch0wW : Found keys
 
@@ -119,7 +119,7 @@ EXTERN_CVAR(g_resetinvonexit)
 void              SexMessage(const char *from, char *to, int gender, const char *victim, const char *killer);
 Players::iterator SV_RemoveDisconnectedPlayer(Players::iterator it);
 void              P_PlayerLeavesGame(player_s *player);
-bool              P_LineSpecialMovesSector(short special);
+bool              P_LineSpecialMovesSector(int16_t special);
 
 void        SV_UpdateShareKeys(player_t &player);
 std::string SV_BuildKillsDeathsStatusString(player_t &player);
@@ -526,7 +526,7 @@ Players::iterator SV_GetFreeClient(void)
     players.back().playerstate = PST_CONTACT;
 
     // generate player id
-    std::set<byte>::iterator id = free_player_ids.begin();
+    std::set<uint8_t>::iterator id = free_player_ids.begin();
     players.back().id           = *id;
     free_player_ids.erase(id);
 
@@ -654,7 +654,7 @@ void SV_MidPrint(const char *msg, player_t *p, int msgtime)
 //
 // SV_Sound
 //
-void SV_Sound(AActor *mo, byte channel, const char *name, byte attenuation)
+void SV_Sound(AActor *mo, uint8_t channel, const char *name, uint8_t attenuation)
 {
     int       sfx_id;
     client_t *cl;
@@ -682,7 +682,7 @@ void SV_Sound(AActor *mo, byte channel, const char *name, byte attenuation)
     }
 }
 
-void SV_Sound(player_t &pl, AActor *mo, const byte channel, const char *name, const byte attenuation)
+void SV_Sound(player_t &pl, AActor *mo, const uint8_t channel, const char *name, const uint8_t attenuation)
 {
     int sfx_id;
     int x = 0, y = 0;
@@ -710,7 +710,7 @@ void SV_Sound(player_t &pl, AActor *mo, const byte channel, const char *name, co
 // UV_SoundAvoidPlayer
 // Sends a sound to clients, but doesn't send it to client 'player'.
 //
-void UV_SoundAvoidPlayer(AActor *mo, byte channel, const char *name, byte attenuation)
+void UV_SoundAvoidPlayer(AActor *mo, uint8_t channel, const char *name, uint8_t attenuation)
 {
     int       sfx_id;
     client_t *cl;
@@ -743,7 +743,7 @@ void UV_SoundAvoidPlayer(AActor *mo, byte channel, const char *name, byte attenu
 //	SV_SoundTeam
 //	Sends a sound to players on the specified teams
 //
-void SV_SoundTeam(byte channel, const char *name, byte attenuation, int team)
+void SV_SoundTeam(uint8_t channel, const char *name, uint8_t attenuation, int team)
 {
     int sfx_id;
 
@@ -768,7 +768,7 @@ void SV_SoundTeam(byte channel, const char *name, byte attenuation, int team)
     }
 }
 
-void SV_Sound(fixed_t x, fixed_t y, byte channel, const char *name, byte attenuation)
+void SV_Sound(fixed_t x, fixed_t y, uint8_t channel, const char *name, uint8_t attenuation)
 {
     int       sfx_id;
     client_t *cl;
@@ -859,7 +859,7 @@ bool SV_SetupUserInfo(player_t &player)
 
     gender_t gender = static_cast<gender_t>(MSG_ReadLong());
 
-    byte color[4];
+    uint8_t color[4];
     for (int i = 3; i >= 0; i--)
         color[i] = MSG_ReadByte();
 
@@ -871,11 +871,11 @@ bool SV_SetupUserInfo(player_t &player)
 
     weaponswitch_t switchweapon = static_cast<weaponswitch_t>(MSG_ReadByte());
 
-    byte weapon_prefs[NUMWEAPONS];
+    uint8_t weapon_prefs[NUMWEAPONS];
     for (size_t i = 0; i < NUMWEAPONS; i++)
     {
         // sanitize the weapon preference input
-        byte preflevel = MSG_ReadByte();
+        uint8_t preflevel = MSG_ReadByte();
         if (preflevel >= NUMWEAPONS)
             preflevel = NUMWEAPONS - 1;
 
@@ -1366,7 +1366,7 @@ void SV_UpdateMovingSectors(player_t &player)
 // send only the least significant byte to save bandwidth.
 void SV_SendGametic(client_t *cl)
 {
-    byte tic = static_cast<byte>(gametic & 0xFF);
+    uint8_t tic = static_cast<uint8_t>(gametic & 0xFF);
     MSG_WriteSVC(&cl->netbuf, SVC_ServerGametic(tic));
 }
 
@@ -1669,7 +1669,7 @@ bool SV_CheckClientVersion(client_t *cl, Players::iterator it)
 static void SV_DisconnectOldClient()
 {
     int         cl_version      = MSG_ReadShort();
-    byte        connection_type = MSG_ReadByte();
+    uint8_t        connection_type = MSG_ReadByte();
     std::string VersionStr;
 
     int GameVer = 0;
@@ -1697,8 +1697,8 @@ static void SV_DisconnectOldClient()
     }
 
     // Send using the old protocol mechanism without relying on any defines
-    const byte old_svc_disconnect = 2;
-    const byte old_svc_print      = 28;
+    const uint8_t old_svc_disconnect = 2;
+    const uint8_t old_svc_print      = 28;
     const int  old_PRINT_HIGH     = 2;
 
     static buf_t smallbuf(1024);
@@ -1806,7 +1806,7 @@ void SV_ConnectClient()
     player->JoinTime = time(NULL);
 
     cl->version          = MSG_ReadShort();
-    byte connection_type = MSG_ReadByte();
+    uint8_t connection_type = MSG_ReadByte();
 
     // [SL] 2011-05-11 - Register the player with the reconciliation system
     // for unlagging
@@ -2552,7 +2552,7 @@ void SVC_PrivMsg(player_t &player, player_t &dplayer, const char *message)
 //
 bool SV_Say(player_t &player)
 {
-    byte message_visibility = MSG_ReadByte();
+    uint8_t message_visibility = MSG_ReadByte();
 
     std::string message(MSG_ReadString());
     StripColorCodes(message);
@@ -2896,7 +2896,7 @@ void SV_UpdateMonsterRespawnCount()
 // current gametic
 void SV_CalcPing(player_t &player)
 {
-    unsigned int ping = I_MSTime() - MSG_ReadLong();
+    uint32_t ping = I_MSTime() - MSG_ReadLong();
 
     if (ping > 999)
         ping = 999;
@@ -3015,7 +3015,7 @@ void SV_SendPlayerStateUpdate(client_t *client, player_t *player)
 
 void SV_SpyPlayer(player_t &viewer)
 {
-    byte id = MSG_ReadByte();
+    uint8_t id = MSG_ReadByte();
 
     player_t &other = idplayer(id);
     if (!validplayer(other) || !P_CanSpy(viewer, other))
@@ -3309,7 +3309,7 @@ void SV_Spectate(player_t &player)
     // [AM] Code has three possible values; true, false and 5.  True specs the
     //      player, false unspecs him and 5 updates the server with the spec's
     //      new position.
-    byte Code = MSG_ReadByte();
+    uint8_t Code = MSG_ReadByte();
 
     if (!player.ingame())
         return;
@@ -3770,11 +3770,11 @@ void SV_Suicide(player_t &player)
 //
 void SV_Cheat(player_t &player)
 {
-    byte cheatType = MSG_ReadByte();
+    uint8_t cheatType = MSG_ReadByte();
 
     if (cheatType == 0)
     {
-        unsigned int cheat = MSG_ReadShort();
+        uint32_t cheat = MSG_ReadShort();
 
         if (!CHEAT_AreCheatsEnabled())
             return;
@@ -4038,7 +4038,7 @@ bool SV_Frozen()
 //
 // SV_StepTics
 //
-void SV_StepTics(QWORD count)
+void SV_StepTics(uint64_t count)
 {
     DObject::BeginFrame();
 
@@ -4155,9 +4155,9 @@ void SV_RunTics()
 
 BEGIN_COMMAND(step)
 {
-    QWORD newtics = argc > 1 ? atoi(argv[1]) : 1;
+    uint64_t newtics = argc > 1 ? atoi(argv[1]) : 1;
 
-    extern unsigned char prndindex;
+    extern uint8_t prndindex;
 
     SV_StepTics(newtics);
 
@@ -4321,7 +4321,7 @@ END_COMMAND(players)
 void OnChangedSwitchTexture(line_t *line, int useAgain)
 {
     int      l     = line - lines;
-    unsigned state = 0, time = 0;
+    uint32_t state = 0, time = 0;
     P_GetButtonInfo(line, state, time);
 
     for (Players::iterator it = players.begin(); it != players.end(); ++it)
@@ -4615,7 +4615,7 @@ void SV_ClearPlayerQueue()
         SV_SendPlayerQueuePositions(&(*it), false);
 }
 
-void SV_SendExecuteLineSpecial(byte special, line_t *line, AActor *activator, int arg0, int arg1, int arg2, int arg3,
+void SV_SendExecuteLineSpecial(uint8_t special, line_t *line, AActor *activator, int arg0, int arg1, int arg2, int arg3,
                                int arg4)
 {
     if (P_LineSpecialMovesSector(special))
@@ -4637,7 +4637,7 @@ void SV_SendExecuteLineSpecial(byte special, line_t *line, AActor *activator, in
 // If playerOnly is true and the activator is a player, then it will only be
 // sent to the activating player.
 //
-void SV_ACSExecuteSpecial(byte special, AActor *activator, const char *print, bool playerOnly,
+void SV_ACSExecuteSpecial(uint8_t special, AActor *activator, const char *print, bool playerOnly,
                           const std::vector<int> &args)
 {
     player_s *sendPlayer = NULL;

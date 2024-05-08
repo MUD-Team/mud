@@ -227,7 +227,7 @@ bool P_SightTraverseIntercepts(void)
     //
     while (count--)
     {
-        dist = MAX_INT;
+        dist = INT32_MAX;
         for (scan = 0; scan < intercepts.Size(); scan++)
             if (intercepts[scan].frac < dist)
             {
@@ -238,7 +238,7 @@ bool P_SightTraverseIntercepts(void)
         if (!PTR_SightTraverse(in))
             return false; // don't bother going farther
 
-        in->frac = MAX_INT;
+        in->frac = INT32_MAX;
     }
 
     return true; // everything was traversed

@@ -37,7 +37,7 @@ class SdlMixerMusicSystem : public MusicSystem
     SdlMixerMusicSystem();
     virtual ~SdlMixerMusicSystem();
 
-    virtual void startSong(byte *data, size_t length, bool loop);
+    virtual void startSong(uint8_t *data, size_t length, bool loop);
     virtual void stopSong();
     virtual void pauseSong();
     virtual void resumeSong();
@@ -56,6 +56,6 @@ class SdlMixerMusicSystem : public MusicSystem
     MusicHandler_t m_registeredSong;
 
     void _StopSong();
-    void _RegisterSong(byte *data, size_t length);
+    void _RegisterSong(uint8_t *data, size_t length);
     void _UnregisterSong();
 };

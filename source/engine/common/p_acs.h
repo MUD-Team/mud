@@ -10,34 +10,34 @@
 
 struct ScriptPtr
 {
-    WORD  Number;
-    BYTE  Type;
-    BYTE  ArgCount;
-    DWORD Address;
+    uint16_t  Number;
+    uint8_t  Type;
+    uint8_t  ArgCount;
+    uint32_t Address;
 };
 
 struct ScriptPtr1
 {
-    WORD  Number;
-    WORD  Type;
-    DWORD Address;
-    DWORD ArgCount;
+    uint16_t  Number;
+    uint16_t  Type;
+    uint32_t Address;
+    uint32_t ArgCount;
 };
 
 struct ScriptPtr2
 {
-    DWORD Number; // Type is Number / 1000
-    DWORD Address;
-    DWORD ArgCount;
+    uint32_t Number; // Type is Number / 1000
+    uint32_t Address;
+    uint32_t ArgCount;
 };
 
 struct ScriptFunction
 {
-    BYTE  ArgCount;
-    BYTE  LocalCount;
-    BYTE  HasReturnValue;
-    BYTE  Pad;
-    DWORD Address;
+    uint8_t  ArgCount;
+    uint8_t  LocalCount;
+    uint8_t  HasReturnValue;
+    uint8_t  Pad;
+    uint32_t Address;
 };
 
 enum
@@ -65,23 +65,23 @@ enum ACSFormat
 class FBehavior
 {
   public:
-    FBehavior(BYTE *object, int len);
+    FBehavior(uint8_t *object, int len);
     ~FBehavior();
 
     bool        IsGood();
-    BYTE       *FindChunk(DWORD id) const;
-    BYTE       *NextChunk(BYTE *chunk) const;
+    uint8_t       *FindChunk(uint32_t id) const;
+    uint8_t       *NextChunk(uint8_t *chunk) const;
     int        *FindScript(int number) const;
-    void        PrepLocale(DWORD userpref, DWORD userdef, DWORD syspref, DWORD sysdef);
-    const char *LookupString(DWORD index, DWORD ofs = 0) const;
-    const char *LocalizeString(DWORD index) const;
-    void        StartTypedScripts(WORD type, AActor *activator, int arg0 = 0, int arg1 = 0, int arg2 = 0,
+    void        PrepLocale(uint32_t userpref, uint32_t userdef, uint32_t syspref, uint32_t sysdef);
+    const char *LookupString(uint32_t index, uint32_t ofs = 0) const;
+    const char *LocalizeString(uint32_t index) const;
+    void        StartTypedScripts(uint16_t type, AActor *activator, int arg0 = 0, int arg1 = 0, int arg2 = 0,
                                   bool always = true) const;
-    DWORD       PC2Ofs(int *pc) const
+    uint32_t       PC2Ofs(int *pc) const
     {
-        return (BYTE *)pc - Data;
+        return (uint8_t *)pc - Data;
     }
-    int *Ofs2PC(DWORD ofs) const
+    int *Ofs2PC(uint32_t ofs) const
     {
         return (int *)(Data + ofs);
     }
@@ -98,22 +98,22 @@ class FBehavior
 
     ACSFormat Format;
 
-    BYTE      *Data;
+    uint8_t      *Data;
     int        DataSize;
-    BYTE      *Chunks;
-    BYTE      *Scripts;
+    uint8_t      *Chunks;
+    uint8_t      *Scripts;
     int        NumScripts;
-    BYTE      *Functions;
+    uint8_t      *Functions;
     int        NumFunctions;
     ArrayInfo *Arrays;
     int        NumArrays;
-    DWORD      LanguageNeutral;
-    DWORD      Localized;
+    uint32_t      LanguageNeutral;
+    uint32_t      Localized;
 
     static int STACK_ARGS SortScripts(const void *a, const void *b);
-    void                  AddLanguage(DWORD lang);
-    DWORD                 FindLanguage(DWORD lang, bool ignoreregion) const;
-    DWORD                *CheckIfInList(DWORD lang);
+    void                  AddLanguage(uint32_t lang);
+    uint32_t                 FindLanguage(uint32_t lang, bool ignoreregion) const;
+    uint32_t                *CheckIfInList(uint32_t lang);
 };
 
 class DLevelScript : public DObject
@@ -383,19 +383,19 @@ class DLevelScript : public DObject
         PCODE_COMMAND_COUNT
     };
 
-    static void ACS_SetLineTexture(int *args, byte argCount);
+    static void ACS_SetLineTexture(int *args, uint8_t argCount);
     static void ACS_ClearInventory(AActor *actor);
-    static void ACS_Print(byte pcd, AActor *actor, const char *print);
-    static void ACS_ChangeMusic(byte pcd, AActor *activator, int *args, byte argCount);
-    static void ACS_StartSound(byte pcd, AActor *activator, int *args, byte argCount);
-    static void ACS_SetLineBlocking(int *args, byte argCount);
-    static void ACS_SetLineMonsterBlocking(int *args, byte argCount);
-    static void ACS_SetLineSpecial(int *args, byte argCount);
-    static void ACS_SetThingSpecial(int *args, byte argCount);
-    static void ACS_FadeRange(AActor *activator, int *args, byte argCount);
+    static void ACS_Print(uint8_t pcd, AActor *actor, const char *print);
+    static void ACS_ChangeMusic(uint8_t pcd, AActor *activator, int *args, uint8_t argCount);
+    static void ACS_StartSound(uint8_t pcd, AActor *activator, int *args, uint8_t argCount);
+    static void ACS_SetLineBlocking(int *args, uint8_t argCount);
+    static void ACS_SetLineMonsterBlocking(int *args, uint8_t argCount);
+    static void ACS_SetLineSpecial(int *args, uint8_t argCount);
+    static void ACS_SetThingSpecial(int *args, uint8_t argCount);
+    static void ACS_FadeRange(AActor *activator, int *args, uint8_t argCount);
     static void ACS_CancelFade(AActor *activator);
-    static void ACS_ChangeFlat(byte pcd, int *args, byte argCount);
-    static void ACS_SoundSequence(int *args, byte argCount);
+    static void ACS_ChangeFlat(uint8_t pcd, int *args, uint8_t argCount);
+    static void ACS_SoundSequence(int *args, uint8_t argCount);
 
     // Some constants used by ACS scripts
     enum
@@ -519,12 +519,12 @@ class DLevelScript : public DObject
     static void SetLineBlocking(int lineid, int flags);
     static void SetLineMonsterBlocking(int lineid, int toggle);
     static void SetLineSpecial(int lineid, int special, int arg1, int arg2, int arg3, int arg4, int arg5);
-    static void ActivateLineSpecial(byte special, line_t *line, AActor *activator, int arg0, int arg1, int arg2,
+    static void ActivateLineSpecial(uint8_t special, line_t *line, AActor *activator, int arg0, int arg1, int arg2,
                                     int arg3, int arg4);
-    static void ChangeMusic(byte pcd, AActor *activator, int index, int loop);
-    static void StartSound(byte pcd, AActor *activator, int channel, int index, int volume, int attenuation);
-    static void StartSectorSound(byte pcd, sector_t *sector, int channel, int index, int volume, int attenuation);
-    static void StartThingSound(byte pcd, AActor *actor, int channel, int index, int volume, int attenuation);
+    static void ChangeMusic(uint8_t pcd, AActor *activator, int index, int loop);
+    static void StartSound(uint8_t pcd, AActor *activator, int channel, int index, int volume, int attenuation);
+    static void StartSectorSound(uint8_t pcd, sector_t *sector, int channel, int index, int volume, int attenuation);
+    static void StartThingSound(uint8_t pcd, AActor *actor, int channel, int index, int volume, int attenuation);
     static void SetThingSpecial(AActor *actor, int special, int arg1, int arg2, int arg3, int arg4, int arg5);
     static void CancelFade(AActor *actor);
     static void StartSoundSequence(sector_t *sec, int index);
@@ -540,11 +540,11 @@ class DLevelScript : public DObject
 
 inline FArchive &operator<<(FArchive &arc, DLevelScript::EScriptState state)
 {
-    return arc << (BYTE)state;
+    return arc << (uint8_t)state;
 }
 inline FArchive &operator>>(FArchive &arc, DLevelScript::EScriptState &state)
 {
-    BYTE in;
+    uint8_t in;
     arc >> in;
     state = (DLevelScript::EScriptState)in;
     return arc;

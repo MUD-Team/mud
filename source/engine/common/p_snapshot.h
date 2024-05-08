@@ -329,7 +329,7 @@ class ActorSnapshot : public Snapshot
         ACT_FRAME        = BIT(16)
     };
 
-    unsigned int mFields;
+    uint32_t mFields;
 
     fixed_t mX;
     fixed_t mY;
@@ -626,7 +626,7 @@ class PlayerSnapshot : public Snapshot
         PLY_JUMPTIME        = 0x00080000
     };
 
-    unsigned int  mFields; // bitfield of data present in snapshot
+    uint32_t  mFields; // bitfield of data present in snapshot
     ActorSnapshot mActorSnap;
 
     fixed_t mViewHeight;
@@ -757,19 +757,19 @@ class SectorSnapshot : public Snapshot
     {
         mFloorOldDirection = val;
     }
-    void setCeilingTexture(short val)
+    void setCeilingTexture(int16_t val)
     {
         mCeilingTexture = val;
     }
-    void setFloorTexture(short val)
+    void setFloorTexture(int16_t val)
     {
         mFloorTexture = val;
     }
-    void setCeilingSpecial(short val)
+    void setCeilingSpecial(int16_t val)
     {
         mNewCeilingSpecial = val;
     }
-    void setFloorSpecial(short val)
+    void setFloorSpecial(int16_t val)
     {
         mNewFloorSpecial = val;
     }
@@ -954,19 +954,19 @@ class SectorSnapshot : public Snapshot
     {
         return mFloorOldDirection;
     }
-    short getCeilingTexture() const
+    int16_t getCeilingTexture() const
     {
         return mCeilingTexture;
     }
-    short getFloorTexture() const
+    int16_t getFloorTexture() const
     {
         return mFloorTexture;
     }
-    short getCeilingSpecial() const
+    int16_t getCeilingSpecial() const
     {
         return mNewCeilingSpecial;
     }
-    short getFloorSpecial() const
+    int16_t getFloorSpecial() const
     {
         return mNewFloorSpecial;
     }
@@ -1103,11 +1103,11 @@ class SectorSnapshot : public Snapshot
     int mCeilingOldDirection;
     int mFloorOldDirection;
 
-    short mCeilingTexture;
-    short mFloorTexture;
+    int16_t mCeilingTexture;
+    int16_t mFloorTexture;
 
-    short mNewCeilingSpecial;
-    short mNewFloorSpecial;
+    int16_t mNewCeilingSpecial;
+    int16_t mNewFloorSpecial;
 
     fixed_t mCeilingLow;
     fixed_t mCeilingHigh;

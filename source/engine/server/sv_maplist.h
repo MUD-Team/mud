@@ -39,8 +39,8 @@ class Maplist
     bool                         shuffled;
     size_t                       s_index;
     std::vector<size_t>          s_maplist;
-    std::map<int, QWORD>         timeout;
-    byte                         version;
+    std::map<int, uint64_t>         timeout;
+    uint8_t                         version;
     void                         shuffle(void);
     void                         update_shuffle_index(void);
 
@@ -61,7 +61,7 @@ class Maplist
     bool        get_map_by_index(const size_t &index, maplist_entry_t &maplist_entry);
     bool        get_next_index(size_t &index);
     bool        get_this_index(size_t &index);
-    byte        get_version(void);
+    uint8_t        get_version(void);
     bool        query(std::vector<std::pair<size_t, maplist_entry_t *>> &result);
     bool        query(const std::vector<std::string> &query, std::vector<std::pair<size_t, maplist_entry_t *>> &result);
     // Settings

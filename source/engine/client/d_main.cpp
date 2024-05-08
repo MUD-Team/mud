@@ -81,16 +81,16 @@ void D_CheckNetGame(void);
 void D_DoomLoop(void);
 
 extern int           testingmode;
-extern BOOL          gameisdead;
+extern bool          gameisdead;
 extern bool          M_DemoNoPlay; // [RH] if true, then skip any demos in the loop
 extern DThinker      ThinkerCap;
 extern dyncolormap_t NormalLight;
 
-BOOL        devparm;    // started game with -devparm
+bool        devparm;    // started game with -devparm
 const char *D_DrawIcon; // [RH] Patch name of icon to draw on next refresh
 
 char    startmap[8];
-BOOL    autostart;
+bool    autostart;
 event_t events[MAXEVENTS];
 int     eventhead;
 int     eventtail;
@@ -424,7 +424,7 @@ void D_Init_DEHEXTRA_Frames(void);
 //
 void D_DoomMain()
 {
-    unsigned int p;
+    uint32_t p;
 
     gamestate = GS_STARTUP;
 

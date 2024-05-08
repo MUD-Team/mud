@@ -453,8 +453,8 @@ class OString
     // internal typedefs
     // ------------------------------------------------------------------------
 
-    typedef unsigned int StringIdType;
-    typedef unsigned int HashedStringType;
+    typedef uint32_t StringIdType;
+    typedef uint32_t HashedStringType;
 
     typedef SArray<StringRecord>                       StringTable;
     typedef OHashTable<HashedStringType, StringIdType> StringLookupTable;

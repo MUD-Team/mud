@@ -109,7 +109,7 @@ class CoinflipVote : public Vote
 class ForcespecVote : public Vote
 {
   private:
-    byte        id;
+    uint8_t        id;
     std::string netname;
 
   public:
@@ -207,13 +207,13 @@ class ForcestartVote : public Vote
 class FraglimitVote : public Vote
 {
   private:
-    unsigned int fraglimit;
+    uint32_t fraglimit;
 
   public:
     FraglimitVote() : Vote("fraglimit", &sv_callvote_fraglimit){};
     bool setup(const std::vector<std::string> &args, const player_t &player)
     {
-        unsigned int fraglimit;
+        uint32_t fraglimit;
 
         if (!Vote::setup_check_cvar())
             return false;
@@ -259,7 +259,7 @@ class KickVote : public Vote
 {
   private:
     std::string caller;
-    byte        id;
+    uint8_t        id;
     std::string netname;
     std::string reason;
 
@@ -331,7 +331,7 @@ class MapVote : public Vote
 {
   private:
     size_t index;
-    byte   version;
+    uint8_t   version;
 
   public:
     MapVote() : Vote("map", &sv_callvote_map){};
@@ -546,13 +546,13 @@ class RestartVote : public Vote
 class ScorelimitVote : public Vote
 {
   private:
-    unsigned int scorelimit;
+    uint32_t scorelimit;
 
   public:
     ScorelimitVote() : Vote("scorelimit", &sv_callvote_scorelimit){};
     bool setup(const std::vector<std::string> &args, const player_t &player)
     {
-        unsigned int scorelimit;
+        uint32_t scorelimit;
 
         if (!Vote::setup_check_cvar())
             return false;
@@ -1046,7 +1046,7 @@ static void SV_GlobalVoteUpdate()
 void SV_Callvote(player_t &player)
 {
     vote_type_t votecmd = (vote_type_t)MSG_ReadByte();
-    byte        argc    = (byte)MSG_ReadByte();
+    uint8_t        argc    = (uint8_t)MSG_ReadByte();
 
     DPrintf("SV_Callvote: Got votecmd %s from player %d, %d additional arguments.\n", vote_type_cmd[votecmd], player.id,
             argc);
@@ -1251,7 +1251,7 @@ void Vote_Runtic()
 
     // Sync the countdown every few seconds.
     if (vote->get_countdown() % (TICRATE * 5) == 0 &&
-        vote->get_countdown() != ((unsigned int)sv_vote_timelimit.asInt() * TICRATE))
+        vote->get_countdown() != ((uint32_t)sv_vote_timelimit.asInt() * TICRATE))
     {
         SV_GlobalVoteUpdate();
     }

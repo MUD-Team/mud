@@ -70,7 +70,7 @@ void P_SpawnPlayer(player_t &player, mapthing2_t *mthing)
     if (!player.ingame())
         return;
 
-    byte playerstate = player.playerstate; // save playerstate to check enter/respawn script execution later...
+    uint8_t playerstate = player.playerstate; // save playerstate to check enter/respawn script execution later...
 
     if (player.playerstate == PST_REBORN || player.playerstate == PST_ENTER)
         G_PlayerReborn(player);

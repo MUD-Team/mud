@@ -84,14 +84,14 @@ bool P_CrossCompatibleSpecialLine(line_t *line, int side, AActor *thing, bool bo
     // jff 02/04/98 add check here for generalized lindef types
     // pointer to line function is NULL by default, set non-null if
     // line special is walkover generalized linedef type
-    BOOL (*linefunc)(line_t *line) = NULL;
+    bool (*linefunc)(line_t *line) = NULL;
 
     // check each range of generalized linedefs
-    if ((unsigned)line->special >= GenEnd)
+    if ((uint32_t)line->special >= GenEnd)
     {
         // Out of range for GenFloors
     }
-    else if ((unsigned)line->special >= GenFloorBase)
+    else if ((uint32_t)line->special >= GenFloorBase)
     {
         if (!thing->player && thing->type != MT_AVATAR && !bossaction)
             if ((line->special & FloorChange) || !(line->special & FloorModel))
@@ -103,7 +103,7 @@ bool P_CrossCompatibleSpecialLine(line_t *line, int side, AActor *thing, bool bo
         */
         linefunc = EV_DoGenFloor;
     }
-    else if ((unsigned)line->special >= GenCeilingBase)
+    else if ((uint32_t)line->special >= GenCeilingBase)
     {
         if (!thing->player && thing->type != MT_AVATAR && !bossaction)
             if ((line->special & CeilingChange) || !(line->special & CeilingModel))
@@ -116,7 +116,7 @@ bool P_CrossCompatibleSpecialLine(line_t *line, int side, AActor *thing, bool bo
         */
         linefunc = EV_DoGenCeiling;
     }
-    else if ((unsigned)line->special >= GenDoorBase)
+    else if ((uint32_t)line->special >= GenDoorBase)
     {
         if (!thing->player && thing->type != MT_AVATAR && !bossaction)
         {
@@ -132,7 +132,7 @@ bool P_CrossCompatibleSpecialLine(line_t *line, int side, AActor *thing, bool bo
         */
         linefunc = EV_DoGenDoor;
     }
-    else if ((unsigned)line->special >= GenLockedBase)
+    else if ((uint32_t)line->special >= GenLockedBase)
     {
         if ((!thing->player && thing->type != MT_AVATAR) || bossaction) // boss actions can't handle locked doors
             return false;                                               // monsters disallowed from unlocking doors
@@ -145,7 +145,7 @@ bool P_CrossCompatibleSpecialLine(line_t *line, int side, AActor *thing, bool bo
             return false;
         linefunc = EV_DoGenLockedDoor;
     }
-    else if ((unsigned)line->special >= GenLiftBase)
+    else if ((uint32_t)line->special >= GenLiftBase)
     {
         if (!thing->player && thing->type != MT_AVATAR && !bossaction)
             if (!(line->special & LiftMonster))
@@ -157,7 +157,7 @@ bool P_CrossCompatibleSpecialLine(line_t *line, int side, AActor *thing, bool bo
         */
         linefunc = EV_DoGenLift;
     }
-    else if ((unsigned)line->special >= GenStairsBase)
+    else if ((uint32_t)line->special >= GenStairsBase)
     {
         if (!thing->player && thing->type != MT_AVATAR && !bossaction)
             if (!(line->special & StairMonster))
@@ -169,7 +169,7 @@ bool P_CrossCompatibleSpecialLine(line_t *line, int side, AActor *thing, bool bo
         */
         linefunc = EV_DoGenStairs;
     }
-    else if ((unsigned)line->special >= GenCrusherBase)
+    else if ((uint32_t)line->special >= GenCrusherBase)
     {
         // haleyjd 06/09/09: This was completely forgotten in BOOM, disabling
         // all generalized walk-over crusher types!
@@ -1349,7 +1349,7 @@ void P_PostProcessCompatibleSidedefSpecial(side_t *sd, mapsidedef_t *msd, sector
         // upper "texture" is light color
         // lower "texture" is fog color
         {
-            unsigned int color = 0xffffff, fog = 0x000000;
+            uint32_t color = 0xffffff, fog = 0x000000;
 
             SetTextureNoErr(&sd->bottomtexture, &fog, msd->bottomtexture);
             SetTextureNoErr(&sd->toptexture, &color, msd->toptexture);
@@ -1725,14 +1725,14 @@ bool P_UseCompatibleSpecialLine(AActor *thing, line_t *line, int side, bool boss
 
     // pointer to line function is NULL by default, set non-null if
     // line special is push or switch generalized linedef type
-    int (*linefunc)(line_t *line) = NULL;
+    bool (*linefunc)(line_t *line) = NULL;
 
     // check each range of generalized linedefs
-    if ((unsigned)line->special >= GenEnd)
+    if ((uint32_t)line->special >= GenEnd)
     {
         // Out of range for GenFloors
     }
-    else if ((unsigned)line->special >= GenFloorBase)
+    else if ((uint32_t)line->special >= GenFloorBase)
     {
         if (!thing->player && thing->type != MT_AVATAR && !bossaction)
             if ((line->special & FloorChange) || !(line->special & FloorModel))
@@ -1741,7 +1741,7 @@ bool P_UseCompatibleSpecialLine(AActor *thing, line_t *line, int side, bool boss
             return false;                            // generalized types require tag
         linefunc = EV_DoGenFloor;
     }
-    else if ((unsigned)line->special >= GenCeilingBase)
+    else if ((uint32_t)line->special >= GenCeilingBase)
     {
         if (!thing->player && thing->type != MT_AVATAR && !bossaction)
             if ((line->special & CeilingChange) || !(line->special & CeilingModel))
@@ -1751,7 +1751,7 @@ bool P_UseCompatibleSpecialLine(AActor *thing, line_t *line, int side, bool boss
             return false;                            // generalized types require tag
         linefunc = EV_DoGenCeiling;
     }
-    else if ((unsigned)line->special >= GenDoorBase)
+    else if ((uint32_t)line->special >= GenDoorBase)
     {
         if (!thing->player && thing->type != MT_AVATAR && !bossaction)
         {
@@ -1764,7 +1764,7 @@ bool P_UseCompatibleSpecialLine(AActor *thing, line_t *line, int side, bool boss
             return false;                            // generalized types require tag
         linefunc = EV_DoGenDoor;
     }
-    else if ((unsigned)line->special >= GenLockedBase)
+    else if ((uint32_t)line->special >= GenLockedBase)
     {
         if ((!thing->player && thing->type != MT_AVATAR) || bossaction)
             return false;                            // monsters disallowed from unlocking doors
@@ -1775,7 +1775,7 @@ bool P_UseCompatibleSpecialLine(AActor *thing, line_t *line, int side, bool boss
 
         linefunc = EV_DoGenLockedDoor;
     }
-    else if ((unsigned)line->special >= GenLiftBase)
+    else if ((uint32_t)line->special >= GenLiftBase)
     {
         if (!thing->player && thing->type != MT_AVATAR && !bossaction)
             if (!(line->special & LiftMonster))
@@ -1784,7 +1784,7 @@ bool P_UseCompatibleSpecialLine(AActor *thing, line_t *line, int side, bool boss
             return false;                            // generalized types require tag
         linefunc = EV_DoGenLift;
     }
-    else if ((unsigned)line->special >= GenStairsBase)
+    else if ((uint32_t)line->special >= GenStairsBase)
     {
         if (!thing->player && thing->type != MT_AVATAR && !bossaction)
             if (!(line->special & StairMonster))
@@ -1793,7 +1793,7 @@ bool P_UseCompatibleSpecialLine(AActor *thing, line_t *line, int side, bool boss
             return false;                            // generalized types require tag
         linefunc = EV_DoGenStairs;
     }
-    else if ((unsigned)line->special >= GenCrusherBase)
+    else if ((uint32_t)line->special >= GenCrusherBase)
     {
         if (!thing->player && thing->type != MT_AVATAR && !bossaction)
             if (!(line->special & CrusherMonster))
@@ -3100,14 +3100,14 @@ bool P_ShootCompatibleSpecialLine(AActor *thing, line_t *line)
 {
     // pointer to line function is NULL by default, set non-null if
     // line special is gun triggered generalized linedef type
-    int (*linefunc)(line_t *line) = NULL;
+    bool (*linefunc)(line_t *line) = NULL;
 
     // check each range of generalized linedefs
-    if ((unsigned)line->special >= GenEnd)
+    if ((uint32_t)line->special >= GenEnd)
     {
         // Out of range for GenFloors
     }
-    else if ((unsigned)line->special >= GenFloorBase)
+    else if ((uint32_t)line->special >= GenFloorBase)
     {
         if (!thing->player && thing->type != MT_AVATAR)
             if ((line->special & FloorChange) || !(line->special & FloorModel))
@@ -3117,7 +3117,7 @@ bool P_ShootCompatibleSpecialLine(AActor *thing, line_t *line)
 
         linefunc = EV_DoGenFloor;
     }
-    else if ((unsigned)line->special >= GenCeilingBase)
+    else if ((uint32_t)line->special >= GenCeilingBase)
     {
         if (!thing->player && thing->type != MT_AVATAR)
             if ((line->special & CeilingChange) || !(line->special & CeilingModel))
@@ -3126,7 +3126,7 @@ bool P_ShootCompatibleSpecialLine(AActor *thing, line_t *line)
             return false;
         linefunc = EV_DoGenCeiling;
     }
-    else if ((unsigned)line->special >= GenDoorBase)
+    else if ((uint32_t)line->special >= GenDoorBase)
     {
         if (!thing->player && thing->type != MT_AVATAR)
         {
@@ -3139,7 +3139,7 @@ bool P_ShootCompatibleSpecialLine(AActor *thing, line_t *line)
             return false;
         linefunc = EV_DoGenDoor;
     }
-    else if ((unsigned)line->special >= GenLockedBase)
+    else if ((uint32_t)line->special >= GenLockedBase)
     {
         if (!thing->player && thing->type != MT_AVATAR)
             return false; // monsters disallowed from unlocking doors
@@ -3155,14 +3155,14 @@ bool P_ShootCompatibleSpecialLine(AActor *thing, line_t *line)
 
         linefunc = EV_DoGenLockedDoor;
     }
-    else if ((unsigned)line->special >= GenLiftBase)
+    else if ((uint32_t)line->special >= GenLiftBase)
     {
         if (!thing->player && thing->type != MT_AVATAR)
             if (!(line->special & LiftMonster))
                 return false; // monsters disallowed
         linefunc = EV_DoGenLift;
     }
-    else if ((unsigned)line->special >= GenStairsBase)
+    else if ((uint32_t)line->special >= GenStairsBase)
     {
         if (!thing->player && thing->type != MT_AVATAR)
             if (!(line->special & StairMonster))
@@ -3171,7 +3171,7 @@ bool P_ShootCompatibleSpecialLine(AActor *thing, line_t *line)
             return false;
         linefunc = EV_DoGenStairs;
     }
-    else if ((unsigned)line->special >= GenCrusherBase)
+    else if ((uint32_t)line->special >= GenCrusherBase)
     {
         if (!thing->player && thing->type != MT_AVATAR)
             if (!(line->special & StairMonster))
@@ -3277,16 +3277,16 @@ bool P_ShootCompatibleSpecialLine(AActor *thing, line_t *line)
     return false;
 }
 
-const unsigned int P_TranslateCompatibleLineFlags(const unsigned int flags, const bool reserved)
+const uint32_t P_TranslateCompatibleLineFlags(const uint32_t flags, const bool reserved)
 {
     /*
     if (mbf21)
-        const unsigned int filter = (flags & ML_RESERVED && comp[comp_reservedlineflag]) ? 0x01ff : 0x3fff;
+        const uint32_t filter = (flags & ML_RESERVED && comp[comp_reservedlineflag]) ? 0x01ff : 0x3fff;
     else
-        const unsigned int filter = 0x03ff;
+        const uint32_t filter = 0x03ff;
     */
 
-    unsigned int filter;
+    uint32_t filter;
 
     if (reserved)
         filter = 0x01ff;
@@ -3313,11 +3313,11 @@ void P_PostProcessCompatibleLinedefSpecial(line_t *line)
 #else
               // [RH] Second arg controls how opaque it is.
         if (line->id == 0)
-            line->lucency = (byte)128;
+            line->lucency = (uint8_t)128;
         else
             for (j = 0; j < numlines; j++)
                 if (lines[j].id == line->id)
-                    lines[j].lucency = (byte)128;
+                    lines[j].lucency = (uint8_t)128;
 #endif
         line->special = 0;
         break;

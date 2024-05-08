@@ -77,7 +77,7 @@ struct ActionBits actionbits[NUM_ACTIONS] = {
     {0x2314d, ACTION_SHOWSCORES, "showscores"},
     {0x3ea48, ACTION_AUTOMAP_PANRIGHT, "am_panright"},
 };
-byte Actions[NUM_ACTIONS];
+uint8_t Actions[NUM_ACTIONS];
 
 class ActionKeyTracker
 {
@@ -146,9 +146,9 @@ static int ListActionCommands(void)
     return NUM_ACTIONS * 2;
 }
 
-unsigned int MakeKey(const char *s)
+uint32_t MakeKey(const char *s)
 {
-    unsigned int v = 0;
+    uint32_t v = 0;
 
     if (*s)
         v = tolower(*s++);
@@ -165,7 +165,7 @@ unsigned int MakeKey(const char *s)
 // the key could not be found. This uses binary search,
 // actionbits[] must be sorted in ascending order.
 
-int GetActionBit(unsigned int key)
+int GetActionBit(uint32_t key)
 {
     int min = 0;
     int max = NUM_ACTIONS - 1;
@@ -173,7 +173,7 @@ int GetActionBit(unsigned int key)
     while (min <= max)
     {
         int          mid    = (min + max) / 2;
-        unsigned int seekey = actionbits[mid].key;
+        uint32_t seekey = actionbits[mid].key;
 
         if (seekey == key)
             return actionbits[mid].index;
@@ -806,7 +806,7 @@ std::string C_QuoteString(const std::string &argstr)
     return buffer.str();
 }
 
-static int DumpHash(BOOL aliases)
+static int DumpHash(bool aliases)
 {
     int count = 0;
 
@@ -961,7 +961,7 @@ BEGIN_COMMAND(dumpactors)
     Printf(PRINT_HIGH, "Actors at level.time == %d:\n", level.time);
     while ((mo = iterator.Next()))
     {
-        Printf(PRINT_HIGH, "%s (%x, %x, %x | %x) state: %" PRIdSIZE " tics: %d\n", mobjinfo[mo->type].name, mo->x,
+        Printf(PRINT_HIGH, "%s (%x, %x, %x | %x) state: %zd tics: %d\n", mobjinfo[mo->type].name, mo->x,
                mo->y, mo->z, mo->angle, mo->state - states, mo->tics);
     }
 }

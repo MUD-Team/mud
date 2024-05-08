@@ -82,7 +82,7 @@ class OCRC32Sum : public OHash
 
 template <> struct hashfunc<OCRC32Sum>
 {
-    unsigned int operator()(const OCRC32Sum &str) const
+    uint32_t operator()(const OCRC32Sum &str) const
     {
         return __hash_cstring(str.getHexCStr());
     }
@@ -90,7 +90,7 @@ template <> struct hashfunc<OCRC32Sum>
 
 template <> struct hashfunc<OMD5Hash>
 {
-    unsigned int operator()(const OMD5Hash &str) const
+    uint32_t operator()(const OMD5Hash &str) const
     {
         return __hash_cstring(str.getHexCStr());
     }

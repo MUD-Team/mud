@@ -482,7 +482,7 @@ DDoor::DDoor(sector_t *sec, line_t *ln, int delay, int kind, int trigger, int sp
 }
 
 // [Blair] ZDoom-compatible door type
-DDoor::DDoor(sector_t *sec, line_t *ln, EVlDoor type, fixed_t speed, int topwait, byte lighttag, int topcountdown)
+DDoor::DDoor(sector_t *sec, line_t *ln, EVlDoor type, fixed_t speed, int topwait, uint8_t lighttag, int topcountdown)
     : DMovingCeiling(sec), m_Status(init)
 {
     m_Type         = type;
@@ -543,9 +543,9 @@ DDoor *DDoor::Clone(sector_t *sec) const
     return door;
 }
 
-BOOL EV_DoDoor(DDoor::EVlDoor type, line_t *line, AActor *thing, int tag, int speed, int delay, card_t lock)
+bool EV_DoDoor(DDoor::EVlDoor type, line_t *line, AActor *thing, int tag, int speed, int delay, card_t lock)
 {
-    BOOL      rtn = false;
+    bool      rtn = false;
     int       secnum;
     sector_t *sec;
     DDoor    *door;
@@ -686,8 +686,8 @@ void P_SpawnDoorRaiseIn5Mins(sector_t *sec)
     door->m_Status       = DDoor::init;
 }
 
-BOOL EV_DoZDoomDoor(DDoor::EVlDoor type, line_t *line, AActor *mo, byte tag, byte speed_byte, int topwait,
-                    zdoom_lock_t lock, byte lightTag, bool boomgen, int topcountdown)
+bool EV_DoZDoomDoor(DDoor::EVlDoor type, line_t *line, AActor *mo, uint8_t tag, uint8_t speed_byte, int topwait,
+                    zdoom_lock_t lock, uint8_t lightTag, bool boomgen, int topcountdown)
 {
     sector_t *sec;
     fixed_t   speed;
@@ -769,7 +769,7 @@ BOOL EV_DoZDoomDoor(DDoor::EVlDoor type, line_t *line, AActor *mo, byte tag, byt
     else
     {
         int  secnum  = -1;
-        BOOL retcode = false;
+        bool retcode = false;
 
         while ((secnum = P_FindSectorFromTag(tag, secnum)) >= 0)
         {
@@ -795,13 +795,13 @@ BOOL EV_DoZDoomDoor(DDoor::EVlDoor type, line_t *line, AActor *mo, byte tag, byt
 // Passed the linedef activating the generalized door
 // Returns true if a thinker created
 //
-BOOL EV_DoGenDoor(line_t *line)
+bool EV_DoGenDoor(line_t *line)
 {
     int       secnum;
     bool      rtn;
     sector_t *sec;
     bool      manual;
-    unsigned  value = (unsigned)line->special - GenDoorBase;
+    uint32_t  value = (uint32_t)line->special - GenDoorBase;
 
     // parse the bit fields in the line's special type
 
@@ -867,14 +867,14 @@ BOOL EV_DoGenDoor(line_t *line)
 // Passed the linedef activating the generalized locked door
 // Returns true if a thinker created
 //
-BOOL EV_DoGenLockedDoor(line_t *line)
+bool EV_DoGenLockedDoor(line_t *line)
 {
     int       secnum;
     bool      rtn;
     sector_t *sec;
     bool      manual;
     DDoor    *door;
-    unsigned  value = (unsigned)line->special - GenLockedBase;
+    uint32_t  value = (uint32_t)line->special - GenLockedBase;
 
     // parse the bit fields in the line's special type
 

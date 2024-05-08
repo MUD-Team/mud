@@ -226,7 +226,7 @@ uint32_t crc32_1byte_tableless2(const void *data, size_t length, uint32_t previo
                      (((crc << 27) >> 31) & (Polynomial >> 3)) ^ (((crc << 26) >> 31) & (Polynomial >> 2)) ^
                      (((crc << 25) >> 31) & (Polynomial >> 1)) ^ (((crc << 24) >> 31) & Polynomial);
 
-        crc = ((uint32_t)crc >> 8) ^ c; // convert to unsigned integer before right shift
+        crc = ((uint32_t)crc >> 8) ^ c; // convert to uint32_teger before right shift
     }
 
     return ~crc;                        // same as crc ^ 0xFFFFFFFF

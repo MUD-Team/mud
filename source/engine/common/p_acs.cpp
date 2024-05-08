@@ -42,15 +42,15 @@
 #endif
 #include "z_zone.h"
 
-#define CLAMPCOLOR(c)  (EColorRange)((unsigned)(c) > CR_UNTRANSLATED ? CR_UNTRANSLATED : (c))
+#define CLAMPCOLOR(c)  (EColorRange)((uint32_t)(c) > CR_UNTRANSLATED ? CR_UNTRANSLATED : (c))
 #define LANGREGIONMASK MAKE_ID(0, 0, 0xff, 0xff)
 
 struct CallReturn
 {
     int             ReturnAddress;
     ScriptFunction *ReturnFunction;
-    BYTE            bDiscardResult;
-    BYTE            Pad[3];
+    uint8_t            bDiscardResult;
+    uint8_t            Pad[3];
 };
 
 static int Stack[STACK_SIZE];
@@ -67,7 +67,7 @@ template <size_t N> static std::vector<int> ArgvToArgs(const int (&a)[N])
 struct FBehavior::ArrayInfo
 {
     int     ArraySize;
-    SDWORD *Elements;
+    int32_t *Elements;
 };
 
 static void DoClearInv(player_t *player)
@@ -216,7 +216,7 @@ static DoomEntity DoomDecorationNames[60] = {{"BurningBarrel", MT_MISC77},
                                              {"ExplosiveBarrel", MT_BARREL}};
 
 extern ItemEquipVal P_GiveAmmo(player_t *player, ammotype_t ammo, float num);
-extern ItemEquipVal P_GiveWeapon(player_t *player, weapontype_t weapon, BOOL dropped);
+extern ItemEquipVal P_GiveWeapon(player_t *player, weapontype_t weapon, bool dropped);
 extern ItemEquipVal P_GiveCard(player_t *player, card_t card);
 extern ItemEquipVal P_GivePower(player_t *player, int power);
 
@@ -391,7 +391,7 @@ static void TakeWeapon(player_t *player, int weapon)
     SERVER_ONLY(SV_SendPlayerInfo(*player));
 }
 
-extern BOOL P_CheckAmmo(player_t *player);
+extern bool P_CheckAmmo(player_t *player);
 
 static void TakeAmmo(player_t *player, int ammo, int amount)
 {
@@ -549,7 +549,7 @@ EXTERN_CVAR(sv_gametype)
 
 //---- ACS lump manager ----//
 
-FBehavior::FBehavior(BYTE *object, int len)
+FBehavior::FBehavior(uint8_t *object, int len)
 {
     int i;
 
@@ -589,16 +589,16 @@ FBehavior::FBehavior(BYTE *object, int len)
     if (Format == ACS_Old)
     {
         Chunks     = object + len;
-        Scripts    = object + ((DWORD *)object)[1];
-        NumScripts = ((DWORD *)Scripts)[0];
+        Scripts    = object + ((uint32_t *)object)[1];
+        NumScripts = ((uint32_t *)Scripts)[0];
         // Check for redesigned ACSE/ACSe
-        if (((DWORD *)object)[1] >= 6 * 4 && (((DWORD *)Scripts)[-1] == MAKE_ID('A', 'C', 'S', 'e') ||
-                                              ((DWORD *)Scripts)[-1] == MAKE_ID('A', 'C', 'S', 'E')))
+        if (((uint32_t *)object)[1] >= 6 * 4 && (((uint32_t *)Scripts)[-1] == MAKE_ID('A', 'C', 'S', 'e') ||
+                                              ((uint32_t *)Scripts)[-1] == MAKE_ID('A', 'C', 'S', 'E')))
         {
-            Format = (((BYTE *)Scripts)[-1] == 'e') ? ACS_LittleEnhanced : ACS_Enhanced;
-            Chunks = object + ((DWORD *)Scripts)[-2];
+            Format = (((uint8_t *)Scripts)[-1] == 'e') ? ACS_LittleEnhanced : ACS_Enhanced;
+            Chunks = object + ((uint32_t *)Scripts)[-2];
             // Forget about the compatibility cruft at the end of the lump
-            DataSize = ((DWORD *)object)[1] - 8;
+            DataSize = ((uint32_t *)object)[1] - 8;
         }
         else
         {
@@ -616,14 +616,14 @@ FBehavior::FBehavior(BYTE *object, int len)
     }
     else
     {
-        Chunks = object + ((DWORD *)object)[1];
+        Chunks = object + ((uint32_t *)object)[1];
     }
     if (Format != ACS_Old)
     {
         Scripts = FindChunk(MAKE_ID('S', 'P', 'T', 'R'));
         if (object[3] != 0)
         {
-            NumScripts = ((DWORD *)Scripts)[1] / 12;
+            NumScripts = ((uint32_t *)Scripts)[1] / 12;
             Scripts += 8;
             for (i = 0; i < NumScripts; ++i)
             {
@@ -637,7 +637,7 @@ FBehavior::FBehavior(BYTE *object, int len)
         }
         else
         {
-            NumScripts = ((DWORD *)Scripts)[1] / 8;
+            NumScripts = ((uint32_t *)Scripts)[1] / 8;
             Scripts += 8;
         }
     }
@@ -650,8 +650,8 @@ FBehavior::FBehavior(BYTE *object, int len)
 
     if (Format == ACS_Old)
     {
-        LanguageNeutral = ((DWORD *)Data)[1];
-        LanguageNeutral += ((DWORD *)(Data + LanguageNeutral))[0] * 12 + 4;
+        LanguageNeutral = ((uint32_t *)Data)[1];
+        LanguageNeutral += ((uint32_t *)(Data + LanguageNeutral))[0] * 12 + 4;
     }
     else
     {
@@ -661,16 +661,16 @@ FBehavior::FBehavior(BYTE *object, int len)
 
     if (Format != ACS_Old)
     {
-        DWORD *chunk;
+        uint32_t *chunk;
 
         Functions = FindChunk(MAKE_ID('F', 'U', 'N', 'C'));
         if (Functions != NULL)
         {
-            NumFunctions = LELONG(((DWORD *)Functions)[1]);
+            NumFunctions = LELONG(((uint32_t *)Functions)[1]);
             Functions += 8;
         }
 
-        chunk = (DWORD *)FindChunk(MAKE_ID('M', 'I', 'N', 'I'));
+        chunk = (uint32_t *)FindChunk(MAKE_ID('M', 'I', 'N', 'I'));
         if (chunk != NULL)
         {
             int numvars  = LELONG(chunk[1]) / 4;
@@ -681,7 +681,7 @@ FBehavior::FBehavior(BYTE *object, int len)
             }
         }
 
-        chunk = (DWORD *)FindChunk(MAKE_ID('A', 'R', 'A', 'Y'));
+        chunk = (uint32_t *)FindChunk(MAKE_ID('A', 'R', 'A', 'Y'));
         if (chunk != NULL)
         {
             NumArrays = LELONG(chunk[1]) / 8;
@@ -691,25 +691,25 @@ FBehavior::FBehavior(BYTE *object, int len)
             {
                 level.vars[LELONG(chunk[2 + i * 2])] = i;
                 Arrays[i].ArraySize                  = LELONG(chunk[3 + i * 2]);
-                Arrays[i].Elements                   = new SDWORD[Arrays[i].ArraySize];
-                memset(Arrays[i].Elements, 0, Arrays[i].ArraySize * sizeof(DWORD));
+                Arrays[i].Elements                   = new int32_t[Arrays[i].ArraySize];
+                memset(Arrays[i].Elements, 0, Arrays[i].ArraySize * sizeof(uint32_t));
             }
         }
 
-        chunk = (DWORD *)FindChunk(MAKE_ID('A', 'I', 'N', 'I'));
+        chunk = (uint32_t *)FindChunk(MAKE_ID('A', 'I', 'N', 'I'));
         while (chunk != NULL)
         {
             int arraynum = level.vars[LELONG(chunk[2])];
-            if ((unsigned)arraynum < (unsigned)NumArrays)
+            if ((uint32_t)arraynum < (uint32_t)NumArrays)
             {
                 int     initsize = MIN<int>(Arrays[arraynum].ArraySize, (LELONG(chunk[1]) - 4) / 4);
-                SDWORD *elems    = Arrays[arraynum].Elements;
+                int32_t *elems    = Arrays[arraynum].Elements;
                 for (i = 0; i < initsize; ++i)
                 {
                     elems[i] = LELONG(chunk[3 + i]);
                 }
             }
-            chunk = (DWORD *)NextChunk((BYTE *)chunk);
+            chunk = (uint32_t *)NextChunk((uint8_t *)chunk);
         }
     }
 
@@ -749,14 +749,14 @@ bool FBehavior::IsGood()
 int *FBehavior::FindScript(int script) const
 {
     const ScriptPtr *ptr =
-        BinarySearch<ScriptPtr, WORD>((ScriptPtr *)Scripts, NumScripts, &ScriptPtr::Number, (WORD)script);
+        BinarySearch<ScriptPtr, uint16_t>((ScriptPtr *)Scripts, NumScripts, &ScriptPtr::Number, (uint16_t)script);
 
     return ptr ? (int *)(ptr->Address + Data) : NULL;
 }
 
 ScriptFunction *FBehavior::GetFunction(int funcnum) const
 {
-    if ((unsigned)funcnum >= (unsigned)NumFunctions)
+    if ((uint32_t)funcnum >= (uint32_t)NumFunctions)
     {
         return NULL;
     }
@@ -765,59 +765,59 @@ ScriptFunction *FBehavior::GetFunction(int funcnum) const
 
 int FBehavior::GetArrayVal(int arraynum, int index) const
 {
-    if ((unsigned)arraynum >= (unsigned)NumArrays)
+    if ((uint32_t)arraynum >= (uint32_t)NumArrays)
         return 0;
     const ArrayInfo *array = &Arrays[arraynum];
-    if ((unsigned)index >= (unsigned)array->ArraySize)
+    if ((uint32_t)index >= (uint32_t)array->ArraySize)
         return 0;
     return array->Elements[index];
 }
 
 void FBehavior::SetArrayVal(int arraynum, int index, int value)
 {
-    if ((unsigned)arraynum >= (unsigned)NumArrays)
+    if ((uint32_t)arraynum >= (uint32_t)NumArrays)
         return;
     const ArrayInfo *array = &Arrays[arraynum];
-    if ((unsigned)index >= (unsigned)array->ArraySize)
+    if ((uint32_t)index >= (uint32_t)array->ArraySize)
         return;
     array->Elements[index] = value;
 }
 
-BYTE *FBehavior::FindChunk(DWORD id) const
+uint8_t *FBehavior::FindChunk(uint32_t id) const
 {
-    BYTE *chunk = Chunks;
+    uint8_t *chunk = Chunks;
 
     while (chunk != NULL && chunk < Data + DataSize)
     {
-        if (((DWORD *)chunk)[0] == id)
+        if (((uint32_t *)chunk)[0] == id)
         {
             return chunk;
         }
-        chunk += ((DWORD *)chunk)[1] + 8;
+        chunk += ((uint32_t *)chunk)[1] + 8;
     }
     return NULL;
 }
 
-BYTE *FBehavior::NextChunk(BYTE *chunk) const
+uint8_t *FBehavior::NextChunk(uint8_t *chunk) const
 {
-    DWORD id = *(DWORD *)chunk;
-    chunk += ((DWORD *)chunk)[1] + 8;
+    uint32_t id = *(uint32_t *)chunk;
+    chunk += ((uint32_t *)chunk)[1] + 8;
     while (chunk != NULL && chunk < Data + DataSize)
     {
-        if (((DWORD *)chunk)[0] == id)
+        if (((uint32_t *)chunk)[0] == id)
         {
             return chunk;
         }
-        chunk += ((DWORD *)chunk)[1] + 8;
+        chunk += ((uint32_t *)chunk)[1] + 8;
     }
     return NULL;
 }
 
-const char *FBehavior::LookupString(DWORD index, DWORD ofs) const
+const char *FBehavior::LookupString(uint32_t index, uint32_t ofs) const
 {
     if (Format == ACS_Old)
     {
-        DWORD *list = (DWORD *)(Data + LanguageNeutral);
+        uint32_t *list = (uint32_t *)(Data + LanguageNeutral);
 
         if (index >= list[0])
             return NULL; // Out of range for this list;
@@ -833,7 +833,7 @@ const char *FBehavior::LookupString(DWORD index, DWORD ofs) const
                 return NULL;
             }
         }
-        DWORD *list = (DWORD *)(Data + ofs);
+        uint32_t *list = (uint32_t *)(Data + ofs);
 
         if (index >= list[1])
             return NULL; // Out of range for this list
@@ -843,16 +843,16 @@ const char *FBehavior::LookupString(DWORD index, DWORD ofs) const
     }
 }
 
-const char *FBehavior::LocalizeString(DWORD index) const
+const char *FBehavior::LocalizeString(uint32_t index) const
 {
     if (Format != ACS_Old)
     {
-        DWORD       ofs = Localized;
+        uint32_t       ofs = Localized;
         const char *str = NULL;
 
         while (ofs != 0 && (str = LookupString(index, ofs)) == NULL)
         {
-            ofs = ((DWORD *)(Data + ofs))[2];
+            ofs = ((uint32_t *)(Data + ofs))[2];
         }
         return str;
     }
@@ -862,15 +862,15 @@ const char *FBehavior::LocalizeString(DWORD index) const
     }
 }
 
-void FBehavior::PrepLocale(DWORD userpref, DWORD userdef, DWORD syspref, DWORD sysdef)
+void FBehavior::PrepLocale(uint32_t userpref, uint32_t userdef, uint32_t syspref, uint32_t sysdef)
 {
-    BYTE  *chunk;
-    DWORD *list;
+    uint8_t  *chunk;
+    uint32_t *list;
 
     // Clear away any existing links
-    for (chunk = Chunks; chunk < Data + DataSize; chunk += ((DWORD *)chunk)[1] + 8)
+    for (chunk = Chunks; chunk < Data + DataSize; chunk += ((uint32_t *)chunk)[1] + 8)
     {
-        list = (DWORD *)chunk;
+        list = (uint32_t *)chunk;
         if (list[0] == MAKE_ID('S', 'T', 'R', 'L'))
         {
             list[4] = 0;
@@ -898,11 +898,11 @@ void FBehavior::PrepLocale(DWORD userpref, DWORD userdef, DWORD syspref, DWORD s
     AddLanguage(0);                       // Failing that, use language independent strings
 }
 
-void FBehavior::AddLanguage(DWORD langid)
+void FBehavior::AddLanguage(uint32_t langid)
 {
-    DWORD  ofs, *ofsput;
-    DWORD *list;
-    BYTE  *chunk;
+    uint32_t  ofs, *ofsput;
+    uint32_t *list;
+    uint8_t  *chunk;
 
     // First, make sure language is not already inserted
     ofsput = CheckIfInList(langid);
@@ -923,9 +923,9 @@ void FBehavior::AddLanguage(DWORD langid)
     // type, if not in list already
     if ((langid & LANGREGIONMASK) == 0)
     {
-        for (chunk = Chunks; chunk < Data + DataSize; chunk += ((DWORD *)chunk)[1] + 8)
+        for (chunk = Chunks; chunk < Data + DataSize; chunk += ((uint32_t *)chunk)[1] + 8)
         {
-            list = (DWORD *)chunk;
+            list = (uint32_t *)chunk;
             if (list[0] != MAKE_ID('S', 'T', 'R', 'L'))
                 continue;                   // not a string list
             if ((list[2] & ~LANGREGIONMASK) != langid)
@@ -939,16 +939,16 @@ void FBehavior::AddLanguage(DWORD langid)
     }
 }
 
-DWORD *FBehavior::CheckIfInList(DWORD langid)
+uint32_t *FBehavior::CheckIfInList(uint32_t langid)
 {
-    DWORD  ofs, *ofsput;
-    DWORD *list;
+    uint32_t  ofs, *ofsput;
+    uint32_t *list;
 
     ofs    = Localized;
     ofsput = &Localized;
     while (ofs != 0)
     {
-        list = (DWORD *)(Data + ofs);
+        list = (uint32_t *)(Data + ofs);
         if (list[0] == langid)
             return NULL;
         ofsput = &list[2];
@@ -957,17 +957,17 @@ DWORD *FBehavior::CheckIfInList(DWORD langid)
     return ofsput;
 }
 
-DWORD FBehavior::FindLanguage(DWORD langid, bool ignoreregion) const
+uint32_t FBehavior::FindLanguage(uint32_t langid, bool ignoreregion) const
 {
-    BYTE  *chunk;
-    DWORD *list;
-    DWORD  langmask;
+    uint8_t  *chunk;
+    uint32_t *list;
+    uint32_t  langmask;
 
     langmask = ignoreregion ? ~LANGREGIONMASK : ~0;
 
-    for (chunk = Chunks; chunk < Data + DataSize; chunk += ((DWORD *)chunk)[1] + 8)
+    for (chunk = Chunks; chunk < Data + DataSize; chunk += ((uint32_t *)chunk)[1] + 8)
     {
-        list = (DWORD *)chunk;
+        list = (uint32_t *)chunk;
         if (list[0] == MAKE_ID('S', 'T', 'R', 'L') && (list[2] & langmask) == langid)
         {
             return chunk - Data + 8;
@@ -976,7 +976,7 @@ DWORD FBehavior::FindLanguage(DWORD langid, bool ignoreregion) const
     return 0;
 }
 
-void FBehavior::StartTypedScripts(WORD type, AActor *activator, int arg0, int arg1, int arg2, bool always) const
+void FBehavior::StartTypedScripts(uint16_t type, AActor *activator, int arg0, int arg1, int arg2, bool always) const
 {
     if (!serverside)
         return;
@@ -1045,7 +1045,7 @@ void DACSThinker::Serialize(FArchive &arc)
         for (int i = 0; i < 1000; i++)
         {
             if (RunningScripts[i])
-                arc << RunningScripts[i] << (WORD)i;
+                arc << RunningScripts[i] << (uint16_t)i;
         }
         arc << (DLevelScript *)NULL;
     }
@@ -1053,7 +1053,7 @@ void DACSThinker::Serialize(FArchive &arc)
     {
         arc >> Scripts >> LastScript;
 
-        WORD          scriptnum;
+        uint16_t          scriptnum;
         DLevelScript *script;
         arc >> script;
         while (script)
@@ -1320,7 +1320,7 @@ void DLevelScript::operator delete(void *block)
 
 void DLevelScript::Serialize(FArchive &arc)
 {
-    DWORD i;
+    uint32_t i;
 
     Super::Serialize(arc);
 
@@ -1438,7 +1438,7 @@ void DLevelScript::PutFirst()
 int DLevelScript::Random(int min, int max)
 {
     int          num1, num2, num3, num4;
-    unsigned int num;
+    uint32_t num;
 
     num1 = P_Random();
     num2 = P_Random();
@@ -1536,7 +1536,7 @@ int DLevelScript::CountPlayers()
     return static_cast<int>(P_NumPlayersInGame());
 }
 
-void DLevelScript::ACS_SetLineTexture(int *args, byte argCount)
+void DLevelScript::ACS_SetLineTexture(int *args, uint8_t argCount)
 {
     if (argCount < 4)
         return;
@@ -1549,7 +1549,7 @@ void DLevelScript::ACS_ClearInventory(AActor *actor)
     ClearInventory(actor);
 }
 
-void DLevelScript::ACS_Print(byte pcd, AActor *activator, const char *print)
+void DLevelScript::ACS_Print(uint8_t pcd, AActor *activator, const char *print)
 {
     if (print == NULL)
         return;
@@ -1565,7 +1565,7 @@ void DLevelScript::ACS_Print(byte pcd, AActor *activator, const char *print)
     }
 }
 
-void DLevelScript::ACS_ChangeMusic(byte pcd, AActor *activator, int *args, byte argCount)
+void DLevelScript::ACS_ChangeMusic(uint8_t pcd, AActor *activator, int *args, uint8_t argCount)
 {
     if (argCount < 2)
         return;
@@ -1573,7 +1573,7 @@ void DLevelScript::ACS_ChangeMusic(byte pcd, AActor *activator, int *args, byte 
     ChangeMusic(pcd, activator, args[0], args[1]);
 }
 
-void DLevelScript::ACS_StartSound(byte pcd, AActor *activator, int *args, byte argCount)
+void DLevelScript::ACS_StartSound(uint8_t pcd, AActor *activator, int *args, uint8_t argCount)
 {
     if (pcd == PCD_SECTORSOUND)
     {
@@ -1600,7 +1600,7 @@ void DLevelScript::ACS_StartSound(byte pcd, AActor *activator, int *args, byte a
     }
 }
 
-void DLevelScript::ACS_SetLineBlocking(int *args, byte argCount)
+void DLevelScript::ACS_SetLineBlocking(int *args, uint8_t argCount)
 {
     if (argCount < 2)
         return;
@@ -1608,7 +1608,7 @@ void DLevelScript::ACS_SetLineBlocking(int *args, byte argCount)
     SetLineBlocking(args[0], args[1]);
 }
 
-void DLevelScript::ACS_SetLineMonsterBlocking(int *args, byte argCount)
+void DLevelScript::ACS_SetLineMonsterBlocking(int *args, uint8_t argCount)
 {
     if (argCount < 2)
         return;
@@ -1616,7 +1616,7 @@ void DLevelScript::ACS_SetLineMonsterBlocking(int *args, byte argCount)
     SetLineMonsterBlocking(args[0], args[1]);
 }
 
-void DLevelScript::ACS_SetLineSpecial(int *args, byte argCount)
+void DLevelScript::ACS_SetLineSpecial(int *args, uint8_t argCount)
 {
     if (argCount < 7)
         return;
@@ -1624,7 +1624,7 @@ void DLevelScript::ACS_SetLineSpecial(int *args, byte argCount)
     SetLineSpecial(args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
 }
 
-void DLevelScript::ACS_SetThingSpecial(int *args, byte argCount)
+void DLevelScript::ACS_SetThingSpecial(int *args, uint8_t argCount)
 {
     if (argCount < 7)
         return;
@@ -1634,7 +1634,7 @@ void DLevelScript::ACS_SetThingSpecial(int *args, byte argCount)
         SetThingSpecial(actor, args[1], args[2], args[3], args[4], args[5], args[6]);
 }
 
-void DLevelScript::ACS_FadeRange(AActor *activator, int *args, byte argCount)
+void DLevelScript::ACS_FadeRange(AActor *activator, int *args, uint8_t argCount)
 {
     if (argCount < 9)
         return;
@@ -1647,7 +1647,7 @@ void DLevelScript::ACS_CancelFade(AActor *actor)
     CancelFade(actor);
 }
 
-void DLevelScript::ACS_ChangeFlat(byte pcd, int *args, byte argCount)
+void DLevelScript::ACS_ChangeFlat(uint8_t pcd, int *args, uint8_t argCount)
 {
     if (argCount < 2)
         return;
@@ -1655,7 +1655,7 @@ void DLevelScript::ACS_ChangeFlat(byte pcd, int *args, byte argCount)
     ChangeFlat(args[0], args[1], pcd == PCD_CHANGECEILING);
 }
 
-void DLevelScript::ACS_SoundSequence(int *args, byte argCount)
+void DLevelScript::ACS_SoundSequence(int *args, uint8_t argCount)
 {
     if (argCount < 2)
         return;
@@ -1795,7 +1795,7 @@ void DLevelScript::SetLineSpecial(int lineid, int special, int arg1, int arg2, i
     }
 }
 
-void DLevelScript::ActivateLineSpecial(byte special, line_t *line, AActor *activator, int arg0, int arg1, int arg2,
+void DLevelScript::ActivateLineSpecial(uint8_t special, line_t *line, AActor *activator, int arg0, int arg1, int arg2,
                                        int arg3, int arg4)
 {
     if (serverside)
@@ -1805,7 +1805,7 @@ void DLevelScript::ActivateLineSpecial(byte special, line_t *line, AActor *activ
     }
 }
 
-void DLevelScript::ChangeMusic(byte pcd, AActor *activator, int index, int loop)
+void DLevelScript::ChangeMusic(uint8_t pcd, AActor *activator, int index, int loop)
 {
     bool local = (pcd == PCD_LOCALSETMUSIC || pcd == PCD_LOCALSETMUSICDIRECT);
 
@@ -1827,7 +1827,7 @@ void DLevelScript::ChangeMusic(byte pcd, AActor *activator, int index, int loop)
     }
 }
 
-void DLevelScript::StartSound(byte pcd, AActor *activator, int channel, int index, int volume, int attenuation)
+void DLevelScript::StartSound(uint8_t pcd, AActor *activator, int channel, int index, int volume, int attenuation)
 {
     bool local = pcd == PCD_LOCALAMBIENTSOUND;
 
@@ -1849,7 +1849,7 @@ void DLevelScript::StartSound(byte pcd, AActor *activator, int channel, int inde
     }
 }
 
-void DLevelScript::StartSectorSound(byte pcd, sector_t *sector, int channel, int index, int volume, int attenuation)
+void DLevelScript::StartSectorSound(uint8_t pcd, sector_t *sector, int channel, int index, int volume, int attenuation)
 {
     if (clientside)
     {
@@ -1867,7 +1867,7 @@ void DLevelScript::StartSectorSound(byte pcd, sector_t *sector, int channel, int
     }
 }
 
-void DLevelScript::StartThingSound(byte pcd, AActor *actor, int channel, int index, int volume, int attenuation)
+void DLevelScript::StartThingSound(uint8_t pcd, AActor *actor, int channel, int index, int volume, int attenuation)
 {
     if (clientside)
     {
@@ -2077,8 +2077,8 @@ void DLevelScript::DoFadeRange(AActor *who, int r1, int g1, int b1, int a1, int 
 
 inline int getbyte(int *&pc)
 {
-    int res = *(BYTE *)pc;
-    pc      = (int *)((BYTE *)pc + 1);
+    int res = *(uint8_t *)pc;
+    pc      = (int *)((uint8_t *)pc + 1);
     return res;
 }
 
@@ -2185,50 +2185,50 @@ void DLevelScript::RunScript()
             break;
 
         case PCD_PUSHBYTE:
-            PushToStack(*(BYTE *)pc);
-            pc = (int *)((BYTE *)pc + 1);
+            PushToStack(*(uint8_t *)pc);
+            pc = (int *)((uint8_t *)pc + 1);
             break;
 
         case PCD_PUSH2BYTES:
-            Stack[sp]     = ((BYTE *)pc)[0];
-            Stack[sp + 1] = ((BYTE *)pc)[1];
+            Stack[sp]     = ((uint8_t *)pc)[0];
+            Stack[sp + 1] = ((uint8_t *)pc)[1];
             sp += 2;
-            pc = (int *)((BYTE *)pc + 2);
+            pc = (int *)((uint8_t *)pc + 2);
             break;
 
         case PCD_PUSH3BYTES:
-            Stack[sp]     = ((BYTE *)pc)[0];
-            Stack[sp + 1] = ((BYTE *)pc)[1];
-            Stack[sp + 2] = ((BYTE *)pc)[2];
+            Stack[sp]     = ((uint8_t *)pc)[0];
+            Stack[sp + 1] = ((uint8_t *)pc)[1];
+            Stack[sp + 2] = ((uint8_t *)pc)[2];
             sp += 3;
-            pc = (int *)((BYTE *)pc + 3);
+            pc = (int *)((uint8_t *)pc + 3);
             break;
 
         case PCD_PUSH4BYTES:
-            Stack[sp]     = ((BYTE *)pc)[0];
-            Stack[sp + 1] = ((BYTE *)pc)[1];
-            Stack[sp + 2] = ((BYTE *)pc)[2];
-            Stack[sp + 3] = ((BYTE *)pc)[3];
+            Stack[sp]     = ((uint8_t *)pc)[0];
+            Stack[sp + 1] = ((uint8_t *)pc)[1];
+            Stack[sp + 2] = ((uint8_t *)pc)[2];
+            Stack[sp + 3] = ((uint8_t *)pc)[3];
             sp += 4;
-            pc = (int *)((BYTE *)pc + 4);
+            pc = (int *)((uint8_t *)pc + 4);
             break;
 
         case PCD_PUSH5BYTES:
-            Stack[sp]     = ((BYTE *)pc)[0];
-            Stack[sp + 1] = ((BYTE *)pc)[1];
-            Stack[sp + 2] = ((BYTE *)pc)[2];
-            Stack[sp + 3] = ((BYTE *)pc)[3];
-            Stack[sp + 4] = ((BYTE *)pc)[4];
+            Stack[sp]     = ((uint8_t *)pc)[0];
+            Stack[sp + 1] = ((uint8_t *)pc)[1];
+            Stack[sp + 2] = ((uint8_t *)pc)[2];
+            Stack[sp + 3] = ((uint8_t *)pc)[3];
+            Stack[sp + 4] = ((uint8_t *)pc)[4];
             sp += 5;
-            pc = (int *)((BYTE *)pc + 5);
+            pc = (int *)((uint8_t *)pc + 5);
             break;
 
         case PCD_PUSHBYTES:
-            temp = *(BYTE *)pc;
-            pc   = (int *)((BYTE *)pc + temp + 1);
+            temp = *(uint8_t *)pc;
+            pc   = (int *)((uint8_t *)pc + temp + 1);
             for (temp = -temp; temp; temp++)
             {
-                PushToStack(*((BYTE *)pc + temp));
+                PushToStack(*((uint8_t *)pc + temp));
             }
             break;
 
@@ -2297,31 +2297,31 @@ void DLevelScript::RunScript()
             break;
 
         case PCD_LSPEC1DIRECTB:
-            ActivateLineSpecial(((BYTE *)pc)[0], activationline, activator, ((BYTE *)pc)[1], 0, 0, 0, 0);
-            pc = (int *)((BYTE *)pc + 2);
+            ActivateLineSpecial(((uint8_t *)pc)[0], activationline, activator, ((uint8_t *)pc)[1], 0, 0, 0, 0);
+            pc = (int *)((uint8_t *)pc + 2);
             break;
 
         case PCD_LSPEC2DIRECTB:
-            ActivateLineSpecial(((BYTE *)pc)[0], activationline, activator, ((BYTE *)pc)[1], ((BYTE *)pc)[2], 0, 0, 0);
-            pc = (int *)((BYTE *)pc + 3);
+            ActivateLineSpecial(((uint8_t *)pc)[0], activationline, activator, ((uint8_t *)pc)[1], ((uint8_t *)pc)[2], 0, 0, 0);
+            pc = (int *)((uint8_t *)pc + 3);
             break;
 
         case PCD_LSPEC3DIRECTB:
-            ActivateLineSpecial(((BYTE *)pc)[0], activationline, activator, ((BYTE *)pc)[1], ((BYTE *)pc)[2],
-                                ((BYTE *)pc)[3], 0, 0);
-            pc = (int *)((BYTE *)pc + 4);
+            ActivateLineSpecial(((uint8_t *)pc)[0], activationline, activator, ((uint8_t *)pc)[1], ((uint8_t *)pc)[2],
+                                ((uint8_t *)pc)[3], 0, 0);
+            pc = (int *)((uint8_t *)pc + 4);
             break;
 
         case PCD_LSPEC4DIRECTB:
-            ActivateLineSpecial(((BYTE *)pc)[0], activationline, activator, ((BYTE *)pc)[1], ((BYTE *)pc)[2],
-                                ((BYTE *)pc)[3], ((BYTE *)pc)[4], 0);
-            pc = (int *)((BYTE *)pc + 5);
+            ActivateLineSpecial(((uint8_t *)pc)[0], activationline, activator, ((uint8_t *)pc)[1], ((uint8_t *)pc)[2],
+                                ((uint8_t *)pc)[3], ((uint8_t *)pc)[4], 0);
+            pc = (int *)((uint8_t *)pc + 5);
             break;
 
         case PCD_LSPEC5DIRECTB:
-            ActivateLineSpecial(((BYTE *)pc)[0], activationline, activator, ((BYTE *)pc)[1], ((BYTE *)pc)[2],
-                                ((BYTE *)pc)[3], ((BYTE *)pc)[4], ((BYTE *)pc)[5]);
-            pc = (int *)((BYTE *)pc + 6);
+            ActivateLineSpecial(((uint8_t *)pc)[0], activationline, activator, ((uint8_t *)pc)[1], ((uint8_t *)pc)[2],
+                                ((uint8_t *)pc)[3], ((uint8_t *)pc)[4], ((uint8_t *)pc)[5]);
+            pc = (int *)((uint8_t *)pc + 6);
             break;
 
         case PCD_CALL:
@@ -2794,8 +2794,8 @@ void DLevelScript::RunScript()
 
         case PCD_DELAYDIRECTB:
             state     = SCRIPT_Delayed;
-            statedata = *(BYTE *)pc;
-            pc        = (int *)((BYTE *)pc + 1);
+            statedata = *(uint8_t *)pc;
+            pc        = (int *)((uint8_t *)pc + 1);
             break;
 
         case PCD_RANDOM:
@@ -2809,8 +2809,8 @@ void DLevelScript::RunScript()
             break;
 
         case PCD_RANDOMDIRECTB:
-            PushToStack(Random(((BYTE *)pc)[0], ((BYTE *)pc)[1]));
-            pc = (int *)((BYTE *)pc + 2);
+            PushToStack(Random(((uint8_t *)pc)[0], ((uint8_t *)pc)[1]));
+            pc = (int *)((uint8_t *)pc + 2);
             break;
 
         case PCD_THINGCOUNT:
@@ -2995,7 +2995,7 @@ void DLevelScript::RunScript()
         case PCD_PRINTNAME: {
             player_t *player = NULL;
 
-            if (STACK(1) == 0 || (unsigned)STACK(1) > MAXPLAYERS)
+            if (STACK(1) == 0 || (uint32_t)STACK(1) > MAXPLAYERS)
             {
                 if (activator)
                 {
@@ -3740,7 +3740,7 @@ void P_DoDeferedScripts(void)
             scriptdata = level.behavior->FindScript(def->script);
             if (scriptdata)
             {
-                if ((unsigned)def->playernum < MAXPLAYERS && idplayer(def->playernum).ingame())
+                if ((uint32_t)def->playernum < MAXPLAYERS && idplayer(def->playernum).ingame())
                     gomo = idplayer(def->playernum).mo;
 
                 P_GetScriptGoing(gomo, NULL, def->script, scriptdata, 0, def->arg0, def->arg1, def->arg2,
@@ -3925,18 +3925,18 @@ FArchive &operator<<(FArchive &arc, acsdefered_s *defer)
 {
     while (defer)
     {
-        arc << (BYTE)1;
-        arc << (BYTE)defer->type << defer->script << defer->arg0 << defer->arg1 << defer->arg2;
+        arc << (uint8_t)1;
+        arc << (uint8_t)defer->type << defer->script << defer->arg0 << defer->arg1 << defer->arg2;
         defer = defer->next;
     }
-    arc << (BYTE)0;
+    arc << (uint8_t)0;
     return arc;
 }
 
 FArchive &operator>>(FArchive &arc, acsdefered_s *&defertop)
 {
     acsdefered_s **defer = &defertop;
-    BYTE           inbyte;
+    uint8_t           inbyte;
 
     arc >> inbyte;
     while (inbyte)

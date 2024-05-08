@@ -131,7 +131,7 @@ void purecallCallback()
 }
 
 void invalidparamCallback(const wchar_t *expression, const wchar_t *function, const wchar_t *filename,
-                          unsigned int line, uintptr_t x)
+                          uint32_t line, uintptr_t x)
 {
     // Exception pointer is located at _pxcptinfoptrs.
     writeMinidump(static_cast<PEXCEPTION_POINTERS>(_pxcptinfoptrs));

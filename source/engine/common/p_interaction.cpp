@@ -106,7 +106,7 @@ static void PersistPlayerScore(player_t &p, const bool lives, const bool score)
         return;
 
     // Either send flags, lives or both.
-    unsigned flags = 0;
+    uint32_t flags = 0;
     if (lives)
         flags |= SVC_PM_LIVES;
     if (score)
@@ -331,7 +331,7 @@ ItemEquipVal P_GiveAmmo(player_t *player, ammotype_t ammotype, float num)
 // P_GiveWeapon
 // The weapon name may have a MF_DROPPED flag ored in.
 //
-ItemEquipVal P_GiveWeapon(player_t *player, weapontype_t weapon, BOOL dropped)
+ItemEquipVal P_GiveWeapon(player_t *player, weapontype_t weapon, bool dropped)
 {
     bool gaveammo;
     bool gaveweapon;
@@ -1905,7 +1905,7 @@ static bool P_InfightingImmune(AActor *target, AActor *source)
 // [Toke] This is no longer needed client-side
 void P_DamageMobj(AActor *target, AActor *inflictor, AActor *source, int damage, int mod, int flags)
 {
-    unsigned ang;
+    uint32_t ang;
     int      saved = 0;
 
     if (!serverside)
@@ -1977,7 +1977,7 @@ void P_DamageMobj(AActor *target, AActor *inflictor, AActor *source, int damage,
         !(inflictor->flags2 & MF2_NODMGTHRUST))
     {
 
-        unsigned int ang = P_PointToAngle(inflictor->x, inflictor->y, target->x, target->y);
+        uint32_t ang = P_PointToAngle(inflictor->x, inflictor->y, target->x, target->y);
 
         fixed_t thrust = damage * (FRACUNIT >> 3) * 100 / target->info->mass;
 
@@ -1996,7 +1996,7 @@ void P_DamageMobj(AActor *target, AActor *inflictor, AActor *source, int damage,
     // player specific
     if (player)
     {
-        short special = 11;
+        int16_t special = 11;
         if (map_format.getZDoom())
         {
             special = dDamage_End;

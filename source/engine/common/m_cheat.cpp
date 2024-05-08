@@ -51,7 +51,7 @@ void C_DoCommand(const char *cmd, uint32_t key = 0);
 //
 
 static int           firsttime = 1;
-static unsigned char cheat_xlate_table[256];
+static uint8_t cheat_xlate_table[256];
 
 #ifdef CLIENT_APP
 
@@ -139,7 +139,7 @@ bool CHEAT_SetGeneric(cheatseq_t *cheat)
 // writes some bytes to the network data stream, and the network code
 // later calls us.
 
-bool CHEAT_AddKey(cheatseq_t *cheat, unsigned char key, bool *eat)
+bool CHEAT_AddKey(cheatseq_t *cheat, uint8_t key, bool *eat)
 {
     if (cheat->Pos == NULL)
     {
@@ -435,7 +435,7 @@ void CHEAT_DoCheat(player_t *player, int cheat, bool silentmsg)
 
 void CHEAT_GiveTo(player_t *player, const char *name)
 {
-    BOOL     giveall;
+    bool     giveall;
     int      i;
     gitem_t *it;
 

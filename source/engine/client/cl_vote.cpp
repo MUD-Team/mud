@@ -70,7 +70,7 @@ bool VoteState::get(vote_state_t &vote_state)
         return false;
     }
 
-    short countdown = (this->countdown / 35) - ((I_MSTime() - this->countdown_ms) / 1000);
+    int16_t countdown = (this->countdown / 35) - ((I_MSTime() - this->countdown_ms) / 1000);
 
     // If the vote is undecided, don't show the vote HUD if countdown has
     // reached 0 without an update from the server.
@@ -173,7 +173,7 @@ BEGIN_COMMAND(callvote)
     {
         // Match our first argument up with a vote type.
         std::string votecmd_s = StdStringToLower(arguments[0]);
-        for (unsigned char i = (VOTE_NONE + 1); i < VOTE_MAX; ++i)
+        for (uint8_t i = (VOTE_NONE + 1); i < VOTE_MAX; ++i)
         {
             if (votecmd_s.compare(vote_type_cmd[i]) == 0)
             {
@@ -245,8 +245,8 @@ BEGIN_COMMAND(callvote)
     }
 
     MSG_WriteMarker(&net_buffer, clc_callvote);
-    MSG_WriteByte(&net_buffer, (byte)votecmd);
-    MSG_WriteByte(&net_buffer, (byte)(arguments.size()));
+    MSG_WriteByte(&net_buffer, (uint8_t)votecmd);
+    MSG_WriteByte(&net_buffer, (uint8_t)(arguments.size()));
     for (std::vector<std::string>::iterator it = arguments.begin(); it != arguments.end(); ++it)
     {
         MSG_WriteString(&net_buffer, it->c_str());

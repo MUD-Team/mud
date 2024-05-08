@@ -389,7 +389,7 @@ void P_LineOpening(const line_t *linedef, fixed_t x, fixed_t y, fixed_t refx, fi
             usefront = true;
         else if (bflevel)
             usefront = false;
-        else if (refx != MIN_FIXED)
+        else if (refx != INT32_MIN)
             usefront = !P_PointOnLineSide(refx, refy, linedef);
     }
 
@@ -541,7 +541,7 @@ void AActor::SetOrigin(fixed_t ix, fixed_t iy, fixed_t iz)
 //
 extern polyblock_t **PolyBlockMap;
 
-BOOL P_BlockLinesIterator(int x, int y, BOOL (*func)(line_t *))
+bool P_BlockLinesIterator(int x, int y, bool (*func)(line_t *))
 {
     if (x < 0 || y < 0 || x >= bmapwidth || y >= bmapheight)
         return true;
@@ -608,7 +608,7 @@ BOOL P_BlockLinesIterator(int x, int y, BOOL (*func)(line_t *))
 //
 // P_BlockThingsIterator
 //
-BOOL P_BlockThingsIterator(int x, int y, BOOL (*func)(AActor *), AActor *actor)
+bool P_BlockThingsIterator(int x, int y, bool (*func)(AActor *), AActor *actor)
 {
     if (x < 0 || y < 0 || x >= bmapwidth || y >= bmapheight)
         return true;
@@ -633,7 +633,7 @@ BOOL P_BlockThingsIterator(int x, int y, BOOL (*func)(AActor *), AActor *actor)
 TArray<intercept_t> intercepts;
 
 divline_t trace;
-BOOL      earlyout;
+bool      earlyout;
 int       ptflags;
 
 //
@@ -646,7 +646,7 @@ int       ptflags;
 // are on opposite sides of the trace.
 // Returns true if earlyout and a solid line hit.
 //
-BOOL PIT_AddLineIntercepts(line_t *ld)
+bool PIT_AddLineIntercepts(line_t *ld)
 {
     int       s1;
     int       s2;
@@ -693,7 +693,7 @@ BOOL PIT_AddLineIntercepts(line_t *ld)
 //
 // PIT_AddThingIntercepts
 //
-BOOL PIT_AddThingIntercepts(AActor *thing)
+bool PIT_AddThingIntercepts(AActor *thing)
 {
     fixed_t x1;
     fixed_t y1;
@@ -703,7 +703,7 @@ BOOL PIT_AddThingIntercepts(AActor *thing)
     int s1;
     int s2;
 
-    BOOL tracepositive;
+    bool tracepositive;
 
     divline_t dl;
 
@@ -759,7 +759,7 @@ BOOL PIT_AddThingIntercepts(AActor *thing)
 // Returns true if the traverser function returns true
 // for all lines.
 //
-BOOL P_TraverseIntercepts(traverser_t func, fixed_t maxfrac)
+bool P_TraverseIntercepts(traverser_t func, fixed_t maxfrac)
 {
     size_t       count = intercepts.Size();
     fixed_t      dist;
@@ -768,7 +768,7 @@ BOOL P_TraverseIntercepts(traverser_t func, fixed_t maxfrac)
 
     while (count--)
     {
-        dist = MAX_INT;
+        dist = INT32_MAX;
         for (scan = 0; scan < intercepts.Size(); scan++)
         {
             if (intercepts[scan].frac < dist)
@@ -784,7 +784,7 @@ BOOL P_TraverseIntercepts(traverser_t func, fixed_t maxfrac)
         if (!func(in))
             return false; // don't bother going farther
 
-        in->frac = MAX_INT;
+        in->frac = INT32_MAX;
     }
 
     return true; // everything was traversed
@@ -797,7 +797,7 @@ BOOL P_TraverseIntercepts(traverser_t func, fixed_t maxfrac)
 // Returns true if the traverser function returns true
 // for all lines.
 //
-BOOL P_PathTraverse(fixed_t x1, fixed_t y1, fixed_t x2, fixed_t y2, int flags, BOOL (*trav)(intercept_t *))
+bool P_PathTraverse(fixed_t x1, fixed_t y1, fixed_t x2, fixed_t y2, int flags, bool (*trav)(intercept_t *))
 {
     fixed_t xt1;
     fixed_t yt1;

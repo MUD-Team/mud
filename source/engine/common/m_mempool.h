@@ -84,13 +84,13 @@ template <typename T> class Pool
         new_block_size[num_blocks - 1] = new_size;
         block_size                     = new_block_size;
 
-        byte **new_data_block = new byte *[num_blocks];
+        uint8_t **new_data_block = new uint8_t *[num_blocks];
         if (data_block != NULL)
         {
-            memcpy(new_data_block, data_block, (num_blocks - 1) * sizeof(byte *));
+            memcpy(new_data_block, data_block, (num_blocks - 1) * sizeof(uint8_t *));
             delete[] data_block;
         }
-        new_data_block[num_blocks - 1] = new byte[new_size];
+        new_data_block[num_blocks - 1] = new uint8_t[new_size];
         data_block                     = new_data_block;
 
         free_block = data_block[num_blocks - 1];
@@ -111,6 +111,6 @@ template <typename T> class Pool
 
     size_t  num_blocks;
     size_t *block_size;
-    byte  **data_block;
-    byte   *free_block;
+    uint8_t  **data_block;
+    uint8_t   *free_block;
 };

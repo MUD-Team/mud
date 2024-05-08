@@ -191,7 +191,7 @@ class FileIdentificationManager
     }
 
   private:
-    typedef unsigned int IdType;
+    typedef uint32_t IdType;
 
     typedef SArray<fileIdentifier_t> IdentifierTable;
     IdentifierTable                  mIdentifiers;

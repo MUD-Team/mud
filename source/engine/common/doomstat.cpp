@@ -46,7 +46,7 @@ CVAR_FUNC_IMPL(language)
 }
 
 // Set if homebrew PWAD stuff has been added.
-BOOL modifiedgame;
+bool modifiedgame;
 
 // Miscellaneous info that used to be constant
 // Formerly in d_dehacked, subject to change - Dasho

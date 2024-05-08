@@ -89,26 +89,26 @@ EXTERN_CVAR(in_autosr50)
 gameaction_t gameaction;
 gamestate_t  gamestate = GS_STARTUP;
 
-BOOL paused;
-BOOL sendpause;      // send a pause event next tic
-BOOL sendsave;       // send a save event next tic
-BOOL usergame;       // ok to save / end game
-BOOL sendcenterview; // send a center view event next tic
+bool paused;
+bool sendpause;      // send a pause event next tic
+bool sendsave;       // send a save event next tic
+bool usergame;       // ok to save / end game
+bool sendcenterview; // send a center view event next tic
 
 bool nodrawers;      // for comparative timing purposes
 bool noblit;         // for comparative timing purposes
 
-BOOL viewactive;
+bool viewactive;
 
 // Describes if a network game is being played
-BOOL network_game;
+bool network_game;
 // Describes if this is a multiplayer game or not
-BOOL multiplayer;
+bool multiplayer;
 // The player vector, contains all player information
 Players players;
 
-byte consoleplayer_id; // player taking events and displaying
-byte displayplayer_id; // view being displayed
+uint8_t consoleplayer_id; // player taking events and displaying
+uint8_t displayplayer_id; // view being displayed
 int  gametic;
 
 EXTERN_CVAR(sv_nomonsters)
@@ -151,7 +151,7 @@ extern bool simulated_connection;
 
 int iffdemover;
 
-BOOL precache = true;   // if true, load all graphics at start
+bool precache = true;   // if true, load all graphics at start
 
 wbstartstruct_t wminfo; // parms for world map / intermission
 
@@ -362,7 +362,7 @@ void G_BuildTiccmd(ticcmd_t *cmd)
     }
 
     // Joystick analog strafing -- Hyper_Eye
-    side += (int)(((float)joystrafe / (float)SHRT_MAX) * sidemove[speed]);
+    side += (int)(((float)joystrafe / (float)INT16_MAX) * sidemove[speed]);
 
     if (Actions[ACTION_LOOKUP])
     {
@@ -405,9 +405,9 @@ void G_BuildTiccmd(ticcmd_t *cmd)
     if (joy_freelook || consoleplayer().spectator)
     {
         if (joy_invert)
-            look += (int)(((float)joylook / (float)SHRT_MAX) * lookspeed[speed]);
+            look += (int)(((float)joylook / (float)INT16_MAX) * lookspeed[speed]);
         else
-            look -= (int)(((float)joylook / (float)SHRT_MAX) * lookspeed[speed]);
+            look -= (int)(((float)joylook / (float)INT16_MAX) * lookspeed[speed]);
 
         ::localview.skippitch = true;
     }
@@ -458,14 +458,14 @@ void G_BuildTiccmd(ticcmd_t *cmd)
     {
         if (strafe || lookstrafe)
         {
-            side += (int)(((float)::joyturn / (float)SHRT_MAX) * ::sidemove[speed]);
+            side += (int)(((float)::joyturn / (float)INT16_MAX) * ::sidemove[speed]);
         }
         else
         {
             if (Actions[ACTION_FASTTURN])
-                cmd->yaw -= (short)((((float)joyturn / (float)SHRT_MAX) * angleturn[1]) * (joy_fastsensitivity / 10));
+                cmd->yaw -= (int16_t)((((float)joyturn / (float)INT16_MAX) * angleturn[1]) * (joy_fastsensitivity / 10));
             else
-                cmd->yaw -= (short)((((float)joyturn / (float)SHRT_MAX) * angleturn[1]) * (joy_sensitivity / 10));
+                cmd->yaw -= (int16_t)((((float)joyturn / (float)INT16_MAX) * angleturn[1]) * (joy_sensitivity / 10));
         }
         ::localview.skipangle = true;
     }
@@ -473,14 +473,14 @@ void G_BuildTiccmd(ticcmd_t *cmd)
     if (Actions[ACTION_MLOOK])
     {
         if (joy_invert)
-            look += (int)(((float)joyforward / (float)SHRT_MAX) * lookspeed[speed]);
+            look += (int)(((float)joyforward / (float)INT16_MAX) * lookspeed[speed]);
         else
-            look -= (int)(((float)joyforward / (float)SHRT_MAX) * lookspeed[speed]);
+            look -= (int)(((float)joyforward / (float)INT16_MAX) * lookspeed[speed]);
         ::localview.skippitch = true;
     }
     else
     {
-        forward -= (int)(((float)joyforward / (float)SHRT_MAX) * forwardmove[speed]);
+        forward -= (int)(((float)joyforward / (float)INT16_MAX) * forwardmove[speed]);
     }
 
     if (!consoleplayer().spectator && !Actions[ACTION_MLOOK] && !cl_mouselook &&
@@ -640,7 +640,7 @@ bool G_ShouldIgnoreMouseInput()
 // G_Responder
 // Get info needed to make ticcmd_ts for the players.
 //
-BOOL G_Responder(event_t *ev)
+bool G_Responder(event_t *ev)
 {
     // any other key pops up menu if in demos
     // [RH] But only if the key isn't bound to a "special" command
@@ -1032,7 +1032,7 @@ void P_SpawnPlayer(player_t &player, mapthing2_t *mthing);
 
 bool G_CheckSpot(player_t &player, mapthing2_t *mthing)
 {
-    unsigned an;
+    uint32_t an;
     AActor  *mo;
     fixed_t  xa, ya;
 
@@ -1078,7 +1078,7 @@ bool G_CheckSpot(player_t &player, mapthing2_t *mthing)
     //	if (!player.spectator && !player.deadspectator)	// ONLY IF THEY ARE NOT A SPECTATOR
     if (!player.spectator) // ONLY IF THEY ARE NOT A SPECTATOR
     {
-        an = (ANG45 * ((unsigned int)mthing->angle / 45)) >> ANGLETOFINESHIFT;
+        an = (ANG45 * ((uint32_t)mthing->angle / 45)) >> ANGLETOFINESHIFT;
         xa = finecosine[an];
         ya = finesine[an];
 
@@ -1101,7 +1101,7 @@ bool G_CheckSpot(player_t &player, mapthing2_t *mthing)
 // denis - todo - should this be used somewhere?
 /*static fixed_t PlayersRangeFromSpot (mapthing2_t *spot)
 {
-    fixed_t closest = MAX_INT;
+    fixed_t closest = INT32_MAX;
     fixed_t distance;
 
     for (size_t i = 0; i < players.size(); i++)
@@ -1220,7 +1220,7 @@ void G_DoReborn(player_t &player)
     if (playerstarts.empty())
         I_Error("No player starts");
 
-    unsigned int playernum = player.id - 1;
+    uint32_t playernum = player.id - 1;
 
     if (G_CheckSpot(player, &playerstarts[playernum % playerstarts.size()]))
     {
@@ -1267,7 +1267,7 @@ void G_LoadGame(char *name)
 
 void G_DoLoadGame(void)
 {
-    unsigned int i;
+    uint32_t i;
     char         text[16];
 
     gameaction = ga_nothing;
@@ -1318,8 +1318,8 @@ void G_DoLoadGame(void)
     FArchive arc(savefile);
 
     {
-        byte         vars[4096], *vars_p;
-        unsigned int len;
+        uint8_t         vars[4096], *vars_p;
+        uint32_t len;
         vars_p = vars;
         len    = arc.ReadCount();
         arc.Read(vars, len);
@@ -1410,7 +1410,7 @@ void G_DoSaveGame()
     FArchive arc(savefile);
 
     {
-        byte vars[4096], *vars_p;
+        uint8_t vars[4096], *vars_p;
         vars_p = vars;
 
         cvar_t::C_WriteCVars(&vars_p, CVAR_SERVERINFO);

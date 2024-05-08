@@ -212,12 +212,12 @@ bool MapFormat::getHexen(void)
     return map_format.hexen;
 }
 
-short MapFormat::getGeneralizedMask(void)
+int16_t MapFormat::getGeneralizedMask(void)
 {
     return map_format.generalized_mask;
 }
 
-bool P_IsSpecialBoomRepeatable(const short special)
+bool P_IsSpecialBoomRepeatable(const int16_t special)
 {
     switch (special)
     {
@@ -370,7 +370,7 @@ bool P_IsSpecialBoomRepeatable(const short special)
     return false;
 }
 
-bool P_IsExitLine(const short special)
+bool P_IsExitLine(const int16_t special)
 {
     if (map_format.getZDoom())
         return special == 74 || special == 75 || special == 244 || special == 243;
@@ -378,7 +378,7 @@ bool P_IsExitLine(const short special)
     return special == 11 || special == 52 || special == 197 || special == 51 || special == 124 || special == 198;
 }
 
-bool P_IsTeleportLine(const short special)
+bool P_IsTeleportLine(const int16_t special)
 {
     if (map_format.getZDoom())
         return special == 70 || special == 71 || special == 154 || special == 215;
@@ -388,7 +388,7 @@ bool P_IsTeleportLine(const short special)
            special == 269;
 }
 
-bool P_IsThingTeleportLine(const short special)
+bool P_IsThingTeleportLine(const int16_t special)
 {
     if (map_format.getZDoom())
         return false;
@@ -397,7 +397,7 @@ bool P_IsThingTeleportLine(const short special)
            special == 208 || special == 243;
 }
 
-bool P_IsThingNoFogTeleportLine(const short special)
+bool P_IsThingNoFogTeleportLine(const int16_t special)
 {
     if (map_format.getZDoom())
         return false;
@@ -405,7 +405,7 @@ bool P_IsThingNoFogTeleportLine(const short special)
     return special == 207 || special == 208 || special == 209 || special == 210 || special == 268 || special == 269;
 }
 
-bool P_IsCompatibleLockedDoorLine(const short special)
+bool P_IsCompatibleLockedDoorLine(const int16_t special)
 {
     if (map_format.getZDoom())
         return false;
@@ -413,7 +413,7 @@ bool P_IsCompatibleLockedDoorLine(const short special)
     return special == 26 || special == 27 || special == 28 || special == 32 || special == 33 || special == 34;
 }
 
-bool P_IsCompatibleBlueDoorLine(const short special)
+bool P_IsCompatibleBlueDoorLine(const int16_t special)
 {
     if (map_format.getZDoom())
         return false;
@@ -427,7 +427,7 @@ bool P_IsCompatibleBlueDoorLine(const short special)
     return special == 26 || special == 32;
 }
 
-bool P_IsCompatibleRedDoorLine(const short special)
+bool P_IsCompatibleRedDoorLine(const int16_t special)
 {
     if (map_format.getZDoom())
         return false;
@@ -441,7 +441,7 @@ bool P_IsCompatibleRedDoorLine(const short special)
     return special == 28 || special == 33;
 }
 
-bool P_IsCompatibleYellowDoorLine(const short special)
+bool P_IsCompatibleYellowDoorLine(const int16_t special)
 {
     if (map_format.getZDoom())
         return false;
@@ -455,7 +455,7 @@ bool P_IsCompatibleYellowDoorLine(const short special)
     return special == 27 || special == 34;
 }
 
-bool P_IsLightTagDoorType(const short special)
+bool P_IsLightTagDoorType(const int16_t special)
 {
     switch (special)
     {

@@ -128,8 +128,8 @@ typedef struct sfxinfo_struct sfxinfo_t;
 struct sfxinfo_struct
 {
     char     name[MAX_SNDNAME + 1]; // [RH] Sound name defined in SNDINFO
-    unsigned normal;                // Normal sample handle
-    unsigned looping;               // Looping sample handle
+    uint32_t normal;                // Normal sample handle
+    uint32_t looping;               // Looping sample handle
     void    *data;
 
     int link;
@@ -140,10 +140,10 @@ struct sfxinfo_struct
 
     // fix this to use arbitrary length filenames - Dasho
     char        filename[MAX_SNDNAME + 1]; // filename of sfx
-    unsigned int ms;          // [RH] length of sfx in milliseconds
-    unsigned int next, index; // [RH] For hashing
-    unsigned int frequency;   // [RH] Preferred playback rate
-    unsigned int length;      // [RH] Length of the sound in bytes
+    uint32_t ms;          // [RH] length of sfx in milliseconds
+    uint32_t next, index; // [RH] For hashing
+    uint32_t frequency;   // [RH] Preferred playback rate
+    uint32_t length;      // [RH] Length of the sound in bytes
     bool         israndom;    // [DE] Whether or not this is an alias for a set of random sounds
 };
 
@@ -257,7 +257,7 @@ int  S_AddSound(const char *logicalname, const char *filename);
 void S_AddRandomSound(int owner, std::vector<int> &list);
 void S_ClearSoundLumps();
 
-void UV_SoundAvoidPlayer(AActor *mo, byte channel, const char *name, byte attenuation);
+void UV_SoundAvoidPlayer(AActor *mo, uint8_t channel, const char *name, uint8_t attenuation);
 
 // [RH] Prints sound debug info to the screen.
 //		Modelled after Hexen's noise cheat.
@@ -269,7 +269,7 @@ void S_NoiseDebug();
 #include "sv_main.h"
 #endif
 
-static void S_NetSound(AActor *mo, byte channel, const char *name, const byte attenuation)
+static void S_NetSound(AActor *mo, uint8_t channel, const char *name, const uint8_t attenuation)
 {
 #if SERVER_APP
     SV_Sound(mo, channel, name, attenuation);
@@ -278,7 +278,7 @@ static void S_NetSound(AActor *mo, byte channel, const char *name, const byte at
 #endif
 }
 
-static void S_PlayerSound(player_t *pl, AActor *mo, const byte channel, const char *name, const byte attenuation)
+static void S_PlayerSound(player_t *pl, AActor *mo, const uint8_t channel, const char *name, const uint8_t attenuation)
 {
 #if SERVER_APP
     SV_Sound(*pl, mo, channel, name, attenuation);

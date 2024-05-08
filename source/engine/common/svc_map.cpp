@@ -110,7 +110,7 @@ static void InitMap()
  * @brief Given a packet header, return the message Descriptor, or NULL if
  *        the header is invalid.
  */
-const google::protobuf::Descriptor *SVC_ResolveHeader(const byte header)
+const google::protobuf::Descriptor *SVC_ResolveHeader(const uint8_t header)
 {
     if (::g_SVCHeaderMap.empty())
     {

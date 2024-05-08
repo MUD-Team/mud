@@ -26,7 +26,7 @@
 #include "odamex.h"
 #include "v_palette.h"
 
-BOOL menuactive;
+bool menuactive;
 
 void R_ExitLevel()
 {
@@ -37,13 +37,13 @@ void D_SetupUserInfo(void)
 void D_UserInfoChanged(cvar_t *cvar)
 {
 }
-void D_DoServerInfoChange(byte **stream)
+void D_DoServerInfoChange(uint8_t **stream)
 {
 }
-void D_WriteUserInfoStrings(int i, byte **stream, bool compact)
+void D_WriteUserInfoStrings(int i, uint8_t **stream, bool compact)
 {
 }
-void D_ReadUserInfoStrings(int i, byte **stream, bool update)
+void D_ReadUserInfoStrings(int i, uint8_t **stream, bool update)
 {
 }
 

@@ -58,7 +58,7 @@ static struct DownloadState
     std::string     url;
     std::string     filename;
     OMD5Hash        hash;
-    unsigned        flags;
+    uint32_t        flags;
     Websites        checkurls;
     size_t          checkurlidx;
     std::string     checkfilename;
@@ -133,7 +133,7 @@ bool CL_IsDownloading()
  * @param filename Filename of the WAD to download.
  * @param flags DL_* flags to set for the download process.
  */
-bool CL_StartDownload(const Websites &urls, const OWantFile &filename, unsigned flags)
+bool CL_StartDownload(const Websites &urls, const OWantFile &filename, uint32_t flags)
 {
     if (::dlstate.state != STATE_READY)
     {

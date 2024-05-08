@@ -185,9 +185,9 @@ DPillar *DPillar::Clone(sector_t *sec) const
     return pillar;
 }
 
-BOOL EV_DoPillar(DPillar::EPillar type, int tag, fixed_t speed, fixed_t height, fixed_t height2, bool crush)
+bool EV_DoPillar(DPillar::EPillar type, int tag, fixed_t speed, fixed_t height, fixed_t height2, bool crush)
 {
-    BOOL rtn    = false;
+    bool rtn    = false;
     int  secnum = -1;
 
     while ((secnum = P_FindSectorFromTag(tag, secnum)) >= 0)

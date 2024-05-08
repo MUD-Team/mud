@@ -553,7 +553,7 @@ odaproto::svc::SpawnPlayer SVC_SpawnPlayer(player_t &player)
         // The client hasn't yet received his own position from the server
         // This happens with cl_autorecord
         // Just fake a position for now
-        act->set_netid(MAX_SHORT);
+        act->set_netid(INT16_MAX);
     }
 
     return msg;
@@ -662,7 +662,7 @@ odaproto::svc::Print SVC_Print(printlevel_t level, const std::string &str)
  * @param player Player to send information about.
  * @param flags SVC_PM_* flags to designate what gets sent.
  */
-odaproto::svc::PlayerMembers SVC_PlayerMembers(player_t &player, byte flags)
+odaproto::svc::PlayerMembers SVC_PlayerMembers(player_t &player, uint8_t flags)
 {
     odaproto::svc::PlayerMembers msg;
 
@@ -787,7 +787,7 @@ odaproto::svc::MovingSector SVC_MovingSector(const sector_t &sector)
     }
 
     // Create bitfield to denote moving planes in this sector
-    byte movers = byte(ceiling_mover) | (byte(floor_mover) << 4);
+    uint8_t movers = uint8_t(ceiling_mover) | (uint8_t(floor_mover) << 4);
 
     msg.set_sector(sectornum);
     msg.set_ceiling_height(P_CeilingHeight(&sector));
@@ -968,7 +968,7 @@ odaproto::svc::PlayerState SVC_PlayerState(player_t &player)
     for (int i = 0; i < NUMPSPRITES; i++)
     {
         pspdef_t             *psp   = &player.psprites[i];
-        unsigned int          state = psp->state - states;
+        uint32_t          state = psp->state - states;
         odaproto::Player_Psp *plpsp = pl->add_psprites();
         plpsp->set_statenum(state);
     }
@@ -1034,7 +1034,7 @@ odaproto::svc::Switch SVC_Switch(line_t &line, uint32_t state, uint32_t timer)
     return msg;
 }
 
-odaproto::svc::Say SVC_Say(const bool visibility, const byte pid, const std::string &message)
+odaproto::svc::Say SVC_Say(const bool visibility, const uint8_t pid, const std::string &message)
 {
     odaproto::svc::Say msg;
 
@@ -1088,7 +1088,7 @@ odaproto::svc::MidPrint SVC_MidPrint(const std::string &message, const int time)
     return msg;
 }
 
-odaproto::svc::ServerGametic SVC_ServerGametic(const byte tic)
+odaproto::svc::ServerGametic SVC_ServerGametic(const uint8_t tic)
 {
     odaproto::svc::ServerGametic msg;
 
@@ -1097,7 +1097,7 @@ odaproto::svc::ServerGametic SVC_ServerGametic(const byte tic)
     return msg;
 }
 
-odaproto::svc::IntTimeLeft SVC_IntTimeLeft(const unsigned int timeleft)
+odaproto::svc::IntTimeLeft SVC_IntTimeLeft(const uint32_t timeleft)
 {
     odaproto::svc::IntTimeLeft msg;
 
@@ -1270,7 +1270,7 @@ odaproto::svc::DamageMobj SVC_DamageMobj(AActor *target, const int pain)
     return msg;
 }
 
-odaproto::svc::ExecuteLineSpecial SVC_ExecuteLineSpecial(byte special, line_t *line, AActor *mo, const int (&args)[5])
+odaproto::svc::ExecuteLineSpecial SVC_ExecuteLineSpecial(uint8_t special, line_t *line, AActor *mo, const int (&args)[5])
 {
     odaproto::svc::ExecuteLineSpecial msg;
 
@@ -1294,7 +1294,7 @@ odaproto::svc::ExecuteLineSpecial SVC_ExecuteLineSpecial(byte special, line_t *l
  * @param print String to send to client, NULL if no string.
  * @param args Arguments to pass to the client.
  */
-odaproto::svc::ExecuteACSSpecial SVC_ExecuteACSSpecial(const byte special, const AActor *activator, const char *print,
+odaproto::svc::ExecuteACSSpecial SVC_ExecuteACSSpecial(const uint8_t special, const AActor *activator, const char *print,
                                                        const std::vector<int> &args)
 {
     odaproto::svc::ExecuteACSSpecial msg;
@@ -1466,7 +1466,7 @@ odaproto::svc::MaplistUpdate SVC_MaplistUpdate(const maplist_status_t status, co
     return msg;
 }
 
-odaproto::svc::MaplistIndex SVC_MaplistIndex(const byte count, const size_t this_index, const size_t next_index)
+odaproto::svc::MaplistIndex SVC_MaplistIndex(const uint8_t count, const size_t this_index, const size_t next_index)
 {
     odaproto::svc::MaplistIndex msg;
 

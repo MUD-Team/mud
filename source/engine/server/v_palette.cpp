@@ -84,11 +84,11 @@ translationref_t::translationref_t(const translationref_t &other)
 {
 }
 
-translationref_t::translationref_t(const byte *table) : m_table(table), m_player_id(-1)
+translationref_t::translationref_t(const uint8_t *table) : m_table(table), m_player_id(-1)
 {
 }
 
-translationref_t::translationref_t(const byte *table, const int player_id) : m_table(table), m_player_id(player_id)
+translationref_t::translationref_t(const uint8_t *table, const int player_id) : m_table(table), m_player_id(player_id)
 {
 }
 
@@ -179,8 +179,8 @@ dyncolormap_t *GetSpecialLights(int lr, int lg, int lb, int fr, int fg, int fb)
     // Not found. Create it.
     colormap         = (dyncolormap_t *)Z_Malloc(sizeof(*colormap), PU_LEVEL, 0);
     shademap_t *maps = new shademap_t();
-    maps->colormap   = (byte *)Z_Malloc(NUMCOLORMAPS * 256 * sizeof(byte) + 3 + 255, PU_LEVEL, 0);
-    maps->colormap   = (byte *)(((ptrdiff_t)maps->colormap + 255) & ~0xff);
+    maps->colormap   = (uint8_t *)Z_Malloc(NUMCOLORMAPS * 256 * sizeof(uint8_t) + 3 + 255, PU_LEVEL, 0);
+    maps->colormap   = (uint8_t *)(((ptrdiff_t)maps->colormap + 255) & ~0xff);
     maps->shademap   = (argb_t *)Z_Malloc(NUMCOLORMAPS * 256 * sizeof(argb_t) + 3 + 255, PU_LEVEL, 0);
     maps->shademap   = (argb_t *)(((ptrdiff_t)maps->shademap + 255) & ~0xff);
 

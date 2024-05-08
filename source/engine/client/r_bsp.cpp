@@ -59,19 +59,19 @@ fixed_t rw_frontfz1, rw_frontfz2;
 
 int rw_start, rw_stop;
 
-static BYTE FakeSide;
+static uint8_t FakeSide;
 
 const fixed_t NEARCLIP = 2 * FRACUNIT;
 
 drawseg_t *ds_p;
 drawseg_t *drawsegs;
-unsigned   maxdrawsegs;
+uint32_t   maxdrawsegs;
 
 // CPhipps -
 // Instead of clipsegs, let's try using an array with one entry for each column,
 // indicating whether it's blocked by a solid wall yet or not.
 // e6y: resolution limitation is removed
-byte solidcol[MAXWIDTH];
+uint8_t solidcol[MAXWIDTH];
 
 //
 // R_ClearClipSegs
@@ -89,8 +89,8 @@ void R_ReallocDrawSegs(void)
 {
     if (ds_p == drawsegs + maxdrawsegs)                        // killough 1/98 -- fix 2s line HOM
     {
-        unsigned pos    = ds_p - drawsegs;                     // jff 8/9/98 fix from ZDOOM1.14a
-        unsigned newmax = maxdrawsegs ? maxdrawsegs * 2 : 128; // killough
+        uint32_t pos    = ds_p - drawsegs;                     // jff 8/9/98 fix from ZDOOM1.14a
+        uint32_t newmax = maxdrawsegs ? maxdrawsegs * 2 : 128; // killough
         drawsegs        = (drawseg_t *)Realloc(drawsegs, newmax * sizeof(*drawsegs));
         ds_p            = drawsegs + pos;                      // jff 8/9/98 fix from ZDOOM1.14a
         maxdrawsegs     = newmax;
@@ -124,7 +124,7 @@ static void R_ClipWallSegment(int first, int last, bool makesolid)
         {
             // find the first remaining non-solid column
             // if all columns remaining are solid, we're done
-            byte *p = (byte *)memchr(solidcol + first, 0, last - first + 1);
+            uint8_t *p = (uint8_t *)memchr(solidcol + first, 0, last - first + 1);
             if (p == NULL)
                 return;
 
@@ -134,7 +134,7 @@ static void R_ClipWallSegment(int first, int last, bool makesolid)
         {
             int to;
             // find where the span of non-solid columns ends
-            byte *p = (byte *)memchr(solidcol + first, 1, last - first + 1);
+            uint8_t *p = (uint8_t *)memchr(solidcol + first, 1, last - first + 1);
             if (p == NULL)
                 to = last;
             else
@@ -708,7 +708,7 @@ void R_Subsector(int num)
     // [RH] Add particles
     if (r_particles)
     {
-        for (WORD i = ParticlesInSubsec[num]; i != NO_PARTICLE; i = Particles[i].nextinsubsector)
+        for (uint16_t i = ParticlesInSubsec[num]; i != NO_PARTICLE; i = Particles[i].nextinsubsector)
             R_ProjectParticle(Particles + i, subsectors[num].sector, FakeSide);
     }
 

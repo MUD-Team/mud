@@ -62,12 +62,12 @@ class FFile
     virtual bool      IsPersistent() const                   = 0;
     virtual bool      IsOpen() const                         = 0;
 
-    virtual FFile &Write(const void *, unsigned int) = 0;
-    virtual FFile &Read(void *, unsigned int)        = 0;
+    virtual FFile &Write(const void *, uint32_t) = 0;
+    virtual FFile &Read(void *, uint32_t)        = 0;
 
-    virtual unsigned int Tell() const        = 0;
+    virtual uint32_t Tell() const        = 0;
     virtual FFile       &Seek(int, ESeekPos) = 0;
-    inline FFile        &Seek(unsigned int i, ESeekPos p)
+    inline FFile        &Seek(uint32_t i, ESeekPos p)
     {
         return Seek((int)i, p);
     }
@@ -91,16 +91,16 @@ class FLZOFile : public FFile
     }
     virtual bool IsOpen() const;
 
-    virtual FFile       &Write(const void *, unsigned int);
-    virtual FFile       &Read(void *, unsigned int);
-    virtual unsigned int Tell() const;
+    virtual FFile       &Write(const void *, uint32_t);
+    virtual FFile       &Read(void *, uint32_t);
+    virtual uint32_t Tell() const;
     virtual FFile       &Seek(int, ESeekPos);
 
   protected:
-    unsigned int   m_Pos;
-    unsigned int   m_BufferSize;
-    unsigned int   m_MaxBufferSize;
-    unsigned char *m_Buffer;
+    uint32_t   m_Pos;
+    uint32_t   m_BufferSize;
+    uint32_t   m_MaxBufferSize;
+    uint8_t *m_Buffer;
     bool           m_NoCompress;
     EOpenMode      m_Mode;
     PHYSFS_File   *m_File;
@@ -144,7 +144,7 @@ class FLZOMemFile : public FLZOFile
 
   private:
     bool           m_SourceFromMem;
-    unsigned char *m_ImplodedBuffer;
+    uint8_t *m_ImplodedBuffer;
 };
 
 class FArchive
@@ -177,16 +177,16 @@ class FArchive
 
     void Close();
 
-    virtual void Write(const void *mem, unsigned int len);
-    virtual void Read(void *mem, unsigned int len);
+    virtual void Write(const void *mem, uint32_t len);
+    virtual void Read(void *mem, uint32_t len);
 
-    void  WriteCount(DWORD count);
-    DWORD ReadCount();
+    void  WriteCount(uint32_t count);
+    uint32_t ReadCount();
 
-    FArchive &operator<<(BYTE c);
-    FArchive &operator<<(WORD s);
-    FArchive &operator<<(DWORD i);
-    FArchive &operator<<(QWORD i);
+    FArchive &operator<<(uint8_t c);
+    FArchive &operator<<(uint16_t s);
+    FArchive &operator<<(uint32_t i);
+    FArchive &operator<<(uint64_t i);
     FArchive &operator<<(float f);
     FArchive &operator<<(double d);
     FArchive &operator<<(argb_t color);
@@ -195,52 +195,41 @@ class FArchive
 
     inline FArchive &operator<<(char c)
     {
-        return operator<<((BYTE)c);
+        return operator<<((uint8_t)c);
     }
-    inline FArchive &operator<<(SBYTE c)
+    inline FArchive &operator<<(int8_t c)
     {
-        return operator<<((BYTE)c);
+        return operator<<((uint8_t)c);
     }
-    inline FArchive &operator<<(SWORD s)
+    inline FArchive &operator<<(int16_t s)
     {
-        return operator<<((WORD)s);
+        return operator<<((uint16_t)s);
     }
-    inline FArchive &operator<<(SDWORD i)
+    inline FArchive &operator<<(int32_t i)
     {
-        return operator<<((DWORD)i);
+        return operator<<((uint32_t)i);
     }
-    inline FArchive &operator<<(SQWORD i)
+    inline FArchive &operator<<(int64_t i)
     {
-        return operator<<((QWORD)i);
+        return operator<<((uint64_t)i);
     }
-    inline FArchive &operator<<(const unsigned char *str)
+    inline FArchive &operator<<(const uint8_t *str)
     {
         return operator<<((const char *)str);
     }
-    inline FArchive &operator<<(const signed char *str)
+    inline FArchive &operator<<(const int8_t *str)
     {
         return operator<<((const char *)str);
     }
     inline FArchive &operator<<(bool b)
     {
-        return operator<<((BYTE)b);
-    }
-    inline FArchive &operator<<(unsigned int i) // also texhandle_t - Dasho
-    {
-        return operator<<((DWORD)i);
+        return operator<<((uint8_t)b);
     }
 
-#ifdef _WIN32
-    inline FArchive &operator<<(int i)
-    {
-        return operator<<((SDWORD)i);
-    }
-#endif
-
-    FArchive &operator>>(BYTE &c);
-    FArchive &operator>>(WORD &s);
-    FArchive &operator>>(DWORD &i);
-    FArchive &operator>>(QWORD &i);
+    FArchive &operator>>(uint8_t &c);
+    FArchive &operator>>(uint16_t &s);
+    FArchive &operator>>(uint32_t &i);
+    FArchive &operator>>(uint64_t &i);
     FArchive &operator>>(float &f);
     FArchive &operator>>(double &d);
     FArchive &operator>>(argb_t &color);
@@ -249,44 +238,42 @@ class FArchive
 
     inline FArchive &operator>>(char &c)
     {
-        BYTE in;
+        uint8_t in;
         operator>>(in);
         c = (char)in;
         return *this;
     }
-    inline FArchive &operator>>(SBYTE &c)
+    inline FArchive &operator>>(int8_t &c)
     {
-        BYTE in;
+        uint8_t in;
         operator>>(in);
-        c = (SBYTE)in;
+        c = (int8_t)in;
         return *this;
     }
-    inline FArchive &operator>>(SWORD &s)
+    inline FArchive &operator>>(int16_t &s)
     {
-        WORD in;
+        uint16_t in;
         operator>>(in);
-        s = (SWORD)in;
+        s = (int16_t)in;
         return *this;
     }
-    inline FArchive &operator>>(SDWORD &i)
+    inline FArchive &operator>>(int32_t &i)
     {
-        DWORD in;
+        uint32_t in;
         operator>>(in);
-        i = (SDWORD)in;
+        i = (int32_t)in;
         return *this;
     }
-    inline FArchive &operator>>(SQWORD &i)
+    inline FArchive &operator>>(int64_t &i)
     {
-        QWORD in;
+        uint64_t in;
         operator>>(in);
-        i = (SQWORD)in;
+        i = (int64_t)in;
         return *this;
     }
-    // inline	FArchive& operator>> (unsigned char *&str) { return operator>> ((char *&)str); }
-    // inline	FArchive& operator>> (signed char *&str) { return operator>> ((char *&)str); }
     inline FArchive &operator>>(bool &b)
     {
-        BYTE in;
+        uint8_t in;
         operator>>(in);
         b = (in != 0);
         return *this;
@@ -295,23 +282,6 @@ class FArchive
     {
         return ReadObject(object, RUNTIME_CLASS(DObject));
     }
-    inline FArchive &operator>>(unsigned int &i) // also texhandle_t - Dasho
-    {
-        DWORD in;
-        operator>>(in);
-        i = (unsigned int)in;
-        return *this;
-    }
-
-#ifdef _WIN32
-    inline FArchive &operator>>(int &i)
-    {
-        DWORD in;
-        operator>>(in);
-        i = (int)in;
-        return *this;
-    }
-#endif
 
   protected:
     enum
@@ -319,13 +289,13 @@ class FArchive
         EObjectHashSize = 137
     };
 
-    DWORD           FindObjectIndex(const DObject *obj) const;
-    DWORD           MapObject(const DObject *obj);
-    DWORD           WriteClass(const TypeInfo *info);
+    uint32_t           FindObjectIndex(const DObject *obj) const;
+    uint32_t           MapObject(const DObject *obj);
+    uint32_t           WriteClass(const TypeInfo *info);
     const TypeInfo *ReadClass();
     const TypeInfo *ReadClass(const TypeInfo *wanttype);
     const TypeInfo *ReadStoredClass(const TypeInfo *wanttype);
-    DWORD           HashObject(const DObject *obj) const;
+    uint32_t           HashObject(const DObject *obj) const;
 
     bool   m_Persistent;  // meant for persistent storage (disk)?
     bool   m_Loading;     // extracting objects?
@@ -333,14 +303,14 @@ class FArchive
     bool   m_HubTravel;   // travelling inside a hub?
     bool   m_Reset;       // reset state?
     FFile *m_File;        // unerlying file object
-    DWORD  m_ObjectCount; // # of objects currently serialized
-    DWORD  m_MaxObjectCount;
-    DWORD  m_ClassCount;  // # of unique classes currently serialized
+    uint32_t  m_ObjectCount; // # of objects currently serialized
+    uint32_t  m_MaxObjectCount;
+    uint32_t  m_ClassCount;  // # of unique classes currently serialized
 
     struct TypeMap
     {
         const TypeInfo *toCurrent; // maps archive type index to execution type index
-        DWORD           toArchive; // maps execution type index to archive type index
+        uint32_t           toArchive; // maps execution type index to archive type index
 
         enum
         {

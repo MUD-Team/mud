@@ -48,7 +48,7 @@ SdlMixerMusicSystem::~SdlMixerMusicSystem()
     m_isInitialized = false;
 }
 
-void SdlMixerMusicSystem::startSong(byte *data, size_t length, bool loop)
+void SdlMixerMusicSystem::startSong(uint8_t *data, size_t length, bool loop)
 {
     if (!isInitialized())
         return;
@@ -166,7 +166,7 @@ void SdlMixerMusicSystem::_UnregisterSong()
 // Determines the format of music data and allocates the memory for the music
 // data if appropriate.  Note that _UnregisterSong should be called after
 // playing to free the allocated memory.
-void SdlMixerMusicSystem::_RegisterSong(byte *data, size_t length)
+void SdlMixerMusicSystem::_RegisterSong(uint8_t *data, size_t length)
 {
     _UnregisterSong();
 

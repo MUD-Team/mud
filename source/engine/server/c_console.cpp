@@ -49,7 +49,7 @@ struct History
 // CmdLine[259]= offset from beginning of cmdline to display
 // static byte CmdLine[260];
 
-static byte printxormask;
+static uint8_t printxormask;
 
 static struct History *HistTail = NULL;
 
@@ -88,7 +88,7 @@ char *TimeStamp()
  */
 extern int PrintString(int printlevel, const char *outline);
 
-extern BOOL gameisdead;
+extern bool gameisdead;
 
 int VPrintf(int printlevel, const char *format, va_list parms)
 {

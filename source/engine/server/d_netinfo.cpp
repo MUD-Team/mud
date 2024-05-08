@@ -29,7 +29,7 @@
 
 // The default preference ordering when the player runs out of one type of ammo.
 // Vanilla Doom compatible.
-const byte UserInfo::weapon_prefs_default[NUMWEAPONS] = {
+const uint8_t UserInfo::weapon_prefs_default[NUMWEAPONS] = {
     0, // wp_fist
     4, // wp_pistol
     5, // wp_shotgun
@@ -58,7 +58,7 @@ bool SetServerVar(const char *name, const char *value)
 
     if (var)
     {
-        unsigned oldflags = var->flags();
+        uint32_t oldflags = var->flags();
 
         var->m_Flags &= ~(CVAR_SERVERINFO | CVAR_LATCH);
         var->Set(value);

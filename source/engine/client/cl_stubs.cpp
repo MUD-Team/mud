@@ -67,13 +67,13 @@ void STACK_ARGS SV_BroadcastPrintf(const char *format, ...)
 void D_SendServerInfoChange(const cvar_t *cvar, const char *value)
 {
 }
-void D_DoServerInfoChange(byte **stream)
+void D_DoServerInfoChange(uint8_t **stream)
 {
 }
-void D_WriteUserInfoStrings(int i, byte **stream, bool compact)
+void D_WriteUserInfoStrings(int i, uint8_t **stream, bool compact)
 {
 }
-void D_ReadUserInfoStrings(int i, byte **stream, bool update)
+void D_ReadUserInfoStrings(int i, uint8_t **stream, bool update)
 {
 }
 
@@ -140,7 +140,7 @@ bool SV_AwarenessUpdate(player_t &pl, AActor *mo)
 void SV_SendPackets(void)
 {
 }
-void SV_SendExecuteLineSpecial(byte special, line_t *line, AActor *activator, int arg0, int arg1, int arg2, int arg3,
+void SV_SendExecuteLineSpecial(uint8_t special, line_t *line, AActor *activator, int arg0, int arg1, int arg2, int arg3,
                                int arg4)
 {
 }
@@ -148,7 +148,7 @@ void SV_SendExecuteLineSpecial(byte special, line_t *line, AActor *activator, in
 void SV_UpdateMonsterRespawnCount()
 {
 }
-void SV_Sound(AActor *mo, byte channel, const char *name, byte attenuation)
+void SV_Sound(AActor *mo, uint8_t channel, const char *name, uint8_t attenuation)
 {
 }
 

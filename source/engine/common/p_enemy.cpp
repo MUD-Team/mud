@@ -77,7 +77,7 @@ void A_Fall(AActor *actor);
 
 void SV_UpdateMonsterRespawnCount();
 void SV_UpdateMobj(AActor *mo);
-void SV_Sound(AActor *mo, byte channel, const char *name, byte attenuation);
+void SV_Sound(AActor *mo, uint8_t channel, const char *name, uint8_t attenuation);
 
 // killough 8/8/98: distance friends tend to move towards players
 const int distfriend = 128;
@@ -176,7 +176,7 @@ static bool P_CheckRange(AActor *actor, fixed_t range)
 //
 // P_CheckMeleeRange
 //
-BOOL P_CheckMeleeRange(AActor *actor)
+bool P_CheckMeleeRange(AActor *actor)
 {
     AActor *pl;
     fixed_t dist;
@@ -211,7 +211,7 @@ BOOL P_CheckMeleeRange(AActor *actor)
 //
 // P_CheckMissileRange
 //
-BOOL P_CheckMissileRange(AActor *actor)
+bool P_CheckMissileRange(AActor *actor)
 {
     fixed_t dist;
 
@@ -272,10 +272,10 @@ BOOL P_CheckMissileRange(AActor *actor)
 //
 extern std::vector<line_t *> spechit;
 
-BOOL P_Move(AActor *actor)
+bool P_Move(AActor *actor)
 {
     fixed_t tryx, tryy, deltax, deltay, origx, origy;
-    BOOL    try_ok;
+    bool    try_ok;
     int     good;
     int     speed;
     int     movefactor = ORIG_FRICTION_FACTOR;
@@ -304,7 +304,7 @@ BOOL P_Move(AActor *actor)
         }
     }
 
-    if ((unsigned)actor->movedir >= 8)
+    if ((uint32_t)actor->movedir >= 8)
         I_Error("Weird actor->movedir!");
 
     speed = actor->info->speed;
@@ -392,7 +392,7 @@ BOOL P_Move(AActor *actor)
 // If a door is in the way,
 // an OpenDoor call is made to start it opening.
 //
-BOOL P_TryWalk(AActor *actor)
+bool P_TryWalk(AActor *actor)
 {
     if (!P_Move(actor))
     {
@@ -646,7 +646,7 @@ bool P_LookForPlayers(AActor *actor, bool allaround)
     static player_t *playeringame[MAXPLAYERS];
     memset(playeringame, 0, sizeof(player_t *) * MAXPLAYERS);
 
-    short maxid = 0;
+    int16_t maxid = 0;
     for (Players::iterator it = players.begin(); it != players.end(); ++it)
     {
         if (it->ingame() && !(it->spectator))
@@ -672,7 +672,7 @@ bool P_LookForPlayers(AActor *actor, bool allaround)
     int counter = 0;
 
     // [AM] Vanilla braindamage, "fixing" will lead to vanilla desyncs
-    unsigned int stop;
+    uint32_t stop;
     if (actor->lastlook > 0)
         stop = actor->lastlook - 1;
     else
@@ -1358,10 +1358,10 @@ fixed_t viletryx;
 fixed_t viletryy;
 int     viletryradius;
 
-BOOL PIT_VileCheck(AActor *thing)
+bool PIT_VileCheck(AActor *thing)
 {
     int  maxdist;
-    BOOL check;
+    bool check;
 
     if (thing->oflags & MFO_NORAISE)
         return true; // [AM] Can't raise
@@ -1506,7 +1506,7 @@ void A_FireCrackle(AActor *actor)
 void A_Fire(AActor *actor)
 {
     AActor  *dest;
-    unsigned an;
+    uint32_t an;
 
     dest = actor->tracer;
     if (!dest)
@@ -1781,7 +1781,7 @@ void A_SpawnObject(AActor *actor)
     vel_z = actor->state->args[7];
 
     // calculate position offsets
-    an  = actor->angle + (unsigned int)(((int64_t)angle << 16) / 360);
+    an  = actor->angle + (uint32_t)(((int64_t)angle << 16) / 360);
     fan = an >> ANGLETOFINESHIFT;
     dx  = FixedMul(ofs_x, finecosine[fan]) - FixedMul(ofs_y, finesine[fan]);
     dy  = FixedMul(ofs_x, finesine[fan]) + FixedMul(ofs_y, finecosine[fan]);
@@ -2959,14 +2959,14 @@ void A_LineEffect(AActor *mo)
     if (!(mo->intflags & MIF_LINEDONE))                // Unless already used up
     {
         line_t junk = *lines;                          // Fake linedef set to 1st
-        if ((junk.special = (short)mo->state->misc1))  // Linedef type
+        if ((junk.special = (int16_t)mo->state->misc1))  // Linedef type
         {
             // [FG] made static
             static player_t player;                    // Remember player status
             player_t* oldplayer = mo->player;          // Remember player status
             mo->player = &player;                      // Fake player
             player.health = 100;                       // Alive player
-            junk.tag = (short)mo->state->misc2;        // Sector tag for linedef
+            junk.tag = (int16_t)mo->state->misc2;        // Sector tag for linedef
             if (!P_UseSpecialLine(mo, &junk, 0))       // Try using it
                 P_CrossSpecialLine(&junk, 0, mo);        // Try crossing it
             if (!junk.special)                         // If type cleared,

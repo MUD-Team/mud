@@ -35,7 +35,7 @@
 #define FRACUNIT (1 << FRACBITS)
 
 typedef int          fixed_t;   // fixed 16.16
-typedef unsigned int dsfixed_t; // fixedpt used by span drawer
+typedef uint32_t dsfixed_t; // fixedpt used by span drawer
 
 //
 // Fixed Point / Floating Point Conversion
@@ -85,7 +85,7 @@ inline static fixed_t FixedMul(fixed_t a, fixed_t b)
 //
 inline static fixed_t FixedDiv(fixed_t a, fixed_t b)
 {
-    return (abs(a) >> 14) >= abs(b) ? ((a ^ b) >> 31) ^ MAX_INT : (fixed_t)(((int64_t)a << FRACBITS) / b);
+    return (abs(a) >> 14) >= abs(b) ? ((a ^ b) >> 31) ^ INT32_MAX : (fixed_t)(((int64_t)a << FRACBITS) / b);
 }
 
 //

@@ -45,8 +45,8 @@ typedef enum
     MS_FLUIDLITE = 2
 } MusicSystemType;
 
-bool S_MusicIsMus(byte *data, size_t length);
-bool S_MusicIsMidi(byte *data, size_t length);
+bool S_MusicIsMus(uint8_t *data, size_t length);
+bool S_MusicIsMidi(uint8_t *data, size_t length);
 
 //
 //	MUSIC I/O
@@ -67,7 +67,7 @@ void I_ResumeSong();
 //  plays a song, and when the song is done,
 //  starts playing it again in an endless loop.
 // Horrible thing to do, considering.
-void I_PlaySong(byte *data, size_t length, bool loop);
+void I_PlaySong(uint8_t *data, size_t length, bool loop);
 // Stops a song over 3 seconds.
 void I_StopSong();
 void I_UpdateMusic();

@@ -28,8 +28,8 @@
 class Vote
 {
   protected:
-    byte                         caller_id;
-    unsigned int                 countdown;
+    uint8_t                         caller_id;
+    uint32_t                 countdown;
     std::string                  error;
     vote_result_t                result;
     std::map<int, vote_result_t> tally;
@@ -41,7 +41,7 @@ class Vote
     virtual ~Vote(){};
     const char   *name;
     const cvar_t *cvar;
-    unsigned int  get_countdown() const
+    uint32_t  get_countdown() const
     {
         return this->countdown;
     }

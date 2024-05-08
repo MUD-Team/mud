@@ -254,7 +254,7 @@ static IVideoMode I_ValidateVideoMode(const IVideoMode &mode)
             return invalid_mode;
     }
 
-    unsigned int      closest_dist = UINT_MAX;
+    uint32_t      closest_dist = UINT_MAX;
     const IVideoMode *closest_mode = NULL;
 
     const IVideoModeList *modelist = I_GetVideoCapabilities()->getSupportedVideoModes();
@@ -270,7 +270,7 @@ static IVideoMode I_ValidateVideoMode(const IVideoMode &mode)
                 if (iteration == 0 && (it->width < desired_mode.width || it->height < desired_mode.height))
                     continue;
 
-                unsigned int dist = (it->width - desired_mode.width) * (it->width - desired_mode.width) +
+                uint32_t dist = (it->width - desired_mode.width) * (it->width - desired_mode.width) +
                                     (it->height - desired_mode.height) * (it->height - desired_mode.height);
 
                 if (dist < closest_dist)

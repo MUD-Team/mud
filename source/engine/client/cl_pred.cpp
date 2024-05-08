@@ -39,7 +39,7 @@ static PlayerSnapshot cl_savedsnaps[MAXSAVETICS];
 
 bool predicting;
 
-extern std::map<unsigned short, SectorSnapshotManager> sector_snaps;
+extern std::map<uint16_t, SectorSnapshotManager> sector_snaps;
 
 //
 // CL_GetSnapshotManager
@@ -49,11 +49,11 @@ extern std::map<unsigned short, SectorSnapshotManager> sector_snaps;
 //
 static SectorSnapshotManager *CL_GetSectorSnapshotManager(sector_t *sector)
 {
-    unsigned short sectornum = sector - sectors;
+    uint16_t sectornum = sector - sectors;
     if (!sector || sectornum >= numsectors)
         return NULL;
 
-    std::map<unsigned short, SectorSnapshotManager>::iterator mgr_itr;
+    std::map<uint16_t, SectorSnapshotManager>::iterator mgr_itr;
     mgr_itr = sector_snaps.find(sectornum);
 
     if (mgr_itr != sector_snaps.end())
@@ -103,7 +103,7 @@ static void CL_ResetSectors()
     while (itr != movingsectors.end())
     {
         sector_t      *sector    = itr->sector;
-        unsigned short sectornum = sector - sectors;
+        uint16_t sectornum = sector - sectors;
         if (sectornum >= numsectors)
             continue;
 

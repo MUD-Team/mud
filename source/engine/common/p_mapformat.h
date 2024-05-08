@@ -34,7 +34,7 @@ class MapFormat
 
     bool  getZDoom(void);
     bool  getHexen(void);
-    short getGeneralizedMask(void);
+    int16_t getGeneralizedMask(void);
 
     void init_sector_special(sector_t *);
     void player_in_special_sector(player_t *);
@@ -50,7 +50,7 @@ class MapFormat
   protected:
     bool  zdoom;
     bool  hexen;
-    short generalized_mask;
+    int16_t generalized_mask;
 };
 
 extern MapFormat map_format;
@@ -88,13 +88,13 @@ void P_PostProcessCompatibleSidedefSpecial(side_t *sd, mapsidedef_t *msd, sector
 void P_PostProcessZDoomLinedefSpecial(line_t *line);
 void P_PostProcessCompatibleLinedefSpecial(line_t *line);
 
-bool P_IsSpecialBoomRepeatable(const short special);
-bool P_IsExitLine(const short special);
-bool P_IsTeleportLine(const short special);
-bool P_IsThingTeleportLine(const short special);
-bool P_IsThingNoFogTeleportLine(const short special);
-bool P_IsCompatibleLockedDoorLine(const short special);
-bool P_IsCompatibleBlueDoorLine(const short special);
-bool P_IsCompatibleRedDoorLine(const short special);
-bool P_IsCompatibleYellowDoorLine(const short special);
-bool P_IsLightTagDoorType(const short special);
+bool P_IsSpecialBoomRepeatable(const int16_t special);
+bool P_IsExitLine(const int16_t special);
+bool P_IsTeleportLine(const int16_t special);
+bool P_IsThingTeleportLine(const int16_t special);
+bool P_IsThingNoFogTeleportLine(const int16_t special);
+bool P_IsCompatibleLockedDoorLine(const int16_t special);
+bool P_IsCompatibleBlueDoorLine(const int16_t special);
+bool P_IsCompatibleRedDoorLine(const int16_t special);
+bool P_IsCompatibleYellowDoorLine(const int16_t special);
+bool P_IsLightTagDoorType(const int16_t special);

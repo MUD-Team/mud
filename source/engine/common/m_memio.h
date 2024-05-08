@@ -25,6 +25,7 @@
 #pragma once
 
 #include <stddef.h>
+#include <stdint.h>
 
 typedef struct _MEMFILE MEMFILE;
 
@@ -42,6 +43,6 @@ size_t   mem_fwrite(const void *ptr, size_t size, size_t nmemb, MEMFILE *stream)
 void     mem_get_buf(MEMFILE *stream, void **buf, size_t *buflen);
 void     mem_fclose(MEMFILE *stream);
 long     mem_ftell(MEMFILE *stream);
-int      mem_fseek(MEMFILE *stream, signed long offset, mem_rel_t whence);
+int      mem_fseek(MEMFILE *stream, int32_t offset, mem_rel_t whence);
 size_t   mem_fsize(MEMFILE *stream);   // [Russell] - get size of stream
 char    *mem_fgetbuf(MEMFILE *stream); // [Russell] - return stream buffer
