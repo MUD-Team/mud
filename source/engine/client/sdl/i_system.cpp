@@ -40,7 +40,6 @@
 #endif // WIN32
 #ifdef UNIX
 // for getuid and geteuid
-#include <limits.h>
 #include <pwd.h>
 #include <sys/types.h>
 #include <time.h>

@@ -37,7 +37,6 @@
 #include <mach/mach.h>
 #endif
 #ifdef UNIX
-#include <limits.h>
 #include <pwd.h>
 #include <sys/stat.h>
 #include <sys/time.h>

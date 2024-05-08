@@ -405,9 +405,9 @@ void G_BuildTiccmd(ticcmd_t *cmd)
     if (joy_freelook || consoleplayer().spectator)
     {
         if (joy_invert)
-            look += (int)(((float)joylook / (float)SHRT_MAX) * lookspeed[speed]);
+            look += (int)(((float)joylook / (float)INT16_MAX) * lookspeed[speed]);
         else
-            look -= (int)(((float)joylook / (float)SHRT_MAX) * lookspeed[speed]);
+            look -= (int)(((float)joylook / (float)INT16_MAX) * lookspeed[speed]);
 
         ::localview.skippitch = true;
     }
@@ -458,14 +458,14 @@ void G_BuildTiccmd(ticcmd_t *cmd)
     {
         if (strafe || lookstrafe)
         {
-            side += (int)(((float)::joyturn / (float)SHRT_MAX) * ::sidemove[speed]);
+            side += (int)(((float)::joyturn / (float)INT16_MAX) * ::sidemove[speed]);
         }
         else
         {
             if (Actions[ACTION_FASTTURN])
-                cmd->yaw -= (int16_t)((((float)joyturn / (float)SHRT_MAX) * angleturn[1]) * (joy_fastsensitivity / 10));
+                cmd->yaw -= (int16_t)((((float)joyturn / (float)INT16_MAX) * angleturn[1]) * (joy_fastsensitivity / 10));
             else
-                cmd->yaw -= (int16_t)((((float)joyturn / (float)SHRT_MAX) * angleturn[1]) * (joy_sensitivity / 10));
+                cmd->yaw -= (int16_t)((((float)joyturn / (float)INT16_MAX) * angleturn[1]) * (joy_sensitivity / 10));
         }
         ::localview.skipangle = true;
     }
@@ -473,14 +473,14 @@ void G_BuildTiccmd(ticcmd_t *cmd)
     if (Actions[ACTION_MLOOK])
     {
         if (joy_invert)
-            look += (int)(((float)joyforward / (float)SHRT_MAX) * lookspeed[speed]);
+            look += (int)(((float)joyforward / (float)INT16_MAX) * lookspeed[speed]);
         else
-            look -= (int)(((float)joyforward / (float)SHRT_MAX) * lookspeed[speed]);
+            look -= (int)(((float)joyforward / (float)INT16_MAX) * lookspeed[speed]);
         ::localview.skippitch = true;
     }
     else
     {
-        forward -= (int)(((float)joyforward / (float)SHRT_MAX) * forwardmove[speed]);
+        forward -= (int)(((float)joyforward / (float)INT16_MAX) * forwardmove[speed]);
     }
 
     if (!consoleplayer().spectator && !Actions[ACTION_MLOOK] && !cl_mouselook &&

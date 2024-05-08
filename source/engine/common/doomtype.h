@@ -67,7 +67,6 @@ typedef int BOOL;
 // Predefined with some OS.
 #if !defined(UNIX) && !defined(_WIN32)
 #include <float.h>
-#include <limits.h>
 #endif
 
 #ifdef UNIX
