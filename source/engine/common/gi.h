@@ -53,7 +53,7 @@ typedef struct
 
 typedef struct
 {
-    int       flags;
+    int32_t       flags;
     OLumpName titlePage;
     char      creditPage1[8];
     char      creditPage2[8];
@@ -72,11 +72,11 @@ typedef struct
         struct
         {
             char basePage[8];
-            int  numPages;
+            int32_t  numPages;
         } indexed;
     } info;
     char          quitSound[MAX_SNDNAME + 1];
-    int           maxSwitch;
+    int32_t           maxSwitch;
     char          borderFlat[8];
     gameborder_t *border;
 

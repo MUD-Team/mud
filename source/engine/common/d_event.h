@@ -23,6 +23,8 @@
 
 #pragma once
 
+#include <stdint.h>
+
 //
 // Event handling.
 //
@@ -39,7 +41,7 @@ typedef enum
 // Event structure.
 struct event_t
 {
-    event_t(evtype_t t = ev_keydown, int d1 = 0, int d2 = 0, int d3 = 0, int mod = 0)
+    event_t(evtype_t t = ev_keydown, int32_t d1 = 0, int32_t d2 = 0, int32_t d3 = 0, int32_t mod = 0)
         : type(t), data1(d1), data2(d2), data3(d3), mod(mod)
     {
     }
@@ -69,10 +71,10 @@ struct event_t
     }
 
     evtype_t type;
-    int      data1; // keys / mouse/joystick buttons
-    int      data2; // mouse/joystick x move
-    int      data3; // mouse/joystick y move
-    int      mod;   // input mods
+    int32_t      data1; // keys / mouse/joystick buttons
+    int32_t      data2; // mouse/joystick x move
+    int32_t      data3; // mouse/joystick y move
+    int32_t      mod;   // input mods
 };
 
 typedef enum
@@ -130,7 +132,7 @@ typedef enum
 #define MAXEVENTS 128
 
 extern event_t events[MAXEVENTS];
-extern int     eventhead;
-extern int     eventtail;
+extern int32_t     eventhead;
+extern int32_t     eventtail;
 
 extern gameaction_t gameaction;

@@ -54,7 +54,7 @@ size_t UIFileInterface::Read(void *buffer, size_t size, Rml::FileHandle file)
     return read;
 }
 
-bool UIFileInterface::Seek(Rml::FileHandle file, long offset, int origin)
+bool UIFileInterface::Seek(Rml::FileHandle file, long offset, int32_t origin)
 {
     PHYSFS_File *pfile = (PHYSFS_File *)file;
     if (!pfile)

@@ -73,23 +73,23 @@ class DMover : public DSectorEffect
     };
 
   private:
-    EResult MovePlane(fixed_t speed, fixed_t dest, int crush, int floorOrCeiling, int direction, bool hexencrush);
+    EResult MovePlane(fixed_t speed, fixed_t dest, int32_t crush, int32_t floorOrCeiling, int32_t direction, bool hexencrush);
 
   protected:
     DMover();
-    inline EResult MoveFloor(fixed_t speed, fixed_t dest, int crush, int direction, bool hexencrush)
+    inline EResult MoveFloor(fixed_t speed, fixed_t dest, int32_t crush, int32_t direction, bool hexencrush)
     {
         return MovePlane(speed, dest, crush, 0, direction, hexencrush);
     }
-    inline EResult MoveFloor(fixed_t speed, fixed_t dest, int direction)
+    inline EResult MoveFloor(fixed_t speed, fixed_t dest, int32_t direction)
     {
         return MovePlane(speed, dest, NO_CRUSH, 0, direction, false);
     }
-    inline EResult MoveCeiling(fixed_t speed, fixed_t dest, int crush, int direction, bool hexencrush)
+    inline EResult MoveCeiling(fixed_t speed, fixed_t dest, int32_t crush, int32_t direction, bool hexencrush)
     {
         return MovePlane(speed, dest, crush, 1, direction, hexencrush);
     }
-    inline EResult MoveCeiling(fixed_t speed, fixed_t dest, int direction)
+    inline EResult MoveCeiling(fixed_t speed, fixed_t dest, int32_t direction)
     {
         return MovePlane(speed, dest, NO_CRUSH, 1, direction, false);
     }

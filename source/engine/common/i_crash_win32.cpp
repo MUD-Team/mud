@@ -147,7 +147,7 @@ void invalidparamCallback(const wchar_t *expression, const wchar_t *function, co
 //      In theory, you could work around this by spawning another process
 //      and doing them dumping there, but I could never figure out how to
 //      pass the necessary data along with it.
-int newCallback(size_t)
+int32_t newCallback(size_t)
 {
     // Exception pointer is located at _pxcptinfoptrs.
     writeMinidump(static_cast<PEXCEPTION_POINTERS>(_pxcptinfoptrs));
@@ -159,7 +159,7 @@ int newCallback(size_t)
     abort();
 }
 
-void signalCallback(int sig)
+void signalCallback(int32_t sig)
 {
     // Set our default signal handlers.
     signal(SIGILL, SIG_DFL);

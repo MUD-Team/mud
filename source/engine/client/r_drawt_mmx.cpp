@@ -50,10 +50,10 @@ static inline uintptr_t R_GetBytesUntilAligned(void *data, uintptr_t alignment)
     return (alignment - ((uintptr_t)data & mask)) & mask;
 }
 
-void r_dimpatchD_MMX(IWindowSurface *surface, argb_t color, int alpha, int x1, int y1, int w, int h)
+void r_dimpatchD_MMX(IWindowSurface *surface, argb_t color, int32_t alpha, int32_t x1, int32_t y1, int32_t w, int32_t h)
 {
-    int surface_pitch_pixels = surface->getPitchInPixels();
-    int line_inc             = surface_pitch_pixels - w;
+    int32_t surface_pitch_pixels = surface->getPitchInPixels();
+    int32_t line_inc             = surface_pitch_pixels - w;
 
     argb_t *dest = (argb_t *)surface->getBuffer() + y1 * surface_pitch_pixels + x1;
 
@@ -62,17 +62,17 @@ void r_dimpatchD_MMX(IWindowSurface *surface, argb_t color, int alpha, int x1, i
     const __m64 vec_alphacolor = _mm_mullo_pi16(vec_color, _mm_set1_pi16(alpha));
     const __m64 vec_invalpha   = _mm_set1_pi16(256 - alpha);
 
-    for (int rowcount = h; rowcount > 0; --rowcount)
+    for (int32_t rowcount = h; rowcount > 0; --rowcount)
     {
         // [SL] Calculate how many pixels of each row need to be drawn before dest is
         // aligned to a 64-bit boundary.
-        int align = R_GetBytesUntilAligned(dest, 64 / 8) / sizeof(argb_t);
+        int32_t align = R_GetBytesUntilAligned(dest, 64 / 8) / sizeof(argb_t);
         if (align > w)
             align = w;
 
-        const int batch_size = 4;
-        int       batches    = (w - align) / batch_size;
-        int       remainder  = (w - align) & (batch_size - 1);
+        const int32_t batch_size = 4;
+        int32_t       batches    = (w - align) / batch_size;
+        int32_t       remainder  = (w - align) & (batch_size - 1);
 
         // align the destination buffer to 64-bit boundary
         while (align--)

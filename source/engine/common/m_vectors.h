@@ -49,7 +49,7 @@ struct v2int_t
     {
     }
 
-    v2int_t(const int x_, const int y_) : x(x_), y(y_)
+    v2int_t(const int32_t x_, const int32_t y_) : x(x_), y(y_)
     {
     }
 
@@ -57,7 +57,7 @@ struct v2int_t
     {
     }
 
-    int x, y;
+    int32_t x, y;
 };
 
 struct v2fixed_t
@@ -138,7 +138,7 @@ struct rectInt_t
     {
     }
 
-    rectInt_t(const int x1, const int y1, const int x2, const int y2) : min(x1, y1), max(x2, y2)
+    rectInt_t(const int32_t x1, const int32_t y1, const int32_t x2, const int32_t y2) : min(x1, y1), max(x2, y2)
     {
     }
 
@@ -303,8 +303,8 @@ void M_ActorMomentumToVec3Fixed(v3fixed_t *dest, const AActor *thing);
 //
 // Calculates the normalized direction vector from ang and pitch
 //
-void M_AngleToVec3f(v3float_t *dest, angle_t ang, int pitch);
-void M_AngleToVec3(v3double_t *dest, angle_t ang, int pitch);
+void M_AngleToVec3f(v3float_t *dest, angle_t ang, int32_t pitch);
+void M_AngleToVec3(v3double_t *dest, angle_t ang, int32_t pitch);
 
 void M_ProjectPointOnPlane(v3double_t *dest, const v3double_t *p, const v3double_t *normal);
 void M_PerpendicularVec3(v3double_t *dest, const v3double_t *src);

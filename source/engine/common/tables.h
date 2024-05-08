@@ -20,15 +20,15 @@
 //	Do not try to look them up :-).
 //	In the order of appearance:
 //
-//	int finetangent[4096]	- Tangens LUT.
+//	int32_t finetangent[4096]	- Tangens LUT.
 //	 Should work with BAM fairly well (12 of 16bit,
 //      effectively, by shifting).
 //
-//	int finesine[10240]		- Sine lookup.
+//	int32_t finesine[10240]		- Sine lookup.
 //	 Guess what, serves as cosine, too.
 //	 Remarkable thing is, how to use BAMs with this?
 //
-//	int tantoangle[2049]	- ArcTan LUT,
+//	int32_t tantoangle[2049]	- ArcTan LUT,
 //	  maps tan(angle) to angle fast. Gotta search.
 //
 //-----------------------------------------------------------------------------
@@ -82,7 +82,7 @@ extern angle_t       tantoangle_acc[2049];
 extern const angle_t *p_tantoangle;
 
 void Table_InitTanToAngle(void);
-void Table_SetTanToAngle(int version);
+void Table_SetTanToAngle(int32_t version);
 
 // More utility functions, courtesy of Quasar (James Haley).
 // These are straight from Eternity so demos stay in sync.

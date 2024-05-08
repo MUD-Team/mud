@@ -83,7 +83,7 @@ void SkipUnknownType(OScanner &os)
 //
 void SkipUnknownBlock(OScanner &os)
 {
-    int stack = 0;
+    int32_t stack = 0;
 
     while (os.scan())
     {
@@ -112,8 +112,8 @@ template <typename T> void MustGet(OScanner &os)
     I_FatalError("Templated function MustGet templated with non-existant specialized type!");
 }
 
-// ensure token is int
-template <> void MustGet<int>(OScanner &os)
+// ensure token is int32_t
+template <> void MustGet<int32_t>(OScanner &os)
 {
     os.mustScanInt();
 }
@@ -242,12 +242,12 @@ void ParseOLumpName(OScanner &os, OLumpName &buffer)
     buffer = os.getToken();
 }
 
-int ValidateMapName(const OLumpName &mapname, int *pEpi = NULL, int *pMap = NULL)
+int32_t ValidateMapName(const OLumpName &mapname, int32_t *pEpi = NULL, int32_t *pMap = NULL)
 {
     // Check if the given map name can be expressed as a gameepisode/gamemap pair and be
     // reconstructed from it.
     char lumpname[9];
-    int  epi = -1, map = -1;
+    int32_t  epi = -1, map = -1;
 
     if (gamemode != commercial)
     {
@@ -269,7 +269,7 @@ int ValidateMapName(const OLumpName &mapname, int *pEpi = NULL, int *pMap = NULL
     return !strcmp(mapname.c_str(), lumpname);
 }
 
-int ParseStandardUmapInfoProperty(OScanner &os, level_pwad_info_t *mape)
+int32_t ParseStandardUmapInfoProperty(OScanner &os, level_pwad_info_t *mape)
 {
     // find the next line with content.
     // this line is no property.
@@ -448,10 +448,10 @@ int ParseStandardUmapInfoProperty(OScanner &os, level_pwad_info_t *mape)
             // skip comma token
             MustGetStringName(os, ",");
             os.mustScanInt();
-            const int special = os.getTokenInt();
+            const int32_t special = os.getTokenInt();
             MustGetStringName(os, ",");
             os.mustScanInt();
-            const int tag = os.getTokenInt();
+            const int32_t tag = os.getTokenInt();
             // allow no 0-tag specials here, unless a level exit.
             if (tag != 0 || special == 11 || special == 51 || special == 52 || special == 124)
             {
@@ -485,8 +485,8 @@ void MapNameToLevelNum(level_pwad_info_t &info)
     if (info.mapname[0] == 'E' && info.mapname[2] == 'M')
     {
         // Convert a char into its equivalent integer.
-        const int e = info.mapname[1] - '0';
-        const int m = info.mapname[3] - '0';
+        const int32_t e = info.mapname[1] - '0';
+        const int32_t m = info.mapname[3] - '0';
         if (e >= 0 && e <= 9 && m >= 0 && m <= 9)
         {
             // Copypasted from the ZDoom wiki.
@@ -497,7 +497,7 @@ void MapNameToLevelNum(level_pwad_info_t &info)
     {
         // Try and turn the trailing digits after the "MAP" into a
         // level number.
-        const int mapnum = std::atoi(info.mapname.c_str() + 3);
+        const int32_t mapnum = std::atoi(info.mapname.c_str() + 3);
         if (mapnum >= 0 && mapnum <= 99)
         {
             info.levelnum = mapnum;
@@ -600,7 +600,7 @@ void ParseUMapInfoFile(const char *filename)
             else
             {
                 char arr[9] = "";
-                int  ep, map;
+                int32_t  ep, map;
                 ValidateMapName(info.mapname.c_str(), &ep, &map);
                 map++;
                 if (gamemode == commercial)
@@ -644,12 +644,12 @@ void MIType_DoNothing(OScanner &os, bool doEquals, void *data, uint32_t flags, u
 {
 }
 
-// Sets the inputted data as an int
+// Sets the inputted data as an int32_t
 void MIType_Int(OScanner &os, bool doEquals, void *data, uint32_t flags, uint32_t flags2)
 {
-    ParseMapInfoHelper<int>(os, doEquals);
+    ParseMapInfoHelper<int32_t>(os, doEquals);
 
-    *static_cast<int *>(data) = os.getTokenInt();
+    *static_cast<int32_t *>(data) = os.getTokenInt();
 }
 
 // Sets the inputted data as a float
@@ -849,7 +849,7 @@ void MIType_MapName(OScanner &os, bool doEquals, void *data, uint32_t flags, uin
 
         if (IsNum(map_name))
         {
-            const int map = std::atoi(map_name);
+            const int32_t map = std::atoi(map_name);
             sprintf(map_name, "MAP%02d", map);
         }
         else if (os.compareTokenNoCase("EndBunny"))
@@ -1019,9 +1019,9 @@ void MIType_SCFlags(OScanner &os, bool doEquals, void *data, uint32_t flags, uin
 // Sets a cluster
 void MIType_Cluster(OScanner &os, bool doEquals, void *data, uint32_t flags, uint32_t flags2)
 {
-    ParseMapInfoHelper<int>(os, doEquals);
+    ParseMapInfoHelper<int32_t>(os, doEquals);
 
-    *static_cast<int *>(data) = os.getTokenInt();
+    *static_cast<int32_t *>(data) = os.getTokenInt();
     if (HexenHack)
     {
         ClusterInfos   &clusters = getClusterInfos();
@@ -1111,22 +1111,22 @@ void MIType_SpawnFilter(OScanner &os, bool doEquals, void *data, uint32_t flags,
 
     if (IsNum(os.getToken().c_str()))
     {
-        const int num = os.getTokenInt();
+        const int32_t num = os.getTokenInt();
         if (num > 0)
-            *static_cast<int *>(data) |= (1 << (num - 1));
+            *static_cast<int32_t *>(data) |= (1 << (num - 1));
     }
     else
     {
         if (os.compareTokenNoCase("baby"))
-            *static_cast<int *>(data) |= 1;
+            *static_cast<int32_t *>(data) |= 1;
         else if (os.compareTokenNoCase("easy"))
-            *static_cast<int *>(data) |= 1;
+            *static_cast<int32_t *>(data) |= 1;
         else if (os.compareTokenNoCase("normal"))
-            *static_cast<int *>(data) |= 2;
+            *static_cast<int32_t *>(data) |= 2;
         else if (os.compareTokenNoCase("hard"))
-            *static_cast<int *>(data) |= 4;
+            *static_cast<int32_t *>(data) |= 4;
         else if (os.compareTokenNoCase("nightmare"))
-            *static_cast<int *>(data) |= 4;
+            *static_cast<int32_t *>(data) |= 4;
     }
 }
 
@@ -1577,7 +1577,7 @@ template <typename T> void ParseMapInfoLower(OScanner &os, MapInfoDataSetter<T> 
 {
     // 0 if old mapinfo, positive number if new MAPINFO, the exact
     // number represents current brace depth.
-    int newMapInfoStack = 0;
+    int32_t newMapInfoStack = 0;
 
     while (os.scan())
     {
@@ -1646,7 +1646,7 @@ template <typename T> void ParseMapInfoLower(OScanner &os, MapInfoDataSetter<T> 
 // todo: parse episode info like the others? (but how?)
 void ParseEpisodeInfo(OScanner &os)
 {
-    int         new_mapinfo = false; // is int instead of bool for template purposes
+    int32_t         new_mapinfo = false; // is int32_t instead of bool for template purposes
     OLumpName   map;
     std::string pic;
     bool        picisgfx    = false;
@@ -1746,7 +1746,7 @@ void ParseEpisodeInfo(OScanner &os)
         }
     }
 
-    int i;
+    int32_t i;
     for (i = 0; i < episodenum; ++i)
     {
         if (map == EpisodeMaps[i])
@@ -1761,7 +1761,7 @@ void ParseEpisodeInfo(OScanner &os)
         {
             if (i + 1 < episodenum)
             {
-                const int saved_i = i;
+                const int32_t saved_i = i;
 
                 for (; i < episodenum; ++i)
                 {
@@ -1941,7 +1941,7 @@ static void ParseMapInfoFile(const char *filename)
             if (IsNum(map_name))
             {
                 // MAPNAME is a number, assume a Hexen wad
-                const int map = std::atoi(map_name);
+                const int32_t map = std::atoi(map_name);
 
                 sprintf(map_name, "MAP%02d", map);
                 SKYFLATNAME[5] = 0;
@@ -2076,7 +2076,7 @@ static void ParseMapInfoFile(const char *filename)
 void G_ParseMapInfo()
 {
     const char *baseinfoname = NULL;
-    int         lump;
+    int32_t         lump;
 
     // Reset skill definitions
     skillnum = 0;

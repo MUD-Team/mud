@@ -220,8 +220,8 @@ DFloor::DFloor(sector_t *sec) : DMovingFloor(sec), m_Status(init)
 {
 }
 
-DFloor::DFloor(sector_t *sec, DFloor::EFloor floortype, line_t *line, fixed_t speed, fixed_t height, int crush,
-               int change, bool hexencrush, bool hereticlower)
+DFloor::DFloor(sector_t *sec, DFloor::EFloor floortype, line_t *line, fixed_t speed, fixed_t height, int32_t crush,
+               int32_t change, bool hexencrush, bool hereticlower)
     : DMovingFloor(sec), m_Status(init)
 {
     fixed_t floorheight   = P_FloorHeight(sec);
@@ -466,7 +466,7 @@ DFloor::DFloor(sector_t *sec, DFloor::EFloor floortype, line_t *line, fixed_t sp
 }
 
 // Generalized floor init
-DFloor::DFloor(sector_t *sec, line_t *line, int speed, int target, int crush, int change, int direction, int model)
+DFloor::DFloor(sector_t *sec, line_t *line, int32_t speed, int32_t target, int32_t crush, int32_t change, int32_t direction, int32_t model)
     : DMovingFloor(sec), m_Status(init)
 {
     fixed_t floorheight   = P_FloorHeight(sec);
@@ -634,7 +634,7 @@ DFloor::DFloor(sector_t *sec, line_t *line, int speed, int target, int crush, in
 }
 
 DFloor::DFloor(sector_t *sec, DFloor::EFloor floortype, line_t *line, fixed_t speed, fixed_t height, bool crush,
-               int change)
+               int32_t change)
     : DMovingFloor(sec), m_Status(init)
 {
     fixed_t floorheight   = P_FloorHeight(sec);
@@ -888,9 +888,9 @@ DFloor *DFloor::Clone(sector_t *sec) const
 // HANDLE FLOOR TYPES
 // [RH] Added tag, speed, height, crush, change params.
 //
-bool EV_DoFloor(DFloor::EFloor floortype, line_t *line, int tag, fixed_t speed, fixed_t height, bool crush, int change)
+bool EV_DoFloor(DFloor::EFloor floortype, line_t *line, int32_t tag, fixed_t speed, fixed_t height, bool crush, int32_t change)
 {
-    int       secnum;
+    int32_t       secnum;
     bool      rtn = false;
     sector_t *sec;
     bool      manual = false;
@@ -944,7 +944,7 @@ bool EV_DoFloor(DFloor::EFloor floortype, line_t *line, int tag, fixed_t speed, 
 //
 bool EV_DoGenFloor(line_t *line)
 {
-    int       secnum;
+    int32_t       secnum;
     bool      rtn;
     bool      manual;
     sector_t *sec;
@@ -953,13 +953,13 @@ bool EV_DoGenFloor(line_t *line)
 
     // parse the bit fields in the line's special type
 
-    int Crsh = (value & FloorCrush) >> FloorCrushShift;
-    int ChgT = (value & FloorChange) >> FloorChangeShift;
-    int Targ = (value & FloorTarget) >> FloorTargetShift;
-    int Dirn = (value & FloorDirection) >> FloorDirectionShift;
-    int ChgM = (value & FloorModel) >> FloorModelShift;
-    int Sped = (value & FloorSpeed) >> FloorSpeedShift;
-    int Trig = (value & TriggerType) >> TriggerTypeShift;
+    int32_t Crsh = (value & FloorCrush) >> FloorCrushShift;
+    int32_t ChgT = (value & FloorChange) >> FloorChangeShift;
+    int32_t Targ = (value & FloorTarget) >> FloorTargetShift;
+    int32_t Dirn = (value & FloorDirection) >> FloorDirectionShift;
+    int32_t ChgM = (value & FloorModel) >> FloorModelShift;
+    int32_t Sped = (value & FloorSpeed) >> FloorSpeedShift;
+    int32_t Trig = (value & TriggerType) >> TriggerTypeShift;
 
     rtn    = false;
     manual = false;
@@ -999,10 +999,10 @@ bool EV_DoGenFloor(line_t *line)
     return rtn;
 }
 
-bool EV_DoZDoomFloor(DFloor::EFloor floortype, line_t *line, int tag, fixed_t speed, fixed_t height, int crush,
-                     int change, bool hexencrush, bool hereticlower)
+bool EV_DoZDoomFloor(DFloor::EFloor floortype, line_t *line, int32_t tag, fixed_t speed, fixed_t height, int32_t crush,
+                     int32_t change, bool hexencrush, bool hereticlower)
 {
-    int       secnum;
+    int32_t       secnum;
     bool      rtn = false;
     sector_t *sec;
     bool      manual = false;
@@ -1057,9 +1057,9 @@ bool EV_DoZDoomFloor(DFloor::EFloor floortype, line_t *line, int tag, fixed_t sp
 // jff 3/15/98 added to better support generalized sector types
 // [RH] Added tag parameter.
 //
-bool EV_DoChange(line_t *line, EChange changetype, int tag)
+bool EV_DoChange(line_t *line, EChange changetype, int32_t tag)
 {
-    int       secnum;
+    int32_t       secnum;
     bool      rtn;
     sector_t *sec;
     sector_t *secm;
@@ -1103,13 +1103,13 @@ bool EV_DoChange(line_t *line, EChange changetype, int tag)
 //
 bool EV_DoGenStairs(line_t *line)
 {
-    int  secnum;
-    int  osecnum; // jff 3/4/98 save old loop index
-    int  height;
-    int  i;
-    int  newsecnum = 0;
-    int  texture;
-    int  ok;
+    int32_t  secnum;
+    int32_t  osecnum; // jff 3/4/98 save old loop index
+    int32_t  height;
+    int32_t  i;
+    int32_t  newsecnum = 0;
+    int32_t  texture;
+    int32_t  ok;
     bool rtn = false;
 
     sector_t *sec  = NULL;
@@ -1125,11 +1125,11 @@ bool EV_DoGenStairs(line_t *line)
 
     // parse the bit fields in the line's special type
 
-    int Igno = (value & StairIgnore) >> StairIgnoreShift;
-    int Dirn = (value & StairDirection) >> StairDirectionShift;
-    int Step = (value & StairStep) >> StairStepShift;
-    int Sped = (value & StairSpeed) >> StairSpeedShift;
-    int Trig = (value & TriggerType) >> TriggerTypeShift;
+    int32_t Igno = (value & StairIgnore) >> StairIgnoreShift;
+    int32_t Dirn = (value & StairDirection) >> StairDirectionShift;
+    int32_t Step = (value & StairStep) >> StairStepShift;
+    int32_t Sped = (value & StairSpeed) >> StairSpeedShift;
+    int32_t Trig = (value & TriggerType) >> TriggerTypeShift;
 
     // check if a manual trigger, if so do just the sector on the backside
     if (line->id == 0)
@@ -1314,17 +1314,17 @@ bool EV_DoGenStairs(line_t *line)
 //		by its special. If usespecials is 2, each sector stays in "sync" with
 //		the others.
 //
-bool EV_BuildStairs(int tag, DFloor::EStair type, line_t *line, fixed_t stairsize, fixed_t speed, int delay, int reset,
-                    int igntxt, int usespecials)
+bool EV_BuildStairs(int32_t tag, DFloor::EStair type, line_t *line, fixed_t stairsize, fixed_t speed, int32_t delay, int32_t reset,
+                    int32_t igntxt, int32_t usespecials)
 {
-    int  secnum;
-    int  osecnum; // jff 3/4/98 save old loop index
-    int  height;
-    int  i;
-    int  newsecnum = 0;
-    int  texture;
-    int  ok;
-    int  persteptime;
+    int32_t  secnum;
+    int32_t  osecnum; // jff 3/4/98 save old loop index
+    int32_t  height;
+    int32_t  i;
+    int32_t  newsecnum = 0;
+    int32_t  texture;
+    int32_t  ok;
+    int32_t  persteptime;
     bool rtn = false;
 
     sector_t *sec  = NULL;
@@ -1505,20 +1505,20 @@ bool EV_BuildStairs(int tag, DFloor::EStair type, line_t *line, fixed_t stairsiz
     return rtn;
 }
 
-int P_SpawnDonut(int, line_t *, fixed_t, fixed_t);
+int32_t P_SpawnDonut(int32_t, line_t *, fixed_t, fixed_t);
 
-bool EV_DoZDoomDonut(int tag, line_t *line, fixed_t pillarspeed, fixed_t slimespeed)
+bool EV_DoZDoomDonut(int32_t tag, line_t *line, fixed_t pillarspeed, fixed_t slimespeed)
 {
-    int rtn = 0;
+    int32_t rtn = 0;
 
     rtn = P_SpawnDonut(line->id, line, pillarspeed, slimespeed);
 
     return rtn;
 }
 
-int EV_DoDonut(line_t *line)
+int32_t EV_DoDonut(line_t *line)
 {
-    int rtn = 0;
+    int32_t rtn = 0;
 
     rtn = P_SpawnDonut(line->id, line, FLOORSPEED / 2, FLOORSPEED / 2);
 
@@ -1526,14 +1526,14 @@ int EV_DoDonut(line_t *line)
 }
 
 // [RH] Added pillarspeed and slimespeed parameters
-int P_SpawnDonut(int tag, line_t *line, fixed_t pillarspeed, fixed_t slimespeed)
+int32_t P_SpawnDonut(int32_t tag, line_t *line, fixed_t pillarspeed, fixed_t slimespeed)
 {
     sector_t *s1;
     sector_t *s2;
     sector_t *s3;
-    int       secnum;
-    int       rtn;
-    int       i;
+    int32_t       secnum;
+    int32_t       rtn;
+    int32_t       i;
     DFloor   *floor;
 
     secnum = -1;
@@ -1713,7 +1713,7 @@ DElevator *DElevator::Clone(sector_t *sec) const
     return ele;
 }
 
-bool SpawnCommonElevator(line_t *, DElevator::EElevator, fixed_t, fixed_t, int);
+bool SpawnCommonElevator(line_t *, DElevator::EElevator, fixed_t, fixed_t, int32_t);
 
 //
 // EV_DoElevator
@@ -1725,15 +1725,15 @@ bool SpawnCommonElevator(line_t *, DElevator::EElevator, fixed_t, fixed_t, int);
 // jff 2/22/98 new type to move floor and ceiling in parallel
 // [RH] Added speed, tag, and height parameters and new types.
 //
-bool EV_DoElevator(line_t *line, DElevator::EElevator elevtype, fixed_t speed, fixed_t height, int tag)
+bool EV_DoElevator(line_t *line, DElevator::EElevator elevtype, fixed_t speed, fixed_t height, int32_t tag)
 {
     bool rtn = SpawnCommonElevator(line, elevtype, speed, height, tag);
     return rtn;
 }
 
-bool SpawnCommonElevator(line_t *line, DElevator::EElevator type, fixed_t speed, fixed_t height, int tag)
+bool SpawnCommonElevator(line_t *line, DElevator::EElevator type, fixed_t speed, fixed_t height, int32_t tag)
 {
-    int        secnum;
+    int32_t        secnum;
     bool       rtn;
     sector_t  *sec;
     DElevator *elevator;
@@ -1825,7 +1825,7 @@ bool SpawnCommonElevator(line_t *line, DElevator::EElevator type, fixed_t speed,
 }
 
 // Almost identical to the above, but height is multiplied by FRACUNIT
-bool EV_DoZDoomElevator(line_t *line, DElevator::EElevator type, fixed_t speed, fixed_t height, int tag)
+bool EV_DoZDoomElevator(line_t *line, DElevator::EElevator type, fixed_t speed, fixed_t height, int32_t tag)
 {
     height *= FRACUNIT;
 
@@ -1845,10 +1845,10 @@ static const fixed_t FloatBobOffsets[64] = {
     -332605, -370728, -405281, -435930, -462381, -484380, -501713, -514215, -521764, -524288, -521764, -514214, -501713,
     -484379, -462381, -435930, -405280, -370728, -332605, -291279, -247148, -200637, -152193, -102284, -51389};
 /*
-bool EV_StartPlaneWaggle(int tag, line_t* line, int height, int speed, int offset,
-                             int timer, bool ceiling)
+bool EV_StartPlaneWaggle(int32_t tag, line_t* line, int32_t height, int32_t speed, int32_t offset,
+                             int32_t timer, bool ceiling)
 {
-    int sectorIndex;
+    int32_t sectorIndex;
     sector_t* sector;
     bool retCode;
 
@@ -1915,7 +1915,7 @@ DWaggle::DWaggle()
 
 }
 
-DWaggle::DWaggle(sector_t* sector, int height, int speed, int offset, int timer,
+DWaggle::DWaggle(sector_t* sector, int32_t height, int32_t speed, int32_t offset, int32_t timer,
                  bool ceiling)
 {
     if (ceiling)

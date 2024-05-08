@@ -101,7 +101,7 @@ typedef struct
 extern am_default_colors_t AutomapDefaultColors;
 extern am_colors_t         AutomapDefaultCurrentColors;
 
-extern int am_cheating;
+extern int32_t am_cheating;
 
 // Called by main loop.
 bool AM_Responder(event_t *ev);

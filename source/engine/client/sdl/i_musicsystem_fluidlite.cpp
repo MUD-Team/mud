@@ -39,7 +39,7 @@ EXTERN_CVAR(snd_soundfont)
 // Partially based on an implementation from prboom-plus by Nicholai Main (Natt).
 // ============================================================================
 
-static void fluidError(int level, char *message, void *data)
+static void fluidError(int32_t level, char *message, void *data)
 {
     (void)level;
     (void)data;
@@ -54,16 +54,16 @@ static void *fluidFileOpen(fluid_fileapi_t *fileapi, const char *filename)
     return fp;
 }
 
-static int fluidFileClose(void *handle)
+static int32_t fluidFileClose(void *handle)
 {
-    int res = PHYSFS_close((PHYSFS_File *)handle);
+    int32_t res = PHYSFS_close((PHYSFS_File *)handle);
     if (res == 0)
         return -1; // FLUID_FAILED
     else
         return 0; // FLUID_OK
 }
 
-static int fluidFileSeek(void* handle, long offset, int origin)
+static int32_t fluidFileSeek(void* handle, long offset, int32_t origin)
 {
     long real_offset = offset;
     if (origin == SEEK_CUR)
@@ -74,7 +74,7 @@ static int fluidFileSeek(void* handle, long offset, int origin)
     {
         real_offset = PHYSFS_fileLength((PHYSFS_File *)handle) - offset;
     }
-    int res = PHYSFS_seek((PHYSFS_File *)handle, real_offset);
+    int32_t res = PHYSFS_seek((PHYSFS_File *)handle, real_offset);
     if (res == 0)
         return -1; // FLUID_FAILED
     else
@@ -90,9 +90,9 @@ static long fluidFileTell(void* handle)
         return res;
 }
 
-static int fluidFileRead(void *buf, int count, void* handle)
+static int32_t fluidFileRead(void *buf, int32_t count, void* handle)
 {
-    int res = PHYSFS_readBytes((PHYSFS_File *)handle, buf, (PHYSFS_uint64)count);
+    int32_t res = PHYSFS_readBytes((PHYSFS_File *)handle, buf, (PHYSFS_uint64)count);
     if (res == count)
         return 0; // FLUID_OK
     else
@@ -136,7 +136,7 @@ static void rtPitchBend(void *userdata, uint8_t channel, uint8_t msb, uint8_t ls
 
 static void rtSysEx(void *userdata, const uint8_t *msg, size_t size)
 {
-    fluid_synth_sysex((fluid_synth_t *)userdata, (const char *)msg, (int)size, nullptr, nullptr, nullptr, 0);
+    fluid_synth_sysex((fluid_synth_t *)userdata, (const char *)msg, (int32_t)size, nullptr, nullptr, nullptr, 0);
 }
 
 static void rtDeviceSwitch(void *userdata, size_t track, const char *data, size_t length)
@@ -156,10 +156,10 @@ static size_t rtCurrentDevice(void *userdata, size_t track)
 
 static void playSynth(void *userdata, uint8_t *stream, size_t length)
 {
-    fluid_synth_write_s16((fluid_synth_t *)userdata, (int)length / 4, stream, 0, 2, stream + 2, 0, 2);
+    fluid_synth_write_s16((fluid_synth_t *)userdata, (int32_t)length / 4, stream, 0, 2, stream + 2, 0, 2);
 }
 
-static void fluidPlaybackHook(void *udata, uint8_t *stream, int len)
+static void fluidPlaybackHook(void *udata, uint8_t *stream, int32_t len)
 {
     FluidLiteMusicSystem *player = (FluidLiteMusicSystem *)udata;
     if (player->isPlaying() && !player->isPaused())
@@ -189,7 +189,7 @@ FluidLiteMusicSystem::FluidLiteMusicSystem()
     m_synthSettings = new_fluid_settings();
     fluid_settings_setstr(m_synthSettings, "synth.reverb.active", "no");
     fluid_settings_setstr(m_synthSettings, "synth.chorus.active", "no");
-    fluid_settings_setnum(m_synthSettings, "synth.sample-rate", (int)snd_samplerate);
+    fluid_settings_setnum(m_synthSettings, "synth.sample-rate", (int32_t)snd_samplerate);
     fluid_settings_setnum(m_synthSettings, "synth.polyphony", 64);
 
     m_synth = new_fluid_synth(m_synthSettings);
@@ -235,7 +235,7 @@ FluidLiteMusicSystem::FluidLiteMusicSystem()
     m_interface->onPcmRender          = playSynth;
     m_interface->onPcmRender_userdata = m_synth;
 
-    m_interface->pcmSampleRate = (int)snd_samplerate;
+    m_interface->pcmSampleRate = (int32_t)snd_samplerate;
     m_interface->pcmFrameSize  = 2 /*channels*/ * 2 /*size of one sample*/;
 
     m_interface->rt_deviceSwitch  = rtDeviceSwitch;

@@ -24,7 +24,7 @@
 #include "odamex.h"
 #include "r_local.h"
 
-bool R_AlignFlat(int linenum, int side, int fc)
+bool R_AlignFlat(int32_t linenum, int32_t side, int32_t fc)
 {
     line_t   *line = lines + linenum;
     sector_t *sec  = side ? line->backsector : line->frontsector;

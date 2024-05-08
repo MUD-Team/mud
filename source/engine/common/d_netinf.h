@@ -97,5 +97,5 @@ void D_UserInfoChanged(cvar_t *info);
 void D_SendServerInfoChange(const cvar_t *cvar, const char *value);
 void D_DoServerInfoChange(uint8_t **stream);
 
-void D_WriteUserInfoStrings(int player, uint8_t **stream, bool compact = false);
-void D_ReadUserInfoStrings(int player, uint8_t **stream, bool update);
+void D_WriteUserInfoStrings(int32_t player, uint8_t **stream, bool compact = false);
+void D_ReadUserInfoStrings(int32_t player, uint8_t **stream, bool update);

@@ -114,7 +114,7 @@ static void CL_ResetSectors()
 
         if (mgr && !mgr->empty())
         {
-            int            mostrecent = mgr->getMostRecentTime();
+            int32_t            mostrecent = mgr->getMostRecentTime();
             SectorSnapshot snap       = mgr->getSnapshot(mostrecent);
 
             bool ceilingdone = P_CeilingSnapshotDone(&snap);
@@ -149,7 +149,7 @@ static void CL_ResetSectors()
 // CL_PredictSectors
 //
 //
-static void CL_PredictSectors(int predtic)
+static void CL_PredictSectors(int32_t predtic)
 {
     std::list<movingsector_t>::iterator itr;
     for (itr = movingsectors.begin(); itr != movingsectors.end(); ++itr)
@@ -208,7 +208,7 @@ static void CL_PredictSpectator()
 // CL_PredictLocalPlayer
 //
 //
-static void CL_PredictLocalPlayer(int predtic)
+static void CL_PredictLocalPlayer(int32_t predtic)
 {
     player_t *player = &consoleplayer();
 
@@ -268,7 +268,7 @@ void CL_PredictWorld(void)
     predicting = true;
 
     // Figure out where to start predicting from
-    int predtic = consoleplayer().tic > 0 ? consoleplayer().tic : 0;
+    int32_t predtic = consoleplayer().tic > 0 ? consoleplayer().tic : 0;
     // Last position update from the server is too old!
     if (predtic < gametic - MAXSAVETICS)
         predtic = gametic - MAXSAVETICS;
@@ -282,7 +282,7 @@ void CL_PredictWorld(void)
         CL_ResetSectors();
 
     // Move the client to the last position received from the sever
-    int            snaptime = p->snapshots.getMostRecentTime();
+    int32_t            snaptime = p->snapshots.getMostRecentTime();
     PlayerSnapshot snap     = p->snapshots.getSnapshot(snaptime);
     snap.toPlayer(p);
 

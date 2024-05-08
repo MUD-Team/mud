@@ -31,7 +31,7 @@
 void OLumpName::MakeDataPresentable()
 {
     // make m_data uppercase
-    for (int i = 0; i < 8; ++i)
+    for (int32_t i = 0; i < 8; ++i)
         m_data[i] = static_cast<char>(toupper(m_data[i]));
 
     // ensure last char is escape character
@@ -179,17 +179,17 @@ const char *OLumpName::data() const
     return m_data;
 }
 
-int OLumpName::compare(const OLumpName &other) const
+int32_t OLumpName::compare(const OLumpName &other) const
 {
     return !stricmp(m_data, other.m_data);
 }
 
-int OLumpName::compare(const char *other) const
+int32_t OLumpName::compare(const char *other) const
 {
     return !stricmp(m_data, other);
 }
 
-int OLumpName::compare(const std::string &other) const
+int32_t OLumpName::compare(const std::string &other) const
 {
     return !stricmp(m_data, other.data());
 }

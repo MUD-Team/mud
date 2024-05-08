@@ -6,9 +6,9 @@
 
 #include "../sdl/i_input.h"
 
-static Rml::Input::KeyIdentifier ConvertKey(int sdlkey);
-static int                       ConvertMouseButton(int button);
-static int                       GetKeyModifierState();
+static Rml::Input::KeyIdentifier ConvertKey(int32_t sdlkey);
+static int32_t                       ConvertMouseButton(int32_t button);
+static int32_t                       GetKeyModifierState();
 
 
 
@@ -111,7 +111,7 @@ void UIInput::processEvents()
     mSDLEvents.clear();
 }
 
-Rml::Input::KeyIdentifier ConvertKey(int sdlkey)
+Rml::Input::KeyIdentifier ConvertKey(int32_t sdlkey)
 {
     // clang-format off
 	switch (sdlkey)
@@ -236,7 +236,7 @@ Rml::Input::KeyIdentifier ConvertKey(int sdlkey)
     return Rml::Input::KI_UNKNOWN;
 }
 
-int ConvertMouseButton(int button)
+int32_t ConvertMouseButton(int32_t button)
 {
     switch (button)
     {
@@ -251,11 +251,11 @@ int ConvertMouseButton(int button)
     }
 }
 
-int GetKeyModifierState()
+int32_t GetKeyModifierState()
 {
     SDL_Keymod sdl_mods = SDL_GetModState();
 
-    int retval = 0;
+    int32_t retval = 0;
 
     if (sdl_mods & KMOD_CTRL)
         retval |= Rml::Input::KM_CTRL;

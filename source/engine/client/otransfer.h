@@ -43,7 +43,7 @@ struct OTransferProgress
 
 struct OTransferInfo
 {
-    int         code;
+    int32_t         code;
     curl_off_t  speed;
     std::string url;
     std::string contentType;
@@ -106,7 +106,7 @@ class OTransfer
     bool               m_shouldCheckAgain;
 
     OTransfer(const OTransfer &);
-    static int curlProgress(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow);
+    static int32_t curlProgress(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow);
     static size_t curlWrite(void *data, size_t size, size_t nmemb, void *userp);
 
   public:
@@ -130,7 +130,7 @@ class OTransfer
     }
 
     void              setURL(const std::string &src);
-    int               setOutputFile(const std::string &dest);
+    int32_t               setOutputFile(const std::string &dest);
     void              setMD5(const OMD5Hash &hash);
     bool              start();
     void              stop();

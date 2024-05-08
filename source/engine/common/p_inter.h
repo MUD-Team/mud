@@ -29,19 +29,19 @@
 
 #define BONUSADD 6
 
-bool         P_GiveFrags(player_t *player, int num);
-bool         P_GiveKills(player_t *player, int num);
-bool         P_GiveDeaths(player_t *player, int num);
-bool         P_GiveMonsterDamage(player_t *player, int num);
-bool         P_GiveTeamPoints(player_t *player, int num);
-bool         P_GiveLives(player_t *player, int num);
-int          P_GetFragCount(const player_t *player);
-int          P_GetPointCount(const player_t *player);
-int          P_GetDeathCount(const player_t *player);
+bool         P_GiveFrags(player_t *player, int32_t num);
+bool         P_GiveKills(player_t *player, int32_t num);
+bool         P_GiveDeaths(player_t *player, int32_t num);
+bool         P_GiveMonsterDamage(player_t *player, int32_t num);
+bool         P_GiveTeamPoints(player_t *player, int32_t num);
+bool         P_GiveLives(player_t *player, int32_t num);
+int32_t          P_GetFragCount(const player_t *player);
+int32_t          P_GetPointCount(const player_t *player);
+int32_t          P_GetDeathCount(const player_t *player);
 ItemEquipVal P_GiveAmmo(player_t *player, ammotype_t ammotype, float num);
 ItemEquipVal P_GiveWeapon(player_t *player, weapontype_t weapon, bool dropped);
-ItemEquipVal P_GiveArmor(player_t *player, int armortype);
+ItemEquipVal P_GiveArmor(player_t *player, int32_t armortype);
 ItemEquipVal P_GiveCard(player_t *player, card_t card);
-ItemEquipVal P_GivePower(player_t *player, int /*powertype_t*/ power);
+ItemEquipVal P_GivePower(player_t *player, int32_t /*powertype_t*/ power);
 void         P_KillMobj(AActor *source, AActor *target, AActor *inflictor, bool joinkill);
-void         P_HealMobj(AActor *mo, int num);
+void         P_HealMobj(AActor *mo, int32_t num);

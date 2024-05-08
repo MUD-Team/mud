@@ -108,7 +108,7 @@ class NetIDHandler
 };
 
 // [XA] Clamped angle->slope, for convenience
-inline static fixed_t AngleToSlope(int a)
+inline static fixed_t AngleToSlope(int32_t a)
 {
     if (a > ANG90)
         return finetangent[0];
@@ -124,7 +124,7 @@ inline static fixed_t DegToSlope(fixed_t a)
     if (a >= 0)
         return AngleToSlope(FixedToAngle(a));
     else
-        return AngleToSlope(-(int)FixedToAngle(-a));
+        return AngleToSlope(-(int32_t)FixedToAngle(-a));
 }
 
 extern NetIDHandler ServerNetID;
@@ -145,7 +145,7 @@ void     PlayerLandedOnThing(AActor *mo, AActor *onmobj); // [CG] Used to be 'st
 void     P_NightmareRespawn(AActor *mo);
 void     P_SpawnPuff(fixed_t x, fixed_t y, fixed_t z);
 void     P_SpawnTracerPuff(fixed_t x, fixed_t y, fixed_t z);
-void     P_SpawnBlood(fixed_t x, fixed_t y, fixed_t z, angle_t dir, int damage);
+void     P_SpawnBlood(fixed_t x, fixed_t y, fixed_t z, angle_t dir, int32_t damage);
 bool     P_CheckMissileSpawn(AActor *th);
 AActor  *P_SpawnMissile(AActor *source, AActor *dest, mobjtype_t type);
 void     P_SpawnPlayerMissile(AActor *source, mobjtype_t type);
@@ -154,8 +154,8 @@ void     P_SetMobjBaseline(AActor &mo);
 uint32_t P_GetMobjBaselineFlags(AActor &mo);
 
 // [ML] From EE
-int  P_ThingInfoHeight(mobjinfo_t *mi);
-bool P_HealCorpse(AActor *actor, int radius, int healstate, int healsound);
+int32_t  P_ThingInfoHeight(mobjinfo_t *mi);
+bool P_HealCorpse(AActor *actor, int32_t radius, int32_t healstate, int32_t healsound);
 
 // From MBF
 bool P_SeekerMissile(AActor *actor, AActor *seekTarget, angle_t thresh, angle_t turnMax, bool seekcenter);

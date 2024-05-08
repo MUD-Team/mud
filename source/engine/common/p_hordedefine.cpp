@@ -79,17 +79,17 @@ void hordeDefine_t::addMonster(const waveMonsterType_e monster, const mobjtype_t
     monsters.push_back(mon);
 }
 
-int hordeDefine_t::minTotalHealth() const
+int32_t hordeDefine_t::minTotalHealth() const
 {
     return static_cast<float>(maxGroupHealth) * ::g_horde_mintotalhp * SkillScaler();
 }
 
-int hordeDefine_t::maxTotalHealth() const
+int32_t hordeDefine_t::maxTotalHealth() const
 {
     return static_cast<float>(maxGroupHealth) * ::g_horde_maxtotalhp * SkillScaler();
 }
 
-int hordeDefine_t::goalHealth() const
+int32_t hordeDefine_t::goalHealth() const
 {
     return static_cast<float>(maxGroupHealth) * ::g_horde_goalhp * SkillScaler();
 }
@@ -171,7 +171,7 @@ StringTokens hordeDefine_t::weaponStrings(player_t *player) const
  * @param total Total waves.
  * @return Define we selected.
  */
-size_t P_HordePickDefine(const int current, const int total)
+size_t P_HordePickDefine(const int32_t current, const int32_t total)
 {
     if (::WAVE_DEFINES.empty())
     {
@@ -242,11 +242,11 @@ bool P_HordeSpawnRecipe(hordeRecipe_t &out, const hordeDefine_t &define, const b
     const bool                        outIsBoss = monster->monster != hordeDefine_t::RM_NORMAL;
     const hordeDefine_t::monConfig_t *config    = &monster->config;
 
-    int       outCount = 0;
-    const int health   = ::mobjinfo[outType].spawnhealth;
+    int32_t       outCount = 0;
+    const int32_t health   = ::mobjinfo[outType].spawnhealth;
 
     // Maximum health.
-    int maxHealth = -1;
+    int32_t maxHealth = -1;
     if (config->maxGroupHealth >= 0)
     {
         maxHealth = config->maxGroupHealth;
@@ -261,7 +261,7 @@ bool P_HordeSpawnRecipe(hordeRecipe_t &out, const hordeDefine_t &define, const b
     }
 
     // Minimum health.
-    int minHealth = -1;
+    int32_t minHealth = -1;
     if (config->minGroupHealth >= 0)
     {
         minHealth = config->minGroupHealth;
@@ -275,8 +275,8 @@ bool P_HordeSpawnRecipe(hordeRecipe_t &out, const hordeDefine_t &define, const b
         minHealth = define.minGroupHealth;
     }
 
-    const int upper = MAX(maxHealth / health, 1);
-    const int lower = MAX(minHealth / health, 1);
+    const int32_t upper = MAX(maxHealth / health, 1);
+    const int32_t lower = MAX(minHealth / health, 1);
 
     if (upper <= lower)
     {
@@ -304,7 +304,7 @@ bool P_HordeSpawnRecipe(hordeRecipe_t &out, const hordeDefine_t &define, const b
  * @param name Partial name to search for.
  * @return True if the define was found, otherwise false.
  */
-bool P_HordeDefineNamed(int &out, const std::string &name)
+bool P_HordeDefineNamed(int32_t &out, const std::string &name)
 {
     for (size_t i = 0; i < ::WAVE_DEFINES.size(); i++)
     {
@@ -348,10 +348,10 @@ BEGIN_COMMAND(hordedefine)
         {
             if (argc >= 3)
             {
-                const int current = atoi(argv[2]);
+                const int32_t current = atoi(argv[2]);
                 if (current && current <= g_horde_waves)
                 {
-                    int total = -1;
+                    int32_t total = -1;
                     if (argc >= 4)
                     {
                         total = atoi(argv[3]);

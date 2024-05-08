@@ -32,7 +32,7 @@
 struct hordeRecipe_t
 {
     mobjtype_t type;
-    int        count;
+    int32_t        count;
     bool       isBoss;
 
     hordeRecipe_t() : type(MT_NULL), count(0), isBoss(false)
@@ -89,8 +89,8 @@ struct hordeDefine_t
 
     struct monConfig_t
     {
-        int   minGroupHealth;
-        int   maxGroupHealth;
+        int32_t   minGroupHealth;
+        int32_t   maxGroupHealth;
         float chance;
         monConfig_t() : minGroupHealth(-1), maxGroupHealth(-1), chance(1.0f)
         {
@@ -115,10 +115,10 @@ struct hordeDefine_t
     ammos_t     ammos;          // Ammos we can replenish this wave.
     monsters_t  monsters;       // Monsters we can spawn this wave.
     powerups_t  powerups;       // Powerups we can spawn this wave.
-    int         minGroupHealth; // Minimum health of a group of monsters to spawn.
-    int         maxGroupHealth; // Maximum health of a group of monsters to spawn.
-    int         minBossHealth;  // Minimum health of a group of bosses to spawn.
-    int         maxBossHealth;  // Maximum health of a group of bosses to spawn.
+    int32_t         minGroupHealth; // Minimum health of a group of monsters to spawn.
+    int32_t         maxGroupHealth; // Maximum health of a group of monsters to spawn.
+    int32_t         minBossHealth;  // Minimum health of a group of bosses to spawn.
+    int32_t         maxBossHealth;  // Maximum health of a group of bosses to spawn.
 
     hordeDefine_t() : legacyID(0), minGroupHealth(-1), maxGroupHealth(-1), minBossHealth(-1), maxBossHealth(-1)
     {
@@ -127,9 +127,9 @@ struct hordeDefine_t
     void             addPowerup(const mobjtype_t mobj, const powConfig_t &config);
     const powerup_t &randomPowerup() const;
     void             addMonster(const waveMonsterType_e monster, const mobjtype_t mobj, const monConfig_t &config);
-    int              minTotalHealth() const;
-    int              maxTotalHealth() const;
-    int              goalHealth() const;
+    int32_t              minTotalHealth() const;
+    int32_t              maxTotalHealth() const;
+    int32_t              goalHealth() const;
     const char      *difficulty(const bool colored) const;
     StringTokens     weaponStrings(player_t *player) const;
 };
@@ -137,6 +137,6 @@ struct hordeDefine_t
 void                 G_ParseHordeDefs();
 const hordeDefine_t &G_HordeDefine(size_t id);
 
-size_t P_HordePickDefine(const int current, const int total);
+size_t P_HordePickDefine(const int32_t current, const int32_t total);
 bool   P_HordeSpawnRecipe(hordeRecipe_t &out, const hordeDefine_t &define, const bool wantBoss);
-bool   P_HordeDefineNamed(int &out, const std::string &name);
+bool   P_HordeDefineNamed(int32_t &out, const std::string &name);

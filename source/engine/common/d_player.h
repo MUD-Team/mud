@@ -92,8 +92,8 @@ typedef enum
 
 #define MAX_PLAYER_SEE_MOBJ 0x7F
 
-static const int ReJoinDelay  = TICRATE * 5;
-static const int SuicideDelay = TICRATE * 10;
+static const int32_t ReJoinDelay  = TICRATE * 5;
+static const int32_t SuicideDelay = TICRATE * 10;
 
 //
 // Extended player object info: player_t
@@ -137,46 +137,46 @@ class player_s
 
     // This is only used between levels,
     // mo->health is used during levels.
-    int health;
-    int armorpoints;
+    int32_t health;
+    int32_t armorpoints;
     // Armor type is 0-2.
-    int armortype;
+    int32_t armortype;
 
     // Power ups. invinc and invis are tic counters.
-    int  powers[NUMPOWERS];
+    int32_t  powers[NUMPOWERS];
     bool cards[NUMCARDS];
     bool backpack;
 
     // [AM] Lives left.
-    int lives;
+    int32_t lives;
     // [AM] Rounds won in round-based games.
-    int roundwins;
+    int32_t roundwins;
     // [Toke - CTF] Points in a special game mode
-    int points;
+    int32_t points;
     // [Toke - CTF - Carry] Remembers the flag when grabbed
     bool flags[NUMTEAMS];
 
     // Frags, deaths, monster kills
-    int fragcount;
-    int deathcount;
-    int monsterdmgcount;
-    int killcount, itemcount, secretcount; // for intermission
+    int32_t fragcount;
+    int32_t deathcount;
+    int32_t monsterdmgcount;
+    int32_t killcount, itemcount, secretcount; // for intermission
 
     // Total points/frags that aren't reset after rounds. Used for LMS/TLMS/LMSCTF.
-    int totalpoints;
+    int32_t totalpoints;
     // Total Deaths that are seen only on Rounds without lives.
-    int totaldeaths;
+    int32_t totaldeaths;
 
     // Is wp_nochange if not changing.
     weapontype_t pendingweapon;
     weapontype_t readyweapon;
 
     bool weaponowned[NUMWEAPONS + 1];
-    int  ammo[NUMAMMO];
-    int  maxammo[NUMAMMO];
+    int32_t  ammo[NUMAMMO];
+    int32_t  maxammo[NUMAMMO];
 
     // True if button down last tic.
-    int attackdown, usedown;
+    int32_t attackdown, usedown;
 
     // Bit flags, for cheats and debug.
     // See cheat_t, above.
@@ -186,49 +186,49 @@ class player_s
     int16_t refire;
 
     // For screen flashing (red or bright).
-    int damagecount, bonuscount;
+    int32_t damagecount, bonuscount;
 
     // Who did damage (NULL for floors/ceilings).
     AActor::AActorPtrCounted attacker;
 
     // So gun flashes light up areas.
-    int extralight;
+    int32_t extralight;
     // Current PLAYPAL, ???
-    int fixedcolormap;               //  can be set to REDCOLORMAP for pain, etc.
+    int32_t fixedcolormap;               //  can be set to REDCOLORMAP for pain, etc.
 
-    int xviewshift;                  // [RH] view shift (for earthquakes)
+    int32_t xviewshift;                  // [RH] view shift (for earthquakes)
 
-    int      psprnum;
+    int32_t      psprnum;
     pspdef_t psprites[NUMPSPRITES];  // Overlay view sprites (gun, etc).
 
-    int jumpTics;                    // delay the next jump for a moment
+    int32_t jumpTics;                    // delay the next jump for a moment
 
-    int     death_time;              // [SL] Record time of death to enforce respawn delay if needed
-    int     suicidedelay;            // Ch0wW - Time between 2 suicides.
+    int32_t     death_time;              // [SL] Record time of death to enforce respawn delay if needed
+    int32_t     suicidedelay;            // Ch0wW - Time between 2 suicides.
     fixed_t oldvelocity[3];          // [RH] Used for falling damage
 
     AActor::AActorPtr camera;        // [RH] Whose eyes this player sees through
 
-    int air_finished;                // [RH] Time when you start drowning
+    int32_t air_finished;                // [RH] Time when you start drowning
 
-    int    GameTime;                 // [Dash|RD] Length of time that this client has been in the game.
+    int32_t    GameTime;                 // [Dash|RD] Length of time that this client has been in the game.
     time_t JoinTime;                 // [Dash|RD] Time this client joined.
-    int    ping;                     // [Fly] guess what :)
-    int    last_received;
+    int32_t    ping;                     // [Fly] guess what :)
+    int32_t    last_received;
 
-    int tic;                         // gametic last update for player was received
+    int32_t tic;                         // gametic last update for player was received
 
     PlayerSnapshotManager snapshots; // Previous player positions
 
     uint8_t spying;                     // [SL] id of player being spynext'd by this player
     bool spectator;                  // [GhostlyDeath] spectating?
                                      //	bool		deadspectator;			// [tm512] spectating as a dead player?
-    int joindelay;                   // Number of tics to delay player from rejoining
-    int timeout_callvote;            // [AM] Tic when a vote last finished.
-    int timeout_vote;                // [AM] Tic when a player last voted.
+    int32_t joindelay;                   // Number of tics to delay player from rejoining
+    int32_t timeout_callvote;            // [AM] Tic when a vote last finished.
+    int32_t timeout_vote;                // [AM] Tic when a player last voted.
 
     bool ready;                      // [AM] Player is ready.
-    int  timeout_ready;              // [AM] Tic when a player last toggled his ready state.
+    int32_t  timeout_ready;              // [AM] Tic when a player last toggled his ready state.
 
     uint8_t prefcolor[4];               // Nes - Preferred color. Server only.
 
@@ -238,7 +238,7 @@ class player_s
     uint8_t QueuePosition;              // Queue position to join game. 0 means not in queue
 
     // zdoom
-    int  hazardcount;
+    int32_t  hazardcount;
     uint8_t hazardinterval;
 
     // For flood protection
@@ -256,7 +256,7 @@ class player_s
     {
         struct oldPacket_t
         {
-            int   sequence;
+            int32_t   sequence;
             buf_t data;
 
             oldPacket_t() : sequence(-1)
@@ -278,22 +278,22 @@ class player_s
 
         // protocol version supported by the client
         int16_t version;
-        int   packedversion;
+        int32_t   packedversion;
 
         // for reliable protocol
         oldPacket_t oldpackets[256];
 
-        int  sequence;
-        int  last_sequence;
+        int32_t  sequence;
+        int32_t  last_sequence;
         uint8_t packetnum;
 
-        int rate;
-        int reliable_bps;  // bytes per second
-        int unreliable_bps;
+        int32_t rate;
+        int32_t reliable_bps;  // bytes per second
+        int32_t unreliable_bps;
 
-        int last_received; // for timeouts
+        int32_t last_received; // for timeouts
 
-        int lastcmdtic, lastclientcmdtic;
+        int32_t lastcmdtic, lastclientcmdtic;
 
         std::string digest;     // randomly generated string that the client must use for any hashes it sends back
         bool        allow_rcon; // allow remote admin
@@ -363,7 +363,7 @@ class player_s
 
     struct ticcmd_t netcmds[BACKUPTICS];
 
-    int GetPlayerNumber() const
+    int32_t GetPlayerNumber() const
     {
         return id - 1;
     }
@@ -402,22 +402,22 @@ struct PlayerResults
     /**
      * @brief Number of results returned.
      */
-    int count;
+    int32_t count;
 
     /**
      * @brief Number of results returned per team.
      */
-    int teamCount[NUMTEAMS];
+    int32_t teamCount[NUMTEAMS];
 
     /**
      * @brief Total number of players scanned.
      */
-    int total;
+    int32_t total;
 
     /**
      * @brief Total number of players per team.
      */
-    int teamTotal[NUMTEAMS];
+    int32_t teamTotal[NUMTEAMS];
 
     /**
      * @brief A view containing player pointers that satisfy the query.
@@ -632,18 +632,18 @@ typedef struct wbplayerstruct_s
     bool in; // whether the player is in game
 
     // Player stats, kills, collected items etc.
-    int skills;
-    int sitems;
-    int ssecret;
-    int stime;
-    int fragcount; // [RH] Cumulative frags for this player
-    int score;     // current score on entry, modified on return
+    int32_t skills;
+    int32_t sitems;
+    int32_t ssecret;
+    int32_t stime;
+    int32_t fragcount; // [RH] Cumulative frags for this player
+    int32_t score;     // current score on entry, modified on return
 
 } wbplayerstruct_t;
 
 typedef struct wbstartstruct_s
 {
-    int epsd;        // episode # (0-2)
+    int32_t epsd;        // episode # (0-2)
 
     char current[9]; // [RH] Name of map just finished
     char next[9];    // next level, [RH] actual map name
@@ -651,13 +651,13 @@ typedef struct wbstartstruct_s
     char lname0[9];
     char lname1[9];
 
-    int maxkills;
-    int maxitems;
-    int maxsecret;
-    int maxfrags;
+    int32_t maxkills;
+    int32_t maxitems;
+    int32_t maxsecret;
+    int32_t maxfrags;
 
     // the par time
-    int partime;
+    int32_t partime;
 
     // index of this player in game
     uint32_t pnum;

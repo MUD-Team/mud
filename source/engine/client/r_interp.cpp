@@ -48,7 +48,7 @@ void R_InterpolationTicker()
 
     if (gamestate == GS_LEVEL)
     {
-        for (int i = 0; i < numsectors; i++)
+        for (int32_t i = 0; i < numsectors; i++)
         {
             if (sectors[i].ceilingdata)
                 prev_ceilingheight.push_back(std::make_pair(P_CeilingHeight(&sectors[i]), i));

@@ -38,7 +38,7 @@
 #define SIL_TOP    2
 #define SIL_BOTH   3
 
-extern int MaxDrawSegs;
+extern int32_t MaxDrawSegs;
 
 // The size of an 8K 4:3 display.
 #define MAXWIDTH  8192
@@ -184,34 +184,34 @@ struct sector_s
     int16_t        lightlevel;
     int16_t        special;
     int16_t        tag;
-    int          nexttag, firsttag; // killough 1/30/98: improves searches for tags.
+    int32_t          nexttag, firsttag; // killough 1/30/98: improves searches for tags.
     bool         secretsector;      // Ch0wW : This is a secret sector !
     uint32_t flags;             // [Blair] Let's use actual sector flags instead of shoehorning them in special
 
                                     // 0 = untraversed, 1,2 = sndlines -1
-    int soundtraversed;
+    int32_t soundtraversed;
 
     // thing that made a sound (or null)
     AActor::AActorPtr soundtarget;
 
     // mapblock bounding box for height changes
-    int blockbox[4];
+    int32_t blockbox[4];
 
     // origin for any sounds played by the sector
     fixed_t soundorg[3];
 
     // if == validcount, already checked
-    int validcount;
+    int32_t validcount;
 
     // list of mobjs in sector
     AActor *thinglist;
-    int     seqType; // this sector's sound sequence
-    int     sky;
+    int32_t     seqType; // this sector's sound sequence
+    int32_t     sky;
 
     // killough 8/28/98: friction is a sector property, not an mobj property.
     // these fields used to be in AActor, but presented performance problems
     // when processed as mobj properties. Fix is to make them sector properties.
-    int friction, movefactor;
+    int32_t friction, movefactor;
 
     // thinker_t for reversable actions
     DSectorEffect *floordata;    // jff 2/22/98 make thinkers on
@@ -223,9 +223,9 @@ struct sector_s
                                  // about this sector when a client connects.
 
     // jff 2/26/98 lockout machinery for stairbuilding
-    int stairlock; // -2 on first locked -1 after thinker done 0 normally
-    int prevsec;   // -1 or number of sector for previous step
-    int nextsec;   // -1 or number of next step sector
+    int32_t stairlock; // -2 on first locked -1 after thinker done 0 normally
+    int32_t prevsec;   // -1 or number of sector for previous step
+    int32_t nextsec;   // -1 or number of next step sector
 
     // killough 3/7/98: floor and ceiling texture offsets
     fixed_t floor_xoffs, floor_yoffs;
@@ -255,13 +255,13 @@ struct sector_s
     // thinglist is a subset of touching_thinglist
     msecnode_s *touching_thinglist; // phares 3/14/98
 
-    int      linecount;
+    int32_t      linecount;
     line_s **lines;                 // [linecount] size
 
     float          gravity;         // [RH] Sector gravity (1.0 is normal)
-    int            damageamount;
-    int            damageinterval;
-    int            leakrate;
+    int32_t            damageamount;
+    int32_t            damageinterval;
+    int32_t            leakrate;
     int16_t          mod;      // [RH] Means-of-death for applied damage
     dyncolormap_s *colormap; // [RH] Per-sector colormap
 
@@ -278,7 +278,7 @@ struct sector_s
 
     // [SL] 2012-01-16 - planes for sloping ceilings/floors
     plane_t floorplane, ceilingplane;
-    int     SectorChanges;
+    int32_t     SectorChanges;
 };
 typedef sector_s sector_t;
 
@@ -306,7 +306,7 @@ struct side_s
     int16_t linenum;
     int16_t special;
     int16_t tag;
-    int   SidedefChanges;
+    int32_t   SidedefChanges;
 };
 typedef side_s side_t;
 
@@ -355,13 +355,13 @@ struct line_s
     sector_t *backsector;
 
     // if == validcount, already checked
-    int validcount;
+    int32_t validcount;
 
     int16_t id;      // <--- same as tag or set with Line_SetIdentification
     int16_t args[5]; // <--- hexen-style arguments
                    //		note that these are shorts in order to support
                    //		the tag parameter from DOOM.
-    int  firstid, nextid;
+    int32_t  firstid, nextid;
     bool wastoggled;
     bool switchactive;
     bool PropertiesChanged;
@@ -423,17 +423,17 @@ typedef seg_s seg_t;
 // ===== Polyobj data =====
 typedef struct FPolyObj
 {
-    int       numsegs;
+    int32_t       numsegs;
     seg_t   **segs;
     fixed_t   startSpot[3];
     vertex_t *originalPts; // used as the base for the rotations
     vertex_t *prevPts;     // use to restore the old point values
     angle_t   angle;
-    int       tag;         // reference tag assigned in HereticEd
-    int       bbox[4];
-    int       validcount;
+    int32_t       tag;         // reference tag assigned in HereticEd
+    int32_t       bbox[4];
+    int32_t       validcount;
     bool      crush;       // should the polyobj attempt to crush mobjs?
-    int       seqType;
+    int32_t       seqType;
     fixed_t   size;        // polyobj size (area of POLY_AREAUNIT == size of FRACUNIT)
     DThinker *specialdata; // pointer to a thinker, if the poly is moving
 } polyobj_t;
@@ -491,7 +491,7 @@ struct post_t
      *
      * @param lastAbs Last absolute topdelta.
      */
-    int abs(const int lastAbs) const
+    int32_t abs(const int32_t lastAbs) const
     {
         if (topdelta <= lastAbs)
             return lastAbs + topdelta;
@@ -570,8 +570,8 @@ struct drawseg_s
 {
     seg_t *curline;
 
-    int x1;
-    int x2;
+    int32_t x1;
+    int32_t x2;
 
     fixed_t scale1;
     fixed_t scale2;
@@ -580,12 +580,12 @@ struct drawseg_s
     fixed_t light, lightstep;
 
     // 0=none, 1=bottom, 2=top, 3=both
-    int silhouette;
+    int32_t silhouette;
 
     // Pointers to lists for sprite clipping,
     //  all three adjusted so [x1] is first value.
-    int         *sprtopclip;
-    int         *sprbottomclip;
+    int32_t         *sprtopclip;
+    int32_t         *sprbottomclip;
     tallpost_t **midposts;
 };
 typedef drawseg_s drawseg_t;
@@ -605,7 +605,7 @@ struct patch_s
     int16_t _topoffset;  // pixels below the origin
 
   public:
-    int columnofs[8];  // only [width] used
+    int32_t columnofs[8];  // only [width] used
     // the [0] is &columnofs[width]
 
     int16_t width() const
@@ -648,10 +648,10 @@ typedef patch_s patch_t;
 // I.e. a sprite object that is partly visible.
 struct vissprite_s
 {
-    int x1;
-    int x2;
-    int y1;
-    int y2;
+    int32_t x1;
+    int32_t x2;
+    int32_t y1;
+    int32_t y2;
 
     // for line side calculation
     fixed_t gx;
@@ -678,7 +678,7 @@ struct vissprite_s
     //  maxbright frames as well
     shaderef_t colormap;
 
-    int  mobjflags;
+    int32_t  mobjflags;
     bool spectator;               // [Blair] Mark if this visprite belongs to a spectator.
 
     translationref_t translation; // [RH] for translation;
@@ -732,7 +732,7 @@ typedef spriteframe_s spriteframe_t;
 //
 struct spritedef_s
 {
-    int            numframes;
+    int32_t            numframes;
     spriteframe_t *spriteframes;
 };
 typedef spritedef_s spritedef_t;
@@ -747,10 +747,10 @@ struct visplane_s
     plane_t secplane;
 
     texhandle_t     picnum;
-    int     lightlevel;
+    int32_t     lightlevel;
     fixed_t xoffs, yoffs; // killough 2/28/98: Support scrolling flats
-    int     minx;
-    int     maxx;
+    int32_t     minx;
+    int32_t     maxx;
 
     shaderef_t colormap;       // [RH] Support multiple colormaps
     fixed_t    xscale, yscale; // [RH] Support flat scaling

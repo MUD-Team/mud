@@ -45,12 +45,12 @@ void R_InterpolateCamera(fixed_t amount);
 
 #define DISTMAP 2
 
-int negonearray[MAXWIDTH];
-int viewheightarray[MAXWIDTH];
+int32_t negonearray[MAXWIDTH];
+int32_t viewheightarray[MAXWIDTH];
 
 void R_SpanInitData();
 
-extern int *walllights;
+extern int32_t *walllights;
 
 // [RH] Defined in d_main.cpp
 extern dyncolormap_t NormalLight;
@@ -71,24 +71,24 @@ float   focratio;
 float   ifocratio;
 
 // increment every time a check is made
-int validcount = 1;
+int32_t validcount = 1;
 
 // [RH] colormap currently drawing with
 shaderef_t basecolormap;
-int        fixedlightlev;
+int32_t        fixedlightlev;
 shaderef_t fixedcolormap;
 
-int centerx;
-int centery;
+int32_t centerx;
+int32_t centery;
 
 fixed_t centerxfrac;
 fixed_t centeryfrac;
 fixed_t yaspectmul;
 
 // just for profiling purposes
-int framecount;
-int linecount;
-int loopcount;
+int32_t framecount;
+int32_t linecount;
+int32_t loopcount;
 
 fixed_t viewx;
 fixed_t viewy;
@@ -108,22 +108,22 @@ AActor *camera; // [RH] camera to draw from. doesn't have to be a player
 
 const fixed_t *finecosine = &finesine[FINEANGLES / 4];
 
-int scalelight[LIGHTLEVELS][MAXLIGHTSCALE];
-int scalelightfixed[MAXLIGHTSCALE];
-int zlight[LIGHTLEVELS][MAXLIGHTZ];
+int32_t scalelight[LIGHTLEVELS][MAXLIGHTSCALE];
+int32_t scalelightfixed[MAXLIGHTSCALE];
+int32_t zlight[LIGHTLEVELS][MAXLIGHTZ];
 
 // [RH] used to keep hires modes dark enough
-int lightscalexmul;
-int lightscaleymul;
+int32_t lightscalexmul;
+int32_t lightscaleymul;
 
 // bumped light from gun blasts
-int extralight;
+int32_t extralight;
 
 // [RH] ignore extralight and fullbright
 bool foggy;
 
 static bool setsizeneeded = true;
-int         setblocks;
+int32_t         setblocks;
 
 fixed_t freelookviewheight;
 
@@ -138,8 +138,8 @@ void (*spanfunc)(void);
 void (*spanslopefunc)(void);
 
 // [AM] Number of fineangles in a default 90 degree FOV at a 4:3 resolution.
-int FieldOfView        = 2048;
-int CorrectFieldOfView = 2048;
+int32_t FieldOfView        = 2048;
+int32_t CorrectFieldOfView = 2048;
 
 fixed_t render_lerp_amount;
 
@@ -174,7 +174,7 @@ IRenderSurface *R_GetRenderingSurface()
 // Determines which side of a line the point (x, y) is on.
 // Returns side 0 (front) or 1 (back)
 //
-int R_PointOnSide(fixed_t x, fixed_t y, fixed_t xl, fixed_t yl, fixed_t xh, fixed_t yh)
+int32_t R_PointOnSide(fixed_t x, fixed_t y, fixed_t xl, fixed_t yl, fixed_t xh, fixed_t yh)
 {
     return int64_t(xh - xl) * (y - yl) - int64_t(yh - yl) * (x - xl) >= 0;
 }
@@ -189,7 +189,7 @@ int R_PointOnSide(fixed_t x, fixed_t y, fixed_t xl, fixed_t yl, fixed_t xh, fixe
 // killough 5/2/98: reformatted
 // [SL] 2013-02-06 - Changed to use cross product a la ZDoom
 //
-int R_PointOnSide(fixed_t x, fixed_t y, const node_t *node)
+int32_t R_PointOnSide(fixed_t x, fixed_t y, const node_t *node)
 {
     return R_PointOnSide(x, y, node->x, node->y, node->x + node->dx, node->y + node->dy);
 }
@@ -203,7 +203,7 @@ int R_PointOnSide(fixed_t x, fixed_t y, const node_t *node)
 // killough 5/2/98: reformatted
 // [SL] 2013-02-06 - Changed to use cross product a la ZDoom
 //
-int R_PointOnSegSide(fixed_t x, fixed_t y, const seg_t *line)
+int32_t R_PointOnSegSide(fixed_t x, fixed_t y, const seg_t *line)
 {
     return R_PointOnSide(x, y, line->v1->x, line->v1->y, line->v2->x, line->v2->y);
 }
@@ -303,7 +303,7 @@ fixed_t R_PointToDist2(fixed_t dx, fixed_t dy)
 
 void R_RotatePoint(fixed_t x, fixed_t y, angle_t ang, fixed_t &tx, fixed_t &ty)
 {
-    int index = ang >> ANGLETOFINESHIFT;
+    int32_t index = ang >> ANGLETOFINESHIFT;
 
     tx = FixedMul(x, finecosine[index]) - FixedMul(y, finesine[index]);
     ty = FixedMul(x, finesine[index]) + FixedMul(y, finecosine[index]);
@@ -428,7 +428,7 @@ bool R_ClipLineToFrustum(const v2fixed_t *v1, const v2fixed_t *v2, fixed_t clipd
 //
 // Returns the screen column that a point in camera-space projects to.
 //
-int R_ProjectPointX(fixed_t x, fixed_t y)
+int32_t R_ProjectPointX(fixed_t x, fixed_t y)
 {
     if (y > 0)
         return FIXED2INT(centerxfrac + int64_t(FocalLengthX) * int64_t(x) / int64_t(y));
@@ -441,7 +441,7 @@ int R_ProjectPointX(fixed_t x, fixed_t y)
 //
 // Returns the screen row that a point in camera-space projects to.
 //
-int R_ProjectPointY(fixed_t z, fixed_t y)
+int32_t R_ProjectPointY(fixed_t z, fixed_t y)
 {
     if (y > 0)
         return FIXED2INT(centeryfrac - int64_t(FocalLengthY) * int64_t(z) / int64_t(y));
@@ -455,7 +455,7 @@ int R_ProjectPointY(fixed_t z, fixed_t y)
 // Clamps the columns x1 and x2 to the viewing screen and returns false if
 // the entire projection is off the screen.
 //
-bool R_CheckProjectionX(int &x1, int &x2)
+bool R_CheckProjectionX(int32_t &x1, int32_t &x2)
 {
     x1 = MAX(x1, 0);
     x2 = MIN(x2, viewwidth - 1);
@@ -468,7 +468,7 @@ bool R_CheckProjectionX(int &x1, int &x2)
 // Clamps the rows y1 and y2 to the viewing screen and returns false if
 // the entire projection is off the screen.
 //
-bool R_CheckProjectionY(int &y1, int &y2)
+bool R_CheckProjectionY(int32_t &y1, int32_t &y2)
 {
     y1 = MAX(y1, 0);
     y2 = MIN(y2, viewheight - 1);
@@ -478,7 +478,7 @@ bool R_CheckProjectionY(int &y1, int &y2)
 //
 // R_DrawPixel
 //
-static inline void R_DrawPixel(int x, int y, uint8_t color)
+static inline void R_DrawPixel(int32_t x, int32_t y, uint8_t color)
 {
     uint8_t *dest = dcol.destination + y * dcol.pitch_in_pixels + x;
     *dest      = color;
@@ -506,31 +506,31 @@ void R_DrawLine(const v3fixed_t *inpt1, const v3fixed_t *inpt2, uint8_t color)
     }
 
     // convert from camera-space to screen-space
-    int lclip, rclip;
+    int32_t lclip, rclip;
 
     if (!R_ClipLineToFrustum((v2fixed_t *)&pt1, (v2fixed_t *)&pt2, NEARCLIP, lclip, rclip))
         return;
 
     R_ClipLine((v2fixed_t *)&pt1, (v2fixed_t *)&pt2, lclip, rclip, (v2fixed_t *)&pt1, (v2fixed_t *)&pt2);
 
-    int x1 = clamp(R_ProjectPointX(pt1.x, pt1.y), 0, viewwidth - 1);
-    int x2 = clamp(R_ProjectPointX(pt2.x, pt2.y), 0, viewwidth - 1);
-    int y1 = clamp(R_ProjectPointY(pt1.z, pt1.y), 0, viewheight - 1);
-    int y2 = clamp(R_ProjectPointY(pt2.z, pt2.y), 0, viewheight - 1);
+    int32_t x1 = clamp(R_ProjectPointX(pt1.x, pt1.y), 0, viewwidth - 1);
+    int32_t x2 = clamp(R_ProjectPointX(pt2.x, pt2.y), 0, viewwidth - 1);
+    int32_t y1 = clamp(R_ProjectPointY(pt1.z, pt1.y), 0, viewheight - 1);
+    int32_t y2 = clamp(R_ProjectPointY(pt2.z, pt2.y), 0, viewheight - 1);
 
     // draw the line to the framebuffer
-    int dx = x2 - x1;
-    int dy = y2 - y1;
+    int32_t dx = x2 - x1;
+    int32_t dy = y2 - y1;
 
-    int ax = 2 * (dx < 0 ? -dx : dx);
-    int sx = dx < 0 ? -1 : 1;
+    int32_t ax = 2 * (dx < 0 ? -dx : dx);
+    int32_t sx = dx < 0 ? -1 : 1;
 
-    int ay = 2 * (dy < 0 ? -dy : dy);
-    int sy = dy < 0 ? -1 : 1;
+    int32_t ay = 2 * (dy < 0 ? -dy : dy);
+    int32_t sy = dy < 0 ? -1 : 1;
 
-    int x = x1;
-    int y = y1;
-    int d;
+    int32_t x = x1;
+    int32_t y = y1;
+    int32_t d;
 
     if (ax > ay)
     {
@@ -579,7 +579,7 @@ void R_DrawLine(const v3fixed_t *inpt1, const v3fixed_t *inpt2, uint8_t color)
 // of a refresh. The change will take effect next refresh.
 //
 //
-void R_SetViewSize(int blocks)
+void R_SetViewSize(int32_t blocks)
 {
     R_ForceViewWindowResize();
     setblocks = blocks;
@@ -595,7 +595,7 @@ void R_SetViewSize(int blocks)
 
 CVAR_FUNC_IMPL(screenblocks)
 {
-    R_SetViewSize((int)var);
+    R_SetViewSize((int32_t)var);
 }
 
 //
@@ -605,7 +605,7 @@ CVAR_FUNC_IMPL(screenblocks)
 void R_Init()
 {
     R_InitData();
-    R_SetViewSize((int)screenblocks);
+    R_SetViewSize((int32_t)screenblocks);
     R_InitPlanes();
     R_InitTranslationTables();
 
@@ -631,8 +631,8 @@ void STACK_ARGS R_Shutdown()
 subsector_t *R_PointInSubsector(fixed_t x, fixed_t y)
 {
     node_t *node;
-    int     side;
-    int     nodenum;
+    int32_t     side;
+    int32_t     nodenum;
 
     // single subsector is a special case
     if (!numnodes)
@@ -663,7 +663,7 @@ static void R_ViewShear(angle_t pitch)
     centeryfrac = (viewheight << (FRACBITS - 1)) + dy;
     centery     = centeryfrac >> FRACBITS;
 
-    int     e = viewheight, i = 0;
+    int32_t     e = viewheight, i = 0;
     fixed_t focus = FocalLengthY;
     fixed_t den;
 
@@ -781,7 +781,7 @@ void R_SetupFrame(player_t *player)
 
     if (camera->player && camera->player->xviewshift && !paused)
     {
-        int intensity = camera->player->xviewshift;
+        int32_t intensity = camera->player->xviewshift;
         viewx += ((M_Random() % (intensity << 2)) - (intensity << 1)) << FRACBITS;
         viewy += ((M_Random() % (intensity << 2)) - (intensity << 1)) << FRACBITS;
     }
@@ -814,7 +814,7 @@ void R_SetupFrame(player_t *player)
             R_SetSectorBlend(new_sector_blend_color);
 
             // use colormap lumps in 8bpp mode instead of blends
-            int colormap_num = 0;
+            int32_t colormap_num = 0;
             // if (IRenderSurface::getCurrentRenderSurface()->getBitsPerPixel() == 8)
             //     colormap_num = R_ColormapForBlend(new_sector_blend_color);
 
@@ -1015,8 +1015,8 @@ void R_RenderPlayerView(player_t *player)
     if (r_flashhom)
     {
         argb_t color = gametic & 8 ? argb_t(0, 0, 0) : argb_t(0, 0, 255);
-        int    x1 = viewwindowx, y1 = viewwindowy;
-        int    x2 = viewwindowx + viewwidth - 1, y2 = viewwindowy + viewheight - 1;
+        int32_t    x1 = viewwindowx, y1 = viewwindowy;
+        int32_t    x2 = viewwindowx + viewwidth - 1, y2 = viewwindowy + viewheight - 1;
 
         //surface->getDefaultCanvas()->Clear(x1, y1, x2, y2, color);
     }
@@ -1030,7 +1030,7 @@ void R_RenderPlayerView(player_t *player)
     // Never draw the player unless in chasecam mode
     if (camera && camera->player && !(player->cheats & CF_CHASECAM))
     {
-        int flags2_backup = camera->flags2;
+        int32_t flags2_backup = camera->flags2;
         camera->flags2 |= MF2_DONTDRAW;
         R_RenderBSPNode(numnodes - 1);
         camera->flags2 = flags2_backup;
@@ -1043,7 +1043,7 @@ void R_RenderPlayerView(player_t *player)
     R_DrawMasked();
 
     // NOTE(jsd): Full-screen status color blending:
-    int blend_alpha = int(blend_color.geta() * 255.0f);
+    int32_t blend_alpha = int32_t(blend_color.geta() * 255.0f);
     if (blend_alpha > 0)
     {
         r_dimpatchD(surface, V_GammaCorrect(blend_color), blend_alpha, viewwindowx, viewwindowy, viewwidth, viewheight);
@@ -1058,27 +1058,27 @@ void R_RenderPlayerView(player_t *player)
 // Calculates the values for the scalelight and the zlight tables for seg
 // and plane lighting.
 //
-static void R_InitLightTables(int surface_width, int surface_height)
+static void R_InitLightTables(int32_t surface_width, int32_t surface_height)
 {
     // Calculate the light levels to use for each level / scale combination.
     // [RH] This just stores indices into the colormap rather than pointers to a specific one.
-    for (int i = 0; i < LIGHTLEVELS; i++)
+    for (int32_t i = 0; i < LIGHTLEVELS; i++)
     {
-        int startmap = ((LIGHTLEVELS - 1 - i) * 2) * NUMCOLORMAPS / LIGHTLEVELS;
-        for (int j = 0; j < MAXLIGHTSCALE; j++)
+        int32_t startmap = ((LIGHTLEVELS - 1 - i) * 2) * NUMCOLORMAPS / LIGHTLEVELS;
+        for (int32_t j = 0; j < MAXLIGHTSCALE; j++)
         {
-            int level        = startmap - (j * surface_width) / ((viewwidth * DISTMAP));
+            int32_t level        = startmap - (j * surface_width) / ((viewwidth * DISTMAP));
             scalelight[i][j] = clamp(level, 0, NUMCOLORMAPS - 1);
         }
     }
 
     // Calculate the light levels to use for each level / distance combination.
-    for (int i = 0; i < LIGHTLEVELS; i++)
+    for (int32_t i = 0; i < LIGHTLEVELS; i++)
     {
-        int startmap = ((LIGHTLEVELS - 1 - i) * 2) * NUMCOLORMAPS / LIGHTLEVELS;
-        for (int j = 0; j < MAXLIGHTZ; j++)
+        int32_t startmap = ((LIGHTLEVELS - 1 - i) * 2) * NUMCOLORMAPS / LIGHTLEVELS;
+        for (int32_t j = 0; j < MAXLIGHTZ; j++)
         {
-            int scale = FixedDiv(160 * FRACUNIT, (j + 1) << LIGHTZSHIFT);
+            int32_t scale = FixedDiv(160 * FRACUNIT, (j + 1) << LIGHTZSHIFT);
             scale >>= LIGHTSCALESHIFT - LIGHTSCALEMULBITS;
             zlight[i][j] = clamp(startmap - scale / DISTMAP, 0, NUMCOLORMAPS - 1);
         }
@@ -1090,7 +1090,7 @@ static void R_InitLightTables(int surface_width, int surface_height)
 //
 // R_ViewWidth
 //
-int R_ViewWidth(int width, int height)
+int32_t R_ViewWidth(int32_t width, int32_t height)
 {
     if (setblocks == 10 || setblocks == 11 || setblocks == 12)
         return width;
@@ -1101,7 +1101,7 @@ int R_ViewWidth(int width, int height)
 //
 // R_ViewHeight
 //
-int R_ViewHeight(int width, int height)
+int32_t R_ViewHeight(int32_t width, int32_t height)
 {
     // if (setblocks == 11 || setblocks == 12)
     return height;
@@ -1114,7 +1114,7 @@ int R_ViewHeight(int width, int height)
 //
 // R_ViewWindowX
 //
-int R_ViewWindowX(int width, int height)
+int32_t R_ViewWindowX(int32_t width, int32_t height)
 {
     return (width - R_ViewWidth(width, height)) / 2;
 }
@@ -1122,7 +1122,7 @@ int R_ViewWindowX(int width, int height)
 //
 // R_ViewWindowY
 //
-int R_ViewWindowY(int width, int height)
+int32_t R_ViewWindowY(int32_t width, int32_t height)
 {
     return 0;
 }
@@ -1138,7 +1138,7 @@ int R_ViewWindowY(int width, int height)
 static void R_InitViewWindow()
 {
     IRenderSurface *surface       = R_GetRenderingSurface();
-    int             surface_width = surface->getWidth(), surface_height = surface->getHeight();
+    int32_t             surface_width = surface->getWidth(), surface_height = surface->getHeight();
 
     surface->lock();
 
@@ -1167,14 +1167,14 @@ static void R_InitViewWindow()
     if (consoleplayer().camera && consoleplayer().camera->player)
         desired_fov = clamp(consoleplayer().camera->player->fov, 45.0f, 135.0f);
 
-    FieldOfView = int(desired_fov * FINEANGLES / 360.0f);
+    FieldOfView = int32_t(desired_fov * FINEANGLES / 360.0f);
 
     if (V_UseWidescreen())
     {
         float am           = (3.0f * I_GetSurfaceWidth()) / (4.0f * I_GetSurfaceHeight());
         float radfov       = desired_fov * PI / 180.0f;
         float widefov      = (2 * atan(am * tan(radfov / 2))) * 180.0f / PI;
-        CorrectFieldOfView = int(widefov * FINEANGLES / 360.0f);
+        CorrectFieldOfView = int32_t(widefov * FINEANGLES / 360.0f);
     }
     else
     {
@@ -1195,7 +1195,7 @@ static void R_InitViewWindow()
     // [AM] Using centerxfrac will make our sprite too fat, so we
     //      generate a corrected 4:3 screen width based on our
     //      height, then generate the x-scale based on that.
-    int cswidth, crvwidth;
+    int32_t cswidth, crvwidth;
     cswidth = 4 * surface_height / 3;
 
     if (setblocks < 10)
@@ -1208,10 +1208,10 @@ static void R_InitViewWindow()
     pspritexiscale = FixedDiv(FRACUNIT, pspritexscale);
 
     // Precalculate all row offsets.
-    for (int i = 0; i < surface_width; i++)
+    for (int32_t i = 0; i < surface_width; i++)
     {
         negonearray[i]     = -1;
-        viewheightarray[i] = (int)viewheight;
+        viewheightarray[i] = (int32_t)viewheight;
     }
 
     R_InitLightTables(surface_width, surface_height);

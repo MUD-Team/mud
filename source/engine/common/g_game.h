@@ -39,8 +39,8 @@ void G_LoadGame(char *name);
 void G_DoLoadGame(void);
 
 // Called by M_Responder.
-void G_BuildSaveName(std::string &name, int slot);
-void G_SaveGame(int slot, char *description);
+void G_BuildSaveName(std::string &name, int32_t slot);
+void G_SaveGame(int32_t slot, char *description);
 
 void G_WorldDone(void);
 
@@ -51,8 +51,8 @@ void G_ScreenShot(const char *filename);
 
 void G_PlayerFinishLevel(player_t &player);
 
-void G_AddViewAngle(int yaw);
-void G_AddViewPitch(int pitch);
+void G_AddViewAngle(int32_t yaw);
+void G_AddViewPitch(int32_t pitch);
 bool G_ShouldIgnoreMouseInput();
 
-extern int mapchange;
+extern int32_t mapchange;

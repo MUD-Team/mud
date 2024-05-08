@@ -103,12 +103,12 @@ struct KeyState
     {
     }
 
-    int  double_click_time;
+    int32_t  double_click_time;
     bool double_clicked;
     bool key_down;
 };
 
-typedef OHashTable<int, KeyState> KeyStateTable;
+typedef OHashTable<int32_t, KeyState> KeyStateTable;
 static KeyStateTable              KeyStates;
 
 void OKeyBindings::SetBindingType(std::string cmd)
@@ -119,7 +119,7 @@ void OKeyBindings::SetBindingType(std::string cmd)
 void OKeyBindings::UnbindKey(const char *key)
 {
     std::string keyname = StdStringToLower(key);
-    int         keycode = I_GetKeyFromName(keyname);
+    int32_t         keycode = I_GetKeyFromName(keyname);
 
     if (keycode)
         Binds.erase(keycode);
@@ -137,7 +137,7 @@ void OKeyBindings::BindAKey(size_t argc, char **argv, const char *msg)
     if (argc > 1)
     {
         std::string key_name = StdStringToLower(argv[1]);
-        int         key      = I_GetKeyFromName(key_name);
+        int32_t         key      = I_GetKeyFromName(key_name);
         if (!key)
         {
             Printf(PRINT_HIGH, "Unknown key %s\n", C_QuoteString(argv[1]).c_str());
@@ -155,7 +155,7 @@ void OKeyBindings::BindAKey(size_t argc, char **argv, const char *msg)
         Printf(PRINT_HIGH, "%s\n", msg);
         for (BindingTable::const_iterator it = Binds.begin(); it != Binds.end(); ++it)
         {
-            int                key     = it->first;
+            int32_t                key     = it->first;
             const std::string &binding = it->second;
             if (!binding.empty())
                 Printf(PRINT_HIGH, "%s = %s\n", I_GetKeyName(key).c_str(), C_QuoteString(binding).c_str());
@@ -165,7 +165,7 @@ void OKeyBindings::BindAKey(size_t argc, char **argv, const char *msg)
 
 void OKeyBindings::DoBind(const char *key, const char *bind)
 {
-    int keynum = I_GetKeyFromName(StdStringToLower(key));
+    int32_t keynum = I_GetKeyFromName(StdStringToLower(key));
     if (keynum != 0)
     {
         this->Binds[keynum] = bind;
@@ -221,7 +221,7 @@ bool C_DoKey(event_t *ev, OKeyBindings *binds, OKeyBindings *doublebinds)
         return false;
 
     const std::string *binding = NULL;
-    int                key     = ev->data1;
+    int32_t                key     = ev->data1;
 
     KeyState &key_state = KeyStates[key];
     if (doublebinds != NULL && ev->type == ev_keydown && key_state.double_click_time > level.time)
@@ -294,7 +294,7 @@ void C_ReleaseKeys()
 {
     for (KeyStateTable::iterator it = KeyStates.begin(); it != KeyStates.end(); ++it)
     {
-        int       key       = it->first;
+        int32_t       key       = it->first;
         KeyState &key_state = it->second;
         if (key_state.key_down)
         {
@@ -319,7 +319,7 @@ void OKeyBindings::ArchiveBindings(PHYSFS_File *f)
     std::string str;
     for (BindingTable::const_iterator it = Binds.begin(); it != Binds.end(); ++it)
     {
-        const int          key     = it->first;
+        const int32_t          key     = it->first;
         const std::string &binding = it->second;
         if (!binding.empty())
         {
@@ -331,14 +331,14 @@ void OKeyBindings::ArchiveBindings(PHYSFS_File *f)
         PHYSFS_writeBytes(f, str.data(), str.size());
 }
 
-int OKeyBindings::GetKeysForCommand(const char *cmd, int *first, int *second)
+int32_t OKeyBindings::GetKeysForCommand(const char *cmd, int32_t *first, int32_t *second)
 {
-    int c  = 0;
+    int32_t c  = 0;
     *first = *second = 0;
 
     for (BindingTable::const_iterator it = Binds.begin(); it != Binds.end(); ++it)
     {
-        int                key     = it->first;
+        int32_t                key     = it->first;
         const std::string &binding = it->second;
         if (!binding.empty() && stricmp(cmd, binding.c_str()) == 0)
         {
@@ -357,7 +357,7 @@ int OKeyBindings::GetKeysForCommand(const char *cmd, int *first, int *second)
     return c;
 }
 
-std::string OKeyBindings::GetNameKeys(int first, int second)
+std::string OKeyBindings::GetNameKeys(int32_t first, int32_t second)
 {
     if (!first && !second)
         return "???";
@@ -392,12 +392,12 @@ void OKeyBindings::UnbindACommand(const char *str)
     }
 }
 
-void OKeyBindings::ChangeBinding(const char *str, int newone)
+void OKeyBindings::ChangeBinding(const char *str, int32_t newone)
 {
     // Check which bindings that are already set. If both binding slots are taken,
     // erase all bindings and reassign the new one and the secondary binding to the key instead.
-    int first  = 0;
-    int second = 0;
+    int32_t first  = 0;
+    int32_t second = 0;
 
     GetKeysForCommand(str, &first, &second);
 
@@ -417,7 +417,7 @@ void OKeyBindings::ChangeBinding(const char *str, int newone)
     }
 }
 
-const std::string &OKeyBindings::GetBind(int key)
+const std::string &OKeyBindings::GetBind(int32_t key)
 {
     return Binds[key];
 }
@@ -429,8 +429,8 @@ Finds binds from a command and returns it into a std::string .
 */
 std::string OKeyBindings::GetKeynameFromCommand(const char *cmd, bool bTwoEntries)
 {
-    int first  = -1;
-    int second = -1;
+    int32_t first  = -1;
+    int32_t second = -1;
 
     GetKeysForCommand(cmd, &first, &second);
 

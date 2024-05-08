@@ -49,7 +49,7 @@
 #include "svc_map.h"
 
 #ifndef _WIN32
-typedef int SOCKET;
+typedef int32_t SOCKET;
 #define SOCKET_ERROR   -1
 #define INVALID_SOCKET -1
 #define closesocket    close
@@ -64,7 +64,7 @@ typedef int SOCKET;
 #endif
 
 uint32_t inet_socket;
-int          localport;
+int32_t          localport;
 netadr_t     net_from; // address of who sent the packet
 
 buf_t       net_message(MAX_UDP_PACKET);
@@ -101,7 +101,7 @@ SOCKET UDPsocket(void)
 //
 void BindToLocalPort(SOCKET s, u_short wanted)
 {
-    int                v;
+    int32_t                v;
     struct sockaddr_in address;
 
     memset(&address, 0, sizeof(address));
@@ -190,7 +190,7 @@ bool NET_StringToAdr(const char *s, netadr_t *a)
     if (!(h = gethostbyname(copy)))
         return 0;
 
-    *(int *)&sadr.sin_addr = *(int *)h->h_addr_list[0];
+    *(int32_t *)&sadr.sin_addr = *(int32_t *)h->h_addr_list[0];
 
     SockadrToNetadr(&sadr, a);
 
@@ -206,12 +206,12 @@ bool NET_CompareAdr(netadr_t a, netadr_t b)
 }
 
 #ifdef _WIN32
-typedef int socklen_t;
+typedef int32_t socklen_t;
 #endif
 
-int NET_GetPacket(void)
+int32_t NET_GetPacket(void)
 {
-    int                ret;
+    int32_t                ret;
     struct sockaddr_in from;
     socklen_t          fromlen;
 
@@ -255,9 +255,9 @@ int NET_GetPacket(void)
     return ret;
 }
 
-int NET_SendPacket(buf_t &buf, netadr_t &to)
+int32_t NET_SendPacket(buf_t &buf, netadr_t &to)
 {
-    int                ret;
+    int32_t                ret;
     struct sockaddr_in addr;
 
     // [SL] 2011-07-06 - Don't try to send a packet if we're not really connected
@@ -277,7 +277,7 @@ int NET_SendPacket(buf_t &buf, netadr_t &to)
     if (ret == -1)
     {
 #ifdef _WIN32
-        int err = WSAGetLastError();
+        int32_t err = WSAGetLastError();
 
         // wouldblock is silent
         if (err == WSAEWOULDBLOCK)
@@ -330,12 +330,12 @@ void SZ_Clear(buf_t *buf)
     buf->clear();
 }
 
-void SZ_Write(buf_t *b, const void *data, int length)
+void SZ_Write(buf_t *b, const void *data, int32_t length)
 {
     b->WriteChunk((const char *)data, length);
 }
 
-void SZ_Write(buf_t *b, const uint8_t *data, int startpos, int length)
+void SZ_Write(buf_t *b, const uint8_t *data, int32_t startpos, int32_t length)
 {
     b->WriteChunk((const char *)data, length, startpos);
 }
@@ -428,7 +428,7 @@ void MSG_WriteSVC(buf_t *b, const google::protobuf::Message &msg)
  * @param msg Message to broadcast to all players.
  * @param skip If passed, skip this player id.
  */
-void MSG_BroadcastSVC(const clientBuf_e buf, const google::protobuf::Message &msg, const int skipPlayer)
+void MSG_BroadcastSVC(const clientBuf_e buf, const google::protobuf::Message &msg, const int32_t skipPlayer)
 {
     if (simulated_connection)
         return;
@@ -456,7 +456,7 @@ void MSG_BroadcastSVC(const clientBuf_e buf, const google::protobuf::Message &ms
         if (!it->ingame())
             continue;
 
-        if (static_cast<int>(it->id) == skipPlayer)
+        if (static_cast<int32_t>(it->id) == skipPlayer)
             continue;
 
         // Select the correct buffer.
@@ -480,7 +480,7 @@ void MSG_WriteShort(buf_t *b, short c)
     b->WriteShort(c);
 }
 
-void MSG_WriteLong(buf_t *b, int c)
+void MSG_WriteLong(buf_t *b, int32_t c)
 {
     if (simulated_connection)
         return;
@@ -494,7 +494,7 @@ void MSG_WriteUnVarint(buf_t *b, uint32_t uv)
     b->WriteUnVarint(uv);
 }
 
-void MSG_WriteVarint(buf_t *b, int v)
+void MSG_WriteVarint(buf_t *b, int32_t v)
 {
     if (simulated_connection)
         return;
@@ -583,17 +583,17 @@ void MSG_WriteHexString(buf_t *b, const char *s)
     MSG_WriteChunk(b, output, numdigits);
 }
 
-int MSG_BytesLeft(void)
+int32_t MSG_BytesLeft(void)
 {
     return net_message.BytesLeftToRead();
 }
 
-int MSG_ReadByte(void)
+int32_t MSG_ReadByte(void)
 {
     return net_message.ReadByte();
 }
 
-int MSG_NextByte(void)
+int32_t MSG_NextByte(void)
 {
     return net_message.NextByte();
 }
@@ -658,7 +658,7 @@ bool MSG_CompressMinilzo(buf_t &buf, size_t start_offset, size_t write_gap)
     if (compressed.maxsize() < total_len)
         compressed.resize(total_len);
 
-    int r = lzo1x_1_compress(buf.ptr() + start_offset, buf.size() - start_offset,
+    int32_t r = lzo1x_1_compress(buf.ptr() + start_offset, buf.size() - start_offset,
                              compressed.ptr() + start_offset + write_gap, &outlen, wrkmem);
 
     // worth the effort?
@@ -725,12 +725,12 @@ bool MSG_CompressAdaptive(huffman &huff, buf_t &buf, size_t start_offset, size_t
     return true;
 }
 
-int MSG_ReadShort(void)
+int32_t MSG_ReadShort(void)
 {
     return net_message.ReadShort();
 }
 
-int MSG_ReadLong(void)
+int32_t MSG_ReadLong(void)
 {
     return net_message.ReadLong();
 }
@@ -740,7 +740,7 @@ uint32_t MSG_ReadUnVarint()
     return net_message.ReadUnVarint();
 }
 
-int MSG_ReadVarint()
+int32_t MSG_ReadVarint()
 {
     return net_message.ReadVarint();
 }
@@ -751,7 +751,7 @@ int MSG_ReadVarint()
 // Read a boolean value
 bool MSG_ReadBool(void)
 {
-    int Value = net_message.ReadByte();
+    int32_t Value = net_message.ReadByte();
 
     if (Value < 0 || Value > 1)
     {
@@ -918,8 +918,8 @@ static void InitNetMessageFormats()
 
 CVAR_FUNC_IMPL(net_rcvbuf)
 {
-    int n = var.asInt();
-    if (setsockopt(inet_socket, SOL_SOCKET, SO_RCVBUF, SETSOCKOPTCAST(&n), (int)sizeof(n)) == -1)
+    int32_t n = var.asInt();
+    if (setsockopt(inet_socket, SOL_SOCKET, SO_RCVBUF, SETSOCKOPTCAST(&n), (int32_t)sizeof(n)) == -1)
     {
         Printf(PRINT_HIGH, "setsockopt SO_RCVBUF: %s", strerror(errno));
     }
@@ -931,8 +931,8 @@ CVAR_FUNC_IMPL(net_rcvbuf)
 
 CVAR_FUNC_IMPL(net_sndbuf)
 {
-    int n = var.asInt();
-    if (setsockopt(inet_socket, SOL_SOCKET, SO_SNDBUF, SETSOCKOPTCAST(&n), (int)sizeof(n)) == -1)
+    int32_t n = var.asInt();
+    if (setsockopt(inet_socket, SOL_SOCKET, SO_SNDBUF, SETSOCKOPTCAST(&n), (int32_t)sizeof(n)) == -1)
     {
         Printf(PRINT_HIGH, "setsockopt SO_SNDBUF: %s", strerror(errno));
     }
@@ -973,13 +973,13 @@ void InitNetCommon(void)
 //
 bool NetWaitOrTimeout(size_t ms)
 {
-    struct timeval timeout = {0, int(1000 * ms) + 1};
+    struct timeval timeout = {0, int32_t(1000 * ms) + 1};
     fd_set         fds;
 
     FD_ZERO(&fds);
     FD_SET(inet_socket, &fds);
 
-    int ret = select(inet_socket + 1, &fds, NULL, NULL, &timeout);
+    int32_t ret = select(inet_socket + 1, &fds, NULL, NULL, &timeout);
 
     if (ret == 1)
         return true;
@@ -997,7 +997,7 @@ bool NetWaitOrTimeout(size_t ms)
     return false;
 }
 
-void I_SetPort(netadr_t &addr, int port)
+void I_SetPort(netadr_t &addr, int32_t port)
 {
     addr.port = htons(port);
 }

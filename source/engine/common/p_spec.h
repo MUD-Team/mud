@@ -116,11 +116,11 @@ void                                P_RemoveMovingFloor(sector_t *sector);
 bool                                P_MovingCeilingCompleted(sector_t *sector);
 bool                                P_MovingFloorCompleted(sector_t *sector);
 bool                                P_HandleSpecialRepeat(line_t *line);
-void                                P_ApplySectorDamage(player_t *player, int damage, int leak, int mod = 0);
+void                                P_ApplySectorDamage(player_t *player, int32_t damage, int32_t leak, int32_t mod = 0);
 void                                P_ApplySectorDamageEndLevel(player_t *player);
 void                                P_CollectSecretCommon(sector_t *sector, player_t *player);
-int                                 P_FindSectorFromTagOrLine(int tag, const line_t *line, int start);
-int                                 P_FindLineFromTag(int tag, int start);
+int32_t                                 P_FindSectorFromTagOrLine(int32_t tag, const line_t *line, int32_t start);
+int32_t                                 P_FindLineFromTag(int32_t tag, int32_t start);
 bool                                P_FloorActive(const sector_t *sec);
 bool                                P_LightingActive(const sector_t *sec);
 bool                                P_CeilingActive(const sector_t *sec);
@@ -129,9 +129,9 @@ bool                                P_ArgToCrushType(uint8_t arg);
 void                                P_ResetSectorSpecial(sector_t *sector);
 void                                P_CopySectorSpecial(sector_t *dest, sector_t *source);
 uint8_t                                P_ArgToChange(uint8_t arg);
-int                                 P_ArgToCrush(uint8_t arg);
-int                                 P_FindSectorFromLineTag(const line_t *line, int start);
-int                                 P_ArgToCrushMode(uint8_t arg, bool slowdown);
+int32_t                                 P_ArgToCrush(uint8_t arg);
+int32_t                                 P_FindSectorFromLineTag(const line_t *line, int32_t start);
+int32_t                                 P_ArgToCrushMode(uint8_t arg, bool slowdown);
 fixed_t                             P_ArgsToFixed(fixed_t arg_i, fixed_t arg_f);
 bool                                P_CheckTag(line_t *line);
 void                                P_TransferSectorFlags(uint32_t *, uint32_t);
@@ -193,9 +193,9 @@ struct newspecial_s
 {
     int16_t        special;
     uint32_t flags;
-    int          damageamount;
-    int          damageinterval;
-    int          damageleakrate;
+    int32_t          damageamount;
+    int32_t          damageinterval;
+    int32_t          damageleakrate;
 };
 
 #define FLOORSPEED FRACUNIT
@@ -217,16 +217,16 @@ class DScroller : public DThinker
         sc_carry_ceiling // killough 4/11/98: carry objects hanging on ceilings
     };
 
-    DScroller(EScrollType type, fixed_t dx, fixed_t dy, int control, int affectee, int accel);
-    DScroller(fixed_t dx, fixed_t dy, const line_t *l, int control, int accel);
+    DScroller(EScrollType type, fixed_t dx, fixed_t dy, int32_t control, int32_t affectee, int32_t accel);
+    DScroller(fixed_t dx, fixed_t dy, const line_t *l, int32_t control, int32_t accel);
 
     void RunThink();
 
-    bool AffectsWall(int wallnum)
+    bool AffectsWall(int32_t wallnum)
     {
         return m_Type == sc_side && m_Affectee == wallnum;
     }
-    int GetWallNum()
+    int32_t GetWallNum()
     {
         return m_Type == sc_side ? m_Affectee : -1;
     }
@@ -239,15 +239,15 @@ class DScroller : public DThinker
     {
         return type == m_Type;
     }
-    int GetAffectee() const
+    int32_t GetAffectee() const
     {
         return m_Affectee;
     }
-    int GetAccel() const
+    int32_t GetAccel() const
     {
         return m_Accel;
     }
-    int GetControl() const
+    int32_t GetControl() const
     {
         return m_Control;
     }
@@ -268,11 +268,11 @@ class DScroller : public DThinker
   protected:
     EScrollType m_Type;       // Type of scroll effect
     fixed_t     m_dx, m_dy;   // (dx,dy) scroll speeds
-    int         m_Affectee;   // Number of affected sidedef, sector, tag, or whatever
-    int         m_Control;    // Control sector (-1 if none) used to control scrolling
+    int32_t         m_Affectee;   // Number of affected sidedef, sector, tag, or whatever
+    int32_t         m_Control;    // Control sector (-1 if none) used to control scrolling
     fixed_t     m_LastHeight; // Last known height of control sector
     fixed_t     m_vdx, m_vdy; // Accumulated velocity if accelerative
-    int         m_Accel;      // Whether it's accelerative
+    int32_t         m_Accel;      // Whether it's accelerative
 
   private:
     DScroller();
@@ -305,15 +305,15 @@ class DPusher : public DThinker
     };
 
     DPusher();
-    DPusher(EPusher type, line_t *l, int magnitude, int angle, AActor *source, int affectee);
-    int CheckForSectorMatch(EPusher type, int tag)
+    DPusher(EPusher type, line_t *l, int32_t magnitude, int32_t angle, AActor *source, int32_t affectee);
+    int32_t CheckForSectorMatch(EPusher type, int32_t tag)
     {
         if (m_Type == type && sectors[m_Affectee].tag == tag)
             return m_Affectee;
         else
             return -1;
     }
-    void ChangeValues(int magnitude, int angle)
+    void ChangeValues(int32_t magnitude, int32_t angle)
     {
         angle_t ang = (angle << 24) >> ANGLETOFINESHIFT;
         m_Xmag      = (magnitude * finecosine[ang]) >> FRACBITS;
@@ -326,13 +326,13 @@ class DPusher : public DThinker
   protected:
     EPusher           m_Type;
     AActor::AActorPtr m_Source;    // Point source if point pusher
-    int               m_Xmag;      // X Strength
-    int               m_Ymag;      // Y Strength
-    int               m_Magnitude; // Vector strength for point pusher
-    int               m_Radius;    // Effective radius for point pusher
-    int               m_X;         // X of point source if point pusher
-    int               m_Y;         // Y of point source if point pusher
-    int               m_Affectee;  // Number of affected sector
+    int32_t               m_Xmag;      // X Strength
+    int32_t               m_Ymag;      // Y Strength
+    int32_t               m_Magnitude; // Vector strength for point pusher
+    int32_t               m_Radius;    // Effective radius for point pusher
+    int32_t               m_X;         // X of point source if point pusher
+    int32_t               m_Y;         // Y of point source if point pusher
+    int32_t               m_Affectee;  // Number of affected sector
 
     friend bool PIT_PushThing(AActor *thing);
 };
@@ -366,13 +366,13 @@ void P_SpawnZDoomSectorSpecials(void);
 void P_UpdateSpecials(void);
 
 // when needed
-void P_CrossSpecialLine(line_t *line, int side, AActor *thing, bool bossaction);
+void P_CrossSpecialLine(line_t *line, int32_t side, AActor *thing, bool bossaction);
 void P_ShootSpecialLine(AActor *thing, line_t *line);
-bool P_UseSpecialLine(AActor *thing, line_t *line, int side, bool bossaction);
-bool P_PushSpecialLine(AActor *thing, line_t *line, int side);
+bool P_UseSpecialLine(AActor *thing, line_t *line, int32_t side, bool bossaction);
+bool P_PushSpecialLine(AActor *thing, line_t *line, int32_t side);
 
 void P_PlayerInZDoomSector(player_t *player);
-void P_ApplySectorFriction(int tag, int value, bool use_thinker);
+void P_ApplySectorFriction(int32_t tag, int32_t value, bool use_thinker);
 
 //
 // getSector()
@@ -380,7 +380,7 @@ void P_ApplySectorFriction(int tag, int value, bool use_thinker);
 //	given the number of the current sector,
 //	the line number and the side (0/1) that you want.
 //
-inline sector_t *getSector(int currentSector, int line, int side)
+inline sector_t *getSector(int32_t currentSector, int32_t line, int32_t side)
 {
     return sides[(sectors[currentSector].lines[line])->sidenum[side]].sector;
 }
@@ -416,12 +416,12 @@ fixed_t P_FindShortestUpperAround(sector_t *sec);                          // jf
 sector_t *P_FindModelFloorSector(fixed_t floordestheight, sector_t *sec);  // jff 02/04/98
 sector_t *P_FindModelCeilingSector(fixed_t ceildestheight, sector_t *sec); // jff 02/04/98
 
-int P_FindSectorFromTag(int tag, int start);
-int P_FindLineFromID(int id, int start);
+int32_t P_FindSectorFromTag(int32_t tag, int32_t start);
+int32_t P_FindLineFromID(int32_t id, int32_t start);
 
-int P_FindMinSurroundingLight(sector_t *sector, int max);
+int32_t P_FindMinSurroundingLight(sector_t *sector, int32_t max);
 
-sector_t *P_NextSpecialSector(sector_t *sec, int type, sector_t *back2); // [RH]
+sector_t *P_NextSpecialSector(sector_t *sec, int32_t type, sector_t *back2); // [RH]
 
 //
 // P_LIGHTS
@@ -443,21 +443,21 @@ class DFireFlicker : public DLighting
     DECLARE_SERIAL(DFireFlicker, DLighting)
   public:
     DFireFlicker(sector_t *sector);
-    DFireFlicker(sector_t *sector, int upper, int lower);
+    DFireFlicker(sector_t *sector, int32_t upper, int32_t lower);
     void RunThink();
-    int  GetMaxLight() const
+    int32_t  GetMaxLight() const
     {
         return m_MaxLight;
     }
-    int GetMinLight() const
+    int32_t GetMinLight() const
     {
         return m_MinLight;
     }
 
   protected:
-    int m_Count;
-    int m_MaxLight;
-    int m_MinLight;
+    int32_t m_Count;
+    int32_t m_MaxLight;
+    int32_t m_MinLight;
 
   private:
     DFireFlicker();
@@ -467,21 +467,21 @@ class DFlicker : public DLighting
 {
     DECLARE_SERIAL(DFlicker, DLighting)
   public:
-    DFlicker(sector_t *sector, int upper, int lower);
+    DFlicker(sector_t *sector, int32_t upper, int32_t lower);
     void RunThink();
-    int  GetMaxLight() const
+    int32_t  GetMaxLight() const
     {
         return m_MaxLight;
     }
-    int GetMinLight() const
+    int32_t GetMinLight() const
     {
         return m_MinLight;
     }
 
   protected:
-    int m_Count;
-    int m_MaxLight;
-    int m_MinLight;
+    int32_t m_Count;
+    int32_t m_MaxLight;
+    int32_t m_MinLight;
 
   private:
     DFlicker();
@@ -492,23 +492,23 @@ class DLightFlash : public DLighting
     DECLARE_SERIAL(DLightFlash, DLighting)
   public:
     DLightFlash(sector_t *sector);
-    DLightFlash(sector_t *sector, int min, int max);
+    DLightFlash(sector_t *sector, int32_t min, int32_t max);
     void RunThink();
-    int  GetMaxLight() const
+    int32_t  GetMaxLight() const
     {
         return m_MaxLight;
     }
-    int GetMinLight() const
+    int32_t GetMinLight() const
     {
         return m_MinLight;
     }
 
   protected:
-    int m_Count;
-    int m_MaxLight;
-    int m_MinLight;
-    int m_MaxTime;
-    int m_MinTime;
+    int32_t m_Count;
+    int32_t m_MaxLight;
+    int32_t m_MinLight;
+    int32_t m_MaxTime;
+    int32_t m_MinTime;
 
   private:
     DLightFlash();
@@ -518,40 +518,40 @@ class DStrobe : public DLighting
 {
     DECLARE_SERIAL(DStrobe, DLighting)
   public:
-    DStrobe(sector_t *sector, int utics, int ltics, bool inSync);
-    DStrobe(sector_t *sector, int upper, int lower, int utics, int ltics);
+    DStrobe(sector_t *sector, int32_t utics, int32_t ltics, bool inSync);
+    DStrobe(sector_t *sector, int32_t upper, int32_t lower, int32_t utics, int32_t ltics);
     void RunThink();
-    int  GetMaxLight() const
+    int32_t  GetMaxLight() const
     {
         return m_MaxLight;
     }
-    int GetMinLight() const
+    int32_t GetMinLight() const
     {
         return m_MinLight;
     }
-    int GetDarkTime() const
+    int32_t GetDarkTime() const
     {
         return m_DarkTime;
     }
-    int GetBrightTime() const
+    int32_t GetBrightTime() const
     {
         return m_BrightTime;
     }
-    int GetCount() const
+    int32_t GetCount() const
     {
         return m_Count;
     }
-    void SetCount(int count)
+    void SetCount(int32_t count)
     {
         m_Count = count;
     }
 
   protected:
-    int m_Count;
-    int m_MinLight;
-    int m_MaxLight;
-    int m_DarkTime;
-    int m_BrightTime;
+    int32_t m_Count;
+    int32_t m_MinLight;
+    int32_t m_MaxLight;
+    int32_t m_DarkTime;
+    int32_t m_BrightTime;
 
   private:
     DStrobe();
@@ -565,9 +565,9 @@ class DGlow : public DLighting
     void RunThink();
 
   protected:
-    int m_MinLight;
-    int m_MaxLight;
-    int m_Direction;
+    int32_t m_MinLight;
+    int32_t m_MaxLight;
+    int32_t m_Direction;
 
   private:
     DGlow();
@@ -578,17 +578,17 @@ class DGlow2 : public DLighting
 {
     DECLARE_SERIAL(DGlow2, DLighting)
   public:
-    DGlow2(sector_t *sector, int start, int end, int tics, bool oneshot);
+    DGlow2(sector_t *sector, int32_t start, int32_t end, int32_t tics, bool oneshot);
     void RunThink();
-    int  GetStart() const
+    int32_t  GetStart() const
     {
         return m_Start;
     }
-    int GetEnd() const
+    int32_t GetEnd() const
     {
         return m_End;
     }
-    int GetMaxTics() const
+    int32_t GetMaxTics() const
     {
         return m_MaxTics;
     }
@@ -598,10 +598,10 @@ class DGlow2 : public DLighting
     }
 
   protected:
-    int  m_Start;
-    int  m_End;
-    int  m_MaxTics;
-    int  m_Tics;
+    int32_t  m_Start;
+    int32_t  m_End;
+    int32_t  m_MaxTics;
+    int32_t  m_Tics;
     bool m_OneShot;
 
   private:
@@ -614,7 +614,7 @@ class DPhased : public DLighting
     DECLARE_SERIAL(DPhased, DLighting)
   public:
     DPhased(sector_t *sector);
-    DPhased(sector_t *sector, int baselevel, int phase);
+    DPhased(sector_t *sector, int32_t baselevel, int32_t phase);
     void RunThink();
     uint8_t GetBaseLevel() const
     {
@@ -631,8 +631,8 @@ class DPhased : public DLighting
 
   private:
     DPhased();
-    DPhased(sector_t *sector, int baselevel);
-    int PhaseHelper(sector_t *sector, int index, int light, sector_t *prev);
+    DPhased(sector_t *sector, int32_t baselevel);
+    int32_t PhaseHelper(sector_t *sector, int32_t index, int32_t light, sector_t *prev);
 };
 
 #define GLOWSPEED    8
@@ -640,18 +640,18 @@ class DPhased : public DLighting
 #define FASTDARK     15
 #define SLOWDARK     TICRATE
 
-void EV_StartLightFlickering(int tag, int upper, int lower);
-void EV_StartLightStrobing(int tag, int upper, int lower, int utics, int ltics);
-void EV_StartLightStrobing(int tag, int utics, int ltics);
-void EV_TurnTagLightsOff(int tag);
-void EV_LightTurnOn(int tag, int bright);
-void EV_LightChange(int tag, int value);
-int  EV_LightTurnOnPartway(int tag, int level);
+void EV_StartLightFlickering(int32_t tag, int32_t upper, int32_t lower);
+void EV_StartLightStrobing(int32_t tag, int32_t upper, int32_t lower, int32_t utics, int32_t ltics);
+void EV_StartLightStrobing(int32_t tag, int32_t utics, int32_t ltics);
+void EV_TurnTagLightsOff(int32_t tag);
+void EV_LightTurnOn(int32_t tag, int32_t bright);
+void EV_LightChange(int32_t tag, int32_t value);
+int32_t  EV_LightTurnOnPartway(int32_t tag, int32_t level);
 
 void P_SpawnGlowingLight(sector_t *sector);
 
-void EV_StartLightGlowing(int tag, int upper, int lower, int tics);
-void EV_StartLightFading(int tag, int value, int tics);
+void EV_StartLightGlowing(int32_t tag, int32_t upper, int32_t lower, int32_t tics);
+void EV_StartLightFading(int32_t tag, int32_t value, int32_t tics);
 
 //
 // P_SWITCH
@@ -670,7 +670,7 @@ typedef struct
 // 1 second, in ticks.
 #define BUTTONTIME TICRATE
 
-void P_ChangeSwitchTexture(line_t *line, int useAgain, bool playsound);
+void P_ChangeSwitchTexture(line_t *line, int32_t useAgain, bool playsound);
 
 void P_InitSwitchList();
 
@@ -731,20 +731,20 @@ class DPlat : public DMovingFloor
 
     void RunThink();
 
-    void SetState(uint8_t state, int count)
+    void SetState(uint8_t state, int32_t count)
     {
         m_Status = (EPlatState)state;
         m_Count  = count;
     }
-    void GetState(uint8_t &state, int &count)
+    void GetState(uint8_t &state, int32_t &count)
     {
         state = (uint8_t)m_Status;
         count = m_Count;
     }
 
     DPlat(sector_t *sector);
-    DPlat(sector_t *sector, DPlat::EPlatType type, fixed_t height, int speed, int delay, fixed_t lip);
-    DPlat(sector_t *sector, int target, int delay, int speed, int trigger); // [Blair] Boom Generic Plat type
+    DPlat(sector_t *sector, DPlat::EPlatType type, fixed_t height, int32_t speed, int32_t delay, fixed_t lip);
+    DPlat(sector_t *sector, int32_t target, int32_t delay, int32_t speed, int32_t trigger); // [Blair] Boom Generic Plat type
     DPlat      *Clone(sector_t *sec) const;
     friend void P_SetPlatDestroy(DPlat *plat);
 
@@ -753,12 +753,12 @@ class DPlat : public DMovingFloor
     fixed_t    m_Speed;
     fixed_t    m_Low;
     fixed_t    m_High;
-    int        m_Wait;
-    int        m_Count;
+    int32_t        m_Wait;
+    int32_t        m_Count;
     EPlatState m_Status;
     EPlatState m_OldStatus;
     bool       m_Crush;
-    int        m_Tag;
+    int32_t        m_Tag;
     EPlatType  m_Type;
     fixed_t    m_Height;
     fixed_t    m_Lip;
@@ -770,10 +770,10 @@ class DPlat : public DMovingFloor
   private:
     DPlat();
 
-    friend bool EV_DoPlat(int tag, line_t *line, EPlatType type, fixed_t height, int speed, int delay, fixed_t lip,
-                          int change);
-    friend void EV_StopPlat(int tag);
-    friend void P_ActivateInStasis(int tag);
+    friend bool EV_DoPlat(int32_t tag, line_t *line, EPlatType type, fixed_t height, int32_t speed, int32_t delay, fixed_t lip,
+                          int32_t change);
+    friend void EV_StopPlat(int32_t tag);
+    friend void P_ActivateInStasis(int32_t tag);
     friend bool EV_DoGenLift(line_t *line);
 };
 
@@ -824,11 +824,11 @@ class DPillar : public DMover
     };
 
     DPillar();
-    DPillar(sector_t *sector, EPillar type, fixed_t speed, fixed_t height, fixed_t height2, int crush, bool hexencrush);
+    DPillar(sector_t *sector, EPillar type, fixed_t speed, fixed_t height, fixed_t height2, int32_t crush, bool hexencrush);
     DPillar    *Clone(sector_t *sec) const;
     friend void P_SetPillarDestroy(DPillar *pillar);
-    friend bool EV_DoZDoomPillar(DPillar::EPillar type, line_t *line, int tag, fixed_t speed, fixed_t floordist,
-                                 fixed_t ceilingdist, int crush, bool hexencrush);
+    friend bool EV_DoZDoomPillar(DPillar::EPillar type, line_t *line, int32_t tag, fixed_t speed, fixed_t floordist,
+                                 fixed_t ceilingdist, int32_t crush, bool hexencrush);
 
     void RunThink();
     void PlayPillarSound();
@@ -838,7 +838,7 @@ class DPillar : public DMover
     fixed_t m_CeilingSpeed;
     fixed_t m_FloorTarget;
     fixed_t m_CeilingTarget;
-    int     m_Crush;
+    int32_t     m_Crush;
     bool    m_HexenCrush;
 
     EPillarState m_Status;
@@ -867,7 +867,7 @@ inline FArchive &operator>>(FArchive &arc, DPillar::EPillarState &out)
     return arc;
 }
 
-bool EV_DoPillar(DPillar::EPillar type, int tag, fixed_t speed, fixed_t height, fixed_t height2, bool crush);
+bool EV_DoPillar(DPillar::EPillar type, int32_t tag, fixed_t speed, fixed_t height, fixed_t height2, bool crush);
 void P_SpawnDoorCloseIn30(sector_t *sec);
 void P_SpawnDoorRaiseIn5Mins(sector_t *sec);
 
@@ -917,13 +917,13 @@ class DDoor : public DMovingCeiling
 
     DDoor(sector_t *sector);
     // Boom Generic Door
-    DDoor(sector_t *sec, line_t *ln, int delay, int time, int trigger, int speed);
+    DDoor(sector_t *sec, line_t *ln, int32_t delay, int32_t time, int32_t trigger, int32_t speed);
     // Boom Generic Locked Door
-    DDoor(sector_t *sec, line_t *ln, int kind, int trigger, int speed);
+    DDoor(sector_t *sec, line_t *ln, int32_t kind, int32_t trigger, int32_t speed);
     // Boom Compatible DDoor
-    DDoor(sector_t *sec, line_t *ln, EVlDoor type, fixed_t speed, int delay);
+    DDoor(sector_t *sec, line_t *ln, EVlDoor type, fixed_t speed, int32_t delay);
     // ZDoom Compatible DDoor
-    DDoor(sector_t *sec, line_t *ln, EVlDoor type, fixed_t speed, int topwait, uint8_t lighttag, int topcountdown);
+    DDoor(sector_t *sec, line_t *ln, EVlDoor type, fixed_t speed, int32_t topwait, uint8_t lighttag, int32_t topcountdown);
     DDoor *Clone(sector_t *sec) const;
 
     friend void P_SetDoorDestroy(DDoor *door);
@@ -936,21 +936,21 @@ class DDoor : public DMovingCeiling
     fixed_t m_Speed;
 
     // tics to wait at the top
-    int m_TopWait;
+    int32_t m_TopWait;
     // (keep in case a door going down is reset)
     // when it reaches 0, start going down
-    int m_TopCountdown;
+    int32_t m_TopCountdown;
 
     EDoorState m_Status;
 
     line_t *m_Line;
 
-    int m_LightTag; // ZDoom compat
+    int32_t m_LightTag; // ZDoom compat
 
   protected:
-    friend bool EV_DoDoor(DDoor::EVlDoor type, line_t *line, AActor *thing, int tag, int speed, int delay, card_t lock);
-    friend bool EV_DoZDoomDoor(DDoor::EVlDoor type, line_t *line, AActor *mo, uint8_t tag, uint8_t speed_byte, int topwait,
-                               zdoom_lock_t lock, uint8_t lightTag, bool boomgen, int topcountdown);
+    friend bool EV_DoDoor(DDoor::EVlDoor type, line_t *line, AActor *thing, int32_t tag, int32_t speed, int32_t delay, card_t lock);
+    friend bool EV_DoZDoomDoor(DDoor::EVlDoor type, line_t *line, AActor *mo, uint8_t tag, uint8_t speed_byte, int32_t topwait,
+                               zdoom_lock_t lock, uint8_t lightTag, bool boomgen, int32_t topcountdown);
     friend void P_SpawnDoorCloseIn30(sector_t *sec);
     friend void P_SpawnDoorRaiseIn5Mins(sector_t *sec);
 
@@ -1045,9 +1045,9 @@ class DCeiling : public DMovingCeiling
     };
 
     DCeiling(sector_t *sec);
-    DCeiling(sector_t *sec, fixed_t speed1, fixed_t speed2, int silent);
-    DCeiling(sector_t *sec, line_t *line, int speed, int target, int crush, int change, int direction, int model);
-    DCeiling(sector_t *sec, line_t *line, int silent, int speed);
+    DCeiling(sector_t *sec, fixed_t speed1, fixed_t speed2, int32_t silent);
+    DCeiling(sector_t *sec, line_t *line, int32_t speed, int32_t target, int32_t crush, int32_t change, int32_t direction, int32_t model);
+    DCeiling(sector_t *sec, line_t *line, int32_t silent, int32_t speed);
     DCeiling   *Clone(sector_t *sec) const;
     friend void P_SetCeilingDestroy(DCeiling *ceiling);
 
@@ -1061,9 +1061,9 @@ class DCeiling : public DMovingCeiling
     fixed_t     m_Speed;
     fixed_t     m_Speed1;    // [RH] dnspeed of crushers
     fixed_t     m_Speed2;    // [RH] upspeed of crushers
-    int         m_Crush;
-    int         m_Silent;
-    int         m_Direction; // 1 = up, 0 = waiting, -1 = down
+    int32_t         m_Crush;
+    int32_t         m_Silent;
+    int32_t         m_Direction; // 1 = up, 0 = waiting, -1 = down
 
     // [RH] Need these for BOOM-ish transferring ceilings
     texhandle_t   m_Texture;
@@ -1074,8 +1074,8 @@ class DCeiling : public DMovingCeiling
     uint8_t  m_NewDmgInterval;
 
     // ID
-    int m_Tag;
-    int m_OldDirection;
+    int32_t m_Tag;
+    int32_t m_OldDirection;
 
     ECeilingState m_Status;
 
@@ -1083,11 +1083,11 @@ class DCeiling : public DMovingCeiling
   private:
     DCeiling();
 
-    friend bool EV_DoCeiling(DCeiling::ECeiling type, line_t *line, int tag, fixed_t speed, fixed_t speed2,
-                             fixed_t height, bool crush, int silent, int change);
-    friend bool EV_CeilingCrushStop(int tag);
-    friend void P_ActivateInStasisCeiling(int tag);
-    friend bool EV_ZDoomCeilingCrushStop(int tag, bool remove);
+    friend bool EV_DoCeiling(DCeiling::ECeiling type, line_t *line, int32_t tag, fixed_t speed, fixed_t speed2,
+                             fixed_t height, bool crush, int32_t silent, int32_t change);
+    friend bool EV_CeilingCrushStop(int32_t tag);
+    friend void P_ActivateInStasisCeiling(int32_t tag);
+    friend bool EV_ZDoomCeilingCrushStop(int32_t tag, bool remove);
 };
 
 inline FArchive &operator<<(FArchive &arc, DCeiling::ECeiling type)
@@ -1182,9 +1182,9 @@ class DFloor : public DMovingFloor
 
     DFloor(sector_t *sec);
     DFloor(sector_t *sec, DFloor::EFloor floortype, line_t *line, fixed_t speed, fixed_t height, bool crush,
-           int change);
-    DFloor(sector_t *sec, line_t *line, int speed, int target, int crush, int change, int direction, int model);
-    DFloor(sector_t *sec, DFloor::EFloor floortype, line_t *line, fixed_t speed, fixed_t height, int crush, int change,
+           int32_t change);
+    DFloor(sector_t *sec, line_t *line, int32_t speed, int32_t target, int32_t crush, int32_t change, int32_t direction, int32_t model);
+    DFloor(sector_t *sec, DFloor::EFloor floortype, line_t *line, fixed_t speed, fixed_t height, int32_t crush, int32_t change,
            bool hexencrush, bool hereticlower);
     DFloor     *Clone(sector_t *sec) const;
     friend void P_SetFloorDestroy(DFloor *floor);
@@ -1196,9 +1196,9 @@ class DFloor : public DMovingFloor
 
     EFloor      m_Type;
     EFloorState m_Status;
-    int         m_Crush;
+    int32_t         m_Crush;
     bool        m_HexenCrush;
-    int         m_Direction;
+    int32_t         m_Direction;
     int16_t       m_NewSpecial;
     uint32_t       m_NewFlags;
     int16_t       m_NewDamageRate;
@@ -1209,27 +1209,27 @@ class DFloor : public DMovingFloor
     fixed_t     m_Speed;
 
     // [RH] New parameters used to reset and delay stairs
-    int m_ResetCount;
-    int m_OrgHeight;
-    int m_Delay;
-    int m_PauseTime;
-    int m_StepTime;
-    int m_PerStepTime;
+    int32_t m_ResetCount;
+    int32_t m_OrgHeight;
+    int32_t m_Delay;
+    int32_t m_PauseTime;
+    int32_t m_StepTime;
+    int32_t m_PerStepTime;
 
     fixed_t m_Height;
     line_t *m_Line;
-    int     m_Change;
+    int32_t     m_Change;
 
   protected:
-    friend bool EV_BuildStairs(int tag, DFloor::EStair type, line_t *line, fixed_t stairsize, fixed_t speed, int delay,
-                               int reset, int igntxt, int usespecials);
-    friend bool EV_DoFloor(DFloor::EFloor floortype, line_t *line, int tag, fixed_t speed, fixed_t height, bool crush,
-                           int change);
-    friend int  EV_DoDonut(line_t *line);
-    friend bool EV_DoZDoomDonut(int tag, line_t *line, fixed_t pillarspeed, fixed_t slimespeed);
-    friend int  P_SpawnDonut(int tag, line_t *line, fixed_t pillarspeed, fixed_t slimespeed);
-    friend bool EV_DoZDoomFloor(DFloor::EFloor floortype, line_t *line, int tag, fixed_t speed, fixed_t height,
-                                int crush, int change, bool hexencrush, bool hereticlower);
+    friend bool EV_BuildStairs(int32_t tag, DFloor::EStair type, line_t *line, fixed_t stairsize, fixed_t speed, int32_t delay,
+                               int32_t reset, int32_t igntxt, int32_t usespecials);
+    friend bool EV_DoFloor(DFloor::EFloor floortype, line_t *line, int32_t tag, fixed_t speed, fixed_t height, bool crush,
+                           int32_t change);
+    friend int32_t  EV_DoDonut(line_t *line);
+    friend bool EV_DoZDoomDonut(int32_t tag, line_t *line, fixed_t pillarspeed, fixed_t slimespeed);
+    friend int32_t  P_SpawnDonut(int32_t tag, line_t *line, fixed_t pillarspeed, fixed_t slimespeed);
+    friend bool EV_DoZDoomFloor(DFloor::EFloor floortype, line_t *line, int32_t tag, fixed_t speed, fixed_t height,
+                                int32_t crush, int32_t change, bool hexencrush, bool hereticlower);
 
   private:
     DFloor();
@@ -1288,7 +1288,7 @@ class DElevator : public DMover
     void PlayElevatorSound();
 
     EElevator m_Type;
-    int       m_Direction;
+    int32_t       m_Direction;
     fixed_t   m_FloorDestHeight;
     fixed_t   m_CeilingDestHeight;
     fixed_t   m_Speed;
@@ -1296,8 +1296,8 @@ class DElevator : public DMover
     EElevatorState m_Status;
 
   protected:
-    friend bool EV_DoElevator(line_t *line, DElevator::EElevator type, fixed_t speed, fixed_t height, int tag);
-    friend bool EV_DoZDoomElevator(line_t *line, DElevator::EElevator type, fixed_t speed, fixed_t height, int tag);
+    friend bool EV_DoElevator(line_t *line, DElevator::EElevator type, fixed_t speed, fixed_t height, int32_t tag);
+    friend bool EV_DoZDoomElevator(line_t *line, DElevator::EElevator type, fixed_t speed, fixed_t height, int32_t tag);
 
   private:
     DElevator();
@@ -1343,7 +1343,7 @@ class DWaggle : public DMover
         state_size
     };
     DWaggle(sector_t* sec);
-    DWaggle(sector_t* sector, int height, int speed, int offset, int timer,
+    DWaggle(sector_t* sector, int32_t height, int32_t speed, int32_t offset, int32_t timer,
                      bool ceiling);
     DWaggle* Clone(sector_t* sec) const;
     friend void P_SetWaggleDestroy(DWaggle* waggle);
@@ -1357,14 +1357,14 @@ class DWaggle : public DMover
     fixed_t m_Scale;
     fixed_t m_ScaleDelta;
     fixed_t m_StartTic; // [Blair] Client will predict a created (or serialized) waggle based on the start tic.
-    int m_Ticker;
-    int m_State;
+    int32_t m_Ticker;
+    int32_t m_State;
     bool m_Ceiling;
     DWaggle();
 
   protected:
-    friend bool EV_StartPlaneWaggle(int tag, line_t* line, int height, int speed,
-                                    int offset, int timer, bool ceiling);
+    friend bool EV_StartPlaneWaggle(int32_t tag, line_t* line, int32_t height, int32_t speed,
+                                    int32_t offset, int32_t timer, bool ceiling);
 };
 */
 // jff 3/15/98 pure texture/type change for better generalized support
@@ -1374,31 +1374,31 @@ enum EChange
     numChangeOnly
 };
 
-bool EV_DoChange(line_t *line, EChange changetype, int tag);
+bool EV_DoChange(line_t *line, EChange changetype, int32_t tag);
 
 //
 // P_TELEPT
 //
-bool EV_Teleport(int tid, int tag, int arg0, int side, AActor *thing, int nostop);
-bool EV_LineTeleport(line_t *line, int side, AActor *thing);
-bool EV_SilentTeleport(int tid, int useangle, int tag, int keepheight, line_t *line, int side, AActor *thing);
-bool EV_SilentLineTeleport(line_t *line, int side, AActor *thing, int id, bool reverse);
+bool EV_Teleport(int32_t tid, int32_t tag, int32_t arg0, int32_t side, AActor *thing, int32_t nostop);
+bool EV_LineTeleport(line_t *line, int32_t side, AActor *thing);
+bool EV_SilentTeleport(int32_t tid, int32_t useangle, int32_t tag, int32_t keepheight, line_t *line, int32_t side, AActor *thing);
+bool EV_SilentLineTeleport(line_t *line, int32_t side, AActor *thing, int32_t id, bool reverse);
 
 //
 // [RH] ACS (see also p_acs.h)
 //
 
-bool P_StartScript(AActor *who, line_t *where, int script, const char *map, int lineSide, int arg0, int arg1, int arg2,
-                   int always);
-void P_SuspendScript(int script, const char *map);
-void P_TerminateScript(int script, const char *map);
+bool P_StartScript(AActor *who, line_t *where, int32_t script, const char *map, int32_t lineSide, int32_t arg0, int32_t arg1, int32_t arg2,
+                   int32_t always);
+void P_SuspendScript(int32_t script, const char *map);
+void P_TerminateScript(int32_t script, const char *map);
 void P_StartOpenScripts(void);
 void P_DoDeferedScripts(void);
 
 //
 // [RH] p_quake.c
 //
-bool P_StartQuake(int tid, int intensity, int duration, int damrad, int tremrad);
+bool P_StartQuake(int32_t tid, int32_t intensity, int32_t duration, int32_t damrad, int32_t tremrad);
 
 // [AM] Trigger actor specials.
-bool A_TriggerAction(AActor *mo, AActor *triggerer, int activationType);
+bool A_TriggerAction(AActor *mo, AActor *triggerer, int32_t activationType);

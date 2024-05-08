@@ -171,13 +171,13 @@ enum clientBuf_e
  */
 #define SVC_PM_CHEATS BIT(5)
 
-extern int localport;
-extern int msg_badread;
+extern int32_t localport;
+extern int32_t msg_badread;
 
 // network message info
 struct msg_info_t
 {
-    int         id;
+    int32_t         id;
     const char *msgName;
     const char *msgFormat; // 'b'=byte, 'n'=short, 'N'=long, 's'=string
 
@@ -362,7 +362,7 @@ class buf_t
         }
     }
 
-    void WriteLong(int l)
+    void WriteLong(int32_t l)
     {
         uint8_t *buf = SZ_GetSpace(sizeof(l));
 
@@ -378,8 +378,8 @@ class buf_t
     //
     // Write an unsigned varint to the wire.
     //
-    // Use these when you want to send an int and are reasonably sure that
-    // the int will usually be small.
+    // Use these when you want to send an int32_t and are reasonably sure that
+    // the int32_t will usually be small.
     //
     // [AM] If you make a change to this, please also duplicate that change
     //      into varint.c in the tools directory.
@@ -391,7 +391,7 @@ class buf_t
         for (;;)
         {
             // Our next byte contains 7 bits of the number.
-            int out = v & 0x7F;
+            int32_t out = v & 0x7F;
 
             // Any bits left?
             v >>= 7;
@@ -408,7 +408,7 @@ class buf_t
         }
     }
 
-    void WriteVarint(int v)
+    void WriteVarint(int32_t v)
     {
         // Zig-zag encoding for negative numbers.
         WriteUnVarint((v << 1) ^ (v >> 31));
@@ -430,7 +430,7 @@ class buf_t
             WriteByte(0);
     }
 
-    void WriteChunk(const char *c, uint32_t l, int startpos = 0)
+    void WriteChunk(const char *c, uint32_t l, int32_t startpos = 0)
     {
         uint8_t *buf = SZ_GetSpace(l);
 
@@ -440,7 +440,7 @@ class buf_t
         }
     }
 
-    int ReadByte()
+    int32_t ReadByte()
     {
         if (readpos + 1 > cursize)
         {
@@ -450,7 +450,7 @@ class buf_t
         return data[readpos++];
     }
 
-    int NextByte()
+    int32_t NextByte()
     {
         if (readpos + 1 > cursize)
         {
@@ -472,7 +472,7 @@ class buf_t
         return data + oldpos;
     }
 
-    int ReadShort()
+    int32_t ReadShort()
     {
         if (readpos + 2 > cursize)
         {
@@ -484,7 +484,7 @@ class buf_t
         return (int16_t)(data[oldpos] + (data[oldpos + 1] << 8));
     }
 
-    int ReadLong()
+    int32_t ReadLong()
     {
         if (readpos + 4 > cursize)
         {
@@ -530,14 +530,14 @@ class buf_t
 
             if (offset >= 32)
             {
-                // Our variant int is too big - overflow us.
+                // Our variant int32_t is too big - overflow us.
                 overflowed = true;
                 return -1;
             }
         }
     }
 
-    int ReadVarint()
+    int32_t ReadVarint()
     {
         uint32_t uv = ReadUnVarint();
         if (overflowed)
@@ -588,7 +588,7 @@ class buf_t
         }
 
         case BT_SEND: {
-            if ((int)(readpos - offset) < 0)
+            if ((int32_t)(readpos - offset) < 0)
             {
                 // lies, an underflow occured
                 overflowed = true;
@@ -730,44 +730,44 @@ extern buf_t net_message;
 
 void CloseNetwork(void);
 void InitNetCommon(void);
-void I_SetPort(netadr_t &addr, int port);
+void I_SetPort(netadr_t &addr, int32_t port);
 bool NetWaitOrTimeout(size_t ms);
 
 char       *NET_AdrToString(netadr_t a);
 bool        NET_StringToAdr(const char *s, netadr_t *a);
 bool        NET_CompareAdr(netadr_t a, netadr_t b);
-int         NET_GetPacket(void);
-int         NET_SendPacket(buf_t &buf, netadr_t &to);
+int32_t         NET_GetPacket(void);
+int32_t         NET_SendPacket(buf_t &buf, netadr_t &to);
 std::string NET_GetLocalAddress(void);
 
 void SZ_Clear(buf_t *buf);
-void SZ_Write(buf_t *b, const void *data, int length);
-void SZ_Write(buf_t *b, const uint8_t *data, int startpos, int length);
+void SZ_Write(buf_t *b, const void *data, int32_t length);
+void SZ_Write(buf_t *b, const uint8_t *data, int32_t startpos, int32_t length);
 
 void MSG_WriteByte(buf_t *b, uint8_t c);
 void MSG_WriteMarker(buf_t *b, svc_t c);
 void MSG_WriteMarker(buf_t *b, clc_t c);
 void MSG_WriteShort(buf_t *b, int16_t c);
-void MSG_WriteLong(buf_t *b, int c);
+void MSG_WriteLong(buf_t *b, int32_t c);
 void MSG_WriteUnVarint(buf_t *b, uint32_t uv);
-void MSG_WriteVarint(buf_t *b, int v);
+void MSG_WriteVarint(buf_t *b, int32_t v);
 void MSG_WriteBool(buf_t *b, bool);
 void MSG_WriteFloat(buf_t *b, float);
 void MSG_WriteString(buf_t *b, const char *s);
 void MSG_WriteHexString(buf_t *b, const char *s);
 void MSG_WriteChunk(buf_t *b, const void *p, uint32_t l);
 void MSG_WriteSVC(buf_t *b, const google::protobuf::Message &msg);
-void MSG_BroadcastSVC(const clientBuf_e buf, const google::protobuf::Message &msg, const int skipPlayer = -1);
+void MSG_BroadcastSVC(const clientBuf_e buf, const google::protobuf::Message &msg, const int32_t skipPlayer = -1);
 
-int MSG_BytesLeft(void);
-int MSG_NextByte(void);
+int32_t MSG_BytesLeft(void);
+int32_t MSG_NextByte(void);
 
-int          MSG_ReadByte(void);
+int32_t          MSG_ReadByte(void);
 void        *MSG_ReadChunk(const size_t &size);
-int          MSG_ReadShort(void);
-int          MSG_ReadLong(void);
+int32_t          MSG_ReadShort(void);
+int32_t          MSG_ReadLong(void);
 uint32_t MSG_ReadUnVarint();
-int          MSG_ReadVarint();
+int32_t          MSG_ReadVarint();
 bool         MSG_ReadBool(void);
 float        MSG_ReadFloat(void);
 const char  *MSG_ReadString(void);

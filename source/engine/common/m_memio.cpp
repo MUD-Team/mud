@@ -175,22 +175,22 @@ long mem_ftell(MEMFILE *stream)
     return stream->position;
 }
 
-int mem_fseek(MEMFILE *stream, int32_t position, mem_rel_t whence)
+int32_t mem_fseek(MEMFILE *stream, int32_t position, mem_rel_t whence)
 {
     uint32_t newpos;
 
     switch (whence)
     {
     case MEM_SEEK_SET:
-        newpos = (int)position;
+        newpos = (int32_t)position;
         break;
 
     case MEM_SEEK_CUR:
-        newpos = (int)(stream->position + position);
+        newpos = (int32_t)(stream->position + position);
         break;
 
     case MEM_SEEK_END:
-        newpos = (int)(stream->buflen + position);
+        newpos = (int32_t)(stream->buflen + position);
         break;
     default:
         return -1;

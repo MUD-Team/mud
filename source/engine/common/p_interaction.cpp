@@ -60,12 +60,12 @@ EXTERN_CVAR(g_lives)
 // sapientlion - experimental
 EXTERN_CVAR(sv_weapondrop)
 
-int MeansOfDeath;
+int32_t MeansOfDeath;
 
 // a weapon is found with two clip loads,
 // a big item has five clip loads
-int maxammo[NUMAMMO]  = {200, 50, 300, 50};
-int clipammo[NUMAMMO] = {10, 4, 20, 1};
+int32_t maxammo[NUMAMMO]  = {200, 50, 300, 50};
+int32_t clipammo[NUMAMMO] = {10, 4, 20, 1};
 
 void AM_Stop(void);
 void SV_SpawnMobj(AActor *mobj);
@@ -73,8 +73,8 @@ void SV_UpdateFrags(player_t &player);
 void SV_TouchSpecial(AActor *special, player_t *player);
 void SV_SocketTouch(player_t &player, team_t f);
 void SV_SendKillMobj(AActor *source, AActor *target, AActor *inflictor, bool joinkill);
-void SV_SendDamagePlayer(player_t *player, AActor *inflictor, int healthDamage, int armorDamage);
-void SV_SendDamageMobj(AActor *target, int pain);
+void SV_SendDamagePlayer(player_t *player, AActor *inflictor, int32_t healthDamage, int32_t armorDamage);
+void SV_SendDamageMobj(AActor *target, int32_t pain);
 void SV_ActorTarget(AActor *actor);
 void PickupMessage(AActor *toucher, const char *message);
 void WeaponPickupMessage(AActor *toucher, weapontype_t &Weapon);
@@ -142,7 +142,7 @@ static void PersistTeamScore(team_t team)
 //
 
 // Give frags to a player
-bool P_GiveFrags(player_t *player, int num)
+bool P_GiveFrags(player_t *player, int32_t num)
 {
     if (!G_CanScoreChange())
         return false;
@@ -156,7 +156,7 @@ bool P_GiveFrags(player_t *player, int num)
 }
 
 // Give coop kills to a player
-bool P_GiveKills(player_t *player, int num)
+bool P_GiveKills(player_t *player, int32_t num)
 {
     if (!G_CanScoreChange())
         return false;
@@ -166,7 +166,7 @@ bool P_GiveKills(player_t *player, int num)
 }
 
 // Give coop kills to a player
-bool P_GiveDeaths(player_t *player, int num)
+bool P_GiveDeaths(player_t *player, int32_t num)
 {
     if (!G_CanScoreChange())
         return false;
@@ -179,7 +179,7 @@ bool P_GiveDeaths(player_t *player, int num)
     return true;
 }
 
-bool P_GiveMonsterDamage(player_t *player, int num)
+bool P_GiveMonsterDamage(player_t *player, int32_t num)
 {
     if (!G_CanScoreChange())
         return false;
@@ -189,7 +189,7 @@ bool P_GiveMonsterDamage(player_t *player, int num)
 }
 
 // Give a specific number of points to a player's team
-bool P_GiveTeamPoints(player_t *player, int num)
+bool P_GiveTeamPoints(player_t *player, int32_t num)
 {
     if (!G_CanScoreChange())
         return false;
@@ -201,7 +201,7 @@ bool P_GiveTeamPoints(player_t *player, int num)
 /**
  * @brief Give lives to a player...or take them away.
  */
-bool P_GiveLives(player_t *player, int num)
+bool P_GiveLives(player_t *player, int32_t num)
 {
     if (!G_CanLivesChange())
         return false;
@@ -210,7 +210,7 @@ bool P_GiveLives(player_t *player, int num)
     return true;
 }
 
-int P_GetFragCount(const player_t *player)
+int32_t P_GetFragCount(const player_t *player)
 {
     if (G_IsRoundsGame() && !G_IsDuelGame())
         return player->totalpoints;
@@ -218,7 +218,7 @@ int P_GetFragCount(const player_t *player)
     return player->fragcount;
 }
 
-int P_GetPointCount(const player_t *player)
+int32_t P_GetPointCount(const player_t *player)
 {
     if (G_IsRoundsGame())
         return player->totalpoints;
@@ -226,7 +226,7 @@ int P_GetPointCount(const player_t *player)
     return player->points;
 }
 
-int P_GetDeathCount(const player_t *player)
+int32_t P_GetDeathCount(const player_t *player)
 {
     if (G_IsRoundsGame())
         return player->totaldeaths;
@@ -242,9 +242,9 @@ int P_GetDeathCount(const player_t *player)
 //
 
 // mbf21: take into account new weapon autoswitch flags
-static ItemEquipVal P_GiveAmmoAutoSwitch(player_t *player, ammotype_t ammo, int oldammo)
+static ItemEquipVal P_GiveAmmoAutoSwitch(player_t *player, ammotype_t ammo, int32_t oldammo)
 {
-    int i;
+    int32_t i;
 
     if (player->userinfo.switchweapon != WPSW_NEVER)
     {
@@ -303,8 +303,8 @@ ItemEquipVal P_GiveAmmo(player_t *player, ammotype_t ammotype, float num)
         num *= G_GetCurrentSkill().ammo_factor;
     }
 
-    const int oldammotype = player->ammo[ammotype];
-    player->ammo[ammotype] += static_cast<int>(num);
+    const int32_t oldammotype = player->ammo[ammotype];
+    player->ammo[ammotype] += static_cast<int32_t>(num);
 
     if (player->ammo[ammotype] > player->maxammo[ammotype])
     {
@@ -412,14 +412,14 @@ ItemEquipVal P_GiveWeapon(player_t *player, weapontype_t weapon, bool dropped)
 // P_GiveBody
 // Returns false if the body isn't needed at all
 //
-ItemEquipVal P_GiveBody(player_t *player, int num)
+ItemEquipVal P_GiveBody(player_t *player, int32_t num)
 {
     if (player->health >= MAXHEALTH)
     {
         return IEV_NotEquipped;
     }
 
-    player->health += static_cast<int>(static_cast<float>(num) * G_GetCurrentSkill().health_factor);
+    player->health += static_cast<int32_t>(static_cast<float>(num) * G_GetCurrentSkill().health_factor);
     if (player->health > MAXHEALTH)
     {
         player->health = MAXHEALTH;
@@ -434,15 +434,15 @@ ItemEquipVal P_GiveBody(player_t *player, int num)
 // Returns false if the armor is worse
 // than the current armor.
 //
-ItemEquipVal P_GiveArmor(player_t *player, int armortype)
+ItemEquipVal P_GiveArmor(player_t *player, int32_t armortype)
 {
-    const int hits = armortype * 100;
+    const int32_t hits = armortype * 100;
     if (player->armorpoints >= hits)
     {
         return IEV_NotEquipped; // don't pick up
     }
 
-    const int hits_real = static_cast<int>(static_cast<float>(hits) * G_GetCurrentSkill().armor_factor);
+    const int32_t hits_real = static_cast<int32_t>(static_cast<float>(hits) * G_GetCurrentSkill().armor_factor);
 
     player->armortype = armortype;
     player->armorpoints += hits_real;
@@ -481,7 +481,7 @@ ItemEquipVal P_GiveCard(player_t *player, card_t card)
 //
 // P_GivePower
 //
-ItemEquipVal P_GivePower(player_t *player, int /*powertype_t*/ power)
+ItemEquipVal P_GivePower(player_t *player, int32_t /*powertype_t*/ power)
 {
     if (power == pw_invulnerability)
     {
@@ -534,7 +534,7 @@ ItemEquipVal P_GivePower(player_t *player, int /*powertype_t*/ power)
  */
 static void P_GiveCarePack(player_t *player)
 {
-    const int ammomulti[NUMAMMO] = {2, 1, 1, 2};
+    const int32_t ammomulti[NUMAMMO] = {2, 1, 1, 2};
 
     // [AM] There is way too much going on in here to accurately predict.
     if (!::serverside)
@@ -556,7 +556,7 @@ static void P_GiveCarePack(player_t *player)
     }
 
     // We get "blocks" of inventory to give out.
-    int         blocks = 4;
+    int32_t         blocks = 4;
     std::string message, midmessage;
 
     // Players who are extremely low on health always get an initial health
@@ -585,7 +585,7 @@ static void P_GiveCarePack(player_t *player)
         }
 
         // Missle clip is a bit stingy, so we double our handouts.
-        const int   lowLimit   = ammomulti[ammo] * 2;
+        const int32_t   lowLimit   = ammomulti[ammo] * 2;
         const float giveAmount = static_cast<float>(ammomulti[ammo] * 5);
 
         if (player->ammo[ammo] < ::clipammo[ammo] * lowLimit)
@@ -732,7 +732,7 @@ bool P_SpecialIsWeapon(AActor *special)
             special->type == MT_MISC28);
 }
 
-void P_PickupSound(AActor *ent, int channel, const char *name)
+void P_PickupSound(AActor *ent, int32_t channel, const char *name)
 {
     if (clientside && ent == consoleplayer().mo) // Only play our own pickup sounds, the server will send other
                                                  // players pickup sounds if needed
@@ -745,7 +745,7 @@ void P_GiveSpecial(player_t *player, AActor *special)
         return;
 
     AActor        *toucher = player->mo;
-    int            sound   = 0;
+    int32_t            sound   = 0;
     const OString *msg     = NULL;
     ItemEquipVal   val     = IEV_EquipRemove;
     bool           dropped = false;
@@ -774,7 +774,7 @@ void P_GiveSpecial(player_t *player, AActor *special)
 
     // bonus items
     case SPR_BON1:
-        player->health += static_cast<int>(G_GetCurrentSkill().health_factor); // can go over 100%
+        player->health += static_cast<int32_t>(G_GetCurrentSkill().health_factor); // can go over 100%
         if (player->health > deh.MaxSoulsphere)
         {
             player->health = deh.MaxSoulsphere;
@@ -785,7 +785,7 @@ void P_GiveSpecial(player_t *player, AActor *special)
         break;
 
     case SPR_BON2:
-        player->armorpoints += static_cast<int>(G_GetCurrentSkill().armor_factor); // can go over 100%
+        player->armorpoints += static_cast<int32_t>(G_GetCurrentSkill().armor_factor); // can go over 100%
         if (player->armorpoints > deh.MaxArmor)
         {
             player->armorpoints = deh.MaxArmor;
@@ -800,7 +800,7 @@ void P_GiveSpecial(player_t *player, AActor *special)
 
     case SPR_SOUL:
         player->health +=
-            static_cast<int>(static_cast<float>(deh.SoulsphereHealth) * G_GetCurrentSkill().health_factor);
+            static_cast<int32_t>(static_cast<float>(deh.SoulsphereHealth) * G_GetCurrentSkill().health_factor);
         if (player->health > deh.MaxSoulsphere)
         {
             player->health = deh.MaxSoulsphere;
@@ -812,7 +812,7 @@ void P_GiveSpecial(player_t *player, AActor *special)
         break;
 
     case SPR_MEGA:
-        player->health = static_cast<int>(static_cast<float>(deh.MegasphereHealth) * G_GetCurrentSkill().health_factor);
+        player->health = static_cast<int32_t>(static_cast<float>(deh.MegasphereHealth) * G_GetCurrentSkill().health_factor);
         player->mo->health = player->health;
         P_GiveArmor(player, deh.BlueAC);
         msg   = &GOTMSPHERE;
@@ -1042,14 +1042,14 @@ void P_GiveSpecial(player_t *player, AActor *special)
     case SPR_BPAK:
         if (!player->backpack)
         {
-            for (int i = 0; i < NUMAMMO; i++)
+            for (int32_t i = 0; i < NUMAMMO; i++)
             {
                 player->maxammo[i] *= 2;
             }
             player->backpack = true;
             M_LogWDLPickupEvent(player, special, WDL_PICKUP_BACKPACK, false);
         }
-        for (int i = 0; i < NUMAMMO; i++)
+        for (int32_t i = 0; i < NUMAMMO; i++)
         {
             P_GiveAmmo(player, (ammotype_t)i, 1);
         }
@@ -1244,10 +1244,10 @@ void P_TouchSpecialThing(AActor *special, AActor *toucher)
 //		%o -> other (victim)
 //		%k -> killer
 //
-void SexMessage(const char *from, char *to, int gender, const char *victim, const char *killer)
+void SexMessage(const char *from, char *to, int32_t gender, const char *victim, const char *killer)
 {
     static const char *genderstuff[3][3] = {{"he", "him", "his"}, {"she", "her", "her"}, {"it", "it", "its"}};
-    static const int   gendershift[3][3] = {{2, 3, 3}, {3, 3, 3}, {2, 2, 3}};
+    static const int32_t   gendershift[3][3] = {{2, 3, 3}, {3, 3, 3}, {2, 2, 3}};
     const char        *subst             = NULL;
 
     do
@@ -1258,7 +1258,7 @@ void SexMessage(const char *from, char *to, int gender, const char *victim, cons
         }
         else
         {
-            int gendermsg = -1;
+            int32_t gendermsg = -1;
 
             switch (from[1])
             {
@@ -1280,7 +1280,7 @@ void SexMessage(const char *from, char *to, int gender, const char *victim, cons
             }
             if (subst != NULL)
             {
-                int len = strlen(subst);
+                int32_t len = strlen(subst);
                 memcpy(to, subst, len);
                 to += len;
                 from++;
@@ -1315,7 +1315,7 @@ static void ClientObituary(AActor *self, AActor *inflictor, AActor *attacker)
     if (!G_CanShowObituary() || gamestate != GS_LEVEL)
         return;
 
-    int gender = self->player->userinfo.gender;
+    int32_t gender = self->player->userinfo.gender;
 
     // Treat voodoo dolls as unknown deaths
     if (inflictor && inflictor->player == self->player)
@@ -1329,7 +1329,7 @@ static void ClientObituary(AActor *self, AActor *inflictor, AActor *attacker)
         MeansOfDeath |= MOD_FRIENDLY_FIRE;
 
     bool        friendly = MeansOfDeath & MOD_FRIENDLY_FIRE;
-    int         mod      = MeansOfDeath & ~MOD_FRIENDLY_FIRE;
+    int32_t         mod      = MeansOfDeath & ~MOD_FRIENDLY_FIRE;
     const char *message  = NULL;
     OString     messagename;
 
@@ -1903,10 +1903,10 @@ static bool P_InfightingImmune(AActor *target, AActor *source)
 // and other environmental stuff.
 //
 // [Toke] This is no longer needed client-side
-void P_DamageMobj(AActor *target, AActor *inflictor, AActor *source, int damage, int mod, int flags)
+void P_DamageMobj(AActor *target, AActor *inflictor, AActor *source, int32_t damage, int32_t mod, int32_t flags)
 {
     uint32_t ang;
-    int      saved = 0;
+    int32_t      saved = 0;
 
     if (!serverside)
     {
@@ -1959,7 +1959,7 @@ void P_DamageMobj(AActor *target, AActor *inflictor, AActor *source, int damage,
 
     if (player)
     {
-        damage = static_cast<int>(static_cast<float>(damage) * G_GetCurrentSkill().damage_factor);
+        damage = static_cast<int32_t>(static_cast<float>(damage) * G_GetCurrentSkill().damage_factor);
     }
 
     // [AM] Weapon and monster damage scaling.
@@ -2027,7 +2027,7 @@ void P_DamageMobj(AActor *target, AActor *inflictor, AActor *source, int damage,
             }
         }
 
-        int armorDamage = 0;
+        int32_t armorDamage = 0;
         if (player->armortype && !(flags & DMG_NO_ARMOR))
         {
             if (player->armortype == deh.GreenAC)
@@ -2047,8 +2047,8 @@ void P_DamageMobj(AActor *target, AActor *inflictor, AActor *source, int damage,
 
         // WDL damage events - they have to be up here to ensure we know how
         // much armor is subtracted.
-        int low          = std::max(target->health - damage, 0);
-        int actualdamage = target->health - low;
+        int32_t low          = std::max(target->health - damage, 0);
+        int32_t actualdamage = target->health - low;
 
         angle_t sangle = 0;
 
@@ -2134,8 +2134,8 @@ void P_DamageMobj(AActor *target, AActor *inflictor, AActor *source, int damage,
             }
 
             // Calculate amount of HP to take away from the boss pool
-            int low          = std::max(target->health - damage, 0);
-            int actualdamage = target->health - low;
+            int32_t low          = std::max(target->health - damage, 0);
+            int32_t actualdamage = target->health - low;
 
             P_AddDamagePool(target, actualdamage);
 
@@ -2176,7 +2176,7 @@ void P_DamageMobj(AActor *target, AActor *inflictor, AActor *source, int damage,
 
     if (!(target->flags2 & MF2_DORMANT))
     {
-        int pain = P_Random();
+        int32_t pain = P_Random();
 
         if (target->oflags & MFO_UNFLINCHING)
         {
@@ -2254,7 +2254,7 @@ void P_PlayerLeavesGame(player_s *player)
     G_AssertValidPlayerCount();
 }
 
-void P_HealMobj(AActor *mo, int num)
+void P_HealMobj(AActor *mo, int32_t num)
 {
     player_t *player = mo->player;
 
@@ -2268,7 +2268,7 @@ void P_HealMobj(AActor *mo, int num)
     }
     else
     {
-        int max = mobjinfo[mo->type].spawnhealth;
+        int32_t max = mobjinfo[mo->type].spawnhealth;
 
         mo->health += num;
         if (mo->health > max)

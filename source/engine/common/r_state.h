@@ -35,39 +35,39 @@
 //	for rendering.
 //
 
-extern "C" int viewwidth;
-extern "C" int viewheight;
+extern "C" int32_t viewwidth;
+extern "C" int32_t viewheight;
 
 //
 // Lookup tables for map data.
 //
 extern bool g_ValidLevel;
 
-extern int          numsprites;
+extern int32_t          numsprites;
 extern spritedef_t *sprites;
 
-extern int       numvertexes;
+extern int32_t       numvertexes;
 extern vertex_t *vertexes;
 
-extern int    numsegs;
+extern int32_t    numsegs;
 extern seg_t *segs;
 
-extern int       numsectors;
+extern int32_t       numsectors;
 extern sector_t *sectors;
 
-extern int          numsubsectors;
+extern int32_t          numsubsectors;
 extern subsector_t *subsectors;
 
-extern int     numnodes;
+extern int32_t     numnodes;
 extern node_t *nodes;
 
-extern int     numlines;
+extern int32_t     numlines;
 extern line_t *lines;
 
-extern int     numsides;
+extern int32_t     numsides;
 extern side_t *sides;
 
-extern std::vector<int> originalLightLevels;
+extern std::vector<int32_t> originalLightLevels;
 
 inline FArchive &operator<<(FArchive &arc, sector_t *sec)
 {
@@ -110,7 +110,7 @@ struct LocalView
     angle_t angle;
     bool    setangle;
     bool    skipangle;
-    int     pitch;
+    int32_t     pitch;
     bool    setpitch;
     bool    skippitch;
 };
@@ -135,6 +135,6 @@ extern visplane_t *ceilingplane;
 extern visplane_t *skyplane;
 
 // [AM] 4:3 Field of View
-extern int FieldOfView;
+extern int32_t FieldOfView;
 // [AM] Corrected (for widescreen) Field of View
-extern int CorrectFieldOfView;
+extern int32_t CorrectFieldOfView;

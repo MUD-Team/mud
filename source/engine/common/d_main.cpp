@@ -471,7 +471,7 @@ class UncappedTaskScheduler : public TaskScheduler
 class CappedTaskScheduler : public TaskScheduler
 {
   public:
-    CappedTaskScheduler(void (*task)(), float rate, int max_count)
+    CappedTaskScheduler(void (*task)(), float rate, int32_t max_count)
         : mTask(task), mMaxCount(max_count), mFrameDuration(I_ConvertTimeFromMs(1000) / rate),
           mAccumulator(mFrameDuration), mPreviousFrameStartTime(I_GetTime())
     {
@@ -487,7 +487,7 @@ class CappedTaskScheduler : public TaskScheduler
         mAccumulator += mFrameStartTime - mPreviousFrameStartTime;
         mPreviousFrameStartTime = mFrameStartTime;
 
-        int count = mMaxCount;
+        int32_t count = mMaxCount;
 
         while (mAccumulator >= mFrameDuration && count--)
         {
@@ -511,7 +511,7 @@ class CappedTaskScheduler : public TaskScheduler
 
   private:
     void (*mTask)();
-    const int     mMaxCount;
+    const int32_t     mMaxCount;
     const dtime_t mFrameDuration;
     dtime_t       mAccumulator;
     dtime_t       mFrameStartTime;

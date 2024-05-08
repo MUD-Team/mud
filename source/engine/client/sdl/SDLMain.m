@@ -48,7 +48,7 @@ extern OSErr	CPSSetFrontProcess( CPSProcessSerNum *psn);
 
 #endif /* SDL_USE_CPS */
 
-static int    gArgc;
+static int32_t    gArgc;
 static char  **gArgv;
 static BOOL   gFinderLaunch;
 static BOOL   gCalledAppMainline = FALSE;
@@ -209,7 +209,7 @@ static void setupWindowMenu(void)
 }
 
 /* Replacement for NSApplicationMain */
-static void CustomApplicationMain (int argc, char **argv)
+static void CustomApplicationMain (int32_t argc, char **argv)
 {
     NSAutoreleasePool	*pool = [[NSAutoreleasePool alloc] init];
     SDLMain				*sdlMain;
@@ -299,7 +299,7 @@ static void CustomApplicationMain (int argc, char **argv)
 /* Called when the internal event loop has just started running */
 - (void) applicationDidFinishLaunching: (NSNotification *) note
 {
-    int status;
+    int32_t status;
 
     /* Set the working directory to the .app's parent directory */
     [self setupWorkingDirectory:gFinderLaunch];
@@ -366,7 +366,7 @@ static void CustomApplicationMain (int argc, char **argv)
 
 
 /* Main entry point to executable - should *not* be SDL_main! */
-int main (int argc, char **argv)
+int32_t main (int32_t argc, char **argv)
 {
     /* Copy the arguments into a global variable */
     /* This is passed if we are launched by double-clicking */
@@ -377,7 +377,7 @@ int main (int argc, char **argv)
         gArgc = 1;
         gFinderLaunch = YES;
     } else {
-        int i;
+        int32_t i;
         gArgc = argc;
         gArgv = (char **) SDL_malloc(sizeof (char *) * (argc+1));
         for (i = 0; i <= argc; i++)

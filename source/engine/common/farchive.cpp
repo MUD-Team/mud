@@ -263,7 +263,7 @@ uint32_t FLZOFile::Tell() const
     return m_Pos;
 }
 
-FFile &FLZOFile::Seek(int pos, ESeekPos ofs)
+FFile &FLZOFile::Seek(int32_t pos, ESeekPos ofs)
 {
     if (ofs == ESeekRelative)
         pos += m_Pos;
@@ -293,7 +293,7 @@ void FLZOFile::Implode()
         compressed = new lzo_byte[MaxLZOCompressedLength(input_len)];
 
         lzo_byte *wrkmem = new lzo_byte[LZO1X_1_MEM_COMPRESS];
-        int       res    = lzo1x_1_compress(m_Buffer, input_len, compressed, &compressed_len, wrkmem);
+        int32_t       res    = lzo1x_1_compress(m_Buffer, input_len, compressed, &compressed_len, wrkmem);
         delete[] wrkmem;
 
         // If the data could not be compressed, store it as-is.
@@ -344,7 +344,7 @@ void FLZOFile::Explode()
         {
             lzo_uint newlen = expanded_len;
 
-            int res = lzo1x_decompress_safe(m_Buffer + 8, compressed_len, expanded_buffer, &newlen, NULL);
+            int32_t res = lzo1x_decompress_safe(m_Buffer + 8, compressed_len, expanded_buffer, &newlen, NULL);
             if (res != LZO_E_OK || newlen != expanded_len)
             {
                 M_Free(expanded_buffer);
@@ -520,7 +520,7 @@ void FLZOMemFile::WriteToBuffer(void *buf, size_t length) const
 
 FArchive::FArchive(FFile &file, uint32_t flags)
 {
-    int i;
+    int32_t i;
 
     m_Reset          = flags & FA_RESET;
     m_HubTravel      = false;
@@ -605,7 +605,7 @@ uint32_t FArchive::ReadCount()
 {
     uint8_t  in;
     uint32_t count = 0;
-    int   ofs   = 0;
+    int32_t   ofs   = 0;
 
     do
     {
@@ -928,7 +928,7 @@ uint32_t FArchive::WriteClass(const TypeInfo *info)
 const TypeInfo *FArchive::ReadClass()
 {
     std::string typeName;
-    int         i;
+    int32_t         i;
 
     if (m_ClassCount >= TypeInfo::m_NumTypes)
     {

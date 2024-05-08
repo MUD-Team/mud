@@ -10,10 +10,10 @@
 void LUA_OpenCommonState(lua_State *L);
 
 static void LUA_Sandbox(lua_State *L);
-static int  LUA_DbgNOP(lua_State *L);
-static int  LUA_MsgHandler(lua_State *L);
-static int  LUA_LuaRequire(lua_State *L);
-static int  LUA_DoFile(lua_State *L, const std::string &filepath, const char *source, size_t source_length);
+static int32_t  LUA_DbgNOP(lua_State *L);
+static int32_t  LUA_MsgHandler(lua_State *L);
+static int32_t  LUA_LuaRequire(lua_State *L);
+static int32_t  LUA_DoFile(lua_State *L, const std::string &filepath, const char *source, size_t source_length);
 
 // TODO: Fixme
 static std::vector<std::string> requirePaths;
@@ -74,7 +74,7 @@ void LUA_CloseState(lua_State *L)
     lua_close(L);
 }
 
-int LUA_DoFile(lua_State *L, const std::string &filepath)
+int32_t LUA_DoFile(lua_State *L, const std::string &filepath)
 {
     std::string path;
     M_ExtractFilePath(filepath, path);
@@ -113,14 +113,14 @@ int LUA_DoFile(lua_State *L, const std::string &filepath)
     PHYSFS_close(fp);
 
     buffer[length] = 0;
-    int result     = LUA_DoFile(L, filepath, buffer, length);
+    int32_t result     = LUA_DoFile(L, filepath, buffer, length);
     delete[] buffer;
 
     requirePaths.pop_back();
     return result;
 }
 
-int LUA_DoFile(lua_State *L, const std::string &filepath, const char *source, size_t source_length)
+int32_t LUA_DoFile(lua_State *L, const std::string &filepath, const char *source, size_t source_length)
 {
     if (true) // lua_debug.d_)
     {
@@ -137,8 +137,8 @@ int LUA_DoFile(lua_State *L, const std::string &filepath, const char *source, si
         lua_setfield(L, -2, filepath.c_str());
         lua_pop(L, 1);
     }
-    int top    = lua_gettop(L);
-    int status = luaL_loadbuffer(L, source, source_length, (std::string("@") + filepath).c_str());
+    int32_t top    = lua_gettop(L);
+    int32_t status = luaL_loadbuffer(L, source, source_length, (std::string("@") + filepath).c_str());
 
     if (status != LUA_OK)
     {
@@ -151,7 +151,7 @@ int LUA_DoFile(lua_State *L, const std::string &filepath, const char *source, si
     }
     else
     {
-        int base = lua_gettop(L);             // function index
+        int32_t base = lua_gettop(L);             // function index
         lua_pushcfunction(L, LUA_MsgHandler); // push message handler */
         lua_insert(L, base);                  // put it under function and args */
         status = lua_pcall(L, 0, LUA_MULTRET, base);
@@ -167,7 +167,7 @@ int LUA_DoFile(lua_State *L, const std::string &filepath, const char *source, si
     return lua_gettop(L) - top;
 }
 
-static int LUA_LuaRequire(lua_State *L)
+static int32_t LUA_LuaRequire(lua_State *L)
 {
     const char *name = luaL_checkstring(L, 1);
 
@@ -207,7 +207,7 @@ static int LUA_LuaRequire(lua_State *L)
 
     lua_pop(L, 1);
 
-    int result = LUA_DoFile(L, path.c_str());
+    int32_t result = LUA_DoFile(L, path.c_str());
 
     if (result == 0)
     {
@@ -224,7 +224,7 @@ static int LUA_LuaRequire(lua_State *L)
     return result;
 }
 
-int LUA_MsgHandler(lua_State *L)
+int32_t LUA_MsgHandler(lua_State *L)
 {
     const char *msg = lua_tostring(L, 1);
     if (msg == nullptr)
@@ -239,7 +239,7 @@ int LUA_MsgHandler(lua_State *L)
     return 1;                     /* return the traceback */
 }
 
-static int LUA_SandboxWarning(lua_State *L)
+static int32_t LUA_SandboxWarning(lua_State *L)
 {
     const char *function_name = luaL_checkstring(L, lua_upvalueindex(1));
 
@@ -254,7 +254,7 @@ static int LUA_SandboxWarning(lua_State *L)
 
 static void LUA_SandboxModule(lua_State *L, const char *module_name, const char **functions)
 {
-    int i = 0;
+    int32_t i = 0;
     lua_getglobal(L, module_name);
     while (const char *function_name = functions[i++])
     {
@@ -299,7 +299,7 @@ void LUA_Sandbox(lua_State *L)
 
 // NOP dbg() for when debugger is disabled and someone has left some breakpoints in code
 static bool dbg_nop_warn = false;
-int         LUA_DbgNOP(lua_State *L)
+int32_t         LUA_DbgNOP(lua_State *L)
 {
     if (!dbg_nop_warn)
     {
@@ -327,16 +327,16 @@ static void LuaError(const char *msg, const char *luaerror)
 void LUA_CallGlobalFunction(lua_State *L, const char *function_name)
 {
 
-    int top = lua_gettop(L);
+    int32_t top = lua_gettop(L);
     lua_getglobal(L, function_name);
-    int status = 0;
+    int32_t status = 0;
     if (true) // lua_debug.d_)
     {
         status = dbg_pcall(L, 0, 0, 0);
     }
     else
     {
-        int base = lua_gettop(L);             // function index
+        int32_t base = lua_gettop(L);             // function index
         lua_pushcfunction(L, LUA_MsgHandler); // push message handler */
         lua_insert(L, base);                  // put it under function and args */
 

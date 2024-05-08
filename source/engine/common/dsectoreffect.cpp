@@ -129,7 +129,7 @@ void DMovingCeiling::Serialize(FArchive &arc)
 // [RH] Crush specifies the actual amount of crushing damage inflictable.
 //		(Use -1 to prevent it from trying to crush)
 //
-DMover::EResult DMover::MovePlane(fixed_t speed, fixed_t dest, int crush, int floorOrCeiling, int direction,
+DMover::EResult DMover::MovePlane(fixed_t speed, fixed_t dest, int32_t crush, int32_t floorOrCeiling, int32_t direction,
                                   bool hexencrush)
 {
     bool    flag;

@@ -117,8 +117,8 @@ void UI_OnResize()
     Rml::Context *context = Rml::GetContext("play");
     if (context)
     {
-        int width  = I_GetVideoWidth();
-        int height = I_GetVideoHeight();
+        int32_t width  = I_GetVideoWidth();
+        int32_t height = I_GetVideoHeight();
 
         context->SetDimensions(Rml::Vector2i(width, height));
     }

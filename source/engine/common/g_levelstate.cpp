@@ -47,12 +47,12 @@ LevelState levelstate;
 /**
  * @brief Countdown getter.
  */
-int LevelState::getCountdown() const
+int32_t LevelState::getCountdown() const
 {
     if (m_state == LevelState::WARMUP || m_state == LevelState::INGAME)
         return 0;
 
-    int period = m_countdownDoneTime - ::level.time;
+    int32_t period = m_countdownDoneTime - ::level.time;
     if (period < 0)
     {
         // Time desync at the start of a round, force to maximum.
@@ -73,15 +73,15 @@ team_t LevelState::getDefendingTeam() const
     }
 
     // Blue always goes first, then red, then so on...
-    int teams  = clamp(sv_teamsinplay.asInt(), 2, 3);
-    int round0 = MAX(::levelstate.getRound() - 1, 0);
+    int32_t teams  = clamp(sv_teamsinplay.asInt(), 2, 3);
+    int32_t round0 = MAX(::levelstate.getRound() - 1, 0);
     return static_cast<team_t>(round0 % teams);
 }
 
 /**
  * @brief Get ingame start time.
  */
-int LevelState::getIngameStartTime() const
+int32_t LevelState::getIngameStartTime() const
 {
     return m_ingameStartTime;
 }
@@ -89,20 +89,20 @@ int LevelState::getIngameStartTime() const
 /**
  * @brief Amount of time left for a player to join the game.
  */
-int LevelState::getJoinTimeLeft() const
+int32_t LevelState::getJoinTimeLeft() const
 {
     if (m_state != LevelState::INGAME)
         return 0;
 
-    int end_time = m_ingameStartTime + g_lives_jointimer * TICRATE;
-    int left     = ceil((end_time - ::level.time) / (float)TICRATE);
+    int32_t end_time = m_ingameStartTime + g_lives_jointimer * TICRATE;
+    int32_t left     = ceil((end_time - ::level.time) / (float)TICRATE);
     return MAX(left, 0);
 }
 
 /**
  * @brief Get the current round number.
  */
-int LevelState::getRound() const
+int32_t LevelState::getRound() const
 {
     return m_roundNumber;
 }
@@ -164,7 +164,7 @@ void LevelState::setStateCB(LevelState::SetStateCB cb)
  * @param type Winner of the round.
  * @param id ID of the winning player or team.  If N/A, put 0.
  */
-void LevelState::setWinner(WinInfo::WinType type, int id)
+void LevelState::setWinner(WinInfo::WinType type, int32_t id)
 {
     // Set our round/match winner.
     m_lastWininfo.type = type;
@@ -268,12 +268,12 @@ void LevelState::readyToggle()
         return;
 
     float  f_calc = total * sv_warmup_autostart;
-    size_t i_calc = (int)floor(f_calc + 0.5f);
+    size_t i_calc = (int32_t)floor(f_calc + 0.5f);
     if (f_calc > i_calc - MPEPSILON && f_calc < i_calc + MPEPSILON)
     {
         needed = i_calc + 1;
     }
-    needed = (int)ceil(f_calc);
+    needed = (int32_t)ceil(f_calc);
 
     if (ready >= needed)
     {
@@ -425,7 +425,7 @@ void LevelState::tic()
             else if (G_IsTeamGame())
             {
                 // We need at least one person on at least two different teams.
-                int ready = 0;
+                int32_t ready = 0;
                 for (size_t i = 0; i < NUMTEAMS; i++)
                 {
                     if (pr.teamCount[i] > 0)

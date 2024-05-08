@@ -119,7 +119,7 @@ void UIRenderInterface::setMode(uint16_t width, uint16_t height, const PixelForm
 }
 
 Rml::CompiledGeometryHandle UIRenderInterface::CompileGeometry(Rml::Span<const Rml::Vertex> vertices,
-                                                               Rml::Span<const int>         indices)
+                                                               Rml::Span<const int32_t>         indices)
 {
     GeometryView *data = new GeometryView{vertices, indices};
     return reinterpret_cast<Rml::CompiledGeometryHandle>(data);
@@ -136,7 +136,7 @@ void UIRenderInterface::RenderGeometry(Rml::CompiledGeometryHandle handle, Rml::
     const GeometryView *geometry     = reinterpret_cast<GeometryView *>(handle);
     const Rml::Vertex  *vertices     = geometry->vertices.data();
     const size_t        num_vertices = geometry->vertices.size();
-    const int          *indices      = geometry->indices.data();
+    const int32_t          *indices      = geometry->indices.data();
     const size_t        num_indices  = geometry->indices.size();
 
     SDL_FPoint *positions = new SDL_FPoint[num_vertices];
@@ -151,7 +151,7 @@ void UIRenderInterface::RenderGeometry(Rml::CompiledGeometryHandle handle, Rml::
 
     SDL_RenderGeometryRaw(mRenderer, sdl_texture, &positions[0].x, sizeof(SDL_FPoint),
                           (const SDL_Color *)&vertices->colour, sizeof(Rml::Vertex), &vertices->tex_coord.x,
-                          sizeof(Rml::Vertex), (int)num_vertices, indices, (int)num_indices, 4);
+                          sizeof(Rml::Vertex), (int32_t)num_vertices, indices, (int32_t)num_indices, 4);
 
     delete[] positions;
 }
@@ -214,8 +214,8 @@ Rml::TextureHandle UIRenderInterface::LoadTexture(Rml::Vector2i &texture_dimensi
     const size_t i_ext     = source.rfind('.');
     Rml::String  extension = (i_ext == Rml::String::npos ? Rml::String() : source.substr(i_ext + 1));
 
-    int      width, height, channels;
-    stbi_uc *image_data = stbi_load_from_memory(buffer.get(), int(buffer_size), &width, &height, &channels, 0);
+    int32_t      width, height, channels;
+    stbi_uc *image_data = stbi_load_from_memory(buffer.get(), int32_t(buffer_size), &width, &height, &channels, 0);
 
     Uint32 format = (channels == 3) ? SDL_PIXELFORMAT_RGB24 : SDL_PIXELFORMAT_RGBA32;
 
@@ -238,11 +238,11 @@ Rml::TextureHandle UIRenderInterface::LoadTexture(Rml::Vector2i &texture_dimensi
 
     // Convert colors to premultiplied alpha, which is necessary for correct alpha compositing.
     byte *pixels = static_cast<byte *>(surface->pixels);
-    for (int i = 0; i < surface->w * surface->h * 4; i += 4)
+    for (int32_t i = 0; i < surface->w * surface->h * 4; i += 4)
     {
         const byte alpha = pixels[i + 3];
-        for (int j = 0; j < 3; ++j)
-            pixels[i + j] = byte(int(pixels[i + j]) * int(alpha) / 255);
+        for (int32_t j = 0; j < 3; ++j)
+            pixels[i + j] = byte(int32_t(pixels[i + j]) * int32_t(alpha) / 255);
     }
 
     SDL_Texture *texture = SDL_CreateTextureFromSurface(mRenderer, surface);

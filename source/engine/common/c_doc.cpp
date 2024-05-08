@@ -103,7 +103,7 @@ static void HTMLCvarRow(std::string &out, const cvar_t &cvar)
     switch (cvar.type())
     {
     case CVARTYPE_BOOL: {
-        int val = atoi(cvar.getDefault().c_str());
+        int32_t val = atoi(cvar.getDefault().c_str());
         info.push_back(val == 0 ? "Default: False" : "Default: True");
         break;
     }
@@ -111,19 +111,19 @@ static void HTMLCvarRow(std::string &out, const cvar_t &cvar)
     case CVARTYPE_WORD:
     case CVARTYPE_INT: {
         std::string buffer;
-        int         val = atoi(cvar.getDefault().c_str());
+        int32_t         val = atoi(cvar.getDefault().c_str());
         StrFormat(buffer, "Default: %d", val);
         info.push_back(buffer);
 
         if (cvar.getMinValue() != -FLT_MAX)
         {
-            StrFormat(buffer, "Min: %d", static_cast<int>(cvar.getMinValue()));
+            StrFormat(buffer, "Min: %d", static_cast<int32_t>(cvar.getMinValue()));
             info.push_back(buffer);
         }
 
         if (cvar.getMaxValue() != FLT_MAX)
         {
-            StrFormat(buffer, "Max: %d", static_cast<int>(cvar.getMaxValue()));
+            StrFormat(buffer, "Max: %d", static_cast<int32_t>(cvar.getMaxValue()));
             info.push_back(buffer);
         }
 

@@ -224,7 +224,7 @@ dtime_t I_GetTime()
 
 #else
     // [SL] use SDL_GetTicks, but account for the fact that after
-    // 49 days, it wraps around since it returns a 32-bit int
+    // 49 days, it wraps around since it returns a 32-bit int32_t
     static const uint64_t mask         = 0xFFFFFFFFLL;
     static uint64_t       last_time    = 0LL;
     uint64_t              current_time = SDL_GetTicks();
@@ -292,7 +292,7 @@ void I_Yield()
 // I_WaitVBL is never used to actually synchronize to the
 // vertical blank. Instead, it's used for delay purposes.
 //
-void I_WaitVBL(int count)
+void I_WaitVBL(int32_t count)
 {
     I_Sleep(1000000LL * 1000LL * count / 70);
 }
@@ -301,7 +301,7 @@ void I_WaitVBL(int count)
 // SubsetLanguageIDs
 //
 #if defined _WIN32
-static void SubsetLanguageIDs(LCID id, LCTYPE type, int idx)
+static void SubsetLanguageIDs(LCID id, LCTYPE type, int32_t idx)
 {
     char  buf[8];
     LCID  langid;
@@ -369,7 +369,7 @@ void I_FinishClockCalibration()
 //
 // I_Quit
 //
-static int has_exited;
+static int32_t has_exited;
 
 void STACK_ARGS I_Quit(void)
 {
@@ -410,7 +410,7 @@ NORETURN void STACK_ARGS I_FatalError(const char *error, ...)
         alreadyThrown = true;
         va_list argptr;
         va_start(argptr, error);
-        int index = vsnprintf(errortext, ARRAY_LENGTH(errortext), error, argptr);
+        int32_t index = vsnprintf(errortext, ARRAY_LENGTH(errortext), error, argptr);
         if (SDL_GetError()[0] != '\0')
         {
             snprintf(messagetext, ARRAY_LENGTH(messagetext), "%s\nLast SDL Error:\n%s\n", errortext, SDL_GetError());
@@ -437,7 +437,7 @@ NORETURN void STACK_ARGS I_FatalError(const char *error, ...)
     // Recursive atterm, we've used up all our chances.
     va_list argptr;
     va_start(argptr, error);
-    int index = vsnprintf(errortext, ARRAY_LENGTH(errortext), error, argptr);
+    int32_t index = vsnprintf(errortext, ARRAY_LENGTH(errortext), error, argptr);
     if (SDL_GetError()[0] != '\0')
     {
         snprintf(messagetext, ARRAY_LENGTH(messagetext),
@@ -501,7 +501,7 @@ char DoomStartupTitle[256] = {0};
 
 void I_SetTitleString(const char *title)
 {
-    int i;
+    int32_t i;
 
     for (i = 0; title[i]; i++)
         DoomStartupTitle[i] = title[i] | 0x80;
@@ -524,7 +524,7 @@ std::string I_GetClipboardText()
     std::string ret;
 
     Display *dis    = XOpenDisplay(NULL);
-    int      screen = DefaultScreen(dis);
+    int32_t      screen = DefaultScreen(dis);
 
     if (!dis)
     {
@@ -561,7 +561,7 @@ std::string I_GetClipboardText()
         }
 
         Atom    type;
-        int     format, result;
+        int32_t     format, result;
         u_long  len, bytes_left, temp;
         u_char *data;
 
@@ -652,7 +652,7 @@ std::string I_GetClipboardText()
     ScrapRef scrap;
     Size     size;
 
-    int err = GetCurrentScrap(&scrap);
+    int32_t err = GetCurrentScrap(&scrap);
 
     if (err)
     {
@@ -768,7 +768,7 @@ std::string I_ConsoleInput(void)
 {
     std::string ret;
     static char text[1024] = {0};
-    int         len;
+    int32_t         len;
 
     fd_set fdr;
     FD_ZERO(&fdr);

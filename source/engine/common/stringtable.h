@@ -50,7 +50,7 @@ class StringTable
         // Pass that string was added by.
         //
         // In some cases, we need to
-        int pass;
+        int32_t pass;
 
         // Index of string.
         //
@@ -58,14 +58,14 @@ class StringTable
         // strings, and there were (and still are) several places in the
         // code that used comparison operators on the enum index.  This
         // index is -1 if it's a custom string.
-        int index;
+        int32_t index;
     };
     typedef OHashTable<OString, TableEntry> StringHash;
     StringHash                              _stringHash;
 
-    bool canSetPassString(int pass, const std::string &name) const;
+    bool canSetPassString(int32_t pass, const std::string &name) const;
     void clearStrings();
-    void loadLanguage(const char *code, bool exactMatch, int pass, char *lump, size_t lumpLen);
+    void loadLanguage(const char *code, bool exactMatch, int32_t pass, char *lump, size_t lumpLen);
     void loadStringsFile(const char *filename, const bool engOnly);
     void prepareIndexes();
     void replaceEscapes(std::string &str);
@@ -95,7 +95,7 @@ class StringTable
     //
     // Obtain a string by index.
     //
-    const char *getIndex(int index) const
+    const char *getIndex(int32_t index) const
     {
         if (index >= 0 && static_cast<size_t>(index) < ARRAY_LENGTH(::stringIndexes))
         {
@@ -116,7 +116,7 @@ class StringTable
     //
     // Obtain an index by name.
     //
-    int toIndex(const OString &name) const
+    int32_t toIndex(const OString &name) const
     {
         StringHash::const_iterator it = _stringHash.find(name);
         if (it != _stringHash.end())
@@ -134,6 +134,6 @@ class StringTable
     void           loadStrings(const bool engOnly);
     const OString &matchString(const OString &string) const;
     void           setString(const OString &name, const OString &string);
-    void           setPassString(int pass, const OString &name, const OString &string);
+    void           setPassString(int32_t pass, const OString &name, const OString &string);
     size_t         size() const;
 };

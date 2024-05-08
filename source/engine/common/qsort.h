@@ -30,7 +30,7 @@
  *  #include "iqsort.h"
  *  #define islt(a,b) (strcmp((*a),(*b))<0)
  *  char *arr[];
- *  int n;
+ *  int32_t n;
  *  QSORT(char*, arr, n, islt);
  *
  * The "prototype" and 4 arguments are:
@@ -48,13 +48,13 @@
  * another, no other conditions (greather than, equal to etc) are tested.
  * So, for example, to define integer sort, use:
  *  #define islt(a,b) ((*a)<(*b))
- *  QSORT(int, arr, n, islt)
+ *  QSORT(int32_t, arr, n, islt)
  *
  * The macro could be used to implement a sorting function (see examples
  * below), or to implement the sorting algorithm inline.  That is, either
  * create a sorting function and use it whenever you want to sort something,
  * or use QSORT() macro directly instead a call to such routine.  Note that
- * the macro expands to quite some code (compiled size of int qsort on x86
+ * the macro expands to quite some code (compiled size of int32_t qsort on x86
  * is about 700..800 bytes).
  *
  * Using this macro directly it isn't possible to implement traditional
@@ -64,9 +64,9 @@
  * Several ready-to-use examples:
  *
  * Sorting array of integers:
- * void int_qsort(int *arr, uint32_t n) {
+ * void int_qsort(int32_t *arr, uint32_t n) {
  * #define int_lt(a,b) ((*a)<(*b))
- *   QSORT(int, arr, n, int_lt);
+ *   QSORT(int32_t, arr, n, int_lt);
  * }
  *
  * Sorting array of string pointers:
@@ -78,7 +78,7 @@
  * Sorting array of structures:
  *
  * struct elt {
- *   int key;
+ *   int32_t key;
  *   ...
  * };
  * void elt_qsort(struct elt *arr, uint32_t n) {

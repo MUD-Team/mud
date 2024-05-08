@@ -25,7 +25,7 @@
 	
 	EXAMPLE:
 	
-	int main(int argc, char **argv){
+	int32_t main(int32_t argc, char **argv){
 		lua_State *lua = luaL_newstate();
 		luaL_openlibs(lua);
 		
@@ -63,7 +63,7 @@ extern "C" {
 
 
 typedef struct lua_State lua_State;
-typedef int (*lua_CFunction)(lua_State *L);
+typedef int(*lua_CFunction)(lua_State *L);
 
 
 // This function must be called before calling dbg_pcall() to set up the debugger module.

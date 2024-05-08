@@ -45,7 +45,7 @@ class huffman
 
     struct huff_sym_t
     {
-        int          Symbol;
+        int32_t          Symbol;
         uint32_t Count;
         uint32_t Code;
         uint32_t Bits;
@@ -54,8 +54,8 @@ class huffman
     struct huff_encodenode_t
     {
         huff_encodenode_t *ChildA, *ChildB;
-        int                Count;
-        int                Symbol;
+        int32_t                Count;
+        int32_t                Symbol;
     };
 
     // Histogram of character frequency
@@ -97,7 +97,7 @@ class huffman
     bool decompress(uint8_t *in_data, size_t in_len, uint8_t *out_data, size_t &out_len);
 
     // For debugging, this count can be used to see if two codecs have had the same length input
-    int get_count()
+    int32_t get_count()
     {
         return total_count;
     }

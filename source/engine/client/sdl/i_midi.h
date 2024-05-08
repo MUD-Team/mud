@@ -481,7 +481,7 @@ class MidiSequencer
      * @param [_inout] status status of the track processing
      * @return Parsed MIDI event entry
      */
-    MidiEvent parseEvent(const uint8_t **ptr, const uint8_t *end, int &status);
+    MidiEvent parseEvent(const uint8_t **ptr, const uint8_t *end, int32_t &status);
 
     /**
      * @brief Process MIDI events on the current tick moment
@@ -575,7 +575,7 @@ class MidiSequencer
     bool m_midi_at_end;
 
     //! Set the number of loops limit. Lesser than 0 - loop infinite
-    int m_midi_loop_count;
+    int32_t m_midi_loop_count;
 
     /**
      * @brief Loop stack entry
@@ -585,7 +585,7 @@ class MidiSequencer
         //! is infinite loop
         bool infinity = false;
         //! Count of loops left to break. <0 - infinite loop
-        int loops = 0;
+        int32_t loops = 0;
         //! Start position snapshot to return back
         Position start_position;
         //! Loop start tick
@@ -620,16 +620,16 @@ class MidiSequencer
 
         //! How much times the loop should start repeat? For example, if you
         //! want to loop song twice, set value 1
-        int m_loops_count;
+        int32_t m_loops_count;
 
         //! how many loops left until finish the song
-        int m_loops_left;
+        int32_t m_loops_left;
 
         //! Stack of nested loops
         std::vector<LoopStackEntry> m_stack;
         //! Current level on the loop stack (<0 - out of loop, 0++ - the index
         //! in the loop stack)
-        int m_stacklevel;
+        int32_t m_stacklevel;
 
         /**
          * @brief Reset loop state to initial
@@ -657,7 +657,7 @@ class MidiSequencer
 
         bool isStackEnd()
         {
-            if (m_caught_m_stackend && (m_stacklevel >= 0) && (m_stacklevel < (int)(m_stack.size())))
+            if (m_caught_m_stackend && (m_stacklevel >= 0) && (m_stacklevel < (int32_t)(m_stack.size())))
             {
                 const LoopStackEntry &e = m_stack[(size_t)(m_stacklevel)];
                 if (e.infinity || (!e.infinity && e.loops > 0))
@@ -666,19 +666,19 @@ class MidiSequencer
             return false;
         }
 
-        void stackUp(int count = 1)
+        void stackUp(int32_t count = 1)
         {
             m_stacklevel += count;
         }
 
-        void stackDown(int count = 1)
+        void stackDown(int32_t count = 1)
         {
             m_stacklevel -= count;
         }
 
         LoopStackEntry &getCurrentStack()
         {
-            if ((m_stacklevel >= 0) && (m_stacklevel < (int)(m_stack.size())))
+            if ((m_stacklevel >= 0) && (m_stacklevel < (int32_t)(m_stack.size())))
                 return m_stack[(size_t)(m_stacklevel)];
             if (m_stack.empty())
             {
@@ -769,7 +769,7 @@ class MidiSequencer
      * @param length length of the buffer in bytes
      * @return Count of recorded data in bytes
      */
-    int playStream(uint8_t *stream, size_t length);
+    int32_t playStream(uint8_t *stream, size_t length);
 
     /**
      * @brief Returns the number of tracks
@@ -829,13 +829,13 @@ class MidiSequencer
      * @brief Get the number of loops set
      * @return number of loops or -1 if loop infinite
      */
-    int getLoopsCount();
+    int32_t getLoopsCount();
 
     /**
      * @brief How many times song should loop
      * @param loops count or -1 to loop infinite
      */
-    void setLoopsCount(int loops);
+    void setLoopsCount(int32_t loops);
 
     /**
      * @brief Switch loop hooks-only mode on/off
@@ -1113,7 +1113,7 @@ void MidiSequencer::MidiTrackRow::sortEvents(bool *note_states)
                 markAsOn.insert(note_i);
                 // Detect zero-length notes are following previously pressed
                 // note
-                int noteOffsOnSameNote = 0;
+                int32_t noteOffsOnSameNote = 0;
                 for (EvtArr::iterator j = noteOffs.begin(); j != noteOffs.end();)
                 {
                     // If note was off, and note-off on same row with note-on -
@@ -1215,9 +1215,9 @@ void MidiSequencer::setInterface(const MidiRealTimeInterface *intrf)
     m_midi_output_interface = intrf;
 }
 
-int MidiSequencer::playStream(uint8_t *stream, size_t length)
+int32_t MidiSequencer::playStream(uint8_t *stream, size_t length)
 {
-    int      count      = 0;
+    int32_t      count      = 0;
     size_t   samples    = (size_t)(length / (size_t)(m_midi_time.m_frame_size));
     size_t   left       = samples;
     size_t   periodSize = 0;
@@ -1254,7 +1254,7 @@ int MidiSequencer::playStream(uint8_t *stream, size_t length)
         }
     }
 
-    return count * (int)(m_midi_time.m_frame_size);
+    return count * (int32_t)(m_midi_time.m_frame_size);
 }
 
 size_t MidiSequencer::getTrackCount() const
@@ -1285,7 +1285,7 @@ bool MidiSequencer::setChannelEnabled(size_t channel, bool enable)
         m_midi_output_interface->rt_controllerChange(m_midi_output_interface->rtUserData, ch, 66, 0);
 
         // Release all notes on the channel now
-        for (int i = 0; i < 127; ++i)
+        for (int32_t i = 0; i < 127; ++i)
         {
             if (m_midi_output_interface->rt_noteOff)
                 m_midi_output_interface->rt_noteOff(m_midi_output_interface->rtUserData, ch, i);
@@ -1324,12 +1324,12 @@ void MidiSequencer::setLoopEnabled(bool enabled)
     m_midi_loop_enabled = enabled;
 }
 
-int MidiSequencer::getLoopsCount()
+int32_t MidiSequencer::getLoopsCount()
 {
     return m_midi_loop_count >= 0 ? (m_midi_loop_count + 1) : m_midi_loop_count;
 }
 
-void MidiSequencer::setLoopsCount(int loops)
+void MidiSequencer::setLoopsCount(int32_t loops)
 {
     if (loops >= 1)
         loops -= 1; // Internally, loops count has the 0 base
@@ -1436,7 +1436,7 @@ bool MidiSequencer::buildSMFTrackData(const std::vector<std::vector<uint8_t>> &t
     for (size_t tk = 0; tk < track_count; ++tk)
     {
         uint64_t       abs_position = 0;
-        int            status       = 0;
+        int32_t            status       = 0;
         MidiEvent      event;
         bool           ok       = false;
         const uint8_t *end      = track_data[tk].data() + track_data[tk].size();
@@ -1449,10 +1449,10 @@ bool MidiSequencer::buildSMFTrackData(const std::vector<std::vector<uint8_t>> &t
             evtPos.m_delay = readVariableLengthValue(&trackPtr, end, ok);
             if (!ok)
             {
-                int len = snprintf(error, 150,
+                int32_t len = snprintf(error, 150,
                                    "buildTrackData: Can't read variable-length "
                                    "value at begin of track %d.\n",
-                                   (int)tk);
+                                   (int32_t)tk);
                 if ((len > 0) && (len < 150))
                     m_midi_parsing_errors_string += std::string(error, (size_t)len);
                 return false;
@@ -1479,7 +1479,7 @@ bool MidiSequencer::buildSMFTrackData(const std::vector<std::vector<uint8_t>> &t
             event = parseEvent(&trackPtr, end, status);
             if (!event.is_valid)
             {
-                int len = snprintf(error, 150, "buildTrackData: Fail to parse event in the track %d.\n", (int)tk);
+                int32_t len = snprintf(error, 150, "buildTrackData: Fail to parse event in the track %d.\n", (int32_t)tk);
                 if ((len > 0) && (len < 150))
                     m_midi_parsing_errors_string += std::string(error, (size_t)len);
                 return false;
@@ -1547,7 +1547,7 @@ bool MidiSequencer::buildSMFTrackData(const std::vector<std::vector<uint8_t>> &t
                     }
 
                     m_midi_loop.stackUp();
-                    if (m_midi_loop.m_stacklevel >= (int)(m_midi_loop.m_stack.size()))
+                    if (m_midi_loop.m_stacklevel >= (int32_t)(m_midi_loop.m_stack.size()))
                     {
                         LoopStackEntry e;
                         e.loops    = event.data[0];
@@ -2074,7 +2074,7 @@ bool MidiSequencer::processEvents(bool is_seek)
     return true; // Has events in queue
 }
 
-MidiSequencer::MidiEvent MidiSequencer::parseEvent(const uint8_t **pptr, const uint8_t *end, int &status)
+MidiSequencer::MidiEvent MidiSequencer::parseEvent(const uint8_t **pptr, const uint8_t *end, int32_t &status)
 {
     const uint8_t          *&ptr = *pptr;
     MidiSequencer::MidiEvent evt;
@@ -2490,7 +2490,7 @@ void MidiSequencer::handleEvent(size_t track, const MidiSequencer::MidiEvent &ev
                 }
 
                 LoopStackEntry &s                 = m_midi_loop.m_stack[slevel];
-                s.loops                           = (int)(x);
+                s.loops                           = (int32_t)(x);
                 s.infinity                        = (x == 0);
                 m_midi_loop.m_caught_m_stackstart = true;
                 return;
@@ -2610,7 +2610,7 @@ double MidiSequencer::Tick(double s, double granularity)
     m_midi_current_position.wait -= s;
     m_midi_current_position.absolute_time_position += s;
 
-    int antiFreezeCounter = 10000; // Limit 10000 loops to avoid freezing
+    int32_t antiFreezeCounter = 10000; // Limit 10000 loops to avoid freezing
     while ((m_midi_current_position.wait <= granularity * 0.5) && (antiFreezeCounter > 0))
     {
         if (!processEvents())
@@ -2675,7 +2675,7 @@ double MidiSequencer::Seek(double seconds, const double granularity)
     {
         m_midi_current_position.wait -= s;
         m_midi_current_position.absolute_time_position += s;
-        int    antiFreezeCounter = 10000; // Limit 10000 loops to avoid freezing
+        int32_t    antiFreezeCounter = 10000; // Limit 10000 loops to avoid freezing
         double dstWait           = m_midi_current_position.wait + granualityHalf;
         while ((m_midi_current_position.wait <= granualityHalf) /*&& (antiFreezeCounter > 0)*/)
         {
@@ -2973,7 +2973,7 @@ bool MidiSequencer::_ParseMus(MEMFILE *mfr)
 
     uint8_t *mid     = nullptr;
     uint32_t mid_len = 0;
-    int      m2mret  = ConvertMusToMidi(mus, (uint32_t)(mus_len), &mid, &mid_len, 0);
+    int32_t      m2mret  = ConvertMusToMidi(mus, (uint32_t)(mus_len), &mid, &mid_len, 0);
 
     if (mus)
         free(mus);

@@ -41,7 +41,7 @@ const uint8_t UserInfo::weapon_prefs_default[NUMWEAPONS] = {
     7  // wp_supershotgun
 };
 
-int D_GenderToInt(const char *gender)
+int32_t D_GenderToInt(const char *gender)
 {
     if (!stricmp(gender, "female"))
         return GENDER_FEMALE;

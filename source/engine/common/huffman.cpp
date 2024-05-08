@@ -199,7 +199,7 @@ void huffman::_Huffman_Hist(uint8_t *in, huff_sym_t *sym, uint32_t size)
     // Tax all entries to prevent overflow
     while (total_count > 65000)
     {
-        for (int i = 0; i < 256; i++)
+        for (int32_t i = 0; i < 256; i++)
         {
             total_count -= sym[i].Count;
             sym[i].Count /= 2;
@@ -375,7 +375,7 @@ bool huffman::Huffman_Compress_Using_Histogram(uint8_t *in, size_t insize, uint8
     }
 
     /* Calculate size of output data */
-    outsize = (int)(stream.BytePtr - out);
+    outsize = (int32_t)(stream.BytePtr - out);
 
     if (stream.BitPos > 0)
     {
@@ -473,7 +473,7 @@ bool huffman::Huffman_Uncompress_Using_Tree(uint8_t *in, size_t insize, uint8_t 
 // Clear statistics
 void huffman::reset()
 {
-    for (int k = 0; k < 256; ++k)
+    for (int32_t k = 0; k < 256; ++k)
     {
         sym[k].Symbol = k;
         sym[k].Count  = 1;

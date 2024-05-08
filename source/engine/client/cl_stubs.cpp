@@ -33,7 +33,7 @@
 bool unnatural_level_progression;
 
 FORMAT_PRINTF(2, 3)
-void STACK_ARGS SV_BroadcastPrintf(int printlevel, const char *format, ...)
+void STACK_ARGS SV_BroadcastPrintf(int32_t printlevel, const char *format, ...)
 {
     if (!serverside)
         return;
@@ -70,10 +70,10 @@ void D_SendServerInfoChange(const cvar_t *cvar, const char *value)
 void D_DoServerInfoChange(uint8_t **stream)
 {
 }
-void D_WriteUserInfoStrings(int i, uint8_t **stream, bool compact)
+void D_WriteUserInfoStrings(int32_t i, uint8_t **stream, bool compact)
 {
 }
-void D_ReadUserInfoStrings(int i, uint8_t **stream, bool update)
+void D_ReadUserInfoStrings(int32_t i, uint8_t **stream, bool update)
 {
 }
 
@@ -93,10 +93,10 @@ void SV_SocketTouch(player_t &player, team_t f)
 void SV_SendKillMobj(AActor *source, AActor *target, AActor *inflictor, bool joinkill)
 {
 }
-void SV_SendDamagePlayer(player_t *player, AActor *inflictor, int healthDamage, int armorDamage)
+void SV_SendDamagePlayer(player_t *player, AActor *inflictor, int32_t healthDamage, int32_t armorDamage)
 {
 }
-void SV_SendDamageMobj(AActor *target, int pain)
+void SV_SendDamageMobj(AActor *target, int32_t pain)
 {
 }
 void SV_UpdateFrags(player_t &player)
@@ -117,7 +117,7 @@ void SV_SendPlayerInfo(player_t &player)
 void SV_PreservePlayer(player_t &player)
 {
 }
-void SV_BroadcastSector(int sectornum)
+void SV_BroadcastSector(int32_t sectornum)
 {
 }
 void SV_UpdateMobj(AActor *mo)
@@ -140,8 +140,8 @@ bool SV_AwarenessUpdate(player_t &pl, AActor *mo)
 void SV_SendPackets(void)
 {
 }
-void SV_SendExecuteLineSpecial(uint8_t special, line_t *line, AActor *activator, int arg0, int arg1, int arg2, int arg3,
-                               int arg4)
+void SV_SendExecuteLineSpecial(uint8_t special, line_t *line, AActor *activator, int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3,
+                               int32_t arg4)
 {
 }
 

@@ -177,7 +177,7 @@ static bool cmpWins(player_t *a, const player_t *b)
 PlayerResults PlayerQuery::execute()
 {
     PlayerResults results;
-    int           maxscore = 0;
+    int32_t           maxscore = 0;
 
     // Construct a base result set from all ingame players, possibly filtered.
     for (Players::iterator it = ::players.begin(); it != players.end(); ++it)
@@ -226,7 +226,7 @@ PlayerResults PlayerQuery::execute()
         if (m_sortFilter == SFILTER_MAX || m_sortFilter == SFILTER_NOT_MAX)
         {
             // Since it's sorted, we know the top fragger is at the front.
-            int top = results.players.at(0)->fragcount;
+            int32_t top = results.players.at(0)->fragcount;
             for (PlayersView::iterator it = results.players.begin(); it != results.players.end();)
             {
                 bool cmp = (m_sortFilter == SFILTER_MAX) ? (*it)->fragcount != top : (*it)->fragcount == top;
@@ -246,7 +246,7 @@ PlayerResults PlayerQuery::execute()
         if (m_sortFilter == SFILTER_MAX || m_sortFilter == SFILTER_NOT_MAX)
         {
             // Since it's sorted, we know the top fragger is at the front.
-            int top = results.players.at(0)->lives;
+            int32_t top = results.players.at(0)->lives;
             for (PlayersView::iterator it = results.players.begin(); it != results.players.end();)
             {
                 bool cmp = (m_sortFilter == SFILTER_MAX) ? (*it)->lives != top : (*it)->lives == top;
@@ -266,7 +266,7 @@ PlayerResults PlayerQuery::execute()
         if (m_sortFilter == SFILTER_MAX || m_sortFilter == SFILTER_NOT_MAX)
         {
             // Since it's sorted, we know the top winner is at the front.
-            int top = results.players.at(0)->roundwins;
+            int32_t top = results.players.at(0)->roundwins;
             for (PlayersView::iterator it = results.players.begin(); it != results.players.end();)
             {
                 bool cmp = (m_sortFilter == SFILTER_MAX) ? (*it)->roundwins != top : (*it)->roundwins == top;
@@ -381,7 +381,7 @@ void P_ForwardThrust(player_t *player, angle_t angle, fixed_t move)
 //
 void P_CalcHeight(player_t *player)
 {
-    int     angle;
+    int32_t     angle;
     fixed_t bob;
 
     // Regular movement bobbing
@@ -466,7 +466,7 @@ void P_CalcHeight(player_t *player)
 //
 void P_PlayerLookUpDown(player_t *p)
 {
-    int look = p->cmd.pitch << 16;
+    int32_t look = p->cmd.pitch << 16;
 
     // The player's view pitch is clamped between -32 and +56 degrees,
     // which translates to about half a screen height up and (more than)
@@ -568,8 +568,8 @@ void P_MovePlayer(player_t *player)
     if (player->cmd.forwardmove | player->cmd.sidemove)
     {
         fixed_t forwardmove, sidemove;
-        int     bobfactor;
-        int     friction, movefactor;
+        int32_t     bobfactor;
+        int32_t     friction, movefactor;
 
         movefactor = P_GetMoveFactor(mo, &friction);
         bobfactor  = friction < ORIG_FRICTION ? movefactor : ORIG_FRICTION_FACTOR;
@@ -638,7 +638,7 @@ void P_MovePlayer(player_t *player)
 void P_FallingDamage(AActor *ent)
 {
     float delta;
-    int   damage;
+    int32_t   damage;
 
     if (!ent->player)
         return; // not a player
@@ -670,7 +670,7 @@ void P_FallingDamage(AActor *ent)
 
     if (delta > 30)
     {
-        damage = (int)((delta - 30) / 2);
+        damage = (int32_t)((delta - 30) / 2);
         if (damage < 1)
             damage = 1;
 
@@ -738,7 +738,7 @@ void P_DeathThink(player_t *player)
             (!clientside && sv_forcerespawn && level.time >= player->death_time + sv_forcerespawntime * TICRATE);
 
         // [SL] Can we respawn yet?
-        int  respawn_time  = player->death_time + sv_spawndelaytime * TICRATE;
+        int32_t  respawn_time  = player->death_time + sv_spawndelaytime * TICRATE;
         bool delay_respawn = (!clientside && level.time < respawn_time);
 
         // [Toke - dmflags] Old location of DF_FORCE_RESPAWN
@@ -1066,7 +1066,7 @@ BEGIN_COMMAND(cheat_players)
 {
     Printf("== PLAYERS ==");
 
-    int dead = 0;
+    int32_t dead = 0;
 
     AActor                  *mo;
     TThinkerIterator<AActor> iterator;

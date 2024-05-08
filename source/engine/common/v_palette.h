@@ -66,16 +66,16 @@ static inline argb_t V_GammaCorrect(const argb_t value)
     return argb_t(value.geta(), gammatable[value.getr()], gammatable[value.getg()], gammatable[value.getb()]);
 }
 
-palindex_t V_BestColor(const argb_t *palette_colors, int r, int g, int b);
+palindex_t V_BestColor(const argb_t *palette_colors, int32_t r, int32_t g, int32_t b);
 palindex_t V_BestColor(const argb_t *palette_colors, argb_t color);
 
 // Alpha blend between two RGB colors with only dest alpha value
 // 0 <=   toa <= 256
-argb_t alphablend1a(const argb_t from, const argb_t to, const int toa);
+argb_t alphablend1a(const argb_t from, const argb_t to, const int32_t toa);
 // Alpha blend between two RGB colors with two alpha values
 // 0 <= froma <= 256
 // 0 <=   toa <= 256
-argb_t alphablend2a(const argb_t from, const int froma, const argb_t to, const int toa);
+argb_t alphablend2a(const argb_t from, const int32_t froma, const argb_t to, const int32_t toa);
 
 void V_InitPalette(const char *filename);
 
@@ -120,4 +120,4 @@ void V_ResetPalette();
 fahsv_t V_RGBtoHSV(const fargb_t &color);
 fargb_t V_HSVtoRGB(const fahsv_t &color);
 
-dyncolormap_t *GetSpecialLights(int lr, int lg, int lb, int fr, int fg, int fb);
+dyncolormap_t *GetSpecialLights(int32_t lr, int32_t lg, int32_t lb, int32_t fr, int32_t fg, int32_t fb);

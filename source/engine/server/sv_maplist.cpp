@@ -96,8 +96,8 @@ bool Maplist::add(maplist_entry_t &maplist_entry)
 // Inserts a map into the maplist at the specified position.
 bool Maplist::insert(const size_t &position, maplist_entry_t &maplist_entry)
 {
-    // We send the maplist to clients using a short int, so we don't want
-    // more maps in the list than the short int can handle.
+    // We send the maplist to clients using a short int32_t, so we don't want
+    // more maps in the list than the short int32_t can handle.
     if (this->maplist.size() > (uint16_t)-1)
     {
         this->error = "Maplist is full.";
@@ -502,7 +502,7 @@ void Maplist::set_shuffle(const bool setting)
 
 // Check the timeout for a specific player id, return true if their time
 // is up or if they have no timeout.
-bool Maplist::pid_timeout(const int index)
+bool Maplist::pid_timeout(const int32_t index)
 {
     if (this->timeout.find(index) == this->timeout.end())
     {
@@ -515,20 +515,20 @@ bool Maplist::pid_timeout(const int index)
 // Return true if we've already passed our maplist to the player id.  This
 // method doesn't perform any comparisons, it just sees if the timeout
 // exists at all.
-bool Maplist::pid_cached(const int index)
+bool Maplist::pid_cached(const int32_t index)
 {
     return (this->timeout.find(index) != this->timeout.end());
 }
 
 // Set the timeout for a player.
-void Maplist::set_timeout(const int index)
+void Maplist::set_timeout(const int32_t index)
 {
     // Set timeout to 60 seconds from now.
     this->timeout[index] = I_MSTime() + (1000 * 60);
 }
 
 // Clear the timeout for a disconnecting player.
-void Maplist::clear_timeout(const int index)
+void Maplist::clear_timeout(const int32_t index)
 {
     this->timeout.erase(index);
 }

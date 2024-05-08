@@ -46,9 +46,9 @@ EXTERN_CVAR(sv_allowexit)
 //
 // CPhipps - take a line_t pointer instead of a line number, as in MBF
 
-bool P_CrossCompatibleSpecialLine(line_t *line, int side, AActor *thing, bool bossaction)
+bool P_CrossCompatibleSpecialLine(line_t *line, int32_t side, AActor *thing, bool bossaction)
 {
-    int ok;
+    int32_t ok;
 
     //  Things that should never trigger lines
     //
@@ -1161,7 +1161,7 @@ bool P_CrossCompatibleSpecialLine(line_t *line, int side, AActor *thing, bool bo
     return false;
 }
 
-void P_ApplyGeneralizedSectorDamage(player_t *player, int bits)
+void P_ApplyGeneralizedSectorDamage(player_t *player, int32_t bits)
 {
     switch (bits & 3)
     {
@@ -1332,7 +1332,7 @@ bool P_ActorInCompatibleSector(AActor *actor)
     return false;
 }
 
-void P_PostProcessCompatibleSidedefSpecial(side_t *sd, mapsidedef_t *msd, sector_t *sec, int i)
+void P_PostProcessCompatibleSidedefSpecial(side_t *sd, mapsidedef_t *msd, sector_t *sec, int32_t i)
 {
     switch (sd->special)
     {
@@ -1361,7 +1361,7 @@ void P_PostProcessCompatibleSidedefSpecial(side_t *sd, mapsidedef_t *msd, sector
                     GetSpecialLights(((argb_t)color).getr(), ((argb_t)color).getg(), ((argb_t)color).getb(),
                                      ((argb_t)fog).getr(), ((argb_t)fog).getg(), ((argb_t)fog).getb());
 
-                for (int s = 0; s < numsectors; s++)
+                for (int32_t s = 0; s < numsectors; s++)
                 {
                     if (sectors[s].tag == sd->tag)
                         sectors[s].colormap = colormap;
@@ -1389,12 +1389,12 @@ void P_PostProcessCompatibleSidedefSpecial(side_t *sd, mapsidedef_t *msd, sector
     }
 }
 
-void P_SpawnCompatibleExtra(int i)
+void P_SpawnCompatibleExtra(int32_t i)
 {
-    int       s;
+    int32_t       s;
     sector_t *sec;
     float     grav;
-    int       damage;
+    int32_t       damage;
 
     switch (lines[i].special)
     {
@@ -1554,7 +1554,7 @@ void P_SpawnCompatibleSectorSpecial(sector_t *sector)
     }
 }
 
-void P_SpawnCompatibleScroller(line_t *l, int i)
+void P_SpawnCompatibleScroller(line_t *l, int32_t i)
 {
     // [Blair] don't run scrolling on clients to prevent desyncs
     if (IgnoreSpecial)
@@ -1562,8 +1562,8 @@ void P_SpawnCompatibleScroller(line_t *l, int i)
 
     fixed_t dx      = l->dx >> SCROLL_SHIFT; // direction and speed of scrolling
     fixed_t dy      = l->dy >> SCROLL_SHIFT;
-    int     control = -1, accel = 0;         // no control sector or acceleration
-    int     special = l->special;
+    int32_t     control = -1, accel = 0;         // no control sector or acceleration
+    int32_t     special = l->special;
 
     // killough 3/7/98: Types 245-249 are same as 250-254 except that the
     // first side's sector's heights cause scrolling when they change, and
@@ -1587,7 +1587,7 @@ void P_SpawnCompatibleScroller(line_t *l, int i)
 
     switch (special)
     {
-        int s;
+        int32_t s;
 
     case 250: // scroll effect ceiling
         for (s = -1; (s = P_FindSectorFromLineTag(l, s)) >= 0;)
@@ -1665,7 +1665,7 @@ void P_SpawnCompatibleFriction(line_t *l)
 {
     if (l->special == 223)
     {
-        int  value;
+        int32_t  value;
         bool use_thinker;
 
         value       = P_AproxDistance(l->dx, l->dy) >> FRACBITS;
@@ -1677,7 +1677,7 @@ void P_SpawnCompatibleFriction(line_t *l)
 
 void P_SpawnCompatiblePusher(line_t *l)
 {
-    int     s;
+    int32_t     s;
     AActor *thing;
 
     switch (l->special)
@@ -1712,7 +1712,7 @@ void P_SpawnCompatiblePusher(line_t *l)
 // Passed the thing using the line, the line being used, and the side used
 // Returns true if a thinker was created
 //
-bool P_UseCompatibleSpecialLine(AActor *thing, line_t *line, int side, bool bossaction)
+bool P_UseCompatibleSpecialLine(AActor *thing, line_t *line, int32_t side, bool bossaction)
 {
     bool reuse   = false;
     bool trigger = false; // used for bossactions
@@ -3203,7 +3203,7 @@ bool P_ShootCompatibleSpecialLine(AActor *thing, line_t *line)
     // Impacts that other things can activate.
     if (thing && !thing->player && thing->type != MT_AVATAR)
     {
-        int ok = 0;
+        int32_t ok = 0;
         switch (line->special)
         {
         case 46:
@@ -3300,7 +3300,7 @@ void P_PostProcessCompatibleLinedefSpecial(line_t *line)
 {
     switch (line->special)
     {         // killough 4/11/98: handle special types
-        int j;
+        int32_t j;
     case 260: // killough 4/11/98: translucent 2s textures
 #if 0
 				lump = sides[*ld->sidenum].special;		// translucency from sidedef

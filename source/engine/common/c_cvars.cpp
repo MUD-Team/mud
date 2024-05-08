@@ -65,7 +65,7 @@ cvar_t *GetFirstCvar(void)
     return ad.GetCVars();
 }
 
-int cvar_defflags;
+int32_t cvar_defflags;
 
 cvar_t::cvar_t(const char *var_name, const char *def, const char *help, cvartype_t type, uint32_t flags, float minval,
                float maxval)
@@ -312,7 +312,7 @@ void cvar_t::EnableCallbacks()
     }
 }
 
-static int STACK_ARGS sortcvars(const void *a, const void *b)
+static int32_t STACK_ARGS sortcvars(const void *a, const void *b)
 {
     return strcmp(((*(cvar_t **)a))->name(), ((*(cvar_t **)b))->name());
 }
@@ -434,7 +434,7 @@ static struct backup_s
     std::string name, string;
 } CVarBackups[MAX_BACKUPCVARS];
 
-static int numbackedup = 0;
+static int32_t numbackedup = 0;
 
 //
 // C_BackupCVars
@@ -469,7 +469,7 @@ void cvar_t::C_BackupCVars(uint32_t bitflag)
 void cvar_t::C_RestoreCVars(void)
 {
     struct backup_s *backup = CVarBackups;
-    int              i;
+    int32_t              i;
 
     for (i = numbackedup; i; i--, backup++)
     {
@@ -566,7 +566,7 @@ void cvar_t::C_ArchiveCVars(void *f)
 void cvar_t::cvarlist()
 {
     cvar_t *var   = ad.GetCVars();
-    int     count = 0;
+    int32_t     count = 0;
 
     while (var)
     {

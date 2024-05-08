@@ -106,7 +106,7 @@ void SV_InitMasters(void)
             // so we can dump them to the server cfg file if one does not exist
             if (masters.empty())
             {
-                for (int i = 0; def_masterlist[i] != NULL; i++)
+                for (int32_t i = 0; def_masterlist[i] != NULL; i++)
                     SV_AddMaster(def_masterlist[i]);
             }
         }

@@ -28,6 +28,6 @@
 // Carries out all thinking of monsters and players.
 void P_Ticker(void);
 
-bool P_AtInterval(int interval);
+bool P_AtInterval(int32_t interval);
 
 void P_Ticker_Pause(bool paused);

@@ -63,11 +63,11 @@ EXTERN_CVAR(sv_fragexitswitch)
 std::list<movingsector_t> movingsectors;
 bool                      s_SpecialFromServer;
 
-int  P_FindSectorFromLineTag(int tag, int start);
-bool EV_DoDoor(DDoor::EVlDoor type, line_t *line, AActor *thing, int tag, int speed, int delay, card_t lock);
+int32_t  P_FindSectorFromLineTag(int32_t tag, int32_t start);
+bool EV_DoDoor(DDoor::EVlDoor type, line_t *line, AActor *thing, int32_t tag, int32_t speed, int32_t delay, card_t lock);
 bool P_ShootCompatibleSpecialLine(AActor *thing, line_t *line);
-bool P_ActivateZDoomLine(line_t *line, AActor *mo, int side, uint32_t activationType);
-bool P_UseCompatibleSpecialLine(AActor *thing, line_t *line, int side, bool bossaction);
+bool P_ActivateZDoomLine(line_t *line, AActor *mo, int32_t side, uint32_t activationType);
+bool P_UseCompatibleSpecialLine(AActor *thing, line_t *line, int32_t side, bool bossaction);
 
 //
 // P_FindMovingSector
@@ -88,7 +88,7 @@ fixed_t P_ArgsToFixed(fixed_t arg_i, fixed_t arg_f)
     return (arg_i << FRACBITS) + (arg_f << FRACBITS) / 100;
 }
 
-int P_ArgToCrushMode(uint8_t arg, bool slowdown)
+int32_t P_ArgToCrushMode(uint8_t arg, bool slowdown)
 {
     static const crushmode_e map[] = {crushDoom, crushHexen, crushSlowdown};
 
@@ -98,7 +98,7 @@ int P_ArgToCrushMode(uint8_t arg, bool slowdown)
     return slowdown ? crushSlowdown : crushDoom;
 }
 
-int P_FindSectorFromLineTag(const line_t *line, int start)
+int32_t P_FindSectorFromLineTag(const line_t *line, int32_t start)
 {
     start = start >= 0 ? sectors[start].nexttag : sectors[(uint32_t)line->id % (uint32_t)numsectors].firsttag;
     while (start >= 0 && sectors[start].tag != line->id)
@@ -106,7 +106,7 @@ int P_FindSectorFromLineTag(const line_t *line, int start)
     return start;
 }
 
-int P_FindLineFromLineTag(const line_t *line, int start)
+int32_t P_FindLineFromLineTag(const line_t *line, int32_t start)
 {
     start = start >= 0 ? lines[start].nextid : lines[(uint32_t)line->id % (uint32_t)numlines].firstid;
     while (start >= 0 && lines[start].id != line->id)
@@ -114,7 +114,7 @@ int P_FindLineFromLineTag(const line_t *line, int start)
     return start;
 }
 
-int P_FindLineFromTag(int tag, int start)
+int32_t P_FindLineFromTag(int32_t tag, int32_t start)
 {
     start = start >= 0 ? lines[start].nextid : lines[(uint32_t)tag % (uint32_t)numlines].firstid;
     while (start >= 0 && lines[start].id != tag)
@@ -167,7 +167,7 @@ uint8_t P_ArgToChange(uint8_t arg)
     return (arg < 8) ? ChangeMap[arg] : 0;
 }
 
-int P_ArgToCrush(uint8_t arg)
+int32_t P_ArgToCrush(uint8_t arg)
 {
     return (arg > 0) ? arg : NO_CRUSH;
 }
@@ -180,11 +180,11 @@ int P_ArgToCrush(uint8_t arg)
  * Returns nonzero if the object is under damage based on
  * their current position.
  */
-int P_IsUnderDamage(AActor *actor)
+int32_t P_IsUnderDamage(AActor *actor)
 {
     const struct msecnode_s *seclist;
     const DCeiling          *cr; // Crushing ceiling
-    int                      dir = 0;
+    int32_t                      dir = 0;
     for (seclist = actor->touching_sectorlist; seclist; seclist = seclist->m_tnext)
     {
         if ((cr = (DCeiling *)seclist->m_sector->ceilingdata) && cr->m_Status == 2) // Down
@@ -574,10 +574,10 @@ bool P_CheckTag(line_t *line)
 //
 // Returns the next special sector attached to this sector
 // with a certain special.
-sector_t *P_NextSpecialSector(sector_t *sec, int type, sector_t *nogood)
+sector_t *P_NextSpecialSector(sector_t *sec, int32_t type, sector_t *nogood)
 {
     sector_t *tsec;
-    int       i;
+    int32_t       i;
 
     for (i = 0; i < sec->linecount; i++)
     {
@@ -610,7 +610,7 @@ sector_t *P_NextSpecialSector(sector_t *sec, int type, sector_t *nogood)
 //
 fixed_t P_FindLowestFloorSurrounding(sector_t *sec)
 {
-    int       i;
+    int32_t       i;
     line_t   *check;
     sector_t *other;
     fixed_t   height = P_FloorHeight(sec);
@@ -640,7 +640,7 @@ fixed_t P_FindLowestFloorSurrounding(sector_t *sec)
 //
 fixed_t P_FindHighestFloorSurrounding(sector_t *sec)
 {
-    int       i;
+    int32_t       i;
     line_t   *check;
     sector_t *other;
     fixed_t   height = INT32_MIN;
@@ -681,7 +681,7 @@ fixed_t P_FindNextHighestFloor(sector_t *sec)
     fixed_t   ogheight = P_FloorHeight(sec);
     fixed_t   height   = INT32_MAX;
 
-    for (int i = 0; i < sec->linecount; i++)
+    for (int32_t i = 0; i < sec->linecount; i++)
     {
         if (NULL != (other = getNextSector(sec->lines[i], sec)))
         {
@@ -723,7 +723,7 @@ fixed_t P_FindNextLowestFloor(sector_t *sec)
     fixed_t   ogheight = P_FloorHeight(sec);
     fixed_t   height   = INT32_MIN;
 
-    for (int i = 0; i < sec->linecount; i++)
+    for (int32_t i = 0; i < sec->linecount; i++)
     {
         if (NULL != (other = getNextSector(sec->lines[i], sec)))
         {
@@ -765,7 +765,7 @@ fixed_t P_FindNextLowestCeiling(sector_t *sec)
     fixed_t   ogheight = P_CeilingHeight(sec);
     fixed_t   height   = INT32_MIN;
 
-    for (int i = 0; i < sec->linecount; i++)
+    for (int32_t i = 0; i < sec->linecount; i++)
     {
         if (NULL != (other = getNextSector(sec->lines[i], sec)))
         {
@@ -807,7 +807,7 @@ fixed_t P_FindNextHighestCeiling(sector_t *sec)
     fixed_t   ogheight = P_CeilingHeight(sec);
     fixed_t   height   = INT32_MAX;
 
-    for (int i = 0; i < sec->linecount; i++)
+    for (int32_t i = 0; i < sec->linecount; i++)
     {
         if (NULL != (other = getNextSector(sec->lines[i], sec)))
         {
@@ -836,7 +836,7 @@ fixed_t P_FindNextHighestCeiling(sector_t *sec)
 //
 fixed_t P_FindLowestCeilingSurrounding(sector_t *sec)
 {
-    int       i;
+    int32_t       i;
     line_t   *check;
     sector_t *other;
     fixed_t   height = INT32_MAX;
@@ -865,7 +865,7 @@ fixed_t P_FindLowestCeilingSurrounding(sector_t *sec)
 //
 fixed_t P_FindHighestCeilingSurrounding(sector_t *sec)
 {
-    int       i;
+    int32_t       i;
     line_t   *check;
     sector_t *other;
     fixed_t   height = INT32_MIN;
@@ -899,9 +899,9 @@ fixed_t P_FindHighestCeilingSurrounding(sector_t *sec)
 //
 fixed_t P_FindShortestTextureAround(sector_t *sec)
 {
-    int     minsize = INT32_MAX;
+    int32_t     minsize = INT32_MAX;
     side_t *side;
-    int     i;
+    int32_t     i;
 
     for (i = 0; i < sec->linecount; i++)
     {
@@ -932,9 +932,9 @@ fixed_t P_FindShortestTextureAround(sector_t *sec)
 //
 fixed_t P_FindShortestUpperAround(sector_t *sec)
 {
-    int     minsize = INT32_MAX;
+    int32_t     minsize = INT32_MAX;
     side_t *side;
-    int     i;
+    int32_t     i;
 
     for (i = 0; i < sec->linecount; i++)
     {
@@ -974,7 +974,7 @@ sector_t *P_FindModelFloorSector(fixed_t floordestheight, sector_t *sec)
 
     // jff 5/23/98 don't disturb sec->linecount while searching
     //  but allow early exit in old demos
-    for (int i = 0; i < sec->linecount; i++)
+    for (int32_t i = 0; i < sec->linecount; i++)
     {
         other = getNextSector(sec->lines[i], sec);
         if (other != NULL && (P_FloorHeight(sec->lines[i]->v1->x, sec->lines[i]->v1->y, other) == floordestheight ||
@@ -1009,7 +1009,7 @@ sector_t *P_FindModelCeilingSector(fixed_t ceildestheight, sector_t *sec)
 
     // jff 5/23/98 don't disturb sec->linecount while searching
     //  but allow early exit in old demos
-    for (int i = 0; i < sec->linecount; i++)
+    for (int32_t i = 0; i < sec->linecount; i++)
     {
         other = getNextSector(sec->lines[i], sec);
         if (other != NULL && (P_CeilingHeight(sec->lines[i]->v1->x, sec->lines[i]->v1->y, other) == ceildestheight ||
@@ -1028,7 +1028,7 @@ sector_t *P_FindModelCeilingSector(fixed_t ceildestheight, sector_t *sec)
 // Find the next sector with a specified tag.
 // Rewritten by Lee Killough to use chained hashing to improve speed
 
-int P_FindSectorFromTag(int tag, int start)
+int32_t P_FindSectorFromTag(int32_t tag, int32_t start)
 {
     start = start >= 0 ? sectors[start].nexttag : sectors[(uint32_t)tag % (uint32_t)numsectors].firsttag;
     while (start >= 0 && sectors[start].tag != tag)
@@ -1038,7 +1038,7 @@ int P_FindSectorFromTag(int tag, int start)
 
 // killough 4/16/98: Same thing, only for linedefs
 
-int P_FindLineFromID(int id, int start)
+int32_t P_FindLineFromID(int32_t id, int32_t start)
 {
     start = start >= 0 ? lines[start].nextid : lines[(uint32_t)id % (uint32_t)numlines].firstid;
     while (start >= 0 && lines[start].id != id)
@@ -1049,10 +1049,10 @@ int P_FindLineFromID(int id, int start)
 //
 // Find minimum light from an adjacent sector
 //
-int P_FindMinSurroundingLight(sector_t *sector, int max)
+int32_t P_FindMinSurroundingLight(sector_t *sector, int32_t max)
 {
-    int       i;
-    int       min;
+    int32_t       i;
+    int32_t       min;
     line_t   *line;
     sector_t *check;
 
@@ -1086,7 +1086,7 @@ bool P_LightingActive(const sector_t *sec)
     return sec->lightingdata != NULL;
 }
 
-int P_FindSectorFromTagOrLine(int tag, const line_t *line, int start)
+int32_t P_FindSectorFromTagOrLine(int32_t tag, const line_t *line, int32_t start)
 {
     if (tag == 0)
     {
@@ -1256,7 +1256,7 @@ bool P_CanUnlockZDoomDoor(player_t *player, zdoom_lock_t lock, bool remote)
     // so print an appropriate message and grunt.
     if (player->mo == consoleplayer().camera)
     {
-        int keytrysound = S_FindSound("misc/keytry");
+        int32_t keytrysound = S_FindSound("misc/keytry");
         if (keytrysound > -1)
         {
             UV_SoundAvoidPlayer(player->mo, CHAN_VOICE, "misc/keytry", ATTN_NORM);
@@ -1295,7 +1295,7 @@ bool P_CanUnlockGenDoor(line_t *line, player_t *player)
     const OString *msg = NULL;
 
     // does this line special distinguish between skulls and keys?
-    int skulliscard = (line->special & LockedNKeys) >> LockedNKeysShift;
+    int32_t skulliscard = (line->special & LockedNKeys) >> LockedNKeysShift;
 
     // determine for each case of lock type if player's keys are adequate
     switch ((line->special & LockedKey) >> LockedKeyShift)
@@ -1408,7 +1408,7 @@ bool P_CanUnlockGenDoor(line_t *line, player_t *player)
     // so print an appropriate message and grunt.
     if (player->mo == consoleplayer().camera)
     {
-        int keytrysound = S_FindSound("misc/keytry");
+        int32_t keytrysound = S_FindSound("misc/keytry");
         if (keytrysound > -1)
         {
             UV_SoundAvoidPlayer(player->mo, CHAN_VOICE, "misc/keytry", ATTN_NORM);
@@ -1518,7 +1518,7 @@ bool P_CheckKeys(player_t *p, card_t lock, bool remote)
     // so print an appropriate message and grunt.
     if (p->mo == consoleplayer().camera)
     {
-        int keytrysound = S_FindSound("misc/keytry");
+        int32_t keytrysound = S_FindSound("misc/keytry");
         if (keytrysound > -1)
             UV_SoundAvoidPlayer(p->mo, CHAN_VOICE, "misc/keytry", ATTN_NORM);
         else
@@ -1531,8 +1531,8 @@ bool P_CheckKeys(player_t *p, card_t lock, bool remote)
     return false;
 }
 
-void OnChangedSwitchTexture(line_t *line, int useAgain);
-void SV_OnActivatedLine(line_t *line, AActor *mo, const int side, const LineActivationType activationType,
+void OnChangedSwitchTexture(line_t *line, int32_t useAgain);
+void SV_OnActivatedLine(line_t *line, AActor *mo, const int32_t side, const LineActivationType activationType,
                         const bool bossaction);
 
 //
@@ -1563,7 +1563,7 @@ bool P_HandleSpecialRepeat(line_t *line)
 // Called every time a thing origin is about
 //  to cross a line with a non 0 special.
 //
-void P_CrossSpecialLine(line_t *line, int side, AActor *thing, bool bossaction)
+void P_CrossSpecialLine(line_t *line, int32_t side, AActor *thing, bool bossaction)
 {
     TeleportSide = side;
 
@@ -1668,7 +1668,7 @@ void P_ShootSpecialLine(AActor *thing, line_t *line)
 // Only the front sides of lines are usable.
 // Returns false if this isn't a door that can be opened
 //
-bool P_UseSpecialLine(AActor *thing, line_t *line, int side, bool bossaction)
+bool P_UseSpecialLine(AActor *thing, line_t *line, int32_t side, bool bossaction)
 {
     if (!bossaction && !P_CanActivateSpecials(thing, line))
         return false;
@@ -1728,7 +1728,7 @@ bool P_UseSpecialLine(AActor *thing, line_t *line, int side, bool bossaction)
 // Called when a thing pushes a special line, only in advanced map format
 // Only the front sides of lines are pushable.
 //
-bool P_PushSpecialLine(AActor *thing, line_t *line, int side)
+bool P_PushSpecialLine(AActor *thing, line_t *line, int32_t side)
 {
     if (!map_format.getZDoom())
         return false;
@@ -1791,7 +1791,7 @@ bool P_PushSpecialLine(AActor *thing, line_t *line, int side)
     return true;
 }
 
-void P_ApplySectorDamage(player_t *player, int damage, int leak, int mod)
+void P_ApplySectorDamage(player_t *player, int32_t damage, int32_t leak, int32_t mod)
 {
     if (!player->powers[pw_ironfeet] || (leak && P_Random(player->mo) < leak))
         if (!(level.time & 0x1f))
@@ -1857,7 +1857,7 @@ CVAR_FUNC_IMPL(sv_forcewater)
 {
     if (gamestate == GS_LEVEL)
     {
-        int  i;
+        int32_t  i;
         uint8_t set = var ? 2 : 0;
 
         for (i = 0; i < numsectors; i++)
@@ -1878,7 +1878,7 @@ CVAR_FUNC_IMPL(sv_forcewater)
 void P_SetupWorldState(void)
 {
     sector_t *sector;
-    int       i;
+    int32_t       i;
 
     //	Init special SECTORs.
     sector = sectors;
@@ -1990,9 +1990,9 @@ void P_DestroyLightThinkers()
         phased->Destroy();
 }
 
-void P_SpawnPhasedLight(sector_t *sector, int base, int index)
+void P_SpawnPhasedLight(sector_t *sector, int32_t base, int32_t index)
 {
-    int i, b;
+    int32_t i, b;
 
     if (index == -1)
     { // sector->lightlevel as the index
@@ -2038,7 +2038,7 @@ void P_SpawnFireFlicker(sector_t *sector)
     P_ClearNonGeneralizedSectorSpecial(sector);
 }
 
-void P_SpawnStrobeFlash(sector_t *sector, int utics, int ltics, bool inSync)
+void P_SpawnStrobeFlash(sector_t *sector, int32_t utics, int32_t ltics, bool inSync)
 {
     new DStrobe(sector, utics, ltics, inSync);
 
@@ -2047,7 +2047,7 @@ void P_SpawnStrobeFlash(sector_t *sector, int utics, int ltics, bool inSync)
 
 static void P_SpawnExtra()
 {
-    for (int i = 0; i < numlines; i++)
+    for (int32_t i = 0; i < numlines; i++)
     {
         map_format.spawn_extra(i);
     }
@@ -2166,7 +2166,7 @@ void DScroller::RunThink()
 // accel: non-zero if this is an accelerative effect
 //
 
-DScroller::DScroller(EScrollType type, fixed_t dx, fixed_t dy, int control, int affectee, int accel)
+DScroller::DScroller(EScrollType type, fixed_t dx, fixed_t dy, int32_t control, int32_t affectee, int32_t accel)
 {
     m_Type  = type;
     m_dx    = dx;
@@ -2191,7 +2191,7 @@ DScroller::DScroller(EScrollType type, fixed_t dx, fixed_t dy, int control, int 
 //
 // killough 5/25/98: cleaned up arithmetic to avoid drift due to roundoff
 
-DScroller::DScroller(fixed_t dx, fixed_t dy, const line_t *l, int control, int accel)
+DScroller::DScroller(fixed_t dx, fixed_t dy, const line_t *l, int32_t control, int32_t accel)
 {
     fixed_t x = abs(l->dx), y = abs(l->dy), d;
     if (y > x)
@@ -2219,7 +2219,7 @@ DScroller::DScroller(fixed_t dx, fixed_t dy, const line_t *l, int control, int a
 // Initialize the scrollers
 static void P_SpawnScrollers(void)
 {
-    int     i;
+    int32_t     i;
     line_t *l = lines;
 
     for (i = 0; i < numlines; i++, l++)
@@ -2293,7 +2293,7 @@ bool P_ArgToCrushType(uint8_t arg)
 
 static void P_SpawnFriction(void)
 {
-    int     i;
+    int32_t     i;
     line_t *l = lines;
 
     for (i = 0; i < numlines; i++, l++)
@@ -2302,9 +2302,9 @@ static void P_SpawnFriction(void)
     }
 }
 
-void P_ApplySectorFriction(int tag, int value, bool use_thinker)
+void P_ApplySectorFriction(int32_t tag, int32_t value, bool use_thinker)
 {
-    int friction, movefactor, s;
+    int32_t friction, movefactor, s;
 
     friction = (0x1EB8 * value) / 0x80 + 0xD000;
 
@@ -2401,7 +2401,7 @@ void P_ApplySectorFriction(int tag, int value, bool use_thinker)
 //
 // Add a push thinker to the thinker list
 
-DPusher::DPusher(DPusher::EPusher type, line_t *l, int magnitude, int angle, AActor *source, int affectee)
+DPusher::DPusher(DPusher::EPusher type, line_t *l, int32_t magnitude, int32_t angle, AActor *source, int32_t affectee)
 {
     m_Source = source ? source->ptr() : AActor::AActorPtr();
     m_Type   = type;
@@ -2438,10 +2438,10 @@ bool PIT_PushThing(AActor *thing)
 {
     if (thing->player && !(thing->flags & (MF_NOGRAVITY | MF_NOCLIP)))
     {
-        int sx    = tmpusher->m_X;
-        int sy    = tmpusher->m_Y;
-        int dist  = P_AproxDistance(thing->x - sx, thing->y - sy);
-        int speed = (tmpusher->m_Magnitude - ((dist >> FRACBITS) >> 1)) << (FRACBITS - PUSH_FACTOR - 1);
+        int32_t sx    = tmpusher->m_X;
+        int32_t sy    = tmpusher->m_Y;
+        int32_t dist  = P_AproxDistance(thing->x - sx, thing->y - sy);
+        int32_t speed = (tmpusher->m_Magnitude - ((dist >> FRACBITS) >> 1)) << (FRACBITS - PUSH_FACTOR - 1);
 
         // If speed <= 0, you're outside the effective radius. You also have
         // to be able to see the push/pull source point.
@@ -2471,10 +2471,10 @@ void DPusher::RunThink()
     sector_t   *sec;
     AActor     *thing;
     msecnode_t *node;
-    int         xspeed, yspeed;
-    int         xl, xh, yl, yh, bx, by;
-    int         radius;
-    int         ht = 0;
+    int32_t         xspeed, yspeed;
+    int32_t         xl, xh, yl, yh, bx, by;
+    int32_t         radius;
+    int32_t         ht = 0;
 
     sec = sectors + m_Affectee;
 
@@ -2598,7 +2598,7 @@ void DPusher::RunThink()
 // P_GetPushThing() returns a pointer to an MT_PUSH or MT_PULL thing,
 // NULL otherwise.
 
-AActor *P_GetPushThing(int s)
+AActor *P_GetPushThing(int32_t s)
 {
     AActor   *thing;
     sector_t *sec;
@@ -2627,7 +2627,7 @@ AActor *P_GetPushThing(int s)
 
 static void P_SpawnPushers(void)
 {
-    int     i;
+    int32_t     i;
     line_t *l = lines;
 
     for (i = 0; i < numlines; i++, l++)
@@ -2647,7 +2647,7 @@ bool A_CheckTrigger(AActor *mo, AActor *triggerer)
     if (mo->special && (triggerer->player || ((mo->flags & MF_AMBUSH) && (triggerer->flags2 & MF2_MCROSS)) ||
                         ((mo->flags2 & MF2_DORMANT) && (triggerer->flags2 & MF2_PCROSS))))
     {
-        int savedSide = TeleportSide;
+        int32_t savedSide = TeleportSide;
         TeleportSide  = 0;
         bool res      = (LineSpecials[mo->special](NULL, triggerer, mo->args[0], mo->args[1], mo->args[2], mo->args[3],
                                               mo->args[4]) != 0);
@@ -2659,7 +2659,7 @@ bool A_CheckTrigger(AActor *mo, AActor *triggerer)
 
 // [AM] Selectively trigger a list of sector action specials that are linked by
 //      their tracer fields based on the passed activation type.
-bool A_TriggerAction(AActor *mo, AActor *triggerer, int activationType)
+bool A_TriggerAction(AActor *mo, AActor *triggerer, int32_t activationType)
 {
     bool trigger_action = false;
 

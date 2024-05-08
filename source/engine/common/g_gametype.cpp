@@ -153,7 +153,7 @@ JoinResult G_CanJoinGameStart()
     // Too many people on either team.
     if (G_IsTeamGame() && sv_maxplayersperteam)
     {
-        int teamplayers = sv_maxplayersperteam * sv_teamsinplay;
+        int32_t teamplayers = sv_maxplayersperteam * sv_teamsinplay;
         if (P_NumPlayersInGame() >= teamplayers)
             return JOIN_GAMEFULL;
     }
@@ -404,7 +404,7 @@ bool G_UsesFraglimit()
 /**
  * @brief Calculate the tic that the level ends on.
  */
-int G_GetEndingTic()
+int32_t G_GetEndingTic()
 {
     return sv_timelimit * 60 * TICRATE + 1;
 }
@@ -467,9 +467,9 @@ void G_AssertValidPlayerCount()
     else if (G_IsTeamGame())
     {
         // End the game if there's only one team with players in it.
-        int           hasplayers = TEAM_NONE;
+        int32_t           hasplayers = TEAM_NONE;
         PlayerResults pr         = PlayerQuery().execute();
-        for (int i = 0; i < NUMTEAMS; i++)
+        for (int32_t i = 0; i < NUMTEAMS; i++)
         {
             if (pr.teamTotal[i] > 0)
             {
@@ -505,7 +505,7 @@ void G_AssertValidPlayerCount()
         ::levelstate.endGame();
 }
 
-static void GiveWins(player_t &player, int wins)
+static void GiveWins(player_t &player, int32_t wins)
 {
     player.roundwins += wins;
 
@@ -522,7 +522,7 @@ static void GiveWins(player_t &player, int wins)
     }
 }
 
-static void GiveTeamWins(team_t team, int wins)
+static void GiveTeamWins(team_t team, int32_t wins)
 {
     TeamInfo *info = GetTeamInfo(team);
     if (info->Team >= NUMTEAMS)
@@ -801,8 +801,8 @@ void G_LivesCheckEndGame()
     {
         // One person alive on a single team is success, nobody alive is a draw.
         PlayerResults pr         = PlayerQuery().hasLives().execute();
-        int           aliveteams = 0;
-        for (int i = 0; i < sv_teamsinplay.asInt(); i++)
+        int32_t           aliveteams = 0;
+        for (int32_t i = 0; i < sv_teamsinplay.asInt(); i++)
         {
             if (pr.teamCount[i] > 0)
                 aliveteams += 1;

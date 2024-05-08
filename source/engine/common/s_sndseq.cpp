@@ -93,7 +93,7 @@ class DSeqActorNode : public DSeqNode
 {
     DECLARE_SERIAL(DSeqActorNode, DSeqNode)
   public:
-    DSeqActorNode(AActor *actor, int sequence);
+    DSeqActorNode(AActor *actor, int32_t sequence);
     ~DSeqActorNode();
     void MakeSound()
     {
@@ -124,7 +124,7 @@ class DSeqPolyNode : public DSeqNode
 {
     DECLARE_SERIAL(DSeqPolyNode, DSeqNode)
   public:
-    DSeqPolyNode(polyobj_t *poly, int sequence);
+    DSeqPolyNode(polyobj_t *poly, int32_t sequence);
     ~DSeqPolyNode();
     void MakeSound()
     {
@@ -154,7 +154,7 @@ class DSeqSectorNode : public DSeqNode
 {
     DECLARE_SERIAL(DSeqSectorNode, DSeqNode)
   public:
-    DSeqSectorNode(sector_t *sec, int sequence);
+    DSeqSectorNode(sector_t *sec, int32_t sequence);
     ~DSeqSectorNode();
     void MakeSound()
     {
@@ -182,8 +182,8 @@ class DSeqSectorNode : public DSeqNode
 
 // PRIVATE FUNCTION PROTOTYPES ---------------------------------------------
 
-static void VerifySeqPtr(int pos, int need);
-static void AssignTranslations(OScanner &os, int seq, seqtype_t type);
+static void VerifySeqPtr(int32_t pos, int32_t need);
+static void AssignTranslations(OScanner &os, int32_t seq, seqtype_t type);
 static void AssignHexenTranslations();
 
 // PRIVATE DATA DEFINITIONS ------------------------------------------------
@@ -211,14 +211,14 @@ static const hexenseq_t HexenSequences[] = {
         NULL,
     }};
 
-static int           SeqTrans[64 * 3];
+static int32_t           SeqTrans[64 * 3];
 static uint32_t *ScriptTemp;
-static int           ScriptTempSize;
+static int32_t           ScriptTempSize;
 
 sndseq_t **Sequences;
-int        NumSequences;
-int        MaxSequences;
-int        ActiveSequences;
+int32_t        NumSequences;
+int32_t        MaxSequences;
+int32_t        ActiveSequences;
 DSeqNode  *DSeqNode::SequenceListHead;
 
 // CODE --------------------------------------------------------------------
@@ -254,13 +254,13 @@ void DSeqNode::Serialize(FArchive &arc)
     else
     {
         std::string seqName, soundName;
-        int         seqOffset = 0, delayTics = 0;
+        int32_t         seqOffset = 0, delayTics = 0;
         float       volume;
-        int         atten = ATTN_NORM;
+        int32_t         atten = ATTN_NORM;
 
         arc >> seqOffset >> delayTics >> volume >> atten >> soundName >> seqName >> m_Next >> m_Prev;
 
-        int i;
+        int32_t i;
 
         for (i = 0; i < NumSequences; i++)
         {
@@ -326,7 +326,7 @@ void DSeqSectorNode::Serialize(FArchive &arc)
 //
 //==========================================================================
 
-static void VerifySeqPtr(int pos, int need)
+static void VerifySeqPtr(int32_t pos, int32_t need)
 {
     if (pos + need > ScriptTempSize)
     {
@@ -341,7 +341,7 @@ static void VerifySeqPtr(int pos, int need)
 //
 //==========================================================================
 
-static void AssignTranslations(OScanner &os, int seq, seqtype_t type)
+static void AssignTranslations(OScanner &os, int32_t seq, seqtype_t type)
 {
     os.crossed() = false;
 
@@ -364,7 +364,7 @@ static void AssignTranslations(OScanner &os, int seq, seqtype_t type)
 
 static void AssignHexenTranslations()
 {
-    int i, j, seq;
+    int32_t i, j, seq;
 
     for (i = 0; HexenSequences[i].name; i++)
     {
@@ -378,7 +378,7 @@ static void AssignHexenTranslations()
 
         for (j = 0; j < 4 && HexenSequences[i].seqs[j] != HexenLastSeq; j++)
         {
-            int trans;
+            int32_t trans;
 
             if (HexenSequences[i].seqs[j] & 0x40)
                 trans = 64;
@@ -398,12 +398,12 @@ static void AssignHexenTranslations()
 //
 //==========================================================================
 
-static int MustMatchString(OScanner &os, const char **strings)
+static int32_t MustMatchString(OScanner &os, const char **strings)
 {
     if (!strings)
         os.error("No strings inputted!");
 
-    for (int i = 0; *strings != NULL; i++)
+    for (int32_t i = 0; *strings != NULL; i++)
     {
         if (os.compareTokenNoCase(*strings++))
         {
@@ -418,9 +418,9 @@ static int MustMatchString(OScanner &os, const char **strings)
 void S_ParseSndSeq()
 {
     char name[MAX_SNDNAME + 1];
-    int  stopsound;
-    int  cursize;
-    int  curseq = -1;
+    int32_t  stopsound;
+    int32_t  cursize;
+    int32_t  curseq = -1;
 
     // denis - reboot safe
     if (Sequences)
@@ -439,7 +439,7 @@ void S_ParseSndSeq()
     ScriptTemp        = (uint32_t *)Malloc(MAX_SEQSIZE * sizeof(*ScriptTemp));
     ScriptTempSize    = MAX_SEQSIZE;
 
-    int lump = -1;
+    int32_t lump = -1;
     while ((lump = W_FindLump("SNDSEQ", lump)) != -1)
     {
         const char *buffer = static_cast<char *>(W_CacheLumpNum(lump, PU_STATIC));
@@ -565,9 +565,9 @@ void S_ParseSndSeq()
                 break;
 
             case SS_STRING_END:
-                Sequences[curseq] = (sndseq_t *)Z_Malloc(sizeof(sndseq_t) + sizeof(int) * cursize, PU_STATIC, 0);
+                Sequences[curseq] = (sndseq_t *)Z_Malloc(sizeof(sndseq_t) + sizeof(int32_t) * cursize, PU_STATIC, 0);
                 strcpy(Sequences[curseq]->name, name);
-                memcpy(Sequences[curseq]->script, ScriptTemp, sizeof(int) * cursize);
+                memcpy(Sequences[curseq]->script, ScriptTemp, sizeof(int32_t) * cursize);
                 Sequences[curseq]->script[cursize] = SS_CMD_END;
                 Sequences[curseq]->stopsound       = stopsound;
                 curseq                             = -1;
@@ -609,7 +609,7 @@ DSeqNode::~DSeqNode()
     ActiveSequences--;
 }
 
-DSeqNode::DSeqNode(int sequence)
+DSeqNode::DSeqNode(int32_t sequence)
 {
     ActivateSequence(sequence);
     if (!SequenceListHead)
@@ -626,7 +626,7 @@ DSeqNode::DSeqNode(int sequence)
     }
 }
 
-void DSeqNode::ActivateSequence(int sequence)
+void DSeqNode::ActivateSequence(int32_t sequence)
 {
     m_SequencePtr    = Sequences[sequence]->script;
     m_Sequence       = sequence;
@@ -639,17 +639,17 @@ void DSeqNode::ActivateSequence(int sequence)
     ActiveSequences++;
 }
 
-DSeqActorNode::DSeqActorNode(AActor *actor, int sequence) : DSeqNode(sequence)
+DSeqActorNode::DSeqActorNode(AActor *actor, int32_t sequence) : DSeqNode(sequence)
 {
     m_Actor = actor;
 }
 
-DSeqPolyNode::DSeqPolyNode(polyobj_t *poly, int sequence) : DSeqNode(sequence)
+DSeqPolyNode::DSeqPolyNode(polyobj_t *poly, int32_t sequence) : DSeqNode(sequence)
 {
     m_Poly = poly;
 }
 
-DSeqSectorNode::DSeqSectorNode(sector_t *sec, int sequence) : DSeqNode(sequence)
+DSeqSectorNode::DSeqSectorNode(sector_t *sec, int32_t sequence) : DSeqNode(sequence)
 {
     m_Sector = sec;
 }
@@ -660,7 +660,7 @@ DSeqSectorNode::DSeqSectorNode(sector_t *sec, int sequence) : DSeqNode(sequence)
 //
 //==========================================================================
 
-static bool TwiddleSeqNum(int &sequence, seqtype_t type)
+static bool TwiddleSeqNum(int32_t &sequence, seqtype_t type)
 {
     if (type < SEQ_NUMSEQTYPES)
         sequence = SeqTrans[sequence + type * 64];
@@ -676,21 +676,21 @@ static bool TwiddleSeqNum(int &sequence, seqtype_t type)
         return true;
 }
 
-void SN_StartSequence(AActor *actor, int sequence, seqtype_t type)
+void SN_StartSequence(AActor *actor, int32_t sequence, seqtype_t type)
 {
     SN_StopSequence(actor); // Stop any previous sequence
     if (TwiddleSeqNum(sequence, type))
         new DSeqActorNode(actor, sequence);
 }
 
-void SN_StartSequence(sector_t *sector, int sequence, seqtype_t type)
+void SN_StartSequence(sector_t *sector, int32_t sequence, seqtype_t type)
 {
     SN_StopSequence(sector);
     if (TwiddleSeqNum(sequence, type))
         new DSeqSectorNode(sector, sequence);
 }
 
-void SN_StartSequence(polyobj_t *poly, int sequence, seqtype_t type)
+void SN_StartSequence(polyobj_t *poly, int32_t sequence, seqtype_t type)
 {
     SN_StopSequence(poly);
     if (TwiddleSeqNum(sequence, type))
@@ -705,7 +705,7 @@ void SN_StartSequence(polyobj_t *poly, int sequence, seqtype_t type)
 
 void SN_StartSequence(AActor *actor, const char *name)
 {
-    int i;
+    int32_t i;
 
     for (i = 0; i < NumSequences; i++)
     {
@@ -719,7 +719,7 @@ void SN_StartSequence(AActor *actor, const char *name)
 
 void SN_StartSequence(sector_t *sec, const char *name)
 {
-    int i;
+    int32_t i;
 
     for (i = 0; i < NumSequences; i++)
     {
@@ -733,7 +733,7 @@ void SN_StartSequence(sector_t *sec, const char *name)
 
 void SN_StartSequence(polyobj_t *poly, const char *name)
 {
-    int i;
+    int32_t i;
 
     for (i = 0; i < NumSequences; i++)
     {
@@ -934,7 +934,7 @@ void SN_StopAllSequences(void)
 //
 //==========================================================================
 
-ptrdiff_t SN_GetSequenceOffset(int sequence, uint32_t *sequencePtr)
+ptrdiff_t SN_GetSequenceOffset(int32_t sequence, uint32_t *sequencePtr)
 {
     return sequencePtr - Sequences[sequence]->script;
 }
@@ -946,9 +946,9 @@ ptrdiff_t SN_GetSequenceOffset(int sequence, uint32_t *sequencePtr)
 // 	nodeNum zero is the first node
 //==========================================================================
 
-void SN_ChangeNodeData(int nodeNum, int seqOffset, int delayTics, float volume, int currentSoundID)
+void SN_ChangeNodeData(int32_t nodeNum, int32_t seqOffset, int32_t delayTics, float volume, int32_t currentSoundID)
 {
-    int       i;
+    int32_t       i;
     DSeqNode *node;
 
     i    = 0;
@@ -965,7 +965,7 @@ void SN_ChangeNodeData(int nodeNum, int seqOffset, int delayTics, float volume, 
     node->ChangeData(seqOffset, delayTics, volume, currentSoundID);
 }
 
-void DSeqNode::ChangeData(int seqOffset, int delayTics, float volume, int currentSoundID)
+void DSeqNode::ChangeData(int32_t seqOffset, int32_t delayTics, float volume, int32_t currentSoundID)
 {
     m_DelayTics = delayTics;
     m_Volume    = volume;

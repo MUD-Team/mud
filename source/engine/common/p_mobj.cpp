@@ -77,9 +77,9 @@ EXTERN_CVAR(sv_teamsinplay)
 EXTERN_CVAR(g_thingfilter)
 
 mapthing2_t itemrespawnque[ITEMQUESIZE];
-int         itemrespawntime[ITEMQUESIZE];
-int         iquehead;
-int         iquetail;
+int32_t         itemrespawntime[ITEMQUESIZE];
+int32_t         iquehead;
+int32_t         iquetail;
 
 NetIDHandler ServerNetID;
 
@@ -803,7 +803,7 @@ void AActor::Serialize(FArchive &arc)
     Super::Serialize(arc);
     if (arc.IsStoring())
     {
-        int playerid = player ? player->id : 0;
+        int32_t playerid = player ? player->id : 0;
         arc << netid << x << y << z << pitch
             << angle
 
@@ -847,7 +847,7 @@ void AActor::Serialize(FArchive &arc)
     {
         uint32_t dummy;
         uint32_t playerid;
-        int      newnetid;
+        int32_t      newnetid;
         AActor  *tmptracer;
 
         arc >> newnetid >> x >> y >> z >> pitch >> angle
@@ -920,7 +920,7 @@ void AActor::Serialize(FArchive &arc)
 //
 // Function to retrieve proper thing height information for a thing.
 //
-int P_ThingInfoHeight(mobjinfo_t *mi)
+int32_t P_ThingInfoHeight(mobjinfo_t *mi)
 {
     return (mi->cdheight ? mi->cdheight : mi->height);
 }
@@ -940,7 +940,7 @@ int P_ThingInfoHeight(mobjinfo_t *mi)
 bool P_SetMobjState(AActor *mobj, statenum_t state, bool cl_update)
 {
     state_t *st;
-    int      cycle_counter = 0;
+    int32_t      cycle_counter = 0;
 
     do
     {
@@ -1002,8 +1002,8 @@ static void P_WindThrustActor(AActor *mo)
 {
     if (mo->flags2 & MF2_WINDTHRUST)
     {
-        static const int windTab[3] = {2048 * 5, 2048 * 10, 2048 * 25};
-        int              special    = mo->subsector->sector->special;
+        static const int32_t windTab[3] = {2048 * 5, 2048 * 10, 2048 * 25};
+        int32_t              special    = mo->subsector->sector->special;
         switch (special)
         {
         case 40:
@@ -1784,7 +1784,7 @@ void AActor::AddToHash()
     }
     else
     {
-        int hash = TIDHASH(tid);
+        int32_t hash = TIDHASH(tid);
 
         inext         = TIDHash[hash];
         iprev         = NULL;
@@ -1806,7 +1806,7 @@ void AActor::RemoveFromHash()
         if (iprev == NULL)
         {
             // First mobj in the chain (probably)
-            int hash = TIDHASH(tid);
+            int32_t hash = TIDHASH(tid);
 
             if (TIDHash[hash] == this)
                 TIDHash[hash] = inext;
@@ -1837,12 +1837,12 @@ void AActor::RemoveFromHash()
 // or the first with that tid if no mobj is passed. Returns
 // NULL if there are no more.
 //
-AActor *AActor::FindByTID(int tid) const
+AActor *AActor::FindByTID(int32_t tid) const
 {
     return FindByTID(this, tid);
 }
 
-AActor *AActor::FindByTID(const AActor *actor, int tid)
+AActor *AActor::FindByTID(const AActor *actor, int32_t tid)
 {
     // Mobjs without tid are never stored.
     if (tid == 0)
@@ -1864,12 +1864,12 @@ AActor *AActor::FindByTID(const AActor *actor, int tid)
 //
 // Like FindByTID except it also matches on type.
 //
-AActor *AActor::FindGoal(int tid, int kind) const
+AActor *AActor::FindGoal(int32_t tid, int32_t kind) const
 {
     return FindGoal(this, tid, kind);
 }
 
-AActor *AActor::FindGoal(const AActor *actor, int tid, int kind)
+AActor *AActor::FindGoal(const AActor *actor, int32_t tid, int32_t kind)
 {
     do
     {
@@ -1954,7 +1954,7 @@ void P_SpawnTracerPuff(fixed_t x, fixed_t y, fixed_t z)
 //
 // P_SpawnBlood
 //
-void P_SpawnBlood(fixed_t x, fixed_t y, fixed_t z, int damage)
+void P_SpawnBlood(fixed_t x, fixed_t y, fixed_t z, int32_t damage)
 {
     // denis - not clientside
     if (!serverside)
@@ -2033,7 +2033,7 @@ bool P_CheckMissileSpawn(AActor *th)
 // Returns 1 if 'source' needs to turn clockwise, or 0 if 'source' needs
 // to turn counter clockwise.  'delta' is set to the amount 'source'
 // needs to turn.
-int P_FaceMobj(AActor *source, AActor *target, angle_t *delta)
+int32_t P_FaceMobj(AActor *source, AActor *target, angle_t *delta)
 {
     angle_t diff;
     angle_t angle1;
@@ -2073,8 +2073,8 @@ int P_FaceMobj(AActor *source, AActor *target, angle_t *delta)
 
 bool P_SeekerMissile(AActor *actor, AActor *seekTarget, angle_t thresh, angle_t turnMax, bool seekcenter)
 {
-    int     dir;
-    int     dist;
+    int32_t     dir;
+    int32_t     dist;
     angle_t delta;
     angle_t angle;
     AActor *target;
@@ -2129,7 +2129,7 @@ AActor *P_SpawnMissile(AActor *source, AActor *dest, mobjtype_t type)
 {
     AActor *th;
     angle_t an;
-    int     dist;
+    int32_t     dist;
     fixed_t dest_x, dest_y, dest_z, dest_flags;
 
     // denis: missile spawn code from chocolate doom
@@ -2336,7 +2336,7 @@ void P_RespawnSpecials(void)
     AActor      *mo;
     mapthing2_t *mthing;
 
-    int i;
+    int32_t i;
 
     // clients do no control respawning of items
     if (!serverside)
@@ -2430,7 +2430,7 @@ void P_ExplodeMissile(AActor *mo)
     if (mo->target && mo->target->player)
     {
         // [Blair] We use means of death for WDL accuracy logs.
-        int mod;
+        int32_t mod;
 
         switch (mo->type)
         {
@@ -2504,7 +2504,7 @@ size_t P_GetMapThingPlayerNumber(mapthing2_t *mthing)
     return mthing->type <= 4 ? mthing->type - 1 : (mthing->type - 4001 + 4) % MAXPLAYERSTARTS;
 }
 
-int P_IsPickupableThing(int16_t type)
+int32_t P_IsPickupableThing(int16_t type)
 {
     return (type == 82                        // SSG
             || (type >= 2000 && type <= 2050) // weapons, ammo, health, armor, special items
@@ -2521,9 +2521,9 @@ int P_IsPickupableThing(int16_t type)
 //
 // [RH] position is used to weed out unwanted start spots
 //
-void P_SpawnMapThing(mapthing2_t *mthing, int position)
+void P_SpawnMapThing(mapthing2_t *mthing, int32_t position)
 {
-    int i = -1;
+    int32_t i = -1;
 
     if (mthing->type == 0 || mthing->type == -1)
         return;
@@ -2547,7 +2547,7 @@ void P_SpawnMapThing(mapthing2_t *mthing, int position)
 
     if (sv_teamspawns)
     {
-        for (int iTeam = 0; iTeam < NUMTEAMS; iTeam++)
+        for (int32_t iTeam = 0; iTeam < NUMTEAMS; iTeam++)
         {
             TeamInfo *teamInfo = GetTeamInfo((team_t)iTeam);
 
@@ -2663,7 +2663,7 @@ void P_SpawnMapThing(mapthing2_t *mthing, int position)
     }
     else if (mthing->type == 1411)
     {
-        int type;
+        int32_t type;
 
         if (mthing->args[0] == 255)
             type = -1;

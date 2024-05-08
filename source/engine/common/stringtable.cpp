@@ -53,7 +53,7 @@ static bool IfGameZDoom(const std::string &str)
     return false;
 }
 
-bool StringTable::canSetPassString(int pass, const std::string &name) const
+bool StringTable::canSetPassString(int32_t pass, const std::string &name) const
 {
     StringHash::const_iterator it = _stringHash.find(name);
 
@@ -80,7 +80,7 @@ void StringTable::clearStrings()
 //
 // Loads a language
 //
-void StringTable::loadLanguage(const char *code, bool exactMatch, int pass, char *lump, size_t lumpLen)
+void StringTable::loadLanguage(const char *code, bool exactMatch, int32_t pass, char *lump, size_t lumpLen)
 {
     OScannerConfig config = {
         "LANGUAGE", // lumpName
@@ -243,7 +243,7 @@ void StringTable::loadStringsFile(const char *filename, const bool engOnly)
 
     // String replacement pass.  Strings in an later pass can be replaced
     // by a string in an earlier pass from another lump.
-    int pass = 1;
+    int32_t pass = 1;
 
     if (!engOnly)
     {
@@ -286,7 +286,7 @@ void StringTable::prepareIndexes()
         StringHash::iterator it   = _stringHash.find(name);
         if (it == _stringHash.end())
         {
-            TableEntry entry = {std::make_pair(false, ""), 0xFF, (int)i};
+            TableEntry entry = {std::make_pair(false, ""), 0xFF, (int32_t)i};
             _stringHash.insert(std::make_pair(name, entry));
         }
     }
@@ -401,7 +401,7 @@ void StringTable::setString(const OString &name, const OString &string)
 //
 // Does not set the string if it already exists.
 //
-void StringTable::setPassString(int pass, const OString &name, const OString &string)
+void StringTable::setPassString(int32_t pass, const OString &name, const OString &string)
 {
     StringHash::iterator it = _stringHash.find(name);
     if (it == _stringHash.end())

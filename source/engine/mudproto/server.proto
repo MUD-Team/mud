@@ -274,7 +274,7 @@ message MovingSector
 		int32 step_time = 38;
 		int32 per_step_time = 39;
 		int32 pause_time = 40;
-		sfixed32 orig_height = 41; // Type is int, but is actually a fixed_t.
+		sfixed32 orig_height = 41; // Type is int32_t, but is actually a fixed_t.
 		int32 delay = 42;
 		sfixed32 floor_lip = 43;
 		sfixed32 floor_offset = 44;

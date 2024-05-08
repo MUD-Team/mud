@@ -132,7 +132,7 @@ struct sfxinfo_struct
     uint32_t looping;               // Looping sample handle
     void    *data;
 
-    int link;
+    int32_t link;
     enum
     {
         NO_LINK = 0xffffffff
@@ -151,7 +151,7 @@ struct sfxinfo_struct
 extern std::vector<sfxinfo_t> S_sfx;
 
 // map of every sound id for sounds that have randomized variants
-extern std::map<int, std::vector<int>> S_rnd;
+extern std::map<int32_t, std::vector<int32_t>> S_rnd;
 
 // Initializes sound stuff, including volume
 // Sets channels, SFX and music volume,
@@ -168,20 +168,20 @@ void S_Stop();
 void S_Start();
 
 // Start sound for thing at <ent>
-void S_Sound(int channel, const char *name, float volume, int attenuation);
-void S_Sound(AActor *ent, int channel, const char *name, float volume, int attenuation);
-void S_Sound(fixed_t *pt, int channel, const char *name, float volume, int attenuation);
-void S_Sound(fixed_t x, fixed_t y, int channel, const char *name, float volume, int attenuation);
-void S_PlatSound(fixed_t *pt, int channel, const char *name, float volume,
-                 int attenuation); // [Russell] - Hack to stop multiple plat stop sounds
-void S_LoopedSound(AActor *ent, int channel, const char *name, float volume, int attenuation);
-void S_LoopedSound(fixed_t *pt, int channel, const char *name, float volume, int attenuation);
-void S_SoundID(int channel, int sfxid, float volume, int attenuation);
-void S_SoundID(fixed_t x, fixed_t y, int channel, int sound_id, float volume, int attenuation);
-void S_SoundID(AActor *ent, int channel, int sfxid, float volume, int attenuation);
-void S_SoundID(fixed_t *pt, int channel, int sfxid, float volume, int attenuation);
-void S_LoopedSoundID(AActor *ent, int channel, int sfxid, float volume, int attenuation);
-void S_LoopedSoundID(fixed_t *pt, int channel, int sfxid, float volume, int attenuation);
+void S_Sound(int32_t channel, const char *name, float volume, int32_t attenuation);
+void S_Sound(AActor *ent, int32_t channel, const char *name, float volume, int32_t attenuation);
+void S_Sound(fixed_t *pt, int32_t channel, const char *name, float volume, int32_t attenuation);
+void S_Sound(fixed_t x, fixed_t y, int32_t channel, const char *name, float volume, int32_t attenuation);
+void S_PlatSound(fixed_t *pt, int32_t channel, const char *name, float volume,
+                 int32_t attenuation); // [Russell] - Hack to stop multiple plat stop sounds
+void S_LoopedSound(AActor *ent, int32_t channel, const char *name, float volume, int32_t attenuation);
+void S_LoopedSound(fixed_t *pt, int32_t channel, const char *name, float volume, int32_t attenuation);
+void S_SoundID(int32_t channel, int32_t sfxid, float volume, int32_t attenuation);
+void S_SoundID(fixed_t x, fixed_t y, int32_t channel, int32_t sound_id, float volume, int32_t attenuation);
+void S_SoundID(AActor *ent, int32_t channel, int32_t sfxid, float volume, int32_t attenuation);
+void S_SoundID(fixed_t *pt, int32_t channel, int32_t sfxid, float volume, int32_t attenuation);
+void S_LoopedSoundID(AActor *ent, int32_t channel, int32_t sfxid, float volume, int32_t attenuation);
+void S_LoopedSoundID(fixed_t *pt, int32_t channel, int32_t sfxid, float volume, int32_t attenuation);
 
 // sound channels
 // channel 0 never willingly overrides
@@ -207,16 +207,16 @@ void S_LoopedSoundID(fixed_t *pt, int channel, int sfxid, float volume, int atte
 #define ATTN_STATIC 3 // diminish very rapidly with distance
 
 // Stops a sound emanating from one of an entity's channels
-void S_StopSound(AActor *ent, int channel);
-void S_StopSound(fixed_t *pt, int channel);
+void S_StopSound(AActor *ent, int32_t channel);
+void S_StopSound(fixed_t *pt, int32_t channel);
 void S_StopSound(fixed_t *pt);
 
 // Stop sound for all channels
 void S_StopAllChannels();
 
 // Is the sound playing on one of the entity's channels?
-bool S_GetSoundPlayingInfo(AActor *ent, int sound_id);
-bool S_GetSoundPlayingInfo(fixed_t *pt, int sound_id);
+bool S_GetSoundPlayingInfo(AActor *ent, int32_t sound_id);
+bool S_GetSoundPlayingInfo(fixed_t *pt, int32_t sound_id);
 
 // Moves all sounds from one mobj to another
 void S_RelinkSound(AActor *from, AActor *to);
@@ -225,7 +225,7 @@ void S_RelinkSound(AActor *from, AActor *to);
 void S_StartMusic(const char *music_name);
 
 // Start music using <music_name>, and set whether looping
-void S_ChangeMusic(std::string music_name, int looping);
+void S_ChangeMusic(std::string music_name, int32_t looping);
 
 // Stops the music fer sure.
 void S_StopMusic();
@@ -245,16 +245,16 @@ void S_SetSfxVolume(float volume);
 
 // [RH] Activates an ambient sound. Called when the thing is added to the map.
 //		(0-biased)
-void S_ActivateAmbient(AActor *mobj, int ambient);
+void S_ActivateAmbient(AActor *mobj, int32_t ambient);
 
 // [RH] S_sfx "maintenance" routines
 void S_ParseSndInfo();
 
 void S_HashSounds();
-int  S_FindSound(const char *logicalname);
-int  S_FindSoundByFilename(const char *filename);
-int  S_AddSound(const char *logicalname, const char *filename);
-void S_AddRandomSound(int owner, std::vector<int> &list);
+int32_t  S_FindSound(const char *logicalname);
+int32_t  S_FindSoundByFilename(const char *filename);
+int32_t  S_AddSound(const char *logicalname, const char *filename);
+void S_AddRandomSound(int32_t owner, std::vector<int32_t> &list);
 void S_ClearSoundLumps();
 
 void UV_SoundAvoidPlayer(AActor *mo, uint8_t channel, const char *name, uint8_t attenuation);

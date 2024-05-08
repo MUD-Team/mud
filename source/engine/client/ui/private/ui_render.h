@@ -16,7 +16,7 @@ class UIRenderInterface : public Rml::RenderInterface
     virtual ~UIRenderInterface();
 
     Rml::CompiledGeometryHandle CompileGeometry(Rml::Span<const Rml::Vertex> vertices,
-                                                Rml::Span<const int>         indices) override;
+                                                Rml::Span<const int32_t>         indices) override;
     void                        ReleaseGeometry(Rml::CompiledGeometryHandle geometry) override;
     void                        RenderGeometry(Rml::CompiledGeometryHandle handle, Rml::Vector2f translation,
                                                Rml::TextureHandle texture) override;
@@ -65,7 +65,7 @@ class UIRenderInterface : public Rml::RenderInterface
     struct GeometryView
     {
         Rml::Span<const Rml::Vertex> vertices;
-        Rml::Span<const int>         indices;
+        Rml::Span<const int32_t>         indices;
     };
 
     // Rendering surface

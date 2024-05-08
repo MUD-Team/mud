@@ -55,10 +55,10 @@ size_t R_CalculateNewPatchSize(patch_t *patch, size_t length)
     if (length < patch->width() * sizeof(uint32_t))
         return 0;
 
-    int           numposts = 0, numpixels = 0;
+    int32_t           numposts = 0, numpixels = 0;
     uint32_t *postofs = (uint32_t *)((uint8_t *)patch + 8);
 
-    for (int i = 0; i < patch->width(); i++)
+    for (int32_t i = 0; i < patch->width(); i++)
     {
         size_t ofs = LELONG(postofs[i]);
 
@@ -104,12 +104,12 @@ void R_ConvertPatch(patch_t *newpatch, patch_t *rawpatch)
 
     uint32_t curofs = rawpatch->datastart(); // keep track of the column offset
 
-    for (int i = 0; i < rawpatch->width(); i++)
+    for (int32_t i = 0; i < rawpatch->width(); i++)
     {
-        int newpost_top = -1;
-        int newpost_len = 0;
+        int32_t newpost_top = -1;
+        int32_t newpost_len = 0;
 
-        int abs_offset = 0;
+        int32_t abs_offset = 0;
 
         newpostofs[i]       = LELONG(curofs); // write the new offset for this column
         post_t     *rawpost = rawpatch->post(LELONG(rawpostofs[i]));
@@ -124,7 +124,7 @@ void R_ConvertPatch(patch_t *newpatch, patch_t *rawpatch)
                 newpost_top = abs_offset;
 
             // watch for column overruns
-            int length = rawpost->length;
+            int32_t length = rawpost->length;
             if (abs_offset + length > rawpatch->height())
                 length = rawpatch->height() - abs_offset;
 
@@ -161,7 +161,7 @@ void R_ConvertPatch(patch_t *newpatch, patch_t *rawpatch)
 //
 // R_GetPatchColumn
 //
-tallpost_t *R_GetPatchColumn(patch_t *patch, int colnum)
+tallpost_t *R_GetPatchColumn(patch_t *patch, int32_t colnum)
 {
     return (tallpost_t *)((uint8_t *)patch + LELONG(patch->columnofs[colnum]));
 }
@@ -169,7 +169,7 @@ tallpost_t *R_GetPatchColumn(patch_t *patch, int colnum)
 //
 // R_GetTextureColumn
 //
-tallpost_t *R_GetTextureColumn(texhandle_t texnum, int colnum)
+tallpost_t *R_GetTextureColumn(texhandle_t texnum, int32_t colnum)
 {
     const Texture *tex = texturemanager.getTexture(texnum);
     colnum &= tex->getWidthMask();
@@ -187,7 +187,7 @@ struct FakeCmap
 static FakeCmap *fakecmaps = NULL;
 
 size_t     numfakecmaps;
-int        firstfakecmap;
+int32_t        firstfakecmap;
 shademap_t realcolormaps;
 
 void R_ForceDefaultColormap(const char *name)
@@ -272,7 +272,7 @@ void R_InitColormaps()
     // [RH] Try and convert BOOM colormaps into blending values.
     //		This is a really rough hack, but it's better than
     //		not doing anything with them at all (right?)
-    int lastfakecmap = W_CheckNumForName("C_END");
+    int32_t lastfakecmap = W_CheckNumForName("C_END");
     firstfakecmap    = W_CheckNumForName("C_START");
 
     if (firstfakecmap == -1 || lastfakecmap == -1)
@@ -308,15 +308,15 @@ void R_InitColormaps()
                 // Copy colormap data:
                 memcpy(colormap, map, (NUMCOLORMAPS + 1) * 256);
 
-                int r = pal->basecolors[*map].getr();
-                int g = pal->basecolors[*map].getg();
-                int b = pal->basecolors[*map].getb();
+                int32_t r = pal->basecolors[*map].getr();
+                int32_t g = pal->basecolors[*map].getg();
+                int32_t b = pal->basecolors[*map].getb();
 
                 char name[9];
                 W_GetLumpName(name, i);
                 fakecmaps[j].name = StdStringToUpper(name, 8);
 
-                for (int k = 1; k < 256; k++)
+                for (int32_t k = 1; k < 256; k++)
                 {
                     r = (r + pal->basecolors[map[k]].getr()) >> 1;
                     g = (g + pal->basecolors[map[k]].getg()) >> 1;
@@ -327,7 +327,7 @@ void R_InitColormaps()
                 fakecmaps[j].blend_color = color;
 
                 // Set up shademap for the colormap:
-                for (int k = 0; k < 256; ++k)
+                for (int32_t k = 0; k < 256; ++k)
                     shademap[k] = alphablend1a(pal->basecolors[map[0]], color, j * (256 / numfakecmaps));
             }
         }
@@ -342,11 +342,11 @@ void R_InitColormaps()
 //
 // COLORMAP always returns 0.
 //
-int R_ColormapNumForName(const char *name)
+int32_t R_ColormapNumForName(const char *name)
 {
     if (strnicmp(name, "COLORMAP", 8) != 0)
     {
-        int lump = W_CheckNumForName(name, ns_colormaps);
+        int32_t lump = W_CheckNumForName(name, ns_colormaps);
 
         if (lump != -1)
             return lump - firstfakecmap + 1;
@@ -374,7 +374,7 @@ argb_t R_BlendForColormap(uint32_t index)
 //
 // Returns the colormap index number that has the given blend color value.
 //
-int R_ColormapForBlend(const argb_t blend_color)
+int32_t R_ColormapForBlend(const argb_t blend_color)
 {
     for (uint32_t i = 1; i < numfakecmaps; i++)
         if (fakecmaps[i].blend_color == blend_color)
@@ -402,7 +402,7 @@ void R_InitData()
 
 void R_PrecacheLevel(void)
 {
-    int   i;
+    int32_t   i;
 
     // Precache flats.
     for (i = numsectors - 1; i >= 0; i--)

@@ -82,11 +82,11 @@ class NetCommand
         return ((mFields & CMD_DELTAPITCH) != 0);
     }
 
-    int getTic() const
+    int32_t getTic() const
     {
         return mTic;
     }
-    int getWorldIndex() const
+    int32_t getWorldIndex() const
     {
         return mWorldIndex;
     }
@@ -127,12 +127,12 @@ class NetCommand
         return mDeltaPitch;
     }
 
-    void setTic(int val)
+    void setTic(int32_t val)
     {
         mTic = val;
     }
 
-    void setWorldIndex(int val)
+    void setWorldIndex(int32_t val)
     {
         mWorldIndex = val;
     }
@@ -199,19 +199,19 @@ class NetCommand
     void fromPlayer(player_t *player);
 
   private:
-    static const int CMD_BUTTONS    = 0x0001;
-    static const int CMD_ANGLE      = 0x0002;
-    static const int CMD_PITCH      = 0x0004;
-    static const int CMD_FORWARD    = 0x0008;
-    static const int CMD_SIDE       = 0x0010;
-    static const int CMD_UP         = 0x0020;
-    static const int CMD_IMPULSE    = 0x0040;
-    static const int CMD_DELTAYAW   = 0x0080;
-    static const int CMD_DELTAPITCH = 0x0100;
+    static const int32_t CMD_BUTTONS    = 0x0001;
+    static const int32_t CMD_ANGLE      = 0x0002;
+    static const int32_t CMD_PITCH      = 0x0004;
+    static const int32_t CMD_FORWARD    = 0x0008;
+    static const int32_t CMD_SIDE       = 0x0010;
+    static const int32_t CMD_UP         = 0x0020;
+    static const int32_t CMD_IMPULSE    = 0x0040;
+    static const int32_t CMD_DELTAYAW   = 0x0080;
+    static const int32_t CMD_DELTAPITCH = 0x0100;
 
-    int     mTic;
-    int     mWorldIndex;
-    int     mFields;
+    int32_t     mTic;
+    int32_t     mWorldIndex;
+    int32_t     mFields;
     uint8_t    mButtons;
     fixed_t mAngle;
     fixed_t mPitch;
@@ -222,9 +222,9 @@ class NetCommand
     int16_t   mDeltaYaw;
     int16_t   mDeltaPitch;
 
-    int getSerializedFields();
+    int32_t getSerializedFields();
 
-    void updateFields(int flag, int value)
+    void updateFields(int32_t flag, int32_t value)
     {
         if (value == 0)
             mFields &= ~flag;

@@ -45,7 +45,7 @@ argb_t CL_GetPlayerColor(player_t *);
 
 EXTERN_CVAR(am_followplayer)
 
-static int lockglow = 0;
+static int32_t lockglow = 0;
 
 EXTERN_CVAR(am_rotate)
 EXTERN_CVAR(am_overlay)
@@ -97,8 +97,8 @@ EXTERN_CVAR(am_ovexitcolor)
 EXTERN_CVAR(am_ovteleportcolor)
 
 // 
-int CleanXfac = 0;
-int CleanYfac = 0;
+int32_t CleanXfac = 0;
+int32_t CleanYfac = 0;
 
 BEGIN_COMMAND(resetcustomcolors)
 {
@@ -144,10 +144,10 @@ EXTERN_CVAR(screenblocks)
 #define F_PANINC (140 / TICRATE)
 // how much zoom-in per tic
 // goes to 2x in 1 second
-#define M_ZOOMIN ((int)(1.02 * FRACUNIT))
+#define M_ZOOMIN ((int32_t)(1.02 * FRACUNIT))
 // how much zoom-out per tic
 // pulls out to 0.5x in 1 second
-#define M_ZOOMOUT ((int)(FRACUNIT / 1.02))
+#define M_ZOOMOUT ((int32_t)(FRACUNIT / 1.02))
 
 // translates between frame-buffer and map distances
 #define FTOM(x) FixedMul(((x) << 16), scale_ftom)
@@ -174,7 +174,7 @@ std::vector<mline_t> thinrectangle_guy;
 
 am_default_colors_t AutomapDefaultColors;
 am_colors_t         AutomapDefaultCurrentColors;
-int                 am_cheating = 0;
+int32_t                 am_cheating = 0;
 static bool         grid        = false;
 static bool         bigstate    = false; // Bigmode
 
@@ -186,12 +186,12 @@ bool automapactive = false;
 static v2int_t f;
 
 // size of window on screen
-static int f_w;
-static int f_h;
-static int f_p;               // [RH] # of bytes from start of a line to start of next
+static int32_t f_w;
+static int32_t f_h;
+static int32_t f_p;               // [RH] # of bytes from start of a line to start of next
 
 static uint8_t *fb;              // pseudo-frame buffer
-static int   amclock;
+static int32_t   amclock;
 
 static mpoint_t m_paninc;     // how far the window pans each tic (map coords)
 static fixed_t  ftom_zoommul; // how far the window zooms in each tic (fb coords)
@@ -225,7 +225,7 @@ static fixed_t scale_ftom;
 
 static lumpHandle_t marknums[10];                 // numbers used for marking by the automap
 static mpoint_t     markpoints[AM_NUMMARKPOINTS]; // where the points are
-static int          markpointnum = 0;             // next point to be assigned
+static int32_t          markpointnum = 0;             // next point to be assigned
 
 static bool stopped = true;
 
@@ -290,12 +290,12 @@ END_COMMAND(am_togglefollow)
 void AM_rotatePoint(mpoint_t &pt);
 
 // translates between frame-buffer and map coordinates
-int CXMTOF(int x)
+int32_t CXMTOF(int32_t x)
 {
     return (MTOF((x)-m_ll.x) /* - f_x*/);
 }
 
-int CYMTOF(int y)
+int32_t CYMTOF(int32_t y)
 {
     return (f_h - MTOF((y)-m_ll.y) /* + f_y*/);
 }
@@ -372,7 +372,7 @@ void AM_findMinMaxBoundaries()
     M_SetVec2Fixed(&min, INT32_MAX, INT32_MAX);
     M_SetVec2Fixed(&max, -INT32_MAX, -INT32_MAX);
 
-    for (int i = 0; i < numvertexes; i++)
+    for (int32_t i = 0; i < numvertexes; i++)
     {
         if (vertexes[i].x < min.x)
             min.x = vertexes[i].x;
@@ -492,7 +492,7 @@ am_color_t AM_GetColorFromString(const argb_t *palette_colors, const char *color
     return c;
 }
 
-am_color_t AM_BestColor(const argb_t *palette_colors, const int r, const int g, const int b)
+am_color_t AM_BestColor(const argb_t *palette_colors, const int32_t r, const int32_t g, const int32_t b)
 {
     am_color_t c;
     c.rgb   = argb_t(r, g, b);
@@ -697,7 +697,7 @@ void AM_loadPics()
 {
     char namebuf[9];
 
-    for (int i = 0; i < 10; i++)
+    for (int32_t i = 0; i < 10; i++)
     {
         sprintf(namebuf, "AMMNUM%d", i);
         marknums[i] = W_CachePatchHandle(namebuf, PU_STATIC);
@@ -706,13 +706,13 @@ void AM_loadPics()
 
 void AM_unloadPics()
 {
-    for (int i = 0; i < 10; i++)
+    for (int32_t i = 0; i < 10; i++)
         marknums[i].clear();
 }
 
 void AM_clearMarks()
 {
-    for (int i = AM_NUMMARKPOINTS - 1; i >= 0; i--)
+    for (int32_t i = AM_NUMMARKPOINTS - 1; i >= 0; i--)
         markpoints[i].x = -1; // means empty
     markpointnum = 0;
 }
@@ -729,7 +729,7 @@ void AM_LevelInit()
     AM_clearMarks();
 
     AM_findMinMaxBoundaries();
-    scale_mtof = FixedDiv(min_scale_mtof, static_cast<int>(0.7 * FRACUNIT));
+    scale_mtof = FixedDiv(min_scale_mtof, static_cast<int32_t>(0.7 * FRACUNIT));
     if (scale_mtof > max_scale_mtof)
         scale_mtof = min_scale_mtof;
     scale_ftom = FixedDiv(FRACUNIT, scale_mtof);
@@ -955,9 +955,9 @@ void AM_clearFB(am_color_t color)
 {
     argb_t *line = reinterpret_cast<argb_t *>(fb);
 
-    for (int y = 0; y < f_h; y++)
+    for (int32_t y = 0; y < f_h; y++)
     {
-        for (int x = 0; x < f_w; x++)
+        for (int32_t x = 0; x < f_w; x++)
             line[x] = color.rgb;
         line += f_p >> 2;
     }
@@ -980,16 +980,16 @@ bool AM_clipMline(mline_t *ml, fline_t *fl)
         TOP    = 8
     };
 
-    int outcode1 = 0;
-    int outcode2 = 0;
-    int outside;
+    int32_t outcode1 = 0;
+    int32_t outcode2 = 0;
+    int32_t outside;
 
     fpoint_t tmp;
 
     tmp.x = 0;
     tmp.y = 0;
-    int dx;
-    int dy;
+    int32_t dx;
+    int32_t dy;
 
 #define DOOUTCODE(oc, mx, my)                                                                                          \
     (oc) = 0;                                                                                                          \
@@ -1112,18 +1112,18 @@ void AM_drawFlineD(fline_t *fl, argb_t color)
     fl->a.y += f.y;
     fl->b.y += f.y;
 
-    const int dx = fl->b.x - fl->a.x;
-    const int ax = 2 * (dx < 0 ? -dx : dx);
-    const int sx = dx < 0 ? -1 : 1;
+    const int32_t dx = fl->b.x - fl->a.x;
+    const int32_t ax = 2 * (dx < 0 ? -dx : dx);
+    const int32_t sx = dx < 0 ? -1 : 1;
 
-    const int dy = fl->b.y - fl->a.y;
-    const int ay = 2 * (dy < 0 ? -dy : dy);
-    const int sy = dy < 0 ? -1 : 1;
+    const int32_t dy = fl->b.y - fl->a.y;
+    const int32_t ay = 2 * (dy < 0 ? -dy : dy);
+    const int32_t sy = dy < 0 ? -1 : 1;
 
-    int x = fl->a.x;
-    int y = fl->a.y;
+    int32_t x = fl->a.x;
+    int32_t y = fl->a.y;
 
-    int d;
+    int32_t d;
 
     if (ax > ay)
     {
@@ -1243,12 +1243,12 @@ void AM_drawGrid(am_color_t color)
 //
 void AM_drawWalls()
 {
-    int              r, g, b;
+    int32_t              r, g, b;
     static mline_t   l;
     float            rdif, gdif, bdif;
     const palette_t *pal = V_GetDefaultPalette();
 
-    for (int i = 0; i < numlines; i++)
+    for (int32_t i = 0; i < numlines; i++)
     {
         M_SetVec2Fixed(&l.a, lines[i].v1->x, lines[i].v1->y);
         M_SetVec2Fixed(&l.b, lines[i].v2->x, lines[i].v2->y);
@@ -1330,15 +1330,15 @@ void AM_drawWalls()
 
                             if (lockglow < 30)
                             {
-                                r += static_cast<int>(rdif) * lockglow;
-                                g += static_cast<int>(gdif) * lockglow;
-                                b += static_cast<int>(bdif) * lockglow;
+                                r += static_cast<int32_t>(rdif) * lockglow;
+                                g += static_cast<int32_t>(gdif) * lockglow;
+                                b += static_cast<int32_t>(bdif) * lockglow;
                             }
                             else if (lockglow < 60)
                             {
-                                r += static_cast<int>(rdif) * (60 - lockglow);
-                                g += static_cast<int>(gdif) * (60 - lockglow);
-                                b += static_cast<int>(bdif) * (60 - lockglow);
+                                r += static_cast<int32_t>(rdif) * (60 - lockglow);
+                                g += static_cast<int32_t>(gdif) * (60 - lockglow);
+                                b += static_cast<int32_t>(bdif) * (60 - lockglow);
                             }
                         }
 
@@ -1378,15 +1378,15 @@ void AM_drawWalls()
 
                             if (lockglow < 30)
                             {
-                                r += static_cast<int>(rdif) * lockglow;
-                                g += static_cast<int>(gdif) * lockglow;
-                                b += static_cast<int>(bdif) * lockglow;
+                                r += static_cast<int32_t>(rdif) * lockglow;
+                                g += static_cast<int32_t>(gdif) * lockglow;
+                                b += static_cast<int32_t>(bdif) * lockglow;
                             }
                             else if (lockglow < 60)
                             {
-                                r += static_cast<int>(rdif) * (60 - lockglow);
-                                g += static_cast<int>(gdif) * (60 - lockglow);
-                                b += static_cast<int>(bdif) * (60 - lockglow);
+                                r += static_cast<int32_t>(rdif) * (60 - lockglow);
+                                g += static_cast<int32_t>(gdif) * (60 - lockglow);
+                                b += static_cast<int32_t>(bdif) * (60 - lockglow);
                             }
                         }
 
@@ -1545,7 +1545,7 @@ am_color_t AM_getKeyColor(AActor *t)
 
 void AM_drawEasyKeys()
 {
-    for (int i = 0; i < numsectors; i++)
+    for (int32_t i = 0; i < numsectors; i++)
     {
         AActor *t = sectors[i].thinglist;
         while (t)
@@ -1566,7 +1566,7 @@ void AM_drawEasyKeys()
 
 void AM_drawThings()
 {
-    for (int i = 0; i < numsectors; i++)
+    for (int32_t i = 0; i < numsectors; i++)
     {
         AActor *t = sectors[i].thinglist;
         while (t)
@@ -1628,7 +1628,7 @@ void AM_drawThings()
 
 void AM_drawMarks()
 {
-    for (int i = 0; i < AM_NUMMARKPOINTS; i++)
+    for (int32_t i = 0; i < AM_NUMMARKPOINTS; i++)
     {
         if (markpoints[i].x != -1)
         {
@@ -1639,13 +1639,13 @@ void AM_drawMarks()
             if (am_rotate)
                 AM_rotatePoint(pt);
 
-            const int fx = CXMTOF(pt.x);
-            const int fy = CYMTOF(pt.y) - 3;
+            const int32_t fx = CXMTOF(pt.x);
+            const int32_t fy = CYMTOF(pt.y) - 3;
 
             //      w = LESHORT(marknums[i]->width);
             //      h = LESHORT(marknums[i]->height);
-            const int w = 5; // because something's wrong with the wad, i guess
-            const int h = 6; // because something's wrong with the wad, i guess
+            const int32_t w = 5; // because something's wrong with the wad, i guess
+            const int32_t h = 6; // because something's wrong with the wad, i guess
 
             if (fx >= f.x && fx <= f_w - w && fy >= f.y && fy <= f_h - h)
             {
@@ -1671,7 +1671,7 @@ void AM_Drawer()
         return;
 
     IWindowSurface *surface       = IRenderSurface::getCurrentRenderSurface();
-    const int       surface_width = surface->getWidth(), surface_height = surface->getHeight();
+    const int32_t       surface_width = surface->getWidth(), surface_height = surface->getHeight();
 
     fb = surface->getBuffer();
 
@@ -1713,10 +1713,10 @@ void AM_Drawer()
     if (!(viewactive && am_overlay < 2) && !hu_font[0].empty())
     {
         char      line[64 + 10];
-        const int time = level.time / TICRATE;
+        const int32_t time = level.time / TICRATE;
 
-        const int text_height = (W_ResolvePatchHandle(hu_font[0])->height() + 1) * CleanYfac;
-        const int OV_Y        = surface_height - (surface_height * 32 / 200);
+        const int32_t text_height = (W_ResolvePatchHandle(hu_font[0])->height() + 1) * CleanYfac;
+        const int32_t OV_Y        = surface_height - (surface_height * 32 / 200);
 
         if (G_IsCoopGame())
         {
@@ -1725,8 +1725,8 @@ void AM_Drawer()
                 sprintf(line, TEXTCOLOR_RED "MONSTERS:" TEXTCOLOR_NORMAL " %d / %d", level.killed_monsters,
                         (level.total_monsters + level.respawned_monsters));
 
-                int       x, y;
-                const int text_width = V_StringWidth(line) * CleanXfac;
+                int32_t       x, y;
+                const int32_t text_width = V_StringWidth(line) * CleanXfac;
 
                 if (AM_OverlayAutomapVisible())
                 {
@@ -1746,8 +1746,8 @@ void AM_Drawer()
             {
                 sprintf(line, TEXTCOLOR_RED "ITEMS:" TEXTCOLOR_NORMAL " %d / %d", level.found_items, level.total_items);
 
-                int       x, y;
-                const int text_width = V_StringWidth(line) * CleanXfac;
+                int32_t       x, y;
+                const int32_t text_width = V_StringWidth(line) * CleanXfac;
 
                 if (AM_OverlayAutomapVisible())
                 {
@@ -1767,8 +1767,8 @@ void AM_Drawer()
             {
                 sprintf(line, TEXTCOLOR_RED "SECRETS:" TEXTCOLOR_NORMAL " %d / %d", level.found_secrets,
                         level.total_secrets);
-                int       x, y;
-                const int text_width = V_StringWidth(line) * CleanXfac;
+                int32_t       x, y;
+                const int32_t text_width = V_StringWidth(line) * CleanXfac;
 
                 if (AM_OverlayAutomapVisible())
                 {
@@ -1787,8 +1787,8 @@ void AM_Drawer()
 
         if (am_classicmapstring)
         {
-            int firstmap;
-            int mapoffset = 1;
+            int32_t firstmap;
+            int32_t mapoffset = 1;
             switch (gamemission)
             {
             case doom2:
@@ -1810,8 +1810,8 @@ void AM_Drawer()
 
             strncpy(line, GStrings.getIndex(firstmap + level.levelnum - mapoffset), ARRAY_LENGTH(line) - 1);
 
-            int       x, y;
-            const int text_width = V_StringWidth(line) * CleanXfac;
+            int32_t       x, y;
+            const int32_t text_width = V_StringWidth(line) * CleanXfac;
 
             if (AM_OverlayAutomapVisible())
             {
@@ -1829,8 +1829,8 @@ void AM_Drawer()
         else
         {
             strcpy(line, TEXTCOLOR_RED);
-            int pos = strlen(line);
-            for (int i = 0; i < 8 && level.mapname[i]; i++, pos++)
+            int32_t pos = strlen(line);
+            for (int32_t i = 0; i < 8 && level.mapname[i]; i++, pos++)
                 line[pos] = level.mapname[i];
 
             line[pos++] = ':';
@@ -1839,8 +1839,8 @@ void AM_Drawer()
             line[pos++] = ' ';
             strcpy(&line[pos], level.level_name);
 
-            int       x, y;
-            const int text_width = V_StringWidth(line) * CleanXfac;
+            int32_t       x, y;
+            const int32_t text_width = V_StringWidth(line) * CleanXfac;
 
             if (AM_OverlayAutomapVisible())
             {
@@ -1861,8 +1861,8 @@ void AM_Drawer()
             sprintf(line, " %02d:%02d:%02d", time / 3600, (time % 3600) / 60,
                     time % 60); // Time
 
-            int       x, y;
-            const int text_width = V_StringWidth(line) * CleanXfac;
+            int32_t       x, y;
+            const int32_t text_width = V_StringWidth(line) * CleanXfac;
 
             if (AM_OverlayAutomapVisible())
             {

@@ -26,15 +26,15 @@
 
 // Functions for v_video.cpp support
 
-void r_dimpatchD_c(IRenderSurface *surface, argb_t color, int alpha, int x1, int y1, int w, int h)
+void r_dimpatchD_c(IRenderSurface *surface, argb_t color, int32_t alpha, int32_t x1, int32_t y1, int32_t w, int32_t h)
 {
-    const int surface_pitch_pixels = surface->getPitchInPixels();
+    const int32_t surface_pitch_pixels = surface->getPitchInPixels();
 
     argb_t *line = (argb_t *)surface->getBuffer() + y1 * surface_pitch_pixels;
 
-    for (int y = y1; y < y1 + h; y++)
+    for (int32_t y = y1; y < y1 + h; y++)
     {
-        for (int x = x1; x < x1 + w; x++)
+        for (int32_t x = x1; x < x1 + w; x++)
             line[x] = alphablend1a(line[x], color, alpha);
 
         line += surface_pitch_pixels;

@@ -40,11 +40,11 @@ struct weaponinfo_s
     statenum_t atkstate;
     statenum_t flashstate;
     mobjtype_t droptype;
-    int        ammouse;
-    int        minammo;
+    int32_t        ammouse;
+    int32_t        minammo;
 
     // MBF21 Specifications
-    int flags;
+    int32_t flags;
 };
 typedef struct weaponinfo_s weaponinfo_t;
 
@@ -82,14 +82,14 @@ struct gitem_s
 };
 typedef struct gitem_s gitem_t;
 
-extern int num_items;
+extern int32_t num_items;
 
 extern gitem_t itemlist[];
 
 void InitItems(void);
 
 // FindItem
-gitem_t *GetItemByIndex(int index);
+gitem_t *GetItemByIndex(int32_t index);
 gitem_t *FindItemByClassname(const char *classname);
 gitem_t *FindItem(const char *pickup_name);
 

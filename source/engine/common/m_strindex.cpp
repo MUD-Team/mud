@@ -43,9 +43,9 @@ OStringIndexer OStringIndexer::maplistFactory()
     }
 
     // 36 for Ultimate DOOM.
-    for (int e = 1; e <= 4; e++)
+    for (int32_t e = 1; e <= 4; e++)
     {
-        for (int m = 1; m <= 9; m++)
+        for (int32_t m = 1; m <= 9; m++)
         {
             StrFormat(buf, "E%dM%d", e, m);
             stridx.getIndex(buf);
@@ -53,7 +53,7 @@ OStringIndexer OStringIndexer::maplistFactory()
     }
 
     // 32 for DOOM II/Final Doom.
-    for (int i = 1; i <= 32; i++)
+    for (int32_t i = 1; i <= 32; i++)
     {
         StrFormat(buf, "MAP%02d", i);
         stridx.getIndex(buf);

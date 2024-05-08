@@ -55,9 +55,9 @@ void SV_DrawScores();
 void SV_ServerSettingChange();
 bool SV_IsPlayerAllowedToSee(player_t &pl, AActor *mobj);
 
-void STACK_ARGS SV_ClientPrintf(client_t *cl, int level, const char *fmt, ...);
-void STACK_ARGS SV_SpectatorPrintf(int level, const char *fmt, ...);
-void STACK_ARGS SV_PlayerPrintf(int level, int who, const char *fmt, ...);
+void STACK_ARGS SV_ClientPrintf(client_t *cl, int32_t level, const char *fmt, ...);
+void STACK_ARGS SV_SpectatorPrintf(int32_t level, const char *fmt, ...);
+void STACK_ARGS SV_PlayerPrintf(int32_t level, int32_t who, const char *fmt, ...);
 void            SV_CheckTimeouts(void);
 void            SV_ConnectClient(void);
 void            SV_ConnectClient2(player_t &player);
@@ -71,7 +71,7 @@ void            SV_ParseCommands(player_t &player);
 void            SV_UpdateFrags(player_t &player);
 void            SV_RemoveCorpses(void);
 #define SV_DropClient(who) SV_DropClient2(who, __FILE__, __LINE__)
-void SV_DropClient2(player_t &who, const char *file, const int line);
+void SV_DropClient2(player_t &who, const char *file, const int32_t line);
 void SV_PlayerTriedToCheat(player_t &player);
 void SV_ActorTarget(AActor *actor);
 void SV_ActorTracer(AActor *actor);
@@ -85,16 +85,16 @@ void SV_TouchSpecial(AActor *special, player_t *player);
 void SV_Sound(AActor *mo, uint8_t channel, const char *name, uint8_t attenuation);
 void SV_Sound(player_t &pl, AActor *mo, const uint8_t channel, const char *name, const uint8_t attenuation);
 void SV_Sound(fixed_t x, fixed_t y, uint8_t channel, const char *name, uint8_t attenuation);
-void SV_SoundTeam(uint8_t channel, const char *name, uint8_t attenuation, int t);
+void SV_SoundTeam(uint8_t channel, const char *name, uint8_t attenuation, int32_t t);
 
-void SV_MidPrint(const char *msg, player_t *p, int msgtime = 0);
+void SV_MidPrint(const char *msg, player_t *p, int32_t msgtime = 0);
 
 extern std::vector<std::string> wadnames;
 
 void SV_SendPlayerInfo(player_t &player);
 void SV_SendKillMobj(AActor *source, AActor *target, AActor *inflictor, bool joinkill);
-void SV_SendDamagePlayer(player_t *player, AActor *inflictor, int healthDamage, int armorDamage);
-void SV_SendDamageMobj(AActor *target, int pain);
+void SV_SendDamagePlayer(player_t *player, AActor *inflictor, int32_t healthDamage, int32_t armorDamage);
+void SV_SendDamageMobj(AActor *target, int32_t pain);
 // Tells clients to remove an actor from the world as it doesn't exist anymore
 void SV_SendDestroyActor(AActor *mo);
 
@@ -123,10 +123,10 @@ void SV_ClearPlayerQueue();
 
 void SV_UpdateSecretCount(player_t &player);
 void SV_UpdateMonsterRespawnCount();
-void SV_SendExecuteLineSpecial(uint8_t special, line_t *line, AActor *activator, int arg0, int arg1, int arg2, int arg3,
-                               int arg4);
+void SV_SendExecuteLineSpecial(uint8_t special, line_t *line, AActor *activator, int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3,
+                               int32_t arg4);
 void SV_ACSExecuteSpecial(uint8_t special, AActor *activator, const char *print, bool playerOnly,
-                          const std::vector<int> &args = std::vector<int>());
+                          const std::vector<int32_t> &args = std::vector<int32_t>());
 
 bool CompareQueuePosition(const player_t *p1, const player_t *p2);
 

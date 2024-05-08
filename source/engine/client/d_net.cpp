@@ -37,8 +37,8 @@
 //
 // gametic is the tic about to (or currently being) run
 
-int lastnettic;
-int skiptics;
+int32_t lastnettic;
+int32_t skiptics;
 
 bool step_mode = false;
 

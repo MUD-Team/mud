@@ -31,7 +31,7 @@
 #include <string.h>
 
 static constexpr uint8_t kMusFrequency = 140;
-static constexpr int     kMusTempo     = 0x00068A1B; /* MPQN: 60000000 / 140BPM (140Hz) = 428571 */
+static constexpr int32_t     kMusTempo     = 0x00068A1B; /* MPQN: 60000000 / 140BPM (140Hz) = 428571 */
                                                      /*  0x000D1436 -> MPQN: 60000000 /  70BPM  (70Hz) = 857142 */
 static constexpr uint16_t kMusDivision = 0x0101;     /* 257 for 140Hz files with a 140MPQN */
                                                      /*  0x0088 -> 136 for  70Hz files with a 140MPQN */
@@ -220,16 +220,16 @@ static int32_t MusToMidiWriteVariableLength(int32_t value, uint8_t *out)
 #define EDGE_MUS_READ_SHORT(b) ((b)[0] | ((b)[1] << 8))
 #define EDGE_MUS_READ_INT(b)   ((b)[0] | ((b)[1] << 8) | ((b)[2] << 16) | ((b)[3] << 24))
 
-static int ConvertMusToMidi(uint8_t *in, uint32_t insize, uint8_t **out, uint32_t *outsize, uint16_t frequency)
+static int32_t ConvertMusToMidi(uint8_t *in, uint32_t insize, uint8_t **out, uint32_t *outsize, uint16_t frequency)
 {
     struct MusConversionContext ctx;
     MusHeader                   header;
     uint8_t                    *cur, *end;
     uint32_t                    track_size_pos, begin_track_pos, current_pos;
     int32_t                     delta_time; /* Delta time for midi event */
-    int                         temp, ret = -1;
-    int                         channel_volume[kMusMidiMaxChannels];
-    int                         channelMap[kMusMidiMaxChannels], currentChannel;
+    int32_t                         temp, ret = -1;
+    int32_t                         channel_volume[kMusMidiMaxChannels];
+    int32_t                         channelMap[kMusMidiMaxChannels], currentChannel;
 
     if (insize < sizeof(MusHeader))
     {

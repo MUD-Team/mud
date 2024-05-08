@@ -37,7 +37,7 @@ static bool pticker_paused = false;
 // Decides if it is time to perform a function that is to be performed
 // at regular intervals
 //
-bool P_AtInterval(int interval)
+bool P_AtInterval(int32_t interval)
 {
     return (gametic % interval) == 0;
 }

@@ -64,7 +64,7 @@ weaponinfo_t weaponinfo[NUMWEAPONS + 1] = {
      am_noammo, S_NOWEAPONUP, S_NOWEAPONDOWN, S_NOWEAPON, S_NOWEAPON, S_NOWEAPON, MT_MISC26, 0, 0, WPF_NOFLAG},
 };
 
-int num_items;
+int32_t num_items;
 
 // [RH] Guess what. These next three functions are from Quake2:
 //	g_items.c
@@ -74,7 +74,7 @@ int num_items;
 GetItemByIndex
 ===============
 */
-gitem_t *GetItemByIndex(int index)
+gitem_t *GetItemByIndex(int32_t index)
 {
     if (index == 0 || index >= num_items)
         return NULL;
@@ -90,7 +90,7 @@ FindItemByClassname
 */
 gitem_t *FindItemByClassname(const char *classname)
 {
-    int      i;
+    int32_t      i;
     gitem_t *it;
 
     it = itemlist;
@@ -109,7 +109,7 @@ FindItem
 */
 gitem_t *FindItem(const char *pickup_name)
 {
-    int      i;
+    int32_t      i;
     gitem_t *it;
 
     it = itemlist;
@@ -122,7 +122,7 @@ gitem_t *FindItem(const char *pickup_name)
 
 gitem_t *FindCardItem(card_t card)
 {
-    int      i;
+    int32_t      i;
     gitem_t *it;
 
     it = itemlist;

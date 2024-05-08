@@ -40,10 +40,10 @@ void D_UserInfoChanged(cvar_t *cvar)
 void D_DoServerInfoChange(uint8_t **stream)
 {
 }
-void D_WriteUserInfoStrings(int i, uint8_t **stream, bool compact)
+void D_WriteUserInfoStrings(int32_t i, uint8_t **stream, bool compact)
 {
 }
-void D_ReadUserInfoStrings(int i, uint8_t **stream, bool update)
+void D_ReadUserInfoStrings(int32_t i, uint8_t **stream, bool update)
 {
 }
 

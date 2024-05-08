@@ -40,22 +40,22 @@ void I_SetSfxVolume(float volume);
 //
 
 // Initialize channels
-void I_SetChannels(int);
+void I_SetChannels(int32_t);
 
 // load a sound from disk
 void I_LoadSound(struct sfxinfo_struct *sfx);
 
 // Starts a sound in a particular sound channel.
-int I_StartSound(int id, float vol, int sep, int pitch, bool loop);
+int32_t I_StartSound(int32_t id, float vol, int32_t sep, int32_t pitch, bool loop);
 
 // Stops a sound channel.
-void I_StopSound(int handle);
+void I_StopSound(int32_t handle);
 
 // Called by S_*() functions
 //	to see if a channel is still playing.
 // Returns 0 if no longer playing, 1 if playing.
-int I_SoundIsPlaying(int handle);
+int32_t I_SoundIsPlaying(int32_t handle);
 
 // Updates the volume, separation,
 //	and pitch of a sound channel.
-void I_UpdateSoundParams(int handle, float vol, int sep, int pitch);
+void I_UpdateSoundParams(int32_t handle, float vol, int32_t sep, int32_t pitch);

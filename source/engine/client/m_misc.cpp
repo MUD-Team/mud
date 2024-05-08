@@ -100,7 +100,7 @@ BEGIN_COMMAND(savecfg)
 }
 END_COMMAND(savecfg)
 
-extern int cvar_defflags;
+extern int32_t cvar_defflags;
 
 EXTERN_CVAR(cl_downloadsites);
 EXTERN_CVAR(message_showobituaries);
@@ -283,7 +283,7 @@ bool M_FindFreeName(std::string &filename, const std::string &extension)
         return true;
     }
 
-    int i;
+    int32_t i;
 
     for (i = 1; i <= 9999; i++)
     {

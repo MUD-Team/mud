@@ -112,7 +112,7 @@ uint32_t crc32_bitwise(const void *data, size_t length, uint32_t previousCrc32)
     {
         crc ^= *current++;
 
-        for (int j = 0; j < 8; j++)
+        for (int32_t j = 0; j < 8; j++)
         {
             // branch-free
             crc = (crc >> 1) ^ (-int32_t(crc & 1) & Polynomial);
@@ -514,26 +514,26 @@ uint32_t crc32_combine(uint32_t crcA, uint32_t crcB, size_t lengthB)
 
     // put operator for one zero bit in odd
     odd[0] = Polynomial; // CRC-32 polynomial
-    for (int i = 1; i < (int)CrcBits; i++)
+    for (int32_t i = 1; i < (int32_t)CrcBits; i++)
         odd[i] = 1 << (i - 1);
 
     // put operator for two zero bits in even
     // same as gf2_matrix_square(even, odd);
-    for (int i = 0; i < (int)CrcBits; i++)
+    for (int32_t i = 0; i < (int32_t)CrcBits; i++)
     {
         uint32_t vec = odd[i];
         even[i]      = 0;
-        for (int j = 0; vec != 0; j++, vec >>= 1)
+        for (int32_t j = 0; vec != 0; j++, vec >>= 1)
             if (vec & 1)
                 even[i] ^= odd[j];
     }
     // put operator for four zero bits in odd
     // same as gf2_matrix_square(odd, even);
-    for (int i = 0; i < (int)CrcBits; i++)
+    for (int32_t i = 0; i < (int32_t)CrcBits; i++)
     {
         uint32_t vec = even[i];
         odd[i]       = 0;
-        for (int j = 0; vec != 0; j++, vec >>= 1)
+        for (int32_t j = 0; vec != 0; j++, vec >>= 1)
             if (vec & 1)
                 odd[i] ^= even[j];
     }
@@ -545,11 +545,11 @@ uint32_t crc32_combine(uint32_t crcA, uint32_t crcB, size_t lengthB)
     for (; lengthB > 0; lengthB >>= 1)
     {
         // same as gf2_matrix_square(a, b);
-        for (int i = 0; i < (int)CrcBits; i++)
+        for (int32_t i = 0; i < (int32_t)CrcBits; i++)
         {
             uint32_t vec = b[i];
             a[i]         = 0;
-            for (int j = 0; vec != 0; j++, vec >>= 1)
+            for (int32_t j = 0; vec != 0; j++, vec >>= 1)
                 if (vec & 1)
                     a[i] ^= b[j];
         }
@@ -559,7 +559,7 @@ uint32_t crc32_combine(uint32_t crcA, uint32_t crcB, size_t lengthB)
         {
             // same as firstCrc32 = gf2_matrix_times(a, firstCrc32);
             uint32_t sum = 0;
-            for (int i = 0; crcA != 0; i++, crcA >>= 1)
+            for (int32_t i = 0; crcA != 0; i++, crcA >>= 1)
                 if (crcA & 1)
                     sum ^= a[i];
             crcA = sum;
@@ -582,17 +582,17 @@ uint32_t crc32_combine(uint32_t crcA, uint32_t crcB, size_t lengthB)
 /// look-up table, already declared above
 const uint32_t Crc32Lookup[MaxSlice][256] = {
     //// same algorithm as crc32_bitwise
-    // for (int i = 0; i <= 0xFF; i++)
+    // for (int32_t i = 0; i <= 0xFF; i++)
     //{
     //   uint32_t crc = i;
-    //   for (int j = 0; j < 8; j++)
+    //   for (int32_t j = 0; j < 8; j++)
     //     crc = (crc >> 1) ^ ((crc & 1) * Polynomial);
     //   Crc32Lookup[0][i] = crc;
     // }
     //// ... and the following slicing-by-8 algorithm (from Intel):
     //// http://www.intel.com/technology/comms/perfnet/download/CRC_generators.pdf
     //// http://sourceforge.net/projects/slicing-by-8/
-    // for (int slice = 1; slice < MaxSlice; slice++)
+    // for (int32_t slice = 1; slice < MaxSlice; slice++)
     //   Crc32Lookup[slice][i] = (Crc32Lookup[slice - 1][i] >> 8) ^ Crc32Lookup[0][Crc32Lookup[slice - 1][i] & 0xFF];
     {
         // note: the first number of every second row corresponds to the half-byte look-up table !

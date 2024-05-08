@@ -52,7 +52,7 @@ EXTERN_CVAR(sv_nomonsters)
 
 void A_PainDie(AActor *actor);
 
-const int HORDE_STARTING_TICS = TICRATE * 3;
+const int32_t HORDE_STARTING_TICS = TICRATE * 3;
 
 /**
  * @brief Garbage-collector for Horde corpses.
@@ -189,19 +189,19 @@ static const char *HordeStateStr(const hordeState_e state)
 class HordeState
 {
     hordeState_e      m_state;
-    int               m_wave;
-    int               m_waveTime;
-    int               m_bossTime; // If == waveTime, boss not spawned.
+    int32_t               m_wave;
+    int32_t               m_waveTime;
+    int32_t               m_bossTime; // If == waveTime, boss not spawned.
     size_t            m_defineID;
-    int               m_spawnedHealth;
-    int               m_killedHealth;
-    int               m_bossHealth;
-    int               m_bossDamage;
-    int               m_waveStartHealth;
+    int32_t               m_spawnedHealth;
+    int32_t               m_killedHealth;
+    int32_t               m_bossHealth;
+    int32_t               m_bossDamage;
+    int32_t               m_waveStartHealth;
     AActors           m_bosses;
     hordeRecipe_t     m_bossRecipe;
-    int               m_nextSpawn;
-    int               m_nextPowerup;
+    int32_t               m_nextSpawn;
+    int32_t               m_nextPowerup;
     corpseCollector_t m_corpses;
 
     /**
@@ -346,7 +346,7 @@ class HordeState
      */
     bool forceWave(const std::string &name)
     {
-        int defineID;
+        int32_t defineID;
         if (!P_HordeDefineNamed(defineID, name))
             return false;
 
@@ -427,7 +427,7 @@ class HordeState
         AActor                  *mo;
         TThinkerIterator<AActor> iterator;
 
-        int count = 0;
+        int32_t count = 0;
 
         m_bosses.clear();
         while ((mo = iterator.Next()))
@@ -439,22 +439,22 @@ class HordeState
         }
     }
 
-    void addSpawnHealth(const int health)
+    void addSpawnHealth(const int32_t health)
     {
         m_spawnedHealth += health;
     }
 
-    void addKilledHealth(const int health)
+    void addKilledHealth(const int32_t health)
     {
         m_killedHealth += health;
     }
 
-    void addBossHealth(const int health)
+    void addBossHealth(const int32_t health)
     {
         m_bossHealth += health;
     }
 
-    void addBossDamage(const int health)
+    void addBossDamage(const int32_t health)
     {
         m_bossDamage += health;
     }
@@ -469,12 +469,12 @@ class HordeState
         return m_defineID;
     }
 
-    int getAliveHealth() const
+    int32_t getAliveHealth() const
     {
         return m_spawnedHealth - m_killedHealth;
     }
     void changeState();
-    void getNextSpawnTime(int &min, int &max);
+    void getNextSpawnTime(int32_t &min, int32_t &max);
     void tick();
 } g_HordeDirector;
 
@@ -485,8 +485,8 @@ void HordeState::changeState()
 {
     const hordeDefine_t &define = G_HordeDefine(m_defineID);
 
-    const int aliveHealth = m_spawnedHealth - m_killedHealth;
-    const int goalHealth  = define.goalHealth() + m_waveStartHealth;
+    const int32_t aliveHealth = m_spawnedHealth - m_killedHealth;
+    const int32_t goalHealth  = define.goalHealth() + m_waveStartHealth;
 
     switch (m_state)
     {
@@ -539,7 +539,7 @@ void HordeState::changeState()
  * @param min Minimum spawn time, in seconds.
  * @param max Maximum spawn time, in seconds.
  */
-void HordeState::getNextSpawnTime(int &min, int &max)
+void HordeState::getNextSpawnTime(int32_t &min, int32_t &max)
 {
     const hordeDefine_t &define = G_HordeDefine(::g_HordeDirector.getDefineID());
 
@@ -549,7 +549,7 @@ void HordeState::getNextSpawnTime(int &min, int &max)
     const double FULL_MAX_SPAWN  = g_horde_spawnfull_max;
 
     // Minimum/maximum monster spawn time.
-    int alive = getAliveHealth();
+    int32_t alive = getAliveHealth();
 
     // Slow down the spawn rate if we have bosses.
     if (!m_bosses.empty())
@@ -561,7 +561,7 @@ void HordeState::getNextSpawnTime(int &min, int &max)
     double maxf = Remap(alive, define.minTotalHealth(), define.maxTotalHealth(), FULL_MIN_SPAWN, FULL_MAX_SPAWN);
 
     // Don't absolutely pound the players in the first minute.
-    const int FALLOFF_TIME = m_waveTime + ::HORDE_STARTING_TICS + TICRATE * 60;
+    const int32_t FALLOFF_TIME = m_waveTime + ::HORDE_STARTING_TICS + TICRATE * 60;
     if (::level.time < FALLOFF_TIME)
     {
         const double falloff  = Remap(::level.time, m_waveTime, FALLOFF_TIME, 1.0, 0.0);
@@ -572,8 +572,8 @@ void HordeState::getNextSpawnTime(int &min, int &max)
     }
 
     // Turn into integers.
-    min = MAX(int(round(minf)), 1);
-    max = MAX(int(round(maxf)), 1);
+    min = MAX(int32_t(round(minf)), 1);
+    max = MAX(int32_t(round(maxf)), 1);
     max = MAX(max, min);
 }
 
@@ -606,11 +606,11 @@ void HordeState::tick()
 
     if (::level.time >= m_nextSpawn && getAliveHealth() <= define.maxTotalHealth())
     {
-        int min, max;
+        int32_t min, max;
         getNextSpawnTime(min, max);
 
         // Randomly select our next spawn time.
-        const int offset = P_RandomInt(max - min + 1) + min;
+        const int32_t offset = P_RandomInt(max - min + 1) + min;
         m_nextSpawn      = ::level.time + (offset * TICRATE);
 
         // Should we spawn a monster?
@@ -638,7 +638,7 @@ void HordeState::tick()
                 return;
             }
 
-            const int hp = ::mobjinfo[recipe.type].spawnhealth * recipe.count;
+            const int32_t hp = ::mobjinfo[recipe.type].spawnhealth * recipe.count;
             DPrintf("Spawning %d %s (%d hp) at a %s spawn\n", recipe.count, ::mobjinfo[recipe.type].name, hp,
                     HordeThingStr(spawn->type));
 
@@ -674,7 +674,7 @@ void HordeState::tick()
             {
                 // Adjust the count based on how many bosses we've spawned.
                 recipe       = m_bossRecipe;
-                recipe.count = m_bossRecipe.count - int(m_bosses.size());
+                recipe.count = m_bossRecipe.count - int32_t(m_bosses.size());
             }
 
             // Spawn a boss if we don't have one.
@@ -700,7 +700,7 @@ void HordeState::tick()
     // Always try to spawn a powerup between 30-45 seconds.
     if (!define.powerups.empty() && ::level.time >= m_nextPowerup)
     {
-        const int offset = P_RandomInt(16) + 30;
+        const int32_t offset = P_RandomInt(16) + 30;
         m_nextPowerup    = ::level.time + (offset * TICRATE);
 
         const mobjtype_t pw = define.randomPowerup().mobj;
@@ -708,7 +708,7 @@ void HordeState::tick()
     }
 }
 
-void P_NextSpawnTime(int &min, int &max)
+void P_NextSpawnTime(int32_t &min, int32_t &max)
 {
     ::g_HordeDirector.getNextSpawnTime(min, max);
 }
@@ -757,7 +757,7 @@ void P_RemoveHealthPool(AActor *mo)
     ::g_HordeDirector.addKilledHealth(::mobjinfo[mo->type].spawnhealth);
 }
 
-void P_AddDamagePool(AActor *mo, const int damage)
+void P_AddDamagePool(AActor *mo, const int32_t damage)
 {
     // Not a part of the pool
     if (!(mo->oflags & MFO_BOSSPOOL))
@@ -828,7 +828,7 @@ void P_RunHordeTics()
         ::g_HordeDirector.tick();
 }
 
-bool P_IsHordeThing(const int type)
+bool P_IsHordeThing(const int32_t type)
 {
     return type >= TTYPE_HORDE_SMALLMONSTER && type <= TTYPE_HORDE_SMALLBOSS;
 }
@@ -887,7 +887,7 @@ void P_SerializeHorde(FArchive &arc)
     if (arc.IsStoring())
     {
         hordeInfo_t info     = ::g_HordeDirector.serialize();
-        const int   state    = info.state;
+        const int32_t   state    = info.state;
         const uint32_t defineID = static_cast<uint32_t>(info.defineID);
         arc << state << info.wave << info.waveTime << info.bossTime << defineID << info.spawnedHealth
             << info.killedHealth << info.bossHealth << info.bossDamage << info.waveStartHealth;
@@ -895,7 +895,7 @@ void P_SerializeHorde(FArchive &arc)
     else
     {
         hordeInfo_t info;
-        int         state;
+        int32_t         state;
         uint32_t       defineID;
         arc >> state >> info.wave >> info.waveTime >> info.bossTime >> defineID >> info.spawnedHealth >>
             info.killedHealth >> info.bossHealth >> info.bossDamage >> info.waveStartHealth;
@@ -997,7 +997,7 @@ BEGIN_COMMAND(hordeinfo)
         break;
     }
 
-    int min, max;
+    int32_t min, max;
     ::g_HordeDirector.getNextSpawnTime(min, max);
 
     Printf("[Wave: %d]\n", ::g_HordeDirector.serialize().wave);

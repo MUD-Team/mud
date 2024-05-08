@@ -236,7 +236,7 @@ void ElementConsole::ProcessEvent(Rml::Event &event)
         if (event == Rml::EventId::Keyup)
         {
             Rml::Input::KeyIdentifier key_identifier =
-                (Rml::Input::KeyIdentifier)event.GetParameter<int>("key_identifier", 0);
+                (Rml::Input::KeyIdentifier)event.GetParameter<int32_t>("key_identifier", 0);
             if (key_identifier == Rml::Input::KI_TAB)
             {
             }

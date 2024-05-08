@@ -121,7 +121,7 @@ class FileIdentificationManager
     // Adds identification information for a known file.
     //
     void addFile(const OString &idname, const OString &filename, const OString &crc32, const OString &md5,
-                 const OString &group, bool commercial, const bool iwad, const bool deprecated, const int weight)
+                 const OString &group, bool commercial, const bool iwad, const bool deprecated, const int32_t weight)
     {
         OCRC32Sum crc32Hash;
         OCRC32Sum::makeFromHexStr(crc32Hash, crc32);
@@ -161,7 +161,7 @@ class FileIdentificationManager
         // This function for now is severely crippled and will work under the
         // assumption that we are only loading Freedoom 1 or 2 - Dasho
 
-        static const int  NUM_CHECKLUMPS                = 2;
+        static const int32_t  NUM_CHECKLUMPS                = 2;
         static const char checklumps[NUM_CHECKLUMPS][8] = {
             {'E', '1', 'M', '1'},                     // 0
             {'M', 'A', 'P', '0', '1'},                // 1
@@ -170,7 +170,7 @@ class FileIdentificationManager
         bool lumpsfound[NUM_CHECKLUMPS] = {0};
 
         WadFileLumpFinder lumps(file.getBasename());
-        for (int i = 0; i < NUM_CHECKLUMPS; i++)
+        for (int32_t i = 0; i < NUM_CHECKLUMPS; i++)
             if (lumps.exists(std::string(checklumps[i], 8)))
                 lumpsfound[i] = true;
 

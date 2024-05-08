@@ -22,6 +22,8 @@
 
 #pragma once
 
+#include <stdint.h>
+
 #include <string>
 
 #if defined(CLIENT_APP)
@@ -95,14 +97,14 @@
 
 #define NETDEMOVER 3
 
-int         VersionCompat(const int server, const int client);
-std::string VersionMessage(const int server, const int client, const char *email);
+int32_t         VersionCompat(const int32_t server, const int32_t client);
+std::string VersionMessage(const int32_t server, const int32_t client, const char *email);
 
 // denis - per-file svn version stamps
 class file_version
 {
   public:
-    file_version(const char *uid, const char *id, const char *p, int l, const char *t, const char *d);
+    file_version(const char *uid, const char *id, const char *p, int32_t l, const char *t, const char *d);
 };
 
 #define VERSION_CONTROL(uid, id)                                                                                       \

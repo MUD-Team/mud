@@ -30,7 +30,7 @@ typedef std::vector<std::string> StringList;
 struct GametypeParam
 {
     const char *cvar;
-    const int   def;
+    const int32_t   def;
     const char *flag;
     const char *flagparam;
     const char *help;
@@ -66,7 +66,7 @@ template <size_t SIZE> static StringList GametypeArgs(const GametypeParam (&para
     StringList ret;
 
     // Insert defaults into a hashtable.
-    typedef OHashTable<std::string, int> CvarTable;
+    typedef OHashTable<std::string, int32_t> CvarTable;
     CvarTable                            cvars;
     for (size_t i = 0; i < SIZE; i++)
     {
@@ -91,7 +91,7 @@ template <size_t SIZE> static StringList GametypeArgs(const GametypeParam (&para
             }
 
             const std::string &cmd = args.at(0);
-            const int          val = atoi(args.at(1).c_str());
+            const int32_t          val = atoi(args.at(1).c_str());
 
             bool next = false;
             for (size_t i = 0; i < SIZE; i++)

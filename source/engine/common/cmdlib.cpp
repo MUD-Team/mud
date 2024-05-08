@@ -64,7 +64,7 @@ char *copystring(const char *s)
 char *COM_Parse(
     char *data) // denis - todo - security com_token overrun needs expert check, i have just put simple bounds on len
 {
-    int    c;
+    int32_t    c;
     size_t len;
 
     len          = 0;
@@ -137,9 +137,9 @@ skipwhite:
 //
 // ParseNum / ParseHex
 //
-int ParseHex(const char *hex)
+int32_t ParseHex(const char *hex)
 {
-    int         num = 0;
+    int32_t         num = 0;
     const char *str = hex;
 
     while (*str)
@@ -165,7 +165,7 @@ int ParseHex(const char *hex)
 //
 // ParseNum
 //
-int ParseNum(const char *str)
+int32_t ParseNum(const char *str)
 {
     if (str[0] == '$')
         return ParseHex(str + 1);
@@ -382,7 +382,7 @@ void STACK_ARGS VStrFormat(std::string &out, const char *fmt, va_list va)
     va_copy(va2, va);
 
     // Get desired length of buffer.
-    int chars = vsnprintf(NULL, 0, fmt, va);
+    int32_t chars = vsnprintf(NULL, 0, fmt, va);
     if (chars < 0)
     {
         I_Error("Encoding error detected in StrFormat\n");
@@ -397,7 +397,7 @@ void STACK_ARGS VStrFormat(std::string &out, const char *fmt, va_list va)
     }
 
     // Actually write to the buffer.
-    int ok = vsnprintf(buf, len, fmt, va2);
+    int32_t ok = vsnprintf(buf, len, fmt, va2);
     if (ok != chars)
     {
         I_Error("Truncation detected in StrFormat\n");
@@ -417,7 +417,7 @@ std::string STACK_ARGS VStrFormat(const char *fmt, va_list va)
     va_copy(va2, va);
 
     // Get desired length of buffer.
-    int chars = vsnprintf(NULL, 0, fmt, va);
+    int32_t chars = vsnprintf(NULL, 0, fmt, va);
     if (chars < 0)
     {
         I_Error("Encoding error detected in StrFormat\n");
@@ -432,7 +432,7 @@ std::string STACK_ARGS VStrFormat(const char *fmt, va_list va)
     }
 
     // Actually write to the buffer.
-    int ok = vsnprintf(buf, len, fmt, va2);
+    int32_t ok = vsnprintf(buf, len, fmt, va2);
     if (ok != chars)
     {
         I_Error("Truncation detected in StrFormat\n");
@@ -645,7 +645,7 @@ bool StrToTime(std::string str, time_t &tim)
  * @param time Number of tics to turn into a time.
  * @param ceil Round up to the nearest second.
  */
-void TicsToTime(OTimespan &span, int time, bool ceilsec)
+void TicsToTime(OTimespan &span, int32_t time, bool ceilsec)
 {
     if (time < 0)
     {
@@ -683,7 +683,7 @@ void TicsToTime(OTimespan &span, int time, bool ceilsec)
 }
 
 // [SL] Reimplement std::isspace
-static int _isspace(int c)
+static int32_t _isspace(int32_t c)
 {
     return (c == ' ' || c == '\n' || c == '\t' || c == '\v' || c == '\f' || c == '\r');
 }
@@ -691,14 +691,14 @@ static int _isspace(int c)
 // Trim whitespace from the start of a string
 std::string &TrimStringStart(std::string &s)
 {
-    s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not_fn(std::function<int(int)>(_isspace))));
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not_fn(std::function<int32_t(int32_t)>(_isspace))));
     return s;
 }
 
 // Trim whitespace from the end of a string
 std::string &TrimStringEnd(std::string &s)
 {
-    s.erase(std::find_if(s.rbegin(), s.rend(), std::not_fn(std::function<int(int)>(_isspace))).base(), s.end());
+    s.erase(std::find_if(s.rbegin(), s.rend(), std::not_fn(std::function<int32_t(int32_t)>(_isspace))).base(), s.end());
     return s;
 }
 

@@ -50,7 +50,7 @@ void C_DoCommand(const char *cmd, uint32_t key = 0);
 // CHEAT SEQUENCE PACKAGE
 //
 
-static int           firsttime = 1;
+static int32_t           firsttime = 1;
 static uint8_t cheat_xlate_table[256];
 
 #ifdef CLIENT_APP
@@ -234,7 +234,7 @@ bool CHEAT_AreCheatsEnabled()
 
 extern void A_PainDie(AActor *);
 
-void CHEAT_DoCheat(player_t *player, int cheat, bool silentmsg)
+void CHEAT_DoCheat(player_t *player, int32_t cheat, bool silentmsg)
 {
     const char *msg = "";
     char        msgbuild[32];
@@ -339,7 +339,7 @@ void CHEAT_DoCheat(player_t *player, int cheat, bool silentmsg)
         if (player->spectator)
             return;
 
-        int i = cheat - CHT_BEHOLDV;
+        int32_t i = cheat - CHT_BEHOLDV;
 
         if (!player->powers[i])
             P_GivePower(player, i);
@@ -359,7 +359,7 @@ void CHEAT_DoCheat(player_t *player, int cheat, bool silentmsg)
         // killough 2/7/98: cleaned up code and changed to use dprintf;
         // fixed lost soul bug (LSs left behind when PEs are killed)
 
-        int                      killcount = 0;
+        int32_t                      killcount = 0;
         AActor                  *actor;
         TThinkerIterator<AActor> iterator;
 
@@ -436,7 +436,7 @@ void CHEAT_DoCheat(player_t *player, int cheat, bool silentmsg)
 void CHEAT_GiveTo(player_t *player, const char *name)
 {
     bool     giveall;
-    int      i;
+    int32_t      i;
     gitem_t *it;
 
     if (player != &consoleplayer())
@@ -449,7 +449,7 @@ void CHEAT_GiveTo(player_t *player, const char *name)
 
     if (giveall || strnicmp(name, "health", 6) == 0)
     {
-        int h;
+        int32_t h;
 
         if (0 < (h = atoi(name + 6)))
         {
@@ -545,7 +545,7 @@ void CHEAT_GiveTo(player_t *player, const char *name)
 
     if (it->flags & IT_AMMO)
     {
-        int howmuch;
+        int32_t howmuch;
 
         /*	if (argc == 3)
                 howmuch = atoi (argv[2]);

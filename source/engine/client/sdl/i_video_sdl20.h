@@ -95,7 +95,7 @@ class ISDL20Window : public IWindow
         return mVideoMode.bpp;
     }
 
-    virtual int getBytesPerPixel() const
+    virtual int32_t getBytesPerPixel() const
     {
         return mVideoMode.bpp >> 3;
     }
@@ -178,7 +178,7 @@ class ISDL20Window : public IWindow
     bool mMouseFocus;
     bool mKeyboardFocus;
 
-    int mAcceptResizeEventsTime;    
+    int32_t mAcceptResizeEventsTime;    
 };
 
 // ****************************************************************************
@@ -209,7 +209,7 @@ class ISDL20VideoSubsystem : public IVideoSubsystem
         return mWindow;
     }
 
-    virtual int getMonitorCount() const;
+    virtual int32_t getMonitorCount() const;
 
   private:
     const IVideoCapabilities *mVideoCapabilities;

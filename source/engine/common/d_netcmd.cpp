@@ -88,7 +88,7 @@ void NetCommand::toPlayer(player_t *player) const
 void NetCommand::write(buf_t *buf)
 {
     // Let the recipient know which cmd fields are being sent
-    int serialized_fields = getSerializedFields();
+    int32_t serialized_fields = getSerializedFields();
     buf->WriteByte(serialized_fields);
     buf->WriteLong(mWorldIndex);
 
@@ -137,9 +137,9 @@ void NetCommand::read(buf_t *buf)
         mImpulse = buf->ReadByte();
 }
 
-int NetCommand::getSerializedFields()
+int32_t NetCommand::getSerializedFields()
 {
-    int serialized_fields = 0;
+    int32_t serialized_fields = 0;
 
     if (hasButtons())
         serialized_fields |= CMD_BUTTONS;

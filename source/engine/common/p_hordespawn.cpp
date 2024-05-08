@@ -40,7 +40,7 @@ struct SpawnPointWeight
 {
     hordeSpawn_t *spawn;
     float         score;
-    int           dist;
+    int32_t           dist;
     bool          visible;
 };
 typedef std::vector<SpawnPointWeight> SpawnPointWeights;
@@ -116,7 +116,7 @@ static AActor::AActorPtr SpawnMonster(hordeSpawn_t &spawn, const hordeRecipe_t &
  * @param count Number of monsters to spawn on the point.
  * @return Actors spawned by this function.  Can be discarded.
  */
-static AActors SpawnMonsterGroup(hordeSpawn_t &spawn, const hordeRecipe_t &recipe, const int count)
+static AActors SpawnMonsterGroup(hordeSpawn_t &spawn, const hordeRecipe_t &recipe, const int32_t count)
 {
     AActors ok;
 
@@ -228,7 +228,7 @@ void P_HordeClearSpawns()
  * @param rad Radius to check in whole units (not fixed).
  * @param height Height to check in whole units (not fixed).
  */
-static bool FitRadHeight(const mobjinfo_t &info, const int rad, const int height)
+static bool FitRadHeight(const mobjinfo_t &info, const int32_t rad, const int32_t height)
 {
     return info.radius <= (rad * FRACUNIT) && info.height <= (height * FRACUNIT);
 }
@@ -394,8 +394,8 @@ AActors P_HordeSpawn(hordeSpawn_t &spawn, const hordeRecipe_t &recipe)
     // Ensure we only spawn as many monsters as can fit in the spawn.
     // Snipers must fit in a 64x64 square, big snipers must fit into a 128x128 square,
     // bosses must fit in a 256x256 square, everything else must fit in a 128x128 square.
-    const int rad          = ::mobjinfo[recipe.type].radius >> FRACBITS;
-    int       maxGroupSize = 4;
+    const int32_t rad          = ::mobjinfo[recipe.type].radius >> FRACBITS;
+    int32_t       maxGroupSize = 4;
     if (spawn.type == TTYPE_HORDE_SMALLSNIPER || spawn.type == TTYPE_HORDE_SNIPER ||
         (spawn.type == TTYPE_HORDE_BOSS && rad * 2 > 128) || rad * 2 > 64)
     {
@@ -408,14 +408,14 @@ AActors P_HordeSpawn(hordeSpawn_t &spawn, const hordeRecipe_t &recipe)
     // Place monsters in spawn points in order of approx distance.
     for (SpawnPointWeights::iterator it = weights.begin(); it != weights.end(); ++it)
     {
-        const int left = recipe.count - ok.size();
+        const int32_t left = recipe.count - ok.size();
         if (left < 1)
             break;
 
         if (it->dist > (1024 * FRACUNIT))
             continue;
 
-        int groupIter = clamp(left, 1, maxGroupSize);
+        int32_t groupIter = clamp(left, 1, maxGroupSize);
 
         AActors okIter = SpawnMonsterGroup(*it->spawn, recipe, groupIter);
         ok.insert(ok.end(), okIter.begin(), okIter.end());

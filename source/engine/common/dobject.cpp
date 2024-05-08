@@ -89,7 +89,7 @@ DObject::~DObject()
             // object is queued for deletion, but is not being deleted
             // by the destruction process, so remove it from the
             // ToDestroy array and do other necessary stuff.
-            int i;
+            int32_t i;
 
             for (i = ToDestroy.Size() - 1; i >= 0; i--)
             {

@@ -32,6 +32,8 @@
 
 #if defined(_WIN32)
 
+#include <stdint.h>
+
 #include <cctype>
 #include <cstdlib>
 #include <cstring>
@@ -59,12 +61,12 @@ static const char *ampm[] = {"am", "pm", NULL};
  * index of the matching string (or -1 if none).  Also advance buf.
  */
 
-static int match_string(const char **buf, const char **strs)
+static int32_t match_string(const char **buf, const char **strs)
 {
-    int i = 0;
+    int32_t i = 0;
     for (i = 0; strs[i] != NULL; ++i)
     {
-        int len = (int)strlen(strs[i]);
+        int32_t len = (int32_t)strlen(strs[i]);
         if (strncasecmp(*buf, strs[i], len) == 0)
         {
             *buf += len;
@@ -77,13 +79,13 @@ static int match_string(const char **buf, const char **strs)
 /*
  * tm_year is relative this year */
 
-const int tm_year_base = 1900;
+const int32_t tm_year_base = 1900;
 
 /*
  * Return TRUE iff `year' was a leap year.
  */
 
-static int is_leap_year(int year)
+static int32_t is_leap_year(int32_t year)
 {
     return (year % 4) == 0 && ((year % 100) != 0 || (year % 400) == 0);
 }
@@ -92,9 +94,9 @@ static int is_leap_year(int year)
  * Return the weekday [0,6] (0 = Sunday) of the first day of `year'
  */
 
-static int first_day(int year)
+static int32_t first_day(int32_t year)
 {
-    int ret = 4;
+    int32_t ret = 4;
 
     for (; year > 1970; --year)
         ret = (ret + 365 + is_leap_year(year) ? 1 : 0) % 7;
@@ -105,9 +107,9 @@ static int first_day(int year)
  * Set `timeptr' given `wnum' (week number [0, 53])
  */
 
-static void set_week_number_sun(struct tm *timeptr, int wnum)
+static void set_week_number_sun(struct tm *timeptr, int32_t wnum)
 {
-    int fday = first_day(timeptr->tm_year + tm_year_base);
+    int32_t fday = first_day(timeptr->tm_year + tm_year_base);
 
     timeptr->tm_yday = wnum * 7 + timeptr->tm_wday - fday;
     if (timeptr->tm_yday < 0)
@@ -121,9 +123,9 @@ static void set_week_number_sun(struct tm *timeptr, int wnum)
  * Set `timeptr' given `wnum' (week number [0, 53])
  */
 
-static void set_week_number_mon(struct tm *timeptr, int wnum)
+static void set_week_number_mon(struct tm *timeptr, int32_t wnum)
 {
-    int fday = (first_day(timeptr->tm_year + tm_year_base) + 6) % 7;
+    int32_t fday = (first_day(timeptr->tm_year + tm_year_base) + 6) % 7;
 
     timeptr->tm_yday = wnum * 7 + (timeptr->tm_wday + 6) % 7 - fday;
     if (timeptr->tm_yday < 0)
@@ -137,10 +139,10 @@ static void set_week_number_mon(struct tm *timeptr, int wnum)
  * Set `timeptr' given `wnum' (week number [0, 53])
  */
 
-static void set_week_number_mon4(struct tm *timeptr, int wnum)
+static void set_week_number_mon4(struct tm *timeptr, int32_t wnum)
 {
-    int fday   = (first_day(timeptr->tm_year + tm_year_base) + 6) % 7;
-    int offset = 0;
+    int32_t fday   = (first_day(timeptr->tm_year + tm_year_base) + 6) % 7;
+    int32_t offset = 0;
 
     if (fday < 4)
         offset += 7;
@@ -164,7 +166,7 @@ char *strptime(const char *buf, const char *fmt, struct tm *timeptr)
     for (; (c = *fmt) != '\0'; ++fmt)
     {
         char *s;
-        int   ret;
+        int32_t   ret;
 
         if (isspace(c))
         {

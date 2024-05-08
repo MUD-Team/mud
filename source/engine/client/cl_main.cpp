@@ -74,22 +74,22 @@ extern bool step_mode;
 
 // denis - client version (VERSION or other supported)
 int16_t version           = 0;
-int   gameversion       = 0; // GhostlyDeath -- Bigger Game Version
-int   gameversiontosend = 0; // If the server is 0.4, let's fake our client info
+int32_t   gameversion       = 0; // GhostlyDeath -- Bigger Game Version
+int32_t   gameversiontosend = 0; // If the server is 0.4, let's fake our client info
 
 buf_t net_buffer(MAX_UDP_PACKET);
 
 bool noservermsgs;
-int  last_received;
+int32_t  last_received;
 
 // [SL] 2012-03-17 - world_index is the gametic on the server that the client
 // is currently simulating.  world_index_accum is a continuous accumulator that
 // is used to advance world_index if appropriate.
-int   world_index       = 0;
+int32_t   world_index       = 0;
 float world_index_accum = 0.0f;
 
-int last_svgametic     = 0;
-int last_player_update = 0;
+int32_t last_svgametic     = 0;
+int32_t last_player_update = 0;
 
 bool recv_full_update = false;
 
@@ -100,7 +100,7 @@ netadr_t serveraddr; // address of a server
 netadr_t lastconaddr;
 
 const static size_t PACKET_SEQ_MASK = 0xFF;
-static int          packetseq[256];
+static int32_t          packetseq[256];
 
 // denis - unique session key provided by the server
 std::string digest;
@@ -271,7 +271,7 @@ void R_InterpolationTicker();
 size_t P_NumPlayersInGame();
 void   G_PlayerReborn(player_t &player);
 void   P_KillMobj(AActor *source, AActor *target, AActor *inflictor, bool joinkill);
-void   P_SetPsprite(player_t *player, int position, statenum_t stnum);
+void   P_SetPsprite(player_t *player, int32_t position, statenum_t stnum);
 void   P_ExplodeMissile(AActor *mo);
 void   P_CalcHeight(player_t *player);
 bool   P_CheckMissileSpawn(AActor *th);
@@ -287,7 +287,7 @@ void     AM_Stop();
 // Calculates world_index based on the most recently received gametic from the
 // server and the number of tics the client wants to withold for interpolation.
 //
-static int CL_CalculateWorldIndexSync()
+static int32_t CL_CalculateWorldIndexSync()
 {
     return last_svgametic ? last_svgametic - cl_interp : 0;
 }
@@ -298,18 +298,18 @@ static int CL_CalculateWorldIndexSync()
 // [SL] 2012-03-17 - Try to maintain sync with the server by gradually
 // slowing down or speeding up world_index
 //
-static int CL_CalculateWorldIndexDriftCorrection()
+static int32_t CL_CalculateWorldIndexDriftCorrection()
 {
     static const float CORRECTION_PERIOD = 1.0f / 16.0f;
 
-    int delta = CL_CalculateWorldIndexSync() - world_index;
+    int32_t delta = CL_CalculateWorldIndexSync() - world_index;
     if (delta == 0)
         world_index_accum = 0.0f;
     else
         world_index_accum += CORRECTION_PERIOD * delta;
 
     // truncate the decimal portion of world_index_accum
-    int correction = int(world_index_accum);
+    int32_t correction = int32_t(world_index_accum);
 
     // reset world_index_accum if our correction will affect world_index
     if (correction != 0)
@@ -336,7 +336,7 @@ void Host_EndGame(const char *msg)
     CL_QuitNetGame(NQ_SILENT);
 }
 
-void CL_QuitNetGame2(const netQuitReason_e reason, const char *file, const int line)
+void CL_QuitNetGame2(const netQuitReason_e reason, const char *file, const int32_t line)
 {
     if (connected)
     {
@@ -543,7 +543,7 @@ template <class Iterator> void CL_SpyCycle(Iterator begin, Iterator end)
 }
 
 uint64_t       nextstep   = 0;
-int         canceltics = 0;
+int32_t         canceltics = 0;
 
 void CL_StepTics(uint32_t count)
 {
@@ -719,7 +719,7 @@ END_COMMAND(reconnect)
 BEGIN_COMMAND(players)
 {
     // Gather all ingame players
-    std::map<int, std::string> mplayers;
+    std::map<int32_t, std::string> mplayers;
     for (Players::const_iterator it = players.begin(); it != players.end(); ++it)
     {
         if (it->ingame())
@@ -730,7 +730,7 @@ BEGIN_COMMAND(players)
 
     // Print them, ordered by player id.
     Printf("PLAYERS IN GAME:\n");
-    for (std::map<int, std::string>::iterator it = mplayers.begin(); it != mplayers.end(); ++it)
+    for (std::map<int32_t, std::string>::iterator it = mplayers.begin(); it != mplayers.end(); ++it)
     {
         Printf("%3d. %s\n", (*it).first, (*it).second.c_str());
     }
@@ -883,7 +883,7 @@ END_COMMAND(playerteam)
 
 BEGIN_COMMAND(changeteams)
 {
-    int iTeam = (int)consoleplayer().userinfo.team;
+    int32_t iTeam = (int32_t)consoleplayer().userinfo.team;
     iTeam     = ++iTeam % sv_teamsinplay.asInt();
     cl_team.Set(GetTeamInfo((team_t)iTeam)->ColorStringUpper.c_str());
 }
@@ -1071,7 +1071,7 @@ void CL_SendUserInfo(void)
     MSG_WriteByte(&net_buffer, coninfo->team); // [Toke]
     MSG_WriteLong(&net_buffer, coninfo->gender);
 
-    for (int i = 3; i >= 0; i--)
+    for (int32_t i = 3; i >= 0; i--)
         MSG_WriteByte(&net_buffer, coninfo->color[i]);
 
     // [SL] place holder for deprecated skins
@@ -1177,7 +1177,7 @@ void CL_SpectatePlayer(player_t &player, bool spectate)
     CL_CheckDisplayPlayer();
 }
 
-int connecttimeout = 0;
+int32_t connecttimeout = 0;
 
 //
 // [denis] CL_RequestConnectInfo
@@ -1389,7 +1389,7 @@ bool CL_PrepareConnect()
             gameversiontosend = 40;
         }
 
-        int major, minor, patch;
+        int32_t major, minor, patch;
         BREAKVER(gameversion, major, minor, patch);
         Printf(PRINT_HIGH, "> Server Version %i.%i.%i\n", major, minor, patch);
 
@@ -1572,7 +1572,7 @@ void CL_TryToConnect(uint32_t server_token)
 
         // [SL] The "rate" CVAR has been deprecated. Now just send a hard-coded
         // maximum rate that the server will ignore.
-        const int rate = 0xFFFF;
+        const int32_t rate = 0xFFFF;
         MSG_WriteLong(&net_buffer, rate);
 
         MSG_WriteString(&net_buffer, (char *)connectpasshash.c_str());
@@ -1639,8 +1639,8 @@ void CL_Decompress()
 bool CL_ReadPacketHeader()
 {
     // Packet sequence number.
-    int sequence    = MSG_ReadLong();
-    int oldsequence = ::packetseq[sequence & PACKET_SEQ_MASK];
+    int32_t sequence    = MSG_ReadLong();
+    int32_t oldsequence = ::packetseq[sequence & PACKET_SEQ_MASK];
 
     if (sequence == oldsequence)
     {
@@ -1767,7 +1767,7 @@ void CL_SaveCmd(void)
     netcmd->setWorldIndex(world_index);
 }
 
-extern int outrate;
+extern int32_t outrate;
 
 //
 // CL_SendCmd
@@ -1796,7 +1796,7 @@ void CL_SendCmd(void)
     // need to be used for client's positional prediction.
     MSG_WriteLong(&net_buffer, gametic);
 
-    for (int i = 9; i >= 0; i--)
+    for (int32_t i = 9; i >= 0; i--)
     {
         NetCommand  blank_netcmd;
         NetCommand *netcmd;
@@ -1809,7 +1809,7 @@ void CL_SendCmd(void)
         netcmd->write(&net_buffer);
     }
 
-    int bytesWritten = NET_SendPacket(net_buffer, serveraddr);
+    int32_t bytesWritten = NET_SendPacket(net_buffer, serveraddr);
     //netgraph.addTrafficOut(bytesWritten);
 
     outrate += net_buffer.size();
@@ -1831,7 +1831,7 @@ void CL_PlayerTimes()
 //
 // CL_SendCheat
 //
-void CL_SendCheat(int cheats)
+void CL_SendCheat(int32_t cheats)
 {
     MSG_WriteMarker(&net_buffer, clc_cheat);
     MSG_WriteByte(&net_buffer, 0);
@@ -1852,7 +1852,7 @@ void PickupMessage(AActor *toucher, const char *message)
 {
     // Some maps have multiple items stacked on top of each other.
     // It looks odd to display pickup messages for all of them.
-    static int         lastmessagetic;
+    static int32_t         lastmessagetic;
     static const char *lastmessage = NULL;
 
     if (toucher == consoleplayer().camera && (lastmessagetic != gametic || lastmessage != message))
@@ -1920,7 +1920,7 @@ void CL_RemoveCompletedMovingSectors()
     while (itr != sector_snaps.end())
     {
         SectorSnapshotManager *mgr  = &(itr->second);
-        int                    time = mgr->getMostRecentTime();
+        int32_t                    time = mgr->getMostRecentTime();
 
         // are all the snapshots in the container invalid or too old?
         if (world_index - time > NUM_SNAPSHOTS || mgr->empty())
@@ -2041,7 +2041,7 @@ void CL_SimulatePlayers()
                 }
             }
 
-            int oldframe = player->mo->frame;
+            int32_t oldframe = player->mo->frame;
             snap.toPlayer(player);
 
             if (player->playerstate != PST_LIVE)
@@ -2074,11 +2074,11 @@ void CL_SimulateWorld()
         return;
 
     // if the world_index falls outside this range, resync it
-    static const int MAX_BEHIND = 16;
-    static const int MAX_AHEAD  = 16;
+    static const int32_t MAX_BEHIND = 16;
+    static const int32_t MAX_AHEAD  = 16;
 
-    int lower_sync_limit = CL_CalculateWorldIndexSync() - MAX_BEHIND;
-    int upper_sync_limit = CL_CalculateWorldIndexSync() + MAX_AHEAD;
+    int32_t lower_sync_limit = CL_CalculateWorldIndexSync() - MAX_BEHIND;
+    int32_t upper_sync_limit = CL_CalculateWorldIndexSync() + MAX_AHEAD;
 
     // Was the displayplayer just teleported?
     bool continuous = displayplayer().snapshots.getSnapshot(world_index).isContinuous();
@@ -2120,7 +2120,7 @@ void CL_SimulateWorld()
 
     // [SL] 2012-03-17 - Try to maintain sync with the server by gradually
     // slowing down or speeding up world_index
-    int drift_correction = CL_CalculateWorldIndexDriftCorrection();
+    int32_t drift_correction = CL_CalculateWorldIndexDriftCorrection();
 
 #ifdef _WORLD_INDEX_DEBUG_
     if (drift_correction != 0)
@@ -2130,10 +2130,10 @@ void CL_SimulateWorld()
     world_index = world_index + 1 + drift_correction;
 }
 
-void OnChangedSwitchTexture(line_t *line, int useAgain)
+void OnChangedSwitchTexture(line_t *line, int32_t useAgain)
 {
 }
-void SV_OnActivatedLine(line_t *line, AActor *mo, const int side, const LineActivationType activationType,
+void SV_OnActivatedLine(line_t *line, AActor *mo, const int32_t side, const LineActivationType activationType,
                         const bool bossaction)
 {
 }

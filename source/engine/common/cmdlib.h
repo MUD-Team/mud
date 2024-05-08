@@ -45,18 +45,18 @@
 
 struct OTimespan
 {
-    int csecs;
-    int tics;
-    int seconds;
-    int minutes;
-    int hours;
+    int32_t csecs;
+    int32_t tics;
+    int32_t seconds;
+    int32_t minutes;
+    int32_t hours;
     OTimespan() : csecs(0), tics(0), seconds(0), minutes(0), hours(0)
     {
     }
 };
 
-int  ParseHex(const char *str);
-int  ParseNum(const char *str);
+int32_t  ParseHex(const char *str);
+int32_t  ParseNum(const char *str);
 bool IsNum(const char *str); // [RH] added
 bool IsRealNum(const char *str);
 
@@ -103,7 +103,7 @@ bool StrFormatISOTime(std::string &s, const tm *utc_tm);
 bool StrParseISOTime(const std::string &s, tm *utc_tm);
 bool StrToTime(std::string str, time_t &tim);
 
-void TicsToTime(OTimespan &span, int time, bool ceilsec = false);
+void TicsToTime(OTimespan &span, int32_t time, bool ceilsec = false);
 
 bool CheckWildcards(const char *pattern, const char *text);
 void ReplaceString(char **ptr, const char *str);

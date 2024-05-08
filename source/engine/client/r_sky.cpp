@@ -36,7 +36,7 @@
 #include "res_texture.h"
 #include "w_wad.h"
 
-extern int    *texturewidthmask;
+extern int32_t    *texturewidthmask;
 extern fixed_t FocalLengthX;
 extern fixed_t freelookviewheight;
 
@@ -50,11 +50,11 @@ texhandle_t     skyflatnum;
 texhandle_t     sky1texture, sky2texture;
 fixed_t skytexturemid;
 fixed_t skyscale;
-int     skystretch;
+int32_t     skystretch;
 fixed_t skyheight;
 fixed_t skyiscale;
 
-int     sky1shift, sky2shift;
+int32_t     sky1shift, sky2shift;
 fixed_t sky1pos = 0, sky1speed = 0;
 fixed_t sky2pos = 0, sky2speed = 0;
 
@@ -81,7 +81,7 @@ static tallpost_t *skyposts[MAXWIDTH];
 //
 static void R_InitXToViewAngle()
 {
-    static int     last_viewwidth = -1;
+    static int32_t     last_viewwidth = -1;
     static fixed_t last_focx      = -1;
 
     if (viewwidth != last_viewwidth || FocalLengthX != last_focx)
@@ -89,17 +89,17 @@ static void R_InitXToViewAngle()
         if (centerx > 0)
         {
             const fixed_t hitan     = finetangent[FINEANGLES / 4 + CorrectFieldOfView / 2];
-            const int     t         = std::min<int>((FocalLengthX >> FRACBITS) + centerx, viewwidth);
+            const int32_t     t         = std::min<int32_t>((FocalLengthX >> FRACBITS) + centerx, viewwidth);
             const fixed_t slopestep = hitan / centerx;
             const fixed_t dfocus    = FocalLengthX >> DBITS;
 
-            for (int i = centerx, slope = 0; i <= t; i++, slope += slopestep)
+            for (int32_t i = centerx, slope = 0; i <= t; i++, slope += slopestep)
                 xtoviewangle[i] = (angle_t) - (int32_t)tantoangle[slope >> DBITS];
 
-            for (int i = t + 1; i <= viewwidth; i++)
+            for (int32_t i = t + 1; i <= viewwidth; i++)
                 xtoviewangle[i] = ANG270 + tantoangle[dfocus / (i - centerx)];
 
-            for (int i = 0; i < centerx; i++)
+            for (int32_t i = 0; i < centerx; i++)
                 xtoviewangle[i] = (angle_t)(-(int32_t)xtoviewangle[viewwidth - i - 1]);
         }
         else
@@ -121,7 +121,7 @@ static void R_InitXToViewAngle()
 // [ML] 5/11/06 - Remove sky2 stuffs
 // [ML] 3/16/10 - Bring it back!
 
-void R_GenerateLookup(int texnum, int *const errors); // from r_data.cpp
+void R_GenerateLookup(int32_t texnum, int32_t *const errors); // from r_data.cpp
 
 void R_InitSkyMap()
 {
@@ -206,7 +206,7 @@ void R_RenderSkyRange(visplane_t *pl)
 
     MUD_ZoneScoped;
 
-    int     columnmethod = 2;
+    int32_t     columnmethod = 2;
     texhandle_t     skytex;
     fixed_t front_offset = 0;
     angle_t skyflip      = 0;
@@ -216,7 +216,7 @@ void R_RenderSkyRange(visplane_t *pl)
         // use sky1
         skytex = sky1texture;
     }
-    else if (pl->picnum == int(PL_SKYFLAT))
+    else if (pl->picnum == int32_t(PL_SKYFLAT))
     {
         // use sky2
         skytex = sky2texture;
@@ -277,13 +277,13 @@ void R_RenderSkyRange(visplane_t *pl)
 
     // determine which texture posts will be used for each screen
     // column in this range.
-    for (int x = pl->minx; x <= pl->maxx; x++)
+    for (int32_t x = pl->minx; x <= pl->maxx; x++)
     {
-        int colnum  = ((((viewangle + xtoviewangle[x]) ^ skyflip) >> sky1shift) + front_offset) >> FRACBITS;
+        int32_t colnum  = ((((viewangle + xtoviewangle[x]) ^ skyflip) >> sky1shift) + front_offset) >> FRACBITS;
         skyposts[x] = R_GetTextureColumn(skytex, colnum);
     }
 
-    R_RenderColumnRange(pl->minx, pl->maxx, (int *)pl->top, (int *)pl->bottom, skyposts, SkyColumnBlaster, false,
+    R_RenderColumnRange(pl->minx, pl->maxx, (int32_t *)pl->top, (int32_t *)pl->bottom, skyposts, SkyColumnBlaster, false,
                         columnmethod);
 
     R_ResetDrawFuncs();

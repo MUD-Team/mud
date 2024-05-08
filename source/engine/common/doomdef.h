@@ -549,15 +549,15 @@ static inline void UNMAKE_ID(char *out, uint32_t id)
 //==========================================================================
 
 template <class ClassType, class KeyType>
-inline const ClassType *BinarySearch(const ClassType *first, int max, const KeyType ClassType::*keyptr,
+inline const ClassType *BinarySearch(const ClassType *first, int32_t max, const KeyType ClassType::*keyptr,
                                      const KeyType key)
 {
-    int min = 0;
+    int32_t min = 0;
     --max;
 
     while (min <= max)
     {
-        int              mid    = (min + max) / 2;
+        int32_t              mid    = (min + max) / 2;
         const ClassType *probe  = &first[mid];
         const KeyType   &seekey = probe->*keyptr;
         if (seekey == key)
@@ -588,7 +588,7 @@ inline const ClassType *BinarySearch(const ClassType *first, int max, const KeyT
 // items in the array.
 //
 // Template parameters:
-//		IndexType -		The type used to index the array (int, size_t, etc.)
+//		IndexType -		The type used to index the array (int32_t, size_t, etc.)
 //		KeyType -		The type of the key
 //		CompType -		A class with a static DoCompare(IndexType, KeyType) method.
 //
@@ -610,7 +610,7 @@ inline IndexType BinarySearchFlexible(IndexType max, const KeyType key, IndexTyp
     while (min <= max)
     {
         IndexType mid  = (min + max) / 2;
-        int       lexx = CompType::DoCompare(mid, key);
+        int32_t       lexx = CompType::DoCompare(mid, key);
         if (lexx == 0)
         {
             return mid;

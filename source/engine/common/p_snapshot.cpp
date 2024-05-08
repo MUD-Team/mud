@@ -34,7 +34,7 @@
 #include "p_local.h"
 #include "p_spec.h"
 
-static const int MAX_EXTRAPOLATION = 4;
+static const int32_t MAX_EXTRAPOLATION = 4;
 
 static const fixed_t POS_LERP_THRESHOLD    = 2 * FRACUNIT;
 static const fixed_t SECTOR_LERP_THRESHOLD = 2 * FRACUNIT;
@@ -47,7 +47,7 @@ extern bool predicting;
 //
 // ============================================================================
 
-Snapshot::Snapshot(int time)
+Snapshot::Snapshot(int32_t time)
     : mTime(time), mValid(time > 0), mAuthoritative(false), mContinuous(true), mInterpolated(false),
       mExtrapolated(false)
 {
@@ -66,14 +66,14 @@ bool Snapshot::operator==(const Snapshot &other) const
 //
 // ============================================================================
 
-ActorSnapshot::ActorSnapshot(int time)
+ActorSnapshot::ActorSnapshot(int32_t time)
     : Snapshot(time), mFields(0), mX(0), mY(0), mZ(0), mMomX(0), mMomY(0), mMomZ(0), mAngle(0), mPitch(0),
       mOnGround(true), mCeilingZ(0), mFloorZ(0), mReactionTime(0), mWaterLevel(0), mFlags(0), mFlags2(0), mFlags3(0),
       mFrame(0)
 {
 }
 
-ActorSnapshot::ActorSnapshot(int time, const AActor *mo)
+ActorSnapshot::ActorSnapshot(int32_t time, const AActor *mo)
     : Snapshot(time), mFields(0xFFFFFFFF), mX(mo->x), mY(mo->y), mZ(mo->z), mMomX(mo->momx), mMomY(mo->momy),
       mMomZ(mo->momz), mAngle(mo->angle), mPitch(mo->pitch), mOnGround(mo->onground), mCeilingZ(mo->ceilingz),
       mFloorZ(mo->floorz), mReactionTime(mo->reactiontime), mWaterLevel(mo->waterlevel), mFlags(mo->flags),
@@ -214,12 +214,12 @@ void ActorSnapshot::toActor(AActor *mo) const
 //
 // ============================================================================
 
-PlayerSnapshot::PlayerSnapshot(int time)
+PlayerSnapshot::PlayerSnapshot(int32_t time)
     : Snapshot(time), mFields(0), mActorSnap(time), mViewHeight(0), mDeltaViewHeight(0), mJumpTime(0)
 {
 }
 
-PlayerSnapshot::PlayerSnapshot(int time, player_t *player)
+PlayerSnapshot::PlayerSnapshot(int32_t time, player_t *player)
     : Snapshot(time), mFields(0xFFFFFFFF), mActorSnap(time, player->mo), mViewHeight(player->viewheight),
       mDeltaViewHeight(player->deltaviewheight), mJumpTime(player->jumpTics)
 {
@@ -279,7 +279,7 @@ PlayerSnapshotManager::PlayerSnapshotManager() : mMostRecent(0)
 void PlayerSnapshotManager::clearSnapshots()
 {
     // Set the time for all snapshots to an invalid value
-    for (int i = 0; i < NUM_SNAPSHOTS; i++)
+    for (int32_t i = 0; i < NUM_SNAPSHOTS; i++)
         mSnaps[i].setTime(-1);
 
     mMostRecent = 0;
@@ -290,7 +290,7 @@ void PlayerSnapshotManager::clearSnapshots()
 //
 // Returns true if a snapshot at the given time is present in the container
 //
-bool PlayerSnapshotManager::mValidSnapshot(int time) const
+bool PlayerSnapshotManager::mValidSnapshot(int32_t time) const
 {
 
     return ((time <= mMostRecent) && (mMostRecent - time <= NUM_SNAPSHOTS) && (time > 0) &&
@@ -306,7 +306,7 @@ bool PlayerSnapshotManager::mValidSnapshot(int time) const
 // Note: The caller of this function has the responsibility for verifying
 // that the container has valid snapshots at the times "from" and "to".
 //
-PlayerSnapshot PlayerSnapshotManager::mInterpolateSnapshots(int from, int to, int time) const
+PlayerSnapshot PlayerSnapshotManager::mInterpolateSnapshots(int32_t from, int32_t to, int32_t time) const
 {
     // Assumes that range checking from and to has been performed by the caller
     const PlayerSnapshot *snapfrom = &mSnaps[from % NUM_SNAPSHOTS];
@@ -329,7 +329,7 @@ PlayerSnapshot PlayerSnapshotManager::mInterpolateSnapshots(int from, int to, in
 // Note: The caller of this function has the responsibility for verifying
 // that the container has valid snapshots at the time "from".
 //
-PlayerSnapshot PlayerSnapshotManager::mExtrapolateSnapshot(int from, int time) const
+PlayerSnapshot PlayerSnapshotManager::mExtrapolateSnapshot(int32_t from, int32_t time) const
 {
     // Assumes that range checking from has been performed by the caller
     const PlayerSnapshot *snapfrom = &mSnaps[from % NUM_SNAPSHOTS];
@@ -347,7 +347,7 @@ PlayerSnapshot PlayerSnapshotManager::mExtrapolateSnapshot(int from, int time) c
 //
 void PlayerSnapshotManager::addSnapshot(const PlayerSnapshot &snap)
 {
-    int time = snap.getTime();
+    int32_t time = snap.getTime();
 
     if (!snap.isValid())
     {
@@ -380,7 +380,7 @@ void PlayerSnapshotManager::addSnapshot(const PlayerSnapshot &snap)
         mMostRecent = time;
 }
 
-int PlayerSnapshotManager::mFindValidSnapshot(int starttime, int endtime) const
+int32_t PlayerSnapshotManager::mFindValidSnapshot(int32_t starttime, int32_t endtime) const
 {
     if (starttime < mMostRecent - NUM_SNAPSHOTS || endtime < mMostRecent - NUM_SNAPSHOTS || starttime > mMostRecent ||
         endtime > mMostRecent)
@@ -388,13 +388,13 @@ int PlayerSnapshotManager::mFindValidSnapshot(int starttime, int endtime) const
 
     if (endtime >= starttime)
     {
-        for (int t = starttime; t <= endtime; t++)
+        for (int32_t t = starttime; t <= endtime; t++)
             if (mValidSnapshot(t))
                 return t;
     }
     else
     {
-        for (int t = starttime; t >= endtime; t--)
+        for (int32_t t = starttime; t >= endtime; t--)
             if (mValidSnapshot(t))
                 return t;
     }
@@ -410,7 +410,7 @@ int PlayerSnapshotManager::mFindValidSnapshot(int starttime, int endtime) const
 // If there is not a snapshot matching the time, one is generated using
 // interpolation or extrapolation.
 //
-PlayerSnapshot PlayerSnapshotManager::getSnapshot(int time) const
+PlayerSnapshot PlayerSnapshotManager::getSnapshot(int32_t time) const
 {
     if (time <= 0 || mMostRecent <= 0)
         return PlayerSnapshot();
@@ -422,7 +422,7 @@ PlayerSnapshot PlayerSnapshotManager::getSnapshot(int time) const
     // Should we extrapolate?
     if (time > mMostRecent)
     {
-        int amount = time - mMostRecent;
+        int32_t amount = time - mMostRecent;
         if (amount > MAX_EXTRAPOLATION) // cap extrapolation
         {
 #ifdef _SNAPSHOT_DEBUG_
@@ -441,10 +441,10 @@ PlayerSnapshot PlayerSnapshotManager::getSnapshot(int time) const
     }
 
     // find the snapshot that precedes the desired time
-    int pretime = mFindValidSnapshot(time, mMostRecent - NUM_SNAPSHOTS);
+    int32_t pretime = mFindValidSnapshot(time, mMostRecent - NUM_SNAPSHOTS);
 
     // find the snapshot that follows the desired time
-    int posttime = mFindValidSnapshot(time, mMostRecent);
+    int32_t posttime = mFindValidSnapshot(time, mMostRecent);
 
     // Can we interpolate?
     if (pretime > 0 && posttime > 0 && time < posttime && time > pretime)
@@ -564,7 +564,7 @@ ActorSnapshot P_LerpActorPosition(const ActorSnapshot &from, const ActorSnapshot
 #endif // _SNAPSHOT_DEBUG_
 
     // lerp the angle
-    int     anglediff = int(to.getAngle()) - int(from.getAngle());
+    int32_t     anglediff = int32_t(to.getAngle()) - int32_t(from.getAngle());
     angle_t angle     = from.getAngle() + FixedMul(anglediff, amount_fixed);
 
 #ifdef _SNAPSHOT_DEBUG_
@@ -633,7 +633,7 @@ void P_SetPlayerSnapshotNoPosition(player_t *player, const PlayerSnapshot &snap)
 //
 // ============================================================================
 
-SectorSnapshot::SectorSnapshot(int time)
+SectorSnapshot::SectorSnapshot(int32_t time)
     : Snapshot(time), mCeilingMoverType(SEC_INVALID), mFloorMoverType(SEC_INVALID), mSector(NULL), mCeilingType(0),
       mFloorType(0), mCeilingTag(0), mFloorTag(0), mCeilingLine(NULL), mFloorLine(NULL), mCeilingHeight(0),
       mFloorHeight(0), mCeilingSpeed(0), mFloorSpeed(0), mCeilingDestination(0), mFloorDestination(0),
@@ -646,7 +646,7 @@ SectorSnapshot::SectorSnapshot(int time)
 {
 }
 
-SectorSnapshot::SectorSnapshot(int time, sector_t *sector)
+SectorSnapshot::SectorSnapshot(int32_t time, sector_t *sector)
     : Snapshot(time), mCeilingMoverType(SEC_INVALID), mFloorMoverType(SEC_INVALID), mSector(sector)
 {
     if (!sector)
@@ -787,7 +787,7 @@ void SectorSnapshot::toSector(sector_t *sector) const
 
     if (mCeilingMoverType == SEC_PILLAR && mCeilingStatus != DPillar::destroy)
     {
-        int status = mCeilingStatus;
+        int32_t status = mCeilingStatus;
 
         if (sector->ceilingdata && !sector->ceilingdata->IsA(RUNTIME_CLASS(DPillar)))
         {
@@ -984,7 +984,7 @@ SectorSnapshotManager::SectorSnapshotManager() : mMostRecent(0)
 void SectorSnapshotManager::clearSnapshots()
 {
     // Set the time for all snapshots to an invalid value
-    for (int i = 0; i < NUM_SNAPSHOTS; i++)
+    for (int32_t i = 0; i < NUM_SNAPSHOTS; i++)
         mSnaps[i].clear();
 
     mMostRecent = 0;
@@ -995,7 +995,7 @@ void SectorSnapshotManager::clearSnapshots()
 //
 // Returns true if a snapshot at the given time is present in the container
 //
-bool SectorSnapshotManager::mValidSnapshot(int time) const
+bool SectorSnapshotManager::mValidSnapshot(int32_t time) const
 {
     return ((time <= mMostRecent) && (mMostRecent - time <= NUM_SNAPSHOTS) && (time > 0) &&
             (mSnaps[time % NUM_SNAPSHOTS].isValid()) && (mSnaps[time % NUM_SNAPSHOTS].getTime() == time) &&
@@ -1021,7 +1021,7 @@ bool SectorSnapshotManager::empty()
 //
 void SectorSnapshotManager::addSnapshot(const SectorSnapshot &newsnap)
 {
-    int time = newsnap.getTime();
+    int32_t time = newsnap.getTime();
 
     if (!newsnap.isValid())
     {
@@ -1052,7 +1052,7 @@ void SectorSnapshotManager::addSnapshot(const SectorSnapshot &newsnap)
 // If there is not a snapshot matching the time, one is generated by
 // running the moving sector's thinker function.
 //
-SectorSnapshot SectorSnapshotManager::getSnapshot(int time) const
+SectorSnapshot SectorSnapshotManager::getSnapshot(int32_t time) const
 {
     if (time <= 0 || mMostRecent <= 0)
         return SectorSnapshot();
@@ -1062,7 +1062,7 @@ SectorSnapshot SectorSnapshotManager::getSnapshot(int time) const
         return mSnaps[time % NUM_SNAPSHOTS];
 
     // Find the snapshot in the container that preceeds the desired time
-    int prevsnaptime = time;
+    int32_t prevsnaptime = time;
     while (--prevsnaptime > mMostRecent - NUM_SNAPSHOTS)
     {
         if (mValidSnapshot(prevsnaptime))
@@ -1085,7 +1085,7 @@ SectorSnapshot SectorSnapshotManager::getSnapshot(int time) const
 
             snap->toSector(&tempsector);
 
-            for (int i = 0; i < time - prevsnaptime; i++)
+            for (int32_t i = 0; i < time - prevsnaptime; i++)
             {
                 if (tempsector.ceilingdata)
                     tempsector.ceilingdata->RunThink();

@@ -58,26 +58,26 @@ bool            I_VideoInitialized();
 void I_SetVideoMode(const IVideoMode &video_mode);
 
 const IVideoCapabilities *I_GetVideoCapabilities();
-int                       I_GetMonitorCount();
+int32_t                       I_GetMonitorCount();
 IWindow                  *I_GetWindow();
 
-IRenderSurface *I_AllocateSurface(int width, int height, int bpp);
+IRenderSurface *I_AllocateSurface(int32_t width, int32_t height, int32_t bpp);
 void            I_FreeSurface(IRenderSurface *&surface);
 
-int I_GetVideoWidth();
-int I_GetVideoHeight();
-int I_GetVideoBitDepth();
+int32_t I_GetVideoWidth();
+int32_t I_GetVideoHeight();
+int32_t I_GetVideoBitDepth();
 
-int I_GetSurfaceWidth();
-int I_GetSurfaceHeight();
+int32_t I_GetSurfaceWidth();
+int32_t I_GetSurfaceHeight();
 
 bool I_IsWideResolution();
-bool I_IsWideResolution(int width, int height);
+bool I_IsWideResolution(int32_t width, int32_t height);
 
 void I_BeginUpdate();
 void I_FinishUpdate();
 
-void I_WaitVBL(int count);
+void I_WaitVBL(int32_t count);
 
 void I_SetWindowCaption(const std::string &caption = "");
 void I_SetWindowIcon();
@@ -130,9 +130,9 @@ class IVideoMode
         if (bpp != other.bpp)
             return bpp < other.bpp;
         if (window_mode != other.window_mode)
-            return (int)window_mode < (int)other.window_mode;
+            return (int32_t)window_mode < (int32_t)other.window_mode;
         if (vsync != other.vsync)
-            return (int)vsync < (int)other.vsync;
+            return (int32_t)vsync < (int32_t)other.vsync;
         if (stretch_mode != other.stretch_mode)
             return stretch_mode < other.stretch_mode;
         return false;
@@ -304,7 +304,7 @@ class IRenderSurface
 
     inline const uint8_t *getBuffer(uint16_t x, uint16_t y) const
     {
-        return mSurfaceBuffer + int(y) * getPitch() + int(x) * getBytesPerPixel();
+        return mSurfaceBuffer + int32_t(y) * getPitch() + int32_t(x) * getBytesPerPixel();
     }
 
     inline uint8_t *getBuffer(uint16_t x, uint16_t y)
@@ -416,7 +416,7 @@ class IWindow
 
     virtual uint8_t getBitsPerPixel() const = 0;
 
-    virtual int getBytesPerPixel() const = 0;
+    virtual int32_t getBytesPerPixel() const = 0;
 
     virtual const IVideoMode &getVideoMode() const = 0;
 
@@ -511,7 +511,7 @@ class IDummyWindow : public IWindow
         return getPrimarySurface()->getBitsPerPixel();
     }
 
-    virtual int getBytesPerPixel() const
+    virtual int32_t getBytesPerPixel() const
     {
         return getPrimarySurface()->getBytesPerPixel();
     }
@@ -601,7 +601,7 @@ class IVideoSubsystem
         return const_cast<IWindow *>(static_cast<const IVideoSubsystem &>(*this).getWindow());
     }
 
-    virtual int getMonitorCount() const
+    virtual int32_t getMonitorCount() const
     {
         return 1;
     }

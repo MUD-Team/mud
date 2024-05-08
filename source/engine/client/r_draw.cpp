@@ -44,7 +44,7 @@
 
 // status bar height at bottom of screen
 // [RH] status bar position at bottom of screen
-extern int ST_Y;
+extern int32_t ST_Y;
 
 //
 // All drawing to the view buffer is accomplished in this file.
@@ -65,13 +65,13 @@ uint8_t *viewimage;
 
 extern "C"
 {
-    int viewwidth;
-    int viewheight;
+    int32_t viewwidth;
+    int32_t viewheight;
 }
 
-int scaledviewwidth;
-int viewwindowx;
-int viewwindowy;
+int32_t scaledviewwidth;
+int32_t viewwindowx;
+int32_t viewwindowy;
 
 // [RH] Pointers to the different column drawers.
 //		These get changed depending on the current
@@ -90,7 +90,7 @@ void (*R_FillTranslucentSpan)(void);
 // Possibly vectorized functions:
 void (*R_DrawSpanD)(void);
 void (*R_DrawSlopeSpanD)(void);
-void (*r_dimpatchD)(IRenderSurface *surface, argb_t color, int alpha, int x1, int y1, int w, int h);
+void (*r_dimpatchD)(IRenderSurface *surface, argb_t color, int32_t alpha, int32_t x1, int32_t y1, int32_t w, int32_t h);
 
 // ============================================================================
 //
@@ -120,23 +120,23 @@ class FuzzTable
         pos = (pos + 3) % FuzzTable::size;
     }
 
-    forceinline int getValue() const
+    forceinline int32_t getValue() const
     {
         // [SL] quickly convert the table value (-1 or 1) into (-pitch or pitch).
         // [AM] Replaced with a multiply that returns accurate results.  Hopefully
         //      we can find a way to improve upon an imul someday.
-        int pitch = R_GetRenderingSurface()->getPitchInPixels();
-        int value = table[pos];
+        int32_t pitch = R_GetRenderingSurface()->getPitchInPixels();
+        int32_t value = table[pos];
         return pitch * value;
     }
 
   private:
     static const size_t size = 64;
-    static const int    table[FuzzTable::size];
-    int                 pos;
+    static const int32_t    table[FuzzTable::size];
+    int32_t                 pos;
 };
 
-const int FuzzTable::table[FuzzTable::size] = {
+const int32_t FuzzTable::table[FuzzTable::size] = {
     1, -1, 1,  -1, 1, 1,  -1, 1,  1,  -1, 1, 1, 1, -1, 1, 1, 1,  -1, -1, -1, -1, 1, -1, -1, 1,  1, 1, 1,  -1, 1, -1, 1,
     1, -1, -1, 1,  1, -1, -1, -1, -1, 1,  1, 1, 1, -1, 1, 1, -1, 1,  1,  1,  -1, 1, 1,  1,  -1, 1, 1, -1, 1,  1, -1, 1};
 
@@ -206,7 +206,7 @@ uint8_t        *Ranges;
 static uint8_t *translationtablesmem = NULL;
 uint8_t         bosstable[256];
 
-static void R_BuildFontTranslation(int color_num, argb_t start_color, argb_t end_color)
+static void R_BuildFontTranslation(int32_t color_num, argb_t start_color, argb_t end_color)
 {
     const palindex_t chexstart_index = 0x70;
     const palindex_t chexend_index   = 0x7F;
@@ -216,48 +216,48 @@ static void R_BuildFontTranslation(int color_num, argb_t start_color, argb_t end
     const palindex_t hacxend_index   = 0xF2;
     const palindex_t start_index     = 0xB0;
     const palindex_t end_index       = 0xBF;
-    const int        index_range     = end_index - start_index + 1;
+    const int32_t        index_range     = end_index - start_index + 1;
 
     palindex_t *dest = (palindex_t *)Ranges + color_num * 256;
 
     if (gamemode == retail_chex)
     {
-        for (int index = 0; index < chexstart_index; index++)
+        for (int32_t index = 0; index < chexstart_index; index++)
             dest[index] = index;
-        for (int index = chexend_index + 1; index < 256; index++)
+        for (int32_t index = chexend_index + 1; index < 256; index++)
             dest[index] = index;
     }
     else if (gamemission == commercial_hacx)
     {
-        for (int index = 0; index < hacxstart_index; index++)
+        for (int32_t index = 0; index < hacxstart_index; index++)
             dest[index] = index;
-        for (int index = hacxmid1_index + 1; index < hacxmid2_index; index++)
+        for (int32_t index = hacxmid1_index + 1; index < hacxmid2_index; index++)
             dest[index] = index;
-        for (int index = hacxend_index + 1; index < 256; index++)
+        for (int32_t index = hacxend_index + 1; index < 256; index++)
             dest[index] = index;
     }
     else
     {
-        for (int index = 0; index < start_index; index++)
+        for (int32_t index = 0; index < start_index; index++)
             dest[index] = index;
-        for (int index = end_index + 1; index < 256; index++)
+        for (int32_t index = end_index + 1; index < 256; index++)
             dest[index] = index;
     }
 
-    int r_diff = end_color.getr() - start_color.getr();
-    int g_diff = end_color.getg() - start_color.getg();
-    int b_diff = end_color.getb() - start_color.getb();
-    int hacxtrack;
+    int32_t r_diff = end_color.getr() - start_color.getr();
+    int32_t g_diff = end_color.getg() - start_color.getg();
+    int32_t b_diff = end_color.getb() - start_color.getb();
+    int32_t hacxtrack;
 
     if (gamemode == retail_chex)
     {
         for (palindex_t index = chexstart_index; index <= chexend_index; index++)
         {
-            int i = index - chexstart_index;
+            int32_t i = index - chexstart_index;
 
-            int r = start_color.getr() + i * r_diff / index_range;
-            int g = start_color.getg() + i * g_diff / index_range;
-            int b = start_color.getb() + i * b_diff / index_range;
+            int32_t r = start_color.getr() + i * r_diff / index_range;
+            int32_t g = start_color.getg() + i * g_diff / index_range;
+            int32_t b = start_color.getb() + i * b_diff / index_range;
 
             dest[index] = V_BestColor(V_GetDefaultPalette()->basecolors, r, g, b);
         }
@@ -275,11 +275,11 @@ static void R_BuildFontTranslation(int color_num, argb_t start_color, argb_t end
                 hacxtrack = hacxstart_index;
             else
                 hacxtrack = hacxmid2_index - (hacxmid1_index - hacxstart_index + 1);
-            int i = index - hacxtrack;
+            int32_t i = index - hacxtrack;
 
-            int r = start_color.getr() + i * r_diff / index_range;
-            int g = start_color.getg() + i * g_diff / index_range;
-            int b = start_color.getb() + i * b_diff / index_range;
+            int32_t r = start_color.getr() + i * r_diff / index_range;
+            int32_t g = start_color.getg() + i * g_diff / index_range;
+            int32_t b = start_color.getb() + i * b_diff / index_range;
 
             dest[index] = V_BestColor(V_GetDefaultPalette()->basecolors, r, g, b);
         }
@@ -290,11 +290,11 @@ static void R_BuildFontTranslation(int color_num, argb_t start_color, argb_t end
     {
         for (palindex_t index = start_index; index <= end_index; index++)
         {
-            int i = index - start_index;
+            int32_t i = index - start_index;
 
-            int r = start_color.getr() + i * r_diff / index_range;
-            int g = start_color.getg() + i * g_diff / index_range;
-            int b = start_color.getb() + i * b_diff / index_range;
+            int32_t r = start_color.getr() + i * r_diff / index_range;
+            int32_t g = start_color.getg() + i * g_diff / index_range;
+            int32_t b = start_color.getb() + i * b_diff / index_range;
 
             dest[index] = V_BestColor(V_GetDefaultPalette()->basecolors, r, g, b);
         }
@@ -355,22 +355,22 @@ void R_InitTranslationTables()
     //		in here. We do, however load some text translation
     //		tables from our PWAD (ala BOOM).
 
-    for (int i = 0; i < 256; i++)
+    for (int32_t i = 0; i < 256; i++)
         translationtables[i] = i;
 
     // Set up default translationRGB tables:
     const palette_t *pal = V_GetDefaultPalette();
-    for (int i = 0; i < MAXPLAYERS; ++i)
+    for (int32_t i = 0; i < MAXPLAYERS; ++i)
     {
-        for (int j = 0x70; j < 0x80; ++j)
+        for (int32_t j = 0x70; j < 0x80; ++j)
             translationRGB[i][j - 0x70] = pal->basecolors[j];
     }
 
-    for (int i = 1; i < MAXPLAYERS + 3; i++)
+    for (int32_t i = 1; i < MAXPLAYERS + 3; i++)
         memcpy(translationtables + i * 256, translationtables, 256);
 
     // create translation tables for dehacked patches that expect them
-    for (int i = 0x70; i < 0x80; i++)
+    for (int32_t i = 0x70; i < 0x80; i++)
     {
         // map green ramp to gray, brown, red
         translationtables[i + (MAXPLAYERS + 0) * 256] = 0x60 + (i & 0xf);
@@ -410,10 +410,10 @@ void R_FreeTranslationTables(void)
 }
 
 // [Nes] Vanilla player translation table.
-void R_BuildClassicPlayerTranslation(int player, int color)
+void R_BuildClassicPlayerTranslation(int32_t player, int32_t color)
 {
     const palette_t *pal = V_GetDefaultPalette();
-    int              i;
+    int32_t              i;
 
     if (color == 1) // Indigo
         for (i = 0x70; i < 0x80; i++)
@@ -435,9 +435,9 @@ void R_BuildClassicPlayerTranslation(int player, int color)
         }
 }
 
-void R_CopyTranslationRGB(int fromplayer, int toplayer)
+void R_CopyTranslationRGB(int32_t fromplayer, int32_t toplayer)
 {
-    for (int i = 0x70; i < 0x80; ++i)
+    for (int32_t i = 0x70; i < 0x80; ++i)
     {
         translationRGB[toplayer][i - 0x70]      = translationRGB[fromplayer][i - 0x70];
         translationtables[i + (toplayer * 256)] = translationtables[i + (fromplayer * 256)];
@@ -446,7 +446,7 @@ void R_CopyTranslationRGB(int fromplayer, int toplayer)
 
 // [RH] Create a player's translation table based on
 //		a given mid-range color.
-void R_BuildPlayerTranslation(int player, argb_t dest_color)
+void R_BuildPlayerTranslation(int32_t player, argb_t dest_color)
 {
     const palette_t *pal   = V_GetDefaultPalette();
     uint8_t            *table = &translationtables[player * 256];
@@ -464,7 +464,7 @@ void R_BuildPlayerTranslation(int player, argb_t dest_color)
         v = 1.0f;
     float vdelta = -0.05882f;
 
-    for (int i = 0x70; i < 0x80; i++)
+    for (int32_t i = 0x70; i < 0x80; i++)
     {
         argb_t color(V_HSVtoRGB(fahsv_t(h, s, v)));
 
@@ -550,9 +550,9 @@ static forceinline void R_FillColumnGeneric(PIXEL_T *dest, const drawcolumn_t &d
     }
 #endif
 
-    int color = drawcolumn.color;
-    int pitch = drawcolumn.pitch_in_pixels;
-    int count = drawcolumn.yh - drawcolumn.yl + 1;
+    int32_t color = drawcolumn.color;
+    int32_t pitch = drawcolumn.pitch_in_pixels;
+    int32_t count = drawcolumn.yh - drawcolumn.yl + 1;
     if (count <= 0)
         return;
 
@@ -590,16 +590,16 @@ static forceinline void R_DrawColumnGeneric(PIXEL_T *dest, const drawcolumn_t &d
 #endif
 
     palindex_t *source = drawcolumn.source;
-    int         pitch  = drawcolumn.pitch_in_pixels;
-    int         count  = drawcolumn.yh - drawcolumn.yl + 1;
+    int32_t         pitch  = drawcolumn.pitch_in_pixels;
+    int32_t         count  = drawcolumn.yh - drawcolumn.yl + 1;
     if (count <= 0)
         return;
 
     const fixed_t fracstep = drawcolumn.iscale;
     fixed_t       frac     = drawcolumn.texturefrac;
 
-    const int texheight = drawcolumn.textureheight;
-    const int mask      = (texheight >> FRACBITS) - 1;
+    const int32_t texheight = drawcolumn.textureheight;
+    const int32_t mask      = (texheight >> FRACBITS) - 1;
 
     COLORFUNC colorfunc(drawcolumn);
 
@@ -712,8 +712,8 @@ static forceinline void R_FillSpanGeneric(PIXEL_T *dest, const drawspan_t &draws
     }
 #endif
 
-    int color = drawspan.color;
-    int count = drawspan.x2 - drawspan.x1 + 1;
+    int32_t color = drawspan.color;
+    int32_t count = drawspan.x2 - drawspan.x1 + 1;
     if (count <= 0)
         return;
 
@@ -746,7 +746,7 @@ static forceinline void R_DrawLevelSpanGeneric(PIXEL_T *dest, const drawspan_t &
 #endif
 
     palindex_t *source = drawspan.source;
-    int         count  = drawspan.x2 - drawspan.x1 + 1;
+    int32_t         count  = drawspan.x2 - drawspan.x1 + 1;
     if (count <= 0)
         return;
 
@@ -760,7 +760,7 @@ static forceinline void R_DrawLevelSpanGeneric(PIXEL_T *dest, const drawspan_t &
     do
     {
         // Current texture index in u,v.
-        const int spot = ((yfrac >> (32 - 6 - 6)) & (63 * 64)) + (xfrac >> (32 - 6));
+        const int32_t spot = ((yfrac >> (32 - 6 - 6)) & (63 * 64)) + (xfrac >> (32 - 6));
 
         // Lookup pixel from flat texture tile,
         //  re-index using light/colormap.
@@ -799,7 +799,7 @@ static forceinline void R_DrawSlopedSpanGeneric(PIXEL_T *dest, const drawspan_t 
 #endif
 
     palindex_t *source = drawspan.source;
-    int         count  = drawspan.x2 - drawspan.x1 + 1;
+    int32_t         count  = drawspan.x2 - drawspan.x1 + 1;
     if (count <= 0)
         return;
 
@@ -807,7 +807,7 @@ static forceinline void R_DrawSlopedSpanGeneric(PIXEL_T *dest, const drawspan_t 
     const float ius = drawspan.iustep, ivs = drawspan.ivstep;
     float       id = drawspan.id, ids = drawspan.idstep;
 
-    int ltindex = 0;
+    int32_t ltindex = 0;
 
     shaderef_t colormap;
     COLORFUNC  colorfunc(drawspan);
@@ -833,12 +833,12 @@ static forceinline void R_DrawSlopedSpanGeneric(PIXEL_T *dest, const drawspan_t 
         fixed_t ustep = (fixed_t)((uend - ustart) * INTERPSTEP);
         fixed_t vstep = (fixed_t)((vend - vstart) * INTERPSTEP);
 
-        int incount = SPANJUMP;
+        int32_t incount = SPANJUMP;
         while (incount--)
         {
             colormap = drawspan.slopelighting[ltindex++];
 
-            const int spot = ((vfrac >> 10) & 0xFC0) | ((ufrac >> 16) & 63);
+            const int32_t spot = ((vfrac >> 10) & 0xFC0) | ((ufrac >> 16) & 63);
             colorfunc(source[spot], dest);
             dest++;
             ufrac += ustep;
@@ -869,12 +869,12 @@ static forceinline void R_DrawSlopedSpanGeneric(PIXEL_T *dest, const drawspan_t 
         fixed_t ustep = (fixed_t)((uend - ustart) / count);
         fixed_t vstep = (fixed_t)((vend - vstart) / count);
 
-        int incount = count;
+        int32_t incount = count;
         while (incount--)
         {
             colormap = drawspan.slopelighting[ltindex++];
 
-            const int spot = ((vfrac >> 10) & 0xFC0) | ((ufrac >> 16) & 63);
+            const int32_t spot = ((vfrac >> 10) & 0xFC0) | ((ufrac >> 16) & 63);
             colorfunc(source[spot], dest);
             dest++;
             ufrac += ustep;
@@ -981,7 +981,7 @@ class DirectTranslucentColormapFunc
     }
 
     const shaderef_t &colormap;
-    int               fga, bga;
+    int32_t               fga, bga;
 };
 
 class DirectTranslatedColormapFunc
@@ -1185,7 +1185,7 @@ void R_DrawSlopeSpanD_c()
 // Draws the border around the view
 //  for different size windows?
 //
-void V_MarkRect(int x, int y, int width, int height);
+void V_MarkRect(int32_t x, int32_t y, int32_t width, int32_t height);
 
 enum r_optimize_kind
 {

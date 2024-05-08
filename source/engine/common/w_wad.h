@@ -44,15 +44,15 @@ typedef struct
 {
     // Should be "IWAD" or "PWAD".
     uint32_t identification;
-    int      numlumps;
-    int      infotableofs;
+    int32_t      numlumps;
+    int32_t      infotableofs;
 
 } wadinfo_t;
 
 typedef struct
 {
-    int  filepos;
-    int  size;
+    int32_t  filepos;
+    int32_t  size;
     char name[8]; // denis - todo - string
 
 } filelump_t;
@@ -64,14 +64,14 @@ typedef struct lumpinfo_s
 {
     char  name[8]; // denis - todo - string
     PHYSFS_File *handle;
-    int   position;
-    int   size;
+    int32_t   position;
+    int32_t   size;
 
     // [RH] Hashing stuff
-    int next;
-    int index;
+    int32_t next;
+    int32_t index;
 
-    int namespc;
+    int32_t namespc;
 } lumpinfo_t;
 
 // [RH] Namespaces from BOOM.
@@ -111,10 +111,10 @@ OCRC32Sum    W_CRC32(const std::string &filename);
 OMD5Hash     W_MD5(const std::string &filename);
 void         W_InitMultipleFiles(const OResFiles &filenames);
 lumpHandle_t W_LumpToHandle(const uint32_t lump);
-int          W_HandleToLump(const lumpHandle_t handle);
+int32_t          W_HandleToLump(const lumpHandle_t handle);
 
-int W_CheckNumForName(const char *name, int ns = ns_global);
-int W_GetNumForName(const char *name, int ns = ns_global);
+int32_t W_CheckNumForName(const char *name, int32_t ns = ns_global);
+int32_t W_GetNumForName(const char *name, int32_t ns = ns_global);
 
 std::string W_LumpName(uint32_t lump);
 uint32_t    W_LumpLength(uint32_t lump);
@@ -125,22 +125,22 @@ void        *W_CacheLumpNum(uint32_t lump, const zoneTag_e tag);
 void        *W_CacheLumpName(const char *name, const zoneTag_e tag);
 patch_t     *W_CachePatch(uint32_t lump, const zoneTag_e tag = PU_CACHE);
 patch_t     *W_CachePatch(const char *name, const zoneTag_e tag = PU_CACHE);
-lumpHandle_t W_CachePatchHandle(const int lumpNum, const zoneTag_e tag = PU_CACHE);
-lumpHandle_t W_CachePatchHandle(const char *name, const zoneTag_e tag = PU_CACHE, int ns = ns_global);
+lumpHandle_t W_CachePatchHandle(const int32_t lumpNum, const zoneTag_e tag = PU_CACHE);
+lumpHandle_t W_CachePatchHandle(const char *name, const zoneTag_e tag = PU_CACHE, int32_t ns = ns_global);
 patch_t     *W_ResolvePatchHandle(const lumpHandle_t lump);
 
 void W_Profile(const char *fname);
 
 void W_Close();
 
-int  W_FindLump(const char *name, int lastlump); // [RH]	Find lumps with duplication
+int32_t  W_FindLump(const char *name, int32_t lastlump); // [RH]	Find lumps with duplication
 bool W_CheckLumpName(uint32_t    lump,
                      const char *name); // [RH] True if lump's name == name // denis - todo - replace with map<>
 
 // unsigned W_LumpNameHash (const char *name);				// [RH] Create hash key from an 8-char name
 
 // [RH] Combine multiple marked ranges of lumps into one.
-void W_MergeLumps(const char *start, const char *end, int);
+void W_MergeLumps(const char *start, const char *end, int32_t);
 
 // [RH] Copy an 8-char string and uppercase it.
 void uppercopy(char *to, const char *from);
@@ -149,7 +149,7 @@ void uppercopy(char *to, const char *from);
 void W_GetLumpName(char *to, uint32_t lump);
 
 // [RH] Returns file handle for specified lump
-int W_GetLumpFile(uint32_t lump);
+int32_t W_GetLumpFile(uint32_t lump);
 
 // [RH] Put a lump in a certain namespace
-// void W_SetLumpNamespace (unsigned lump, int nmspace);
+// void W_SetLumpNamespace (unsigned lump, int32_t nmspace);

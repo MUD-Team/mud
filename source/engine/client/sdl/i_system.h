@@ -89,7 +89,7 @@ void addterm(void(STACK_ARGS *func)(void), const char *name);
 void I_PaintConsole(void);
 
 // Print a console string
-void I_PrintStr(int x, const char *str, int count, bool scroll);
+void I_PrintStr(int32_t x, const char *str, int32_t count, bool scroll);
 
 // Set the title string of the startup window
 void I_SetTitleString(const char *title);

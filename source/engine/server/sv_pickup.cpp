@@ -85,7 +85,7 @@ bool Pickup_DistributePlayers(size_t num_players, std::string &error)
     // onto alternating teams.
     team_t dest_team = TEAM_BLUE;
     size_t i         = 0;
-    int    teamCount = sv_teamsinplay.asInt();
+    int32_t    teamCount = sv_teamsinplay.asInt();
     for (std::vector<player_t *>::iterator it = eligible.begin(); it != eligible.end(); ++it, ++i)
     {
         player_t &player = **it;
@@ -113,7 +113,7 @@ bool Pickup_DistributePlayers(size_t num_players, std::string &error)
             SV_SendUserInfo(player, &(pit->client));
         }
 
-        int iTeam = dest_team;
+        int32_t iTeam = dest_team;
         iTeam     = ++iTeam % teamCount;
         dest_team = (team_t)iTeam;
     }

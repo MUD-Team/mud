@@ -82,7 +82,7 @@ odaproto::svc::PlayerInfo SVC_PlayerInfo(player_t &player)
 
     msg.mutable_player()->set_backpack(player.backpack);
 
-    for (int i = 0; i < NUMAMMO; i++)
+    for (int32_t i = 0; i < NUMAMMO; i++)
     {
         msg.mutable_player()->add_ammo(player.ammo[i]);
         msg.mutable_player()->add_maxammo(player.maxammo[i]);
@@ -95,7 +95,7 @@ odaproto::svc::PlayerInfo SVC_PlayerInfo(player_t &player)
     msg.mutable_player()->set_readyweapon(player.readyweapon);
     msg.mutable_player()->set_pendingweapon(player.pendingweapon);
 
-    for (int i = 0; i < NUMPOWERS; i++)
+    for (int32_t i = 0; i < NUMPOWERS; i++)
     {
         msg.mutable_player()->add_powers(player.powers[i]);
     }
@@ -109,7 +109,7 @@ odaproto::svc::PlayerInfo SVC_PlayerInfo(player_t &player)
 /**
  * @brief Change the location of a player.
  */
-odaproto::svc::MovePlayer SVC_MovePlayer(player_t &player, const int tic)
+odaproto::svc::MovePlayer SVC_MovePlayer(player_t &player, const int32_t tic)
 {
     odaproto::svc::MovePlayer msg;
 
@@ -157,7 +157,7 @@ odaproto::svc::MovePlayer SVC_MovePlayer(player_t &player, const int tic)
 /**
  * @brief Send the local player position for a client.
  */
-odaproto::svc::UpdateLocalPlayer SVC_UpdateLocalPlayer(AActor &mo, const int tic)
+odaproto::svc::UpdateLocalPlayer SVC_UpdateLocalPlayer(AActor &mo, const int32_t tic)
 {
     odaproto::svc::UpdateLocalPlayer msg;
 
@@ -398,7 +398,7 @@ odaproto::svc::DisconnectClient SVC_DisconnectClient(player_t &player)
  *        WAD and DEH patch files and load a map.
  */
 odaproto::svc::LoadMap SVC_LoadMap(const OResFiles &wadnames, const std::string &mapname,
-                                   int time)
+                                   int32_t time)
 {
     odaproto::svc::LoadMap msg;
 
@@ -559,7 +559,7 @@ odaproto::svc::SpawnPlayer SVC_SpawnPlayer(player_t &player)
     return msg;
 }
 
-odaproto::svc::DamagePlayer SVC_DamagePlayer(player_t &player, AActor *inflictor, int health, int armor)
+odaproto::svc::DamagePlayer SVC_DamagePlayer(player_t &player, AActor *inflictor, int32_t health, int32_t armor)
 {
     odaproto::svc::DamagePlayer msg;
 
@@ -576,7 +576,7 @@ odaproto::svc::DamagePlayer SVC_DamagePlayer(player_t &player, AActor *inflictor
 /**
  * @brief Kill a mobj.
  */
-odaproto::svc::KillMobj SVC_KillMobj(AActor *source, AActor *target, AActor *inflictor, int mod, bool joinkill)
+odaproto::svc::KillMobj SVC_KillMobj(AActor *source, AActor *target, AActor *inflictor, int32_t mod, bool joinkill)
 {
     odaproto::svc::KillMobj msg;
 
@@ -731,7 +731,7 @@ odaproto::svc::TeamMembers SVC_TeamMembers(team_t team)
     return msg;
 }
 
-odaproto::svc::ActivateLine SVC_ActivateLine(line_t *line, AActor *mo, int side, LineActivationType type)
+odaproto::svc::ActivateLine SVC_ActivateLine(line_t *line, AActor *mo, int32_t side, LineActivationType type)
 {
     odaproto::svc::ActivateLine msg;
 
@@ -902,8 +902,8 @@ odaproto::svc::MovingSector SVC_MovingSector(const sector_t &sector)
     return msg;
 }
 
-odaproto::svc::PlaySound SVC_PlaySound(const PlaySoundType &type, int channel, int sfx_id, float volume,
-                                       int attenuation)
+odaproto::svc::PlaySound SVC_PlaySound(const PlaySoundType &type, int32_t channel, int32_t sfx_id, float volume,
+                                       int32_t attenuation)
 {
     odaproto::svc::PlaySound msg;
 
@@ -954,18 +954,18 @@ odaproto::svc::PlayerState SVC_PlayerState(player_t &player)
     pl->set_readyweapon(player.readyweapon);
 
     std::bitset<6> cardBits;
-    for (int i = 0; i < NUMCARDS; i++)
+    for (int32_t i = 0; i < NUMCARDS; i++)
     {
         cardBits.set(i, player.cards[i]);
     }
     pl->set_cards(cardBits.to_ulong());
 
-    for (int i = 0; i < NUMAMMO; i++)
+    for (int32_t i = 0; i < NUMAMMO; i++)
     {
         pl->add_ammo(player.ammo[i]);
     }
 
-    for (int i = 0; i < NUMPSPRITES; i++)
+    for (int32_t i = 0; i < NUMPSPRITES; i++)
     {
         pspdef_t             *psp   = &player.psprites[i];
         uint32_t          state = psp->state - states;
@@ -973,7 +973,7 @@ odaproto::svc::PlayerState SVC_PlayerState(player_t &player)
         plpsp->set_statenum(state);
     }
 
-    for (int i = 0; i < NUMPOWERS; i++)
+    for (int32_t i = 0; i < NUMPOWERS; i++)
     {
         pl->add_powers(player.powers[i]);
     }
@@ -1078,7 +1078,7 @@ odaproto::svc::ConnectClient SVC_ConnectClient(const player_t &player)
     return msg;
 }
 
-odaproto::svc::MidPrint SVC_MidPrint(const std::string &message, const int time)
+odaproto::svc::MidPrint SVC_MidPrint(const std::string &message, const int32_t time)
 {
     odaproto::svc::MidPrint msg;
 
@@ -1142,7 +1142,7 @@ odaproto::svc::SectorProperties SVC_SectorProperties(sector_t &sector)
     msg.set_changes(sector.SectorChanges);
     odaproto::Sector *secmsg = msg.mutable_sector();
 
-    for (int i = 0, prop = 1; prop < SPC_Max; i++)
+    for (int32_t i = 0, prop = 1; prop < SPC_Max; i++)
     {
         prop = 1 << i;
         if ((prop & sector.SectorChanges) == 0)
@@ -1212,7 +1212,7 @@ odaproto::svc::SectorProperties SVC_SectorProperties(sector_t &sector)
     return msg;
 }
 
-odaproto::svc::LineSideUpdate SVC_LineSideUpdate(const line_t &line, const int sideNum)
+odaproto::svc::LineSideUpdate SVC_LineSideUpdate(const line_t &line, const int32_t sideNum)
 {
     odaproto::svc::LineSideUpdate msg;
 
@@ -1222,7 +1222,7 @@ odaproto::svc::LineSideUpdate SVC_LineSideUpdate(const line_t &line, const int s
     msg.set_side(sideNum);
     msg.set_changes(currentSideDef->SidedefChanges);
 
-    for (int i = 0, prop = 1; prop < SDPC_Max; i++)
+    for (int32_t i = 0, prop = 1; prop < SDPC_Max; i++)
     {
         prop = BIT(i);
         if ((prop & currentSideDef->SidedefChanges) == 0)
@@ -1259,7 +1259,7 @@ odaproto::svc::MobjState SVC_MobjState(AActor *mo)
     return msg;
 }
 
-odaproto::svc::DamageMobj SVC_DamageMobj(AActor *target, const int pain)
+odaproto::svc::DamageMobj SVC_DamageMobj(AActor *target, const int32_t pain)
 {
     odaproto::svc::DamageMobj msg;
 
@@ -1270,7 +1270,7 @@ odaproto::svc::DamageMobj SVC_DamageMobj(AActor *target, const int pain)
     return msg;
 }
 
-odaproto::svc::ExecuteLineSpecial SVC_ExecuteLineSpecial(uint8_t special, line_t *line, AActor *mo, const int (&args)[5])
+odaproto::svc::ExecuteLineSpecial SVC_ExecuteLineSpecial(uint8_t special, line_t *line, AActor *mo, const int32_t (&args)[5])
 {
     odaproto::svc::ExecuteLineSpecial msg;
 
@@ -1295,7 +1295,7 @@ odaproto::svc::ExecuteLineSpecial SVC_ExecuteLineSpecial(uint8_t special, line_t
  * @param args Arguments to pass to the client.
  */
 odaproto::svc::ExecuteACSSpecial SVC_ExecuteACSSpecial(const uint8_t special, const AActor *activator, const char *print,
-                                                       const std::vector<int> &args)
+                                                       const std::vector<int32_t> &args)
 {
     odaproto::svc::ExecuteACSSpecial msg;
 
@@ -1309,7 +1309,7 @@ odaproto::svc::ExecuteACSSpecial SVC_ExecuteACSSpecial(const uint8_t special, co
         msg.set_print(print);
     }
 
-    for (std::vector<int>::const_iterator it = args.begin(); it != args.end(); ++it)
+    for (std::vector<int32_t>::const_iterator it = args.begin(); it != args.end(); ++it)
     {
         msg.add_args(*it);
     }

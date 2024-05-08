@@ -282,7 +282,7 @@ void OScanner::mustScan()
 }
 
 //
-// Ensure next token is an int.
+// Ensure next token is an int32_t.
 //
 void OScanner::mustScanInt()
 {
@@ -362,9 +362,9 @@ std::string OScanner::getToken() const
 }
 
 //
-// Get token as an int.
+// Get token as an int32_t.
 //
-int OScanner::getTokenInt() const
+int32_t OScanner::getTokenInt() const
 {
     std::string str = m_token;
     char       *stopper;
@@ -374,7 +374,7 @@ int OScanner::getTokenInt() const
         return INT32_MAX; // INT32_MAX;
     }
 
-    const int num = strtol(str.c_str(), &stopper, 0);
+    const int32_t num = strtol(str.c_str(), &stopper, 0);
 
     if (*stopper != 0)
     {

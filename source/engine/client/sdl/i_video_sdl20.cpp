@@ -66,19 +66,19 @@ EXTERN_CVAR(vid_widescreen)
 // Queries SDL to find the supported video modes at the given bit depth
 // and then adds them to modelist.
 //
-static void I_AddSDL20VideoModes(IVideoModeList *modelist, int bpp)
+static void I_AddSDL20VideoModes(IVideoModeList *modelist, int32_t bpp)
 {
-    int             display_index = 0;
+    int32_t             display_index = 0;
     SDL_DisplayMode mode          = {SDL_PIXELFORMAT_UNKNOWN, 0, 0, 0, 0};
 
-    int display_mode_count = SDL_GetNumDisplayModes(display_index);
+    int32_t display_mode_count = SDL_GetNumDisplayModes(display_index);
     if (display_mode_count < 1)
     {
         I_FatalError("SDL_GetNumDisplayModes failed: %s", SDL_GetError());
         return;
     }
 
-    for (int i = 0; i < display_mode_count; i++)
+    for (int32_t i = 0; i < display_mode_count; i++)
     {
         if (SDL_GetDisplayMode(display_index, i, &mode) != 0)
         {
@@ -86,7 +86,7 @@ static void I_AddSDL20VideoModes(IVideoModeList *modelist, int bpp)
             return;
         }
 
-        int width = mode.w, height = mode.h;
+        int32_t width = mode.w, height = mode.h;
         // add this video mode to the list (both fullscreen & windowed)
         modelist->push_back(IVideoMode(width, height, bpp, WINDOW_Windowed));
         modelist->push_back(IVideoMode(width, height, bpp, WINDOW_DesktopFullscreen));
@@ -109,8 +109,8 @@ static void I_AddSDL20VideoModes(IVideoModeList *modelist, int bpp)
 //
 ISDL20VideoCapabilities::ISDL20VideoCapabilities() : IVideoCapabilities(), mNativeMode(0, 0, 0, WINDOW_Windowed)
 {
-    const int display_index = 0;
-    int       bpp;
+    const int32_t display_index = 0;
+    int32_t       bpp;
     Uint32    Rmask, Gmask, Bmask, Amask;
 
     SDL_DisplayMode sdl_display_mode;
@@ -215,7 +215,7 @@ void ISDL20Window::setRendererDriver()
     // Preferred ordering of drivers
     const char *drivers[] = {"direct3d", "opengl", "opengles2", "opengles", "software", ""};
 
-    for (int i = 0; drivers[i][0] != '\0'; i++)
+    for (int32_t i = 0; drivers[i][0] != '\0'; i++)
     {
         const char *driver = drivers[i];
         if (isRendererDriverAvailable(driver))
@@ -232,9 +232,9 @@ void ISDL20Window::setRendererDriver()
 bool ISDL20Window::isRendererDriverAvailable(const char *driver) const
 {
     SDL_RendererInfo info;
-    int              num_drivers = SDL_GetNumRenderDrivers();
+    int32_t              num_drivers = SDL_GetNumRenderDrivers();
 
-    for (int i = 0; i < num_drivers; i++)
+    for (int32_t i = 0; i < num_drivers; i++)
     {
         SDL_GetRenderDriverInfo(i, &info);
         if (strncmp(info.name, driver, strlen(driver)) == 0)
@@ -269,13 +269,13 @@ void ISDL20Window::getEvents()
     SDL_PumpEvents();
 
     // Retrieve chunks of up to 1024 events from SDL
-    int       num_events = 0;
-    const int max_events = 1024;
+    int32_t       num_events = 0;
+    const int32_t max_events = 1024;
     SDL_Event sdl_events[max_events];
 
     while ((num_events = SDL_PeepEvents(sdl_events, max_events, SDL_GETEVENT, SDL_QUIT, SDL_SYSWMEVENT)))
     {
-        for (int i = 0; i < num_events; i++)
+        for (int32_t i = 0; i < num_events; i++)
         {
             const SDL_Event &sdl_ev = sdl_events[i];
 
@@ -340,7 +340,7 @@ void ISDL20Window::getEvents()
                     uint16_t height = sdl_ev.window.data2;
                     DPrintf("SDL_WINDOWEVENT_RESIZED (%dx%d)\n", width, height);
 
-                    int current_time = I_MSTime();
+                    int32_t current_time = I_MSTime();
                     if ((EWindowMode)vid_fullscreen.asInt() == WINDOW_Windowed &&
                         current_time > mAcceptResizeEventsTime)
                     {
@@ -477,7 +477,7 @@ std::string ISDL20Window::getVideoDriverName() const
 static void I_BuildPixelFormatFromSDLPixelFormatEnum(uint32_t sdl_fmt, PixelFormat *format)
 {
     uint32_t amask, rmask, gmask, bmask;
-    int      bpp;
+    int32_t      bpp;
     SDL_PixelFormatEnumToMasks(sdl_fmt, &bpp, &rmask, &gmask, &bmask, &amask);
 
     uint32_t rshift = 0, rloss = 8;
@@ -625,7 +625,7 @@ bool ISDL20Window::setMode(const IVideoMode &video_mode)
 //
 uint16_t ISDL20Window::getCurrentWidth() const
 {
-    int width;
+    int32_t width;
     SDL_GetWindowSize(mSDLWindow, &width, NULL);
     return width;
 }
@@ -635,7 +635,7 @@ uint16_t ISDL20Window::getCurrentWidth() const
 //
 uint16_t ISDL20Window::getCurrentHeight() const
 {
-    int height;
+    int32_t height;
     SDL_GetWindowSize(mSDLWindow, NULL, &height);
     return height;
 }
@@ -711,7 +711,7 @@ ISDL20VideoSubsystem::~ISDL20VideoSubsystem()
 //
 // ISDL20VideoSubsystem::getMonitorCount
 //
-int ISDL20VideoSubsystem::getMonitorCount() const
+int32_t ISDL20VideoSubsystem::getMonitorCount() const
 {
     return SDL_GetNumVideoDisplays();
 }

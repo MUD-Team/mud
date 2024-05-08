@@ -291,7 +291,7 @@ class KickVote : public Vote
 
         // Create votestring
         std::ostringstream buffer;
-        buffer << "kick " << this->netname << " (id:" << (int)this->id << ")";
+        buffer << "kick " << this->netname << " (id:" << (int32_t)this->id << ")";
         if (!this->reason.empty())
         {
             buffer << " \"" << this->reason << "\"";
@@ -716,8 +716,8 @@ size_t Vote::count_yes() const
         return 0;
     }
 
-    int                                          count = 0;
-    std::map<int, vote_result_t>::const_iterator it;
+    int32_t                                          count = 0;
+    std::map<int32_t, vote_result_t>::const_iterator it;
 
     // Count the for votes.
     for (it = this->tally.begin(); it != this->tally.end(); ++it)
@@ -747,12 +747,12 @@ size_t Vote::calc_yes(const bool noabs) const
     }
 
     float  f_calc = size * sv_vote_majority;
-    size_t i_calc = (int)floor(f_calc + 0.5f);
+    size_t i_calc = (int32_t)floor(f_calc + 0.5f);
     if (f_calc > i_calc - MPEPSILON && f_calc < i_calc + MPEPSILON)
     {
         return i_calc + 1;
     }
-    return (int)ceil(f_calc);
+    return (int32_t)ceil(f_calc);
 }
 
 // Tally up the number of players who are voting against the current callvote.
@@ -764,8 +764,8 @@ size_t Vote::count_no() const
         return 0;
     }
 
-    int                                          count = 0;
-    std::map<int, vote_result_t>::const_iterator it;
+    int32_t                                          count = 0;
+    std::map<int32_t, vote_result_t>::const_iterator it;
 
     // Count the against votes.
     for (it = this->tally.begin(); it != this->tally.end(); ++it)
@@ -783,12 +783,12 @@ size_t Vote::count_no() const
 size_t Vote::calc_no() const
 {
     float  f_calc = this->tally.size() * (1.0f - sv_vote_majority);
-    size_t i_calc = (int)floor(f_calc + 0.5f);
+    size_t i_calc = (int32_t)floor(f_calc + 0.5f);
     if (f_calc > i_calc - MPEPSILON && f_calc < i_calc + MPEPSILON)
     {
         return i_calc;
     }
-    return (int)ceil(f_calc);
+    return (int32_t)ceil(f_calc);
 }
 
 size_t Vote::count_abs() const
@@ -842,8 +842,8 @@ bool Vote::init(const std::vector<std::string> &args, const player_t &player)
     // Check the vote timeout.
     if (player.timeout_callvote > 0)
     {
-        int timeout = level.time - player.timeout_callvote;
-        int timeout_check, timeout_waitsec;
+        int32_t timeout = level.time - player.timeout_callvote;
+        int32_t timeout_check, timeout_waitsec;
         if (players.size() == 1)
         {
             // A single player is made to always wait 10 seconds.
@@ -998,11 +998,11 @@ bool Vote::vote(player_t &player, bool ballot)
     // Has the user voted too soon after his last vote?
     if (player.timeout_vote > 0)
     {
-        int timeout = level.time - player.timeout_vote;
+        int32_t timeout = level.time - player.timeout_vote;
 
         // Players can only change their minds once every 3 seconds.
-        int timeout_check   = 3 * TICRATE;
-        int timeout_waitsec = 3 - (timeout / TICRATE);
+        int32_t timeout_check   = 3 * TICRATE;
+        int32_t timeout_waitsec = 3 - (timeout / TICRATE);
 
         if (timeout < timeout_check)
         {
@@ -1052,7 +1052,7 @@ void SV_Callvote(player_t &player)
             argc);
 
     std::vector<std::string> arguments(argc);
-    for (int i = 0; i < argc; i++)
+    for (int32_t i = 0; i < argc; i++)
     {
         arguments[i] = std::string(MSG_ReadString());
         DPrintf("SV_Callvote: arguments[%d] = \"%s\"\n", i, arguments[i].c_str());
@@ -1064,7 +1064,7 @@ void SV_Callvote(player_t &player)
         // TODO: Only return enabled votes.
         std::ostringstream buffer;
         buffer << "Valid votes are: ";
-        for (int i = VOTE_NONE + 1; i < VOTE_MAX; i++)
+        for (int32_t i = VOTE_NONE + 1; i < VOTE_MAX; i++)
         {
             buffer << vote_type_cmd[i];
             if (i + 1 != VOTE_MAX)

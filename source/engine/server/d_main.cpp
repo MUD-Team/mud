@@ -347,7 +347,7 @@ void D_DoomMain()
     p = Args.CheckParm("-warp");
     if (p && p < Args.NumArgs() - (1 + (gameinfo.flags & GI_MAPxx ? 0 : 1)))
     {
-        int ep, map;
+        int32_t ep, map;
 
         if (gameinfo.flags & GI_MAPxx)
         {

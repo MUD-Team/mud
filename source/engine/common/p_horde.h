@@ -39,22 +39,22 @@ enum hordeState_e
 struct hordeInfo_t
 {
     hordeState_e state;
-    int          wave;
-    int          waveTime;
-    int          bossTime;
+    int32_t          wave;
+    int32_t          waveTime;
+    int32_t          bossTime;
     uint64_t     defineID;
     uint64_t     legacyID;
-    int          spawnedHealth;
-    int          killedHealth;
-    int          bossHealth;
-    int          bossDamage;
-    int          waveStartHealth;
+    int32_t          spawnedHealth;
+    int32_t          killedHealth;
+    int32_t          bossHealth;
+    int32_t          bossDamage;
+    int32_t          waveStartHealth;
 
-    int alive() const
+    int32_t alive() const
     {
         return spawnedHealth - killedHealth;
     }
-    int killed() const
+    int32_t killed() const
     {
         return killedHealth - waveStartHealth;
     }
@@ -62,7 +62,7 @@ struct hordeInfo_t
     {
         return waveTime != bossTime;
     }
-    int bossTic() const
+    int32_t bossTic() const
     {
         return ::level.time - bossTime;
     }
@@ -92,16 +92,16 @@ struct hordeInfo_t
     }
 };
 
-void        P_NextSpawnTime(int &min, int &max);
+void        P_NextSpawnTime(int32_t &min, int32_t &max);
 hordeInfo_t P_HordeInfo();
 void        P_SetHordeInfo(const hordeInfo_t &info);
 void        P_AddHealthPool(AActor *mo);
 void        P_RemoveHealthPool(AActor *mo);
-void        P_AddDamagePool(AActor *mo, const int damage);
+void        P_AddDamagePool(AActor *mo, const int32_t damage);
 void        P_QueueCorpseForDestroy(AActor *mo);
 
 void                            P_RunHordeTics();
-bool                            P_IsHordeThing(const int type);
+bool                            P_IsHordeThing(const int32_t type);
 const hordeDefine_t::weapons_t &P_HordeWeapons();
 const hordeDefine_t::ammos_t   &P_HordeAmmos();
 void                            P_SerializeHorde(FArchive &arc);

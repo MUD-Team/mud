@@ -140,7 +140,7 @@ static void IntQryBuildInformation(const uint32_t &EqProtocolVersion, const uint
         break;
 
         case CVARTYPE_INT: {
-            MSG_WriteLong(&ml_message, (int)atoi(Cvars[i].Value.c_str()));
+            MSG_WriteLong(&ml_message, (int32_t)atoi(Cvars[i].Value.c_str()));
         }
         break;
 
@@ -161,7 +161,7 @@ static void IntQryBuildInformation(const uint32_t &EqProtocolVersion, const uint
 
     MSG_WriteString(&ml_message, level.mapname.c_str());
 
-    int timeleft = (int)(sv_timelimit - level.time / (TICRATE * 60));
+    int32_t timeleft = (int32_t)(sv_timelimit - level.time / (TICRATE * 60));
 
     if (timeleft < 0)
         timeleft = 0;
@@ -180,10 +180,10 @@ static void IntQryBuildInformation(const uint32_t &EqProtocolVersion, const uint
     if (G_IsTeamGame())
     {
         // Team data
-        int teams = sv_teamsinplay.asInt();
+        int32_t teams = sv_teamsinplay.asInt();
         MSG_WriteByte(&ml_message, teams);
 
-        for (int i = 0; i < teams; i++)
+        for (int32_t i = 0; i < teams; i++)
         {
             TeamInfo *teamInfo = GetTeamInfo((team_t)i);
             MSG_WriteString(&ml_message, teamInfo->ColorString.c_str());
@@ -208,7 +208,7 @@ static void IntQryBuildInformation(const uint32_t &EqProtocolVersion, const uint
     {
         MSG_WriteString(&ml_message, it->userinfo.netname.c_str());
 
-        for (int i = 3; i >= 0; i--)
+        for (int32_t i = 3; i >= 0; i--)
             MSG_WriteByte(&ml_message, it->userinfo.color[i]);
 
         if (G_IsTeamGame())
@@ -216,7 +216,7 @@ static void IntQryBuildInformation(const uint32_t &EqProtocolVersion, const uint
 
         MSG_WriteShort(&ml_message, it->ping);
 
-        int timeingame = (time(NULL) - it->JoinTime) / 60;
+        int32_t timeingame = (time(NULL) - it->JoinTime) / 60;
 
         if (timeingame < 0)
             timeingame = 0;

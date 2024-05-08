@@ -119,7 +119,7 @@ void W_HashLumps(void)
 //
 void uppercopy(char *to, const char *from)
 {
-    int i;
+    int32_t i;
 
     for (i = 0; i < 8 && from[i]; i++)
         to[i] = toupper(from[i]);
@@ -137,7 +137,7 @@ OCRC32Sum W_CRC32(const std::string &filename)
 {
     OCRC32Sum rvo;
 
-    const int file_chunk_size = 8192;
+    const int32_t file_chunk_size = 8192;
     PHYSFS_File     *fp       = PHYSFS_openRead(filename.c_str());
 
     if (!fp)
@@ -167,7 +167,7 @@ OMD5Hash W_MD5(const std::string &filename)
 {
     OMD5Hash rvo;
 
-    const int file_chunk_size = 8192;
+    const int32_t file_chunk_size = 8192;
     PHYSFS_File     *fp       = PHYSFS_openRead(filename.c_str());
 
     if (!fp)
@@ -189,7 +189,7 @@ OMD5Hash W_MD5(const std::string &filename)
 
     std::stringstream hashStr;
 
-    for (int i = 0; i < 16; i++)
+    for (int32_t i = 0; i < 16; i++)
         hashStr << std::setw(2) << std::setfill('0') << std::hex << std::uppercase << (int16_t)digest[i];
 
     OMD5Hash::makeFromHexStr(rvo, hashStr.str());
@@ -312,7 +312,7 @@ void AddFile(const OResFile &file)
         }
 
         // convert from little-endian to target arch and capitalize lump name
-        for (int i = 0; i < header.numlumps; i++)
+        for (int32_t i = 0; i < header.numlumps; i++)
         {
             fileinfo[i].filepos = LELONG(fileinfo[i].filepos);
             fileinfo[i].size    = LELONG(fileinfo[i].size);
@@ -351,7 +351,7 @@ static bool IsMarker(const lumpinfo_t *lump, const char *marker)
 // Basically from BOOM, too, although I tried to write it independently.
 //
 
-void W_MergeLumps(const char *start, const char *end, int space)
+void W_MergeLumps(const char *start, const char *end, int32_t space)
 {
     char        ustart[8], uend[8];
     lumpinfo_t *newlumpinfos;
@@ -370,7 +370,7 @@ void W_MergeLumps(const char *start, const char *end, int space)
     flatHack = 0;
     if (!strcmp("F_START", ustart) && !Args.CheckParm("-noflathack"))
     {
-        int      fudge = 0;
+        int32_t      fudge = 0;
         uint32_t start = 0;
 
         for (i = 0; i < numlumps; i++)
@@ -558,7 +558,7 @@ lumpHandle_t W_LumpToHandle(const uint32_t lump)
 /**
  * @brief Return a lump for a given handle, or -1 if the handle is invalid.
  */
-int W_HandleToLump(const lumpHandle_t handle)
+int32_t W_HandleToLump(const lumpHandle_t handle)
 {
     size_t gen = handle.id & HANDLE_GEN_MASK;
     if (gen != ::handleGen)
@@ -590,13 +590,13 @@ int W_HandleToLump(const lumpHandle_t handle)
 //
 // [SL] taken from prboom-plus
 //
-int W_CheckNumForName(const char *name, int namespc)
+int32_t W_CheckNumForName(const char *name, int32_t namespc)
 {
     // Hash function maps the name to one of possibly numlump chains.
     // It has been tuned so that the average chain length never exceeds 2.
 
     // proff 2001/09/07 - check numlumps==0, this happens when called before WAD loaded
-    int i = (numlumps == 0) ? (-1) : (lumpinfo[W_LumpNameHash(name) % numlumps].index);
+    int32_t i = (numlumps == 0) ? (-1) : (lumpinfo[W_LumpNameHash(name) % numlumps].index);
 
     // We search along the chain until end, looking for case-insensitive
     // matches which also match a namespace tag. Separate hash tables are
@@ -615,9 +615,9 @@ int W_CheckNumForName(const char *name, int namespc)
 // W_GetNumForName
 // Calls W_CheckNumForName, but bombs out if not found.
 //
-int W_GetNumForName(const char *name, int namespc)
+int32_t W_GetNumForName(const char *name, int32_t namespc)
 {
-    int i = W_CheckNumForName(name, namespc);
+    int32_t i = W_CheckNumForName(name, namespc);
 
     if (i == -1)
     {
@@ -660,7 +660,7 @@ uint32_t W_LumpLength(uint32_t lump)
 //
 void W_ReadLump(uint32_t lump, void *dest)
 {
-    int         c;
+    int32_t         c;
     lumpinfo_t *l;
 
     if (lump >= numlumps)
@@ -828,7 +828,7 @@ patch_t *W_CachePatch(const char *name, const zoneTag_e tag)
 /**
  * @brief Cache a patch by lump number and return a handle to it.
  */
-lumpHandle_t W_CachePatchHandle(const int lumpNum, const zoneTag_e tag)
+lumpHandle_t W_CachePatchHandle(const int32_t lumpNum, const zoneTag_e tag)
 {
     W_CachePatch(lumpNum, tag);
     return W_LumpToHandle(lumpNum);
@@ -837,7 +837,7 @@ lumpHandle_t W_CachePatchHandle(const int lumpNum, const zoneTag_e tag)
 /**
  * @brief Cache a patch by name and namespace and return a handle to it.
  */
-lumpHandle_t W_CachePatchHandle(const char *name, const zoneTag_e tag, const int ns)
+lumpHandle_t W_CachePatchHandle(const char *name, const zoneTag_e tag, const int32_t ns)
 {
     return W_CachePatchHandle(W_GetNumForName(name, ns), tag);
 }
@@ -848,7 +848,7 @@ lumpHandle_t W_CachePatchHandle(const char *name, const zoneTag_e tag, const int
  */
 patch_t *W_ResolvePatchHandle(const lumpHandle_t lump)
 {
-    int lumpnum = W_HandleToLump(lump);
+    int32_t lumpnum = W_HandleToLump(lump);
     if (lumpnum == -1)
     {
         static patch_t empty;
@@ -868,12 +868,12 @@ patch_t *W_ResolvePatchHandle(const lumpHandle_t lump)
 // ordering, returning older lumps with a matching name first.
 // Initialize search with lastlump == -1 before calling for the first time.
 //
-int W_FindLump(const char *name, int lastlump)
+int32_t W_FindLump(const char *name, int32_t lastlump)
 {
     if (lastlump < -1)
         lastlump = -1;
 
-    for (int i = lastlump + 1; i < (int)numlumps; i++)
+    for (int32_t i = lastlump + 1; i < (int32_t)numlumps; i++)
     {
         if (strnicmp(lumpinfo[i].name, name, 8) == 0)
             return i;
