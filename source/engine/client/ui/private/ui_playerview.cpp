@@ -9,7 +9,7 @@
 #include "r_main.h"
 #include "ui_render.h"
 
-int                  ElementPlayerView::mResolution = 1;
+int32_t                  ElementPlayerView::mResolution = 1;
 Rml::DataModelHandle ElementPlayerView::mPlayerViewHandle;
 
 ElementPlayerView::ElementPlayerView(const Rml::String &tag) : Rml::Element(tag)
@@ -32,7 +32,7 @@ void ElementPlayerView::InitializeContext(Rml::Context *context)
 
     constructor.BindFunc(
         "resolution", [](Rml::Variant &variant) { variant = mResolution; },
-        [](const Rml::Variant &variant) { mResolution = variant.Get<int>(); });
+        [](const Rml::Variant &variant) { mResolution = variant.Get<int32_t>(); });
 
     mPlayerViewHandle = constructor.GetModelHandle();
 }

@@ -40,19 +40,19 @@ class ClientReplay
     static ClientReplay &getInstance(); // returns the instantiated ClientReplay object
     void                 reset();       // called when starting/resetting a level
     static bool          enabled();
-    void                 recordReplayItem(const int tic, const uint32_t netId);
-    void                 removeReplayItem(const std::pair<int, uint32_t> replayItem);
+    void                 recordReplayItem(const int32_t tic, const uint32_t netId);
+    void                 removeReplayItem(const std::pair<int32_t, uint32_t> replayItem);
     void                 itemReplay();
     bool                 wasReplayed();
 
   private:
-    std::vector<std::pair<int, uint32_t>>
+    std::vector<std::pair<int32_t, uint32_t>>
                           itemReplayStack; // Used to replay item pickups for items the clients can't find.
     static const uint32_t MAX_REPLAY_TIC_LENGTH = TICRATE * 3; // Should be plenty of time.
     bool                  replayed              = false;
     uint32_t              replayDoneCounter     = TICRATE * 7;
     uint32_t              firstReadyTic         = 0;
-    // <int, uint32_t> = <gametic, itemid>
+    // <int32_t, uint32_t> = <gametic, itemid>
     ClientReplay()
     {
     }                                      // private contsructor (part of Singleton)

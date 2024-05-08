@@ -53,11 +53,6 @@
 #define NORETURN __attribute__((noreturn))
 #endif
 
-// [RH] Some windows includes already define this
-#if !defined(_WINDEF_) && !defined(__wtypes_h__)
-typedef int BOOL;
-#endif
-
 #if defined(_MSC_VER) || defined(__WATCOMC__)
 #define STACK_ARGS __cdecl
 #else
@@ -105,12 +100,12 @@ static inline uint32_t BIT_MASK(uint32_t a, uint32_t b)
 }
 
 // [RH] This gets used all over; define it here:
-FORMAT_PRINTF(1, 2) int STACK_ARGS Printf(const char *format, ...);
-FORMAT_PRINTF(2, 3) int STACK_ARGS Printf(int printlevel, const char *format, ...);
+FORMAT_PRINTF(1, 2) int32_t STACK_ARGS Printf(const char *format, ...);
+FORMAT_PRINTF(2, 3) int32_t STACK_ARGS Printf(int32_t printlevel, const char *format, ...);
 // [Russell] Prints a bold green message to the console
-FORMAT_PRINTF(1, 2) int STACK_ARGS Printf_Bold(const char *format, ...);
+FORMAT_PRINTF(1, 2) int32_t STACK_ARGS Printf_Bold(const char *format, ...);
 // [RH] Same here:
-FORMAT_PRINTF(1, 2) int STACK_ARGS DPrintf(const char *format, ...);
+FORMAT_PRINTF(1, 2) int32_t STACK_ARGS DPrintf(const char *format, ...);
 
 /**
  * @brief Print to all clients in a server, or to the local player offline.
@@ -131,10 +126,10 @@ void STACK_ARGS SV_BroadcastPrintf(const char *format, ...) FORMAT_PRINTF(1, 2);
  * @param format printf-style format string.
  * @param ... printf-style arguments.
  */
-void STACK_ARGS SV_BroadcastPrintf(int printlevel, const char *format, ...) FORMAT_PRINTF(2, 3);
+void STACK_ARGS SV_BroadcastPrintf(int32_t printlevel, const char *format, ...) FORMAT_PRINTF(2, 3);
 
 #ifdef SERVER_APP
-void STACK_ARGS SV_BroadcastPrintfButPlayer(int printlevel, int player_id, const char *format, ...);
+void STACK_ARGS SV_BroadcastPrintfButPlayer(int32_t printlevel, int32_t player_id, const char *format, ...);
 #endif
 
 // game print flags
@@ -487,16 +482,16 @@ class fahsv_t
 class translationref_t
 {
     const palindex_t *m_table;
-    int               m_player_id;
+    int32_t               m_player_id;
 
   public:
     translationref_t();
     translationref_t(const translationref_t &other);
     translationref_t(const palindex_t *table);
-    translationref_t(const palindex_t *table, const int player_id);
+    translationref_t(const palindex_t *table, const int32_t player_id);
 
     palindex_t        tlate(const uint8_t c) const;
-    int               getPlayerID() const;
+    int32_t               getPlayerID() const;
     const palindex_t *getTable() const;
 
     operator bool() const;
@@ -511,7 +506,7 @@ forceinline palindex_t translationref_t::tlate(const uint8_t c) const
     return m_table[c];
 }
 
-forceinline int translationref_t::getPlayerID() const
+forceinline int32_t translationref_t::getPlayerID() const
 {
     return m_player_id;
 }
@@ -543,7 +538,7 @@ struct shaderef_t
 {
   private:
     const shademap_t *m_colors;                 // The color/shade map to use
-    int               m_mapnum;                 // Which index into the color/shade map to use
+    int32_t               m_mapnum;                 // Which index into the color/shade map to use
 
   public:
     mutable const palindex_t    *m_colormap;    // Computed colormap pointer
@@ -553,17 +548,17 @@ struct shaderef_t
   public:
     shaderef_t();
     shaderef_t(const shaderef_t &other);
-    shaderef_t(const shademap_t *const colors, const int mapnum);
+    shaderef_t(const shademap_t *const colors, const int32_t mapnum);
 
     // Determines if m_colors is NULL
     bool isValid() const;
 
-    shaderef_t with(const int mapnum) const;
+    shaderef_t with(const int32_t mapnum) const;
 
     palindex_t        index(const uint8_t c) const;
     argb_t            shade(const uint8_t c) const;
     const shademap_t *map() const;
-    int               mapnum() const;
+    int32_t               mapnum() const;
     uint8_t              ramp() const;
 
     argb_t tlate(const translationref_t &translation, const uint8_t c) const;
@@ -576,7 +571,7 @@ forceinline bool shaderef_t::isValid() const
     return m_colors != NULL;
 }
 
-forceinline shaderef_t shaderef_t::with(const int mapnum) const
+forceinline shaderef_t shaderef_t::with(const int32_t mapnum) const
 {
     return shaderef_t(m_colors, m_mapnum + mapnum);
 }
@@ -610,7 +605,7 @@ forceinline const shademap_t *shaderef_t::map() const
     return m_colors;
 }
 
-forceinline int shaderef_t::mapnum() const
+forceinline int32_t shaderef_t::mapnum() const
 {
     return m_mapnum;
 }
@@ -635,7 +630,7 @@ static forceinline pixel_t rt_tlatecolor(const shaderef_t &pal, const translatio
 
 // rt_blend2 does alpha blending between two colors.
 template <typename pixel_t>
-static forceinline pixel_t rt_blend2(const pixel_t bg, const int bga, const pixel_t fg, const int fga);
+static forceinline pixel_t rt_blend2(const pixel_t bg, const int32_t bga, const pixel_t fg, const int32_t fga);
 
 template <> forceinline palindex_t rt_rawcolor<palindex_t>(const shaderef_t &pal, const uint8_t c)
 {

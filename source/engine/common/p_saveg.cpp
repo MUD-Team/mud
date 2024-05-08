@@ -38,11 +38,11 @@ void P_SerializePlayers(FArchive &arc)
     if (arc.IsStoring())
     {
         for (Players::const_iterator it = players.begin(); it != players.end(); ++it)
-            arc << (int)(it->playerstate);
+            arc << (int32_t)(it->playerstate);
     }
     else
     {
-        int playerstate = (playerstate_t)0;
+        int32_t playerstate = (playerstate_t)0;
         for (Players::iterator it = players.begin(); it != players.end(); ++it)
         {
             arc >> playerstate;
@@ -62,7 +62,7 @@ void P_SerializePlayers(FArchive &arc)
 //
 void P_SerializeWorld(FArchive &arc)
 {
-    int       i, j;
+    int32_t       i, j;
     sector_t *sec;
     line_t   *li;
 
@@ -209,12 +209,12 @@ void P_SerializeSounds(FArchive &arc)
 
 void P_SerializePolyobjs(FArchive &arc)
 {
-    int        i;
+    int32_t        i;
     polyobj_t *po;
 
     if (arc.IsStoring())
     {
-        arc << (int)ASEG_POLYOBJS << po_NumPolyobjs;
+        arc << (int32_t)ASEG_POLYOBJS << po_NumPolyobjs;
         for (i = 0, po = polyobjs; i < po_NumPolyobjs; i++, po++)
         {
             arc << po->tag << po->angle << po->startSpot[0] << po->startSpot[1] << po->startSpot[2];
@@ -222,7 +222,7 @@ void P_SerializePolyobjs(FArchive &arc)
     }
     else
     {
-        int     data;
+        int32_t     data;
         angle_t angle;
         fixed_t deltaX, deltaY, deltaZ;
 

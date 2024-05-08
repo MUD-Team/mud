@@ -34,7 +34,7 @@
 #include "v_palette.h"
 #include "v_textcolors.h"
 
-static const int MAX_LINE_LENGTH = 8192;
+static const int32_t MAX_LINE_LENGTH = 8192;
 
 struct History
 {
@@ -86,11 +86,11 @@ char *TimeStamp()
 /* Provide our own Printf() that is sensitive of the
  * console status (in or out of game)
  */
-extern int PrintString(int printlevel, const char *outline);
+extern int32_t PrintString(int32_t printlevel, const char *outline);
 
 extern bool gameisdead;
 
-int VPrintf(int printlevel, const char *format, va_list parms)
+int32_t VPrintf(int32_t printlevel, const char *format, va_list parms)
 {
     char outline[MAX_LINE_LENGTH];
 
@@ -127,10 +127,10 @@ int VPrintf(int printlevel, const char *format, va_list parms)
     return PrintString(printlevel, str.c_str());
 }
 
-FORMAT_PRINTF(1, 2) int STACK_ARGS Printf(const char *format, ...)
+FORMAT_PRINTF(1, 2) int32_t STACK_ARGS Printf(const char *format, ...)
 {
     va_list argptr;
-    int     count;
+    int32_t     count;
 
     va_start(argptr, format);
     count = VPrintf(PRINT_HIGH, format, argptr);
@@ -139,10 +139,10 @@ FORMAT_PRINTF(1, 2) int STACK_ARGS Printf(const char *format, ...)
     return count;
 }
 
-FORMAT_PRINTF(2, 3) int STACK_ARGS Printf(int printlevel, const char *format, ...)
+FORMAT_PRINTF(2, 3) int32_t STACK_ARGS Printf(int32_t printlevel, const char *format, ...)
 {
     va_list argptr;
-    int     count;
+    int32_t     count;
 
     va_start(argptr, format);
     count = VPrintf(printlevel, format, argptr);
@@ -151,10 +151,10 @@ FORMAT_PRINTF(2, 3) int STACK_ARGS Printf(int printlevel, const char *format, ..
     return count;
 }
 
-FORMAT_PRINTF(1, 2) int STACK_ARGS Printf_Bold(const char *format, ...)
+FORMAT_PRINTF(1, 2) int32_t STACK_ARGS Printf_Bold(const char *format, ...)
 {
     va_list argptr;
-    int     count;
+    int32_t     count;
 
     printxormask = 0x80;
     va_start(argptr, format);
@@ -164,10 +164,10 @@ FORMAT_PRINTF(1, 2) int STACK_ARGS Printf_Bold(const char *format, ...)
     return count;
 }
 
-FORMAT_PRINTF(1, 2) int STACK_ARGS DPrintf(const char *format, ...)
+FORMAT_PRINTF(1, 2) int32_t STACK_ARGS DPrintf(const char *format, ...)
 {
     va_list argptr;
-    int     count;
+    int32_t     count;
 
     if (developer || devparm)
     {
@@ -204,7 +204,7 @@ BEGIN_COMMAND(echo)
 }
 END_COMMAND(echo)
 
-void C_MidPrint(const char *msg, player_t *p, int msgtime)
+void C_MidPrint(const char *msg, player_t *p, int32_t msgtime)
 {
     if (p == NULL)
         return;

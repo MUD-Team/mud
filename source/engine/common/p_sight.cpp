@@ -42,8 +42,8 @@ divline_t strace;    // from t1 to t2
 fixed_t   t2x;
 fixed_t   t2y;
 
-int sightcounts[2];
-int sightcounts2[3];
+int32_t sightcounts[2];
+int32_t sightcounts2[3];
 
 /*
 ==============
@@ -104,17 +104,17 @@ bool PTR_SightTraverse(intercept_t *in)
 ===================
 */
 
-bool P_SightBlockLinesIterator(int x, int y)
+bool P_SightBlockLinesIterator(int32_t x, int32_t y)
 {
-    int       offset;
-    int      *list;
+    int32_t       offset;
+    int32_t      *list;
     line_t   *ld;
-    int       s1, s2;
+    int32_t       s1, s2;
     divline_t dl;
 
     polyblock_t         *polyLink;
     seg_t              **segList;
-    int                  i;
+    int32_t                  i;
     extern polyblock_t **PolyBlockMap;
 
     offset = y * bmapwidth + x;
@@ -260,8 +260,8 @@ bool P_SightPathTraverse(fixed_t x1, fixed_t y1, fixed_t x2, fixed_t y2)
     fixed_t xstep, ystep;
     fixed_t partial;
     fixed_t xintercept, yintercept;
-    int     mapx, mapy, mapxstep, mapystep;
-    int     count;
+    int32_t     mapx, mapy, mapxstep, mapystep;
+    int32_t     count;
 
     validcount++;
     intercepts.Clear();
@@ -390,7 +390,7 @@ bool P_CheckSightZDoom(const AActor *t1, const AActor *t2)
 
     const sector_t *s1   = t1->subsector->sector;
     const sector_t *s2   = t2->subsector->sector;
-    int             pnum = (s1 - sectors) * numsectors + (s2 - sectors);
+    int32_t             pnum = (s1 - sectors) * numsectors + (s2 - sectors);
 
     //
     // check for trivial rejection
@@ -446,7 +446,7 @@ bool P_CheckSightEdgesZDoom(const AActor *t1, const AActor *t2, float radius_boo
 {
     const sector_t *s1   = t1->subsector->sector;
     const sector_t *s2   = t2->subsector->sector;
-    int             pnum = (s1 - sectors) * numsectors + (s2 - sectors);
+    int32_t             pnum = (s1 - sectors) * numsectors + (s2 - sectors);
 
     //
     // check for trivial rejection
@@ -507,7 +507,7 @@ bool P_CheckSightEdgesZDoom(const AActor *t1, const AActor *t2, float radius_boo
 // P_DivlineSide
 // Returns side 0 (front), 1 (back), or 2 (on).
 //
-int P_DivlineSide(fixed_t x, fixed_t y, divline_t *node)
+int32_t P_DivlineSide(fixed_t x, fixed_t y, divline_t *node)
 {
     fixed_t dx;
     fixed_t dy;
@@ -579,13 +579,13 @@ fixed_t P_InterceptVector2(divline_t *v2, divline_t *v1)
 // Returns true
 //  if strace crosses the given subsector successfully.
 //
-bool P_CrossSubsector(int num)
+bool P_CrossSubsector(int32_t num)
 {
     seg_t       *seg;
     line_t      *line;
-    int          s1;
-    int          s2;
-    int          count;
+    int32_t          s1;
+    int32_t          s2;
+    int32_t          count;
     subsector_t *sub;
     sector_t    *front;
     sector_t    *back;
@@ -704,10 +704,10 @@ bool P_CrossSubsector(int num)
 // Returns true
 //  if strace crosses the given node successfully.
 //
-bool P_CrossBSPNode(int bspnum)
+bool P_CrossBSPNode(int32_t bspnum)
 {
     node_t *bsp;
-    int     side;
+    int32_t     side;
 
     if (bspnum & NF_SUBSECTOR)
     {
@@ -747,11 +747,11 @@ bool P_CrossBSPNode(int bspnum)
 //
 bool P_CheckSightDoom(const AActor *t1, const AActor *t2)
 {
-    int s1;
-    int s2;
-    int pnum;
-    int bytenum;
-    int bitnum;
+    int32_t s1;
+    int32_t s2;
+    int32_t pnum;
+    int32_t bytenum;
+    int32_t bitnum;
 
     if (!t1 || !t2 || !t1->subsector || !t2->subsector)
         return false;
@@ -804,11 +804,11 @@ bool P_CheckSightDoom(const AActor *t1, const AActor *t2)
 static bool P_CheckSightDoom(fixed_t x1, fixed_t y1, fixed_t z1, fixed_t h1, fixed_t x2, fixed_t y2, fixed_t z2,
                              fixed_t h2)
 {
-    int s1;
-    int s2;
-    int pnum;
-    int bytenum;
-    int bitnum;
+    int32_t s1;
+    int32_t s2;
+    int32_t pnum;
+    int32_t bytenum;
+    int32_t bitnum;
 
     // First check for trivial rejection.
 

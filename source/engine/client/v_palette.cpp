@@ -875,7 +875,7 @@ EXTERN_CVAR(sv_allowredscreen)
 
 dyncolormap_t NormalLight;
 
-static int current_palette_num;
+static int32_t current_palette_num;
 
 translationref_t::translationref_t() : m_table(NULL), m_player_id(-1)
 {
@@ -890,7 +890,7 @@ translationref_t::translationref_t(const uint8_t *table) : m_table(table), m_pla
 {
 }
 
-translationref_t::translationref_t(const uint8_t *table, const int player_id) : m_table(table), m_player_id(player_id)
+translationref_t::translationref_t(const uint8_t *table, const int32_t player_id) : m_table(table), m_player_id(player_id)
 {
 }
 
@@ -904,7 +904,7 @@ shaderef_t::shaderef_t(const shaderef_t &other)
 {
 }
 
-shaderef_t::shaderef_t(const shademap_t *const colors, const int mapnum) : m_colors(colors), m_mapnum(mapnum)
+shaderef_t::shaderef_t(const shademap_t *const colors, const int32_t mapnum) : m_colors(colors), m_mapnum(mapnum)
 {
 #if ODAMEX_DEBUG
     // NOTE(jsd): Arbitrary value picked here because we don't record the max number of colormaps for dynamic ones... or
@@ -1023,7 +1023,7 @@ class DoomGammaStrategy : public GammaStrategy
         const double basefac = pow(2.0, (double)level) * (255.0 / 256.0);
         const double exp     = 1.0 - 0.125 * level;
 
-        for (int i = 0; i < 256; i++)
+        for (int32_t i = 0; i < 256; i++)
             table[i] = (uint8_t)(0.5 + basefac * pow(double(i) + 1.0, exp));
     }
 };
@@ -1058,7 +1058,7 @@ class ZDoomGammaStrategy : public GammaStrategy
 
         double invgamma = 1.0 / level;
 
-        for (int i = 0; i < 256; i++)
+        for (int32_t i = 0; i < 256; i++)
             table[i] = (uint8_t)(255.0 * pow(double(i) / 255.0, invgamma));
     }
 };
@@ -1091,7 +1091,7 @@ static void V_GammaAdjustPalette(palette_t *palette)
     const argb_t *from = palette->basecolors;
     argb_t       *to   = palette->colors;
 
-    for (int i = 0; i < 256; i++)
+    for (int32_t i = 0; i < 256; i++)
         *to++ = V_GammaCorrect(*from++);
 }
 
@@ -1104,8 +1104,8 @@ static void V_GammaAdjustPalette(palette_t *palette)
 static void V_UpdateGammaLevel(float level)
 {
     static float lastgammalevel = 0.0f;
-    static int   lasttype       = -1; // ensure this gets set up the first time
-    int          type           = vid_gammatype;
+    static int32_t   lasttype       = -1; // ensure this gets set up the first time
+    int32_t          type           = vid_gammatype;
 
     if (lastgammalevel != level || lasttype != type)
     {
@@ -1183,19 +1183,19 @@ void V_RestoreScreenPalette()
 // (borrowed from Quake2 source: utils3/qdata/images.c)
 // [SL] Also nearly identical to BestColor in dcolors.c in Doom utilites
 //
-palindex_t V_BestColor(const argb_t *palette_colors, int r, int g, int b)
+palindex_t V_BestColor(const argb_t *palette_colors, int32_t r, int32_t g, int32_t b)
 {
-    int bestdistortion = INT32_MAX;
-    int bestcolor      = 0; /// let any color go to 0 as a last resort
+    int32_t bestdistortion = INT32_MAX;
+    int32_t bestcolor      = 0; /// let any color go to 0 as a last resort
 
-    for (int i = 0; i < 256; i++)
+    for (int32_t i = 0; i < 256; i++)
     {
         argb_t color(palette_colors[i]);
 
-        int dr         = r - color.getr();
-        int dg         = g - color.getg();
-        int db         = b - color.getb();
-        int distortion = dr * dr + dg * dg + db * db;
+        int32_t dr         = r - color.getr();
+        int32_t dg         = g - color.getg();
+        int32_t db         = b - color.getb();
+        int32_t distortion = dr * dr + dg * dg + db * db;
         if (distortion < bestdistortion)
         {
             if (distortion == 0)
@@ -1223,22 +1223,22 @@ palindex_t V_BestColor(const argb_t *palette_colors, argb_t color)
 //
 void V_ClosestColors(const argb_t *palette_colors, palindex_t &color1, palindex_t &color2)
 {
-    int bestdistortion = INT32_MAX;
+    int32_t bestdistortion = INT32_MAX;
 
     color1 = color2 = 0; // go to color 0 as a last resort
 
-    for (int x = 0; x < 256; x++)
+    for (int32_t x = 0; x < 256; x++)
     {
-        for (int y = 0; y < 256 - x; y++)
+        for (int32_t y = 0; y < 256 - x; y++)
         {
             // don't compare a color with itself
             if (x == y)
                 continue;
 
-            int dr         = (int)palette_colors[y].getr() - (int)palette_colors[x].getr();
-            int dg         = (int)palette_colors[y].getg() - (int)palette_colors[x].getg();
-            int db         = (int)palette_colors[y].getb() - (int)palette_colors[x].getb();
-            int distortion = dr * dr + dg * dg + db * db;
+            int32_t dr         = (int32_t)palette_colors[y].getr() - (int32_t)palette_colors[x].getr();
+            int32_t dg         = (int32_t)palette_colors[y].getg() - (int32_t)palette_colors[x].getg();
+            int32_t db         = (int32_t)palette_colors[y].getb() - (int32_t)palette_colors[x].getb();
+            int32_t distortion = dr * dr + dg * dg + db * db;
             if (distortion < bestdistortion)
             {
                 color1 = x, color2 = y;
@@ -1260,7 +1260,7 @@ void V_ClosestColors(const argb_t *palette_colors, palindex_t &color1, palindex_
 static std::string V_GetColorStringByName(const std::string &name)
 {
     char *rgbNames, *data, descr[5 * 3];
-    int   c[3], step;
+    int32_t   c[3], step;
 
     rgbNames = (char *)x11r6rgb;
 
@@ -1312,7 +1312,7 @@ argb_t V_GetColorFromString(const std::string &input_string)
     // if not a valid color name, try to parse the color channel values
     const char *str = color_name_string.empty() == false ? color_name_string.c_str() : input_string.c_str();
 
-    int         c[3], i, p;
+    int32_t         c[3], i, p;
     char        val[5];
     const char *s, *g;
 
@@ -1390,7 +1390,7 @@ void V_InitPalette(const char *filename)
     default_palette.maps.colormap = new palindex_t[(NUMCOLORMAPS + 1) * 256];
     default_palette.maps.shademap = new argb_t[(NUMCOLORMAPS + 1) * 256];
 
-    for (int i = 0; i < 256; i++)
+    for (int32_t i = 0; i < 256; i++)
         default_palette.basecolors[i] = argb_t(255, data[i * 3 + 0], data[i * 3 + 1], data[i * 3 + 2]);
 
     delete[] data;
@@ -1421,20 +1421,20 @@ static void V_DoBlending(argb_t *dest, const argb_t *source, argb_t color)
     }
     else
     {
-        for (int i = 0; i < 256; i++, source++, dest++)
+        for (int32_t i = 0; i < 256; i++, source++, dest++)
         {
-            int fromr = source->getr();
-            int fromg = source->getg();
-            int fromb = source->getb();
+            int32_t fromr = source->getr();
+            int32_t fromg = source->getg();
+            int32_t fromb = source->getb();
 
-            int toa = color.geta();
-            int tor = color.getr();
-            int tog = color.getg();
-            int tob = color.getb();
+            int32_t toa = color.geta();
+            int32_t tor = color.getr();
+            int32_t tog = color.getg();
+            int32_t tob = color.getb();
 
-            int dr = tor - fromr;
-            int dg = tog - fromg;
-            int db = tob - fromb;
+            int32_t dr = tor - fromr;
+            int32_t dg = tog - fromg;
+            int32_t db = tob - fromb;
 
             argb_t newcolor(source->geta(), fromr + ((dr * toa) >> 8), fromg + ((dg * toa) >> 8),
                             fromb + ((db * toa) >> 8));
@@ -1457,11 +1457,11 @@ static const float lightScale(float a)
 
 void BuildLightRamp(shademap_t &maps)
 {
-    int l;
+    int32_t l;
     // Build light ramp:
     for (l = 0; l < 256; ++l)
     {
-        int a        = (int)(255 * lightScale(l / 255.0f));
+        int32_t a        = (int32_t)(255 * lightScale(l / 255.0f));
         maps.ramp[l] = a;
     }
 }
@@ -1479,9 +1479,9 @@ void BuildDefaultColorAndShademap(const palette_t *pal, shademap_t &maps)
     palindex_t *colormap = maps.colormap;
     argb_t     *shademap = maps.shademap;
 
-    for (int i = 0; i < NUMCOLORMAPS; i++, colormap += 256, shademap += 256)
+    for (int32_t i = 0; i < NUMCOLORMAPS; i++, colormap += 256, shademap += 256)
     {
-        for (int c = 0; c < 256; c++)
+        for (int32_t c = 0; c < 256; c++)
         {
             uint32_t r =
                 (palette[c].getr() * (NUMCOLORMAPS - i) + fadecolor.getr() * i + NUMCOLORMAPS / 2) / NUMCOLORMAPS;
@@ -1497,9 +1497,9 @@ void BuildDefaultColorAndShademap(const palette_t *pal, shademap_t &maps)
     }
 
     // build special maps (e.g. invulnerability)
-    for (int c = 0; c < 256; c++)
+    for (int32_t c = 0; c < 256; c++)
     {
-        int grayint = (int)(255.0f * clamp(1.0f - (palette[c].getr() * 0.00116796875f +
+        int32_t grayint = (int32_t)(255.0f * clamp(1.0f - (palette[c].getr() * 0.00116796875f +
                                                    palette[c].getg() * 0.00229296875f + palette[c].getb() * 0.0005625f),
                                            0.0f, 1.0f));
 
@@ -1521,9 +1521,9 @@ void BuildDefaultShademap(const palette_t *pal, shademap_t &maps)
 
     argb_t *shademap = maps.shademap;
 
-    for (int i = 0; i < NUMCOLORMAPS; i++, shademap += 256)
+    for (int32_t i = 0; i < NUMCOLORMAPS; i++, shademap += 256)
     {
-        for (int c = 0; c < 256; c++)
+        for (int32_t c = 0; c < 256; c++)
         {
             uint32_t r =
                 (palette[c].getr() * (NUMCOLORMAPS - i) + fadecolor.getr() * i + NUMCOLORMAPS / 2) / NUMCOLORMAPS;
@@ -1538,9 +1538,9 @@ void BuildDefaultShademap(const palette_t *pal, shademap_t &maps)
     }
 
     // build special maps (e.g. invulnerability)
-    for (int c = 0; c < 256; c++)
+    for (int32_t c = 0; c < 256; c++)
     {
-        int grayint = (int)(255.0f * clamp(1.0f - (palette[c].getr() * 0.00116796875f +
+        int32_t grayint = (int32_t)(255.0f * clamp(1.0f - (palette[c].getr() * 0.00116796875f +
                                                    palette[c].getg() * 0.00229296875f + palette[c].getb() * 0.0005625f),
                                            0.0f, 1.0f));
 
@@ -1627,7 +1627,7 @@ BEGIN_COMMAND(testblend)
     {
         argb_t color(V_GetColorFromString(argv[1]));
 
-        int alpha = 255.0 * clamp((float)atof(argv[2]), 0.0f, 1.0f);
+        int32_t alpha = 255.0 * clamp((float)atof(argv[2]), 0.0f, 1.0f);
         R_SetSectorBlend(argb_t(alpha, color.getr(), color.getg(), color.getb()));
     }
 }
@@ -1712,7 +1712,7 @@ fargb_t V_HSVtoRGB(const fahsv_t &color)
     float q = v * (1.0f - s * f);
     float t = v * (1.0f - s * (1.0f - f));
 
-    int sector = int(h / 60.0f);
+    int32_t sector = int32_t(h / 60.0f);
     switch (sector)
     {
     case 0:
@@ -1735,8 +1735,8 @@ fargb_t V_HSVtoRGB(const fahsv_t &color)
 /****** Colored Lighting Stuffs (Sorry, 8-bit only) ******/
 
 // Builds NUMCOLORMAPS colormaps lit with the specified color
-static void BuildColoredLights(shademap_t *maps, const int lr, const int lg, const int lb, const int fr, const int fg,
-                               const int fb)
+static void BuildColoredLights(shademap_t *maps, const int32_t lr, const int32_t lg, const int32_t lb, const int32_t fr, const int32_t fg,
+                               const int32_t fb)
 {
     // The default palette is assumed to contain the maps for white light.
     if (!maps)
@@ -1765,7 +1765,7 @@ static void BuildColoredLights(shademap_t *maps, const int lr, const int lg, con
     }
 }
 
-dyncolormap_t *GetSpecialLights(int lr, int lg, int lb, int fr, int fg, int fb)
+dyncolormap_t *GetSpecialLights(int32_t lr, int32_t lg, int32_t lb, int32_t fr, int32_t fg, int32_t fb)
 {
     argb_t         color(255, lr, lg, lb);
     argb_t         fade(255, fr, fg, fb);

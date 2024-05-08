@@ -86,7 +86,7 @@ extern bool step_mode;
 // denis - Every actor has a random number generator so they can be sync'ed
 // across the network without knowledge of other actors
 //
-int P_Random(AActor *actor)
+int32_t P_Random(AActor *actor)
 {
     if (!actor || step_mode)
         return P_Random();
@@ -94,28 +94,28 @@ int P_Random(AActor *actor)
     return (rndtable[++actor->rndindex]);
 }
 
-int P_RandomDiff(AActor *actor)
+int32_t P_RandomDiff(AActor *actor)
 {
-    int a = P_Random(actor);
-    int b = P_Random(actor);
+    int32_t a = P_Random(actor);
+    int32_t b = P_Random(actor);
 
     return a - b;
 }
 
-int P_Random()
+int32_t P_Random()
 {
     return (rndtable[++prndindex]);
 }
 
-int P_RandomDiff()
+int32_t P_RandomDiff()
 {
-    int a = P_Random();
-    int b = P_Random();
+    int32_t a = P_Random();
+    int32_t b = P_Random();
 
     return a - b;
 }
 
-int M_Random()
+int32_t M_Random()
 {
     return (rndtable[++rndindex]);
 }
@@ -266,20 +266,20 @@ void P_SerializeRNGState(FArchive &arc)
 
 //
 // P_RandomHitscanAngle
-// Outputs a random angle between (-spread, spread), as an int ('cause it can be
+// Outputs a random angle between (-spread, spread), as an int32_t ('cause it can be
 // negative).
 //   spread: Maximum angle (degrees, in fixed point -- not BAM!)
 //
-int P_RandomHitscanAngle(fixed_t spread)
+int32_t P_RandomHitscanAngle(fixed_t spread)
 {
-    int      t;
+    int32_t      t;
     uint64_t spread_bam;
 
     // FixedToAngle doesn't work for negative numbers,
     // so for convenience take just the absolute value.
     spread_bam = (spread < 0 ? FixedToAngle(-spread) : FixedToAngle(spread));
     t          = P_Random();
-    return (int)((spread_bam * (t - P_Random())) / 255);
+    return (int32_t)((spread_bam * (t - P_Random())) / 255);
 }
 
 //
@@ -287,9 +287,9 @@ int P_RandomHitscanAngle(fixed_t spread)
 // Outputs a random angle between (-spread, spread), converted to values used for slope
 //   spread: Maximum vertical angle (degrees, in fixed point -- not BAM!)
 //
-int P_RandomHitscanSlope(fixed_t spread)
+int32_t P_RandomHitscanSlope(fixed_t spread)
 {
-    int angle;
+    int32_t angle;
 
     angle = P_RandomHitscanAngle(spread);
 

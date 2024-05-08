@@ -156,7 +156,7 @@ TeamsView TeamQuery::execute()
         if (m_sortFilter == SFILTER_MAX || m_sortFilter == SFILTER_NOT_MAX)
         {
             // Since it's sorted, we know the top scoring team is at the front.
-            int top = results.at(0)->LivesPool();
+            int32_t top = results.at(0)->LivesPool();
             for (TeamsView::iterator it = results.begin(); it != results.end();)
             {
                 bool cmp = (m_sortFilter == SFILTER_MAX) ? (*it)->LivesPool() != top : (*it)->LivesPool() == top;
@@ -176,7 +176,7 @@ TeamsView TeamQuery::execute()
         if (m_sortFilter == SFILTER_MAX || m_sortFilter == SFILTER_NOT_MAX)
         {
             // Since it's sorted, we know the top scoring team is at the front.
-            int top = results.at(0)->Points;
+            int32_t top = results.at(0)->Points;
             for (TeamsView::iterator it = results.begin(); it != results.end();)
             {
                 bool cmp = (m_sortFilter == SFILTER_MAX) ? (*it)->Points != top : (*it)->Points == top;
@@ -196,7 +196,7 @@ TeamsView TeamQuery::execute()
         if (m_sortFilter == SFILTER_MAX || m_sortFilter == SFILTER_NOT_MAX)
         {
             // Since it's sorted, we know the top winning team is at the front.
-            int top = results.at(0)->RoundWins;
+            int32_t top = results.at(0)->RoundWins;
             for (TeamsView::iterator it = results.begin(); it != results.end();)
             {
                 bool cmp = (m_sortFilter == SFILTER_MAX) ? (*it)->RoundWins != top : (*it)->RoundWins == top;
@@ -239,9 +239,9 @@ const std::string TeamInfo::ColorizedTeamName()
     return buf;
 }
 
-int TeamInfo::LivesPool()
+int32_t TeamInfo::LivesPool()
 {
-    int           pool = 0;
+    int32_t           pool = 0;
     PlayerResults pr   = PlayerQuery().hasLives().execute();
 
     for (PlayersView::const_iterator it = pr.players.begin(); it != pr.players.end(); ++it)

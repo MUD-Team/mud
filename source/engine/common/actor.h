@@ -120,31 +120,31 @@ class PlayerBitField
 
     void set(uint8_t id)
     {
-        int bytenum = id >> 3;
-        int bitnum  = id & bytemask;
+        int32_t bytenum = id >> 3;
+        int32_t bitnum  = id & bytemask;
 
         bitfield[bytenum] |= (1 << bitnum);
     }
 
     void unset(uint8_t id)
     {
-        int bytenum = id >> 3;
-        int bitnum  = id & bytemask;
+        int32_t bytenum = id >> 3;
+        int32_t bitnum  = id & bytemask;
 
         bitfield[bytenum] &= ~(1 << bitnum);
     }
 
     bool get(uint8_t id) const
     {
-        int bytenum = id >> 3;
-        int bitnum  = id & bytemask;
+        int32_t bytenum = id >> 3;
+        int32_t bitnum  = id & bytemask;
 
         return ((bitfield[bytenum] & (1 << bitnum)) != 0);
     }
 
   private:
-    static const int bytesize = 8 * sizeof(uint8_t);
-    static const int bytemask = bytesize - 1;
+    static const int32_t bytesize = 8 * sizeof(uint8_t);
+    static const int32_t bytemask = bytesize - 1;
 
     // Hacky way of getting ceil() at compile-time
     static const size_t fieldsize = (MAXPLAYERS + bytemask) / bytesize;
@@ -301,7 +301,7 @@ struct baseline_t
     angle_t   angle;
     uint32_t  targetid;
     uint32_t  tracerid;
-    int       movecount;
+    int32_t       movecount;
     uint8_t      movedir;
     uint8_t      rndindex;
 
@@ -430,7 +430,7 @@ class AActor : public DThinker
     angle_t     angle;  // orientation
     angle_t     prevangle;
     spritenum_t sprite; // used to find patch_t and flip value
-    int         frame;  // might be ORed with FF_FULLBRIGHT
+    int32_t         frame;  // might be ORed with FF_FULLBRIGHT
     fixed_t     pitch;
     angle_t     prevpitch;
 
@@ -456,24 +456,24 @@ class AActor : public DThinker
     fixed_t momz;
 
     // If == validcount, already checked.
-    int validcount;
+    int32_t validcount;
 
     mobjtype_t  type;
     mobjinfo_t *info;     // &mobjinfo[mobj->type]
-    int         tics;     // state tic counter
+    int32_t         tics;     // state tic counter
     state_t    *state;
-    int         damage;   // For missiles
-    int         flags;
-    int         flags2;   // Heretic flags
-    int         flags3;   // MBF21 flags
-    int         oflags;   // Odamex flags
-    int         special1; // Special info
-    int         special2; // Special info
-    int         health;
+    int32_t         damage;   // For missiles
+    int32_t         flags;
+    int32_t         flags2;   // Heretic flags
+    int32_t         flags3;   // MBF21 flags
+    int32_t         oflags;   // Odamex flags
+    int32_t         special1; // Special info
+    int32_t         special2; // Special info
+    int32_t         health;
 
     // Movement direction, movement generation (zig-zagging).
     uint8_t movedir;   // 0-7
-    int  movecount; // when 0, select a new dir
+    int32_t  movecount; // when 0, select a new dir
     char visdir;
 
                     // Thing being chased/attacked (or NULL),
@@ -483,11 +483,11 @@ class AActor : public DThinker
 
     // Reaction time: if non 0, don't attack yet.
     // Used by player to freeze a bit after teleporting.
-    int reactiontime;
+    int32_t reactiontime;
 
     // If >0, the target will be chased
     // no matter what (even if shot)
-    int threshold;
+    int32_t threshold;
 
     // Additional info record for player avatars only.
     // Only valid if type == MT_PLAYER
@@ -523,7 +523,7 @@ class AActor : public DThinker
     struct msecnode_s *touching_sectorlist; // phares 3/14/98
 
     int16_t deadtic;                          // tics after player's death
-    int   oldframe;
+    int32_t   oldframe;
 
     uint8_t rndindex; // denis - because everything should have a random number generator, for prediction
 
@@ -531,10 +531,10 @@ class AActor : public DThinker
     static void    ClearTIDHashes();
     void           AddToHash();
     void           RemoveFromHash();
-    AActor        *FindByTID(int tid) const;
-    static AActor *FindByTID(const AActor *first, int tid);
-    AActor        *FindGoal(int tid, int kind) const;
-    static AActor *FindGoal(const AActor *first, int tid, int kind);
+    AActor        *FindByTID(int32_t tid) const;
+    static AActor *FindByTID(const AActor *first, int32_t tid);
+    AActor        *FindGoal(int32_t tid, int32_t kind) const;
+    static AActor *FindGoal(const AActor *first, int32_t tid, int32_t kind);
 
     uint32_t   netid;        // every object has its own netid
     int16_t      tid;          // thing identifier
@@ -545,7 +545,7 @@ class AActor : public DThinker
     static const size_t TIDHashSize = 256;
     static const size_t TIDHashMask = TIDHashSize - 1;
     static AActor      *TIDHash[TIDHashSize];
-    static inline int   TIDHASH(int key)
+    static inline int32_t   TIDHASH(int32_t key)
     {
         return key & TIDHashMask;
     }
@@ -577,11 +577,11 @@ class AActor : public DThinker
         ActorBlockMapListNode(AActor *mo);
         void    Link();
         void    Unlink();
-        AActor *Next(int bmx, int bmy);
+        AActor *Next(int32_t bmx, int32_t bmy);
 
       private:
         void   clear();
-        size_t getIndex(int bmx, int bmy);
+        size_t getIndex(int32_t bmx, int32_t bmy);
 
         static const size_t BLOCKSX = 3;
         static const size_t BLOCKSY = 3;
@@ -589,11 +589,11 @@ class AActor : public DThinker
         AActor *actor;
 
         // the top-left blockmap the actor is in
-        int originx;
-        int originy;
+        int32_t originx;
+        int32_t originy;
         // the number of blocks the actor occupies
-        int blockcntx;
-        int blockcnty;
+        int32_t blockcntx;
+        int32_t blockcnty;
 
         // the next and previous actors in each of the possible blockmaps
         // this actor can inhabit
@@ -609,7 +609,7 @@ typedef std::vector<AActor::AActorPtr> AActors;
 class FActorIterator
 {
   public:
-    FActorIterator(int i) : base(NULL), id(i)
+    FActorIterator(int32_t i) : base(NULL), id(i)
     {
     }
     AActor *Next()
@@ -629,13 +629,13 @@ class FActorIterator
 
   private:
     AActor *base;
-    int     id;
+    int32_t     id;
 };
 
 template <class T> class TActorIterator : public FActorIterator
 {
   public:
-    TActorIterator(int id) : FActorIterator(id)
+    TActorIterator(int32_t id) : FActorIterator(id)
     {
     }
     T *Next()

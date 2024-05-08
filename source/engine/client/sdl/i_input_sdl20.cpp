@@ -33,7 +33,7 @@
 #include "odamex.h"
 #include "ui/ui_public.h"
 
-static const int MAX_SDL_EVENTS_PER_TIC = 8192;
+static const int32_t MAX_SDL_EVENTS_PER_TIC = 8192;
 
 EXTERN_CVAR(joy_deadzone)
 EXTERN_CVAR(joy_lefttrigger_deadzone)
@@ -56,7 +56,7 @@ EXTERN_CVAR(joy_righttrigger_deadzone)
 //
 // ISDL20KeyboardInputDevice::ISDL20KeyboardInputDevice
 //
-ISDL20KeyboardInputDevice::ISDL20KeyboardInputDevice(int id) : mActive(false), mTextEntry(false)
+ISDL20KeyboardInputDevice::ISDL20KeyboardInputDevice(int32_t id) : mActive(false), mTextEntry(false)
 {
     // enable keyboard input
     resume();
@@ -194,7 +194,7 @@ void ISDL20KeyboardInputDevice::disableTextEntry()
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 //
-int ISDL20KeyboardInputDevice::getTextEventValue()
+int32_t ISDL20KeyboardInputDevice::getTextEventValue()
 {
     const size_t max_events = 32;
     SDL_Event    sdl_events[max_events];
@@ -240,7 +240,7 @@ int ISDL20KeyboardInputDevice::getTextEventValue()
 // to Odamex's internal key representation (which is identical
 // to SDL 2.0's key representation).
 //
-int ISDL20KeyboardInputDevice::translateKey(SDL_Keysym keysym)
+int32_t ISDL20KeyboardInputDevice::translateKey(SDL_Keysym keysym)
 {
     return keysym.sym;
 }
@@ -270,8 +270,8 @@ void ISDL20KeyboardInputDevice::gatherEvents()
         // be implicitly ignored unless handled below.
         if (sdl_ev.type == SDL_KEYDOWN || sdl_ev.type == SDL_KEYUP)
         {
-            const int sym = sdl_ev.key.keysym.sym;
-            const int mod = sdl_ev.key.keysym.mod;
+            const int32_t sym = sdl_ev.key.keysym.sym;
+            const int32_t mod = sdl_ev.key.keysym.mod;
 
             event_t ev;
             ev.type = (sdl_ev.type == SDL_KEYDOWN) ? ev_keydown : ev_keyup;
@@ -346,7 +346,7 @@ void ISDL20KeyboardInputDevice::getEvent(event_t *ev)
 //
 // ISDL20MouseInputDevice::ISDL20MouseInputDevice
 //
-ISDL20MouseInputDevice::ISDL20MouseInputDevice(int id) : mActive(false)
+ISDL20MouseInputDevice::ISDL20MouseInputDevice(int32_t id) : mActive(false)
 {
     reset();
 }
@@ -433,7 +433,7 @@ void ISDL20MouseInputDevice::gatherEvents()
     // Force SDL to gather events from input devices. This is called
     // implicitly from SDL_PollEvent but since we're using SDL_PeepEvents to
     // process only mouse events, SDL_PumpEvents is necessary.
-    int       num_events;
+    int32_t       num_events;
     SDL_Event sdl_events[MAX_SDL_EVENTS_PER_TIC];
     SDL_PumpEvents();
 
@@ -446,7 +446,7 @@ void ISDL20MouseInputDevice::gatherEvents()
     while ((num_events =
                 SDL_PeepEvents(sdl_events, MAX_SDL_EVENTS_PER_TIC, SDL_GETEVENT, SDL_MOUSEMOTION, SDL_MOUSEMOTION)))
     {        
-        for (int i = 0; i < num_events; i++)
+        for (int32_t i = 0; i < num_events; i++)
         {                    
             UI_PostEvent(sdl_events[i]);
 
@@ -469,7 +469,7 @@ void ISDL20MouseInputDevice::gatherEvents()
     while ((num_events =
                 SDL_PeepEvents(sdl_events, MAX_SDL_EVENTS_PER_TIC, SDL_GETEVENT, SDL_MOUSEBUTTONDOWN, SDL_MOUSEWHEEL)))
     {
-        for (int i = 0; i < num_events; i++)
+        for (int32_t i = 0; i < num_events; i++)
         {
             UI_PostEvent(sdl_events[i]);
             
@@ -481,7 +481,7 @@ void ISDL20MouseInputDevice::gatherEvents()
             if (sdl_ev.type == SDL_MOUSEWHEEL)
             {
                 ev.type       = ev_keydown;
-                int direction = 1;
+                int32_t direction = 1;
 #if (SDL_VERSION >= SDL_VERSIONNUM(2, 0, 4))
                 if (sdl_ev.wheel.direction == SDL_MOUSEWHEEL_FLIPPED)
                     direction = -1;
@@ -537,7 +537,7 @@ void ISDL20MouseInputDevice::getEvent(event_t *ev)
 //
 // ISDL20JoystickInputDevice::ISDL20JoystickInputDevice
 //
-ISDL20JoystickInputDevice::ISDL20JoystickInputDevice(int id) : mActive(false), mJoystickId(id), mJoystick(NULL)
+ISDL20JoystickInputDevice::ISDL20JoystickInputDevice(int32_t id) : mActive(false), mJoystickId(id), mJoystick(NULL)
 {
     assert(SDL_WasInit(SDL_INIT_GAMECONTROLLER));
     assert(mJoystickId >= 0 && mJoystickId < SDL_NumJoysticks());
@@ -643,13 +643,13 @@ void ISDL20JoystickInputDevice::gatherEvents()
     SDL_PumpEvents();
 
     // Retrieve events from SDL
-    int       num_events = 0;
+    int32_t       num_events = 0;
     SDL_Event sdl_events[MAX_SDL_EVENTS_PER_TIC];
 
     while ((num_events = SDL_PeepEvents(sdl_events, MAX_SDL_EVENTS_PER_TIC, SDL_GETEVENT, SDL_CONTROLLERAXISMOTION,
                                         SDL_CONTROLLERBUTTONUP)))
     {
-        for (int i = 0; i < num_events; i++)
+        for (int32_t i = 0; i < num_events; i++)
         {
             const SDL_Event &sdl_ev = sdl_events[i];
 
@@ -717,7 +717,7 @@ void ISDL20JoystickInputDevice::gatherEvents()
     SDL_FlushEvents(SDL_JOYAXISMOTION, SDL_CONTROLLERDEVICEREMAPPED);
 }
 
-int ISDL20JoystickInputDevice::calcAxisValue(int raw_value)
+int32_t ISDL20JoystickInputDevice::calcAxisValue(int32_t raw_value)
 {
     float value;
 
@@ -840,7 +840,7 @@ std::vector<IInputDeviceInfo> ISDL20InputSubsystem::getKeyboardDevices() const
 //
 // ISDL20InputSubsystem::initKeyboard
 //
-void ISDL20InputSubsystem::initKeyboard(int id)
+void ISDL20InputSubsystem::initKeyboard(int32_t id)
 {
     shutdownKeyboard(0);
 
@@ -862,7 +862,7 @@ void ISDL20InputSubsystem::initKeyboard(int id)
 //
 // ISDL20InputSubsystem::shutdownKeyboard
 //
-void ISDL20InputSubsystem::shutdownKeyboard(int id)
+void ISDL20InputSubsystem::shutdownKeyboard(int32_t id)
 {
     IInputDevice *device = getKeyboardInputDevice();
     if (device)
@@ -892,7 +892,7 @@ std::vector<IInputDeviceInfo> ISDL20InputSubsystem::getMouseDevices() const
 //
 // ISDL20InputSubsystem::initMouse
 //
-void ISDL20InputSubsystem::initMouse(int id)
+void ISDL20InputSubsystem::initMouse(int32_t id)
 {
     shutdownMouse(0);
 
@@ -915,7 +915,7 @@ void ISDL20InputSubsystem::initMouse(int id)
 //
 // ISDL20InputSubsystem::shutdownMouse
 //
-void ISDL20InputSubsystem::shutdownMouse(int id)
+void ISDL20InputSubsystem::shutdownMouse(int32_t id)
 {
     IInputDevice *device = getMouseInputDevice();
     if (device)
@@ -935,7 +935,7 @@ std::vector<IInputDeviceInfo> ISDL20InputSubsystem::getJoystickDevices() const
 {
     // TODO: does the SDL Joystick subsystem need to be initialized?
     std::vector<IInputDeviceInfo> devices;
-    for (int i = 0; i < SDL_NumJoysticks(); i++)
+    for (int32_t i = 0; i < SDL_NumJoysticks(); i++)
     {
         devices.push_back(IInputDeviceInfo());
         IInputDeviceInfo &device_info = devices.back();
@@ -950,7 +950,7 @@ std::vector<IInputDeviceInfo> ISDL20InputSubsystem::getJoystickDevices() const
 
 // ISDL20InputSubsystem::initJoystick
 //
-void ISDL20InputSubsystem::initJoystick(int id)
+void ISDL20InputSubsystem::initJoystick(int32_t id)
 {
     shutdownJoystick(0);
 
@@ -972,7 +972,7 @@ void ISDL20InputSubsystem::initJoystick(int id)
 //
 // ISDL20InputSubsystem::shutdownJoystick
 //
-void ISDL20InputSubsystem::shutdownJoystick(int id)
+void ISDL20InputSubsystem::shutdownJoystick(int32_t id)
 {
     IInputDevice *device = getJoystickInputDevice();
     if (device)

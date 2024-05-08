@@ -77,12 +77,12 @@ class Texture
         return mData;
     }
 
-    int getWidth() const
+    int32_t getWidth() const
     {
         return mWidth;
     }
 
-    int getHeight() const
+    int32_t getHeight() const
     {
         return mHeight;
     }
@@ -92,17 +92,17 @@ class Texture
         return mFracHeight;
     }
 
-    int getWidthMask() const
+    int32_t getWidthMask() const
     {
         return mWidthMask;
     }
 
-    int getOffsetX() const
+    int32_t getOffsetX() const
     {
         return mOffsetX;
     }
 
-    int getOffsetY() const
+    int32_t getOffsetY() const
     {
         return mOffsetY;
     }
@@ -117,12 +117,12 @@ class Texture
         return mScaleY;
     }
 
-    void setOffsetX(int value)
+    void setOffsetX(int32_t value)
     {
         mOffsetX = value;
     }
 
-    void setOffsetY(int value)
+    void setOffsetY(int32_t value)
     {
         mOffsetY = value;
     }
@@ -132,7 +132,7 @@ class Texture
 
     Texture();
 
-    void          init(int width, int height);
+    void          init(int32_t width, int32_t height);
 
     texhandle_t mHandle;
 
@@ -143,7 +143,7 @@ class Texture
     uint16_t mHeight;
 
     fixed_t mFracHeight;
-    int mWidthMask;
+    int32_t mWidthMask;
 
     int16_t mOffsetX;
     int16_t mOffsetY;
@@ -185,7 +185,7 @@ class TextureManager
     texhandle_t    getHandle(const OString &name, Texture::TextureSourceType type);
     const Texture *getTexture(texhandle_t handle);
 
-    Texture *createTexture(texhandle_t handle, int width, int height);
+    Texture *createTexture(texhandle_t handle, int32_t width, int32_t height);
     void     freeTexture(texhandle_t handle);
 
     static const texhandle_t NO_TEXTURE_HANDLE        = 0x0;

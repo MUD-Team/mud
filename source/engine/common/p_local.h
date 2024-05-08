@@ -107,32 +107,32 @@ bool P_CanSpy(player_t &viewer, player_t &other);
 #define ITEMQUESIZE 128
 
 extern mapthing2_t itemrespawnque[ITEMQUESIZE];
-extern int         itemrespawntime[ITEMQUESIZE];
-extern int         iquehead;
-extern int         iquetail;
+extern int32_t         itemrespawntime[ITEMQUESIZE];
+extern int32_t         iquehead;
+extern int32_t         iquetail;
 
 void P_ThrustMobj(AActor *mo, angle_t angle, fixed_t move);
 void P_RespawnSpecials(void);
 
 bool P_SetMobjState(AActor *mobj, statenum_t state, bool cl_update = false);
 
-void    P_SpawnBlood(fixed_t x, fixed_t y, fixed_t z, int damage);
+void    P_SpawnBlood(fixed_t x, fixed_t y, fixed_t z, int32_t damage);
 AActor *P_SpawnMissile(AActor *source, AActor *dest, mobjtype_t type);
 void    P_SpawnPlayerMissile(AActor *source, mobjtype_t type);
 void    P_SpawnMBF21PlayerMissile(AActor *source, mobjtype_t type, fixed_t angle, fixed_t pitch, fixed_t xyofs,
                                   fixed_t zofs);
 bool    P_CheckSwitchWeapon(player_t *player, weapontype_t weapon);
 
-void P_RailAttack(AActor *source, int damage, int offset); // [RH] Shoot a railgun
+void P_RailAttack(AActor *source, int32_t damage, int32_t offset); // [RH] Shoot a railgun
 bool P_HitFloor(AActor *thing);
 //
 // [RH] P_THINGS
 //
-extern int       SpawnableThings[];
-extern const int NumSpawnableThings;
+extern int32_t       SpawnableThings[];
+extern const int32_t NumSpawnableThings;
 
-bool P_Thing_Spawn(int tid, int type, angle_t angle, bool fog);
-bool P_Thing_Projectile(int tid, int type, angle_t angle, fixed_t speed, fixed_t vspeed, bool gravity);
+bool P_Thing_Spawn(int32_t tid, int32_t type, angle_t angle, bool fog);
+bool P_Thing_Projectile(int32_t tid, int32_t type, angle_t angle, fixed_t speed, fixed_t vspeed, bool gravity);
 bool P_ActivateMobj(AActor *mobj, AActor *activator);
 bool P_DeactivateMobj(AActor *mobj);
 
@@ -144,7 +144,7 @@ void P_SpawnBrainTargets(void); // killough 3/26/98: spawn icon landings
 
 extern struct brain_s
 {                               // killough 3/26/98: global state of boss brain
-    int easy, targeton;
+    int32_t easy, targeton;
 } brain;
 
 //
@@ -182,13 +182,13 @@ fixed_t      P_AproxDistance2(AActor *mo, fixed_t x, fixed_t y);
 fixed_t      P_AproxDistance2(AActor *a, AActor *b);
 
 bool    P_ActorInFOV(AActor *origin, AActor *mo, float f, fixed_t dist);
-AActor *P_RoughTargetSearch(AActor *mo, angle_t fov, int distance);
+AActor *P_RoughTargetSearch(AActor *mo, angle_t fov, int32_t distance);
 
-int     P_PointOnLineSide(fixed_t x, fixed_t y, const line_t *line);
-int     P_PointOnDivlineSide(fixed_t x, fixed_t y, const divline_t *line);
+int32_t     P_PointOnLineSide(fixed_t x, fixed_t y, const line_t *line);
+int32_t     P_PointOnDivlineSide(fixed_t x, fixed_t y, const divline_t *line);
 void    P_MakeDivline(const line_t *li, divline_t *dl);
 fixed_t P_InterceptVector(const divline_t *v2, const divline_t *v1);
-int     P_BoxOnLineSide(const fixed_t *tmbox, const line_t *ld);
+int32_t     P_BoxOnLineSide(const fixed_t *tmbox, const line_t *ld);
 
 extern fixed_t opentop;
 extern fixed_t openbottom;
@@ -197,8 +197,8 @@ extern fixed_t lowfloor;
 
 void P_LineOpening(const line_t *linedef, fixed_t x, fixed_t y, fixed_t refx = INT32_MIN, fixed_t refy = 0);
 
-bool P_BlockLinesIterator(int x, int y, bool (*func)(line_t *));
-bool P_BlockThingsIterator(int x, int y, bool (*func)(AActor *), AActor *start = NULL);
+bool P_BlockLinesIterator(int32_t x, int32_t y, bool (*func)(line_t *));
+bool P_BlockThingsIterator(int32_t x, int32_t y, bool (*func)(AActor *), AActor *start = NULL);
 
 #define PT_ADDLINES  1
 #define PT_ADDTHINGS 2
@@ -206,7 +206,7 @@ bool P_BlockThingsIterator(int x, int y, bool (*func)(AActor *), AActor *start =
 
 extern divline_t trace;
 
-bool P_PathTraverse(fixed_t x1, fixed_t y1, fixed_t x2, fixed_t y2, int flags, bool (*trav)(intercept_t *));
+bool P_PathTraverse(fixed_t x1, fixed_t y1, fixed_t x2, fixed_t y2, int32_t flags, bool (*trav)(intercept_t *));
 
 // [ML] 2/1/10: Break out P_PointToAngle from R_PointToAngle2 (from EE)
 angle_t P_PointToAngle(fixed_t xo, fixed_t yo, fixed_t x, fixed_t y);
@@ -277,36 +277,36 @@ v3fixed_t P_LinePlaneIntersection(const plane_t *plane, const v3fixed_t &lineorg
 bool P_CheckSightEdges(const AActor *t1, const AActor *t2, float radius_boost);
 bool P_SpecialIsWeapon(AActor *special);
 
-bool P_ChangeSector(sector_t *sector, int crunch);
+bool P_ChangeSector(sector_t *sector, int32_t crunch);
 
 extern AActor *linetarget; // who got hit (or NULL)
 
 fixed_t P_AimLineAttack(AActor *t1, angle_t angle, fixed_t distance);
-fixed_t P_AutoAimLineAttack(AActor *actor, angle_t &angle, const angle_t spread, const int tracers, fixed_t distance);
-void    P_LineAttack(AActor *t1, angle_t angle, fixed_t distance, fixed_t slope, int damage);
+fixed_t P_AutoAimLineAttack(AActor *actor, angle_t &angle, const angle_t spread, const int32_t tracers, fixed_t distance);
+void    P_LineAttack(AActor *t1, angle_t angle, fixed_t distance, fixed_t slope, int32_t damage);
 
 // [RH] Position the chasecam
 void           P_AimCamera(AActor *t1);
 extern fixed_t CameraX, CameraY, CameraZ;
 
 // [RH] Means of death
-void P_RadiusAttack(AActor *spot, AActor *source, int damage, int distance, bool hurtSelf, int mod);
+void P_RadiusAttack(AActor *spot, AActor *source, int32_t damage, int32_t distance, bool hurtSelf, int32_t mod);
 
 void P_DelSeclist(msecnode_t *);                        // phares 3/16/98
 void P_CreateSecNodeList(AActor *, fixed_t, fixed_t);   // phares 3/14/98
-int  P_GetMoveFactor(const AActor *mo, int *frictionp); // phares  3/6/98
-int  P_GetFriction(const AActor *mo, int *frictionfactor);
-bool Check_Sides(AActor *, int, int);                   // phares
+int32_t  P_GetMoveFactor(const AActor *mo, int32_t *frictionp); // phares  3/6/98
+int32_t  P_GetFriction(const AActor *mo, int32_t *frictionfactor);
+bool Check_Sides(AActor *, int32_t, int32_t);                   // phares
 
 //
 // P_SETUP
 //
 extern uint8_t    *rejectmatrix; // for fast sight rejection
 extern bool     rejectempty;
-extern int     *blockmaplump; // offsets in blockmap are from here
-extern int     *blockmap;
-extern int      bmapwidth;
-extern int      bmapheight;   // in mapblocks
+extern int32_t     *blockmaplump; // offsets in blockmap are from here
+extern int32_t     *blockmap;
+extern int32_t      bmapwidth;
+extern int32_t      bmapheight;   // in mapblocks
 extern fixed_t  bmaporgx;
 extern fixed_t  bmaporgy;     // origin of block map
 extern AActor **blocklinks;   // for thing chains
@@ -316,13 +316,13 @@ extern std::set<int16_t> movable_sectors;
 //
 // P_INTER
 //
-extern int maxammo[NUMAMMO];
-extern int clipammo[NUMAMMO];
+extern int32_t maxammo[NUMAMMO];
+extern int32_t clipammo[NUMAMMO];
 
 void P_GiveSpecial(player_t *player, AActor *special);
 void P_TouchSpecialThing(AActor *special, AActor *toucher);
 
-void P_DamageMobj(AActor *target, AActor *inflictor, AActor *source, int damage, int mod = 0, int flags = 0);
+void P_DamageMobj(AActor *target, AActor *inflictor, AActor *source, int32_t damage, int32_t mod = 0, int32_t flags = 0);
 
 #define DMG_NO_ARMOR 1
 
@@ -357,7 +357,7 @@ void P_DamageMobj(AActor *target, AActor *inflictor, AActor *source, int damage,
 #define NUMMODS           (MOD_VILEFIRE + 1)
 #define MOD_FRIENDLY_FIRE 0x80000000
 
-extern int MeansOfDeath;
+extern int32_t MeansOfDeath;
 
 //
 // PO_MAN
@@ -387,13 +387,13 @@ class DPolyAction : public DThinker
 {
     DECLARE_SERIAL(DPolyAction, DThinker)
   public:
-    DPolyAction(int polyNum);
+    DPolyAction(int32_t polyNum);
 
   protected:
     DPolyAction();
-    int m_PolyObj;
-    int m_Speed;
-    int m_Dist;
+    int32_t m_PolyObj;
+    int32_t m_Speed;
+    int32_t m_Dist;
 
     friend void ThrustMobj(AActor *actor, seg_t *seg, polyobj_t *po);
 };
@@ -402,11 +402,11 @@ class DRotatePoly : public DPolyAction
 {
     DECLARE_SERIAL(DRotatePoly, DPolyAction)
   public:
-    DRotatePoly(int polyNum);
+    DRotatePoly(int32_t polyNum);
     void RunThink();
 
   protected:
-    friend bool EV_RotatePoly(line_t *line, int polyNum, int speed, int byteAngle, int direction, bool overRide);
+    friend bool EV_RotatePoly(line_t *line, int32_t polyNum, int32_t speed, int32_t byteAngle, int32_t direction, bool overRide);
 
   private:
     DRotatePoly();
@@ -416,34 +416,34 @@ class DMovePoly : public DPolyAction
 {
     DECLARE_SERIAL(DMovePoly, DPolyAction)
   public:
-    DMovePoly(int polyNum);
+    DMovePoly(int32_t polyNum);
     void RunThink();
 
   protected:
     DMovePoly();
-    int     m_Angle;
+    int32_t     m_Angle;
     fixed_t m_xSpeed; // for sliding walls
     fixed_t m_ySpeed;
 
-    friend bool EV_MovePoly(line_t *line, int polyNum, int speed, angle_t angle, fixed_t dist, bool overRide);
+    friend bool EV_MovePoly(line_t *line, int32_t polyNum, int32_t speed, angle_t angle, fixed_t dist, bool overRide);
 };
 
 class DPolyDoor : public DMovePoly
 {
     DECLARE_SERIAL(DPolyDoor, DMovePoly)
   public:
-    DPolyDoor(int polyNum, podoortype_t type);
+    DPolyDoor(int32_t polyNum, podoortype_t type);
     void RunThink();
 
   protected:
-    int          m_Direction;
-    int          m_TotalDist;
-    int          m_Tics;
-    int          m_WaitTics;
+    int32_t          m_Direction;
+    int32_t          m_TotalDist;
+    int32_t          m_Tics;
+    int32_t          m_WaitTics;
     podoortype_t m_Type;
     bool         m_Close;
 
-    friend bool EV_OpenPolyDoor(line_t *line, int polyNum, int speed, angle_t angle, int delay, int distance,
+    friend bool EV_OpenPolyDoor(line_t *line, int32_t polyNum, int32_t speed, angle_t angle, int32_t delay, int32_t distance,
                                 podoortype_t type);
 
   private:
@@ -477,13 +477,13 @@ enum
 #define PO_LINE_EXPLICIT 5
 
 extern polyobj_t    *polyobjs;   // list of all poly-objects on the level
-extern int           po_NumPolyobjs;
+extern int32_t           po_NumPolyobjs;
 extern polyspawns_t *polyspawns; // [RH] list of polyobject things to spawn
 
-bool PO_MovePolyobj(int num, int x, int y);
-bool PO_RotatePolyobj(int num, angle_t angle);
+bool PO_MovePolyobj(int32_t num, int32_t x, int32_t y);
+bool PO_RotatePolyobj(int32_t num, angle_t angle);
 void PO_Init(void);
-bool PO_Busy(int polyobj);
+bool PO_Busy(int32_t polyobj);
 
 bool P_CheckFov(AActor *t1, AActor *t2, angle_t fov);
 bool P_IsFriendlyThing(AActor *actor, AActor *friendshiptest);

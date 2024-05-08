@@ -54,7 +54,7 @@
 #define snprintf  _snprintf
 #endif
 
-static const int MAX_LINE_LENGTH = 8192;
+static const int32_t MAX_LINE_LENGTH = 8192;
 
 static bool   ShouldTabCycle = false;
 static size_t NextCycleIndex = 0;
@@ -314,7 +314,7 @@ static void TabComplete(TabCompleteDirection dir)
 // Prioritise messages on top of screen
 // Break up the lines so that they wrap around the screen boundary
 //
-void C_AddNotifyString(int printlevel, const char *color_code, const char *source)
+void C_AddNotifyString(int32_t printlevel, const char *color_code, const char *source)
 {
 }
 
@@ -324,7 +324,7 @@ void C_AddNotifyString(int printlevel, const char *color_code, const char *sourc
 // Prints the given string to stdout, stripping away any color markup
 // escape codes.
 //
-static int C_PrintStringStdOut(const char *str)
+static int32_t C_PrintStringStdOut(const char *str)
 {
     std::string sanitized_str(str);
     StripColorCodes(sanitized_str);
@@ -335,7 +335,7 @@ static int C_PrintStringStdOut(const char *str)
     return sanitized_str.length();
 }
 
-static int VPrintf(int printlevel, const char *color_code, const char *format, va_list parms)
+static int32_t VPrintf(int32_t printlevel, const char *color_code, const char *format, va_list parms)
 {
     char outline[MAX_LINE_LENGTH], outlinelog[MAX_LINE_LENGTH];
 
@@ -348,8 +348,8 @@ static int VPrintf(int printlevel, const char *color_code, const char *format, v
     // denis - 0x07 is a system beep, which can DoS the console (lol)
     // ToDo: there may be more characters not allowed on a consoleprint,
     // maybe restrict a few ASCII stuff later on ?
-    int len = strlen(outline);
-    for (int i = 0; i < len; i++)
+    int32_t len = strlen(outline);
+    for (int32_t i = 0; i < len; i++)
     {
         if (outline[i] == 0x07)
             outline[i] = '.';
@@ -361,7 +361,7 @@ static int VPrintf(int printlevel, const char *color_code, const char *format, v
         strcpy(outlinelog, outline);
 
         // [Nes] - Horizontal line won't show up as-is in the logfile.
-        for (int i = 0; i < len; i++)
+        for (int32_t i = 0; i < len; i++)
         {
             if (outlinelog[i] == '\35' || outlinelog[i] == '\36' || outlinelog[i] == '\37')
                 outlinelog[i] = '=';
@@ -374,7 +374,7 @@ static int VPrintf(int printlevel, const char *color_code, const char *format, v
         // We need to know if there were any new lines being printed
         // in our string.
 
-        int newLineCount = std::count(outline, outline + strlen(outline), '\n');
+        int32_t newLineCount = std::count(outline, outline + strlen(outline), '\n');
     }
 
     if (print_stdout)
@@ -408,10 +408,10 @@ static int VPrintf(int printlevel, const char *color_code, const char *format, v
     return len;
 }
 
-FORMAT_PRINTF(1, 2) int STACK_ARGS Printf(const char *format, ...)
+FORMAT_PRINTF(1, 2) int32_t STACK_ARGS Printf(const char *format, ...)
 {
     va_list argptr;
-    int     count;
+    int32_t     count;
 
     va_start(argptr, format);
     count = VPrintf(PRINT_HIGH, TEXTCOLOR_NORMAL, format, argptr);
@@ -420,36 +420,36 @@ FORMAT_PRINTF(1, 2) int STACK_ARGS Printf(const char *format, ...)
     return count;
 }
 
-FORMAT_PRINTF(2, 3) int STACK_ARGS Printf(int printlevel, const char *format, ...)
+FORMAT_PRINTF(2, 3) int32_t STACK_ARGS Printf(int32_t printlevel, const char *format, ...)
 {
     va_list argptr;
 
     va_start(argptr, format);
-    int count = VPrintf(printlevel, TEXTCOLOR_NORMAL, format, argptr);
+    int32_t count = VPrintf(printlevel, TEXTCOLOR_NORMAL, format, argptr);
     va_end(argptr);
 
     return count;
 }
 
-FORMAT_PRINTF(1, 2) int STACK_ARGS Printf_Bold(const char *format, ...)
+FORMAT_PRINTF(1, 2) int32_t STACK_ARGS Printf_Bold(const char *format, ...)
 {
     va_list argptr;
 
     va_start(argptr, format);
-    int count = VPrintf(PRINT_HIGH, TEXTCOLOR_BOLD, format, argptr);
+    int32_t count = VPrintf(PRINT_HIGH, TEXTCOLOR_BOLD, format, argptr);
     va_end(argptr);
 
     return count;
 }
 
-FORMAT_PRINTF(1, 2) int STACK_ARGS DPrintf(const char *format, ...)
+FORMAT_PRINTF(1, 2) int32_t STACK_ARGS DPrintf(const char *format, ...)
 {
     if (developer || devparm)
     {
         va_list argptr;
 
         va_start(argptr, format);
-        int count = VPrintf(PRINT_WARNING, TEXTCOLOR_NORMAL, format, argptr);
+        int32_t count = VPrintf(PRINT_WARNING, TEXTCOLOR_NORMAL, format, argptr);
         va_end(argptr);
         return count;
     }

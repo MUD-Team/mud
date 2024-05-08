@@ -57,7 +57,7 @@ fixed_t rw_backfz1, rw_backfz2;
 fixed_t rw_frontcz1, rw_frontcz2;
 fixed_t rw_frontfz1, rw_frontfz2;
 
-int rw_start, rw_stop;
+int32_t rw_start, rw_stop;
 
 static uint8_t FakeSide;
 
@@ -116,7 +116,7 @@ void R_ClearDrawSegs(void)
 // are those which have not yet had a 1s lineseg drawn to them. If makesolid
 // is specified, any range of non-solid columns found will be marked as solid.
 //
-static void R_ClipWallSegment(int first, int last, bool makesolid)
+static void R_ClipWallSegment(int32_t first, int32_t last, bool makesolid)
 {
     while (first <= last)
     {
@@ -132,7 +132,7 @@ static void R_ClipWallSegment(int first, int last, bool makesolid)
         }
         else
         {
-            int to;
+            int32_t to;
             // find where the span of non-solid columns ends
             uint8_t *p = (uint8_t *)memchr(solidcol + first, 1, last - first + 1);
             if (p == NULL)
@@ -195,7 +195,7 @@ bool CopyPlaneIfValid(plane_t *dest, const plane_t *source, const plane_t *opp)
 // killough 4/11/98, 4/13/98: fix bugs, add 'back' parameter
 //
 
-sector_t *R_FakeFlat(sector_t *sec, sector_t *tempsec, int *floorlightlevel, int *ceilinglightlevel, bool back)
+sector_t *R_FakeFlat(sector_t *sec, sector_t *tempsec, int32_t *floorlightlevel, int32_t *ceilinglightlevel, bool back)
 {
     // [RH] allow per-plane lighting
     if (floorlightlevel != NULL)
@@ -222,7 +222,7 @@ sector_t *R_FakeFlat(sector_t *sec, sector_t *tempsec, int *floorlightlevel, int
 
     bool underwater     = r_fakingunderwater || (heightsec && viewz <= P_FloorHeight(viewx, viewy, heightsec));
     bool doorunderwater = false;
-    int  diffTex        = (s->MoreFlags & SECF_CLIPFAKEPLANES);
+    int32_t  diffTex        = (s->MoreFlags & SECF_CLIPFAKEPLANES);
 
     // Replace sector being drawn with a copy to be hacked
     *tempsec = *sec;
@@ -454,8 +454,8 @@ void R_AddLine(seg_t *line)
     R_ClipLine(&t1, &t2, lclip, rclip, &t1, &t2);
 
     // project the line endpoints to determine which columns the line seg occupies
-    int x1 = R_ProjectPointX(t1.x, t1.y);
-    int x2 = R_ProjectPointX(t2.x, t2.y) - 1;
+    int32_t x1 = R_ProjectPointX(t1.x, t1.y);
+    int32_t x2 = R_ProjectPointX(t2.x, t2.y) - 1;
     if (!R_CheckProjectionX(x1, x2))
         return;
 
@@ -542,7 +542,7 @@ void R_AddLine(seg_t *line)
     R_ClipWallSegment(x1, x2, false);
 }
 
-static const int checkcoord[12][4] = // killough -- static const
+static const int32_t checkcoord[12][4] = // killough -- static const
     {{3, 0, 2, 1}, {3, 0, 2, 0}, {3, 1, 2, 0}, {0},          {2, 0, 2, 1}, {0, 0, 0, 0},
      {3, 1, 3, 0}, {0},          {2, 0, 3, 1}, {2, 1, 3, 1}, {2, 1, 3, 0}};
 
@@ -563,7 +563,7 @@ static bool R_CheckBBox(const fixed_t *bspcoord)
     v2fixed_t     t1, t2;
 
     // Find the corners of the box that define the edges from current viewpoint
-    int boxpos = (viewx <= bspcoord[BOXLEFT]   ? 0
+    int32_t boxpos = (viewx <= bspcoord[BOXLEFT]   ? 0
                   : viewx < bspcoord[BOXRIGHT] ? 1
                                                : 2) +
                  (viewy >= bspcoord[BOXTOP]     ? 0
@@ -608,7 +608,7 @@ static bool R_CheckBBox(const fixed_t *bspcoord)
     // Check each of the four sides of the bounding box to see if
     // any part is visible. Find the maximum range of columns the bounding box
     // will project onto the screen.
-    for (int i = 0; i < 4; i++)
+    for (int32_t i = 0; i < 4; i++)
     {
         v2fixed_t p1 = box_pts[i][0];
         v2fixed_t p2 = box_pts[i][1];
@@ -620,8 +620,8 @@ static bool R_CheckBBox(const fixed_t *bspcoord)
         if (R_ClipLineToFrustum(&p1, &p2, clipdist, lclip, rclip))
         {
             R_ClipLine(&p1, &p2, lclip, rclip, &p1, &p2);
-            int x1 = R_ProjectPointX(p1.x, p1.y);
-            int x2 = R_ProjectPointX(p2.x, p2.y) - 1;
+            int32_t x1 = R_ProjectPointX(p1.x, p1.y);
+            int32_t x2 = R_ProjectPointX(p2.x, p2.y) - 1;
             if (R_CheckProjectionX(x1, x2))
             {
                 if (memchr(solidcol + x1, 0, x2 - x1 + 1) != NULL)
@@ -639,14 +639,14 @@ static bool R_CheckBBox(const fixed_t *bspcoord)
 // Add sprites of things in sector.
 // Draw one or more line segments.
 //
-void R_Subsector(int num)
+void R_Subsector(int32_t num)
 {
-    int          count;
+    int32_t          count;
     seg_t       *line;
     subsector_t *sub;
     sector_t     tempsec;           // killough 3/7/98: deep water hack
-    int          floorlightlevel;   // killough 3/16/98: set floor lightlevel
-    int          ceilinglightlevel; // killough 4/11/98
+    int32_t          floorlightlevel;   // killough 3/16/98: set floor lightlevel
+    int32_t          ceilinglightlevel; // killough 4/11/98
 
 #ifdef RANGECHECK
     if (num >= numsubsectors)
@@ -714,7 +714,7 @@ void R_Subsector(int num)
 
     if (sub->poly)
     { // Render the polyobj in the subsector first
-        int     polyCount = sub->poly->numsegs;
+        int32_t     polyCount = sub->poly->numsegs;
         seg_t **polySeg   = sub->poly->segs;
         while (polyCount--)
             R_AddLine(*polySeg++);
@@ -731,15 +731,15 @@ void R_Subsector(int num)
 // Just call with BSP root.
 // killough 5/2/98: reformatted, removed tail recursion
 //
-void R_RenderBSPNode(int bspnum)
+void R_RenderBSPNode(int32_t bspnum)
 {
     while (!(bspnum & NF_SUBSECTOR)) // Found a subsector?
     {
         node_t *bsp = &nodes[bspnum];
 
         // Decide which side the view point is on.
-        int frontside = R_PointOnSide(viewx, viewy, bsp);
-        int backside  = frontside ^ 1;
+        int32_t frontside = R_PointOnSide(viewx, viewy, bsp);
+        int32_t backside  = frontside ^ 1;
 
         // Recursively divide front space.
         R_RenderBSPNode(bsp->children[frontside]);

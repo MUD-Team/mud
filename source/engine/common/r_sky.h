@@ -30,13 +30,13 @@
 // SKY, store the number for name.
 extern char SKYFLATNAME[8];
 
-extern int sky1shift;       //		[ML] 5/11/06 - remove sky2 remenants
+extern int32_t sky1shift;       //		[ML] 5/11/06 - remove sky2 remenants
 
 extern texhandle_t     sky1texture; //		""
 extern texhandle_t     sky2texture; //		""
 extern fixed_t skypos;      //		""
 extern fixed_t skytexturemid;
-extern int     skystretch;
+extern int32_t     skystretch;
 extern fixed_t skyiscale;
 extern fixed_t skyscale;
 extern fixed_t skyheight;

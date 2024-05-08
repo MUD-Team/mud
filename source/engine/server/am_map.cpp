@@ -27,7 +27,7 @@
 
 am_default_colors_t AutomapDefaultColors;
 am_colors_t         AutomapDefaultCurrentColors;
-int                 am_cheating = 0;
+int32_t                 am_cheating = 0;
 
 bool automapactive = false;
 

@@ -101,11 +101,11 @@ EXTERN_CVAR(sv_allowwidescreen)
 EXTERN_CVAR(vid_vsync)
 EXTERN_CVAR(vid_displayfps)
 
-static int vid_widescreen_old = -1;
+static int32_t vid_widescreen_old = -1;
 
 static IVideoMode V_GetRequestedVideoMode()
 {
-    int               surface_bpp = 32;
+    int32_t               surface_bpp = 32;
     EWindowMode       window_mode = (EWindowMode)vid_fullscreen.asInt();
     bool              vsync       = (vid_vsync != 0.0f);
     const std::string stretch_mode(vid_filter);
@@ -298,7 +298,7 @@ END_COMMAND(checkres)
 //
 BEGIN_COMMAND(vid_setmode)
 {
-    int width = 0, height = 0;
+    int32_t width = 0, height = 0;
 
     // No arguments
     if (argc == 1)
@@ -341,7 +341,7 @@ END_COMMAND(vid_setmode)
 //
 bool V_UseWidescreen()
 {
-    int width = I_GetVideoWidth(), height = I_GetVideoHeight();
+    int32_t width = I_GetVideoWidth(), height = I_GetVideoHeight();
 
     if (width == 0 || height == 0)
         return false;
@@ -383,9 +383,9 @@ void V_Init()
 {
     if (!I_VideoInitialized())
     {
-        int video_width  = M_GetParmValue("-width");
-        int video_height = M_GetParmValue("-height");
-        int video_bpp    = M_GetParmValue("-bits");
+        int32_t video_width  = M_GetParmValue("-width");
+        int32_t video_height = M_GetParmValue("-height");
+        int32_t video_bpp    = M_GetParmValue("-bits");
 
         // ensure the width & height cvars are sane
         if (vid_defwidth.asInt() <= 0 || vid_defheight.asInt() <= 0)
@@ -432,7 +432,7 @@ void V_Init()
     // For automap
     // This uses the smaller of the two results. It's still not ideal but at least
     // this allows hud_scaletext to have some purpose...
-     //int surface_width = I_GetSurfaceWidth(), surface_height = I_GetSurfaceHeight();
+     //int32_t surface_width = I_GetSurfaceWidth(), surface_height = I_GetSurfaceHeight();
     //CleanXfac = CleanYfac = std::max(1, std::min(surface_width / 320, surface_height / 200));
 
     R_InitColumnDrawers();
@@ -448,14 +448,14 @@ void V_Init()
 //
 // V_MarkRect
 //
-void V_MarkRect(int x, int y, int width, int height)
+void V_MarkRect(int32_t x, int32_t y, int32_t width, int32_t height)
 {
     dirtybox.AddToBox(x, y);
     dirtybox.AddToBox(x + width - 1, y + height - 1);
 }
 
-const int    GRAPH_WIDTH           = 140;
-const int    GRAPH_HEIGHT          = 80;
+const int32_t    GRAPH_WIDTH           = 140;
+const int32_t    GRAPH_HEIGHT          = 80;
 const double GRAPH_BASELINE        = 1000 / 60.0;
 const double GRAPH_CAPPED_BASELINE = 1000 / 35.0;
 
@@ -545,14 +545,14 @@ struct frametimeGraph_t
 static void BuildTransTable(const argb_t *palette_colors)
 {
     // create the small RGB table
-    for (int r = 0; r < 32; r++)
-        for (int g = 0; g < 32; g++)
-            for (int b = 0; b < 32; b++)
+    for (int32_t r = 0; r < 32; r++)
+        for (int32_t g = 0; g < 32; g++)
+            for (int32_t b = 0; b < 32; b++)
                 RGB32k[r][g][b] =
                     V_BestColor(palette_colors, (r << 3) | (r >> 2), (g << 3) | (g >> 2), (b << 3) | (b >> 2));
 
-    for (int x = 0; x < 65; x++)
-        for (int y = 0; y < 256; y++)
+    for (int32_t x = 0; x < 65; x++)
+        for (int32_t y = 0; y < 256; y++)
             Col2RGB8[x][y] = (((palette_colors[y].getr() * x) >> 4) << 20) | ((palette_colors[y].getg() * x) >> 4) |
                              (((palette_colors[y].getb() * x) >> 4) << 10);
 }

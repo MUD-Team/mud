@@ -100,7 +100,7 @@ void                  SV_DelayLoop()
     {
         while (m_delayQueue.size())
         {
-            int  sendgametic = gametic;
+            int32_t  sendgametic = gametic;
             auto item        = &m_delayQueue.front();
 
             while (std::chrono::steady_clock::now() < item->m_tp)
@@ -131,7 +131,7 @@ void SV_SendPacketDelayed(buf_t &packet, player_t &pl)
 //
 bool SV_SendPacket(player_t &pl)
 {
-    int bps = 0; // bytes per second, not bits per second
+    int32_t bps = 0; // bytes per second, not bits per second
 
     client_t *cl = &pl.client;
 
@@ -185,7 +185,7 @@ bool SV_SendPacket(player_t &pl)
     // add the unreliable part if space is available and rate value
     // allows it
     if (gametic % 35)
-        bps = (int)((double)((cl->unreliable_bps + cl->reliable_bps) * TICRATE) / (double)(gametic % 35));
+        bps = (int32_t)((double)((cl->unreliable_bps + cl->reliable_bps) * TICRATE) / (double)(gametic % 35));
 
     if (bps < cl->rate * 1000)
 
@@ -225,7 +225,7 @@ bool SV_SendPacket(player_t &pl)
  * @param pl Player to send to.
  * @param sequence Sequence number to send.  This assumss
  */
-static void SendOldPacket(player_t &pl, const int sequence)
+static void SendOldPacket(player_t &pl, const int32_t sequence)
 {
     // Send buffer.
     static buf_t send(MAX_UDP_PACKET);
@@ -263,7 +263,7 @@ void SV_AcknowledgePacket(player_t &player)
 {
     client_t *cl = &player.client;
 
-    int sequence = MSG_ReadLong();
+    int32_t sequence = MSG_ReadLong();
 
     cl->compressor.packet_acked(sequence);
 
@@ -271,9 +271,9 @@ void SV_AcknowledgePacket(player_t &player)
     if (sequence - cl->last_sequence > 1)
     {
         // resend
-        for (int seq = cl->last_sequence + 1; seq < sequence; seq++)
+        for (int32_t seq = cl->last_sequence + 1; seq < sequence; seq++)
         {
-            int  n;
+            int32_t  n;
             bool needfullupdate = true;
 
             if (cl->oldpackets[seq & PACKET_OLD_MASK].sequence != seq)

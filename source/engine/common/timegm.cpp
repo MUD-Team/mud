@@ -37,7 +37,7 @@
 
 #include <ctime>
 
-static int is_leap(uint32_t y)
+static int32_t is_leap(uint32_t y)
 {
     y += 1900;
     return (y % 4) == 0 && ((y % 100) != 0 || (y % 400) == 0);
@@ -48,7 +48,7 @@ time_t timegm(struct tm *tm)
     static const uint32_t ndays[2][12] = {{31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31},
                                           {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}};
     time_t                res          = 0;
-    int                   i;
+    int32_t                   i;
 
     for (i = 70; i < tm->tm_year; ++i)
         res += is_leap(i) ? 366 : 365;

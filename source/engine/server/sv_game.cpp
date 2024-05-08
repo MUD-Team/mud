@@ -68,7 +68,7 @@ player_t nullplayer;    // The null player
 
 uint8_t consoleplayer_id;  // player taking events and displaying
 uint8_t displayplayer_id;  // view being displayed
-int  gametic;
+int32_t  gametic;
 
 wbstartstruct_t wminfo; // parms for world map / intermission
 
@@ -92,7 +92,7 @@ END_COMMAND(pause)
 // G_Ticker
 // Make ticcmd_ts for the players.
 //
-int mapchange;
+int32_t mapchange;
 
 void G_Ticker(void)
 {
@@ -326,11 +326,11 @@ static fixed_t PlayersRangeFromSpot(mapthing2_t *spot)
 }
 
 // [RH] Select the deathmatch spawn spot farthest from everyone.
-static mapthing2_t *SelectFarthestDeathmatchSpot(int selections)
+static mapthing2_t *SelectFarthestDeathmatchSpot(int32_t selections)
 {
     fixed_t      bestdistance = 0;
     mapthing2_t *bestspot     = NULL;
-    int          i;
+    int32_t          i;
 
     for (i = 0; i < selections; i++)
     {
@@ -347,9 +347,9 @@ static mapthing2_t *SelectFarthestDeathmatchSpot(int selections)
 }
 
 // [RH] Select a deathmatch spawn spot at random (original mechanism)
-static mapthing2_t *SelectRandomDeathmatchSpot(player_t &player, int selections)
+static mapthing2_t *SelectRandomDeathmatchSpot(player_t &player, int32_t selections)
 {
-    int i = 0, j;
+    int32_t i = 0, j;
 
     for (j = 0; j < 20; j++)
     {
@@ -364,7 +364,7 @@ static mapthing2_t *SelectRandomDeathmatchSpot(player_t &player, int selections)
     return &DeathMatchStarts[i];
 }
 
-static mapthing2_t *SelectTeamSpot(player_t &player, std::vector<mapthing2_t> &starts, int selections)
+static mapthing2_t *SelectTeamSpot(player_t &player, std::vector<mapthing2_t> &starts, int32_t selections)
 {
     for (size_t j = 0; j < starts.size(); ++j)
     {
@@ -377,7 +377,7 @@ static mapthing2_t *SelectTeamSpot(player_t &player, std::vector<mapthing2_t> &s
 
 // [Toke] Randomly selects a team spawn point
 // [AM] Moved out of CTF gametype and cleaned up.
-static mapthing2_t *SelectRandomTeamSpot(player_t &player, int selections)
+static mapthing2_t *SelectRandomTeamSpot(player_t &player, int32_t selections)
 {
     if (player.userinfo.team < NUMTEAMS)
         return SelectTeamSpot(player, GetTeamInfo(player.userinfo.team)->Starts, selections);
@@ -387,7 +387,7 @@ static mapthing2_t *SelectRandomTeamSpot(player_t &player, int selections)
 
 void G_TeamSpawnPlayer(player_t &player) // [Toke - CTF - starts] Modified this function to accept teamplay starts
 {
-    int          selections;
+    int32_t          selections;
     mapthing2_t *spot = NULL;
 
     selections = 0;
@@ -431,7 +431,7 @@ EXTERN_CVAR(sv_dmfarspawn)
 
 void G_DeathMatchSpawnPlayer(player_t &player)
 {
-    int          selections;
+    int32_t          selections;
     mapthing2_t *spot;
 
     if (G_UsesCoopSpawns())

@@ -38,17 +38,17 @@
 // INITIALIZATION FUNCTIONS
 //
 spritedef_t *sprites;
-int          numsprites;
+int32_t          numsprites;
 
 spriteframe_t sprtemp[MAX_SPRITE_FRAMES];
-int           maxframe;
+int32_t           maxframe;
 
 void R_CacheSprite(spritedef_t *sprite)
 {
     DPrintf("cache sprite %s\n", sprite - sprites < NUMSPRITES ? sprnames[sprite - sprites] : "");
-    for (int i = 0; i < sprite->numframes; i++)
+    for (int32_t i = 0; i < sprite->numframes; i++)
     {
-        for (int r = 0; r < 8; r++)
+        for (int32_t r = 0; r < 8; r++)
         {
             if (sprite->spriteframes[i].width[r] == SPRITE_NEEDS_INFO)
             {
@@ -73,9 +73,9 @@ void R_CacheSprite(spritedef_t *sprite)
 void R_InstallSpriteTex(const texhandle_t tex_id, uint32_t frame, uint32_t rot, bool flipped)
 {
 	if (frame >= MAX_SPRITE_FRAMES || rot > 8)
-		I_FatalError ("R_InstallSpriteTex: Bad frame characters in resource ID %i", (int)tex_id);
+		I_FatalError ("R_InstallSpriteTex: Bad frame characters in resource ID %i", (int32_t)tex_id);
 
-	if (static_cast<int>(frame) > maxframe)
+	if (static_cast<int32_t>(frame) > maxframe)
 		maxframe = frame;
 
 	if (rot == 0)
@@ -83,7 +83,7 @@ void R_InstallSpriteTex(const texhandle_t tex_id, uint32_t frame, uint32_t rot, 
 		// the resource should be used for all rotations
         // false=0, true=1, but array initialised to -1
         // allows doom to have a "no value set yet" boolean value!
-		for (int r = 7; r >= 0; r--)
+		for (int32_t r = 7; r >= 0; r--)
 		{
 			if (sprtemp[frame].texes[r] == TextureManager::NO_TEXTURE_HANDLE)
 			{
@@ -107,10 +107,10 @@ void R_InstallSpriteTex(const texhandle_t tex_id, uint32_t frame, uint32_t rot, 
 }
 
 // [RH] Seperated out of R_InitSpriteDefs()
-void R_InstallSprite(const char* name, int num)
+void R_InstallSprite(const char* name, int32_t num)
 {
 	char sprname[5];
-	int frame;
+	int32_t frame;
 
 	if (maxframe == -1)
 	{
@@ -125,7 +125,7 @@ void R_InstallSprite(const char* name, int num)
 
 	for (frame = 0; frame < maxframe; frame++)
 	{
-		switch ((int)sprtemp[frame].rotate)
+		switch ((int32_t)sprtemp[frame].rotate)
 		{
 		case -1:
 			// no rotations were found for that frame at all
@@ -140,7 +140,7 @@ void R_InstallSprite(const char* name, int num)
 		case 1:
 			// must have all 8 frames
 			{
-				for (int rotation = 0; rotation < 8; rotation++)
+				for (int32_t rotation = 0; rotation < 8; rotation++)
 				{
 					if (sprtemp[frame].texes[rotation] == TextureManager::NO_TEXTURE_HANDLE)
 						I_FatalError(
@@ -162,7 +162,7 @@ void R_InstallSprite(const char* name, int num)
 //
 // GAME FUNCTIONS
 //
-int          MaxVisSprites;
+int32_t          MaxVisSprites;
 vissprite_t *vissprites;
 vissprite_t *lastvissprite;
 

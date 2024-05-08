@@ -75,7 +75,7 @@ BEGIN_COMMAND(stringinfo)
     }
     else if (stricmp(argv[1], "index") == 0)
     {
-        int index = atoi(argv[2]);
+        int32_t index = atoi(argv[2]);
         Printf(PRINT_HIGH, "%s = \"%s\"\n", argv[2], GStrings.getIndex(index));
         return;
     }

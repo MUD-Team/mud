@@ -36,7 +36,7 @@
 #include "w_wad.h"
 #include "z_zone.h"
 
-extern int numtextures;
+extern int32_t numtextures;
 
 //
 // CHANGE THE TEXTURE OF A WALL SWITCH TO ITS OPPOSITE
@@ -79,8 +79,8 @@ class DActiveButton : public DThinker
     }
 };
 
-static int *switchlist;
-static int  numswitches;
+static int32_t *switchlist;
+static int32_t  numswitches;
 
 //
 // P_InitSwitchList
@@ -112,20 +112,20 @@ void P_InitSwitchList(void)
     PHYSFS_close(rawswitches);
 
     uint8_t *list_p;
-    int   i;
+    int32_t   i;
 
     for (i = 0, list_p = alphSwitchList; list_p[18] || list_p[19]; list_p += 20, i++)
         ;
 
     if (i == 0)
     {
-        switchlist  = (int *)Z_Malloc(sizeof(*switchlist), PU_STATIC, 0);
+        switchlist  = (int32_t *)Z_Malloc(sizeof(*switchlist), PU_STATIC, 0);
         *switchlist = TextureManager::NOT_FOUND_TEXTURE_HANDLE;
         numswitches = 0;
     }
     else
     {
-        switchlist = (int *)Z_Malloc(sizeof(*switchlist) * (i * 2 + 1), PU_STATIC, 0);
+        switchlist = (int32_t *)Z_Malloc(sizeof(*switchlist) * (i * 2 + 1), PU_STATIC, 0);
 
         for (i = 0, list_p = alphSwitchList; list_p[18] || list_p[19]; list_p += 20)
         {
@@ -160,7 +160,7 @@ void P_DestroyButtonThinkers()
 // Start a button counting down till it turns off.
 // [RH] Rewritten to remove MAXBUTTONS limit and use temporary soundorgs.
 //
-static void P_StartButton(line_t *line, DActiveButton::EWhere w, int texture, int time, fixed_t x, fixed_t y)
+static void P_StartButton(line_t *line, DActiveButton::EWhere w, int32_t texture, int32_t time, fixed_t x, fixed_t y)
 {
     DActiveButton                  *button;
     TThinkerIterator<DActiveButton> iterator;
@@ -186,7 +186,7 @@ texhandle_t *P_GetButtonTexturePtr(line_t *line, texhandle_t *&altTexture, DActi
     where      = (DActiveButton::EWhere)0;
     altTexture = NULL;
 
-    for (int i = 0; i < numswitches * 2; i++)
+    for (int32_t i = 0; i < numswitches * 2; i++)
     {
         if (switchlist[i] == texTop)
         {
@@ -299,7 +299,7 @@ void P_UpdateButtons(client_t *cl)
         MSG_WriteSVC(&cl->reliablebuf, SVC_Switch(lines[l], state, timer));
     }
 
-    for (int l = 0; l < numlines; l++)
+    for (int32_t l = 0; l < numlines; l++)
     {
         // update all button state except those that have actors assigned:
         if (!actedlines[l] && lines[l].wastoggled)
@@ -313,7 +313,7 @@ void P_UpdateButtons(client_t *cl)
 // Function that changes wall texture.
 // Tell it if switch is ok to use again (1=yes, it's a button).
 //
-void P_ChangeSwitchTexture(line_t *line, int useAgain, bool playsound)
+void P_ChangeSwitchTexture(line_t *line, int32_t useAgain, bool playsound)
 {
     const char *sound;
 

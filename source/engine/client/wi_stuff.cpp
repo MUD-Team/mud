@@ -86,8 +86,8 @@ typedef enum
 
 typedef struct
 {
-    int x;
-    int y;
+    int32_t x;
+    int32_t y;
 
 } point_t;
 
@@ -99,10 +99,10 @@ typedef struct
     animenum_t type;
 
     // period in tics between animations
-    int period;
+    int32_t period;
 
     // number of animation frames
-    int nanims;
+    int32_t nanims;
 
     // location of animation
     point_t loc;
@@ -110,12 +110,12 @@ typedef struct
     // ALWAYS: n/a,
     // RANDOM: period deviation (<256),
     // LEVEL: level
-    int data1;
+    int32_t data1;
 
     // ALWAYS: n/a,
     // RANDOM: random base period,
     // LEVEL: n/a
-    int data2;
+    int32_t data2;
 
     // actual graphics for frames of animations
     patch_t *p[3];
@@ -123,16 +123,16 @@ typedef struct
     // following must be initialized to zero before use!
 
     // next value of bcnt (used in conjunction with period)
-    int nexttic;
+    int32_t nexttic;
 
     // last drawn animation frame
-    int lastdrawn;
+    int32_t lastdrawn;
 
     // next frame number to animate
-    int ctr;
+    int32_t ctr;
 
     // used by RANDOM and LEVEL when animating
-    int state;
+    int32_t state;
 
 } animinfo_t;
 
@@ -211,7 +211,7 @@ static animinfo_t epsd2animinfo[] = {{ANIM_ALWAYS, TICRATE / 3, 3, {104, 168}, 0
                                      {ANIM_ALWAYS, TICRATE / 3, 3, {120, 32}, 0, 0, {NULL, NULL, NULL}, 0, 0, 0, 0},
                                      {ANIM_ALWAYS, TICRATE / 4, 3, {40, 0}, 0, 0, {NULL, NULL, NULL}, 0, 0, 0, 0}};
 
-static int NUMANIMS[NUMEPISODES] = {ARRAY_LENGTH(epsd0animinfo), ARRAY_LENGTH(epsd1animinfo),
+static int32_t NUMANIMS[NUMEPISODES] = {ARRAY_LENGTH(epsd0animinfo), ARRAY_LENGTH(epsd1animinfo),
                                     ARRAY_LENGTH(epsd2animinfo)};
 
 static animinfo_t *anims[NUMEPISODES] = {epsd0animinfo, epsd1animinfo, epsd2animinfo};
@@ -246,35 +246,35 @@ static stateenum_t state;
 static wbstartstruct_t *wbs;
 
 static std::vector<wbplayerstruct_t> plrs;         // = wbs->plyr
-static std::vector<int>              cnt_kills_c;  // = cnt_kills
-static std::vector<int>              cnt_items_c;  // = cnt_items
-static std::vector<int>              cnt_secret_c; // = cnt_secret
-static std::vector<int>              cnt_frags_c;  // = cnt_frags
+static std::vector<int32_t>              cnt_kills_c;  // = cnt_kills
+static std::vector<int32_t>              cnt_items_c;  // = cnt_items
+static std::vector<int32_t>              cnt_secret_c; // = cnt_secret
+static std::vector<int32_t>              cnt_frags_c;  // = cnt_frags
 static lumpHandle_t                  faceclassic[4];
-static int                           dofrags;
-static int                           ng_state;
+static int32_t                           dofrags;
+static int32_t                           ng_state;
 
 // used for general timing
-static int cnt;
+static int32_t cnt;
 
 // used for timing of background animation
-static int bcnt;
+static int32_t bcnt;
 
 /*struct count_t
 {
-    int cnt_kills, cnt_items, cnt_secret, cnt_frags;
+    int32_t cnt_kills, cnt_items, cnt_secret, cnt_frags;
 };
 
 static std::vector<count_t> stats;
-static std::vector<int> dm_totals;*/
+static std::vector<int32_t> dm_totals;*/
 
 // Since classic is used for singleplayer only...
-static int cnt_kills;
-static int cnt_items;
-static int cnt_secret;
-static int cnt_time;
-static int cnt_par;
-static int cnt_pause;
+static int32_t cnt_kills;
+static int32_t cnt_items;
+static int32_t cnt_secret;
+static int32_t cnt_time;
+static int32_t cnt_par;
+static int32_t cnt_pause;
 
 //
 //		GRAPHICS
@@ -329,7 +329,7 @@ static lumpHandle_t p; // [RH] Only one
 static lumpHandle_t lnames[2];
 
 // [RH] Info to dynamically generate the level name graphics
-static int         lnamewidths[2];
+static int32_t         lnamewidths[2];
 static const char *lnametexts[2];
 
 EXTERN_CVAR(sv_maxplayers)
@@ -345,10 +345,10 @@ EXTERN_CVAR(wi_oldintermission)
 // Returns the width of the area that the intermission screen will be
 // drawn to. The intermisison screen should be 4:3, except in 320x200 mode.
 //
-static int WI_GetWidth()
+static int32_t WI_GetWidth()
 {
-    const int surface_width  = IRenderSurface::getCurrentRenderSurface()->getWidth();
-    const int surface_height = IRenderSurface::getCurrentRenderSurface()->getHeight();
+    const int32_t surface_width  = IRenderSurface::getCurrentRenderSurface()->getWidth();
+    const int32_t surface_height = IRenderSurface::getCurrentRenderSurface()->getHeight();
 
     if (surface_width * 3 >= surface_height * 4)
         return surface_height * 4 / 3;
@@ -362,10 +362,10 @@ static int WI_GetWidth()
 // Returns the height of the area that the intermission screen will be
 // drawn to. The intermisison screen should be 4:3, except in 320x200 mode.
 //
-static int WI_GetHeight()
+static int32_t WI_GetHeight()
 {
-    const int surface_width  = IRenderSurface::getCurrentRenderSurface()->getWidth();
-    const int surface_height = IRenderSurface::getCurrentRenderSurface()->getHeight();
+    const int32_t surface_width  = IRenderSurface::getCurrentRenderSurface()->getWidth();
+    const int32_t surface_height = IRenderSurface::getCurrentRenderSurface()->getHeight();
 
     if (surface_width * 3 >= surface_height * 4)
         return surface_height;
@@ -373,9 +373,9 @@ static int WI_GetHeight()
         return surface_width * 3 / 4;
 }
 
-int WI_MapToIndex(char *map)
+int32_t WI_MapToIndex(char *map)
 {
-    int i;
+    int32_t i;
 
     for (i = 0; i < NUMMAPS; i++)
     {
@@ -391,7 +391,7 @@ void WI_initAnimatedBack()
     if ((gameinfo.flags & GI_MAPxx) || wbs->epsd > 2)
         return;
 
-    for (int i = 0; i < NUMANIMS[wbs->epsd]; i++)
+    for (int32_t i = 0; i < NUMANIMS[wbs->epsd]; i++)
     {
         animinfo_t *a = &anims[wbs->epsd][i];
 
@@ -411,7 +411,7 @@ void WI_updateAnimatedBack()
     if ((gameinfo.flags & GI_MAPxx) || wbs->epsd > 2)
         return;
 
-    for (int i = 0; i < NUMANIMS[wbs->epsd]; i++)
+    for (int32_t i = 0; i < NUMANIMS[wbs->epsd]; i++)
     {
         animinfo_t *a = &anims[wbs->epsd][i];
 
@@ -502,7 +502,7 @@ void WI_updateShowNextLoc()
     }
 }
 
-int WI_fragSum(player_t &player)
+int32_t WI_fragSum(player_t &player)
 {
     return player.fragcount;
 }
@@ -650,7 +650,7 @@ void WI_updateNetgameStats()
     }
     else if (ng_state == 8)
     {
-        int fsum;
+        int32_t fsum;
         if (!(bcnt & 3))
             S_Sound(CHAN_INTERFACE, "weapons/pistol", 1, ATTN_NONE);
 
@@ -697,7 +697,7 @@ void WI_updateNetgameStats()
     }
 }
 
-static int sp_state;
+static int32_t sp_state;
 
 void WI_initStats()
 {
@@ -891,18 +891,18 @@ void WI_Ticker()
     }
 }
 
-static int WI_CalcWidth(const char *str)
+static int32_t WI_CalcWidth(const char *str)
 {
     if (!str)
         return 0;
 
-    int w = 0;
+    int32_t w = 0;
 
     while (*str)
     {
         char charname[9];
         sprintf(charname, "FONTB%02u", toupper(*str) - 32);
-        int lump = W_CheckNumForName(charname);
+        int32_t lump = W_CheckNumForName(charname);
 
         if (lump != -1)
         {
@@ -936,7 +936,7 @@ void WI_loadData()
     // background
     const patch_t *bg_patch = W_CachePatch(name);
 
-    for (int i = 0, j; i < 2; i++)
+    for (int32_t i = 0, j; i < 2; i++)
     {
         char *lname = (i == 0 ? wbs->lname0 : wbs->lname1);
 
@@ -970,10 +970,10 @@ void WI_loadData()
 
         if (wbs->epsd < 3)
         {
-            for (int j = 0; j < NUMANIMS[wbs->epsd]; j++)
+            for (int32_t j = 0; j < NUMANIMS[wbs->epsd]; j++)
             {
                 animinfo_t *a = &anims[wbs->epsd][j];
-                for (int i = 0; i < a->nanims; i++)
+                for (int32_t i = 0; i < a->nanims; i++)
                 {
                     // MONDO HACK!
                     if (wbs->epsd != 1 || j != 8)
@@ -992,7 +992,7 @@ void WI_loadData()
         }
     }
 
-    for (int i = 0; i < 10; i++)
+    for (int32_t i = 0; i < 10; i++)
     {
         // numbers 0-9
         sprintf(name, "WINUM%d", i);
@@ -1050,7 +1050,7 @@ void WI_loadData()
     p = W_CachePatchHandle("STPBANY", PU_STATIC);
 
     // [Nes] Classic vanilla lifebars.
-    for (int i = 0; i < 4; i++)
+    for (int32_t i = 0; i < 4; i++)
     {
         sprintf(name, "STPB%d", i);
         faceclassic[i] = W_CachePatchHandle(name, PU_STATIC);
@@ -1059,7 +1059,7 @@ void WI_loadData()
 
 void WI_unloadData()
 {
-    /*	int i, j;
+    /*	int32_t i, j;
 
         Z_ChangeTag (wiminus, PU_CACHE);
 
@@ -1096,7 +1096,7 @@ void WI_unloadData()
 
         Z_ChangeTag (p, PU_CACHE);*/
 
-    for (int i = 0; i < 10; i++)
+    for (int32_t i = 0; i < 10; i++)
         num[i].clear();
 
     wiminus.clear();
@@ -1116,7 +1116,7 @@ void WI_unloadData()
     //	Z_ChangeTag(bstar, PU_CACHE);
     p.clear();
 
-    for (int i = 0; i < 4; i++)
+    for (int32_t i = 0; i < 4; i++)
         faceclassic[i].clear();
 }
 

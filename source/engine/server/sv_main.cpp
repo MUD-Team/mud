@@ -87,7 +87,7 @@ baseapp_t baseapp    = server;
 // really only used clientside
 bool simulated_connection = false;
 
-extern int mapchange;
+extern int32_t mapchange;
 
 bool step_mode = false;
 
@@ -116,7 +116,7 @@ EXTERN_CVAR(g_winnerstays)
 EXTERN_CVAR(debug_disconnect)
 EXTERN_CVAR(g_resetinvonexit)
 
-void              SexMessage(const char *from, char *to, int gender, const char *victim, const char *killer);
+void              SexMessage(const char *from, char *to, int32_t gender, const char *victim, const char *killer);
 Players::iterator SV_RemoveDisconnectedPlayer(Players::iterator it);
 void              P_PlayerLeavesGame(player_s *player);
 bool              P_LineSpecialMovesSector(int16_t special);
@@ -128,7 +128,7 @@ std::string V_GetTeamColor(UserInfo userinfo);
 CVAR_FUNC_IMPL(sv_maxclients)
 {
     // Describes the max number of clients that are allowed to connect.
-    int               count = var.asInt();
+    int32_t               count = var.asInt();
     Players::iterator it    = players.begin();
     while (it != players.end())
     {
@@ -150,7 +150,7 @@ CVAR_FUNC_IMPL(sv_maxclients)
 
 CVAR_FUNC_IMPL(sv_maxplayers)
 {
-    int  normalcount = 0;
+    int32_t  normalcount = 0;
     bool queueExists = false;
 
     for (Players::iterator it = players.begin(); it != players.end(); ++it)
@@ -192,9 +192,9 @@ CVAR_FUNC_IMPL(sv_maxplayers)
 // [AM] - Force extras on a team to become spectators.
 CVAR_FUNC_IMPL(sv_maxplayersperteam)
 {
-    for (int i = 0; i < NUMTEAMS; i++)
+    for (int32_t i = 0; i < NUMTEAMS; i++)
     {
-        int normalcount = 0;
+        int32_t normalcount = 0;
         for (Players::iterator it = players.begin(); it != players.end(); ++it)
         {
             bool spectator = it->spectator || !it->ingame();
@@ -263,7 +263,7 @@ CVAR_FUNC_IMPL(sv_maxrate)
         sv_waddownloadcap.Set(var);
 
     for (Players::iterator it = players.begin(); it != players.end(); ++it)
-        it->client.rate = int(sv_maxrate);
+        it->client.rate = int32_t(sv_maxrate);
 }
 
 CVAR_FUNC_IMPL(sv_waddownloadcap)
@@ -518,7 +518,7 @@ Players::iterator SV_GetFreeClient(void)
     if (free_player_ids.empty())
     {
         // list of free ids needs to be initialized
-        for (int i = 1; i < MAXPLAYERS; i++)
+        for (int32_t i = 1; i < MAXPLAYERS; i++)
             free_player_ids.insert(i);
     }
 
@@ -575,7 +575,7 @@ Players::iterator SV_RemoveDisconnectedPlayer(Players::iterator it)
     if (it == players.end() || !validplayer(*it))
         return players.end();
 
-    int player_id = it->id;
+    int32_t player_id = it->id;
 
     if (!it->spectator)
     {
@@ -644,7 +644,7 @@ void SV_GetPackets()
 }
 
 // Print a midscreen message to a client
-void SV_MidPrint(const char *msg, player_t *p, int msgtime)
+void SV_MidPrint(const char *msg, player_t *p, int32_t msgtime)
 {
     client_t *cl = &p->client;
 
@@ -656,9 +656,9 @@ void SV_MidPrint(const char *msg, player_t *p, int msgtime)
 //
 void SV_Sound(AActor *mo, uint8_t channel, const char *name, uint8_t attenuation)
 {
-    int       sfx_id;
+    int32_t       sfx_id;
     client_t *cl;
-    int       x = 0, y = 0;
+    int32_t       x = 0, y = 0;
 
     sfx_id = S_FindSound(name);
 
@@ -684,8 +684,8 @@ void SV_Sound(AActor *mo, uint8_t channel, const char *name, uint8_t attenuation
 
 void SV_Sound(player_t &pl, AActor *mo, const uint8_t channel, const char *name, const uint8_t attenuation)
 {
-    int sfx_id;
-    int x = 0, y = 0;
+    int32_t sfx_id;
+    int32_t x = 0, y = 0;
 
     sfx_id = S_FindSound(name);
 
@@ -712,7 +712,7 @@ void SV_Sound(player_t &pl, AActor *mo, const uint8_t channel, const char *name,
 //
 void UV_SoundAvoidPlayer(AActor *mo, uint8_t channel, const char *name, uint8_t attenuation)
 {
-    int       sfx_id;
+    int32_t       sfx_id;
     client_t *cl;
 
     if (!mo || !mo->player)
@@ -743,9 +743,9 @@ void UV_SoundAvoidPlayer(AActor *mo, uint8_t channel, const char *name, uint8_t 
 //	SV_SoundTeam
 //	Sends a sound to players on the specified teams
 //
-void SV_SoundTeam(uint8_t channel, const char *name, uint8_t attenuation, int team)
+void SV_SoundTeam(uint8_t channel, const char *name, uint8_t attenuation, int32_t team)
 {
-    int sfx_id;
+    int32_t sfx_id;
 
     client_t *cl;
 
@@ -770,7 +770,7 @@ void SV_SoundTeam(uint8_t channel, const char *name, uint8_t attenuation, int te
 
 void SV_Sound(fixed_t x, fixed_t y, uint8_t channel, const char *name, uint8_t attenuation)
 {
-    int       sfx_id;
+    int32_t       sfx_id;
     client_t *cl;
 
     sfx_id = S_FindSound(name);
@@ -860,7 +860,7 @@ bool SV_SetupUserInfo(player_t &player)
     gender_t gender = static_cast<gender_t>(MSG_ReadLong());
 
     uint8_t color[4];
-    for (int i = 3; i >= 0; i--)
+    for (int32_t i = 3; i >= 0; i--)
         color[i] = MSG_ReadByte();
 
     MSG_ReadString(); // [SL] place holder for deprecated skins
@@ -922,7 +922,7 @@ bool SV_SetupUserInfo(player_t &player)
         {
             std::string test_netname = std::string(new_netname);
 
-            for (int num = 2; num < MAXPLAYERS + 2; num++)
+            for (int32_t num = 2; num < MAXPLAYERS + 2; num++)
             {
                 std::ostringstream buffer;
                 buffer << num;
@@ -1047,7 +1047,7 @@ void SV_CheckTeam(player_t &player)
 //
 team_t SV_GoodTeam(void)
 {
-    int teamcount = sv_teamsinplay;
+    int32_t teamcount = sv_teamsinplay;
 
     // Unsure how this can be triggered?
     if (teamcount == 0)
@@ -1059,7 +1059,7 @@ team_t SV_GoodTeam(void)
     // Find the smallest team
     size_t smallest_team_size = MAXPLAYERS;
     team_t smallest_team      = (team_t)0;
-    for (int i = 0; i < teamcount; i++)
+    for (int32_t i = 0; i < teamcount; i++)
     {
         size_t team_size = P_NumPlayersOnTeam((team_t)i);
         if (team_size < smallest_team_size)
@@ -1223,7 +1223,7 @@ void SV_UpdateHiddenMobj(void)
         if (!pl.mo)
             continue;
 
-        int updated = 0;
+        int32_t updated = 0;
 
         while (!pl.to_spawn.empty())
         {
@@ -1248,7 +1248,7 @@ void SV_UpdateHiddenMobj(void)
     }
 }
 
-void SV_UpdateSector(client_t *cl, int sectornum)
+void SV_UpdateSector(client_t *cl, int32_t sectornum)
 {
     sector_t *sector = &sectors[sectornum];
 
@@ -1259,7 +1259,7 @@ void SV_UpdateSector(client_t *cl, int sectornum)
     }
 }
 
-void SV_BroadcastSector(int sectornum)
+void SV_BroadcastSector(int32_t sectornum)
 {
     for (Players::iterator it = players.begin(); it != players.end(); ++it)
         SV_UpdateSector(&(it->client), sectornum);
@@ -1271,7 +1271,7 @@ void SV_BroadcastSector(int sectornum)
 //
 void SV_UpdateSectors(client_t *cl)
 {
-    for (int sectornum = 0; sectornum < numsectors; sectornum++)
+    for (int32_t sectornum = 0; sectornum < numsectors; sectornum++)
     {
         SV_UpdateSector(cl, sectornum);
 
@@ -1328,7 +1328,7 @@ void SV_SendMovingSectorUpdate(player_t &player, sector_t *sector)
     if (!sector || !validplayer(player))
         return;
 
-    int sectornum = sector - sectors;
+    int32_t sectornum = sector - sectors;
     if (sectornum < 0 || sectornum >= numsectors)
         return;
 
@@ -1372,7 +1372,7 @@ void SV_SendGametic(client_t *cl)
 
 void SV_LineStateUpdate(client_t *cl)
 {
-    for (int lineNum = 0; lineNum < numlines; lineNum++)
+    for (int32_t lineNum = 0; lineNum < numlines; lineNum++)
     {
         line_t *line = &lines[lineNum];
 
@@ -1384,7 +1384,7 @@ void SV_LineStateUpdate(client_t *cl)
         if (!line->SidedefChanged)
             continue;
 
-        for (int sideNum = 0; sideNum < 2; sideNum++)
+        for (int32_t sideNum = 0; sideNum < 2; sideNum++)
         {
             if (line->sidenum[sideNum] != R_NOSIDE)
             {
@@ -1488,7 +1488,7 @@ void SV_ClientFullUpdate(player_t &pl)
     // [deathz0r] send team frags/captures if teamplay is enabled
     if (G_IsTeamGame())
     {
-        for (int i = 0; i < NUMTEAMS; i++)
+        for (int32_t i = 0; i < NUMTEAMS; i++)
             MSG_WriteSVC(&cl->reliablebuf, SVC_TeamMembers(static_cast<team_t>(i)));
     }
 
@@ -1589,14 +1589,14 @@ void SV_ServerSettingChange()
 // SV_CheckClientVersion
 bool SV_CheckClientVersion(client_t *cl, Players::iterator it)
 {
-    int         GameVer = 0;
+    int32_t         GameVer = 0;
     std::string VersionStr;
     std::string OurVersionStr(DOTVERSIONSTR);
     bool        AllowConnect = true;
-    int         cl_major     = 0;
-    int         cl_minor     = 0;
-    int         cl_patch     = 0;
-    int         sv_major, sv_minor, sv_patch;
+    int32_t         cl_major     = 0;
+    int32_t         cl_minor     = 0;
+    int32_t         cl_patch     = 0;
+    int32_t         sv_major, sv_minor, sv_patch;
     BREAKVER(GAMEVER, sv_major, sv_minor, sv_patch);
 
     switch (cl->version)
@@ -1668,11 +1668,11 @@ bool SV_CheckClientVersion(client_t *cl, Players::iterator it)
  */
 static void SV_DisconnectOldClient()
 {
-    int         cl_version      = MSG_ReadShort();
+    int32_t         cl_version      = MSG_ReadShort();
     uint8_t        connection_type = MSG_ReadByte();
     std::string VersionStr;
 
-    int GameVer = 0;
+    int32_t GameVer = 0;
     if (cl_version == VERSION)
     {
         GameVer = MSG_ReadLong();
@@ -1683,7 +1683,7 @@ static void SV_DisconnectOldClient()
         GameVer = MAKEVER(0, 3, 0);
     }
 
-    int cl_maj, cl_min, cl_pat;
+    int32_t cl_maj, cl_min, cl_pat;
     BREAKVER(GameVer, cl_maj, cl_min, cl_pat);
 
     std::string msg = VersionMessage(GAMEVER, GameVer, ::sv_email.cstring());
@@ -1699,7 +1699,7 @@ static void SV_DisconnectOldClient()
     // Send using the old protocol mechanism without relying on any defines
     const uint8_t old_svc_disconnect = 2;
     const uint8_t old_svc_print      = 28;
-    const int  old_PRINT_HIGH     = 2;
+    const int32_t  old_PRINT_HIGH     = 2;
 
     static buf_t smallbuf(1024);
 
@@ -1725,7 +1725,7 @@ void G_DoReborn(player_t &playernum);
 //
 void SV_ConnectClient()
 {
-    int challenge = MSG_ReadLong();
+    int32_t challenge = MSG_ReadLong();
 
     // New querying system
     if (SV_QryParseEnquiry(challenge) == 0)
@@ -1832,7 +1832,7 @@ void SV_ConnectClient()
 
     // [SL] Read and ignore deprecated client rate. Clients now always use sv_maxrate.
     MSG_ReadLong();
-    cl->rate = int(sv_maxrate);
+    cl->rate = int32_t(sv_maxrate);
 
     // Check if the IP is banned from our list or not.
     if (SV_BanCheck(cl))
@@ -1997,7 +1997,7 @@ void SV_DisconnectClient(player_t &who)
 // SV_DropClient
 // Called when the player is leaving the server unwillingly.
 //
-void SV_DropClient2(player_t &who, const char *file, const int line)
+void SV_DropClient2(player_t &who, const char *file, const int32_t line)
 {
     client_t *cl = &who.client;
 
@@ -2119,8 +2119,8 @@ static float SV_CalculateKillDeathRatio(const player_t *player)
 static float SV_CalculateFragDeathRatio(const player_t *player)
 {
 
-    int frags  = 0;
-    int deaths = 0;
+    int32_t frags  = 0;
+    int32_t deaths = 0;
 
     if (G_IsRoundsGame() && !G_IsDuelGame())
     {
@@ -2185,7 +2185,7 @@ void SV_DrawScores()
 
         Printf_Bold("%18s\n", str);
 
-        for (int team_num = 0; team_num < sv_teamsinplay; team_num++)
+        for (int32_t team_num = 0; team_num < sv_teamsinplay; team_num++)
         {
             if (team_num == TEAM_BLUE)
                 Printf_Bold("--------------------------------------------------BLUE TEAM");
@@ -2293,7 +2293,7 @@ BEGIN_COMMAND(showscores)
 END_COMMAND(showscores)
 
 FORMAT_PRINTF(2, 3)
-void STACK_ARGS SV_BroadcastPrintf(int printlevel, const char *format, ...)
+void STACK_ARGS SV_BroadcastPrintf(int32_t printlevel, const char *format, ...)
 {
     va_list     argptr;
     std::string string;
@@ -2331,7 +2331,7 @@ void STACK_ARGS SV_BroadcastPrintf(const char *fmt, ...)
     SV_BroadcastPrintf(PRINT_NORCON, "%s", string);
 }
 
-void STACK_ARGS SV_BroadcastPrintfButPlayer(int printlevel, int player_id, const char *format, ...)
+void STACK_ARGS SV_BroadcastPrintfButPlayer(int32_t printlevel, int32_t player_id, const char *format, ...)
 {
     va_list     argptr;
     std::string string;
@@ -2361,7 +2361,7 @@ void STACK_ARGS SV_BroadcastPrintfButPlayer(int printlevel, int player_id, const
 }
 
 // GhostlyDeath -- same as above but ONLY for spectators
-void STACK_ARGS SV_SpectatorPrintf(int level, const char *fmt, ...)
+void STACK_ARGS SV_SpectatorPrintf(int32_t level, const char *fmt, ...)
 {
     va_list   argptr;
     char      string[2048];
@@ -2386,7 +2386,7 @@ void STACK_ARGS SV_SpectatorPrintf(int level, const char *fmt, ...)
 }
 
 // Print directly to a specific client.
-void STACK_ARGS SV_ClientPrintf(client_t *cl, int level, const char *fmt, ...)
+void STACK_ARGS SV_ClientPrintf(client_t *cl, int32_t level, const char *fmt, ...)
 {
     va_list argptr;
     char    string[2048];
@@ -2399,7 +2399,7 @@ void STACK_ARGS SV_ClientPrintf(client_t *cl, int level, const char *fmt, ...)
 }
 
 // Print directly to a specific player.
-void STACK_ARGS SV_PlayerPrintf(int level, int player_id, const char *fmt, ...)
+void STACK_ARGS SV_PlayerPrintf(int32_t level, int32_t player_id, const char *fmt, ...)
 {
     va_list argptr;
     char    string[2048];
@@ -2412,7 +2412,7 @@ void STACK_ARGS SV_PlayerPrintf(int level, int player_id, const char *fmt, ...)
     MSG_WriteSVC(&cl->reliablebuf, SVC_Print(static_cast<printlevel_t>(level), string));
 }
 
-void STACK_ARGS SV_TeamPrintf(int level, int who, const char *fmt, ...)
+void STACK_ARGS SV_TeamPrintf(int32_t level, int32_t who, const char *fmt, ...)
 {
     va_list argptr;
     char    string[2048];
@@ -2771,7 +2771,7 @@ void SV_UpdateGametype(player_t &pl)
     if (G_IsHordeMode())
     {
         static hordeInfo_t lastInfo = {HS_STARTING, -1, -1, -1, 0, 0, -1, -1, -1, -1, -1};
-        static int         ticsent;
+        static int32_t         ticsent;
 
         // If the hordeinfo has changed since last tic, save and send it.
         if (ticsent != ::gametic)
@@ -2837,7 +2837,7 @@ void SV_ActorTracer(AActor *actor)
 void SV_RemoveCorpses(void)
 {
     AActor *mo;
-    int     corpses = 0;
+    int32_t     corpses = 0;
 
     // joek - Number of corpses infinite
     if (sv_maxcorpses <= 0)
@@ -3111,7 +3111,7 @@ void SV_FlushPlayerCmds(player_t &player)
 // most circumstances, it should be 1 per gametic to have the smoothest
 // player movement possible.
 //
-int SV_CalculateNumTiccmds(player_t &player)
+int32_t SV_CalculateNumTiccmds(player_t &player)
 {
     if (!player.mo || player.cmdqueue.empty())
         return 0;
@@ -3157,11 +3157,11 @@ int SV_CalculateNumTiccmds(player_t &player)
 //
 void SV_ProcessPlayerCmd(player_t &player)
 {
-    const int max_forward_move = 50 << 8;
+    const int32_t max_forward_move = 50 << 8;
 #if 0
-	const int max_sr40_side_move = 40 << 8;
+	const int32_t max_sr40_side_move = 40 << 8;
 #endif
-    const int max_sr50_side_move = 50 << 8;
+    const int32_t max_sr50_side_move = 50 << 8;
 
     if (player.joindelay)
         player.joindelay--;
@@ -3175,9 +3175,9 @@ void SV_ProcessPlayerCmd(player_t &player)
     DPrintf("Cmd queue size for %s: %d\n", player.userinfo.netname, player.cmdqueue.size());
 #endif // _TICCMD_QUEUE_DEBUG_
 
-    int num_cmds = SV_CalculateNumTiccmds(player);
+    int32_t num_cmds = SV_CalculateNumTiccmds(player);
 
-    for (int i = 0; i < num_cmds && !player.cmdqueue.empty(); i++)
+    for (int32_t i = 0; i < num_cmds && !player.cmdqueue.empty(); i++)
     {
         NetCommand *netcmd = &(player.cmdqueue.front());
         player.cmd         = ticcmd_t();
@@ -3230,11 +3230,11 @@ void SV_GetPlayerCmd(player_t &player)
 
     // The client-tic at the time this message was sent.  The server stores
     // this and sends it back the next time it tells the client
-    int tic = MSG_ReadLong();
+    int32_t tic = MSG_ReadLong();
 
     // Read the last 10 ticcmds from the client and add any new ones
     // to the cmdqueue
-    for (int i = 9; i >= 0; i--)
+    for (int32_t i = 9; i >= 0; i--)
     {
         NetCommand netcmd;
         netcmd.read(&net_message);
@@ -3319,7 +3319,7 @@ void SV_Spectate(player_t &player)
         // GhostlyDeath -- Prevent Cheaters
         if (!player.spectator || !player.mo)
         {
-            for (int i = 0; i < 3; i++)
+            for (int32_t i = 0; i < 3; i++)
                 MSG_ReadLong();
             return;
         }
@@ -3633,11 +3633,11 @@ static void ReadyCmd(player_t &player)
     // Check to see if the player's timeout has expired.
     if (player.timeout_ready > 0)
     {
-        int timeout = level.time - player.timeout_ready;
+        int32_t timeout = level.time - player.timeout_ready;
 
         // Players can only toggle their ready state every 3 seconds.
-        int timeout_check   = 3 * TICRATE;
-        int timeout_waitsec = 3 - (timeout / TICRATE);
+        int32_t timeout_check   = 3 * TICRATE;
+        int32_t timeout_waitsec = 3 - (timeout / TICRATE);
 
         if (timeout < timeout_check)
         {
@@ -3779,7 +3779,7 @@ void SV_Cheat(player_t &player)
         if (!CHEAT_AreCheatsEnabled())
             return;
 
-        int oldCheats = player.cheats;
+        int32_t oldCheats = player.cheats;
         CHEAT_DoCheat(&player, cheat);
 
         if (player.cheats != oldCheats)
@@ -3953,14 +3953,14 @@ void SV_ParseCommands(player_t &player)
             break;
 
         default:
-            Printf("SV_ParseCommands: Unknown client message %d.\n", (int)cmd);
+            Printf("SV_ParseCommands: Unknown client message %d.\n", (int32_t)cmd);
             SV_DropClient(player);
             return;
         }
 
         if (net_message.overflowed)
         {
-            Printf("SV_ReadClientMessage: badread %d(%s)\n", (int)cmd, clc_info[cmd].getName());
+            Printf("SV_ReadClientMessage: badread %d(%s)\n", (int32_t)cmd, clc_info[cmd].getName());
             SV_DropClient(player);
             return;
         }
@@ -4056,7 +4056,7 @@ void SV_StepTics(uint64_t count)
         SV_DestroyFinishedMovingSectors();
 
         // increment player_t::GameTime for all players once a second
-        static int TicCount = 0;
+        static int32_t TicCount = 0;
         // Only do this once a second.
         if (TicCount++ >= 35)
         {
@@ -4236,9 +4236,9 @@ END_COMMAND(playerinfo)
 BEGIN_COMMAND(playerlist)
 {
     bool anybody = false;
-    int  frags   = 0;
-    int  deaths  = 0;
-    int  points  = 0;
+    int32_t  frags   = 0;
+    int32_t  deaths  = 0;
+    int32_t  points  = 0;
 
     for (Players::reverse_iterator it = players.rbegin(); it != players.rend(); ++it)
     {
@@ -4318,9 +4318,9 @@ BEGIN_COMMAND(players)
 }
 END_COMMAND(players)
 
-void OnChangedSwitchTexture(line_t *line, int useAgain)
+void OnChangedSwitchTexture(line_t *line, int32_t useAgain)
 {
-    int      l     = line - lines;
+    int32_t      l     = line - lines;
     uint32_t state = 0, time = 0;
     P_GetButtonInfo(line, state, time);
 
@@ -4332,7 +4332,7 @@ void OnChangedSwitchTexture(line_t *line, int useAgain)
     }
 }
 
-void SV_OnActivatedLine(line_t *line, AActor *mo, const int side, const LineActivationType activationType,
+void SV_OnActivatedLine(line_t *line, AActor *mo, const int32_t side, const LineActivationType activationType,
                         const bool bossaction)
 {
     if (P_LineSpecialMovesSector(line->special))
@@ -4349,7 +4349,7 @@ void SV_OnActivatedLine(line_t *line, AActor *mo, const int side, const LineActi
     }
 }
 
-void SV_SendDamagePlayer(player_t *player, AActor *inflictor, int healthDamage, int armorDamage)
+void SV_SendDamagePlayer(player_t *player, AActor *inflictor, int32_t healthDamage, int32_t armorDamage)
 {
     for (Players::iterator it = players.begin(); it != players.end(); ++it)
     {
@@ -4359,7 +4359,7 @@ void SV_SendDamagePlayer(player_t *player, AActor *inflictor, int healthDamage, 
     }
 }
 
-void SV_SendDamageMobj(AActor *target, int pain)
+void SV_SendDamageMobj(AActor *target, int32_t pain)
 {
     if (!target)
         return;
@@ -4469,7 +4469,7 @@ void SV_UpdatePlayerQueueLevelChange(const WinInfo &win)
 {
     if (::g_winnerstays)
     {
-        int                     queuedPlayerCount = 0;
+        int32_t                     queuedPlayerCount = 0;
         std::vector<player_t *> loserPlayers;
 
         PlayerResults pr = PlayerQuery().execute();
@@ -4533,8 +4533,8 @@ void SV_UpdatePlayerQueueLevelChange(const WinInfo &win)
 
 void SV_UpdatePlayerQueuePositions(JoinTest joinTest, player_t *disconnectPlayer)
 {
-    int         playerCount = 0;
-    int         queuePos    = 1;
+    int32_t         playerCount = 0;
+    int32_t         queuePos    = 1;
     PlayersView queued;
     PlayersView queueUpdates;
 
@@ -4615,8 +4615,8 @@ void SV_ClearPlayerQueue()
         SV_SendPlayerQueuePositions(&(*it), false);
 }
 
-void SV_SendExecuteLineSpecial(uint8_t special, line_t *line, AActor *activator, int arg0, int arg1, int arg2, int arg3,
-                               int arg4)
+void SV_SendExecuteLineSpecial(uint8_t special, line_t *line, AActor *activator, int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3,
+                               int32_t arg4)
 {
     if (P_LineSpecialMovesSector(special))
         return;
@@ -4628,7 +4628,7 @@ void SV_SendExecuteLineSpecial(uint8_t special, line_t *line, AActor *activator,
 
         client_t *cl = &it->client;
 
-        int args[5] = {arg0, arg1, arg2, arg3, arg4};
+        int32_t args[5] = {arg0, arg1, arg2, arg3, arg4};
         MSG_WriteSVC(&cl->reliablebuf, SVC_ExecuteLineSpecial(special, line, activator, args));
     }
 }
@@ -4638,7 +4638,7 @@ void SV_SendExecuteLineSpecial(uint8_t special, line_t *line, AActor *activator,
 // sent to the activating player.
 //
 void SV_ACSExecuteSpecial(uint8_t special, AActor *activator, const char *print, bool playerOnly,
-                          const std::vector<int> &args)
+                          const std::vector<int32_t> &args)
 {
     player_s *sendPlayer = NULL;
     if (playerOnly && activator != NULL && activator->player != NULL)
@@ -4670,7 +4670,7 @@ void SV_UpdateShareKeys(player_t &player)
         return;
 
     // Update their keys informations
-    for (int i = 0; i < NUMCARDS; i++)
+    for (int32_t i = 0; i < NUMCARDS; i++)
     {
         player.cards[i] = keysfound[i];
     }

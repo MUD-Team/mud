@@ -69,6 +69,6 @@ class ElementPlayerView : public Rml::Element, public Rml::EventListener
 
     // Data Model
 
-    static int mResolution;
+    static int32_t mResolution;
     static Rml::DataModelHandle mPlayerViewHandle;
 };

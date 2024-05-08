@@ -69,7 +69,7 @@ void DFireFlicker::Serialize(FArchive &arc)
 //
 void DFireFlicker::RunThink()
 {
-    int amount;
+    int32_t amount;
 
     if (--m_Count == 0)
     {
@@ -94,7 +94,7 @@ DFireFlicker::DFireFlicker(sector_t *sector) : DLighting(sector)
     m_Count    = 4;
 }
 
-DFireFlicker::DFireFlicker(sector_t *sector, int upper, int lower) : DLighting(sector)
+DFireFlicker::DFireFlicker(sector_t *sector, int32_t upper, int32_t lower) : DLighting(sector)
 {
     m_MaxLight = CLIPLIGHT(upper);
     m_MinLight = CLIPLIGHT(lower);
@@ -137,7 +137,7 @@ void DFlicker::RunThink()
     }
 }
 
-DFlicker::DFlicker(sector_t *sector, int upper, int lower) : DLighting(sector)
+DFlicker::DFlicker(sector_t *sector, int32_t upper, int32_t lower) : DLighting(sector)
 {
     m_MaxLight         = upper;
     m_MinLight         = lower;
@@ -145,12 +145,12 @@ DFlicker::DFlicker(sector_t *sector, int upper, int lower) : DLighting(sector)
     m_Count            = (P_Random() & 64) + 1;
 }
 
-void EV_StartLightFlickering(int tag, int upper, int lower)
+void EV_StartLightFlickering(int32_t tag, int32_t upper, int32_t lower)
 {
     if (IgnoreSpecial)
         return;
 
-    int secnum;
+    int32_t secnum;
 
     secnum = -1;
     while ((secnum = P_FindSectorFromTag(tag, secnum)) >= 0)
@@ -212,7 +212,7 @@ DLightFlash::DLightFlash(sector_t *sector) : DLighting(sector)
     m_Count    = (P_Random() & m_MaxTime) + 1;
 }
 
-DLightFlash::DLightFlash(sector_t *sector, int min, int max) : DLighting(sector)
+DLightFlash::DLightFlash(sector_t *sector, int32_t min, int32_t max) : DLighting(sector)
 {
     // Use specified light levels.
     m_MaxLight = CLIPLIGHT(max);
@@ -264,7 +264,7 @@ void DStrobe::RunThink()
 //
 // Hexen-style constructor
 //
-DStrobe::DStrobe(sector_t *sector, int upper, int lower, int utics, int ltics) : DLighting(sector)
+DStrobe::DStrobe(sector_t *sector, int32_t upper, int32_t lower, int32_t utics, int32_t ltics) : DLighting(sector)
 {
     m_DarkTime   = ltics;
     m_BrightTime = utics;
@@ -276,7 +276,7 @@ DStrobe::DStrobe(sector_t *sector, int upper, int lower, int utics, int ltics) :
 //
 // Doom-style constructor
 //
-DStrobe::DStrobe(sector_t *sector, int utics, int ltics, bool inSync) : DLighting(sector)
+DStrobe::DStrobe(sector_t *sector, int32_t utics, int32_t ltics, bool inSync) : DLighting(sector)
 {
     m_DarkTime   = ltics;
     m_BrightTime = utics;
@@ -294,12 +294,12 @@ DStrobe::DStrobe(sector_t *sector, int utics, int ltics, bool inSync) : DLightin
 // Start strobing lights (usually from a trigger)
 // [RH] Made it more configurable.
 //
-void EV_StartLightStrobing(int tag, int upper, int lower, int utics, int ltics)
+void EV_StartLightStrobing(int32_t tag, int32_t upper, int32_t lower, int32_t utics, int32_t ltics)
 {
     if (IgnoreSpecial)
         return;
 
-    int secnum;
+    int32_t secnum;
 
     secnum = -1;
     while ((secnum = P_FindSectorFromTag(tag, secnum)) >= 0)
@@ -312,12 +312,12 @@ void EV_StartLightStrobing(int tag, int upper, int lower, int utics, int ltics)
     }
 }
 
-void EV_StartLightStrobing(int tag, int utics, int ltics)
+void EV_StartLightStrobing(int32_t tag, int32_t utics, int32_t ltics)
 {
     if (IgnoreSpecial)
         return;
 
-    int secnum;
+    int32_t secnum;
 
     secnum = -1;
     while ((secnum = P_FindSectorFromTag(tag, secnum)) >= 0)
@@ -334,16 +334,16 @@ void EV_StartLightStrobing(int tag, int utics, int ltics)
 // TURN LINE'S TAG LIGHTS OFF
 // [RH] Takes a tag instead of a line
 //
-void EV_TurnTagLightsOff(int tag)
+void EV_TurnTagLightsOff(int32_t tag)
 {
-    int i;
-    int secnum;
+    int32_t i;
+    int32_t secnum;
 
     // [RH] Don't do a linear search
     for (secnum = -1; (secnum = P_FindSectorFromTag(tag, secnum)) >= 0;)
     {
         sector_t *sector = sectors + secnum;
-        int       min    = sector->lightlevel;
+        int32_t       min    = sector->lightlevel;
 
         for (i = 0; i < sector->linecount; i++)
         {
@@ -362,9 +362,9 @@ void EV_TurnTagLightsOff(int tag)
 // TURN LINE'S TAG LIGHTS ON
 // [RH] Takes a tag instead of a line
 //
-void EV_LightTurnOn(int tag, int bright)
+void EV_LightTurnOn(int32_t tag, int32_t bright)
 {
-    int secnum = -1;
+    int32_t secnum = -1;
 
     // [RH] Don't do a linear search
     while ((secnum = P_FindSectorFromTag(tag, secnum)) >= 0)
@@ -376,7 +376,7 @@ void EV_LightTurnOn(int tag, int bright)
         // surrounding sector
         if (bright < 0)
         {
-            int j;
+            int32_t j;
 
             bright = 0;
             for (j = 0; j < sector->linecount; j++)
@@ -407,10 +407,10 @@ void EV_LightTurnOn(int tag, int bright)
  *
  * Returns true
  */
-// int EV_LightTurnOnPartway(line_t *line, fixed_t level)
-int EV_LightTurnOnPartway(int tag, int level)
+// int32_t EV_LightTurnOnPartway(line_t *line, fixed_t level)
+int32_t EV_LightTurnOnPartway(int32_t tag, int32_t level)
 {
-    int i;
+    int32_t i;
 
     if (level < 0) // clip at extremes
     {
@@ -426,9 +426,9 @@ int EV_LightTurnOnPartway(int tag, int level)
     for (i = -1; (i = P_FindSectorFromTag(tag, i)) >= 0;)
     {
         sector_t *temp, *sector = sectors + i;
-        int       j;
-        int       bright = 0;
-        int       min    = sector->lightlevel;
+        int32_t       j;
+        int32_t       bright = 0;
+        int32_t       min    = sector->lightlevel;
         for (j = 0; j < sector->linecount; j++)
         {
             if ((temp = getNextSector(sector->lines[j], sector)))
@@ -455,25 +455,25 @@ int EV_LightTurnOnPartway(int tag, int level)
 //		by a relative amount. Light levels are clipped to
 //		within the range 0-255 inclusive.
 //
-void EV_LightChange(int tag, int value)
+void EV_LightChange(int32_t tag, int32_t value)
 {
-    int secnum = -1;
+    int32_t secnum = -1;
 
     while ((secnum = P_FindSectorFromTag(tag, secnum)) >= 0)
     {
-        int newlight               = sectors[secnum].lightlevel + value;
+        int32_t newlight               = sectors[secnum].lightlevel + value;
         sectors[secnum].lightlevel = CLIPLIGHT(newlight);
         sectors[secnum].SectorChanges |= SPC_LightLevel;
     }
 }
 
-void EV_LightSetMinNeighbor(int tag)
+void EV_LightSetMinNeighbor(int32_t tag)
 {
-    int s = -1;
+    int32_t s = -1;
 
     while ((s = P_FindSectorFromTag(tag, s)) >= 0)
     {
-        int       i;
+        int32_t       i;
         int16_t     level;
         sector_t *temp, *sector;
 
@@ -488,13 +488,13 @@ void EV_LightSetMinNeighbor(int tag)
     }
 }
 
-void EV_LightSetMaxNeighbor(int tag)
+void EV_LightSetMaxNeighbor(int32_t tag)
 {
-    int s = -1;
+    int32_t s = -1;
 
     while ((s = P_FindSectorFromTag(tag, s)) >= 0)
     {
-        int       i;
+        int32_t       i;
         int16_t     level;
         sector_t *temp, *sector;
 
@@ -591,7 +591,7 @@ void DGlow2::RunThink()
         }
         else
         {
-            int temp = m_Start;
+            int32_t temp = m_Start;
             m_Start  = m_End;
             m_End    = temp;
             m_Tics -= m_MaxTics;
@@ -601,7 +601,7 @@ void DGlow2::RunThink()
     m_Sector->lightlevel = ((m_End - m_Start) * m_Tics) / m_MaxTics + m_Start;
 }
 
-DGlow2::DGlow2(sector_t *sector, int start, int end, int tics, bool oneshot) : DLighting(sector)
+DGlow2::DGlow2(sector_t *sector, int32_t start, int32_t end, int32_t tics, bool oneshot) : DLighting(sector)
 {
     m_Start   = CLIPLIGHT(start);
     m_End     = CLIPLIGHT(end);
@@ -610,16 +610,16 @@ DGlow2::DGlow2(sector_t *sector, int start, int end, int tics, bool oneshot) : D
     m_OneShot = oneshot;
 }
 
-void EV_StartLightGlowing(int tag, int upper, int lower, int tics)
+void EV_StartLightGlowing(int32_t tag, int32_t upper, int32_t lower, int32_t tics)
 {
     if (IgnoreSpecial)
         return;
 
-    int secnum;
+    int32_t secnum;
 
     if (upper < lower)
     {
-        int temp = upper;
+        int32_t temp = upper;
         upper    = lower;
         lower    = temp;
     }
@@ -634,12 +634,12 @@ void EV_StartLightGlowing(int tag, int upper, int lower, int tics)
     }
 }
 
-void EV_StartLightFading(int tag, int value, int tics)
+void EV_StartLightFading(int32_t tag, int32_t value, int32_t tics)
 {
     if (IgnoreSpecial)
         return;
 
-    int secnum;
+    int32_t secnum;
 
     secnum = -1;
     while ((secnum = P_FindSectorFromTag(tag, secnum)) >= 0)
@@ -675,7 +675,7 @@ void DPhased::Serialize(FArchive &arc)
 
 void DPhased::RunThink()
 {
-    const int steps = 12;
+    const int32_t steps = 12;
 
     if (m_Phase < steps)
         m_Sector->lightlevel = ((255 - m_BaseLevel) * m_Phase) / steps + m_BaseLevel;
@@ -690,7 +690,7 @@ void DPhased::RunThink()
         m_Phase--;
 }
 
-int DPhased::PhaseHelper(sector_t *sector, int index, int light, sector_t *prev)
+int32_t DPhased::PhaseHelper(sector_t *sector, int32_t index, int32_t light, sector_t *prev)
 {
     if (!sector)
     {
@@ -699,7 +699,7 @@ int DPhased::PhaseHelper(sector_t *sector, int index, int light, sector_t *prev)
     else
     {
         DPhased *l;
-        int      baselevel = sector->lightlevel ? sector->lightlevel : light;
+        int32_t      baselevel = sector->lightlevel ? sector->lightlevel : light;
 
         if (index == 0)
         {
@@ -709,7 +709,7 @@ int DPhased::PhaseHelper(sector_t *sector, int index, int light, sector_t *prev)
         else
             l = new DPhased(sector, baselevel);
 
-        int numsteps =
+        int32_t numsteps =
             PhaseHelper(P_NextSpecialSector(sector,
                                             (sector->special & 0x00ff) == LightSequenceSpecial1 ? LightSequenceSpecial2
                                                                                                 : LightSequenceSpecial1,
@@ -721,7 +721,7 @@ int DPhased::PhaseHelper(sector_t *sector, int index, int light, sector_t *prev)
     }
 }
 
-DPhased::DPhased(sector_t *sector, int baselevel) : DLighting(sector)
+DPhased::DPhased(sector_t *sector, int32_t baselevel) : DLighting(sector)
 {
     m_BaseLevel = baselevel;
 }
@@ -731,7 +731,7 @@ DPhased::DPhased(sector_t *sector) : DLighting(sector)
     PhaseHelper(sector, 0, 0, NULL);
 }
 
-DPhased::DPhased(sector_t *sector, int baselevel, int phase) : DLighting(sector)
+DPhased::DPhased(sector_t *sector, int32_t baselevel, int32_t phase) : DLighting(sector)
 {
     m_BaseLevel = baselevel;
     m_Phase     = phase;

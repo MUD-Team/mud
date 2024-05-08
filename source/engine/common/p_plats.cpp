@@ -29,7 +29,7 @@
 #include "s_sound.h"
 
 // From sv_main.cpp
-void SV_BroadcastSector(int sectornum);
+void SV_BroadcastSector(int32_t sectornum);
 
 extern bool predicting;
 
@@ -240,7 +240,7 @@ DPlat::DPlat(sector_t *sector) : DMovingFloor(sector), m_Status(init)
 {
 }
 
-void P_ActivateInStasis(int tag)
+void P_ActivateInStasis(int32_t tag)
 {
     DPlat                  *scan;
     TThinkerIterator<DPlat> iterator;
@@ -252,7 +252,7 @@ void P_ActivateInStasis(int tag)
     }
 }
 
-DPlat::DPlat(sector_t *sec, DPlat::EPlatType type, fixed_t height, int speed, int delay, fixed_t lip)
+DPlat::DPlat(sector_t *sec, DPlat::EPlatType type, fixed_t height, int32_t speed, int32_t delay, fixed_t lip)
     : DMovingFloor(sec), m_Status(init)
 {
     m_Type   = type;
@@ -364,7 +364,7 @@ DPlat::DPlat(sector_t *sec, DPlat::EPlatType type, fixed_t height, int speed, in
     }
 }
 
-DPlat::DPlat(sector_t *sec, int target, int delay, int speed, int trigger) : DMovingFloor(sec), m_Status(init)
+DPlat::DPlat(sector_t *sec, int32_t target, int32_t delay, int32_t speed, int32_t trigger) : DMovingFloor(sec), m_Status(init)
 {
     m_Crush  = false;
     m_Type   = genLift;
@@ -459,13 +459,13 @@ DPlat *DPlat::Clone(sector_t *sec) const
 //	[RH] Changed amount to height and added delay,
 //		 lip, change, tag, and speed parameters.
 //
-bool EV_DoPlat(int tag, line_t *line, DPlat::EPlatType type, fixed_t height, int speed, int delay, fixed_t lip,
-               int change)
+bool EV_DoPlat(int32_t tag, line_t *line, DPlat::EPlatType type, fixed_t height, int32_t speed, int32_t delay, fixed_t lip,
+               int32_t change)
 {
     DPlat    *plat;
-    int       secnum;
+    int32_t       secnum;
     sector_t *sec;
-    int       rtn    = false;
+    int32_t       rtn    = false;
     bool      manual = false;
 
     // [RH] If tag is zero, use the sector on the back side
@@ -532,16 +532,16 @@ bool EV_DoPlat(int tag, line_t *line, DPlat::EPlatType type, fixed_t height, int
 bool EV_DoGenLift(line_t *line)
 {
     DPlat    *plat;
-    int       secnum;
+    int32_t       secnum;
     sector_t *sec;
     bool      rtn    = false;
     bool      manual = false;
     uint32_t  value  = (uint32_t)line->special - GenLiftBase;
 
-    int Targ = (value & LiftTarget) >> LiftTargetShift;
-    int Dely = (value & LiftDelay) >> LiftDelayShift;
-    int Sped = (value & LiftSpeed) >> LiftSpeedShift;
-    int Trig = (value & TriggerType) >> TriggerTypeShift;
+    int32_t Targ = (value & LiftTarget) >> LiftTargetShift;
+    int32_t Dely = (value & LiftDelay) >> LiftDelayShift;
+    int32_t Sped = (value & LiftSpeed) >> LiftSpeedShift;
+    int32_t Trig = (value & TriggerType) >> TriggerTypeShift;
 
     // Activate all <type> plats that are in_stasis
 
@@ -598,7 +598,7 @@ void DPlat::Stop()
     m_Status    = in_stasis;
 }
 
-void EV_StopPlat(int tag)
+void EV_StopPlat(int32_t tag)
 {
     DPlat                  *scan;
     TThinkerIterator<DPlat> iterator;

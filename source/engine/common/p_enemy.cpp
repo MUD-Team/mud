@@ -80,10 +80,10 @@ void SV_UpdateMobj(AActor *mo);
 void SV_Sound(AActor *mo, uint8_t channel, const char *name, uint8_t attenuation);
 
 // killough 8/8/98: distance friends tend to move towards players
-const int distfriend = 128;
+const int32_t distfriend = 128;
 
 // killough 9/8/98: whether monsters are allowed to strafe or retreat
-const int monster_backing = 0;
+const int32_t monster_backing = 0;
 
 extern bool isFast;
 
@@ -101,9 +101,9 @@ extern bool isFast;
 // sound blocking lines cut off traversal.
 //
 
-void P_RecursiveSound(sector_t *sec, int soundblocks, AActor *soundtarget)
+void P_RecursiveSound(sector_t *sec, int32_t soundblocks, AActor *soundtarget)
 {
-    int       i;
+    int32_t       i;
     line_t   *check;
     sector_t *other;
 
@@ -276,10 +276,10 @@ bool P_Move(AActor *actor)
 {
     fixed_t tryx, tryy, deltax, deltay, origx, origy;
     bool    try_ok;
-    int     good;
-    int     speed;
-    int     movefactor = ORIG_FRICTION_FACTOR;
-    int     friction   = ORIG_FRICTION;
+    int32_t     good;
+    int32_t     speed;
+    int32_t     movefactor = ORIG_FRICTION_FACTOR;
+    int32_t     friction   = ORIG_FRICTION;
 
     if (!actor->subsector)
         return false;
@@ -418,7 +418,7 @@ bool P_IsOnLift(const AActor *actor)
 {
     const sector_t *sec = actor->subsector->sector;
     line_t          line;
-    int             l;
+    int32_t             l;
 
     // Short-circuit: it's on a lift which is active.
     if (sec->floordata && ((DFloor *)sec->floordata)->m_Status == DFloor::up)
@@ -476,7 +476,7 @@ void P_NewChaseDir(AActor *actor)
 
     dirtype_t d[3];
 
-    int       tdir;
+    int32_t       tdir;
     dirtype_t olddir;
 
     dirtype_t turnaround;
@@ -669,7 +669,7 @@ bool P_LookForPlayers(AActor *actor, bool allaround)
     static bool sightcheckfailed[MAXPLAYERS];
     memset(sightcheckfailed, 0, sizeof(bool) * maxid);
 
-    int counter = 0;
+    int32_t counter = 0;
 
     // [AM] Vanilla braindamage, "fixing" will lead to vanilla desyncs
     uint32_t stop;
@@ -863,7 +863,7 @@ seeyou:
 //
 void A_Chase(AActor *actor)
 {
-    int     delta;
+    int32_t     delta;
     AActor *ngoal;
 
     // GhostlyDeath -- Don't chase spectators at all
@@ -1028,7 +1028,7 @@ void A_MonsterRail(AActor *actor)
     actor->angle = R_PointToAngle2(actor->x, actor->y, actor->target->x, actor->target->y);
 
     // actor->pitch = tantoangle[P_AimLineAttack (actor, actor->angle, MISSILERANGE) >> DBITS];
-    actor->pitch = -(int)(tan((float)P_AimLineAttack(actor, actor->angle, MISSILERANGE) / 65536.0f) * ANG180 / PI);
+    actor->pitch = -(int32_t)(tan((float)P_AimLineAttack(actor, actor->angle, MISSILERANGE) / 65536.0f) * ANG180 / PI);
 
     // Let the aim trail behind the player
     actor->angle = R_PointToAngle2(actor->x, actor->y, actor->target->x - actor->target->momx * 3,
@@ -1036,7 +1036,7 @@ void A_MonsterRail(AActor *actor)
 
     if (actor->target->flags & MF_SHADOW)
     {
-        int t = P_Random(actor);
+        int32_t t = P_Random(actor);
         actor->angle += (t - P_Random(actor)) << 21;
     }
 
@@ -1049,9 +1049,9 @@ void A_MonsterRail(AActor *actor)
 //
 void A_PosAttack(AActor *actor)
 {
-    int angle;
-    int damage;
-    int slope;
+    int32_t angle;
+    int32_t damage;
+    int32_t slope;
 
     if (!actor->target)
         return;
@@ -1068,9 +1068,9 @@ void A_PosAttack(AActor *actor)
 
 void A_SPosAttack(AActor *actor)
 {
-    int i;
-    int bangle;
-    int slope;
+    int32_t i;
+    int32_t bangle;
+    int32_t slope;
 
     if (!actor->target)
         return;
@@ -1082,18 +1082,18 @@ void A_SPosAttack(AActor *actor)
 
     for (i = 0; i < 3; i++)
     {
-        int angle  = bangle + (P_RandomDiff(actor) << 20);
-        int damage = ((P_Random(actor) % 5) + 1) * 3;
+        int32_t angle  = bangle + (P_RandomDiff(actor) << 20);
+        int32_t damage = ((P_Random(actor) % 5) + 1) * 3;
         P_LineAttack(actor, angle, MISSILERANGE, slope, damage);
     }
 }
 
 void A_CPosAttack(AActor *actor)
 {
-    int angle;
-    int bangle;
-    int damage;
-    int slope;
+    int32_t angle;
+    int32_t bangle;
+    int32_t damage;
+    int32_t slope;
 
     if (!actor->target)
         return;
@@ -1160,7 +1160,7 @@ void A_TroopAttack(AActor *actor)
     if (P_CheckMeleeRange(actor))
     {
         S_Sound(actor, CHAN_WEAPON, "imp/melee", 1, ATTN_NORM);
-        int damage = (P_Random(actor) % 8 + 1) * 3;
+        int32_t damage = (P_Random(actor) % 8 + 1) * 3;
         P_DamageMobj(actor->target, actor, actor, damage, MOD_HIT);
         return;
     }
@@ -1178,7 +1178,7 @@ void A_SargAttack(AActor *actor)
     A_FaceTarget(actor);
     if (P_CheckMeleeRange(actor))
     {
-        int damage = ((P_Random(actor) % 10) + 1) * 4;
+        int32_t damage = ((P_Random(actor) % 10) + 1) * 4;
         P_DamageMobj(actor->target, actor, actor, damage, MOD_HIT);
     }
 }
@@ -1191,7 +1191,7 @@ void A_HeadAttack(AActor *actor)
     A_FaceTarget(actor);
     if (P_CheckMeleeRange(actor))
     {
-        int damage = (P_Random(actor) % 6 + 1) * 10;
+        int32_t damage = (P_Random(actor) % 6 + 1) * 10;
         P_DamageMobj(actor->target, actor, actor, damage, MOD_HIT);
         return;
     }
@@ -1221,7 +1221,7 @@ void A_BruisAttack(AActor *actor)
 
     if (P_CheckMeleeRange(actor))
     {
-        int damage = (P_Random(actor) % 8 + 1) * 10;
+        int32_t damage = (P_Random(actor) % 8 + 1) * 10;
         S_Sound(actor, CHAN_WEAPON, "baron/melee", 1, ATTN_NORM);
         P_DamageMobj(actor->target, actor, actor, damage, MOD_HIT);
         return;
@@ -1342,7 +1342,7 @@ void A_SkelFist(AActor *actor)
 
     if (P_CheckMeleeRange(actor))
     {
-        int damage = ((P_Random(actor) % 10) + 1) * 6;
+        int32_t damage = ((P_Random(actor) % 10) + 1) * 6;
         S_Sound(actor, CHAN_WEAPON, "skeleton/melee", 1, ATTN_NORM);
         P_DamageMobj(actor->target, actor, actor, damage, MOD_HIT);
     }
@@ -1356,11 +1356,11 @@ AActor *corpsehit;
 AActor *vileobj;
 fixed_t viletryx;
 fixed_t viletryy;
-int     viletryradius;
+int32_t     viletryradius;
 
 bool PIT_VileCheck(AActor *thing)
 {
-    int  maxdist;
+    int32_t  maxdist;
     bool check;
 
     if (thing->oflags & MFO_NORAISE)
@@ -1402,13 +1402,13 @@ void A_VileChase(AActor *actor)
         return;
     }
 
-    int xl;
-    int xh;
-    int yl;
-    int yh;
+    int32_t xl;
+    int32_t xh;
+    int32_t yl;
+    int32_t yh;
 
-    int bx;
-    int by;
+    int32_t bx;
+    int32_t by;
 
     mobjinfo_t       *info;
     AActor::AActorPtr temp;
@@ -1549,7 +1549,7 @@ void A_VileTarget(AActor *actor)
 void A_VileAttack(AActor *actor)
 {
     AActor *fire;
-    int     an;
+    int32_t     an;
 
     if (!actor->target)
         return;
@@ -1605,7 +1605,7 @@ void A_FatAttack1(AActor *actor)
         AActor *mo = P_SpawnMissile(actor, actor->target, MT_FATSHOT);
 
         mo->angle += FATSPREAD;
-        int an   = mo->angle >> ANGLETOFINESHIFT;
+        int32_t an   = mo->angle >> ANGLETOFINESHIFT;
         mo->momx = FixedMul(mo->info->speed, finecosine[an]);
         mo->momy = FixedMul(mo->info->speed, finesine[an]);
     }
@@ -1628,7 +1628,7 @@ void A_FatAttack2(AActor *actor)
         AActor *mo = P_SpawnMissile(actor, actor->target, MT_FATSHOT);
 
         mo->angle -= FATSPREAD * 2;
-        int an   = mo->angle >> ANGLETOFINESHIFT;
+        int32_t an   = mo->angle >> ANGLETOFINESHIFT;
         mo->momx = FixedMul(mo->info->speed, finecosine[an]);
         mo->momy = FixedMul(mo->info->speed, finesine[an]);
     }
@@ -1646,7 +1646,7 @@ void A_FatAttack3(AActor *actor)
         AActor *mo = P_SpawnMissile(actor, actor->target, MT_FATSHOT);
 
         mo->angle -= FATSPREAD / 2;
-        int an = mo->angle >> ANGLETOFINESHIFT;
+        int32_t an = mo->angle >> ANGLETOFINESHIFT;
 
         mo->momx = FixedMul(mo->info->speed, finecosine[an]);
         mo->momy = FixedMul(mo->info->speed, finesine[an]);
@@ -1669,7 +1669,7 @@ void A_Mushroom(AActor *actor)
     if (!serverside)
         return;
 
-    int n = actor->info->damage;
+    int32_t n = actor->info->damage;
 
     // Mushroom parameters are part of code pointer's state
     fixed_t misc1 = actor->state->misc1 ? actor->state->misc1 : FRACUNIT * 4;
@@ -1677,9 +1677,9 @@ void A_Mushroom(AActor *actor)
 
     A_Explode(actor);                // make normal explosion
 
-    for (int i = -n; i <= n; i += 8) // launch mushroom cloud
+    for (int32_t i = -n; i <= n; i += 8) // launch mushroom cloud
     {
-        for (int j = -n; j <= n; j += 8)
+        for (int32_t j = -n; j <= n; j += 8)
         {
             AActor *target = new AActor(actor->x, actor->y, actor->z, MT_UNKNOWNTHING);
             target->x += i << FRACBITS;                             // Aim in many directions from source
@@ -1708,7 +1708,7 @@ void A_SkullAttack(AActor *actor)
 {
     AActor *dest;
     angle_t an;
-    int     dist;
+    int32_t     dist;
 
     if (!actor->target)
         return;
@@ -1745,7 +1745,7 @@ void A_BetaSkullAttack(AActor *actor)
         S_Sound(actor, CHAN_VOICE, actor->info->attacksound, 1, ATTN_NORM);
     }
     A_FaceTarget(actor);
-    int damage = (P_Random(actor) % 8 + 1) * actor->info->damage;
+    int32_t damage = (P_Random(actor) % 8 + 1) * actor->info->damage;
     P_DamageMobj(actor->target, actor, actor, damage);
 }
 
@@ -1763,7 +1763,7 @@ void A_BetaSkullAttack(AActor *actor)
 //
 void A_SpawnObject(AActor *actor)
 {
-    int     type, angle, ofs_x, ofs_y, ofs_z, vel_x, vel_y, vel_z;
+    int32_t     type, angle, ofs_x, ofs_y, ofs_z, vel_x, vel_y, vel_z;
     angle_t an;
     fixed_t fan, dx, dy;
     AActor *mo;
@@ -1830,9 +1830,9 @@ void A_SpawnObject(AActor *actor)
 //
 void A_MonsterProjectile(AActor *actor)
 {
-    int     type, angle, pitch, spawnofs_xy, spawnofs_z;
+    int32_t     type, angle, pitch, spawnofs_xy, spawnofs_z;
     AActor *mo;
-    int     an;
+    int32_t     an;
 
     if (!actor->target || !actor->state->args[0] || !serverside)
         return;
@@ -1881,8 +1881,8 @@ void A_MonsterProjectile(AActor *actor)
 
 void A_MonsterBulletAttack(AActor *actor)
 {
-    int hspread, vspread, numbullets, damagebase, damagemod;
-    int aimslope, i, damage, angle, slope;
+    int32_t hspread, vspread, numbullets, damagebase, damagemod;
+    int32_t aimslope, i, damage, angle, slope;
 
     if (!actor->target)
         return;
@@ -1901,7 +1901,7 @@ void A_MonsterBulletAttack(AActor *actor)
     for (i = 0; i < numbullets; i++)
     {
         damage = (P_Random() % damagemod + 1) * damagebase;
-        angle  = (int)actor->angle + P_RandomHitscanAngle(hspread);
+        angle  = (int32_t)actor->angle + P_RandomHitscanAngle(hspread);
         slope  = aimslope + P_RandomHitscanSlope(vspread);
 
         P_LineAttack(actor, angle, MISSILERANGE, slope, damage);
@@ -1917,8 +1917,8 @@ void A_MonsterBulletAttack(AActor *actor)
 //
 void A_MonsterMeleeAttack(AActor *actor)
 {
-    int damagebase, damagemod, hitsound, range;
-    int damage;
+    int32_t damagebase, damagemod, hitsound, range;
+    int32_t damage;
 
     if (!actor->target)
         return;
@@ -1946,8 +1946,8 @@ void A_MonsterMeleeAttack(AActor *actor)
 //
 // A_RadiusDamage
 // A parameterized version of A_Explode. Friggin' finally. :P
-//   args[0]: Damage (int)
-//   args[1]: Radius (also int; no real need for fractional precision here)
+//   args[0]: Damage (int32_t)
+//   args[1]: Radius (also int32_t; no real need for fractional precision here)
 //
 void A_RadiusDamage(AActor *actor)
 {
@@ -1977,7 +1977,7 @@ void A_NoiseAlert(AActor *actor)
 //
 void A_HealChase(AActor *actor)
 {
-    int state, sound;
+    int32_t state, sound;
 
     if (!actor)
         return;
@@ -1993,7 +1993,7 @@ void A_HealChase(AActor *actor)
 // P_HealCorpse
 // A generic corpse resurrection codepointer.
 //
-bool P_HealCorpse(AActor *actor, int radius, int healstate, int healsound)
+bool P_HealCorpse(AActor *actor, int32_t radius, int32_t healstate, int32_t healsound)
 {
     // don't attempt to resurrect clientside
     if (!serverside)
@@ -2001,9 +2001,9 @@ bool P_HealCorpse(AActor *actor, int radius, int healstate, int healsound)
         return false;
     }
 
-    int xl, xh;
-    int yl, yh;
-    int bx, by;
+    int32_t xl, xh;
+    int32_t yl, yh;
+    int32_t bx, by;
 
     if (actor->movedir != DI_NODIR)
     {
@@ -2104,7 +2104,7 @@ void A_SeekTracer(AActor *actor)
 void A_FindTracer(AActor *actor)
 {
     angle_t fov;
-    int     dist;
+    int32_t     dist;
 
     if (!actor || (actor->tracer != AActor::AActorPtr() && actor->tracer->health > 0) || !serverside)
         return;
@@ -2150,7 +2150,7 @@ void A_ClearTracer(AActor *actor)
 //
 void A_JumpIfHealthBelow(AActor *actor)
 {
-    int state, health;
+    int32_t state, health;
 
     if (!actor)
         return;
@@ -2171,7 +2171,7 @@ void A_JumpIfHealthBelow(AActor *actor)
 //
 void A_JumpIfTargetInSight(AActor *actor)
 {
-    int     state;
+    int32_t     state;
     angle_t fov;
 
     if (!actor || !actor->target)
@@ -2196,7 +2196,7 @@ void A_JumpIfTargetInSight(AActor *actor)
 //
 void A_JumpIfTargetCloser(AActor *actor)
 {
-    int state, distance;
+    int32_t state, distance;
 
     if (!actor || !actor->target)
         return;
@@ -2218,7 +2218,7 @@ void A_JumpIfTargetCloser(AActor *actor)
 void A_JumpIfTracerInSight(AActor *actor)
 {
     angle_t fov;
-    int     state;
+    int32_t     state;
 
     if (!actor || !actor->tracer || !serverside)
         return;
@@ -2246,7 +2246,7 @@ void A_JumpIfTracerInSight(AActor *actor)
 //
 void A_JumpIfTracerCloser(AActor *actor)
 {
-    int state, distance;
+    int32_t state, distance;
 
     if (!actor || !actor->tracer || !serverside)
         return;
@@ -2270,8 +2270,8 @@ void A_JumpIfTracerCloser(AActor *actor)
 //
 void A_JumpIfFlagsSet(AActor *actor)
 {
-    int state;
-    int flags, flags2;
+    int32_t state;
+    int32_t flags, flags2;
 
     if (!actor)
         return;
@@ -2292,7 +2292,7 @@ void A_JumpIfFlagsSet(AActor *actor)
 //
 void A_AddFlags(AActor *actor)
 {
-    int flags, flags2;
+    int32_t flags, flags2;
 
     if (!actor)
         return;
@@ -2312,7 +2312,7 @@ void A_AddFlags(AActor *actor)
 //
 void A_RemoveFlags(AActor *actor)
 {
-    int flags, flags2;
+    int32_t flags, flags2;
 
     if (!actor)
         return;
@@ -2341,8 +2341,8 @@ void A_PainShootSkull(AActor *actor, angle_t angle)
 
     AActor *other;
     angle_t an;
-    int     prestep;
-    int     count;
+    int32_t     prestep;
+    int32_t     count;
 
     if (!serverside)
         return;
@@ -2514,9 +2514,9 @@ void A_Detonate(AActor *mo)
 void A_Explode(AActor *thing)
 {
     // [RH] figure out means of death;
-    int  mod;
-    int  damage     = 128;
-    int  distance   = 128;
+    int32_t  mod;
+    int32_t  damage     = 128;
+    int32_t  distance   = 128;
     bool hurtSource = true;
 
     switch (thing->type)
@@ -2629,8 +2629,8 @@ void A_BabyMetal(AActor *mo)
 
 // killough 2/7/98: Remove limit on icon landings:
 AActor **braintargets;
-int      numbraintargets_alloc;
-int      numbraintargets;
+int32_t      numbraintargets_alloc;
+int32_t      numbraintargets;
 
 struct brain_s brain; // killough 3/26/98: global state of boss brain
 
@@ -2678,9 +2678,9 @@ void A_BrainScream(AActor *mo)
     if (!clientside)
         return;
 
-    int     x;
-    int     y;
-    int     z;
+    int32_t     x;
+    int32_t     y;
+    int32_t     z;
     AActor *th;
 
     for (x = mo->x - 196 * FRACUNIT; x < mo->x + 320 * FRACUNIT; x += FRACUNIT * 8)
@@ -2705,9 +2705,9 @@ void A_BrainExplode(AActor *mo)
     if (!clientside)
         return;
 
-    int     x  = mo->x + P_RandomDiff(mo) * 2048;
-    int     y  = mo->y;
-    int     z  = 128 + P_Random(mo) * 2 * FRACUNIT;
+    int32_t     x  = mo->x + P_RandomDiff(mo) * 2048;
+    int32_t     y  = mo->y;
+    int32_t     z  = 128 + P_Random(mo) * 2 * FRACUNIT;
     AActor *th = new AActor(x, y, z, MT_ROCKET);
     th->momz   = P_Random(mo) << 9;
 
@@ -2770,7 +2770,7 @@ void A_SpawnFly(AActor *mo)
     AActor    *newmobj;
     AActor    *fog;
     AActor    *targ;
-    int        r;
+    int32_t        r;
     mobjtype_t type;
 
     if (--mo->reactiontime)
@@ -2932,7 +2932,7 @@ void A_PlaySound(AActor *mo)
 {
     // Play the sound from the SoundMap
 
-    int sndmap = mo->state->misc1;
+    int32_t sndmap = mo->state->misc1;
 
     if (sndmap >= ARRAY_LENGTH(SoundMap))
     {

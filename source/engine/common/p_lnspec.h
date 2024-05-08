@@ -516,16 +516,16 @@ typedef struct
 struct line_s;
 class AActor;
 
-typedef bool (*lnSpecFunc)(struct line_s *line, class AActor *activator, int arg1, int arg2, int arg3, int arg4,
-                           int arg5);
+typedef bool (*lnSpecFunc)(struct line_s *line, class AActor *activator, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4,
+                           int32_t arg5);
 
 extern lnSpecFunc LineSpecials[283];
 
-bool EV_CeilingCrushStop(int tag);
-void EV_StopPlat(int tag);
-bool EV_DoZDoomDonut(int tag, line_t *line, fixed_t pillarspeed, fixed_t slimespeed);
-bool EV_ZDoomCeilingCrushStop(int tag, bool remove);
-bool EV_CompatibleTeleport(int tag, line_t *line, int side, AActor *thing, int flags);
+bool EV_CeilingCrushStop(int32_t tag);
+void EV_StopPlat(int32_t tag);
+bool EV_DoZDoomDonut(int32_t tag, line_t *line, fixed_t pillarspeed, fixed_t slimespeed);
+bool EV_ZDoomCeilingCrushStop(int32_t tag, bool remove);
+bool EV_CompatibleTeleport(int32_t tag, line_t *line, int32_t side, AActor *thing, int32_t flags);
 
 bool P_LineSpecialMovesSector(int16_t special);
 bool P_CanActivateSpecials(AActor *mo, line_t *line);
@@ -533,12 +533,12 @@ bool P_ActorInSpecialSector(AActor *actor);
 void P_DestroyScrollerThinkers();
 void P_DestroyLightThinkers();
 
-int         P_FindLineFromLineTag(const line_t *line, int start);
-int         P_IsUnderDamage(const AActor *actor);
+int32_t         P_FindLineFromLineTag(const line_t *line, int32_t start);
+int32_t         P_IsUnderDamage(const AActor *actor);
 bool        P_IsOnLift(const AActor *actor);
-int         P_IsUnderDamage(AActor *actor);
+int32_t         P_IsUnderDamage(AActor *actor);
 static bool P_CheckRange(AActor *actor, fixed_t range);
-void        EV_LightSetMinNeighbor(int tag);
-void        EV_LightSetMaxNeighbor(int tag);
+void        EV_LightSetMinNeighbor(int32_t tag);
+void        EV_LightSetMaxNeighbor(int32_t tag);
 
-extern int TeleportSide;
+extern int32_t TeleportSide;

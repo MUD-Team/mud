@@ -105,8 +105,8 @@ typedef enum
 } pr_class_t;
 
 // The random number generator.
-int M_Random();
-int P_Random();
+int32_t M_Random();
+int32_t P_Random();
 
 // [AM] RNG's that use xoshiro128** and not Doom's random table.
 
@@ -117,11 +117,11 @@ float M_RandomFloat();
 float P_RandomFloat();
 
 // As P_Random, but used by the play simulation, one per actor
-int P_Random(AActor *actor);
+int32_t P_Random(AActor *actor);
 
 // Optimization safe random difference functions -- Hyper_Eye 04/11/2010
-int P_RandomDiff();
-int P_RandomDiff(AActor *actor);
+int32_t P_RandomDiff();
+int32_t P_RandomDiff(AActor *actor);
 
 // Fix randoms for demos.
 void M_ClearRandom(void);
@@ -167,8 +167,8 @@ template <typename T> const T &P_RandomFloatWeighted(const std::vector<T> &data,
 }
 
 // Used for MBF21 mostly.
-int P_RandomHitscanAngle(fixed_t spread);
-int P_RandomHitscanSlope(fixed_t spread);
+int32_t P_RandomHitscanAngle(fixed_t spread);
+int32_t P_RandomHitscanSlope(fixed_t spread);
 
 // For std::shuffle - Dasho
 extern std::mt19937 random_shuffler;

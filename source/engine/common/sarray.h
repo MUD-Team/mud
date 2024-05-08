@@ -72,7 +72,7 @@ typedef uint32_t SArrayId;
 // SArray interface & inline implementation
 // ----------------------------------------------------------------------------
 
-template <typename VT, int N = 16> class SArray
+template <typename VT, int32_t N = 16> class SArray
 {
   private:
     typedef SArray<VT, N> SArrayType;
@@ -155,7 +155,7 @@ template <typename VT, int N = 16> class SArray
             return *this;
         }
 
-        inline ThisClass operator++(int)
+        inline ThisClass operator++(int32_t)
         {
             generic_iterator temp(*this);
             return temp.operator++();

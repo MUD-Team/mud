@@ -35,15 +35,15 @@ struct particle_s
     uint8_t    trans;
     uint8_t    size;
     uint8_t    fade;
-    int     color;
+    int32_t     color;
     uint16_t    next;
     uint16_t    nextinsubsector;
 };
 typedef struct particle_s particle_t;
 
-extern int          NumParticles;
-extern int          ActiveParticles;
-extern int          InactiveParticles;
+extern int32_t          NumParticles;
+extern int32_t          ActiveParticles;
+extern int32_t          InactiveParticles;
 extern particle_t  *Particles;
 extern TArray<uint16_t> ParticlesInSubsec;
 
@@ -68,18 +68,18 @@ particle_t *NewParticle();
 void R_InitParticles();
 void R_ClearParticles();
 void R_DrawParticle(vissprite_t *);
-void R_ProjectParticle(particle_t *, const sector_t *sector, int fakeside);
+void R_ProjectParticle(particle_t *, const sector_t *sector, int32_t fakeside);
 void R_FindParticleSubsectors();
 
-extern int MaxVisSprites;
+extern int32_t MaxVisSprites;
 
 extern vissprite_t *vissprites;
 extern vissprite_t *vissprite_p;
 extern vissprite_t  vsprsortedhead;
 
 // vars for R_DrawMaskedColumn
-extern int    *mfloorclip;
-extern int    *mceilingclip;
+extern int32_t    *mfloorclip;
+extern int32_t    *mceilingclip;
 extern fixed_t spryscale;
 extern fixed_t sprtopscreen;
 
@@ -88,6 +88,6 @@ extern fixed_t pspriteyscale;
 extern fixed_t pspritexiscale;
 
 void R_SortVisSprites();
-void R_AddSprites(sector_t *sec, int lightlevel, int fakeside);
+void R_AddSprites(sector_t *sec, int32_t lightlevel, int32_t fakeside);
 void R_ClearSprites();
 void R_DrawMasked();

@@ -73,52 +73,52 @@ void S_Stop()
 {
 }
 
-void S_SoundID(int channel, int sound_id, float volume, int attenuation)
+void S_SoundID(int32_t channel, int32_t sound_id, float volume, int32_t attenuation)
 {
 }
 
-void S_SoundID(AActor *ent, int channel, int sound_id, float volume, int attenuation)
+void S_SoundID(AActor *ent, int32_t channel, int32_t sound_id, float volume, int32_t attenuation)
 {
 }
 
-void S_SoundID(fixed_t *pt, int channel, int sound_id, float volume, int attenuation)
+void S_SoundID(fixed_t *pt, int32_t channel, int32_t sound_id, float volume, int32_t attenuation)
 {
 }
 
-void S_LoopedSoundID(AActor *ent, int channel, int sound_id, float volume, int attenuation)
+void S_LoopedSoundID(AActor *ent, int32_t channel, int32_t sound_id, float volume, int32_t attenuation)
 {
 }
 
-void S_LoopedSoundID(fixed_t *pt, int channel, int sound_id, float volume, int attenuation)
+void S_LoopedSoundID(fixed_t *pt, int32_t channel, int32_t sound_id, float volume, int32_t attenuation)
 {
 }
 
 // [Russell] - Hack to stop multiple plat stop sounds
-void S_PlatSound(fixed_t *pt, int channel, const char *name, float volume, int attenuation)
+void S_PlatSound(fixed_t *pt, int32_t channel, const char *name, float volume, int32_t attenuation)
 {
 }
 
-void S_Sound(int channel, const char *name, float volume, int attenuation)
+void S_Sound(int32_t channel, const char *name, float volume, int32_t attenuation)
 {
 }
 
-void S_Sound(AActor *ent, int channel, const char *name, float volume, int attenuation)
+void S_Sound(AActor *ent, int32_t channel, const char *name, float volume, int32_t attenuation)
 {
 }
 
-void S_Sound(fixed_t *pt, int channel, const char *name, float volume, int attenuation)
+void S_Sound(fixed_t *pt, int32_t channel, const char *name, float volume, int32_t attenuation)
 {
 }
 
-void S_LoopedSound(AActor *ent, int channel, const char *name, float volume, int attenuation)
+void S_LoopedSound(AActor *ent, int32_t channel, const char *name, float volume, int32_t attenuation)
 {
 }
 
-void S_LoopedSound(fixed_t *pt, int channel, const char *name, float volume, int attenuation)
+void S_LoopedSound(fixed_t *pt, int32_t channel, const char *name, float volume, int32_t attenuation)
 {
 }
 
-void S_Sound(fixed_t x, fixed_t y, int channel, const char *name, float volume, int attenuation)
+void S_Sound(fixed_t x, fixed_t y, int32_t channel, const char *name, float volume, int32_t attenuation)
 {
 }
 
@@ -126,11 +126,11 @@ void S_StopSound(fixed_t *pt)
 {
 }
 
-void S_StopSound(fixed_t *pt, int channel)
+void S_StopSound(fixed_t *pt, int32_t channel)
 {
 }
 
-void S_StopSound(AActor *ent, int channel)
+void S_StopSound(AActor *ent, int32_t channel)
 {
 }
 
@@ -144,12 +144,12 @@ void S_RelinkSound(AActor *from, AActor *to)
 {
 }
 
-bool S_GetSoundPlayingInfo(fixed_t *pt, int sound_id)
+bool S_GetSoundPlayingInfo(fixed_t *pt, int32_t sound_id)
 {
     return false;
 }
 
-bool S_GetSoundPlayingInfo(AActor *ent, int sound_id)
+bool S_GetSoundPlayingInfo(AActor *ent, int32_t sound_id)
 {
     return S_GetSoundPlayingInfo(ent ? &ent->x : NULL, sound_id);
 }
@@ -193,7 +193,7 @@ void S_StartMusic(const char *m_id)
 
 // [RH] S_ChangeMusic() now accepts the name of the music lump.
 // It's up to the caller to figure out what that name is.
-void S_ChangeMusic(std::string musicname, int looping)
+void S_ChangeMusic(std::string musicname, int32_t looping)
 {
 }
 
@@ -208,13 +208,13 @@ void S_StopMusic()
 // =============================== [RH]
 
 std::vector<sfxinfo_t>          S_sfx; // [RH] This is no longer defined in sounds.c
-std::map<int, std::vector<int>> S_rnd;
+std::map<int32_t, std::vector<int32_t>> S_rnd;
 
 static struct AmbientSound
 {
     uint32_t type;                   // type of ambient sound
-    int      periodmin;              // # of tics between repeats
-    int      periodmax;              // max # of tics for random ambients
+    int32_t      periodmin;              // # of tics between repeats
+    int32_t      periodmax;              // max # of tics for random ambients
     float    volume;                 // relative volume of sound
     float    attenuation;
     char     sound[MAX_SNDNAME + 1]; // Logical name of sound to play
@@ -241,12 +241,12 @@ void S_HashSounds()
     }
 }
 
-int S_FindSound(const char *logicalname)
+int32_t S_FindSound(const char *logicalname)
 {
     if (S_sfx.empty())
         return -1;
 
-    int i = S_sfx[MakeKey(logicalname) % static_cast<uint32_t>(S_sfx.size() - 1)].index;
+    int32_t i = S_sfx[MakeKey(logicalname) % static_cast<uint32_t>(S_sfx.size() - 1)].index;
 
     while ((i != -1) && strnicmp(S_sfx[i].name, logicalname, MAX_SNDNAME))
         i = S_sfx[i].next;
@@ -254,7 +254,7 @@ int S_FindSound(const char *logicalname)
     return i;
 }
 
-int S_FindSoundByFilename(const char *filename)
+int32_t S_FindSoundByFilename(const char *filename)
 {
     if (filename != NULL)
     {
@@ -271,7 +271,7 @@ void S_ClearSoundLumps()
     S_rnd.clear();
 }
 
-int FindSoundNoHash(const char *logicalname)
+int32_t FindSoundNoHash(const char *logicalname)
 {
     for (size_t i = 0; i < S_sfx.size(); i++)
         if (iequals(logicalname, S_sfx[i].name))
@@ -280,9 +280,9 @@ int FindSoundNoHash(const char *logicalname)
     return S_sfx.size();
 }
 
-int FindSoundTentative(const char *name)
+int32_t FindSoundTentative(const char *name)
 {
-    int id = FindSoundNoHash(name);
+    int32_t id = FindSoundNoHash(name);
     if (id == S_sfx.size())
     {
         id = S_AddSound(name, NULL);
@@ -290,9 +290,9 @@ int FindSoundTentative(const char *name)
     return id;
 }
 
-int S_AddSound(const char *logicalname, const char *filename)
+int32_t S_AddSound(const char *logicalname, const char *filename)
 {
-    int sfxid = FindSoundNoHash(logicalname);
+    int32_t sfxid = FindSoundNoHash(logicalname);
 
     // Otherwise, prepare a new one.
     if (sfxid != S_sfx.size())
@@ -323,7 +323,7 @@ int S_AddSound(const char *logicalname, const char *filename)
     return sfxid;
 }
 
-void S_AddRandomSound(int owner, std::vector<int> &list)
+void S_AddRandomSound(int32_t owner, std::vector<int32_t> &list)
 {
     S_rnd[owner]          = list;
     S_sfx[owner].link     = owner;
@@ -335,7 +335,7 @@ void S_ParseSndInfo()
 {
     S_ClearSoundLumps();
 
-    int lump = -1;
+    int32_t lump = -1;
     while ((lump = W_FindLump("SNDINFO", lump)) != -1)
     {
         char *buffer = static_cast<char *>(W_CacheLumpNum(lump, PU_CACHE));
@@ -362,7 +362,7 @@ void S_ParseSndInfo()
                     AmbientSound *ambient, dummy;
 
                     os.mustScanInt();
-                    const int index = os.getTokenInt();
+                    const int32_t index = os.getTokenInt();
                     if (index < 0 || index > 255)
                     {
                         os.warning("Bad ambient index (%d)\n", index);
@@ -418,15 +418,15 @@ void S_ParseSndInfo()
                     {
                         ambient->type |= RANDOM;
                         os.mustScanFloat();
-                        ambient->periodmin = static_cast<int>(os.getTokenFloat() * TICRATE);
+                        ambient->periodmin = static_cast<int32_t>(os.getTokenFloat() * TICRATE);
                         os.mustScanFloat();
-                        ambient->periodmax = static_cast<int>(os.getTokenFloat() * TICRATE);
+                        ambient->periodmax = static_cast<int32_t>(os.getTokenFloat() * TICRATE);
                     }
                     else if (os.compareTokenNoCase("periodic"))
                     {
                         ambient->type |= PERIODIC;
                         os.mustScanFloat();
-                        ambient->periodmin = static_cast<int>(os.getTokenFloat() * TICRATE);
+                        ambient->periodmin = static_cast<int32_t>(os.getTokenFloat() * TICRATE);
                     }
                     else
                     {
@@ -453,22 +453,22 @@ void S_ParseSndInfo()
                 else if (os.compareTokenNoCase("alias"))
                 {
                     os.mustScan();
-                    const int sfxfrom = S_AddSound(os.getToken().c_str(), NULL);
+                    const int32_t sfxfrom = S_AddSound(os.getToken().c_str(), NULL);
                     os.mustScan();
                     S_sfx[sfxfrom].link = FindSoundTentative(os.getToken().c_str());
                 }
                 else if (os.compareTokenNoCase("random"))
                 {
-                    std::vector<int> list;
+                    std::vector<int32_t> list;
 
                     os.mustScan();
-                    const int owner = S_AddSound(os.getToken().c_str(), NULL);
+                    const int32_t owner = S_AddSound(os.getToken().c_str(), NULL);
 
                     os.mustScan();
                     os.assertTokenIs("{");
                     while (os.scan() && !os.compareToken("}"))
                     {
-                        const int sfxto = FindSoundTentative(os.getToken().c_str());
+                        const int32_t sfxto = FindSoundTentative(os.getToken().c_str());
 
                         if (owner == sfxto)
                         {
@@ -520,7 +520,7 @@ void A_Ambient(AActor *actor)
 {
 }
 
-void S_ActivateAmbient(AActor *origin, int ambient)
+void S_ActivateAmbient(AActor *origin, int32_t ambient)
 {
 }
 

@@ -73,16 +73,16 @@ visplane_t *skyplane;
 //	floorclip starts out SCREENHEIGHT-1
 //	ceilingclip starts out 0
 //
-int *floorclip;
-int *ceilingclip;
-int *floorclipinitial;
-int *ceilingclipinitial;
+int32_t *floorclip;
+int32_t *ceilingclip;
+int32_t *floorclipinitial;
+int32_t *ceilingclipinitial;
 
 //
 // spanstart holds the start of a plane span
 // initialized to 0 at start
 //
-int *spanstart;
+int32_t *spanstart;
 
 //
 // texture mapping
@@ -91,7 +91,7 @@ extern fixed_t FocalLengthX, FocalLengthY;
 extern float   xfoc, yfoc;
 extern float   focratio, ifocratio;
 
-int  *planezlight;
+int32_t  *planezlight;
 float plight, shade;
 
 fixed_t       *yslope;
@@ -123,9 +123,9 @@ void R_InitPlanes(void)
 // Based in part on R_MapSlope() and R_SlopeLights() from Eternity Engine,
 // written by SoM/Quasar
 //
-void R_MapSlopedPlane(int y, int x1, int x2)
+void R_MapSlopedPlane(int32_t y, int32_t x1, int32_t x2)
 {
-    int len = x2 - x1 + 1;
+    int32_t len = x2 - x1 + 1;
     if (len <= 0)
         return;
 
@@ -150,12 +150,12 @@ void R_MapSlopedPlane(int y, int x1, int x2)
 
     if (fixedlightlev)
     {
-        for (int i = 0; i < len; i++)
+        for (int32_t i = 0; i < len; i++)
             dspan.slopelighting[i] = basecolormap.with(fixedlightlev);
     }
     else if (fixedcolormap.isValid())
     {
-        for (int i = 0; i < len; i++)
+        for (int32_t i = 0; i < len; i++)
             dspan.slopelighting[i] = fixedcolormap;
     }
     else
@@ -167,9 +167,9 @@ void R_MapSlopedPlane(int y, int x1, int x2)
 
         step = (mapend - mapstart) / len;
 
-        for (int i = 0; i < len; i++)
+        for (int32_t i = 0; i < len; i++)
         {
-            int index = (int)(map >> FRACBITS) + 1;
+            int32_t index = (int32_t)(map >> FRACBITS) + 1;
             index -= (foggy ? 0 : extralight << 2);
 
             if (index < 0)
@@ -206,7 +206,7 @@ void R_MapSlopedPlane(int y, int x1, int x2)
 //
 // Visplanes with the same texture now match up far better than before.
 //
-void R_MapLevelPlane(int y, int x1, int x2)
+void R_MapLevelPlane(int32_t y, int32_t x1, int32_t x2)
 {
     fixed_t distance = FixedMul(planeheight, yslope[y]);
     fixed_t slope    = (fixed_t)(focratio * FixedDiv(planeheight, abs(centery - y) << FRACBITS));
@@ -249,7 +249,7 @@ void R_ClearPlanes(void)
     memcpy(floorclip, floorclipinitial, viewwidth * sizeof(*floorclip));
     memcpy(ceilingclip, ceilingclipinitial, viewwidth * sizeof(*ceilingclip));
 
-    for (int i = 0; i < MAXVISPLANES; i++) // new code -- killough
+    for (int32_t i = 0; i < MAXVISPLANES; i++) // new code -- killough
         for (*freehead = visplanes[i], visplanes[i] = NULL; *freehead;)
             freehead = &(*freehead)->next;
 }
@@ -280,7 +280,7 @@ static visplane_t *new_visplane(uint32_t hash)
 //
 // killough 2/28/98: Add offsets
 //
-visplane_t *R_FindPlane(plane_t secplane, texhandle_t picnum, int lightlevel, fixed_t xoffs, fixed_t yoffs, fixed_t xscale,
+visplane_t *R_FindPlane(plane_t secplane, texhandle_t picnum, int32_t lightlevel, fixed_t xoffs, fixed_t yoffs, fixed_t xscale,
                         fixed_t yscale, angle_t angle)
 {
     visplane_t *check;
@@ -321,13 +321,13 @@ visplane_t *R_FindPlane(plane_t secplane, texhandle_t picnum, int lightlevel, fi
 //
 // R_CheckPlane
 //
-visplane_t *R_CheckPlane(visplane_t *pl, int start, int stop)
+visplane_t *R_CheckPlane(visplane_t *pl, int32_t start, int32_t stop)
 {
-    int intrl;
-    int intrh;
-    int unionl;
-    int unionh;
-    int x;
+    int32_t intrl;
+    int32_t intrh;
+    int32_t unionl;
+    int32_t unionh;
+    int32_t x;
 
     if (start < pl->minx)
     {
@@ -386,9 +386,9 @@ visplane_t *R_CheckPlane(visplane_t *pl, int start, int stop)
 //
 // R_MakeSpans
 //
-void R_MakeSpans(visplane_t *pl, void (*spanfunc)(int, int, int))
+void R_MakeSpans(visplane_t *pl, void (*spanfunc)(int32_t, int32_t, int32_t))
 {
-    for (int x = pl->minx; x <= pl->maxx + 1; x++)
+    for (int32_t x = pl->minx; x <= pl->maxx + 1; x++)
     {
         uint32_t t1 = pl->top[x - 1];
         uint32_t b1 = pl->bottom[x - 1];
@@ -475,7 +475,7 @@ void R_DrawSlopedPlane(visplane_t *pl)
 
     // Translate the points to their position relative to viewx, viewy and
     // rotate them based on viewangle
-    angle_t rotation = (angle_t)(-(int)viewangle + ANG90);
+    angle_t rotation = (angle_t)(-(int32_t)viewangle + ANG90);
     M_TranslateVec3f(&p, &viewpos, rotation);
     M_TranslateVec3f(&t, &viewpos, rotation);
     M_TranslateVec3f(&s, &viewpos, rotation);
@@ -561,7 +561,7 @@ void R_DrawLevelPlane(visplane_t *pl)
     // so just use (0, 0) when calculating the plane's z height
     planeheight = abs(P_PlaneZ(0, 0, &pl->secplane) - viewz);
 
-    int light   = clamp((pl->lightlevel >> LIGHTSEGSHIFT) + (foggy ? 0 : extralight), 0, LIGHTLEVELS - 1);
+    int32_t light   = clamp((pl->lightlevel >> LIGHTSEGSHIFT) + (foggy ? 0 : extralight), 0, LIGHTLEVELS - 1);
     planezlight = zlight[light];
 
     R_MakeSpans(pl, R_MapLevelPlane);
@@ -577,7 +577,7 @@ void R_DrawPlanes(void)
     MUD_ZoneScoped;    
 
     visplane_t *pl;
-    int         i;
+    int32_t         i;
 
     R_ResetDrawFuncs();
 
@@ -615,23 +615,23 @@ void R_DrawPlanes(void)
                             warpedflats[useflatnum] = (byte *)Z_Malloc(64 * 64, PU_STATIC, &warpedflats[useflatnum]);
 
                         static byte buffer[64];
-                        int         timebase = level.time * 23;
+                        int32_t         timebase = level.time * 23;
 
                         flatwarpedwhen[useflatnum] = level.time;
                         byte *warped               = warpedflats[useflatnum];
 
-                        for (int x = 63; x >= 0; x--)
+                        for (int32_t x = 63; x >= 0; x--)
                         {
-                            int   yt, yf = (finesine[(timebase + ((x + 17) << 7)) & FINEMASK] >> 13) & 63;
+                            int32_t   yt, yf = (finesine[(timebase + ((x + 17) << 7)) & FINEMASK] >> 13) & 63;
                             byte *source = dspan.source + x;
                             byte *dest   = warped + x;
                             for (yt = 64; yt; yt--, yf = (yf + 1) & 63, dest += 64)
                                 *dest = *(source + (yf << 6));
                         }
                         timebase = level.time * 32;
-                        for (int y = 63; y >= 0; y--)
+                        for (int32_t y = 63; y >= 0; y--)
                         {
-                            int   xt, xf = (finesine[(timebase + (y << 7)) & FINEMASK] >> 13) & 63;
+                            int32_t   xt, xf = (finesine[(timebase + (y << 7)) & FINEMASK] >> 13) & 63;
                             byte *source = warped + (y << 6);
                             byte *dest   = buffer;
                             for (xt = 64; xt; xt--, xf = (xf + 1) & 63)
@@ -660,8 +660,8 @@ void R_DrawPlanes(void)
 //
 bool R_PlaneInitData(IRenderSurface *surface)
 {
-    int surface_width  = surface->getWidth();
-    int surface_height = surface->getHeight();
+    int32_t surface_width  = surface->getWidth();
+    int32_t surface_height = surface->getHeight();
 
     delete[] floorclip;
     delete[] ceilingclip;
@@ -670,18 +670,18 @@ bool R_PlaneInitData(IRenderSurface *surface)
     delete[] spanstart;
     delete[] yslope;
 
-    floorclip          = new int[surface_width];
-    ceilingclip        = new int[surface_width];
-    floorclipinitial   = new int[surface_width];
-    ceilingclipinitial = new int[surface_width];
+    floorclip          = new int32_t[surface_width];
+    ceilingclip        = new int32_t[surface_width];
+    floorclipinitial   = new int32_t[surface_width];
+    ceilingclipinitial = new int32_t[surface_width];
 
-    for (int i = 0; i < surface_width; i++)
+    for (int32_t i = 0; i < surface_width; i++)
     {
         ceilingclipinitial[i] = -1;
         floorclipinitial[i]   = viewheight;
     }
 
-    spanstart = new int[surface_height];
+    spanstart = new int32_t[surface_height];
     yslope    = new fixed_t[surface_height];
 
     // Free all visplanes and let them be re-allocated as needed.
@@ -696,7 +696,7 @@ bool R_PlaneInitData(IRenderSurface *surface)
     freetail = NULL;
     freehead = &freetail;
 
-    for (int i = 0; i < MAXVISPLANES; i++)
+    for (int32_t i = 0; i < MAXVISPLANES; i++)
     {
         pl           = visplanes[i];
         visplanes[i] = NULL;
@@ -714,7 +714,7 @@ bool R_PlaneInitData(IRenderSurface *surface)
 //
 // R_AlignFlat
 //
-bool R_AlignFlat(int linenum, int side, int fc)
+bool R_AlignFlat(int32_t linenum, int32_t side, int32_t fc)
 {
     line_t   *line = lines + linenum;
     sector_t *sec  = side ? line->backsector : line->frontsector;

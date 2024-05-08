@@ -13,7 +13,7 @@ public:
 	MUDPlugin();
 
 private:
-	int GetEventClasses() override;
+	int32_t GetEventClasses() override;
 
 	void OnInitialise() override;
 

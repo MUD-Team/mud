@@ -66,11 +66,11 @@ class LuaOptions
         std::string       current_mode = options["current_mode"];
         luabridge::LuaRef modes        = options["modes"];
         luabridge::LuaRef mode         = modes[std::stoi(current_mode)];
-        int               width        = mode["width"];
-        int               height       = mode["height"];
+        int32_t               width        = mode["width"];
+        int32_t               height       = mode["height"];
 
-        int hiwidth  = I_GetVideoWidth();
-        int hiheight = I_GetVideoHeight();
+        int32_t hiwidth  = I_GetVideoWidth();
+        int32_t hiheight = I_GetVideoHeight();
 
         if (width != hiwidth || height != hiheight)
         {
@@ -82,10 +82,10 @@ class LuaOptions
         }
     }
 
-    static int buildDisplayModes(lua_State *L, luabridge::LuaRef &modes)
+    static int32_t buildDisplayModes(lua_State *L, luabridge::LuaRef &modes)
     {
-        int hiwidth  = I_GetVideoWidth();
-        int hiheight = I_GetVideoHeight();
+        int32_t hiwidth  = I_GetVideoWidth();
+        int32_t hiheight = I_GetVideoHeight();
 
         // gathers a list of unique resolutions availible for the current
         // screen mode (windowed or fullscreen)
@@ -102,12 +102,12 @@ class LuaOptions
 
         MenuModeList::const_iterator mode_it = menumodelist.begin();
 
-        int index        = 0;
-        int current_mode = -1;
+        int32_t index        = 0;
+        int32_t current_mode = -1;
         for (auto mode : menumodelist)
         {
-            int width  = mode.first;
-            int height = mode.second;
+            int32_t width  = mode.first;
+            int32_t height = mode.second;
 
             luabridge::LuaRef vmode = luabridge::newTable(L);
 

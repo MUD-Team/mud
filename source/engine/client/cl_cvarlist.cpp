@@ -454,7 +454,7 @@ static char *C_GetDefaultMusicSystem()
     MusicSystemType defaultmusicsystem = MS_FLUIDLITE;
 
     // don't overflow str
-    if (int(defaultmusicsystem) > 999 || int(defaultmusicsystem) < 0)
+    if (int32_t(defaultmusicsystem) > 999 || int32_t(defaultmusicsystem) < 0)
         defaultmusicsystem = MS_NONE;
 
     sprintf(str, "%i", defaultmusicsystem);

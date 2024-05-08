@@ -150,7 +150,7 @@ level_pwad_info_t &LevelInfos::findByName(const OLumpName &mapname)
 }
 
 // Find a levelinfo by mapnum
-level_pwad_info_t &LevelInfos::findByNum(int levelnum)
+level_pwad_info_t &LevelInfos::findByNum(int32_t levelnum)
 {
     for (_LevelInfoArray::iterator it = m_infos.begin(); it != m_infos.end(); ++it)
     {
@@ -244,7 +244,7 @@ cluster_info_t &ClusterInfos::create()
 }
 
 // Find a clusterinfo by mapname
-cluster_info_t &ClusterInfos::findByCluster(int i)
+cluster_info_t &ClusterInfos::findByCluster(int32_t i)
 {
     for (_ClusterInfoArray::iterator it = m_infos.begin(); it != m_infos.end(); ++it)
     {
@@ -438,7 +438,7 @@ BEGIN_COMMAND(map)
 }
 END_COMMAND(map)
 
-char *CalcMapName(int episode, int level)
+char *CalcMapName(int32_t episode, int32_t level)
 {
     static char lumpname[9];
 
@@ -487,7 +487,7 @@ void G_SerializeLevel(FArchive &arc, bool hubLoad)
 
         G_AirControlChanged();
 
-        for (int i = 0; i < NUM_MAPVARS; i++)
+        for (int32_t i = 0; i < NUM_MAPVARS; i++)
             arc << level.vars[i];
 
         if (!arc.IsReset())
@@ -502,7 +502,7 @@ void G_SerializeLevel(FArchive &arc, bool hubLoad)
 
         G_AirControlChanged();
 
-        for (int i = 0; i < NUM_MAPVARS; i++)
+        for (int32_t i = 0; i < NUM_MAPVARS; i++)
             arc >> level.vars[i];
 
         if (!arc.IsReset())
@@ -651,7 +651,7 @@ void P_SerializeACSDefereds(FArchive &arc)
     }
 }
 
-static int startpos; // [RH] Support for multiple starts per level
+static int32_t startpos; // [RH] Support for multiple starts per level
 
 void G_DoWorldDone()
 {
@@ -861,7 +861,7 @@ BEGIN_COMMAND(mapinfo)
     }
     else if (stricmp(argv[1], "levelnum") == 0)
     {
-        int levelnum = atoi(argv[2]);
+        int32_t levelnum = atoi(argv[2]);
         infoptr      = &levels.findByNum(levelnum);
         if (!infoptr->exists())
         {
@@ -872,7 +872,7 @@ BEGIN_COMMAND(mapinfo)
     else if (stricmp(argv[1], "at") == 0)
     {
         // Check ahead of time, otherwise we might crash.
-        int id = atoi(argv[2]);
+        int32_t id = atoi(argv[2]);
         if (id < 0 || id >= levels.size())
         {
             Printf(PRINT_HIGH, "Map index %d does not exist\n", id);

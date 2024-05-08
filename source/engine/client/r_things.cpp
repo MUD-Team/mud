@@ -51,7 +51,7 @@ fixed_t pspriteyscale;
 fixed_t pspritexiscale;
 // fixed_t		sky1scale;			// [RH] Sky 1 scale factor
 //  [ML] 5/11/06 - Removed sky2
-int *spritelights;
+int32_t *spritelights;
 
 #define MAX_SPRITE_FRAMES 29 // [RH] Macro-ized as in BOOM.
 #define SPRITE_NEEDS_INFO INT32_MAX
@@ -70,9 +70,9 @@ EXTERN_CVAR(r_particles)
 static tallpost_t *spriteposts[MAXWIDTH];
 
 // [RH] particle globals
-extern int         NumParticles;
-extern int         ActiveParticles;
-extern int         InactiveParticles;
+extern int32_t         NumParticles;
+extern int32_t         ActiveParticles;
+extern int32_t         InactiveParticles;
 extern particle_t *Particles;
 TArray<uint16_t>       ParticlesInSubsec;
 
@@ -80,7 +80,7 @@ TArray<uint16_t>       ParticlesInSubsec;
 // GAME FUNCTIONS
 //
 vissprite_t *vissprite_p;
-int          newvissprite;
+int32_t          newvissprite;
 
 //
 // R_ClearSprites
@@ -98,7 +98,7 @@ vissprite_t *R_NewVisSprite()
 {
     if (vissprite_p == lastvissprite)
     {
-        int prevvisspritenum = vissprite_p - vissprites;
+        int32_t prevvisspritenum = vissprite_p - vissprites;
 
         MaxVisSprites *= 2;
         vissprites    = (vissprite_t *)Realloc(vissprites, MaxVisSprites * sizeof(vissprite_t));
@@ -117,8 +117,8 @@ vissprite_t *R_NewVisSprite()
 // Masked means: partly transparent, i.e. stored
 //	in posts/runs of opaque pixels.
 //
-int *mfloorclip;
-int *mceilingclip;
+int32_t *mfloorclip;
+int32_t *mceilingclip;
 
 fixed_t spryscale;
 fixed_t sprtopscreen;
@@ -130,7 +130,7 @@ void R_BlastSpriteColumn(void (*drawfunc)())
     while (!post->end())
     {
         // calculate unclipped screen coordinates for post
-        int topscreen = sprtopscreen + spryscale * post->topdelta + 1;
+        int32_t topscreen = sprtopscreen + spryscale * post->topdelta + 1;
 
         dcol.yl = (topscreen + FRACUNIT) >> FRACBITS;
         dcol.yh = (topscreen + spryscale * post->length) >> FRACBITS;
@@ -143,7 +143,7 @@ void R_BlastSpriteColumn(void (*drawfunc)())
 
         if (dcol.texturefrac < 0)
         {
-            int cnt = (FixedDiv(-dcol.texturefrac, dcol.iscale) + FRACUNIT - 1) >> FRACBITS;
+            int32_t cnt = (FixedDiv(-dcol.texturefrac, dcol.iscale) + FRACUNIT - 1) >> FRACBITS;
             dcol.yl += cnt;
             dcol.texturefrac += cnt * dcol.iscale;
         }
@@ -153,7 +153,7 @@ void R_BlastSpriteColumn(void (*drawfunc)())
 
         if (endfrac >= maxfrac)
         {
-            int cnt = (FixedDiv(endfrac - maxfrac - 1, dcol.iscale) + FRACUNIT - 1) >> FRACBITS;
+            int32_t cnt = (FixedDiv(endfrac - maxfrac - 1, dcol.iscale) + FRACUNIT - 1) >> FRACBITS;
             dcol.yh -= cnt;
         }
 
@@ -175,7 +175,7 @@ void SpriteColumnBlaster()
 // R_DrawVisSprite
 //	mfloorclip and mceilingclip should also be set.
 //
-void R_DrawVisSprite(vissprite_t *vis, int x1, int x2)
+void R_DrawVisSprite(vissprite_t *vis, int32_t x1, int32_t x2)
 {
     bool fuzz_effect = false;
     bool translated  = false;
@@ -199,14 +199,14 @@ void R_DrawVisSprite(vissprite_t *vis, int x1, int x2)
     if (vis->tex_patch == NULL)
         vis->tex_patch = (patch_t *)texturemanager.getTexture(vis->tex_id)->getData();
     const int16_t patchWidth = vis->tex_patch->width();
-    const int   start      = vis->startfrac >> FRACBITS;
+    const int32_t   start      = vis->startfrac >> FRACBITS;
     if (start < 0 || start > patchWidth)
     {
         return;
     }
 
-    const int enditers = vis->x2 - vis->x1;
-    const int end      = (vis->startfrac + (enditers * vis->xiscale)) >> FRACBITS;
+    const int32_t enditers = vis->x2 - vis->x1;
+    const int32_t end      = (vis->startfrac + (enditers * vis->xiscale)) >> FRACBITS;
     if (end < 0 || end > patchWidth)
     {
         return;
@@ -263,7 +263,7 @@ void R_DrawVisSprite(vissprite_t *vis, int x1, int x2)
 
     // [SL] set up the array that indicates which patch column to use for each screen column
     fixed_t colfrac = vis->startfrac;
-    for (int x = vis->x1; x <= vis->x2; x++)
+    for (int32_t x = vis->x1; x <= vis->x2; x++)
     {
         spriteposts[x] = R_GetPatchColumn(vis->tex_patch, colfrac >> FRACBITS);
         colfrac += vis->xiscale;
@@ -290,7 +290,7 @@ void R_DrawVisSprite(vissprite_t *vis, int x1, int x2)
 // coordinates onto the screen. Returns NULL if the projection is completely
 // clipped off the screen.
 //
-static vissprite_t *R_GenerateVisSprite(const sector_t *sector, int fakeside, fixed_t x, fixed_t y, fixed_t z,
+static vissprite_t *R_GenerateVisSprite(const sector_t *sector, int32_t fakeside, fixed_t x, fixed_t y, fixed_t z,
                                         fixed_t height, fixed_t width, fixed_t topoffs, fixed_t sideoffs, bool flip)
 {
     // translate the sprite edges from world-space to camera-space
@@ -316,14 +316,14 @@ static vissprite_t *R_GenerateVisSprite(const sector_t *sector, int fakeside, fi
     fixed_t gzb = z;
 
     // project the sprite edges to determine which columns the sprite occupies
-    int x1 = R_ProjectPointX(t1.x, ty);
-    int x2 = R_ProjectPointX(t2.x, ty) - 1;
+    int32_t x1 = R_ProjectPointX(t1.x, ty);
+    int32_t x2 = R_ProjectPointX(t2.x, ty) - 1;
     if (!R_CheckProjectionX(x1, x2))
         return NULL;
 
     // Entirely above the top of the screen or below the bottom?
-    int y1 = R_ProjectPointY(gzt - viewz, ty);
-    int y2 = R_ProjectPointY(gzb - viewz, ty) - 1;
+    int32_t y1 = R_ProjectPointY(gzt - viewz, ty);
+    int32_t y2 = R_ProjectPointY(gzb - viewz, ty) - 1;
     if (!R_CheckProjectionY(y1, y2))
         return NULL;
 
@@ -461,7 +461,7 @@ void R_DrawHitBox(AActor *thing)
 // R_ProjectSprite
 // Generates a vissprite for a thing if it might be visible.
 //
-void R_ProjectSprite(AActor *thing, int fakeside)
+void R_ProjectSprite(AActor *thing, int32_t fakeside)
 {
     spritedef_t   *sprdef;
     spriteframe_t *sprframe;
@@ -587,7 +587,7 @@ void R_ProjectSprite(AActor *thing, int fakeside)
     else
     {
         // diminished light
-        int index = (vis->yscale * lightscalexmul) >> LIGHTSCALESHIFT; // [RH]
+        int32_t index = (vis->yscale * lightscalexmul) >> LIGHTSCALESHIFT; // [RH]
         index     = clamp(index, 0, MAXLIGHTSCALE - 1);
 
         vis->colormap = basecolormap.with(spritelights[index]);        // [RH] Use basecolormap
@@ -599,7 +599,7 @@ void R_ProjectSprite(AActor *thing, int fakeside)
 // During BSP traversal, this adds sprites by sector.
 //
 // killough 9/18/98: add lightlevel as parameter, fixing underwater lighting
-void R_AddSprites(sector_t *sec, int lightlevel, int fakeside)
+void R_AddSprites(sector_t *sec, int32_t lightlevel, int32_t fakeside)
 {
     // BSP is traversed by subsector.
     // A sector might have been split into several
@@ -611,7 +611,7 @@ void R_AddSprites(sector_t *sec, int lightlevel, int fakeside)
     // Well, now it will be done.
     sec->validcount = validcount;
 
-    int lightnum = (lightlevel >> LIGHTSEGSHIFT) + (foggy ? 0 : extralight);
+    int32_t lightnum = (lightlevel >> LIGHTSEGSHIFT) + (foggy ? 0 : extralight);
 
     if (lightnum < 0)
         spritelights = scalelight[0];
@@ -639,8 +639,8 @@ fixed_t P_CalculateWeaponBobY(player_t *player, float scale_amount);
 void R_DrawPSprite(pspdef_t *psp, uint32_t flags)
 {
     fixed_t        tx;
-    int            x1;
-    int            x2;
+    int32_t            x1;
+    int32_t            x2;
     spritedef_t   *sprdef;
     spriteframe_t *sprframe;
     texhandle_t    tex_id;
@@ -783,7 +783,7 @@ void R_DrawPlayerSprites()
     MUD_ZoneScoped;    
     
     static sector_t tempsec;
-    int             floorlight, ceilinglight;
+    int32_t             floorlight, ceilinglight;
 
     if (!camera || !camera->subsector)
         return;
@@ -801,7 +801,7 @@ void R_DrawPlayerSprites()
     basecolormap = sec->colormap->maps;
 
     // get light level
-    const int lightnum = ((floorlight + ceilinglight) >> (LIGHTSEGSHIFT + 1)) + (foggy ? 0 : extralight);
+    const int32_t lightnum = ((floorlight + ceilinglight) >> (LIGHTSEGSHIFT + 1)) + (foggy ? 0 : extralight);
 
     if (lightnum < 0)
         spritelights = scalelight[0];
@@ -815,9 +815,9 @@ void R_DrawPlayerSprites()
     mceilingclip = negonearray;
 
     {
-        int       i;
+        int32_t       i;
         pspdef_t *psp;
-        int       centerhack = centery;
+        int32_t       centerhack = centery;
 
         centery     = (viewheight >> 1) + 1; // Ch0wW : Fix for the weapon sprite's offset.
         centeryfrac = centery << FRACBITS;
@@ -844,13 +844,13 @@ void R_DrawPlayerSprites()
 //		gain compared to the old function.
 //
 
-static int           vsprcount;
+static int32_t           vsprcount;
 static vissprite_t **spritesorter;
-static int           spritesorter_size = 0;
+static int32_t           spritesorter_size = 0;
 
-static int STACK_ARGS sv_compare(const void *arg1, const void *arg2)
+static int32_t STACK_ARGS sv_compare(const void *arg1, const void *arg2)
 {
-    int diff = (*(vissprite_t **)arg1)->depth - (*(vissprite_t **)arg2)->depth;
+    int32_t diff = (*(vissprite_t **)arg1)->depth - (*(vissprite_t **)arg2)->depth;
     if (diff == 0)
         return (*(vissprite_t **)arg2)->gzt - (*(vissprite_t **)arg1)->gzt;
     return diff;
@@ -872,7 +872,7 @@ void R_SortVisSprites()
         spritesorter_size = MaxVisSprites;
     }
 
-    for (int i = 0; i < vsprcount; i++)
+    for (int32_t i = 0; i < vsprcount; i++)
         spritesorter[i] = vissprites + i;
 
     qsort(spritesorter, vsprcount, sizeof(vissprite_t *), sv_compare);
@@ -885,17 +885,17 @@ void R_DrawSprite(vissprite_t *spr)
 {
     MUD_ZoneScoped;
 
-    static int cliptop[MAXWIDTH];
-    static int clipbot[MAXWIDTH];
+    static int32_t cliptop[MAXWIDTH];
+    static int32_t clipbot[MAXWIDTH];
 
     drawseg_t *ds;
-    int        x;
-    int        r1, r2;
+    int32_t        x;
+    int32_t        r1, r2;
     fixed_t    segscale1, segscale2;
 
-    int  topclip = 0, botclip = viewheight;
-    int *clip1;
-    int *clip2;
+    int32_t  topclip = 0, botclip = viewheight;
+    int32_t *clip1;
+    int32_t *clip2;
 
     // [RH] Quickly reject sprites with bad x ranges.
     if (spr->x1 > spr->x2)
@@ -915,12 +915,12 @@ void R_DrawSprite(vissprite_t *spr)
             if (spr->FakeFlat == FAKED_BelowFloor)
             { // seen below floor: clip top
                 if (h > topclip)
-                    topclip = MIN<int>(h, viewheight);
+                    topclip = MIN<int32_t>(h, viewheight);
             }
             else
             { // seen in the middle: clip bottom
                 if (h < botclip)
-                    botclip = MAX<int>(0, h);
+                    botclip = MAX<int32_t>(0, h);
             }
         }
         if (spr->FakeFlat != FAKED_BelowFloor)
@@ -931,18 +931,18 @@ void R_DrawSprite(vissprite_t *spr)
             if (spr->FakeFlat == FAKED_AboveCeiling)
             { // seen above ceiling: clip bottom
                 if (h < botclip)
-                    botclip = MAX<int>(0, h);
+                    botclip = MAX<int32_t>(0, h);
             }
             else
             { // seen in the middle: clip top
                 if (h > topclip)
-                    topclip = MIN<int>(h, viewheight);
+                    topclip = MIN<int32_t>(h, viewheight);
             }
         }
     }
 
     // initialize the clipping arrays
-    int i = spr->x2 - spr->x1 + 1;
+    int32_t i = spr->x2 - spr->x1 + 1;
     clip1 = clipbot + spr->x1;
     clip2 = cliptop + spr->x1;
     do
@@ -967,11 +967,11 @@ void R_DrawSprite(vissprite_t *spr)
             continue;
         }
 
-        r1 = MAX<int>(ds->x1, spr->x1);
-        r2 = MIN<int>(ds->x2, spr->x2);
+        r1 = MAX<int32_t>(ds->x1, spr->x1);
+        r2 = MIN<int32_t>(ds->x2, spr->x2);
 
-        segscale1 = MAX<int>(ds->scale1, ds->scale2);
-        segscale2 = MIN<int>(ds->scale1, ds->scale2);
+        segscale1 = MAX<int32_t>(ds->scale1, ds->scale2);
+        segscale2 = MIN<int32_t>(ds->scale1, ds->scale2);
 
         // check if the seg is in front of the sprite
         if (segscale1 < spr->yscale || (segscale2 < spr->yscale && !R_PointOnSegSide(spr->gx, spr->gy, ds->curline)))
@@ -1057,7 +1057,7 @@ void R_InitParticles(void)
 
 void R_ClearParticles(void)
 {
-    int i;
+    int32_t i;
 
     memset(Particles, 0, NumParticles * sizeof(particle_t));
     ActiveParticles   = NO_PARTICLE;
@@ -1074,23 +1074,23 @@ void R_FindParticleSubsectors()
         ParticlesInSubsec.Reserve(numsubsectors - ParticlesInSubsec.Size());
 
     // fill the buffer with NO_PARTICLE
-    for (int i = 0; i < numsubsectors; i++)
+    for (int32_t i = 0; i < numsubsectors; i++)
         ParticlesInSubsec[i] = NO_PARTICLE;
 
     if (!r_particles)
         return;
 
-    for (int i = ActiveParticles; i != NO_PARTICLE; i = Particles[i].next)
+    for (int32_t i = ActiveParticles; i != NO_PARTICLE; i = Particles[i].next)
     {
         subsector_t *ssec  = R_PointInSubsector(Particles[i].x, Particles[i].y);
-        int          ssnum = ssec - subsectors;
+        int32_t          ssnum = ssec - subsectors;
 
         Particles[i].nextinsubsector = ParticlesInSubsec[ssnum];
         ParticlesInSubsec[ssnum]     = i;
     }
 }
 
-void R_ProjectParticle(particle_t *particle, const sector_t *sector, int fakeside)
+void R_ProjectParticle(particle_t *particle, const sector_t *sector, int32_t fakeside)
 {
     if (sector == NULL)
         return;
@@ -1135,8 +1135,8 @@ void R_ProjectParticle(particle_t *particle, const sector_t *sector, int fakesid
         }
         else
         {
-            int index    = (vis->yscale * lightscalexmul) >> (LIGHTSCALESHIFT - 1);
-            int lightnum = (sector->lightlevel >> LIGHTSEGSHIFT) + (foggy ? 0 : extralight);
+            int32_t index    = (vis->yscale * lightscalexmul) >> (LIGHTSCALESHIFT - 1);
+            int32_t lightnum = (sector->lightlevel >> LIGHTSEGSHIFT) + (foggy ? 0 : extralight);
 
             index    = clamp(index, 0, MAXLIGHTSCALE - 1);
             lightnum = clamp(lightnum, 0, LIGHTLEVELS - 1);
@@ -1149,9 +1149,9 @@ void R_ProjectParticle(particle_t *particle, const sector_t *sector, int fakesid
 void R_DrawParticle(vissprite_t *vis)
 {
     // Don't bother clipping each individual column
-    int x1 = vis->x1, x2 = vis->x2;
-    int y1 = MAX(vis->y1, MAX(mceilingclip[x1] + 1, mceilingclip[x2] + 1));
-    int y2 = MIN(vis->y2, MIN(mfloorclip[x1] - 1, mfloorclip[x2] - 1));
+    int32_t x1 = vis->x1, x2 = vis->x2;
+    int32_t y1 = MAX(vis->y1, MAX(mceilingclip[x1] + 1, mceilingclip[x2] + 1));
+    int32_t y2 = MIN(vis->y2, MIN(mfloorclip[x1] - 1, mfloorclip[x2] - 1));
 
     dspan.x1       = vis->x1;
     dspan.x2       = vis->x2;

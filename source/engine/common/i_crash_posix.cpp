@@ -46,7 +46,7 @@ static char gCrashDir[CRASH_DIR_LEN];
 // that is already crashing, and is meant to provide as much
 // information as reasonably possible in the potential absence of a
 // core dump.
-static void WriteBacktrace(int sig, siginfo_t *si)
+static void WriteBacktrace(int32_t sig, siginfo_t *si)
 {
     // Generate a timestamp.
     time_t     now   = time(NULL);
@@ -56,7 +56,7 @@ static void WriteBacktrace(int sig, siginfo_t *si)
     strftime(timebuf, ARRAY_LENGTH(timebuf), "%Y%m%dT%H%M%S", local);
 
     // Find the spot to write our backtrace.
-    int  len = 0;
+    int32_t  len = 0;
     char filename[CRASH_DIR_LEN];
     len = snprintf(filename, ARRAY_LENGTH(filename), "%s/%s_g%s_%d_%s_dump.txt", ::gCrashDir, GAMEEXE, GitShortHash(),
                    getpid(), timebuf);
@@ -67,7 +67,7 @@ static void WriteBacktrace(int sig, siginfo_t *si)
     }
 
     // Create a file.
-    int fd = creat(filename, 0644);
+    int32_t fd = creat(filename, 0644);
     if (fd == -1)
     {
         fprintf(stderr, "%s: File could not be created.\n", __FUNCTION__);
@@ -104,7 +104,7 @@ static void WriteBacktrace(int sig, siginfo_t *si)
     fprintf(stderr, "Wrote \"%s\".\n", filename);
 }
 
-static void SigActionCallback(int sig, siginfo_t *si, void *ctx)
+static void SigActionCallback(int32_t sig, siginfo_t *si, void *ctx)
 {
     fprintf(stderr, "Caught Signal %d (%s), dumping crash info...\n", si->si_signo, strsignal(si->si_signo));
 
@@ -158,7 +158,7 @@ void I_SetCrashDir(const char *crashdir)
 
     // Check to see if we can write to our crash directory.
     snprintf(testfile, ARRAY_LENGTH(testfile), "%s/crashXXXXXX", crashdir);
-    int res = mkstemp(testfile);
+    int32_t res = mkstemp(testfile);
     if (res == -1)
     {
         I_FatalError("Crash directory \"%s\" is not writable.  Please point -crashout to "

@@ -313,7 +313,7 @@ void P_TranslateLineDef(line_t *ld, maplinedef_t *mld)
     int16_t        tag         = mld->tag;
     uint32_t flags       = (uint16_t)mld->flags;
     bool         passthrough = (flags & ML_PASSUSE);
-    int          i;
+    int32_t          i;
 
     flags &= 0x01ff; // Ignore flags unknown to DOOM
 

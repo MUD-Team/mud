@@ -236,7 +236,7 @@ static void I_InitializeKeyNameTable()
 //
 // Returns the key code for the given key name
 //
-int I_GetKeyFromName(const std::string &name)
+int32_t I_GetKeyFromName(const std::string &name)
 {
     if (key_names.empty())
         I_InitializeKeyNameTable();
@@ -259,7 +259,7 @@ int I_GetKeyFromName(const std::string &name)
 //
 // Returns the key code for the given key name
 //
-std::string I_GetKeyName(int key)
+std::string I_GetKeyName(int32_t key)
 {
     if (key_names.empty())
         I_InitializeKeyNameTable();
@@ -418,7 +418,7 @@ CVAR_FUNC_IMPL(joy_active)
     const std::vector<IInputDeviceInfo> devices = input_subsystem->getJoystickDevices();
     for (std::vector<IInputDeviceInfo>::const_iterator it = devices.begin(); it != devices.end(); ++it)
     {
-        if (it->mId == (int)var)
+        if (it->mId == (int32_t)var)
         {
             I_OpenJoystick();
             return;
@@ -429,7 +429,7 @@ CVAR_FUNC_IMPL(joy_active)
 //
 // I_GetJoystickCount
 //
-int I_GetJoystickCount()
+int32_t I_GetJoystickCount()
 {
     const std::vector<IInputDeviceInfo> devices = input_subsystem->getJoystickDevices();
     return devices.size();
@@ -438,7 +438,7 @@ int I_GetJoystickCount()
 //
 // I_GetJoystickNameFromIndex
 //
-std::string I_GetJoystickNameFromIndex(int index)
+std::string I_GetJoystickNameFromIndex(int32_t index)
 {
     const std::vector<IInputDeviceInfo> devices = input_subsystem->getJoystickDevices();
     for (std::vector<IInputDeviceInfo>::const_iterator it = devices.begin(); it != devices.end(); ++it)
@@ -488,7 +488,7 @@ void I_CloseJoystick()
     }
 
     // Reset joy position values. Wouldn't want to get stuck in a turn or something. -- Hyper_Eye
-    extern int joyforward, joystrafe, joyturn, joylook;
+    extern int32_t joyforward, joystrafe, joyturn, joylook;
     joyforward = joystrafe = joyturn = joylook = 0;
 }
 
@@ -689,12 +689,12 @@ void IInputSubsystem::disableTextEntry()
 // concurrently as long as they are held down. Thus a unique value is returned
 // for each of them.
 //
-static int I_GetEventRepeaterKey(const event_t *ev)
+static int32_t I_GetEventRepeaterKey(const event_t *ev)
 {
     if (ev->type != ev_keydown && ev->type != ev_keyup)
         return 0;
 
-    int button = ev->data1;
+    int32_t button = ev->data1;
     if (button == OKEY_CAPSLOCK || button == OKEY_SCRLCK || button == OKEY_LSHIFT || button == OKEY_LCTRL ||
         button == OKEY_LALT || button == OKEY_RSHIFT || button == OKEY_RCTRL || button == OKEY_RALT ||
         button == OKEY_NUMLOCK)
@@ -713,7 +713,7 @@ static int I_GetEventRepeaterKey(const event_t *ev)
 void IInputSubsystem::addToEventRepeaters(event_t &ev)
 {
     // Check if the event needs to be added/removed from the list of repeatable events
-    int key = I_GetEventRepeaterKey(&ev);
+    int32_t key = I_GetEventRepeaterKey(&ev);
     if (ev.type == ev_keydown && key)
     {
         // If there is an existing repeater event for "key",
@@ -848,7 +848,7 @@ static bool TranslateSDLMouseEvent(const SDL_Event &sdl, event_t &event)
         if (sdl.type == SDL_MOUSEWHEEL)
         {
             event.type    = ev_keydown;
-            int direction = 1;
+            int32_t direction = 1;
 #if (SDL_VERSION >= SDL_VERSIONNUM(2, 0, 4))
             if (sdl.wheel.direction == SDL_MOUSEWHEEL_FLIPPED)
                 direction = -1;
@@ -889,8 +889,8 @@ static bool TranslateSDLKeyboardEvent(const SDL_Event &sdl, event_t &event)
     // be implicitly ignored unless handled below.
     if (sdl.type == SDL_KEYDOWN || sdl.type == SDL_KEYUP)
     {
-        const int sym = sdl.key.keysym.sym;
-        const int mod = sdl.key.keysym.mod;
+        const int32_t sym = sdl.key.keysym.sym;
+        const int32_t mod = sdl.key.keysym.mod;
 
         event.type = (sdl.type == SDL_KEYDOWN) ? ev_keydown : ev_keyup;
 

@@ -207,7 +207,7 @@ void SV_SendServerInfo()
     // bond===========================
     MSG_WriteString(&ml_message, (char *)sv_email.cstring());
 
-    int timeleft = (int)(sv_timelimit - level.time / (TICRATE * 60));
+    int32_t timeleft = (int32_t)(sv_timelimit - level.time / (TICRATE * 60));
     if (timeleft < 0)
         timeleft = 0;
 
@@ -235,7 +235,7 @@ void SV_SendServerInfo()
             MSG_WriteShort(&ml_message, it->killcount);
             MSG_WriteShort(&ml_message, it->deathcount);
 
-            int timeingame = (time(NULL) - it->JoinTime) / 60;
+            int32_t timeingame = (time(NULL) - it->JoinTime) / 60;
             if (timeingame < 0)
                 timeingame = 0;
             MSG_WriteShort(&ml_message, timeingame);

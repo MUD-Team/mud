@@ -12,7 +12,7 @@ MUDPlugin::MUDPlugin()
 {
 }
 
-int MUDPlugin::GetEventClasses()
+int32_t MUDPlugin::GetEventClasses()
 {
     return EVT_BASIC | EVT_DOCUMENT;
 }

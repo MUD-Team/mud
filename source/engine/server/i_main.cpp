@@ -69,7 +69,7 @@ void STACK_ARGS call_terms(void)
         TermFuncs.top().first(), TermFuncs.pop();
 }
 
-int PrintString(int printlevel, char const *str)
+int32_t PrintString(int32_t printlevel, char const *str)
 {
     std::string sanitized_str(str);
     StripColorCodes(sanitized_str);
@@ -89,7 +89,7 @@ int PrintString(int printlevel, char const *str)
 #ifdef _WIN32
 static HANDLE hEvent;
 
-int ShutdownNow()
+int32_t ShutdownNow()
 {
     return (WaitForSingleObject(hEvent, 1) == WAIT_OBJECT_0);
 }
@@ -100,7 +100,7 @@ BOOL WINAPI ConsoleHandlerRoutine(DWORD dwCtrlType)
     return TRUE;
 }
 
-int __cdecl main(int argc, char *argv[])
+int32_t __cdecl main(int32_t argc, char *argv[])
 {
     // [AM] Set crash callbacks, so we get something useful from crashes.
 #ifdef NDEBUG
@@ -226,7 +226,7 @@ int __cdecl main(int argc, char *argv[])
 //
 void daemon_init(void)
 {
-    int         pid;
+    int32_t         pid;
     PHYSFS_File *fpid;
     std::string pidfile;
 
@@ -255,7 +255,7 @@ void daemon_init(void)
     }
 }
 
-int main(int argc, char **argv)
+int32_t main(int32_t argc, char **argv)
 {
     // [AM] Set crash callbacks, so we get something useful from crashes.
 #ifdef NDEBUG
@@ -267,7 +267,7 @@ int main(int argc, char **argv)
         if (!getuid() || !geteuid())
             I_FatalError("root user detected, quitting odamex immediately");
 
-        int r_euid = seteuid(getuid());
+        int32_t r_euid = seteuid(getuid());
 
         if (r_euid < 0)
             perror(NULL);

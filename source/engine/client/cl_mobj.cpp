@@ -130,7 +130,7 @@ void P_SpawnPlayer(player_t &player, mapthing2_t *mthing)
     // give all cards in death match mode
     if (!G_IsCoopGame())
     {
-        for (int i = 0; i < NUMCARDS; i++)
+        for (int32_t i = 0; i < NUMCARDS; i++)
             player.cards[i] = true;
     }
 
@@ -177,7 +177,7 @@ void P_ShowSpawns(mapthing2_t *mthing)
 
         if (G_IsTeamGame())
         {
-            for (int iTeam = 0; iTeam < NUMTEAMS; iTeam++)
+            for (int32_t iTeam = 0; iTeam < NUMTEAMS; iTeam++)
             {
                 TeamInfo *teamInfo = GetTeamInfo((team_t)iTeam);
                 if (teamInfo->TeamSpawnThingNum == mthing->type)

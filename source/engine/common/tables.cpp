@@ -21,15 +21,15 @@
 //		Do not try to look them up :-).
 //		In the order of appearance:
 //
-//		int finetangent[4096]	- Tangens LUT.
+//		int32_t finetangent[4096]	- Tangens LUT.
 //		 Should work with BAM fairly well (12 of 16bit,
 //		effectively, by shifting).
 //
-//		int finesine[10240] 			- Sine lookup.
+//		int32_t finesine[10240] 			- Sine lookup.
 //		 Guess what, serves as cosine, too.
 //		 Remarkable thing is, how to use BAMs with this?
 //
-//		int tantoangle[2049]	- ArcTan LUT,
+//		int32_t tantoangle[2049]	- ArcTan LUT,
 //		  maps tan(angle) to angle fast. Gotta search.
 //
 //
@@ -41,7 +41,7 @@
 
 #include "odamex.h"
 
-const int finetangent[4096] = {
+const int32_t finetangent[4096] = {
     -170910304, -56965752, -34178904, -24413316, -18988036, -15535599, -13145455, -11392683, -10052327, -8994149,
     -8137527,   -7429880,  -6835455,  -6329090,  -5892567,  -5512368,  -5178251,  -4882318,  -4618375,  -4381502,
     -4167737,   -3973855,  -3797206,  -3635590,  -3487165,  -3350381,  -3223918,  -3106651,  -2997613,  -2895966,
@@ -453,7 +453,7 @@ const int finetangent[4096] = {
     5512368,    5892567,   6329090,   6835455,   7429880,   8137527,   8994149,   10052327,  11392683,  13145455,
     15535599,   18988036,  24413316,  34178904,  56965752,  170910304};
 
-const int finesine[10240] = {
+const int32_t finesine[10240] = {
     25,     75,     125,    175,    226,    276,    326,    376,    427,    477,    527,    578,    628,    678,
     728,    779,    829,    879,    929,    980,    1030,   1080,   1130,   1181,   1231,   1281,   1331,   1382,
     1432,   1482,   1532,   1583,   1633,   1683,   1733,   1784,   1834,   1884,   1934,   1985,   2035,   2085,
@@ -1407,7 +1407,7 @@ const angle_t *p_tantoangle = tantoangle;
 //
 void Table_InitTanToAngle(void)
 {
-    int i;
+    int32_t i;
 
     for (i = 0; i <= SLOPERANGE; ++i)
     {
@@ -1423,7 +1423,7 @@ void Table_InitTanToAngle(void)
 // haleyjd 01/28/2010: Call when demo_version is set to select the appropriate
 // table to access through the p_tantoangle pointer used by game code.
 //
-void Table_SetTanToAngle(int version)
+void Table_SetTanToAngle(int32_t version)
 {
     if (version < 337)
         p_tantoangle = tantoangle;     // old demo, use old table

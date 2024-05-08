@@ -35,7 +35,7 @@ extern void P_CalcHeight(player_t *player);
 // [AM] From ZDoom SVN, modified for use with Odamex and without the
 //      buggy 2.0.x teleport behavior compatibility fix.  Thanks to both
 //      Randy and Graf.
-static AActor *SelectTeleDest(int tid, int tag)
+static AActor *SelectTeleDest(int32_t tid, int32_t tag)
 {
     AActor *searcher;
 
@@ -48,7 +48,7 @@ static AActor *SelectTeleDest(int tid, int tag)
     if (tid != 0)
     {
         TThinkerIterator<AActor> iterator;
-        int                      count = 0;
+        int32_t                      count = 0;
         while ((searcher = iterator.Next()))
         {
             if (!(searcher->type == MT_TELEPORTMAN || searcher->type == MT_TELEPORTMAN2))
@@ -109,7 +109,7 @@ static AActor *SelectTeleDest(int tid, int tag)
 
     if (tag != 0)
     {
-        int secnum = -1;
+        int32_t secnum = -1;
 
         while ((secnum = P_FindSectorFromTag(tag, secnum)) >= 0)
         {
@@ -138,7 +138,7 @@ static AActor *SelectTeleDest(int tid, int tag)
 //
 // TELEPORTATION
 //
-bool EV_Teleport(int tid, int tag, int arg0, int side, AActor *thing, int nostop)
+bool EV_Teleport(int32_t tid, int32_t tag, int32_t arg0, int32_t side, AActor *thing, int32_t nostop)
 {
     AActor   *m;
     uint32_t  an;
@@ -226,12 +226,12 @@ bool EV_Teleport(int tid, int tag, int arg0, int side, AActor *thing, int nostop
 }
 
 // [ML] Original vanilla-style EV_Teleport, based on code from chocolate doom
-bool EV_LineTeleport(line_t *line, int side, AActor *thing)
+bool EV_LineTeleport(line_t *line, int32_t side, AActor *thing)
 {
     AActor                  *m;
     uint32_t                 an;
-    int                      i;
-    int                      tag;
+    int32_t                      i;
+    int32_t                      tag;
     fixed_t                  oldx;
     fixed_t                  oldy;
     fixed_t                  oldz;
@@ -326,7 +326,7 @@ bool EV_LineTeleport(line_t *line, int side, AActor *thing)
 // [RH] Changed to find destination by tid rather than sector
 //
 
-bool EV_SilentTeleport(int tid, int useangle, int tag, int keepheight, line_t *line, int side, AActor *thing)
+bool EV_SilentTeleport(int32_t tid, int32_t useangle, int32_t tag, int32_t keepheight, line_t *line, int32_t side, AActor *thing)
 {
     AActor *m;
 
@@ -404,9 +404,9 @@ bool EV_SilentTeleport(int tid, int useangle, int tag, int keepheight, line_t *l
 #define FUDGEFACTOR 10
 
 // [RH] Modified to support different source and destination ids.
-bool EV_SilentLineTeleport(line_t *line, int side, AActor *thing, int id, bool reverse)
+bool EV_SilentLineTeleport(line_t *line, int32_t side, AActor *thing, int32_t id, bool reverse)
 {
-    int     i;
+    int32_t     i;
     line_t *l;
 
     if (thing->flags & MF_MISSILE || !line)
@@ -435,7 +435,7 @@ bool EV_SilentLineTeleport(line_t *line, int side, AActor *thing, int id, bool r
 
             // Maximum distance thing can be moved away from interpolated
             // exit, to ensure that it is on the correct side of exit linedef
-            int fudge = FUDGEFACTOR;
+            int32_t fudge = FUDGEFACTOR;
 
             // Whether this is a player, and if so, a pointer to its player_t.
             // Voodoo dolls are excluded by making sure thing->player->mo==thing.
@@ -467,7 +467,7 @@ bool EV_SilentLineTeleport(line_t *line, int side, AActor *thing, int id, bool r
             // Exiting on side 1 slightly improves player viewing
             // when going down a step on a non-reversed teleporter.
 
-            int side = reverse;
+            int32_t side = reverse;
 
             // Make sure we are on correct side of exit linedef.
             while (P_PointOnLineSide(x, y, l) != side && --fudge >= 0)

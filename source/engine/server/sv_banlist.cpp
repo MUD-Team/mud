@@ -1015,8 +1015,8 @@ bool SV_BanCheck(client_t *cl)
         }
     }
 
-    int name   = ban.name.compare("");
-    int reason = ban.reason.compare("");
+    int32_t name   = ban.name.compare("");
+    int32_t reason = ban.reason.compare("");
     if (name != 0 || reason != 0)
     {
         buffer << "The given reason was: \"";

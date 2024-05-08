@@ -109,7 +109,7 @@ Players players;
 
 uint8_t consoleplayer_id; // player taking events and displaying
 uint8_t displayplayer_id; // view being displayed
-int  gametic;
+int32_t  gametic;
 
 EXTERN_CVAR(sv_nomonsters)
 EXTERN_CVAR(sv_fastmonsters)
@@ -149,7 +149,7 @@ CVAR_FUNC_IMPL(cl_mouselook)
 
 extern bool simulated_connection;
 
-int iffdemover;
+int32_t iffdemover;
 
 bool precache = true;   // if true, load all graphics at start
 
@@ -164,26 +164,26 @@ fixed_t sidemove[2]    = {0x18, 0x28};
 
 fixed_t angleturn[3] = {640, 1280, 320}; // + slow turn
 fixed_t flyspeed[2]  = {1 * 256, 3 * 256};
-int     lookspeed[2] = {450, 512};
+int32_t     lookspeed[2] = {450, 512};
 
 #define SLOWTURNTICS 6
 
-int turnheld; // for accelerative turning
+int32_t turnheld; // for accelerative turning
 
 // mouse values are used once
-int mousex;
-int mousey;
+int32_t mousex;
+int32_t mousey;
 
 // [Toke - Mouse] new mouse stuff
-int mousexleft;
-int mouseydown;
+int32_t mousexleft;
+int32_t mouseydown;
 
 // Joystick values are repeated
 // Store a value for each of the analog axis controls -- Hyper_Eye
-int joyforward;
-int joystrafe;
-int joyturn;
-int joylook;
+int32_t joyforward;
+int32_t joystrafe;
+int32_t joyturn;
+int32_t joylook;
 
 EXTERN_CVAR(joy_forwardaxis)
 EXTERN_CVAR(joy_strafeaxis)
@@ -194,7 +194,7 @@ EXTERN_CVAR(joy_fastsensitivity)
 EXTERN_CVAR(joy_invert)
 EXTERN_CVAR(joy_freelook)
 
-int  savegameslot;
+int32_t  savegameslot;
 char savedescription[32];
 
 player_t &consoleplayer()
@@ -222,7 +222,7 @@ std::string shotfile;
  *	So this turned out to not be so temporary. It *will*
  * change, though.
  */
-int Impulse;
+int32_t Impulse;
 
 BEGIN_COMMAND(impulse)
 {
@@ -263,7 +263,7 @@ BEGIN_COMMAND(turnspeeds)
 }
 END_COMMAND(turnspeeds)
 
-static int turntick;
+static int32_t turntick;
 BEGIN_COMMAND(turn180)
 {
     turntick = TURN180_TICKS;
@@ -275,7 +275,7 @@ BEGIN_COMMAND(weapnext)
 {
     weapontype_t newweapon = P_GetNextWeapon(&consoleplayer(), true);
     if (newweapon != wp_nochange)
-        Impulse = int(newweapon) + 50;
+        Impulse = int32_t(newweapon) + 50;
 }
 END_COMMAND(weapnext)
 
@@ -283,7 +283,7 @@ BEGIN_COMMAND(weapprev)
 {
     weapontype_t newweapon = P_GetNextWeapon(&consoleplayer(), false);
     if (newweapon != wp_nochange)
-        Impulse = int(newweapon) + 50;
+        Impulse = int32_t(newweapon) + 50;
 }
 END_COMMAND(weapprev)
 
@@ -301,12 +301,12 @@ void G_BuildTiccmd(ticcmd_t *cmd)
     ticcmd_t *base = I_BaseTiccmd(); // empty or external driver
     memcpy(cmd, base, sizeof(*cmd));
 
-    int strafe = Actions[ACTION_STRAFE];
-    int speed  = Actions[ACTION_SPEED];
+    int32_t strafe = Actions[ACTION_STRAFE];
+    int32_t speed  = Actions[ACTION_SPEED];
     if (cl_run)
         speed ^= 1;
 
-    int forward = 0, side = 0, look = 0, fly = 0;
+    int32_t forward = 0, side = 0, look = 0, fly = 0;
 
     if ((&consoleplayer())->spectator && Actions[ACTION_USE] && connected)
         AddCommandString("join");
@@ -319,7 +319,7 @@ void G_BuildTiccmd(ticcmd_t *cmd)
     else
         turnheld = 0;
 
-    int tspeed = speed;
+    int32_t tspeed = speed;
     if (turnheld < SLOWTURNTICS)
         tspeed = 2; // slow turn
 
@@ -362,7 +362,7 @@ void G_BuildTiccmd(ticcmd_t *cmd)
     }
 
     // Joystick analog strafing -- Hyper_Eye
-    side += (int)(((float)joystrafe / (float)INT16_MAX) * sidemove[speed]);
+    side += (int32_t)(((float)joystrafe / (float)INT16_MAX) * sidemove[speed]);
 
     if (Actions[ACTION_LOOKUP])
     {
@@ -405,9 +405,9 @@ void G_BuildTiccmd(ticcmd_t *cmd)
     if (joy_freelook || consoleplayer().spectator)
     {
         if (joy_invert)
-            look += (int)(((float)joylook / (float)INT16_MAX) * lookspeed[speed]);
+            look += (int32_t)(((float)joylook / (float)INT16_MAX) * lookspeed[speed]);
         else
-            look -= (int)(((float)joylook / (float)INT16_MAX) * lookspeed[speed]);
+            look -= (int32_t)(((float)joylook / (float)INT16_MAX) * lookspeed[speed]);
 
         ::localview.skippitch = true;
     }
@@ -451,14 +451,14 @@ void G_BuildTiccmd(ticcmd_t *cmd)
     if (!serverside && cl_predictpickup)
     {
         if (!cmd->impulse && !(cmd->buttons & BT_CHANGE) && consoleplayer().pendingweapon != wp_nochange)
-            cmd->impulse = 50 + static_cast<int>(consoleplayer().pendingweapon);
+            cmd->impulse = 50 + static_cast<int32_t>(consoleplayer().pendingweapon);
     }
 
     if (::joyturn)
     {
         if (strafe || lookstrafe)
         {
-            side += (int)(((float)::joyturn / (float)INT16_MAX) * ::sidemove[speed]);
+            side += (int32_t)(((float)::joyturn / (float)INT16_MAX) * ::sidemove[speed]);
         }
         else
         {
@@ -473,24 +473,24 @@ void G_BuildTiccmd(ticcmd_t *cmd)
     if (Actions[ACTION_MLOOK])
     {
         if (joy_invert)
-            look += (int)(((float)joyforward / (float)INT16_MAX) * lookspeed[speed]);
+            look += (int32_t)(((float)joyforward / (float)INT16_MAX) * lookspeed[speed]);
         else
-            look -= (int)(((float)joyforward / (float)INT16_MAX) * lookspeed[speed]);
+            look -= (int32_t)(((float)joyforward / (float)INT16_MAX) * lookspeed[speed]);
         ::localview.skippitch = true;
     }
     else
     {
-        forward -= (int)(((float)joyforward / (float)INT16_MAX) * forwardmove[speed]);
+        forward -= (int32_t)(((float)joyforward / (float)INT16_MAX) * forwardmove[speed]);
     }
 
     if (!consoleplayer().spectator && !Actions[ACTION_MLOOK] && !cl_mouselook &&
         novert == 0) // [Toke - Mouse] acts like novert.exe
     {
-        forward += (int)(float(mousey) * m_forward);
+        forward += (int32_t)(float(mousey) * m_forward);
     }
 
     if (strafe || lookstrafe)
-        side += (int)(float(mousex) * m_side);
+        side += (int32_t)(float(mousex) * m_side);
 
     mousex = mousey = 0;
 
@@ -594,14 +594,14 @@ void G_ProcessMouseMovementEvent(const event_t *ev)
     fmousex = G_ZDoomDIMouseScaleX(fmousex);
     fmousey = G_ZDoomDIMouseScaleY(fmousey);
 
-    mousex = (int)fmousex;
-    mousey = (int)fmousey;
+    mousex = (int32_t)fmousex;
+    mousey = (int32_t)fmousey;
 
     G_AddViewAngle(fmousex * 8.0f * m_yaw);
     G_AddViewPitch(fmousey * 16.0f * m_pitch);
 }
 
-void G_AddViewAngle(int yaw)
+void G_AddViewAngle(int32_t yaw)
 {
     if (G_ShouldIgnoreMouseInput())
         return;
@@ -613,7 +613,7 @@ void G_AddViewAngle(int yaw)
     }
 }
 
-void G_AddViewPitch(int pitch)
+void G_AddViewPitch(int32_t pitch)
 {
     if (G_ShouldIgnoreMouseInput())
         return;
@@ -730,9 +730,9 @@ bool G_Responder(event_t *ev)
         return false;
 }
 
-int netin;
-int netout;
-int outrate;
+int32_t netin;
+int32_t netout;
+int32_t outrate;
 
 BEGIN_COMMAND(netstat)
 {
@@ -749,11 +749,11 @@ void CL_SimulateWorld();
 // Make ticcmd_ts for the players.
 //
 extern DCanvas *page;
-extern int      connecttimeout;
+extern int32_t      connecttimeout;
 
 void G_Ticker(void)
 {
-    int buf;
+    int32_t buf;
 
     // Turn off no-z-snapping for all players.
     // [AM] Eventually, it would be nice to do this for all mobjs, but iterating
@@ -822,8 +822,8 @@ void G_Ticker(void)
     // get commands
     memcpy(&consoleplayer().cmd, &consoleplayer().netcmds[buf], sizeof(ticcmd_t));
 
-    static int realrate = 0;
-    int        packet_size;
+    static int32_t realrate = 0;
+    int32_t        packet_size;
 
     if (connected && !simulated_connection)
     {
@@ -870,7 +870,7 @@ void G_Ticker(void)
         // denis - don't accept candy from strangers
         if (gamestate == GS_CONNECTING && NET_CompareAdr(serveraddr, net_from))
         {
-            int type = MSG_ReadLong();
+            int32_t type = MSG_ReadLong();
 
             if (type == MSG_CHALLENGE)
             {
@@ -1120,11 +1120,11 @@ bool G_CheckSpot(player_t &player, mapthing2_t *mthing)
 }
 
 // [RH] Select the deathmatch spawn spot farthest from everyone.
-static mapthing2_t *SelectFarthestDeathmatchSpot (int selections)
+static mapthing2_t *SelectFarthestDeathmatchSpot (int32_t selections)
 {
     fixed_t bestdistance = 0;
     mapthing2_t *bestspot = NULL;
-    int i;
+    int32_t i;
 
     for (i = 0; i < selections; i++)
     {
@@ -1143,9 +1143,9 @@ static mapthing2_t *SelectFarthestDeathmatchSpot (int selections)
 */
 
 // [RH] Select a deathmatch spawn spot at random (original mechanism)
-static mapthing2_t *SelectRandomDeathmatchSpot(player_t &player, int selections)
+static mapthing2_t *SelectRandomDeathmatchSpot(player_t &player, int32_t selections)
 {
-    int i = 0, j;
+    int32_t i = 0, j;
 
     for (j = 0; j < 20; j++)
     {
@@ -1160,7 +1160,7 @@ static mapthing2_t *SelectRandomDeathmatchSpot(player_t &player, int selections)
 
 void G_DeathMatchSpawnPlayer(player_t &player)
 {
-    int          selections;
+    int32_t          selections;
     mapthing2_t *spot;
 
     if (!serverside || G_UsesCoopSpawns())
@@ -1364,7 +1364,7 @@ void G_DoLoadGame(void)
 // Called by the menu task.
 // Description is a 24 byte text string
 //
-void G_SaveGame(int slot, char *description)
+void G_SaveGame(int32_t slot, char *description)
 {
     savegameslot = slot;
     strcpy(savedescription, description);
@@ -1377,7 +1377,7 @@ void G_SaveGame(int slot, char *description)
  * @param name Output string.
  * @param slot Slot number.
  */
-void G_BuildSaveName(std::string &name, int slot)
+void G_BuildSaveName(std::string &name, int32_t slot)
 {
     StrFormat(name, "saves/odasv%d.ods", slot);
 }
@@ -1386,7 +1386,7 @@ void G_DoSaveGame()
 {
     std::string name;
     char       *description;
-    int         i;
+    int32_t         i;
 
     G_SnapshotLevel();
 

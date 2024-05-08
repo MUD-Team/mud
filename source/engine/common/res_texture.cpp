@@ -82,32 +82,32 @@ static void Res_WarpTexture(Texture *dest_texture, const Texture *source_texture
 
 	const palindex_t* source_buffer = source_texture->getData();
 
-	int widthbits = source_texture->getWidthBits();
-	int width = (1 << widthbits);
-	int widthmask = width - 1; 
-	int heightbits = source_texture->getHeightBits();
-	int height = (1 << heightbits);
-	int heightmask = height - 1;
+	int32_t widthbits = source_texture->getWidthBits();
+	int32_t width = (1 << widthbits);
+	int32_t widthmask = width - 1; 
+	int32_t heightbits = source_texture->getHeightBits();
+	int32_t height = (1 << heightbits);
+	int32_t heightmask = height - 1;
 
-	const int time_offset = level.time * 50;
+	const int32_t time_offset = level.time * 50;
 
-	for (int x = 0; x < width; x++)
+	for (int32_t x = 0; x < width; x++)
 	{
 		palindex_t* dest = dest_texture->getData() + (x << heightbits);
 
-		for (int y = 0; y < height; y++)
+		for (int32_t y = 0; y < height; y++)
 		{
 			// calculate angle such that one sinusoidal period is 64 pixels.
 			// add an offset based on the current time to create movement.
-			int angle_index = ((x << 7) + time_offset) & FINEMASK;
+			int32_t angle_index = ((x << 7) + time_offset) & FINEMASK;
 
 			// row and column offsets have the effect of stretching or
 			// compressing the image according to a sine wave
-			int row_offset = (finesine[angle_index] << 2) >> FRACBITS;
-			int col_offset = (finesine[angle_index] << 1) >> FRACBITS;
+			int32_t row_offset = (finesine[angle_index] << 2) >> FRACBITS;
+			int32_t col_offset = (finesine[angle_index] << 1) >> FRACBITS;
 
-			int xindex = (((x + row_offset) & widthmask) << heightbits) + y;
-			int yindex = (x << heightbits) + ((y + col_offset) & heightmask);
+			int32_t xindex = (((x + row_offset) & widthmask) << heightbits) + y;
+			int32_t yindex = (x << heightbits) + ((y + col_offset) & heightmask);
 
 			*dest++ = rt_blend2(source_buffer[xindex], 128, source_buffer[yindex], 127);
 		}
@@ -121,14 +121,14 @@ static void Res_WarpTexture(Texture *dest_texture, const Texture *source_texture
 	palindex_t* warped_buffer = dest_texture->getData();
 	palindex_t temp_buffer[Texture::MAX_TEXTURE_HEIGHT];
 
-	int step = level.time * 32;
-	for (int y = height - 1; y >= 0; y--)
+	int32_t step = level.time * 32;
+	for (int32_t y = height - 1; y >= 0; y--)
 	{
 		const byte* source = source_buffer + y;
 		byte* dest = warped_buffer + y;
 
-		int xf = (finesine[(step + y * 128) & FINEMASK] >> 13) & widthmask;
-		for (int x = 0; x < width; x++)
+		int32_t xf = (finesine[(step + y * 128) & FINEMASK] >> 13) & widthmask;
+		for (int32_t x = 0; x < width; x++)
 		{
 			*dest = source[xf << heightbits];
 			dest += height;
@@ -137,13 +137,13 @@ static void Res_WarpTexture(Texture *dest_texture, const Texture *source_texture
 	}
 
 	step = level.time * 23;
-	for (int x = width - 1; x >= 0; x--)
+	for (int32_t x = width - 1; x >= 0; x--)
 	{
 		const byte *source = warped_buffer + (x << heightbits);
 		byte *dest = temp_buffer;
 
-		int yf = (finesine[(step + 128 * (x + 17)) & FINEMASK] >> 13) & heightmask;
-		for (int y = 0; y < height; y++)
+		int32_t yf = (finesine[(step + 128 * (x + 17)) & FINEMASK] >> 13) & heightmask;
+		for (int32_t y = 0; y < height; y++)
 		{
 			*dest++ = source[yf];
 			yf = (yf + 1) & heightmask;
@@ -169,12 +169,12 @@ Texture::Texture() : mHandle(TextureManager::NO_TEXTURE_HANDLE)
 //
 // Sets up the member variable of Texture based on a supplied width and height.
 //
-void Texture::init(int width, int height)
+void Texture::init(int32_t width, int32_t height)
 {
     mWidth      = width;
     mHeight     = height;
     mFracHeight = height << FRACBITS;
-    int j = 0;
+    int32_t j = 0;
     for (j = 1; j * 2 <= width; j <<= 1)
             ;
     mWidthMask = j - 1;
@@ -352,13 +352,13 @@ void TextureManager::startup()
 
     PHYSFS_freeList(rc);
 
-	for (int i = 0; i < numsprites; i++)
+	for (int32_t i = 0; i < numsprites; i++)
 	{
 		memset(sprtemp, -1, sizeof(sprtemp));
 		maxframe = -1;
 
-		for (int frame = 0; frame < MAX_SPRITE_FRAMES; frame++)
-			for (int r = 0; r < 8; r++)
+		for (int32_t frame = 0; frame < MAX_SPRITE_FRAMES; frame++)
+			for (int32_t r = 0; r < 8; r++)
 				sprtemp[frame].texes[r] = TextureManager::NO_TEXTURE_HANDLE;
 
         std::string actor_id = sprnames[i];
@@ -415,7 +415,7 @@ void TextureManager::precache()
 {
 #if 0
 	// precache all the wall textures
-	for (int i = 0; i < numsides; i++)
+	for (int32_t i = 0; i < numsides; i++)
 	{
 		if (sides[i].toptexture)
 			getTexture(sides[i].toptexture);
@@ -426,7 +426,7 @@ void TextureManager::precache()
 	}
 
 	// precache all the floor/ceiling textures
-	for (int i = 0; i < numsectors; i++)
+	for (int32_t i = 0; i < numsectors; i++)
 	{
 		getTexture(sectors[i].ceiling_texhandle);
 		getTexture(sectors[i].floor_texhandle);
@@ -496,7 +496,7 @@ void TextureManager::readAnimDefLump()
                 uint8_t min = 1, max = 1;
 
                 os.mustScanInt();
-                const int frame = os.getTokenInt();
+                const int32_t frame = os.getTokenInt();
                 os.mustScan();
                 if (os.compareToken("tics"))
                 {
@@ -555,8 +555,8 @@ void TextureManager::readAnimDefLump()
                 // backup the original texture
                 warp.original_texture = getTexture(texhandle);
 
-                const int width  = warp.original_texture->getWidth();
-                const int height = warp.original_texture->getHeight();
+                const int32_t width  = warp.original_texture->getWidth();
+                const int32_t height = warp.original_texture->getHeight();
 
                 // create a new texture of the same size for the warped image
                 warp.warped_texture = createTexture(texhandle, width, height);
@@ -600,7 +600,7 @@ void TextureManager::readAnimDefLump()
 void TextureManager::readAnimatedLump()
 {
     uint8_t *filedata = NULL;
-    int filelen = M_ReadFile("lumps/ANIMATED.lmp", &filedata);
+    int32_t filelen = M_ReadFile("lumps/ANIMATED.lmp", &filedata);
 
     if (filelen <= 0 || filedata == NULL)
         return;
@@ -630,10 +630,10 @@ void TextureManager::readAnimatedLump()
             continue;
         anim.curframe = 0;
 
-        int speed      = LELONG(*(int *)(ptr + 19));
+        int32_t speed      = LELONG(*(int32_t *)(ptr + 19));
         anim.countdown = speed - 1;
 
-        for (int i = 0; i < anim.numframes; i++)
+        for (int32_t i = 0; i < anim.numframes; i++)
         {
             anim.framepic[i] = anim.basepic + i;
             anim.speedmin[i] = anim.speedmax[i] = speed;
@@ -674,9 +674,9 @@ void TextureManager::updateAnimatedTextures()
             getTexture(anim->framepic[0]); // ensure Texture is still cached
             Texture *first_texture = mHandleMap[anim->framepic[0]];
 
-            for (int frame1 = 0; frame1 < anim->numframes - 1; frame1++)
+            for (int32_t frame1 = 0; frame1 < anim->numframes - 1; frame1++)
             {
-                int frame2 = (frame1 + 1) % anim->numframes;
+                int32_t frame2 = (frame1 + 1) % anim->numframes;
                 getTexture(anim->framepic[frame2]); // ensure Texture is still cached
                 mHandleMap[anim->framepic[frame1]] = mHandleMap[anim->framepic[frame2]];
             }
@@ -702,7 +702,7 @@ void TextureManager::updateAnimatedTextures()
 //
 void TextureManager::generateNotFoundTexture()
 {
-    const int width = 64, height = 64;
+    const int32_t width = 64, height = 64;
 
     const texhandle_t handle  = NOT_FOUND_TEXTURE_HANDLE;
     Texture          *texture = createTexture(handle, width, height);
@@ -715,12 +715,12 @@ void TextureManager::generateNotFoundTexture()
         const palindex_t color2_index = V_BestColor(V_GetDefaultPalette()->basecolors, color2);
         texture->mData = new uint8_t[width * height];
 
-        for (int x = 0; x < width / 2; x++)
+        for (int32_t x = 0; x < width / 2; x++)
         {
             memset(texture->mData + x * height + 0, color1_index, height / 2);
             memset(texture->mData + x * height + height / 2, color2_index, height / 2);
         }
-        for (int x = width / 2; x < width; x++)
+        for (int32_t x = width / 2; x < width; x++)
         {
             memset(texture->mData + x * height + 0, color2_index, height / 2);
             memset(texture->mData + x * height + height / 2, color1_index, height / 2);
@@ -734,10 +734,10 @@ void TextureManager::generateNotFoundTexture()
 // Allocates memory for a new texture and returns a pointer to it. The texture
 // is inserted into mHandlesMap for future retrieval.
 //
-Texture *TextureManager::createTexture(texhandle_t texhandle, int width, int height)
+Texture *TextureManager::createTexture(texhandle_t texhandle, int32_t width, int32_t height)
 {
-    width  = std::min<int>(width, Texture::MAX_TEXTURE_WIDTH);
-    height = std::min<int>(height, Texture::MAX_TEXTURE_HEIGHT);
+    width  = std::min<int32_t>(width, Texture::MAX_TEXTURE_WIDTH);
+    height = std::min<int32_t>(height, Texture::MAX_TEXTURE_HEIGHT);
 
     Texture *texture = new Texture;
     texture->init(width, height);
@@ -812,9 +812,9 @@ void TextureManager::cacheSprite(texhandle_t handle)
         I_FatalError("TexureManager::cacheSprite: Error reading %s\n", mSpriteFilenames[filenum-1].c_str());
     }
 
-    int height = 0;
-    int width = 0;
-    int bpp = 0;
+    int32_t height = 0;
+    int32_t width = 0;
+    int32_t bpp = 0;
 
     if (!stbi_info_from_memory(filedata, filelen, &width, &height, &bpp))
     {
@@ -831,7 +831,7 @@ void TextureManager::cacheSprite(texhandle_t handle)
     }
     else
     {
-        int need_bpp = 0;
+        int32_t need_bpp = 0;
 
         // if grayscale/paletted, convert to RGB/RGBA
         if (bpp == 1 || bpp == 2)
@@ -852,8 +852,8 @@ void TextureManager::cacheSprite(texhandle_t handle)
         Texture *texture = createTexture(handle, width, height);
 
         // temporary PNG grAb chunk check
-        int i = 0;
-        int j = 0;
+        int32_t i = 0;
+        int32_t j = 0;
         for (; i<filelen && j<5; i++)
         {
             static uint8_t pgs[5] = { 0x08, 'g', 'r', 'A', 'b' };
@@ -864,7 +864,7 @@ void TextureManager::cacheSprite(texhandle_t handle)
         }
         if (j == 5)
         {
-            int x, y;
+            int32_t x, y;
             memcpy(&x, &filedata[i], 4);
             i+=4;
             memcpy(&y, &filedata[i], 4);
@@ -878,11 +878,11 @@ void TextureManager::cacheSprite(texhandle_t handle)
 
         // Convert image to column/post structure
         std::vector<texcolumn_t> columns;
-        int pixel_step = bpp * width;
+        int32_t pixel_step = bpp * width;
 
         // Go through columns
         uint32_t offset = 0;
-        for (int c = 0; c < width; c++)
+        for (int32_t c = 0; c < width; c++)
         {
             texcolumn_t col;
             texpost_t   post;
@@ -893,7 +893,7 @@ void TextureManager::cacheSprite(texhandle_t handle)
 
             offset          = c;
             uint8_t row_off = 0;
-            for (int r = 0; r < height; r++)
+            for (int32_t r = 0; r < height; r++)
             {
                 // For vanilla-compatible dimensions, use a split at 128 to prevent tiling.
                 if (height < 256)
@@ -1092,10 +1092,10 @@ void TextureManager::cacheFlat(texhandle_t handle)
         I_FatalError("TexureManager::cacheFlat: Error reading %s\n", mFlatFilenames[filenum-1].c_str());
     }
 
-    int height = 0;
-    int width = 0;
-    int bpp = 0;
-    int need_bpp = 0;
+    int32_t height = 0;
+    int32_t width = 0;
+    int32_t bpp = 0;
+    int32_t need_bpp = 0;
 
     if (!stbi_info_from_memory(filedata, filelen, &width, &height, &bpp))
     {
@@ -1204,9 +1204,9 @@ void TextureManager::cacheTexture(texhandle_t handle)
         I_FatalError("TexureManager::cacheTexture: Error reading %s\n", mTextureFilenames[filenum-1].c_str());
     }
 
-    int height = 0;
-    int width = 0;
-    int bpp = 0;
+    int32_t height = 0;
+    int32_t width = 0;
+    int32_t bpp = 0;
 
     if (!stbi_info_from_memory(filedata, filelen, &width, &height, &bpp))
     {
@@ -1223,7 +1223,7 @@ void TextureManager::cacheTexture(texhandle_t handle)
     }
     else
     {
-        int need_bpp = 0;
+        int32_t need_bpp = 0;
 
         // if grayscale/paletted, convert to RGB/RGBA
         if (bpp == 1 || bpp == 2)
@@ -1244,8 +1244,8 @@ void TextureManager::cacheTexture(texhandle_t handle)
         Texture *texture = createTexture(handle, width, height);
 
         // temporary PNG grAb chunk check
-        int i = 0;
-        int j = 0;
+        int32_t i = 0;
+        int32_t j = 0;
         for (; i<filelen && j<5; i++)
         {
             static uint8_t pgs[5] = { 0x08, 'g', 'r', 'A', 'b' };
@@ -1256,7 +1256,7 @@ void TextureManager::cacheTexture(texhandle_t handle)
         }
         if (j == 5)
         {
-            int x, y;
+            int32_t x, y;
             memcpy(&x, &filedata[i], 4);
             i+=4;
             memcpy(&y, &filedata[i], 4);
@@ -1270,11 +1270,11 @@ void TextureManager::cacheTexture(texhandle_t handle)
 
         // Convert image to column/post structure
         std::vector<texcolumn_t> columns;
-        int pixel_step = bpp * width;
+        int32_t pixel_step = bpp * width;
 
         // Go through columns
         uint32_t offset = 0;
-        for (int c = 0; c < width; c++)
+        for (int32_t c = 0; c < width; c++)
         {
             texcolumn_t col;
             texpost_t   post;
@@ -1285,7 +1285,7 @@ void TextureManager::cacheTexture(texhandle_t handle)
 
             offset          = c;
             uint8_t row_off = 0;
-            for (int r = 0; r < height; r++)
+            for (int32_t r = 0; r < height; r++)
             {
                 // For vanilla-compatible dimensions, use a split at 128 to prevent tiling.
                 if (height < 256)

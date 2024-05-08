@@ -51,7 +51,7 @@ uint8_t argb_t::a_num, argb_t::r_num, argb_t::g_num, argb_t::b_num;
 // Global IVideoSubsystem instance for video startup and shutdown
 static IVideoSubsystem *video_subsystem = NULL;
 
-extern int NewWidth, NewHeight, NewBits, DisplayBits;
+extern int32_t NewWidth, NewHeight, NewBits, DisplayBits;
 
 EXTERN_CVAR(vid_fullscreen)
 EXTERN_CVAR(vid_vsync)
@@ -174,9 +174,9 @@ void IRenderSurface::clear()
 
     argb_t *dest = (argb_t *)getBuffer();
 
-    for (int y = 0; y < getHeight(); y++)
+    for (int32_t y = 0; y < getHeight(); y++)
     {
-        for (int x = 0; x < getWidth(); x++)
+        for (int32_t x = 0; x < getWidth(); x++)
             dest[x] = color;
 
         dest += getPitchInPixels();
@@ -258,7 +258,7 @@ static IVideoMode I_ValidateVideoMode(const IVideoMode &mode)
     const IVideoMode *closest_mode = NULL;
 
     const IVideoModeList *modelist = I_GetVideoCapabilities()->getSupportedVideoModes();
-    for (int iteration = 0; iteration < 2; iteration++)
+    for (int32_t iteration = 0; iteration < 2; iteration++)
     {
         for (IVideoModeList::const_iterator it = modelist->begin(); it != modelist->end(); ++it)
         {
@@ -393,7 +393,7 @@ IWindow *I_GetWindow()
 // Returns the width of the current video mode. Assumes that the video
 // window has already been created.
 //
-int I_GetVideoWidth()
+int32_t I_GetVideoWidth()
 {
     if (I_VideoInitialized())
         return I_GetWindow()->getWidth();
@@ -406,7 +406,7 @@ int I_GetVideoWidth()
 // Returns the height of the current video mode. Assumes that the video
 // window has already been created.
 //
-int I_GetVideoHeight()
+int32_t I_GetVideoHeight()
 {
     if (I_VideoInitialized())
         return I_GetWindow()->getHeight();
@@ -419,7 +419,7 @@ int I_GetVideoHeight()
 // Returns the bits per pixelof the current video mode. Assumes that the video
 // window has already been created.
 //
-int I_GetVideoBitDepth()
+int32_t I_GetVideoBitDepth()
 {
     if (I_VideoInitialized())
         return I_GetWindow()->getBitsPerPixel();
@@ -431,7 +431,7 @@ int I_GetVideoBitDepth()
 //
 // Creates a new (non-primary) surface and returns it.
 //
-IRenderSurface *I_AllocateSurface(int width, int height, int bpp)
+IRenderSurface *I_AllocateSurface(int32_t width, int32_t height, int32_t bpp)
 {
     const PixelFormat *format;
 
@@ -458,7 +458,7 @@ void I_FreeSurface(IRenderSurface *&surface)
 //
 // I_GetSurfaceWidth
 //
-int I_GetSurfaceWidth()
+int32_t I_GetSurfaceWidth()
 {
     if (I_VideoInitialized())
         return IRenderSurface::getCurrentRenderSurface()->getWidth();
@@ -468,7 +468,7 @@ int I_GetSurfaceWidth()
 //
 // I_GetSurfaceHeight
 //
-int I_GetSurfaceHeight()
+int32_t I_GetSurfaceHeight()
 {
     if (I_VideoInitialized())
         return IRenderSurface::getCurrentRenderSurface()->getHeight();
@@ -488,7 +488,7 @@ bool I_IsWideResolution()
 //
 // I_IsWideResolution
 //
-bool I_IsWideResolution(int width, int height)
+bool I_IsWideResolution(int32_t width, int32_t height)
 {
 
     // consider the mode widescreen if it's width-to-height ratio is
@@ -555,7 +555,7 @@ void I_SetWindowIcon()
 //
 // I_GetMonitorCount
 //
-int I_GetMonitorCount()
+int32_t I_GetMonitorCount()
 {
     if (I_VideoInitialized())
         return video_subsystem->getMonitorCount();

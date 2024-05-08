@@ -66,10 +66,10 @@ class FFile
     virtual FFile &Read(void *, uint32_t)        = 0;
 
     virtual uint32_t Tell() const        = 0;
-    virtual FFile       &Seek(int, ESeekPos) = 0;
+    virtual FFile       &Seek(int32_t, ESeekPos) = 0;
     inline FFile        &Seek(uint32_t i, ESeekPos p)
     {
-        return Seek((int)i, p);
+        return Seek((int32_t)i, p);
     }
 };
 
@@ -94,7 +94,7 @@ class FLZOFile : public FFile
     virtual FFile       &Write(const void *, uint32_t);
     virtual FFile       &Read(void *, uint32_t);
     virtual uint32_t Tell() const;
-    virtual FFile       &Seek(int, ESeekPos);
+    virtual FFile       &Seek(int32_t, ESeekPos);
 
   protected:
     uint32_t   m_Pos;

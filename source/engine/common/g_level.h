@@ -82,17 +82,17 @@ struct bossaction_t;
 struct level_info_t
 {
     OLumpName     mapname;
-    int           levelnum;
+    int32_t           levelnum;
     std::string   level_name;
     uint8_t          level_fingerprint[16];
     OLumpName     pname;
     OLumpName     nextmap;
     OLumpName     secretmap;
-    int           partime;
+    int32_t           partime;
     OLumpName     skypic;
     OLumpName     music;
     uint32_t      flags;
-    int           cluster;
+    int32_t           cluster;
     FLZOMemFile  *snapshot;
     acsdefered_s *defered;
 
@@ -113,17 +113,17 @@ struct level_pwad_info_t
 {
     // level_info_t
     OLumpName     mapname;
-    int           levelnum;
+    int32_t           levelnum;
     std::string   level_name;
     uint8_t          level_fingerprint[16];
     OLumpName     pname;
     OLumpName     nextmap;
     OLumpName     secretmap;
-    int           partime;
+    int32_t           partime;
     OLumpName     skypic;
     OLumpName     music;
     uint32_t      flags;
-    int           cluster;
+    int32_t           cluster;
     FLZOMemFile  *snapshot;
     acsdefered_s *defered;
 
@@ -225,14 +225,14 @@ struct level_pwad_info_t
 
 struct level_locals_t
 {
-    int          time;
-    int          starttime;
-    int          partime;
+    int32_t          time;
+    int32_t          starttime;
+    int32_t          partime;
     uint32_t inttimeleft;
 
     level_info_t *info;
-    int           cluster;
-    int           levelnum;
+    int32_t           cluster;
+    int32_t           levelnum;
     char          level_name[64]; // the descriptive name (Outer Base, etc)
     uint8_t level_fingerprint[16]; // [Blair] 128-bit FarmHash fingerprint generated for the level to describe it uniquely
                                 // so it can besingled out if it's out of its host wad, like in a compilation wad.
@@ -255,15 +255,15 @@ struct level_locals_t
     OLumpName skypic;
     OLumpName skypic2;
 
-    int total_secrets;
-    int found_secrets;
+    int32_t total_secrets;
+    int32_t found_secrets;
 
-    int total_items;
-    int found_items;
+    int32_t total_items;
+    int32_t found_items;
 
-    int total_monsters;
-    int killed_monsters;
-    int respawned_monsters; // Ch0wW - Keep track of respawned monsters
+    int32_t total_monsters;
+    int32_t killed_monsters;
+    int32_t respawned_monsters; // Ch0wW - Keep track of respawned monsters
 
     float   gravity;
     fixed_t aircontrol;
@@ -296,7 +296,7 @@ const static clusterFlags_t CLUSTER_EXITTEXTISLUMP = BIT(1);
 
 struct bossaction_t
 {
-    int   type;
+    int32_t   type;
     int16_t special;
     int16_t tag;
 
@@ -307,12 +307,12 @@ struct bossaction_t
 
 struct cluster_info_t
 {
-    int       cluster;
+    int32_t       cluster;
     OLumpName messagemusic;
     OLumpName finaleflat;
     char     *exittext;
     char     *entertext;
-    int       flags;
+    int32_t       flags;
     OLumpName finalepic;
 
     cluster_info_t() : cluster(0), messagemusic(""), finaleflat(""), exittext(NULL), entertext(NULL), flags(0)
@@ -344,7 +344,7 @@ class LevelInfos
     level_pwad_info_t &findByName(const char *mapname);
     level_pwad_info_t &findByName(const std::string &mapname);
     level_pwad_info_t &findByName(const OLumpName &mapname);
-    level_pwad_info_t &findByNum(int levelnum);
+    level_pwad_info_t &findByNum(int32_t levelnum);
     size_t             size();
     void               zapDeferreds();
 };
@@ -362,12 +362,12 @@ class ClusterInfos
     cluster_info_t &at(size_t i);
     void            clear();
     cluster_info_t &create();
-    cluster_info_t &findByCluster(int i);
+    cluster_info_t &findByCluster(int32_t i);
     size_t          size() const;
 };
 
-extern int ACS_WorldVars[NUM_WORLDVARS];
-extern int ACS_GlobalVars[NUM_GLOBALVARS];
+extern int32_t ACS_WorldVars[NUM_WORLDVARS];
+extern int32_t ACS_GlobalVars[NUM_GLOBALVARS];
 
 extern bool savegamerestore;
 
@@ -385,17 +385,17 @@ void G_DeferedInitNew(const char *mapname);
 void G_DeferedFullReset();
 void G_DeferedReset();
 
-void G_ExitLevel(int position, int drawscores);
-void G_SecretExitLevel(int position, int drawscores);
+void G_ExitLevel(int32_t position, int32_t drawscores);
+void G_SecretExitLevel(int32_t position, int32_t drawscores);
 
-void G_DoLoadLevel(int position);
+void G_DoLoadLevel(int32_t position);
 void G_DoResetLevel(bool full_reset);
 
 void G_InitLevelLocals();
 
 void G_AirControlChanged();
 
-char *CalcMapName(int episode, int level);
+char *CalcMapName(int32_t episode, int32_t level);
 
 void G_ParseMusInfo();
 

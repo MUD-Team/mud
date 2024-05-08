@@ -1484,19 +1484,19 @@ typedef long statearg_t;
 typedef struct
 {
     spritenum_t sprite;
-    int         frame;
-    int         tics;
+    int32_t         frame;
+    int32_t         tics;
     actionf_p1  action;
     statenum_t  nextstate;
-    int         misc1, misc2;
+    int32_t         misc1, misc2;
 
     // MBF21
     statearg_t args[MAXSTATEARGS]; // [XA] mbf21 args
-    int        flags;
+    int32_t        flags;
     /*
-    DState (spritenum_t sprite, int frame, int tics, acp2, statenum_t nextstate);
-    DState (spritenum_t sprite, int frame, int tics, acp2, statenum_t nextstate, int misc1, int misc2);
-    DState (spritenum_t sprite, int frame, int tics, acp1, statenum_t nextstate);
+    DState (spritenum_t sprite, int32_t frame, int32_t tics, acp2, statenum_t nextstate);
+    DState (spritenum_t sprite, int32_t frame, int32_t tics, acp2, statenum_t nextstate, int32_t misc1, int32_t misc2);
+    DState (spritenum_t sprite, int32_t frame, int32_t tics, acp1, statenum_t nextstate);
 */
 } state_t;
 
@@ -1886,42 +1886,42 @@ typedef enum
 
 typedef struct
 {
-    int         doomednum;
+    int32_t         doomednum;
     statenum_t  spawnstate;
-    int         spawnhealth;
-    int         gibhealth;   // Doom Retro's GibHealth feature
+    int32_t         spawnhealth;
+    int32_t         gibhealth;   // Doom Retro's GibHealth feature
     statenum_t  seestate;
-    const char *seesound;    // [RH] not int
-    int         reactiontime;
-    const char *attacksound; // [RH] not int
+    const char *seesound;    // [RH] not int32_t
+    int32_t         reactiontime;
+    const char *attacksound; // [RH] not int32_t
     statenum_t  painstate;
-    int         painchance;
-    const char *painsound;   // [RH] not int
+    int32_t         painchance;
+    const char *painsound;   // [RH] not int32_t
     statenum_t  meleestate;
     statenum_t  missilestate;
     statenum_t  deathstate;
     statenum_t  xdeathstate;
-    const char *deathsound; // [RH] not int
-    int         speed;
-    int         radius;
-    int         height;
-    int         cdheight;
-    int         mass;
-    int         damage;
-    const char *activesound; // [RH] not int
-    int         flags;
-    int         flags2;
+    const char *deathsound; // [RH] not int32_t
+    int32_t         speed;
+    int32_t         radius;
+    int32_t         height;
+    int32_t         cdheight;
+    int32_t         mass;
+    int32_t         damage;
+    const char *activesound; // [RH] not int32_t
+    int32_t         flags;
+    int32_t         flags2;
     statenum_t  raisestate;
-    int         translucency;
+    int32_t         translucency;
     const char *name;
 
     // MBF21 STUFF HERE
-    int         altspeed;
-    int         meleerange;
-    int         infighting_group;
-    int         projectile_group;
-    int         splash_group;
-    int         flags3;
+    int32_t         altspeed;
+    int32_t         meleerange;
+    int32_t         infighting_group;
+    int32_t         projectile_group;
+    int32_t         splash_group;
+    int32_t         flags3;
     const char *ripsound;
     mobjtype_t  droppeditem;
 

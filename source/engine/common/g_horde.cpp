@@ -412,7 +412,7 @@ static void ParseAlias(OScanner &os)
     g_aliasMap.insert(std::make_pair(alias, otype));
 }
 
-static void ParseHordeDef(const int lump, const char *name)
+static void ParseHordeDef(const int32_t lump, const char *name)
 {
     const char *buffer = static_cast<char *>(W_CacheLumpNum(lump, PU_STATIC));
 
@@ -470,7 +470,7 @@ struct FindHordeDef
 
 static void ParseHordeDefs()
 {
-    int lump = -1;
+    int32_t lump = -1;
     while ((lump = W_FindLump("HORDEDEF", lump)) != -1)
     {
         ParseHordeDef(lump, "HORDEDEF");
@@ -493,7 +493,7 @@ static void ParseHordeDefs()
         ::WAVE_DEFINES[i].legacyID = i;
     }
 
-    int i = -1;
+    int32_t i = -1;
     for (std::vector<hordeDefine_t>::iterator it = ::WAVE_DEFINES.begin(); it != ::WAVE_DEFINES.end(); ++it)
     {
         std::vector<hordeDefine_t>::iterator after = it;

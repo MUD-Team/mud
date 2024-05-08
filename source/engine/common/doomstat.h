@@ -108,10 +108,10 @@ extern bool viewactive;
 extern bool nodrawers;
 extern bool noblit;
 
-extern int     viewwindowx;
-extern int     viewwindowy;
-extern "C" int viewheight;
-extern "C" int viewwidth;
+extern int32_t     viewwindowx;
+extern int32_t     viewwindowy;
+extern "C" int32_t viewheight;
+extern "C" int32_t viewwidth;
 
 extern level_locals_t level;
 
@@ -129,7 +129,7 @@ extern gamestate_t gamestate;
 //	according to user inputs. Partly load from
 //	WAD, partly set at startup time.
 
-extern int gametic;
+extern int32_t gametic;
 
 // Player spawn spots for deathmatch.
 extern std::vector<mapthing2_t> DeathMatchStarts;
@@ -147,7 +147,7 @@ extern struct wbstartstruct_s wminfo;
 
 // LUT of ammunition limits for each kind.
 // This doubles with BackPack powerup item.
-extern int maxammo[NUMAMMO];
+extern int32_t maxammo[NUMAMMO];
 
 //-----------------------------------------
 // Internal parameters, used for engine.
@@ -169,21 +169,21 @@ EXTERN_CVAR(developer) // removeme
 // [RH] Miscellaneous info for DeHackEd support
 struct DehInfo
 {
-    int StartHealth;
-    int StartBullets;
-    int MaxHealth;
-    int MaxArmor;
-    int GreenAC;
-    int BlueAC;
-    int MaxSoulsphere;
-    int SoulsphereHealth;
-    int MegasphereHealth;
-    int GodHealth;
-    int FAArmor;
-    int FAAC;
-    int KFAArmor;
-    int KFAAC;
-    int BFGCells;
-    int Infight;
+    int32_t StartHealth;
+    int32_t StartBullets;
+    int32_t MaxHealth;
+    int32_t MaxArmor;
+    int32_t GreenAC;
+    int32_t BlueAC;
+    int32_t MaxSoulsphere;
+    int32_t SoulsphereHealth;
+    int32_t MegasphereHealth;
+    int32_t GodHealth;
+    int32_t FAArmor;
+    int32_t FAAC;
+    int32_t KFAArmor;
+    int32_t KFAAC;
+    int32_t BFGCells;
+    int32_t Infight;
 };
 extern struct DehInfo deh;

@@ -32,15 +32,15 @@ typedef struct
     uint8_t *source;
     uint8_t *destination;
 
-    int pitch_in_pixels;
+    int32_t pitch_in_pixels;
 
     tallpost_t *post;
 
     shaderef_t colormap;
 
-    int x;
-    int yl;
-    int yh;
+    int32_t x;
+    int32_t yl;
+    int32_t yh;
 
     fixed_t iscale;
     fixed_t texturemid;
@@ -61,13 +61,13 @@ typedef struct
     uint8_t *source;
     uint8_t *destination;
 
-    int pitch_in_pixels;
+    int32_t pitch_in_pixels;
 
     shaderef_t colormap;
 
-    int y;
-    int x1;
-    int x2;
+    int32_t y;
+    int32_t x1;
+    int32_t x2;
 
     dsfixed_t xfrac;
     dsfixed_t yfrac;
@@ -92,8 +92,8 @@ extern "C" drawspan_t dspan;
 
 // [RH] Temporary buffer for column drawing
 
-void R_RenderColumnRange(int start, int stop, int *top, int *bottom, tallpost_t **posts, void (*colblast)(),
-                         bool calc_light, int columnmethod);
+void R_RenderColumnRange(int32_t start, int32_t stop, int32_t *top, int32_t *bottom, tallpost_t **posts, void (*colblast)(),
+                         bool calc_light, int32_t columnmethod);
 
 // [RH] Pointers to the different column and span drawers...
 
@@ -146,30 +146,30 @@ void R_DrawSlopeSpanD_c(void);
 
 class IRenderSurface;
 
-void r_dimpatchD_c(IRenderSurface *surface, argb_t color, int alpha, int x1, int y1, int w, int h);
+void r_dimpatchD_c(IRenderSurface *surface, argb_t color, int32_t alpha, int32_t x1, int32_t y1, int32_t w, int32_t h);
 
 #ifdef __SSE2__
 void R_DrawSpanD_SSE2(void);
 void R_DrawSlopeSpanD_SSE2(void);
-void r_dimpatchD_SSE2(IRenderSurface *, argb_t color, int alpha, int x1, int y1, int w, int h);
+void r_dimpatchD_SSE2(IRenderSurface *, argb_t color, int32_t alpha, int32_t x1, int32_t y1, int32_t w, int32_t h);
 #endif
 
 #ifdef __MMX__
 void R_DrawSpanD_MMX(void);
 void R_DrawSlopeSpanD_MMX(void);
-void r_dimpatchD_MMX(IWindowSurface *, argb_t color, int alpha, int x1, int y1, int w, int h);
+void r_dimpatchD_MMX(IWindowSurface *, argb_t color, int32_t alpha, int32_t x1, int32_t y1, int32_t w, int32_t h);
 #endif
 
 #ifdef __ALTIVEC__
 void R_DrawSpanD_ALTIVEC(void);
 void R_DrawSlopeSpanD_ALTIVEC(void);
-void r_dimpatchD_ALTIVEC(IWindowSurface *, argb_t color, int alpha, int x1, int y1, int w, int h);
+void r_dimpatchD_ALTIVEC(IWindowSurface *, argb_t color, int32_t alpha, int32_t x1, int32_t y1, int32_t w, int32_t h);
 #endif
 
 // Vectorizable function pointers:
 extern void (*R_DrawSpanD)(void);
 extern void (*R_DrawSlopeSpanD)(void);
-extern void (*r_dimpatchD)(IRenderSurface *surface, argb_t color, int alpha, int x1, int y1, int w, int h);
+extern void (*r_dimpatchD)(IRenderSurface *surface, argb_t color, int32_t alpha, int32_t x1, int32_t y1, int32_t w, int32_t h);
 
 extern uint8_t   bosstable[256];
 extern uint8_t  *translationtables;
@@ -189,17 +189,17 @@ enum
 
 #define TRANSLATION(a, b) (((a) << 8) | (b))
 
-const int MAX_ACS_TRANSLATIONS = 32;
+const int32_t MAX_ACS_TRANSLATIONS = 32;
 
 // Initialize color translation tables,
 //	for player rendering etc.
 void R_InitTranslationTables(void);
 void R_FreeTranslationTables(void);
 
-void R_CopyTranslationRGB(int fromplayer, int toplayer);
+void R_CopyTranslationRGB(int32_t fromplayer, int32_t toplayer);
 
 // [RH] Actually create a player's translation table.
-void R_BuildPlayerTranslation(int player, argb_t dest_color);
+void R_BuildPlayerTranslation(int32_t player, argb_t dest_color);
 
 // [Nes] Classic player translation table.
-void R_BuildClassicPlayerTranslation(int player, int color);
+void R_BuildClassicPlayerTranslation(int32_t player, int32_t color);

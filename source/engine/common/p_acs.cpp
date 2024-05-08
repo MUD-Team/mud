@@ -47,26 +47,26 @@
 
 struct CallReturn
 {
-    int             ReturnAddress;
+    int32_t             ReturnAddress;
     ScriptFunction *ReturnFunction;
     uint8_t            bDiscardResult;
     uint8_t            Pad[3];
 };
 
-static int Stack[STACK_SIZE];
+static int32_t Stack[STACK_SIZE];
 
-static bool P_GetScriptGoing(AActor *who, line_t *where, int num, int *code, int lineSide, int arg0, int arg1, int arg2,
-                             int always, bool delay);
+static bool P_GetScriptGoing(AActor *who, line_t *where, int32_t num, int32_t *code, int32_t lineSide, int32_t arg0, int32_t arg1, int32_t arg2,
+                             int32_t always, bool delay);
 AActor     *P_FindThingById(uint32_t id);
 
-template <size_t N> static std::vector<int> ArgvToArgs(const int (&a)[N])
+template <size_t N> static std::vector<int32_t> ArgvToArgs(const int32_t (&a)[N])
 {
-    return std::vector<int>(a, a + N);
+    return std::vector<int32_t>(a, a + N);
 }
 
 struct FBehavior::ArrayInfo
 {
-    int     ArraySize;
+    int32_t     ArraySize;
     int32_t *Elements;
 };
 
@@ -80,7 +80,7 @@ static void DoClearInv(player_t *player)
     if (player->backpack)
     {
         player->backpack = false;
-        for (int i = 0; i < NUMAMMO; i++)
+        for (int32_t i = 0; i < NUMAMMO; i++)
         {
             player->maxammo[i] /= 2;
         }
@@ -218,11 +218,11 @@ static DoomEntity DoomDecorationNames[60] = {{"BurningBarrel", MT_MISC77},
 extern ItemEquipVal P_GiveAmmo(player_t *player, ammotype_t ammo, float num);
 extern ItemEquipVal P_GiveWeapon(player_t *player, weapontype_t weapon, bool dropped);
 extern ItemEquipVal P_GiveCard(player_t *player, card_t card);
-extern ItemEquipVal P_GivePower(player_t *player, int power);
+extern ItemEquipVal P_GivePower(player_t *player, int32_t power);
 
 mobjtype_t FindWeaponEntity(const char *type)
 {
-    int i;
+    int32_t i;
     for (i = 0; i < 9; i++)
     {
         if (strcmp(DoomWeaponNames[i].Name, type) == 0)
@@ -239,9 +239,9 @@ mobjtype_t FindWeaponEntity(const char *type)
     return (mobjtype_t)NULL;
 }
 
-mobjtype_t FindDoomEntity(const char *type, DoomEntity list[], int size)
+mobjtype_t FindDoomEntity(const char *type, DoomEntity list[], int32_t size)
 {
-    int i;
+    int32_t i;
     for (i = 0; i < size; i++)
     {
         if (strcmp(list[i].Name, type) == 0)
@@ -257,25 +257,25 @@ static void GiveBackpack(player_t *player)
 {
     if (!player->backpack)
     {
-        for (int i = 0; i < NUMAMMO; i++)
+        for (int32_t i = 0; i < NUMAMMO; i++)
         {
             player->maxammo[i] *= 2;
         }
         player->backpack = true;
     }
-    for (int i = 0; i < NUMAMMO; i++)
+    for (int32_t i = 0; i < NUMAMMO; i++)
     {
         P_GiveAmmo(player, static_cast<ammotype_t>(i), 1);
     }
     SERVER_ONLY(SV_SendPlayerInfo(*player));
 }
 
-static void DoGiveInv(player_t *player, const char *type, int amount)
+static void DoGiveInv(player_t *player, const char *type, int32_t amount)
 {
     weapontype_t savedpendingweap = player->pendingweapon;
 
     // Give ammo
-    for (int i = 0; i < NUMAMMO; i++)
+    for (int32_t i = 0; i < NUMAMMO; i++)
     {
         if (strcmp(DoomAmmoNames[i].Name, type) == 0)
         {
@@ -286,7 +286,7 @@ static void DoGiveInv(player_t *player, const char *type, int amount)
     }
 
     // Give weapon
-    for (int i = 0; i < NUMWEAPONS; i++)
+    for (int32_t i = 0; i < NUMWEAPONS; i++)
     {
         if (strcmp(DoomWeaponNames[i].Name, type) == 0)
         {
@@ -304,7 +304,7 @@ static void DoGiveInv(player_t *player, const char *type, int amount)
     }
 
     // Give keycard
-    for (int i = 0; i < NUMCARDS; i++)
+    for (int32_t i = 0; i < NUMCARDS; i++)
     {
         if (strcmp(DoomKeyNames[i].Name, type) == 0)
         {
@@ -318,7 +318,7 @@ static void DoGiveInv(player_t *player, const char *type, int amount)
     }
 
     // Give power
-    for (int i = 0; i < NUMPOWERS; i++)
+    for (int32_t i = 0; i < NUMPOWERS; i++)
     {
         if (strcmp(DoomPowerNames[i].Name, type) == 0)
         {
@@ -346,11 +346,11 @@ static void DoGiveInv(player_t *player, const char *type, int amount)
     Printf(PRINT_HIGH, "I don't know what %s is\n", type);
 }
 
-static void GiveInventory(AActor *activator, const char *type, int amount)
+static void GiveInventory(AActor *activator, const char *type, int32_t amount)
 {
     if (activator == NULL)
     {
-        for (int i = 0; i < MAXPLAYERS; ++i)
+        for (int32_t i = 0; i < MAXPLAYERS; ++i)
         {
             Players::iterator it;
             for (it = players.begin(); it != players.end(); ++it)
@@ -368,7 +368,7 @@ static void GiveInventory(AActor *activator, const char *type, int amount)
 
 extern void P_SwitchWeapon(player_t *player);
 
-static void TakeWeapon(player_t *player, int weapon)
+static void TakeWeapon(player_t *player, int32_t weapon)
 {
     player->weaponowned[weapon] = false;
     if (player->readyweapon == weapon || player->pendingweapon == weapon)
@@ -376,7 +376,7 @@ static void TakeWeapon(player_t *player, int weapon)
         P_SwitchWeapon(player);
 
         bool hasWeapon = false;
-        for (int i = 0; i < NUMWEAPONS; i++)
+        for (int32_t i = 0; i < NUMWEAPONS; i++)
         {
             if (player->weaponowned[i])
             {
@@ -393,7 +393,7 @@ static void TakeWeapon(player_t *player, int weapon)
 
 extern bool P_CheckAmmo(player_t *player);
 
-static void TakeAmmo(player_t *player, int ammo, int amount)
+static void TakeAmmo(player_t *player, int32_t ammo, int32_t amount)
 {
     if (amount == 0)
     {
@@ -429,7 +429,7 @@ static void TakeAmmo(player_t *player, int ammo, int amount)
     SERVER_ONLY(SV_SendPlayerInfo(*player));
 }
 
-static AActor *SingleActorFromTID(int tid, AActor *defactor)
+static AActor *SingleActorFromTID(int32_t tid, AActor *defactor)
 {
     if (tid == 0)
     {
@@ -448,7 +448,7 @@ static void TakeBackpack(player_t *player)
         return;
 
     player->backpack = false;
-    for (int i = 0; i < NUMAMMO; ++i)
+    for (int32_t i = 0; i < NUMAMMO; ++i)
     {
         player->maxammo[i] /= 2;
         if (player->ammo[i] > player->maxammo[i])
@@ -459,9 +459,9 @@ static void TakeBackpack(player_t *player)
     SERVER_ONLY(SV_SendPlayerInfo(*player));
 }
 
-static void DoTakeInv(player_t *player, const char *type, int amount)
+static void DoTakeInv(player_t *player, const char *type, int32_t amount)
 {
-    int i;
+    int32_t i;
 
     for (i = 0; i < NUMAMMO; ++i)
     {
@@ -492,7 +492,7 @@ static void DoTakeInv(player_t *player, const char *type, int amount)
     }
 }
 
-static void TakeInventory(AActor *activator, const char *type, int amount)
+static void TakeInventory(AActor *activator, const char *type, int32_t amount)
 {
     if (activator == NULL)
     {
@@ -509,28 +509,28 @@ static void TakeInventory(AActor *activator, const char *type, int amount)
     }
 }
 
-static int CheckInventory(AActor *activator, const char *type)
+static int32_t CheckInventory(AActor *activator, const char *type)
 {
     if (activator == NULL || activator->player == NULL)
         return 0;
 
     player_t *player = activator->player;
 
-    for (int i = 0; i < NUMAMMO; ++i)
+    for (int32_t i = 0; i < NUMAMMO; ++i)
     {
         if (strcmp(DoomAmmoNames[i].Name, type) == 0)
         {
             return player->ammo[i];
         }
     }
-    for (int i = 0; i < NUMWEAPONS; ++i)
+    for (int32_t i = 0; i < NUMWEAPONS; ++i)
     {
         if (strcmp(DoomWeaponNames[i].Name, type) == 0)
         {
             return player->weaponowned[i] ? 1 : 0;
         }
     }
-    for (int i = 0; i < NUMCARDS; ++i)
+    for (int32_t i = 0; i < NUMCARDS; ++i)
     {
         if (strcmp(DoomKeyNames[i].Name, type) == 0)
         {
@@ -549,9 +549,9 @@ EXTERN_CVAR(sv_gametype)
 
 //---- ACS lump manager ----//
 
-FBehavior::FBehavior(uint8_t *object, int len)
+FBehavior::FBehavior(uint8_t *object, int32_t len)
 {
-    int i;
+    int32_t i;
 
     NumScripts   = 0;
     NumFunctions = 0;
@@ -673,8 +673,8 @@ FBehavior::FBehavior(uint8_t *object, int len)
         chunk = (uint32_t *)FindChunk(MAKE_ID('M', 'I', 'N', 'I'));
         if (chunk != NULL)
         {
-            int numvars  = LELONG(chunk[1]) / 4;
-            int firstvar = LELONG(chunk[2]);
+            int32_t numvars  = LELONG(chunk[1]) / 4;
+            int32_t firstvar = LELONG(chunk[2]);
             for (i = 0; i < numvars; ++i)
             {
                 level.vars[i + firstvar] = LELONG(chunk[3 + i]);
@@ -699,10 +699,10 @@ FBehavior::FBehavior(uint8_t *object, int len)
         chunk = (uint32_t *)FindChunk(MAKE_ID('A', 'I', 'N', 'I'));
         while (chunk != NULL)
         {
-            int arraynum = level.vars[LELONG(chunk[2])];
+            int32_t arraynum = level.vars[LELONG(chunk[2])];
             if ((uint32_t)arraynum < (uint32_t)NumArrays)
             {
-                int     initsize = MIN<int>(Arrays[arraynum].ArraySize, (LELONG(chunk[1]) - 4) / 4);
+                int32_t     initsize = MIN<int32_t>(Arrays[arraynum].ArraySize, (LELONG(chunk[1]) - 4) / 4);
                 int32_t *elems    = Arrays[arraynum].Elements;
                 for (i = 0; i < initsize; ++i)
                 {
@@ -721,7 +721,7 @@ FBehavior::~FBehavior()
     // Object file is freed by the zone heap
     if (Arrays != NULL)
     {
-        for (int i = 0; i < NumArrays; ++i)
+        for (int32_t i = 0; i < NumArrays; ++i)
         {
             if (Arrays[i].Elements != NULL)
             {
@@ -734,7 +734,7 @@ FBehavior::~FBehavior()
     }
 }
 
-int STACK_ARGS FBehavior::SortScripts(const void *a, const void *b)
+int32_t STACK_ARGS FBehavior::SortScripts(const void *a, const void *b)
 {
     ScriptPtr *ptr1 = (ScriptPtr *)a;
     ScriptPtr *ptr2 = (ScriptPtr *)b;
@@ -746,15 +746,15 @@ bool FBehavior::IsGood()
     return Format != ACS_Unknown;
 }
 
-int *FBehavior::FindScript(int script) const
+int32_t *FBehavior::FindScript(int32_t script) const
 {
     const ScriptPtr *ptr =
         BinarySearch<ScriptPtr, uint16_t>((ScriptPtr *)Scripts, NumScripts, &ScriptPtr::Number, (uint16_t)script);
 
-    return ptr ? (int *)(ptr->Address + Data) : NULL;
+    return ptr ? (int32_t *)(ptr->Address + Data) : NULL;
 }
 
-ScriptFunction *FBehavior::GetFunction(int funcnum) const
+ScriptFunction *FBehavior::GetFunction(int32_t funcnum) const
 {
     if ((uint32_t)funcnum >= (uint32_t)NumFunctions)
     {
@@ -763,7 +763,7 @@ ScriptFunction *FBehavior::GetFunction(int funcnum) const
     return (ScriptFunction *)Functions + funcnum;
 }
 
-int FBehavior::GetArrayVal(int arraynum, int index) const
+int32_t FBehavior::GetArrayVal(int32_t arraynum, int32_t index) const
 {
     if ((uint32_t)arraynum >= (uint32_t)NumArrays)
         return 0;
@@ -773,7 +773,7 @@ int FBehavior::GetArrayVal(int arraynum, int index) const
     return array->Elements[index];
 }
 
-void FBehavior::SetArrayVal(int arraynum, int index, int value)
+void FBehavior::SetArrayVal(int32_t arraynum, int32_t index, int32_t value)
 {
     if ((uint32_t)arraynum >= (uint32_t)NumArrays)
         return;
@@ -976,20 +976,20 @@ uint32_t FBehavior::FindLanguage(uint32_t langid, bool ignoreregion) const
     return 0;
 }
 
-void FBehavior::StartTypedScripts(uint16_t type, AActor *activator, int arg0, int arg1, int arg2, bool always) const
+void FBehavior::StartTypedScripts(uint16_t type, AActor *activator, int32_t arg0, int32_t arg1, int32_t arg2, bool always) const
 {
     if (!serverside)
         return;
 
     ScriptPtr *ptr;
-    int        i;
+    int32_t        i;
 
     for (i = 0; i < NumScripts; ++i)
     {
         ptr = (ScriptPtr *)(Scripts + 8 * i);
         if (ptr->Type == type)
         {
-            P_GetScriptGoing(activator, NULL, ptr->Number, (int *)(ptr->Address + Data), 0, arg0, arg1, arg2, always,
+            P_GetScriptGoing(activator, NULL, ptr->Number, (int32_t *)(ptr->Address + Data), 0, arg0, arg1, arg2, always,
                              true);
         }
     }
@@ -1019,7 +1019,7 @@ DACSThinker::DACSThinker()
         ActiveThinker = this;
         Scripts       = NULL;
         LastScript    = NULL;
-        for (int i = 0; i < 1000; i++)
+        for (int32_t i = 0; i < 1000; i++)
             RunningScripts[i] = NULL;
     }
 }
@@ -1042,7 +1042,7 @@ void DACSThinker::Serialize(FArchive &arc)
     if (arc.IsStoring())
     {
         arc << Scripts << LastScript;
-        for (int i = 0; i < 1000; i++)
+        for (int32_t i = 0; i < 1000; i++)
         {
             if (RunningScripts[i])
                 arc << RunningScripts[i] << (uint16_t)i;
@@ -1095,8 +1095,8 @@ class DFlashFader : public DThinker
 
   protected:
     float   Blends[2][4];
-    int     TotalTics;
-    int     StartTic;
+    int32_t     TotalTics;
+    int32_t     StartTic;
     AActor *ForWho;
 
     void SetBlend(float time);
@@ -1117,7 +1117,7 @@ void DFlashFader::DestroyedPointer(DObject *obj)
 
 DFlashFader::DFlashFader(float r1, float g1, float b1, float a1, float r2, float g2, float b2, float a2, float time,
                          AActor *who)
-    : TotalTics((int)(time * TICRATE)), StartTic(level.time), ForWho(who)
+    : TotalTics((int32_t)(time * TICRATE)), StartTic(level.time), ForWho(who)
 {
     Blends[0][0] = r1;
     Blends[0][1] = g1;
@@ -1142,16 +1142,16 @@ void DFlashFader::Serialize(FArchive &arc)
     {
         arc << TotalTics << StartTic << ForWho;
 
-        for (int i = 1; i >= 0; --i)
-            for (int j = 3; j >= 0; --j)
+        for (int32_t i = 1; i >= 0; --i)
+            for (int32_t j = 3; j >= 0; --j)
                 arc << Blends[i][j];
     }
     else
     {
         arc >> TotalTics >> StartTic >> ForWho;
 
-        for (int i = 1; i >= 0; --i)
-            for (int j = 3; j >= 0; --j)
+        for (int32_t i = 1; i >= 0; --i)
+            for (int32_t j = 3; j >= 0; --j)
                 arc >> Blends[i][j];
     }
 }
@@ -1197,18 +1197,18 @@ class DPlaneWatcher : public DThinker
 {
     DECLARE_SERIAL(DPlaneWatcher, DThinker)
   public:
-    DPlaneWatcher(AActor *it, line_t *line, int lineSide, bool ceiling, int tag, int height, int special, int arg0,
-                  int arg1, int arg2, int arg3, int arg4);
+    DPlaneWatcher(AActor *it, line_t *line, int32_t lineSide, bool ceiling, int32_t tag, int32_t height, int32_t special, int32_t arg0,
+                  int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4);
     virtual void RunThink();
     virtual void DestroyedPointer(DObject *obj);
 
   private:
     sector_t *Sector;
     fixed_t   WatchD, LastD;
-    int       Special, Arg0, Arg1, Arg2, Arg3, Arg4;
+    int32_t       Special, Arg0, Arg1, Arg2, Arg3, Arg4;
     AActor   *Activator;
     line_t   *Line;
-    int       LineSide;
+    int32_t       LineSide;
     bool      bCeiling;
 
     DPlaneWatcher()
@@ -1224,12 +1224,12 @@ void DPlaneWatcher::DestroyedPointer(DObject *obj)
         Activator = NULL;
 }
 
-DPlaneWatcher::DPlaneWatcher(AActor *it, line_t *line, int lineSide, bool ceiling, int tag, int height, int special,
-                             int arg0, int arg1, int arg2, int arg3, int arg4)
+DPlaneWatcher::DPlaneWatcher(AActor *it, line_t *line, int32_t lineSide, bool ceiling, int32_t tag, int32_t height, int32_t special,
+                             int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4)
     : Special(special), Arg0(arg0), Arg1(arg1), Arg2(arg2), Arg3(arg3), Arg4(arg4), Activator(it), Line(line),
       LineSide(lineSide), bCeiling(ceiling)
 {
-    int secnum;
+    int32_t secnum;
 
     secnum = P_FindSectorFromTag(tag, -1);
     if (secnum >= 0)
@@ -1435,9 +1435,9 @@ void DLevelScript::PutFirst()
     Link();
 }
 
-int DLevelScript::Random(int min, int max)
+int32_t DLevelScript::Random(int32_t min, int32_t max)
 {
-    int          num1, num2, num3, num4;
+    int32_t          num1, num2, num3, num4;
     uint32_t num;
 
     num1 = P_Random();
@@ -1448,13 +1448,13 @@ int DLevelScript::Random(int min, int max)
     num = ((num1 << 24) | (num2 << 16) | (num3 << 8) | num4);
     num %= (max - min + 1);
     num += min;
-    return (int)num;
+    return (int32_t)num;
 }
 
-int DLevelScript::ThingCount(int type, int tid)
+int32_t DLevelScript::ThingCount(int32_t type, int32_t tid)
 {
     AActor *mobj  = NULL;
-    int     count = 0;
+    int32_t     count = 0;
 
     if (type >= NumSpawnableThings)
     {
@@ -1497,9 +1497,9 @@ int DLevelScript::ThingCount(int type, int tid)
     return count;
 }
 
-void DLevelScript::ChangeFlat(int tag, int name, bool floorOrCeiling)
+void DLevelScript::ChangeFlat(int32_t tag, int32_t name, bool floorOrCeiling)
 {
-    int         secnum = -1;
+    int32_t         secnum = -1;
     const char *flatname = level.behavior->LookupString(name);
 
     if (flatname == NULL)
@@ -1522,8 +1522,8 @@ void DLevelScript::ChangeFlat(int tag, int name, bool floorOrCeiling)
 
     if (serverside)
     {
-        int              argv[] = {tag, name};
-        std::vector<int> args   = ArgvToArgs(argv);
+        int32_t              argv[] = {tag, name};
+        std::vector<int32_t> args   = ArgvToArgs(argv);
         SERVER_ONLY(
             SV_ACSExecuteSpecial(floorOrCeiling ? PCD_CHANGECEILING : PCD_CHANGEFLOOR, NULL, NULL, false, args));
     }
@@ -1531,12 +1531,12 @@ void DLevelScript::ChangeFlat(int tag, int name, bool floorOrCeiling)
 
 extern size_t P_NumPlayersInGame();
 
-int DLevelScript::CountPlayers()
+int32_t DLevelScript::CountPlayers()
 {
-    return static_cast<int>(P_NumPlayersInGame());
+    return static_cast<int32_t>(P_NumPlayersInGame());
 }
 
-void DLevelScript::ACS_SetLineTexture(int *args, uint8_t argCount)
+void DLevelScript::ACS_SetLineTexture(int32_t *args, uint8_t argCount)
 {
     if (argCount < 4)
         return;
@@ -1565,7 +1565,7 @@ void DLevelScript::ACS_Print(uint8_t pcd, AActor *activator, const char *print)
     }
 }
 
-void DLevelScript::ACS_ChangeMusic(uint8_t pcd, AActor *activator, int *args, uint8_t argCount)
+void DLevelScript::ACS_ChangeMusic(uint8_t pcd, AActor *activator, int32_t *args, uint8_t argCount)
 {
     if (argCount < 2)
         return;
@@ -1573,14 +1573,14 @@ void DLevelScript::ACS_ChangeMusic(uint8_t pcd, AActor *activator, int *args, ui
     ChangeMusic(pcd, activator, args[0], args[1]);
 }
 
-void DLevelScript::ACS_StartSound(uint8_t pcd, AActor *activator, int *args, uint8_t argCount)
+void DLevelScript::ACS_StartSound(uint8_t pcd, AActor *activator, int32_t *args, uint8_t argCount)
 {
     if (pcd == PCD_SECTORSOUND)
     {
         if (argCount < 5)
             return;
 
-        int sectorid = args[0];
+        int32_t sectorid = args[0];
         if (sectorid < numsectors)
             StartSectorSound(pcd, &sectors[sectorid], args[1], args[2], args[3], args[4]);
     }
@@ -1600,7 +1600,7 @@ void DLevelScript::ACS_StartSound(uint8_t pcd, AActor *activator, int *args, uin
     }
 }
 
-void DLevelScript::ACS_SetLineBlocking(int *args, uint8_t argCount)
+void DLevelScript::ACS_SetLineBlocking(int32_t *args, uint8_t argCount)
 {
     if (argCount < 2)
         return;
@@ -1608,7 +1608,7 @@ void DLevelScript::ACS_SetLineBlocking(int *args, uint8_t argCount)
     SetLineBlocking(args[0], args[1]);
 }
 
-void DLevelScript::ACS_SetLineMonsterBlocking(int *args, uint8_t argCount)
+void DLevelScript::ACS_SetLineMonsterBlocking(int32_t *args, uint8_t argCount)
 {
     if (argCount < 2)
         return;
@@ -1616,7 +1616,7 @@ void DLevelScript::ACS_SetLineMonsterBlocking(int *args, uint8_t argCount)
     SetLineMonsterBlocking(args[0], args[1]);
 }
 
-void DLevelScript::ACS_SetLineSpecial(int *args, uint8_t argCount)
+void DLevelScript::ACS_SetLineSpecial(int32_t *args, uint8_t argCount)
 {
     if (argCount < 7)
         return;
@@ -1624,7 +1624,7 @@ void DLevelScript::ACS_SetLineSpecial(int *args, uint8_t argCount)
     SetLineSpecial(args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
 }
 
-void DLevelScript::ACS_SetThingSpecial(int *args, uint8_t argCount)
+void DLevelScript::ACS_SetThingSpecial(int32_t *args, uint8_t argCount)
 {
     if (argCount < 7)
         return;
@@ -1634,7 +1634,7 @@ void DLevelScript::ACS_SetThingSpecial(int *args, uint8_t argCount)
         SetThingSpecial(actor, args[1], args[2], args[3], args[4], args[5], args[6]);
 }
 
-void DLevelScript::ACS_FadeRange(AActor *activator, int *args, uint8_t argCount)
+void DLevelScript::ACS_FadeRange(AActor *activator, int32_t *args, uint8_t argCount)
 {
     if (argCount < 9)
         return;
@@ -1647,7 +1647,7 @@ void DLevelScript::ACS_CancelFade(AActor *actor)
     CancelFade(actor);
 }
 
-void DLevelScript::ACS_ChangeFlat(uint8_t pcd, int *args, uint8_t argCount)
+void DLevelScript::ACS_ChangeFlat(uint8_t pcd, int32_t *args, uint8_t argCount)
 {
     if (argCount < 2)
         return;
@@ -1655,7 +1655,7 @@ void DLevelScript::ACS_ChangeFlat(uint8_t pcd, int *args, uint8_t argCount)
     ChangeFlat(args[0], args[1], pcd == PCD_CHANGECEILING);
 }
 
-void DLevelScript::ACS_SoundSequence(int *args, uint8_t argCount)
+void DLevelScript::ACS_SoundSequence(int32_t *args, uint8_t argCount)
 {
     if (argCount < 2)
         return;
@@ -1664,10 +1664,10 @@ void DLevelScript::ACS_SoundSequence(int *args, uint8_t argCount)
         StartSoundSequence(&sectors[args[0]], args[1]);
 }
 
-void DLevelScript::SetLineTexture(int lineid, int side, int position, int name)
+void DLevelScript::SetLineTexture(int32_t lineid, int32_t side, int32_t position, int32_t name)
 {
     texhandle_t texture; 
-    int linenum = -1;
+    int32_t linenum = -1;
     const char *texname = level.behavior->LookupString(name);
 
     if (texname == NULL)
@@ -1675,8 +1675,8 @@ void DLevelScript::SetLineTexture(int lineid, int side, int position, int name)
 
     if (serverside)
     {
-        int              argv[] = {lineid, side, position, name};
-        std::vector<int> args   = ArgvToArgs(argv);
+        int32_t              argv[] = {lineid, side, position, name};
+        std::vector<int32_t> args   = ArgvToArgs(argv);
         SERVER_ONLY(SV_ACSExecuteSpecial(PCD_SETLINETEXTURE, NULL, NULL, false, args));
     }
 
@@ -1714,9 +1714,9 @@ void DLevelScript::SetLineTexture(int lineid, int side, int position, int name)
     }
 }
 
-void DLevelScript::SetLineBlocking(int lineid, int flags)
+void DLevelScript::SetLineBlocking(int32_t lineid, int32_t flags)
 {
-    int line = -1;
+    int32_t line = -1;
 
     while ((line = P_FindLineFromID(lineid, line)) >= 0)
     {
@@ -1741,15 +1741,15 @@ void DLevelScript::SetLineBlocking(int lineid, int flags)
 
     if (serverside)
     {
-        int              argv[] = {lineid, flags};
-        std::vector<int> args   = ArgvToArgs(argv);
+        int32_t              argv[] = {lineid, flags};
+        std::vector<int32_t> args   = ArgvToArgs(argv);
         SERVER_ONLY(SV_ACSExecuteSpecial(PCD_SETLINEBLOCKING, NULL, NULL, false, args));
     }
 }
 
-void DLevelScript::SetLineMonsterBlocking(int lineid, int toggle)
+void DLevelScript::SetLineMonsterBlocking(int32_t lineid, int32_t toggle)
 {
-    int line = -1;
+    int32_t line = -1;
 
     while ((line = P_FindLineFromID(lineid, line)) >= 0)
     {
@@ -1765,15 +1765,15 @@ void DLevelScript::SetLineMonsterBlocking(int lineid, int toggle)
 
     if (serverside)
     {
-        int              argv[] = {lineid, toggle};
-        std::vector<int> args   = ArgvToArgs(argv);
+        int32_t              argv[] = {lineid, toggle};
+        std::vector<int32_t> args   = ArgvToArgs(argv);
         SERVER_ONLY(SV_ACSExecuteSpecial(PCD_SETLINEMONSTERBLOCKING, NULL, NULL, false, args));
     }
 }
 
-void DLevelScript::SetLineSpecial(int lineid, int special, int arg1, int arg2, int arg3, int arg4, int arg5)
+void DLevelScript::SetLineSpecial(int32_t lineid, int32_t special, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4, int32_t arg5)
 {
-    int linenum = -1;
+    int32_t linenum = -1;
 
     while ((linenum = P_FindLineFromID(lineid, linenum)) >= 0)
     {
@@ -1789,14 +1789,14 @@ void DLevelScript::SetLineSpecial(int lineid, int special, int arg1, int arg2, i
 
     if (serverside)
     {
-        int              argv[] = {lineid, special, arg1, arg2, arg3, arg4, arg5};
-        std::vector<int> args   = ArgvToArgs(argv);
+        int32_t              argv[] = {lineid, special, arg1, arg2, arg3, arg4, arg5};
+        std::vector<int32_t> args   = ArgvToArgs(argv);
         SERVER_ONLY(SV_ACSExecuteSpecial(PCD_SETLINESPECIAL, NULL, NULL, false, args));
     }
 }
 
-void DLevelScript::ActivateLineSpecial(uint8_t special, line_t *line, AActor *activator, int arg0, int arg1, int arg2,
-                                       int arg3, int arg4)
+void DLevelScript::ActivateLineSpecial(uint8_t special, line_t *line, AActor *activator, int32_t arg0, int32_t arg1, int32_t arg2,
+                                       int32_t arg3, int32_t arg4)
 {
     if (serverside)
     {
@@ -1805,7 +1805,7 @@ void DLevelScript::ActivateLineSpecial(uint8_t special, line_t *line, AActor *ac
     }
 }
 
-void DLevelScript::ChangeMusic(uint8_t pcd, AActor *activator, int index, int loop)
+void DLevelScript::ChangeMusic(uint8_t pcd, AActor *activator, int32_t index, int32_t loop)
 {
     bool local = (pcd == PCD_LOCALSETMUSIC || pcd == PCD_LOCALSETMUSICDIRECT);
 
@@ -1821,13 +1821,13 @@ void DLevelScript::ChangeMusic(uint8_t pcd, AActor *activator, int index, int lo
 
     if (serverside)
     {
-        int              argv[] = {index, loop};
-        std::vector<int> args   = ArgvToArgs(argv);
+        int32_t              argv[] = {index, loop};
+        std::vector<int32_t> args   = ArgvToArgs(argv);
         SERVER_ONLY(SV_ACSExecuteSpecial(pcd, activator, NULL, local, args));
     }
 }
 
-void DLevelScript::StartSound(uint8_t pcd, AActor *activator, int channel, int index, int volume, int attenuation)
+void DLevelScript::StartSound(uint8_t pcd, AActor *activator, int32_t channel, int32_t index, int32_t volume, int32_t attenuation)
 {
     bool local = pcd == PCD_LOCALAMBIENTSOUND;
 
@@ -1843,13 +1843,13 @@ void DLevelScript::StartSound(uint8_t pcd, AActor *activator, int channel, int i
 
     if (serverside)
     {
-        int              argv[] = {channel, index, volume, attenuation};
-        std::vector<int> args   = ArgvToArgs(argv);
+        int32_t              argv[] = {channel, index, volume, attenuation};
+        std::vector<int32_t> args   = ArgvToArgs(argv);
         SERVER_ONLY(SV_ACSExecuteSpecial(pcd, activator, NULL, local, args));
     }
 }
 
-void DLevelScript::StartSectorSound(uint8_t pcd, sector_t *sector, int channel, int index, int volume, int attenuation)
+void DLevelScript::StartSectorSound(uint8_t pcd, sector_t *sector, int32_t channel, int32_t index, int32_t volume, int32_t attenuation)
 {
     if (clientside)
     {
@@ -1860,14 +1860,14 @@ void DLevelScript::StartSectorSound(uint8_t pcd, sector_t *sector, int channel, 
 
     if (serverside)
     {
-        int              sectorNum = sector ? sector - sectors : 0;
-        int              argv[]    = {sectorNum, channel, index, volume, attenuation};
-        std::vector<int> args      = ArgvToArgs(argv);
+        int32_t              sectorNum = sector ? sector - sectors : 0;
+        int32_t              argv[]    = {sectorNum, channel, index, volume, attenuation};
+        std::vector<int32_t> args      = ArgvToArgs(argv);
         SERVER_ONLY(SV_ACSExecuteSpecial(pcd, NULL, NULL, false, args));
     }
 }
 
-void DLevelScript::StartThingSound(uint8_t pcd, AActor *actor, int channel, int index, int volume, int attenuation)
+void DLevelScript::StartThingSound(uint8_t pcd, AActor *actor, int32_t channel, int32_t index, int32_t volume, int32_t attenuation)
 {
     if (clientside)
     {
@@ -1878,13 +1878,13 @@ void DLevelScript::StartThingSound(uint8_t pcd, AActor *actor, int channel, int 
 
     if (serverside)
     {
-        int              argv[] = {channel, index, volume, attenuation};
-        std::vector<int> args   = ArgvToArgs(argv);
+        int32_t              argv[] = {channel, index, volume, attenuation};
+        std::vector<int32_t> args   = ArgvToArgs(argv);
         SERVER_ONLY(SV_ACSExecuteSpecial(pcd, actor, NULL, false, args));
     }
 }
 
-void DLevelScript::SetThingSpecial(AActor *actor, int special, int arg1, int arg2, int arg3, int arg4, int arg5)
+void DLevelScript::SetThingSpecial(AActor *actor, int32_t special, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4, int32_t arg5)
 {
     actor->special = special;
     actor->args[0] = arg1;
@@ -1895,8 +1895,8 @@ void DLevelScript::SetThingSpecial(AActor *actor, int special, int arg1, int arg
 
     if (serverside)
     {
-        int              argv[] = {(int)actor->netid, special, arg1, arg2, arg3, arg4, arg5};
-        std::vector<int> args   = ArgvToArgs(argv);
+        int32_t              argv[] = {(int32_t)actor->netid, special, arg1, arg2, arg3, arg4, arg5};
+        std::vector<int32_t> args   = ArgvToArgs(argv);
         SERVER_ONLY(SV_ACSExecuteSpecial(PCD_SETTHINGSPECIAL, actor, NULL, false, args));
     }
 }
@@ -1918,7 +1918,7 @@ void DLevelScript::CancelFade(AActor *actor)
     SERVER_ONLY(SV_ACSExecuteSpecial(PCD_CANCELFADE, actor, NULL, true));
 }
 
-void DLevelScript::StartSoundSequence(sector_t *sec, int index)
+void DLevelScript::StartSoundSequence(sector_t *sec, int32_t index)
 {
     if (clientside)
     {
@@ -1929,13 +1929,13 @@ void DLevelScript::StartSoundSequence(sector_t *sec, int index)
 
     if (serverside)
     {
-        int              argv[] = {(int)(sec - sectors), index};
-        std::vector<int> args   = ArgvToArgs(argv);
+        int32_t              argv[] = {(int32_t)(sec - sectors), index};
+        std::vector<int32_t> args   = ArgvToArgs(argv);
         SERVER_ONLY(SV_ACSExecuteSpecial(PCD_SOUNDSEQUENCE, NULL, NULL, false, args));
     }
 }
 
-int DLevelScript::DoSpawn(int type, fixed_t x, fixed_t y, fixed_t z, int tid, int angle)
+int32_t DLevelScript::DoSpawn(int32_t type, fixed_t x, fixed_t y, fixed_t z, int32_t tid, int32_t angle)
 {
     const char *typestr = level.behavior->LookupString(type);
     if (typestr == NULL)
@@ -1989,14 +1989,14 @@ int DLevelScript::DoSpawn(int type, fixed_t x, fixed_t y, fixed_t z, int tid, in
         }
     }
 
-    return (int)(actor - (AActor *)0);
+    return (int32_t)(actor - (AActor *)0);
 }
 
-int DLevelScript::DoSpawnSpot(int type, int spot, int tid, int angle)
+int32_t DLevelScript::DoSpawnSpot(int32_t type, int32_t spot, int32_t tid, int32_t angle)
 {
     FActorIterator iterator(tid);
     AActor        *aspot;
-    int            spawned = 0;
+    int32_t            spawned = 0;
 
     while ((aspot = iterator.Next()))
     {
@@ -2005,7 +2005,7 @@ int DLevelScript::DoSpawnSpot(int type, int spot, int tid, int angle)
     return spawned;
 }
 
-void DLevelScript::DoFadeTo(AActor *who, int r, int g, int b, int a, fixed_t time)
+void DLevelScript::DoFadeTo(AActor *who, int32_t r, int32_t g, int32_t b, int32_t a, fixed_t time)
 {
     DPrintf("DoFadeRange now... \n");
     DoFadeRange(who, 0, 0, 0, -1, r, g, b, a, time);
@@ -2041,7 +2041,7 @@ static void DoActualFadeRange(player_s *viewer, float ftime, bool fadingFrom, fl
     }
 }
 
-void DLevelScript::DoFadeRange(AActor *who, int r1, int g1, int b1, int a1, int r2, int g2, int b2, int a2,
+void DLevelScript::DoFadeRange(AActor *who, int32_t r1, int32_t g1, int32_t b1, int32_t a1, int32_t r2, int32_t g2, int32_t b2, int32_t a2,
                                fixed_t time)
 {
     if (clientside && who->player != NULL)
@@ -2069,16 +2069,16 @@ void DLevelScript::DoFadeRange(AActor *who, int r1, int g1, int b1, int a1, int 
 
     if (serverside)
     {
-        int              argv[] = {r1, g1, b1, a1, r2, g2, b2, a2, time};
-        std::vector<int> args(argv, argv + ARRAY_LENGTH(argv));
+        int32_t              argv[] = {r1, g1, b1, a1, r2, g2, b2, a2, time};
+        std::vector<int32_t> args(argv, argv + ARRAY_LENGTH(argv));
         SERVER_ONLY(SV_ACSExecuteSpecial(PCD_FADERANGE, who, NULL, true, args));
     }
 }
 
-inline int getbyte(int *&pc)
+inline int32_t getbyte(int32_t *&pc)
 {
-    int res = *(uint8_t *)pc;
-    pc      = (int *)((uint8_t *)pc + 1);
+    int32_t res = *(uint8_t *)pc;
+    pc      = (int32_t *)((uint8_t *)pc + 1);
     return res;
 }
 
@@ -2089,7 +2089,7 @@ void DLevelScript::RunScript()
         return;
 
     TeleportSide                   = lineSide;
-    int            *locals         = localvars;
+    int32_t            *locals         = localvars;
     ScriptFunction *activeFunction = NULL;
 
     switch (state)
@@ -2105,7 +2105,7 @@ void DLevelScript::RunScript()
         // Wait for tagged sector(s) to go inactive, then enter
         // state running
         {
-            int secnum = -1;
+            int32_t secnum = -1;
 
             while ((secnum = P_FindSectorFromTag(statedata, secnum)) >= 0)
                 if (sectors[secnum].floordata || sectors[secnum].ceilingdata)
@@ -2143,15 +2143,15 @@ void DLevelScript::RunScript()
         break;
     }
 
-    int            *pc      = this->pc;
-    int             sp      = this->sp;
+    int32_t            *pc      = this->pc;
+    int32_t             sp      = this->sp;
     const ACSFormat fmt     = level.behavior->GetFormat();
-    int             runaway = 0; // used to prevent infinite loops
-    int             pcd;
+    int32_t             runaway = 0; // used to prevent infinite loops
+    int32_t             pcd;
     char            work[4096], *workwhere = work;
     const char     *lookup;
-    //	int optstart = -1;
-    int temp;
+    //	int32_t optstart = -1;
+    int32_t temp;
 
     while (state == SCRIPT_Running)
     {
@@ -2186,14 +2186,14 @@ void DLevelScript::RunScript()
 
         case PCD_PUSHBYTE:
             PushToStack(*(uint8_t *)pc);
-            pc = (int *)((uint8_t *)pc + 1);
+            pc = (int32_t *)((uint8_t *)pc + 1);
             break;
 
         case PCD_PUSH2BYTES:
             Stack[sp]     = ((uint8_t *)pc)[0];
             Stack[sp + 1] = ((uint8_t *)pc)[1];
             sp += 2;
-            pc = (int *)((uint8_t *)pc + 2);
+            pc = (int32_t *)((uint8_t *)pc + 2);
             break;
 
         case PCD_PUSH3BYTES:
@@ -2201,7 +2201,7 @@ void DLevelScript::RunScript()
             Stack[sp + 1] = ((uint8_t *)pc)[1];
             Stack[sp + 2] = ((uint8_t *)pc)[2];
             sp += 3;
-            pc = (int *)((uint8_t *)pc + 3);
+            pc = (int32_t *)((uint8_t *)pc + 3);
             break;
 
         case PCD_PUSH4BYTES:
@@ -2210,7 +2210,7 @@ void DLevelScript::RunScript()
             Stack[sp + 2] = ((uint8_t *)pc)[2];
             Stack[sp + 3] = ((uint8_t *)pc)[3];
             sp += 4;
-            pc = (int *)((uint8_t *)pc + 4);
+            pc = (int32_t *)((uint8_t *)pc + 4);
             break;
 
         case PCD_PUSH5BYTES:
@@ -2220,12 +2220,12 @@ void DLevelScript::RunScript()
             Stack[sp + 3] = ((uint8_t *)pc)[3];
             Stack[sp + 4] = ((uint8_t *)pc)[4];
             sp += 5;
-            pc = (int *)((uint8_t *)pc + 5);
+            pc = (int32_t *)((uint8_t *)pc + 5);
             break;
 
         case PCD_PUSHBYTES:
             temp = *(uint8_t *)pc;
-            pc   = (int *)((uint8_t *)pc + temp + 1);
+            pc   = (int32_t *)((uint8_t *)pc + temp + 1);
             for (temp = -temp; temp; temp++)
             {
                 PushToStack(*((uint8_t *)pc + temp));
@@ -2298,36 +2298,36 @@ void DLevelScript::RunScript()
 
         case PCD_LSPEC1DIRECTB:
             ActivateLineSpecial(((uint8_t *)pc)[0], activationline, activator, ((uint8_t *)pc)[1], 0, 0, 0, 0);
-            pc = (int *)((uint8_t *)pc + 2);
+            pc = (int32_t *)((uint8_t *)pc + 2);
             break;
 
         case PCD_LSPEC2DIRECTB:
             ActivateLineSpecial(((uint8_t *)pc)[0], activationline, activator, ((uint8_t *)pc)[1], ((uint8_t *)pc)[2], 0, 0, 0);
-            pc = (int *)((uint8_t *)pc + 3);
+            pc = (int32_t *)((uint8_t *)pc + 3);
             break;
 
         case PCD_LSPEC3DIRECTB:
             ActivateLineSpecial(((uint8_t *)pc)[0], activationline, activator, ((uint8_t *)pc)[1], ((uint8_t *)pc)[2],
                                 ((uint8_t *)pc)[3], 0, 0);
-            pc = (int *)((uint8_t *)pc + 4);
+            pc = (int32_t *)((uint8_t *)pc + 4);
             break;
 
         case PCD_LSPEC4DIRECTB:
             ActivateLineSpecial(((uint8_t *)pc)[0], activationline, activator, ((uint8_t *)pc)[1], ((uint8_t *)pc)[2],
                                 ((uint8_t *)pc)[3], ((uint8_t *)pc)[4], 0);
-            pc = (int *)((uint8_t *)pc + 5);
+            pc = (int32_t *)((uint8_t *)pc + 5);
             break;
 
         case PCD_LSPEC5DIRECTB:
             ActivateLineSpecial(((uint8_t *)pc)[0], activationline, activator, ((uint8_t *)pc)[1], ((uint8_t *)pc)[2],
                                 ((uint8_t *)pc)[3], ((uint8_t *)pc)[4], ((uint8_t *)pc)[5]);
-            pc = (int *)((uint8_t *)pc + 6);
+            pc = (int32_t *)((uint8_t *)pc + 6);
             break;
 
         case PCD_CALL:
         case PCD_CALLDISCARD: {
-            int             funcnum;
-            int             i;
+            int32_t             funcnum;
+            int32_t             i;
             ScriptFunction *func;
 
             funcnum = NEXTBYTE;
@@ -2355,7 +2355,7 @@ void DLevelScript::RunScript()
             ((CallReturn *)&Stack[sp])->ReturnAddress  = level.behavior->PC2Ofs(pc);
             ((CallReturn *)&Stack[sp])->ReturnFunction = activeFunction;
             ((CallReturn *)&Stack[sp])->bDiscardResult = (pcd == PCD_CALLDISCARD);
-            sp += sizeof(CallReturn) / sizeof(int);
+            sp += sizeof(CallReturn) / sizeof(int32_t);
             pc             = level.behavior->Ofs2PC(func->Address);
             activeFunction = func;
         }
@@ -2363,7 +2363,7 @@ void DLevelScript::RunScript()
 
         case PCD_RETURNVOID:
         case PCD_RETURNVAL: {
-            int         value;
+            int32_t         value;
             CallReturn *retState;
 
             if (pcd == PCD_RETURNVAL)
@@ -2374,7 +2374,7 @@ void DLevelScript::RunScript()
             {
                 value = 0;
             }
-            sp -= sizeof(CallReturn) / sizeof(int);
+            sp -= sizeof(CallReturn) / sizeof(int32_t);
             retState = (CallReturn *)&Stack[sp];
             pc       = level.behavior->Ofs2PC(retState->ReturnAddress);
             sp -= activeFunction->ArgCount + activeFunction->LocalCount;
@@ -2529,8 +2529,8 @@ void DLevelScript::RunScript()
             break;
 
         case PCD_ADDMAPARRAY: {
-            int a = ACS_WorldVars[NEXTBYTE];
-            int i = STACK(2);
+            int32_t a = ACS_WorldVars[NEXTBYTE];
+            int32_t i = STACK(2);
             level.behavior->SetArrayVal(a, i, level.behavior->GetArrayVal(a, i) + STACK(1));
             sp -= 2;
         }
@@ -2557,8 +2557,8 @@ void DLevelScript::RunScript()
             break;
 
         case PCD_SUBMAPARRAY: {
-            int a = ACS_WorldVars[NEXTBYTE];
-            int i = STACK(2);
+            int32_t a = ACS_WorldVars[NEXTBYTE];
+            int32_t i = STACK(2);
             level.behavior->SetArrayVal(a, i, level.behavior->GetArrayVal(a, i) - STACK(1));
             sp -= 2;
         }
@@ -2585,8 +2585,8 @@ void DLevelScript::RunScript()
             break;
 
         case PCD_MULMAPARRAY: {
-            int a = ACS_WorldVars[NEXTBYTE];
-            int i = STACK(2);
+            int32_t a = ACS_WorldVars[NEXTBYTE];
+            int32_t i = STACK(2);
             level.behavior->SetArrayVal(a, i, level.behavior->GetArrayVal(a, i) * STACK(1));
             sp -= 2;
         }
@@ -2647,8 +2647,8 @@ void DLevelScript::RunScript()
             }
             else
             {
-                int a = ACS_WorldVars[NEXTBYTE];
-                int i = STACK(2);
+                int32_t a = ACS_WorldVars[NEXTBYTE];
+                int32_t i = STACK(2);
                 level.behavior->SetArrayVal(a, i, level.behavior->GetArrayVal(a, i) / STACK(1));
                 sp -= 2;
             }
@@ -2710,8 +2710,8 @@ void DLevelScript::RunScript()
             }
             else
             {
-                int a = ACS_WorldVars[NEXTBYTE];
-                int i = STACK(2);
+                int32_t a = ACS_WorldVars[NEXTBYTE];
+                int32_t i = STACK(2);
                 level.behavior->SetArrayVal(a, i, level.behavior->GetArrayVal(a, i) % STACK(1));
                 sp -= 2;
             }
@@ -2734,8 +2734,8 @@ void DLevelScript::RunScript()
             break;
 
         case PCD_INCMAPARRAY: {
-            int a = ACS_WorldVars[NEXTBYTE];
-            int i = STACK(2);
+            int32_t a = ACS_WorldVars[NEXTBYTE];
+            int32_t i = STACK(2);
             level.behavior->SetArrayVal(a, i, level.behavior->GetArrayVal(a, i) + 1);
             sp--;
         }
@@ -2758,8 +2758,8 @@ void DLevelScript::RunScript()
             break;
 
         case PCD_DECMAPARRAY: {
-            int a = ACS_WorldVars[NEXTBYTE];
-            int i = STACK(2);
+            int32_t a = ACS_WorldVars[NEXTBYTE];
+            int32_t i = STACK(2);
             level.behavior->SetArrayVal(a, i, level.behavior->GetArrayVal(a, i) - 1);
             sp--;
         }
@@ -2795,7 +2795,7 @@ void DLevelScript::RunScript()
         case PCD_DELAYDIRECTB:
             state     = SCRIPT_Delayed;
             statedata = *(uint8_t *)pc;
-            pc        = (int *)((uint8_t *)pc + 1);
+            pc        = (int32_t *)((uint8_t *)pc + 1);
             break;
 
         case PCD_RANDOM:
@@ -2810,7 +2810,7 @@ void DLevelScript::RunScript()
 
         case PCD_RANDOMDIRECTB:
             PushToStack(Random(((uint8_t *)pc)[0], ((uint8_t *)pc)[1]));
-            pc = (int *)((uint8_t *)pc + 2);
+            pc = (int32_t *)((uint8_t *)pc + 2);
             break;
 
         case PCD_THINGCOUNT:
@@ -3055,8 +3055,8 @@ void DLevelScript::RunScript()
             if (pcd == PCD_ENDHUDMESSAGEBOLD || activator == NULL ||
                 (activator->player->mo == consoleplayer().camera))
             {
-                int type = Stack[optstart-6];
-                int id = Stack[optstart-5];
+                int32_t type = Stack[optstart-6];
+                int32_t id = Stack[optstart-5];
                 EColorRange color = CLAMPCOLOR(Stack[optstart-4]);
                 float x = FIXED2FLOAT(Stack[optstart-3]);
                 float y = FIXED2FLOAT(Stack[optstart-2]);
@@ -3392,7 +3392,7 @@ void DLevelScript::RunScript()
 
             /*case PCD_STARTTRANSLATION:
                 {
-                    int i = STACK(1);
+                    int32_t i = STACK(1);
                     sp--;
                     if (i >= 1 && i <= MAX_ACS_TRANSLATIONS)
                     {
@@ -3407,10 +3407,10 @@ void DLevelScript::RunScript()
 
             case PCD_TRANSLATIONRANGE1:
                 { // translation using palette shifting
-                    int start = STACK(4);
-                    int end = STACK(3);
-                    int pal1 = STACK(2);
-                    int pal2 = STACK(1);
+                    int32_t start = STACK(4);
+                    int32_t end = STACK(3);
+                    int32_t pal1 = STACK(2);
+                    int32_t pal2 = STACK(1);
                     fixed_t palcol, palstep;
                     sp -= 4;
 
@@ -3430,7 +3430,7 @@ void DLevelScript::RunScript()
                     }
                     palcol = pal1 << FRACBITS;
                     palstep = ((pal2 << FRACBITS) - palcol) / (end - start);
-                    for (int i = start; i <= end; palcol += palstep, ++i)
+                    for (int32_t i = start; i <= end; palcol += palstep, ++i)
                     {
                         translation[i] = palcol >> FRACBITS;
                     }
@@ -3440,8 +3440,8 @@ void DLevelScript::RunScript()
             case PCD_TRANSLATIONRANGE2:
                 { // translation using RGB values
                   // (would HSV be a good idea too?)
-                    int start = STACK(8);
-                    int end = STACK(7);
+                    int32_t start = STACK(8);
+                    int32_t end = STACK(7);
                     fixed_t r1 = STACK(6) << FRACBITS;
                     fixed_t g1 = STACK(5) << FRACBITS;
                     fixed_t b1 = STACK(4) << FRACBITS;
@@ -3484,7 +3484,7 @@ void DLevelScript::RunScript()
                     rs /= (end - start);
                     gs /= (end - start);
                     bs /= (end - start);
-                    for (int i = start; i <= end; ++i)
+                    for (int32_t i = start; i <= end; ++i)
                     {
                         translation[i] = ColorMatcher.Pick
                             (r >> FRACBITS, g >> FRACBITS, b >> FRACBITS);
@@ -3538,7 +3538,7 @@ void DLevelScript::RunScript()
             }
             else
             {
-                STACK(1) = (int)var->value();
+                STACK(1) = (int32_t)var->value();
             }
         }
         break;
@@ -3601,7 +3601,7 @@ void DLevelScript::RunScript()
                 }
                 else
                 {
-                    int i;
+                    int32_t i;
 
                     for (i = 0; i < NUMWEAPONS; ++i)
                     {
@@ -3655,8 +3655,8 @@ void DLevelScript::RunScript()
     }
 }
 
-static bool P_GetScriptGoing(AActor *who, line_t *where, int num, int *code, int lineSide, int arg0, int arg1, int arg2,
-                             int always, bool delay)
+static bool P_GetScriptGoing(AActor *who, line_t *where, int32_t num, int32_t *code, int32_t lineSide, int32_t arg0, int32_t arg1, int32_t arg2,
+                             int32_t always, bool delay)
 {
     DACSThinker *controller = DACSThinker::ActiveThinker;
 
@@ -3675,8 +3675,8 @@ static bool P_GetScriptGoing(AActor *who, line_t *where, int num, int *code, int
     return true;
 }
 
-DLevelScript::DLevelScript(AActor *who, line_t *where, int num, int *code, int lineside, int arg0, int arg1, int arg2,
-                           int always, bool delay)
+DLevelScript::DLevelScript(AActor *who, line_t *where, int32_t num, int32_t *code, int32_t lineside, int32_t arg0, int32_t arg1, int32_t arg2,
+                           int32_t always, bool delay)
 {
     if (DACSThinker::ActiveThinker == NULL)
         new DACSThinker;
@@ -3686,7 +3686,7 @@ DLevelScript::DLevelScript(AActor *who, line_t *where, int num, int *code, int l
     localvars[0] = arg0;
     localvars[1] = arg1;
     localvars[2] = arg2;
-    memset(localvars + 3, 0, sizeof(localvars) - 3 * sizeof(int));
+    memset(localvars + 3, 0, sizeof(localvars) - 3 * sizeof(int32_t));
     pc             = code;
     activator      = who;
     activationline = where;
@@ -3712,7 +3712,7 @@ DLevelScript::DLevelScript(AActor *who, line_t *where, int num, int *code, int l
     DPrintf("Script %d started.\n", num);
 }
 
-static void SetScriptState(int script, DLevelScript::EScriptState state)
+static void SetScriptState(int32_t script, DLevelScript::EScriptState state)
 {
     DACSThinker *controller = DACSThinker::ActiveThinker;
     if (!controller)
@@ -3725,7 +3725,7 @@ static void SetScriptState(int script, DLevelScript::EScriptState state)
 void P_DoDeferedScripts(void)
 {
     acsdefered_t *def;
-    int          *scriptdata;
+    int32_t          *scriptdata;
     AActor       *gomo = NULL;
 
     // Handle defered scripts in this step, too
@@ -3766,7 +3766,7 @@ void P_DoDeferedScripts(void)
     level.info->defered = NULL;
 }
 
-static void addDefered(level_pwad_info_t &i, acsdefered_t::EType type, int script, int arg0, int arg1, int arg2,
+static void addDefered(level_pwad_info_t &i, acsdefered_t::EType type, int32_t script, int32_t arg0, int32_t arg1, int32_t arg2,
                        AActor *who)
 {
     if (i.levelnum != 0)
@@ -3792,12 +3792,12 @@ static void addDefered(level_pwad_info_t &i, acsdefered_t::EType type, int scrip
     }
 }
 
-bool P_StartScript(AActor *who, line_t *where, int script, const char *map, int lineSide, int arg0, int arg1, int arg2,
-                   int always)
+bool P_StartScript(AActor *who, line_t *where, int32_t script, const char *map, int32_t lineSide, int32_t arg0, int32_t arg1, int32_t arg2,
+                   int32_t always)
 {
     if (level.mapname == map)
     {
-        int *scriptdata;
+        int32_t *scriptdata;
 
         if (level.behavior != NULL && (scriptdata = level.behavior->FindScript(script)) != NULL)
         {
@@ -3817,7 +3817,7 @@ bool P_StartScript(AActor *who, line_t *where, int script, const char *map, int 
     return false;
 }
 
-void P_SuspendScript(int script, const char *map)
+void P_SuspendScript(int32_t script, const char *map)
 {
     if (level.mapname != map)
     {
@@ -3830,7 +3830,7 @@ void P_SuspendScript(int script, const char *map)
     }
 }
 
-void P_TerminateScript(int script, const char *map)
+void P_TerminateScript(int32_t script, const char *map)
 {
     if (level.mapname != map)
     {
@@ -3846,7 +3846,7 @@ void P_TerminateScript(int script, const char *map)
 void strbin(char *str)
 {
     char *p = str, c;
-    int   i;
+    int32_t   i;
 
     while ((c = *p++))
     {

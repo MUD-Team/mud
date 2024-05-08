@@ -27,7 +27,7 @@
 #include "odamex.h"
 #include "server.pb.h"
 
-typedef OHashTable<int, const google::protobuf::Descriptor *> SVCHeaderMap;
+typedef OHashTable<int32_t, const google::protobuf::Descriptor *> SVCHeaderMap;
 typedef OHashTable<const void *, svc_t>                       SVCDescMap;
 
 SVCHeaderMap g_SVCHeaderMap;

@@ -34,7 +34,7 @@ EXTERN_CVAR(sv_nomonsters)
 
 // List of spawnable things for the Thing_Spawn and Thing_Projectile specials.
 
-int SpawnableThings[] = {
+int32_t SpawnableThings[] = {
     0,
     MT_SHOTGUY,
     MT_CHAINGUY,
@@ -188,13 +188,13 @@ int SpawnableThings[] = {
     MT_MISC86  // Brains
 };
 
-const int NumSpawnableThings = sizeof(SpawnableThings) / sizeof(*SpawnableThings);
+const int32_t NumSpawnableThings = sizeof(SpawnableThings) / sizeof(*SpawnableThings);
 
-bool P_Thing_Spawn(int tid, int type, angle_t angle, bool fog)
+bool P_Thing_Spawn(int32_t tid, int32_t type, angle_t angle, bool fog)
 {
     fixed_t z;
-    int     rtn = 0;
-    int     kind;
+    int32_t     rtn = 0;
+    int32_t     kind;
     AActor *spot = NULL, *mobj;
 
     if (type >= NumSpawnableThings)
@@ -240,10 +240,10 @@ bool P_Thing_Spawn(int tid, int type, angle_t angle, bool fog)
     return rtn != 0;
 }
 
-bool P_Thing_Projectile(int tid, int type, angle_t angle, fixed_t speed, fixed_t vspeed, bool gravity)
+bool P_Thing_Projectile(int32_t tid, int32_t type, angle_t angle, fixed_t speed, fixed_t vspeed, bool gravity)
 {
-    int     rtn = 0;
-    int     kind;
+    int32_t     rtn = 0;
+    int32_t     kind;
     AActor *spot = NULL, *mobj;
 
     if (type >= NumSpawnableThings)
@@ -302,7 +302,7 @@ bool P_ActivateMobj(AActor *mobj, AActor *activator)
         switch (mobj->type)
         {
         case MT_SPARK: {
-            int  count = mobj->args[0];
+            int32_t  count = mobj->args[0];
             char sound[16];
 
             if (count == 0)

@@ -34,10 +34,10 @@
 // killough 10/98: special mask indicates sky flat comes from sidedef
 #define PL_SKYFLAT (0x80000000)
 
-bool R_AlignFlat(int linenum, int side, int fc);
+bool R_AlignFlat(int32_t linenum, int32_t side, int32_t fc);
 
-extern int negonearray[MAXWIDTH];
-extern int viewheightarray[MAXWIDTH];
+extern int32_t negonearray[MAXWIDTH];
+extern int32_t viewheightarray[MAXWIDTH];
 
 //
 // POV related.
@@ -45,16 +45,16 @@ extern int viewheightarray[MAXWIDTH];
 extern fixed_t viewcos;
 extern fixed_t viewsin;
 
-extern int viewwidth;
-extern int viewheight;
-extern int viewwindowx;
-extern int viewwindowy;
+extern int32_t viewwidth;
+extern int32_t viewheight;
+extern int32_t viewwindowx;
+extern int32_t viewwindowy;
 
 extern bool r_fakingunderwater;
 extern bool r_underwater;
 
-extern int centerx;
-extern int centery;
+extern int32_t centerx;
+extern int32_t centery;
 
 extern fixed_t centerxfrac;
 extern fixed_t centeryfrac;
@@ -62,10 +62,10 @@ extern fixed_t yaspectmul;
 
 extern shaderef_t basecolormap; // [RH] Colormap for sector currently being drawn
 
-extern int validcount;
+extern int32_t validcount;
 
-extern int linecount;
-extern int loopcount;
+extern int32_t linecount;
+extern int32_t loopcount;
 
 extern fixed_t render_lerp_amount;
 
@@ -93,18 +93,18 @@ argb_t R_GetSectorBlend();
 #define MAXLIGHTZ         128
 #define LIGHTZSHIFT       20
 
-// [RH] Changed from shaderef_t* to int.
-extern int scalelight[LIGHTLEVELS][MAXLIGHTSCALE];
-extern int scalelightfixed[MAXLIGHTSCALE];
-extern int zlight[LIGHTLEVELS][MAXLIGHTZ];
+// [RH] Changed from shaderef_t* to int32_t.
+extern int32_t scalelight[LIGHTLEVELS][MAXLIGHTSCALE];
+extern int32_t scalelightfixed[MAXLIGHTSCALE];
+extern int32_t zlight[LIGHTLEVELS][MAXLIGHTZ];
 
-extern int        extralight;
+extern int32_t        extralight;
 extern bool       foggy;
-extern int        fixedlightlev;
+extern int32_t        fixedlightlev;
 extern shaderef_t fixedcolormap;
 
-extern int lightscalexmul; // [RH] for hires lighting fix
-extern int lightscaleymul;
+extern int32_t lightscalexmul; // [RH] for hires lighting fix
+extern int32_t lightscaleymul;
 
 // Number of diminishing brightness levels.
 // There a 0-31, i.e. 32 LUT in the COLORMAP lump.
@@ -120,9 +120,9 @@ extern void (*spanslopefunc)(void);
 //
 // Utility functions.
 
-int  R_PointOnSide(fixed_t x, fixed_t y, const node_t *node);
-int  R_PointOnSide(fixed_t x, fixed_t y, fixed_t xl, fixed_t yl, fixed_t xh, fixed_t yh);
-int  R_PointOnSegSide(fixed_t x, fixed_t y, const seg_t *line);
+int32_t  R_PointOnSide(fixed_t x, fixed_t y, const node_t *node);
+int32_t  R_PointOnSide(fixed_t x, fixed_t y, fixed_t xl, fixed_t yl, fixed_t xh, fixed_t yh);
+int32_t  R_PointOnSegSide(fixed_t x, fixed_t y, const seg_t *line);
 bool R_PointOnLine(fixed_t x, fixed_t y, fixed_t xl, fixed_t yl, fixed_t xh, fixed_t yh);
 
 angle_t R_PointToAngle(fixed_t x, fixed_t y);
@@ -132,10 +132,10 @@ angle_t R_PointToAngle2(fixed_t viewx, fixed_t viewy, fixed_t x, fixed_t y);
 
 fixed_t R_PointToDist(fixed_t x, fixed_t y);
 
-int  R_ProjectPointX(fixed_t x, fixed_t y);
-int  R_ProjectPointY(fixed_t z, fixed_t y);
-bool R_CheckProjectionX(int &x1, int &x2);
-bool R_CheckProjectionY(int &y1, int &y2);
+int32_t  R_ProjectPointX(fixed_t x, fixed_t y);
+int32_t  R_ProjectPointY(fixed_t z, fixed_t y);
+bool R_CheckProjectionX(int32_t &x1, int32_t &x2);
+bool R_CheckProjectionY(int32_t &y1, int32_t &y2);
 
 void R_RotatePoint(fixed_t x, fixed_t y, angle_t ang, fixed_t &tx, fixed_t &ty);
 bool R_ClipLineToFrustum(const v2fixed_t *v1, const v2fixed_t *v2, fixed_t clipdist, int32_t &lclip, int32_t &rclip);
@@ -147,7 +147,7 @@ void R_ClipLine(const vertex_t *in1, const vertex_t *in2, int32_t lclip, int32_t
 
 subsector_t *R_PointInSubsector(fixed_t x, fixed_t y);
 
-void R_AddPointToBox(int x, int y, fixed_t *box);
+void R_AddPointToBox(int32_t x, int32_t y, fixed_t *box);
 
 fixed_t R_PointToDist2(fixed_t dx, fixed_t dy);
 void    R_SetFOV(float fov, bool force);
@@ -157,7 +157,7 @@ float   R_GetFOV(void);
 #define WIDE_ZOOM    1
 #define WIDE_TRUE    2
 
-int R_GetWidescreen(void);
+int32_t R_GetWidescreen(void);
 
 //
 // REFRESH - the actual rendering functions.
@@ -175,7 +175,7 @@ void STACK_ARGS R_Shutdown();
 void R_ExitLevel();
 
 // Called by M_Responder.
-void R_SetViewSize(int blocks);
+void R_SetViewSize(int32_t blocks);
 
 class IRenderSurface;
 IRenderSurface *R_GetRenderingSurface();
@@ -184,10 +184,10 @@ bool R_BorderVisible();
 bool R_StatusBarVisible();
 bool R_DemoBarInvisible();
 
-int R_ViewWidth(int width, int height);
-int R_ViewHeight(int width, int height);
-int R_ViewWindowX(int width, int height);
-int R_ViewWindowY(int width, int height);
+int32_t R_ViewWidth(int32_t width, int32_t height);
+int32_t R_ViewHeight(int32_t width, int32_t height);
+int32_t R_ViewWindowX(int32_t width, int32_t height);
+int32_t R_ViewWindowY(int32_t width, int32_t height);
 
 void R_ForceViewWindowResize();
 
@@ -202,7 +202,7 @@ inline uint8_t shaderef_t::ramp() const
     if (m_mapnum >= NUMCOLORMAPS)
         return 0;
 
-    int index = clamp(m_mapnum * 256 / NUMCOLORMAPS, 0, 255);
+    int32_t index = clamp(m_mapnum * 256 / NUMCOLORMAPS, 0, 255);
     return m_colors->ramp[index];
 }
 
@@ -213,7 +213,7 @@ inline argb_t shaderef_t::tlate(const translationref_t &translation, const uint8
     const palindex_t range_start = 0x70;
     const palindex_t range_stop  = 0x7F;
 
-    int pid = translation.getPlayerID();
+    int32_t pid = translation.getPlayerID();
 
     // Not a player color translation:
     if (pid == -1)

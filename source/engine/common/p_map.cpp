@@ -51,14 +51,14 @@ EXTERN_CVAR(sv_unblockplayers)
 
 fixed_t        tmbbox[4];
 static AActor *tmthing;
-static int     tmflags;
+static int32_t     tmflags;
 static fixed_t tmx;
 static fixed_t tmy;
 static fixed_t tmz;  // [RH] Needed for third dimension of teleporters
-static int     pe_x; // Pain Elemental position for Lost Soul checks	// phares
-static int     pe_y; // Pain Elemental position for Lost Soul checks	// phares
-static int     ls_x; // Lost Soul position for Lost Soul checks		// phares
-static int     ls_y; // Lost Soul position for Lost Soul checks		// phares
+static int32_t     pe_x; // Pain Elemental position for Lost Soul checks	// phares
+static int32_t     pe_y; // Pain Elemental position for Lost Soul checks	// phares
+static int32_t     ls_x; // Lost Soul position for Lost Soul checks		// phares
+static int32_t     ls_y; // Lost Soul position for Lost Soul checks		// phares
 
 // If "floatok" true, move would be ok
 // if within "tmfloorz - tmceilingz".
@@ -167,12 +167,12 @@ bool PIT_StompThing(AActor *thing)
 //		was being teleported between two non-overlapping height ranges.
 bool P_TeleportMove(AActor *thing, fixed_t x, fixed_t y, fixed_t z, bool telefrag)
 {
-    int xl;
-    int xh;
-    int yl;
-    int yh;
-    int bx;
-    int by;
+    int32_t xl;
+    int32_t xh;
+    int32_t yl;
+    int32_t yh;
+    int32_t bx;
+    int32_t by;
 
     subsector_t *newsubsec;
 
@@ -234,10 +234,10 @@ bool P_TeleportMove(AActor *thing, fixed_t x, fixed_t y, fixed_t z, bool telefra
 //
 // Returns the friction associated with a particular mobj.
 
-int P_GetFriction(const AActor *mo, int *frictionfactor)
+int32_t P_GetFriction(const AActor *mo, int32_t *frictionfactor)
 {
-    int               friction   = ORIG_FRICTION;
-    int               movefactor = ORIG_FRICTION_FACTOR;
+    int32_t               friction   = ORIG_FRICTION;
+    int32_t               movefactor = ORIG_FRICTION_FACTOR;
     const msecnode_t *m;
     const sector_t   *sec;
 
@@ -275,9 +275,9 @@ int P_GetFriction(const AActor *mo, int *frictionfactor)
 //
 // killough 8/28/98: rewritten
 
-int P_GetMoveFactor(const AActor *mo, int *frictionp)
+int32_t P_GetMoveFactor(const AActor *mo, int32_t *frictionp)
 {
-    int movefactor, friction;
+    int32_t movefactor, friction;
 
     // If the floor is icy or muddy, it's harder to get moving. This is where
     // the different friction factors are applied to 'trying to move'. In
@@ -288,7 +288,7 @@ int P_GetMoveFactor(const AActor *mo, int *frictionp)
         // phares 3/11/98: you start off slowly, then increase as
         // you get better footing
 
-        int momentum = P_AproxDistance(mo->momx, mo->momy);
+        int32_t momentum = P_AproxDistance(mo->momx, mo->momy);
 
         if (momentum > MORE_FRICTION_MOMENTUM << 2)
             movefactor <<= 3;
@@ -328,7 +328,7 @@ int P_GetMoveFactor(const AActor *mo, int *frictionp)
 //
 // CheckForPushSpecial
 //
-static void CheckForPushSpecial(line_t *line, int side, AActor *mobj)
+static void CheckForPushSpecial(line_t *line, int32_t side, AActor *mobj)
 {
     if (line->special)
     {
@@ -405,7 +405,7 @@ static // killough 3/26/98: make static
         {
             const msecnode_t *node  = tmthing->touching_sectorlist;
             bool              allow = false;
-            int               count = 0;
+            int32_t               count = 0;
             while (node != NULL)
             {
                 count++;
@@ -566,7 +566,7 @@ static bool PIT_CheckThing(AActor *thing)
     // check for skulls slamming into things
     if (tmthing->flags & MF_SKULLFLY)
     {
-        int damage = ((P_Random(tmthing) % 8) + 1) * tmthing->info->damage;
+        int32_t damage = ((P_Random(tmthing) % 8) + 1) * tmthing->info->damage;
         P_DamageMobj(thing, tmthing, tmthing, damage, MOD_HIT);
         tmthing->flags &= ~MF_SKULLFLY;
         tmthing->momx = tmthing->momy = tmthing->momz = 0;
@@ -607,7 +607,7 @@ static bool PIT_CheckThing(AActor *thing)
 
         if (tmthing->flags2 & MF2_RIP)
         {
-            int damage = ((P_Random() & 3) + 2) * tmthing->info->damage;
+            int32_t damage = ((P_Random() & 3) + 2) * tmthing->info->damage;
             if (!(thing->flags & MF_NOBLOOD))
                 P_SpawnBlood(tmthing->x, tmthing->y, tmthing->z, damage);
             if (tmthing->info->ripsound)
@@ -626,10 +626,10 @@ static bool PIT_CheckThing(AActor *thing)
         // damage / explode
         if (tmthing->info->damage)
         {
-            int damage = ((P_Random(tmthing) % 8) + 1) * tmthing->info->damage;
+            int32_t damage = ((P_Random(tmthing) % 8) + 1) * tmthing->info->damage;
             {
                 // [RH] figure out the means of death
-                int mod;
+                int32_t mod;
 
                 switch (tmthing->type)
                 {
@@ -706,9 +706,9 @@ static bool PIT_CheckThing(AActor *thing)
 // sides of the blocking line. If so, return true, otherwise
 // false.
 
-bool Check_Sides(AActor *actor, int x, int y)
+bool Check_Sides(AActor *actor, int32_t x, int32_t y)
 {
-    int bx, by, xl, xh, yl, yh;
+    int32_t bx, by, xl, xh, yl, yh;
 
     pe_x = actor->x;
     pe_y = actor->y;
@@ -792,7 +792,7 @@ bool PIT_CheckOnmobjZ(AActor *thing)
 //
 bool P_TestMobjLocation(AActor *mobj)
 {
-    int flags = mobj->flags;
+    int32_t flags = mobj->flags;
     mobj->flags &= ~MF_PICKUP;
 
     if (P_CheckPosition(mobj, mobj->x, mobj->y))
@@ -870,10 +870,10 @@ bool P_CheckPosition(AActor *thing, fixed_t x, fixed_t y)
     // because DActors are grouped into mapblocks
     // based on their origin point, and can overlap
     // into adjacent blocks by up to MAXRADIUS units.
-    int xl = (tmbbox[BOXLEFT] - bmaporgx - MAXRADIUS) >> MAPBLOCKSHIFT;
-    int xh = (tmbbox[BOXRIGHT] - bmaporgx + MAXRADIUS) >> MAPBLOCKSHIFT;
-    int yl = (tmbbox[BOXBOTTOM] - bmaporgy - MAXRADIUS) >> MAPBLOCKSHIFT;
-    int yh = (tmbbox[BOXTOP] - bmaporgy + MAXRADIUS) >> MAPBLOCKSHIFT;
+    int32_t xl = (tmbbox[BOXLEFT] - bmaporgx - MAXRADIUS) >> MAPBLOCKSHIFT;
+    int32_t xh = (tmbbox[BOXRIGHT] - bmaporgx + MAXRADIUS) >> MAPBLOCKSHIFT;
+    int32_t yl = (tmbbox[BOXBOTTOM] - bmaporgy - MAXRADIUS) >> MAPBLOCKSHIFT;
+    int32_t yh = (tmbbox[BOXTOP] - bmaporgy + MAXRADIUS) >> MAPBLOCKSHIFT;
 
     BlockingMobj = NULL;
 
@@ -882,9 +882,9 @@ bool P_CheckPosition(AActor *thing, fixed_t x, fixed_t y)
         if (thing->player) // [RH] Fake taller height to catch stepping up into things.
             thing->height += 24 * FRACUNIT;
 
-        for (int bx = xl; bx <= xh; bx++)
+        for (int32_t bx = xl; bx <= xh; bx++)
         {
-            for (int by = yl; by <= yh; by++)
+            for (int32_t by = yl; by <= yh; by++)
             {
                 AActor *robin = NULL;
                 do
@@ -945,8 +945,8 @@ bool P_CheckPosition(AActor *thing, fixed_t x, fixed_t y)
     else
     {
         // vanilla Doom's check for blocking things
-        for (int bx = xl; bx <= xh; bx++)
-            for (int by = yl; by <= yh; by++)
+        for (int32_t bx = xl; bx <= xh; bx++)
+            for (int32_t by = yl; by <= yh; by++)
                 if (!P_BlockThingsIterator(bx, by, PIT_CheckThing))
                     return false;
 
@@ -960,8 +960,8 @@ bool P_CheckPosition(AActor *thing, fixed_t x, fixed_t y)
     yl = (tmbbox[BOXBOTTOM] - bmaporgy) >> MAPBLOCKSHIFT;
     yh = (tmbbox[BOXTOP] - bmaporgy) >> MAPBLOCKSHIFT;
 
-    for (int bx = xl; bx <= xh; bx++)
-        for (int by = yl; by <= yh; by++)
+    for (int32_t bx = xl; bx <= xh; bx++)
+        for (int32_t by = yl; by <= yh; by++)
             if (!P_BlockLinesIterator(bx, by, PIT_CheckLine))
                 return false;
 
@@ -988,7 +988,7 @@ AActor *P_CheckOnmobj(AActor *thing)
 
 bool P_TestMobjZ(AActor *actor)
 {
-    int     xl, xh, yl, yh, bx, by;
+    int32_t     xl, xh, yl, yh, bx, by;
     fixed_t x, y;
 
     if (actor->flags & MF_NOCLIP)
@@ -1075,7 +1075,7 @@ void P_CheckPushLines(AActor *thing)
         {
             // see which lines were pushed
             line_t *ld   = spechit[i];
-            int     side = P_PointOnLineSide(thing->x, thing->y, ld);
+            int32_t     side = P_PointOnLineSide(thing->x, thing->y, ld);
             CheckForPushSpecial(ld, side, thing);
         }
     }
@@ -1216,8 +1216,8 @@ bool P_TryMove(AActor *thing, fixed_t x, fixed_t y,
             line_t *ld = spechit.back();
             spechit.pop_back();
 
-            int side    = P_PointOnLineSide(thing->x, thing->y, ld);
-            int oldside = P_PointOnLineSide(oldx, oldy, ld);
+            int32_t side    = P_PointOnLineSide(thing->x, thing->y, ld);
+            int32_t oldside = P_PointOnLineSide(oldx, oldy, ld);
             if (side != oldside && ld->special)
                 P_CrossSpecialLine(ld, oldside, thing, false);
         }
@@ -1233,7 +1233,7 @@ bool P_TryMove(AActor *thing, fixed_t x, fixed_t y,
         }
         if (newsec->SecActTarget)
         {
-            int act = SECSPAC_Enter;
+            int32_t act = SECSPAC_Enter;
             if (testz <= P_FloorHeight(thing->x, thing->y, newsec))
             {
                 act |= SECSPAC_HitFloor;
@@ -1334,12 +1334,12 @@ static bool PIT_ApplyTorque(line_t *ld)
 
 void P_ApplyTorque(AActor *mo)
 {
-    int xl = ((tmbbox[BOXLEFT] = mo->x - mo->radius) - bmaporgx) >> MAPBLOCKSHIFT;
-    int xh = ((tmbbox[BOXRIGHT] = mo->x + mo->radius) - bmaporgx) >> MAPBLOCKSHIFT;
-    int yl = ((tmbbox[BOXBOTTOM] = mo->y - mo->radius) - bmaporgy) >> MAPBLOCKSHIFT;
-    int yh = ((tmbbox[BOXTOP] = mo->y + mo->radius) - bmaporgy) >> MAPBLOCKSHIFT;
-    int bx, by;
-    int flags = mo->oflags; // Remember the current state, for gear-change
+    int32_t xl = ((tmbbox[BOXLEFT] = mo->x - mo->radius) - bmaporgx) >> MAPBLOCKSHIFT;
+    int32_t xh = ((tmbbox[BOXRIGHT] = mo->x + mo->radius) - bmaporgx) >> MAPBLOCKSHIFT;
+    int32_t yl = ((tmbbox[BOXBOTTOM] = mo->y - mo->radius) - bmaporgy) >> MAPBLOCKSHIFT;
+    int32_t yh = ((tmbbox[BOXTOP] = mo->y + mo->radius) - bmaporgy) >> MAPBLOCKSHIFT;
+    int32_t bx, by;
+    int32_t flags = mo->oflags; // Remember the current state, for gear-change
 
     tmthing = mo;
     ++validcount;           // prevents checking same line twice
@@ -1538,7 +1538,7 @@ fixed_t tmymove;
 //
 void P_HitSlideLine(line_t *ld)
 {
-    int side;
+    int32_t side;
 
     angle_t lineangle;
     angle_t moveangle;
@@ -1714,7 +1714,7 @@ void P_SlideMove(AActor *mo)
     fixed_t traily;
     fixed_t newx;
     fixed_t newy;
-    int     hitcount;
+    int32_t     hitcount;
 
     bool walkplane;
 
@@ -1825,7 +1825,7 @@ AActor *shootthing;
 // ???: use slope for monsters?
 fixed_t shootz;
 
-int     la_damage;
+int32_t     la_damage;
 fixed_t attackrange;
 fixed_t aimslope;
 
@@ -2134,7 +2134,7 @@ bool PTR_ShootTraverse(intercept_t *in)
     if (la_damage)
     {
         // [RH] try and figure out means of death;
-        int mod = MOD_HITSCAN;
+        int32_t mod = MOD_HITSCAN;
 
         if (shootthing->player)
         {
@@ -2228,7 +2228,7 @@ fixed_t P_AimLineAttack(AActor *t1, angle_t angle, fixed_t distance)
  * @param  distance Distance to shoot the tracer.  Vanilla is 16 * 64 * FRACUNIT.
  * @return          Slope of the resulting shot.
  */
-fixed_t P_AutoAimLineAttack(AActor *actor, angle_t &angle, const angle_t spread, const int tracers, fixed_t distance)
+fixed_t P_AutoAimLineAttack(AActor *actor, angle_t &angle, const angle_t spread, const int32_t tracers, fixed_t distance)
 {
     fixed_t slope = P_AimLineAttack(actor, angle, distance);
 
@@ -2238,7 +2238,7 @@ fixed_t P_AutoAimLineAttack(AActor *actor, angle_t &angle, const angle_t spread,
     angle_t originangle = angle;
     angle_t testspread  = spread / tracers;
 
-    for (int i = 1; i <= tracers; i++)
+    for (int32_t i = 1; i <= tracers; i++)
     {
         angle = originangle;
         if (i == tracers)
@@ -2266,7 +2266,7 @@ fixed_t P_AutoAimLineAttack(AActor *actor, angle_t &angle, const angle_t spread,
 // If damage == 0, it is just a test trace
 // that will leave linetarget set.
 //
-void P_LineAttack(AActor *t1, angle_t angle, fixed_t distance, fixed_t slope, int damage)
+void P_LineAttack(AActor *t1, angle_t angle, fixed_t distance, fixed_t slope, int32_t damage)
 {
     fixed_t x2, y2;
 
@@ -2291,7 +2291,7 @@ void P_LineAttack(AActor *t1, angle_t angle, fixed_t distance, fixed_t slope, in
         // denis - no, this desyncs demos
         /*fixed_t frac;
         fixed_t z = shootz + FixedMul (distance, slope);
-        int updown;
+        int32_t updown;
 
         opentop -= mobjinfo[MT_PUFF].height;
         if (z < openbottom) {
@@ -2326,7 +2326,7 @@ void P_LineAttack(AActor *t1, angle_t angle, fixed_t distance, fixed_t slope, in
 //
 // [RH] PTR_RailTraverse
 //
-static int MaxRailHits, NumRailHits;
+static int32_t MaxRailHits, NumRailHits;
 static struct SRailHit
 {
     AActor *hitthing;
@@ -2485,11 +2485,11 @@ bool PTR_RailTraverse(intercept_t *in)
     return true;
 }
 
-void P_RailAttack(AActor *source, int damage, int offset)
+void P_RailAttack(AActor *source, int32_t damage, int32_t offset)
 {
     v3double_t start, end;
 
-    int     angleidx = (source->angle - ANG90) >> ANGLETOFINESHIFT;
+    int32_t     angleidx = (source->angle - ANG90) >> ANGLETOFINESHIFT;
     fixed_t x1       = source->x + offset * finecosine[angleidx];
     fixed_t y1       = source->y + offset * finesine[angleidx];
 
@@ -2518,7 +2518,7 @@ void P_RailAttack(AActor *source, int damage, int offset)
         // Hit a wall, maybe some things as well
         end = RailEnd;
 
-        for (int i = 0; i < NumRailHits; i++)
+        for (int32_t i = 0; i < NumRailHits; i++)
         {
             if (RailHits[i].hitthing->flags & MF_NOBLOOD)
                 P_SpawnPuff(RailHits[i].x, RailHits[i].y, RailHits[i].z);
@@ -2702,7 +2702,7 @@ bool PTR_UseTraverse(intercept_t *in)
         return true; // not a special line, but keep checking
     }
 
-    int side = (P_PointOnLineSide(usething->x, usething->y, in->d.line) == 1);
+    int32_t side = (P_PointOnLineSide(usething->x, usething->y, in->d.line) == 1);
 
     P_UseSpecialLine(usething, in->d.line, side, false);
 
@@ -2764,7 +2764,7 @@ bool PTR_NoWayTraverse(intercept_t *in)
 //
 void P_UseLines(player_t *player)
 {
-    int     angle;
+    int32_t     angle;
     fixed_t x1;
     fixed_t y1;
     fixed_t x2;
@@ -2789,7 +2789,7 @@ void P_UseLines(player_t *player)
     {
         // [RH] Give sector a chance to eat the use
         sector_t *sec  = usething->subsector->sector;
-        int       spac = SECSPAC_Use;
+        int32_t       spac = SECSPAC_Use;
         if (foundline)
             spac |= SECSPAC_UseWall;
         if ((!sec->SecActTarget || !A_TriggerAction(sec->SecActTarget, usething, spac)) &&
@@ -2807,12 +2807,12 @@ void P_UseLines(player_t *player)
 //
 static AActor *bombsource;
 static AActor *bombspot;
-static int     bombdamage;
+static int32_t     bombdamage;
 static float   bombdamagefloat;
-static int     bombdistance;
+static int32_t     bombdistance;
 static float   bombdistancefloat;
 static bool    DamageSource;
-static int     bombmod;
+static int32_t     bombmod;
 
 // [RH] Damage scale to apply to thing that shot the missile.
 static float selfthrustscale;
@@ -2869,7 +2869,7 @@ static bool PIT_DoomRadiusAttack(AActor *thing)
 
     if (P_CheckSight(thing, bombspot))
     {
-        int damage;
+        int32_t damage;
 
         if (bombdamage == bombdistance)
             damage = bombdamage - dist;
@@ -2959,7 +2959,7 @@ static bool PIT_ZDoomRadiusAttack(AActor *thing)
 
         fixed_t momx   = thing->momx;
         fixed_t momy   = thing->momy;
-        int     damage = (int)points;
+        int32_t     damage = (int32_t)points;
 
         P_DamageMobj(thing, bombspot, bombsource, damage, bombmod);
 
@@ -2993,13 +2993,13 @@ static bool PIT_ZDoomRadiusAttack(AActor *thing)
 // P_RadiusAttack
 // Source is the creature that caused the explosion at spot.
 //
-void P_RadiusAttack(AActor *spot, AActor *source, int damage, int distance, bool hurtSource, int mod)
+void P_RadiusAttack(AActor *spot, AActor *source, int32_t damage, int32_t distance, bool hurtSource, int32_t mod)
 {
     fixed_t dist      = (distance + MAXRADIUS) << FRACBITS;
-    int     yh        = MIN<int>((spot->y + dist - bmaporgy) >> MAPBLOCKSHIFT, bmapheight - 1);
-    int     yl        = MAX<int>((spot->y - dist - bmaporgy) >> MAPBLOCKSHIFT, 0);
-    int     xh        = MIN<int>((spot->x + dist - bmaporgx) >> MAPBLOCKSHIFT, bmapwidth - 1);
-    int     xl        = MAX<int>((spot->x - dist - bmaporgx) >> MAPBLOCKSHIFT, 0);
+    int32_t     yh        = MIN<int32_t>((spot->y + dist - bmaporgy) >> MAPBLOCKSHIFT, bmapheight - 1);
+    int32_t     yl        = MAX<int32_t>((spot->y - dist - bmaporgy) >> MAPBLOCKSHIFT, 0);
+    int32_t     xh        = MIN<int32_t>((spot->x + dist - bmaporgx) >> MAPBLOCKSHIFT, bmapwidth - 1);
+    int32_t     xl        = MAX<int32_t>((spot->x - dist - bmaporgx) >> MAPBLOCKSHIFT, 0);
     bombspot          = spot;
     bombsource        = source;
     bombdamage        = damage;
@@ -3024,9 +3024,9 @@ void P_RadiusAttack(AActor *spot, AActor *source, int damage, int distance, bool
     // then call the radius attack function once for each actor.
 
     std::set<AActor *> actorset;
-    for (int y = yl; y <= yh; y++)
+    for (int32_t y = yl; y <= yh; y++)
     {
-        for (int x = xl; x <= xh; x++)
+        for (int32_t x = xl; x <= xh; x++)
         {
             AActor *mobj = blocklinks[y * bmapwidth + x];
             while (mobj)
@@ -3058,7 +3058,7 @@ void P_RadiusAttack(AActor *spot, AActor *source, int damage, int distance, bool
 //  the way it was and call P_ChangeSector again
 //  to undo the changes.
 //
-int  crushchange;
+int32_t  crushchange;
 bool nofit;
 
 //
@@ -3127,7 +3127,7 @@ bool PIT_ChangeSector(AActor *thing)
 // sector. Both more accurate and faster.
 //
 
-bool P_ChangeSector(sector_t *sector, int crunch)
+bool P_ChangeSector(sector_t *sector, int32_t crunch)
 {
     if (!sector)
         return true;
@@ -3348,12 +3348,12 @@ bool PIT_GetSectors(line_t *ld)
 
 void P_CreateSecNodeList(AActor *thing, fixed_t x, fixed_t y)
 {
-    int         xl;
-    int         xh;
-    int         yl;
-    int         yh;
-    int         bx;
-    int         by;
+    int32_t         xl;
+    int32_t         xh;
+    int32_t         yl;
+    int32_t         yh;
+    int32_t         bx;
+    int32_t         by;
     msecnode_t *node;
 
     // First, clear out the existing m_thing fields. As each node is
@@ -3372,8 +3372,8 @@ void P_CreateSecNodeList(AActor *thing, fixed_t x, fixed_t y)
     // e.g. when a telefrag results in an item drop.
     // so we need to back up tmthing and then restore it
     AActor *last_tmthing = tmthing;
-    int     last_tmx = tmx, last_tmy = tmy;
-    int     last_tmbbox[4] = {tmbbox[0], tmbbox[1], tmbbox[2], tmbbox[3]};
+    int32_t     last_tmx = tmx, last_tmy = tmy;
+    int32_t     last_tmbbox[4] = {tmbbox[0], tmbbox[1], tmbbox[2], tmbbox[3]};
 
     tmthing = thing;
     tmx     = x;
@@ -3687,7 +3687,7 @@ fixed_t P_LowestHeightOfCeiling(sector_t *sector)
     if (!sector)
         return height;
 
-    for (int i = 0; i < sector->linecount; i++)
+    for (int32_t i = 0; i < sector->linecount; i++)
     {
         vertex_t *v1 = sector->lines[i]->v1;
         vertex_t *v2 = sector->lines[i]->v2;
@@ -3713,7 +3713,7 @@ fixed_t P_LowestHeightOfFloor(sector_t *sector)
     if (!sector)
         return height;
 
-    for (int i = 0; i < sector->linecount; i++)
+    for (int32_t i = 0; i < sector->linecount; i++)
     {
         vertex_t *v1 = sector->lines[i]->v1;
         vertex_t *v2 = sector->lines[i]->v2;
@@ -3739,7 +3739,7 @@ fixed_t P_HighestHeightOfCeiling(sector_t *sector)
     if (!sector)
         return height;
 
-    for (int i = 0; i < sector->linecount; i++)
+    for (int32_t i = 0; i < sector->linecount; i++)
     {
         vertex_t *v1 = sector->lines[i]->v1;
         vertex_t *v2 = sector->lines[i]->v2;
@@ -3765,7 +3765,7 @@ fixed_t P_HighestHeightOfFloor(sector_t *sector)
     if (!sector)
         return height;
 
-    for (int i = 0; i < sector->linecount; i++)
+    for (int32_t i = 0; i < sector->linecount; i++)
     {
         vertex_t *v1 = sector->lines[i]->v1;
         vertex_t *v2 = sector->lines[i]->v2;

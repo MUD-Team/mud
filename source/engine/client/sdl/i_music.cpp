@@ -33,7 +33,7 @@ MusicSystem    *musicsystem              = NULL;
 MusicSystemType current_musicsystem_type = MS_NONE;
 
 void S_StopMusic();
-void S_ChangeMusic(std::string musicname, int looping);
+void S_ChangeMusic(std::string musicname, int32_t looping);
 
 EXTERN_CVAR(snd_musicvolume)
 EXTERN_CVAR(snd_musicsystem)
@@ -96,7 +96,7 @@ void I_InitMusic(MusicSystemType musicsystem_type)
         return;
     }
 
-    switch ((int)musicsystem_type)
+    switch ((int32_t)musicsystem_type)
     {
     case MS_FLUIDLITE:
         musicsystem = new FluidLiteMusicSystem();
@@ -122,7 +122,7 @@ void STACK_ARGS I_ShutdownMusic(void)
 
 CVAR_FUNC_IMPL(snd_musicsystem)
 {
-    if ((int)current_musicsystem_type == snd_musicsystem.asInt())
+    if ((int32_t)current_musicsystem_type == snd_musicsystem.asInt())
         return;
 
     if (musicsystem)
@@ -199,7 +199,7 @@ void I_StopSong()
         musicsystem->stopSong();
 }
 
-bool I_QrySongPlaying(int handle)
+bool I_QrySongPlaying(int32_t handle)
 {
     if (musicsystem)
         return musicsystem->isPlaying();

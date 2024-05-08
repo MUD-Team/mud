@@ -73,10 +73,10 @@ EXTERN_CVAR(g_resetinvonexit)
 dtime_t starttime;
 
 // ACS variables with world scope
-int ACS_WorldVars[NUM_WORLDVARS];
+int32_t ACS_WorldVars[NUM_WORLDVARS];
 
 // ACS variables with global scope
-int ACS_GlobalVars[NUM_GLOBALVARS];
+int32_t ACS_GlobalVars[NUM_GLOBALVARS];
 
 // [AM] Stores the reset snapshot
 FLZOMemFile *reset_snapshot = NULL;
@@ -84,7 +84,7 @@ FLZOMemFile *reset_snapshot = NULL;
 extern bool r_underwater;
 bool        savegamerestore;
 
-extern int  mousex, mousey, joyforward, joystrafe, joyturn, joylook, Impulse;
+extern int32_t  mousex, mousey, joyforward, joystrafe, joyturn, joylook, Impulse;
 extern bool sendpause, sendsave, sendcenterview;
 
 bool isFast = false;
@@ -230,7 +230,7 @@ void G_InitNew(const char *mapname)
             {
                 if (mobjinfo[i].altspeed != NO_ALTSPEED)
                 {
-                    int swap             = mobjinfo[i].speed;
+                    int32_t swap             = mobjinfo[i].speed;
                     mobjinfo[i].speed    = mobjinfo[i].altspeed;
                     mobjinfo[i].altspeed = swap;
                 }
@@ -248,7 +248,7 @@ void G_InitNew(const char *mapname)
             {
                 if (mobjinfo[i].altspeed != NO_ALTSPEED)
                 {
-                    int swap             = mobjinfo[i].altspeed;
+                    int32_t swap             = mobjinfo[i].altspeed;
                     mobjinfo[i].altspeed = mobjinfo[i].speed;
                     mobjinfo[i].speed    = swap;
                 }
@@ -286,12 +286,12 @@ void G_InitNew(const char *mapname)
 // G_DoCompleted
 //
 bool        secretexit;
-static int  startpos; // [RH] Support for multiple starts per level
+static int32_t  startpos; // [RH] Support for multiple starts per level
 
 // [RH] The position parameter to these next three functions should
 //		match the first parameter of the single player start spots
 //		that should appear in the next map.
-static void goOn(int position)
+static void goOn(int32_t position)
 {
     LevelInfos     &levels      = getLevelInfos();
     ClusterInfos   &clusters    = getClusterInfos();
@@ -307,7 +307,7 @@ static void goOn(int position)
     }
 }
 
-void G_ExitLevel(int position, int drawscores)
+void G_ExitLevel(int32_t position, int32_t drawscores)
 {
     secretexit = false;
 
@@ -317,7 +317,7 @@ void G_ExitLevel(int position, int drawscores)
 }
 
 // Here's for the german edition.
-void G_SecretExitLevel(int position, int drawscores)
+void G_SecretExitLevel(int32_t position, int32_t drawscores)
 {
     // IF NO WOLF3D LEVELS, NO SECRET EXIT!
     if ((gameinfo.flags & GI_MAPxx) && (W_CheckNumForName("map31") < 0))
@@ -474,9 +474,9 @@ void G_DoCompleted(void)
 // G_DoLoadLevel
 //
 
-void G_DoLoadLevel(int position)
+void G_DoLoadLevel(int32_t position)
 {
-    static int lastposition = 0;
+    static int32_t lastposition = 0;
     size_t     i;
 
     if (position == -1)
@@ -576,7 +576,7 @@ void G_DoLoadLevel(int position)
                 P_SpawnPlayer(consoleplayer(), &DeathMatchStarts[n]);
         }
 
-        for (int iTeam = 0; iTeam < NUMTEAMS; iTeam++)
+        for (int32_t iTeam = 0; iTeam < NUMTEAMS; iTeam++)
         {
             TeamInfo *teamInfo = GetTeamInfo((team_t)iTeam);
             for (size_t n = 0; n < teamInfo->Starts.size(); n++)

@@ -62,7 +62,7 @@ void R_DrawSpanD_SSE2(void)
     }
 #endif
 
-    const int width = dspan.x2 - dspan.x1 + 1;
+    const int32_t width = dspan.x2 - dspan.x1 + 1;
 
     // TODO: store flats in column-major format and swap u and v
     dsfixed_t ufrac = dspan.yfrac;
@@ -75,20 +75,20 @@ void R_DrawSpanD_SSE2(void)
 
     shaderef_t colormap = dspan.colormap;
 
-    const int texture_width_bits = 6, texture_height_bits = 6;
+    const int32_t texture_width_bits = 6, texture_height_bits = 6;
 
     const uint32_t umask = ((1 << texture_width_bits) - 1) << texture_height_bits;
     const uint32_t vmask = (1 << texture_height_bits) - 1;
     // TODO: don't shift the values of ufrac and vfrac by 10 in R_MapLevelPlane
-    const int ushift = FRACBITS - texture_height_bits + 10;
-    const int vshift = FRACBITS + 10;
+    const int32_t ushift = FRACBITS - texture_height_bits + 10;
+    const int32_t vshift = FRACBITS + 10;
 
-    int align = R_GetBytesUntilAligned(dest, 16) / sizeof(argb_t);
+    int32_t align = R_GetBytesUntilAligned(dest, 16) / sizeof(argb_t);
     if (align > width)
         align = width;
 
-    int batches   = (width - align) / 4;
-    int remainder = (width - align) & 3;
+    int32_t batches   = (width - align) / 4;
+    int32_t remainder = (width - align) & 3;
 
     // Blit until we align ourselves with a 16-byte offset for SSE2:
     while (align--)
@@ -118,10 +118,10 @@ void R_DrawSpanD_SSE2(void)
     while (batches--)
     {
         //		[SL] The below SSE2 intrinsics are equivalent to the following block:
-        //		const int spot0 = (((ufrac + ustep*0) >> ushift) & umask) | (((vfrac + vstep*0) >> vshift) & vmask);
-        //		const int spot1 = (((ufrac + ustep*1) >> ushift) & umask) | (((vfrac + vstep*1) >> vshift) & vmask);
-        //		const int spot2 = (((ufrac + ustep*2) >> ushift) & umask) | (((vfrac + vstep*2) >> vshift) & vmask);
-        //		const int spot3 = (((ufrac + ustep*3) >> ushift) & umask) | (((vfrac + vstep*3) >> vshift) & vmask);
+        //		const int32_t spot0 = (((ufrac + ustep*0) >> ushift) & umask) | (((vfrac + vstep*0) >> vshift) & vmask);
+        //		const int32_t spot1 = (((ufrac + ustep*1) >> ushift) & umask) | (((vfrac + vstep*1) >> vshift) & vmask);
+        //		const int32_t spot2 = (((ufrac + ustep*2) >> ushift) & umask) | (((vfrac + vstep*2) >> vshift) & vmask);
+        //		const int32_t spot3 = (((ufrac + ustep*3) >> ushift) & umask) | (((vfrac + vstep*3) >> vshift) & vmask);
 
         __m128i       u      = _mm_and_si128(_mm_srli_epi32(mufrac, ushift), mumask);
         __m128i       v      = _mm_and_si128(_mm_srli_epi32(mvfrac, vshift), mvmask);
@@ -154,7 +154,7 @@ void R_DrawSpanD_SSE2(void)
     while (remainder--)
     {
         // Current texture index in u,v.
-        const int spot = ((ufrac >> ushift) & umask) | ((vfrac >> vshift) & vmask);
+        const int32_t spot = ((ufrac >> ushift) & umask) | ((vfrac >> vshift) & vmask);
 
         // Lookup pixel from flat texture tile,
         //  re-index using light/colormap.
@@ -169,7 +169,7 @@ void R_DrawSpanD_SSE2(void)
 
 void R_DrawSlopeSpanD_SSE2(void)
 {
-    int count = dspan.x2 - dspan.x1 + 1;
+    int32_t count = dspan.x2 - dspan.x1 + 1;
     if (count <= 0)
         return;
 
@@ -190,7 +190,7 @@ void R_DrawSlopeSpanD_SSE2(void)
     // texture data
     uint8_t *src = (uint8_t *)dspan.source;
 
-    int ltindex = 0; // index into the lighting table
+    int32_t ltindex = 0; // index into the lighting table
 
     // Blit the bulk in batches of SPANJUMP columns:
     while (count >= SPANJUMP)
@@ -214,7 +214,7 @@ void R_DrawSlopeSpanD_SSE2(void)
         fixed_t ustep = (fixed_t)((uend - ustart) * INTERPSTEP);
         fixed_t vstep = (fixed_t)((vend - vstart) * INTERPSTEP);
 
-        int incount = SPANJUMP;
+        int32_t incount = SPANJUMP;
 
         // Blit up to the first 16-byte aligned position:
         while ((((size_t)dest) & 15) && (incount > 0))
@@ -229,15 +229,15 @@ void R_DrawSlopeSpanD_SSE2(void)
 
         if (incount > 0)
         {
-            const int rounds = incount >> 2;
+            const int32_t rounds = incount >> 2;
             if (rounds > 0)
             {
-                for (int i = 0; i < rounds; ++i, incount -= 4)
+                for (int32_t i = 0; i < rounds; ++i, incount -= 4)
                 {
-                    const int spot0 = (((vfrac + vstep * 0) >> 10) & 0xFC0) | (((ufrac + ustep * 0) >> 16) & 63);
-                    const int spot1 = (((vfrac + vstep * 1) >> 10) & 0xFC0) | (((ufrac + ustep * 1) >> 16) & 63);
-                    const int spot2 = (((vfrac + vstep * 2) >> 10) & 0xFC0) | (((ufrac + ustep * 2) >> 16) & 63);
-                    const int spot3 = (((vfrac + vstep * 3) >> 10) & 0xFC0) | (((ufrac + ustep * 3) >> 16) & 63);
+                    const int32_t spot0 = (((vfrac + vstep * 0) >> 10) & 0xFC0) | (((ufrac + ustep * 0) >> 16) & 63);
+                    const int32_t spot1 = (((vfrac + vstep * 1) >> 10) & 0xFC0) | (((ufrac + ustep * 1) >> 16) & 63);
+                    const int32_t spot2 = (((vfrac + vstep * 2) >> 10) & 0xFC0) | (((ufrac + ustep * 2) >> 16) & 63);
+                    const int32_t spot3 = (((vfrac + vstep * 3) >> 10) & 0xFC0) | (((ufrac + ustep * 3) >> 16) & 63);
 
                     const __m128i finalColors = _mm_setr_epi32(dspan.slopelighting[ltindex + 0].shade(src[spot0]),
                                                                dspan.slopelighting[ltindex + 1].shade(src[spot1]),
@@ -259,7 +259,7 @@ void R_DrawSlopeSpanD_SSE2(void)
             while (incount--)
             {
                 const shaderef_t &colormap = dspan.slopelighting[ltindex++];
-                const int         spot     = ((vfrac >> 10) & 0xFC0) | ((ufrac >> 16) & 63);
+                const int32_t         spot     = ((vfrac >> 10) & 0xFC0) | ((ufrac >> 16) & 63);
                 *dest                      = colormap.shade(src[spot]);
                 dest++;
 
@@ -294,7 +294,7 @@ void R_DrawSlopeSpanD_SSE2(void)
         fixed_t ustep = (fixed_t)((uend - ustart) / count);
         fixed_t vstep = (fixed_t)((vend - vstart) / count);
 
-        int incount = count;
+        int32_t incount = count;
         while (incount--)
         {
             const shaderef_t &colormap = dspan.slopelighting[ltindex++];
@@ -306,10 +306,10 @@ void R_DrawSlopeSpanD_SSE2(void)
     }
 }
 
-void r_dimpatchD_SSE2(IRenderSurface *surface, argb_t color, int alpha, int x1, int y1, int w, int h)
+void r_dimpatchD_SSE2(IRenderSurface *surface, argb_t color, int32_t alpha, int32_t x1, int32_t y1, int32_t w, int32_t h)
 {
-    int surface_pitch_pixels = surface->getPitchInPixels();
-    int line_inc             = surface_pitch_pixels - w;
+    int32_t surface_pitch_pixels = surface->getPitchInPixels();
+    int32_t line_inc             = surface_pitch_pixels - w;
 
     // SSE2 temporaries:
     const __m128i vec_color      = _mm_unpacklo_epi8(_mm_set1_epi32(color), _mm_setzero_si128());
@@ -318,17 +318,17 @@ void r_dimpatchD_SSE2(IRenderSurface *surface, argb_t color, int alpha, int x1, 
 
     argb_t *dest = (argb_t *)surface->getBuffer() + y1 * surface_pitch_pixels + x1;
 
-    for (int rowcount = h; rowcount > 0; --rowcount)
+    for (int32_t rowcount = h; rowcount > 0; --rowcount)
     {
         // [SL] Calculate how many pixels of each row need to be drawn before dest is
         // aligned to a 128-bit boundary.
-        int align = R_GetBytesUntilAligned(dest, 128 / 8) / sizeof(argb_t);
+        int32_t align = R_GetBytesUntilAligned(dest, 128 / 8) / sizeof(argb_t);
         if (align > w)
             align = w;
 
-        const int batch_size = 8;
-        int       batches    = (w - align) / batch_size;
-        int       remainder  = (w - align) & (batch_size - 1);
+        const int32_t batch_size = 8;
+        int32_t       batches    = (w - align) / batch_size;
+        int32_t       remainder  = (w - align) & (batch_size - 1);
 
         // align the destination buffer to 128-bit boundary
         while (align--)

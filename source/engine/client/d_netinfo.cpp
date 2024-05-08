@@ -95,7 +95,7 @@ gender_t D_GenderByName(const char *gender)
 //
 team_t D_TeamByName(const char *team)
 {
-    for (int i = 0; i < NUMTEAMS; i++)
+    for (int32_t i = 0; i < NUMTEAMS; i++)
     {
         TeamInfo *teamInfo = GetTeamInfo((team_t)i);
         if (stricmp(team, teamInfo->ColorString.c_str()) == 0)
@@ -241,7 +241,7 @@ FArchive &operator<<(FArchive &arc, UserInfo &info)
     arc.Write(&info.switchweapon, sizeof(info.switchweapon));
     arc.Write(info.weapon_prefs, sizeof(info.weapon_prefs));
 
-    int terminator = 0;
+    int32_t terminator = 0;
     arc << terminator;
 
     return arc;
@@ -271,7 +271,7 @@ FArchive &operator>>(FArchive &arc, UserInfo &info)
     arc.Read(&info.switchweapon, sizeof(info.switchweapon));
     arc.Read(info.weapon_prefs, sizeof(info.weapon_prefs));
 
-    int terminator;
+    int32_t terminator;
     arc >> terminator; // 0
 
     return arc;

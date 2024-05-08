@@ -36,7 +36,7 @@
 #define TTYPE_HORDE_POWERUP      (5307)
 #define TTYPE_HORDE_SMALLBOSS    (5308)
 
-static inline const char *HordeThingStr(const int ttype)
+static inline const char *HordeThingStr(const int32_t ttype)
 {
     switch (ttype)
     {
@@ -66,7 +66,7 @@ static inline const char *HordeThingStr(const int ttype)
 struct hordeSpawn_t
 {
     AActor::AActorPtr mo;
-    int               type;
+    int32_t               type;
 };
 typedef std::vector<hordeSpawn_t> hordeSpawns_t;
 

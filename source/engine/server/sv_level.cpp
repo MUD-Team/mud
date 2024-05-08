@@ -59,7 +59,7 @@
 #define lioffset(x) offsetof(level_pwad_info_t, x)
 #define cioffset(x) offsetof(cluster_info_t, x)
 
-extern int nextupdate;
+extern int32_t nextupdate;
 
 EXTERN_CVAR(sv_endmapscript)
 EXTERN_CVAR(sv_startmapscript)
@@ -72,13 +72,13 @@ EXTERN_CVAR(sv_timelimit)
 EXTERN_CVAR(sv_teamsinplay)
 EXTERN_CVAR(g_resetinvonexit)
 
-extern int mapchange;
+extern int32_t mapchange;
 
 // ACS variables with world scope
-int ACS_WorldVars[NUM_WORLDVARS];
+int32_t ACS_WorldVars[NUM_WORLDVARS];
 
 // ACS variables with global scope
-int ACS_GlobalVars[NUM_GLOBALVARS];
+int32_t ACS_GlobalVars[NUM_GLOBALVARS];
 
 // [AM] Stores the reset snapshot
 FLZOMemFile *reset_snapshot = NULL;
@@ -405,7 +405,7 @@ void G_InitNew(const char *mapname)
         }
     }
 
-    const int old_gametype = sv_gametype.asInt();
+    const int32_t old_gametype = sv_gametype.asInt();
 
     cvar_t::UnlatchCVars();
 
@@ -440,7 +440,7 @@ void G_InitNew(const char *mapname)
             {
                 if (mobjinfo[i].altspeed != NO_ALTSPEED)
                 {
-                    int swap             = mobjinfo[i].speed;
+                    int32_t swap             = mobjinfo[i].speed;
                     mobjinfo[i].speed    = mobjinfo[i].altspeed;
                     mobjinfo[i].altspeed = swap;
                 }
@@ -458,7 +458,7 @@ void G_InitNew(const char *mapname)
             {
                 if (mobjinfo[i].altspeed != NO_ALTSPEED)
                 {
-                    int swap             = mobjinfo[i].altspeed;
+                    int32_t swap             = mobjinfo[i].altspeed;
                     mobjinfo[i].altspeed = mobjinfo[i].speed;
                     mobjinfo[i].speed    = swap;
                 }
@@ -525,7 +525,7 @@ void G_InitNew(const char *mapname)
 // G_DoCompleted
 //
 
-void G_ExitLevel(int position, int drawscores)
+void G_ExitLevel(int32_t position, int32_t drawscores)
 {
     SV_ExitLevel();
 
@@ -544,7 +544,7 @@ void G_ExitLevel(int position, int drawscores)
 }
 
 // Here's for the german edition.
-void G_SecretExitLevel(int position, int drawscores)
+void G_SecretExitLevel(int32_t position, int32_t drawscores)
 {
     SV_ExitLevel();
 
@@ -659,7 +659,7 @@ void G_DoResetLevel(bool full_reset)
     }
 
     // reset switch activation
-    for (int i = 0; i < numlines; i++)
+    for (int32_t i = 0; i < numlines; i++)
         lines[i].switchactive = false;
 
     // Clear the item respawn queue, otherwise all those actors we just
@@ -736,9 +736,9 @@ void G_DoResetLevel(bool full_reset)
 //
 extern float       BaseBlendA;
 
-void G_DoLoadLevel(int position)
+void G_DoLoadLevel(int32_t position)
 {
-    static int lastposition = 0;
+    static int32_t lastposition = 0;
 
     if (position != -1)
         firstmapinit = true;

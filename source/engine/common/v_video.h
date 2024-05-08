@@ -30,7 +30,7 @@
 
 class IRenderSurface;
 
-extern int CleanXfac, CleanYfac;
+extern int32_t CleanXfac, CleanYfac;
 
 // Translucency tables
 extern argb_t     Col2RGB8[65][256];
@@ -43,19 +43,19 @@ void V_ForceVideoModeAdjustment();
 void V_AdjustVideoMode();
 
 // The color to fill with for #4 and #5 above
-extern int V_ColorFill;
+extern int32_t V_ColorFill;
 
 // The color map for #1 and #2 above
 extern translationref_t V_ColorMap;
 
-void V_MarkRect(int x, int y, int width, int height);
+void V_MarkRect(int32_t x, int32_t y, int32_t width, int32_t height);
 
 // Returns the closest color to the one desired. String
 // should be of the form "rr gg bb" or the name of a color
 // as defined in the X11R6RGB lump.
 argb_t V_GetColorFromString(const std::string &str);
 
-template <> forceinline palindex_t rt_blend2(const palindex_t bg, const int bga, const palindex_t fg, const int fga)
+template <> forceinline palindex_t rt_blend2(const palindex_t bg, const int32_t bga, const palindex_t fg, const int32_t fga)
 {
     // Crazy 8bpp alpha-blending using lookup tables and bit twiddling magic
     argb_t bgARGB = Col2RGB8[bga >> 2][bg];
@@ -65,7 +65,7 @@ template <> forceinline palindex_t rt_blend2(const palindex_t bg, const int bga,
     return RGB32k[0][0][mix & (mix >> 15)];
 }
 
-template <> forceinline argb_t rt_blend2(const argb_t bg, const int bga, const argb_t fg, const int fga)
+template <> forceinline argb_t rt_blend2(const argb_t bg, const int32_t bga, const argb_t fg, const int32_t fga)
 {
     return alphablend2a(bg, bga, fg, fga);
 }
@@ -74,15 +74,15 @@ bool V_UseWidescreen();
 
 // Alpha blend between two RGB colors with only dest alpha value
 // 0 <=   toa <= 255
-forceinline argb_t alphablend1a(const argb_t from, const argb_t to, const int toa)
+forceinline argb_t alphablend1a(const argb_t from, const argb_t to, const int32_t toa)
 {
-    const int fr = from.getr();
-    const int fg = from.getg();
-    const int fb = from.getb();
+    const int32_t fr = from.getr();
+    const int32_t fg = from.getg();
+    const int32_t fb = from.getb();
 
-    const int dr = to.getr() - fr;
-    const int dg = to.getg() - fg;
-    const int db = to.getb() - fb;
+    const int32_t dr = to.getr() - fr;
+    const int32_t dg = to.getg() - fg;
+    const int32_t db = to.getb() - fb;
 
     return argb_t(fr + ((dr * toa) >> 8), fg + ((dg * toa) >> 8), fb + ((db * toa) >> 8));
 }
@@ -90,7 +90,7 @@ forceinline argb_t alphablend1a(const argb_t from, const argb_t to, const int to
 // Alpha blend between two RGB colors with two alpha values
 // 0 <= froma <= 255
 // 0 <=   toa <= 255
-forceinline argb_t alphablend2a(const argb_t from, const int froma, const argb_t to, const int toa)
+forceinline argb_t alphablend2a(const argb_t from, const int32_t froma, const argb_t to, const int32_t toa)
 {
     return argb_t((from.getr() * froma + to.getr() * toa) >> 8, (from.getg() * froma + to.getg() * toa) >> 8,
                   (from.getb() * froma + to.getb() * toa) >> 8);

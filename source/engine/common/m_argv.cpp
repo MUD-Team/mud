@@ -81,7 +81,7 @@ void DArgs::CopyArgs(uint32_t argc, char **argv)
     if (!argv || !argc)
         return;
 
-    int       win_argc = 0;
+    int32_t       win_argc = 0;
     uint32_t    i;
     wchar_t **win_argv = CommandLineToArgvW(GetCommandLineW(), &win_argc);
 
@@ -254,7 +254,7 @@ DArgs DArgs::GatherFiles(const char *param) const
 // bond - PROC M_FindResponseFile
 //
 
-static long ParseCommandLine(const char *args, int *argc, char **argv);
+static long ParseCommandLine(const char *args, int32_t *argc, char **argv);
 
 void M_FindResponseFile(void)
 {
@@ -264,10 +264,10 @@ void M_FindResponseFile(void)
         {
             char **argv;
             char  *file;
-            int    argc;
-            int    argcinresp;
+            int32_t    argc;
+            int32_t    argcinresp;
             PHYSFS_File  *handle;
-            int    size;
+            int32_t    size;
             long   argsize;
             size_t index;
 
@@ -336,9 +336,9 @@ void M_FindResponseFile(void)
 // bond - This is just like the version in c_dispatch.cpp, except it does not
 // do cvar expansion.
 
-static long ParseCommandLine(const char *args, int *argc, char **argv)
+static long ParseCommandLine(const char *args, int32_t *argc, char **argv)
 {
-    int   count;
+    int32_t   count;
     char *buffplace;
 
     count     = 0;
@@ -422,7 +422,7 @@ static long ParseCommandLine(const char *args, int *argc, char **argv)
 //
 // Easy way of retrieving an integer parameter value.
 //
-int M_GetParmValue(const char *name)
+int32_t M_GetParmValue(const char *name)
 {
     const char *valuestr = Args.CheckValue(name);
     if (valuestr)

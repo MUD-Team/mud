@@ -34,7 +34,7 @@
 #define FRACBITS 16
 #define FRACUNIT (1 << FRACBITS)
 
-typedef int          fixed_t;   // fixed 16.16
+typedef int32_t          fixed_t;   // fixed 16.16
 typedef uint32_t dsfixed_t; // fixedpt used by span drawer
 
 //
@@ -62,12 +62,12 @@ inline fixed_t DOUBLE2FIXED(double x)
     return fixed_t(x * double(FRACUNIT));
 }
 
-inline int FIXED2INT(fixed_t x)
+inline int32_t FIXED2INT(fixed_t x)
 {
     return (x + FRACUNIT / 2) / FRACUNIT;
 }
 
-inline fixed_t INT2FIXED(int x)
+inline fixed_t INT2FIXED(int32_t x)
 {
     return x << FRACBITS;
 }

@@ -324,7 +324,7 @@ template <typename KT, typename VT, typename HF = hashfunc<KT>> class OHashTable
             return *this;
         }
 
-        ThisClass operator++(int)
+        ThisClass operator++(int32_t)
         {
             generic_iterator temp(*this);
             operator++();
@@ -502,7 +502,7 @@ template <typename KT, typename VT, typename HF = hashfunc<KT>> class OHashTable
         // ensure newsize is a power of two
         // determine number of bits needed for newsize
         newsize  = newsize * 2 - 1;
-        int bits = 0;
+        int32_t bits = 0;
         while (newsize >>= 1)
             bits++;
 

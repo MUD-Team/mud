@@ -31,7 +31,7 @@
 #include "physfs.h"
 
 
-static int luaopen_debugger(lua_State *lua)
+static int32_t luaopen_debugger(lua_State *lua)
 {
 
 	std::string debugger_file = "common/scripts/debugger.lua";
@@ -114,7 +114,7 @@ void dbg_setup_default(lua_State *lua)
     dbg_setup(lua, "debugger", "dbg", nullptr, nullptr);
 }
 
-int dbg_pcall(lua_State *lua, int nargs, int nresults, int msgh)
+int32_t dbg_pcall(lua_State *lua, int32_t nargs, int32_t nresults, int32_t msgh)
 {
     // Call regular lua_pcall() if a message handler is provided.
     if (msgh)
@@ -132,7 +132,7 @@ int dbg_pcall(lua_State *lua, int nargs, int nresults, int msgh)
     lua_insert(lua, msgh);
 
     // Call the function.
-    int err = lua_pcall(lua, nargs, nresults, msgh);
+    int32_t err = lua_pcall(lua, nargs, nresults, msgh);
 
     // Remove the debug handler.
     lua_remove(lua, msgh);

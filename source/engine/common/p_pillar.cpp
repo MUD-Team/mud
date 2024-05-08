@@ -76,7 +76,7 @@ void DPillar::PlayPillarSound()
 
 void DPillar::RunThink()
 {
-    int r, s;
+    int32_t r, s;
 
     if (m_Type == pillarBuild)
     {
@@ -99,7 +99,7 @@ void DPillar::RunThink()
 
 // ZDoom compatible pillar
 // Main fixes: make crush variable, add hexen crush
-DPillar::DPillar(sector_t *sector, EPillar type, fixed_t speed, fixed_t height, fixed_t height2, int crush,
+DPillar::DPillar(sector_t *sector, EPillar type, fixed_t speed, fixed_t height, fixed_t height2, int32_t crush,
                  bool hexencrush)
     : DMover(sector), m_Status(init)
 {
@@ -185,10 +185,10 @@ DPillar *DPillar::Clone(sector_t *sec) const
     return pillar;
 }
 
-bool EV_DoPillar(DPillar::EPillar type, int tag, fixed_t speed, fixed_t height, fixed_t height2, bool crush)
+bool EV_DoPillar(DPillar::EPillar type, int32_t tag, fixed_t speed, fixed_t height, fixed_t height2, bool crush)
 {
     bool rtn    = false;
-    int  secnum = -1;
+    int32_t  secnum = -1;
 
     while ((secnum = P_FindSectorFromTag(tag, secnum)) >= 0)
     {
@@ -212,12 +212,12 @@ bool EV_DoPillar(DPillar::EPillar type, int tag, fixed_t speed, fixed_t height, 
     return rtn;
 }
 
-bool EV_DoZDoomPillar(DPillar::EPillar type, line_t *line, int tag, fixed_t speed, fixed_t floordist,
-                      fixed_t ceilingdist, int crush, bool hexencrush)
+bool EV_DoZDoomPillar(DPillar::EPillar type, line_t *line, int32_t tag, fixed_t speed, fixed_t floordist,
+                      fixed_t ceilingdist, int32_t crush, bool hexencrush)
 {
     bool      rtn = false;
     sector_t *sec;
-    int       secnum = -1;
+    int32_t       secnum = -1;
 
     floordist *= FRACUNIT;
     ceilingdist *= FRACUNIT;

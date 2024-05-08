@@ -40,13 +40,13 @@
 
 #define NUM_CHANNELS 32
 
-static int    mixer_freq;
+static int32_t    mixer_freq;
 static Uint16 mixer_format;
-static int    mixer_channels;
+static int32_t    mixer_channels;
 
 static bool sound_initialized = false;
 static bool channel_in_use[NUM_CHANNELS];
-static int  nextchannel = 0;
+static int32_t  nextchannel = 0;
 
 EXTERN_CVAR(snd_sfxvolume)
 EXTERN_CVAR(snd_musicvolume)
@@ -59,9 +59,9 @@ CVAR_FUNC_IMPL(snd_samplerate)
 }
 
 // [Russell] - Chocolate Doom's sound converter code, how awesome!
-static bool ConvertibleRatio(int freq1, int freq2)
+static bool ConvertibleRatio(int32_t freq1, int32_t freq2)
 {
-    int ratio;
+    int32_t ratio;
 
     if (freq1 > freq2)
     {
@@ -90,7 +90,7 @@ static bool ConvertibleRatio(int freq1, int freq2)
 
 // Generic sound expansion function for any sample rate
 
-static void ExpandSoundData(uint8_t *data, int samplerate, int bits, int length, Mix_Chunk *destination)
+static void ExpandSoundData(uint8_t *data, int32_t samplerate, int32_t bits, int32_t length, Mix_Chunk *destination)
 {
     Sint16 *expanded    = reinterpret_cast<Sint16 *>(destination->abuf);
     size_t  samplecount = length / (bits / 8);
@@ -109,7 +109,7 @@ static void ExpandSoundData(uint8_t *data, int samplerate, int bits, int length,
     for (size_t i = 0; i < expanded_length; ++i)
     {
         Sint16 sample;
-        int    src;
+        int32_t    src;
 
         src = (i * expand_ratio) >> 8;
 
@@ -282,7 +282,7 @@ static void getsfx(sfxinfo_struct *sfx)
 //
 // SFX API
 //
-void I_SetChannels(int numchannels)
+void I_SetChannels(int32_t numchannels)
 {
 }
 
@@ -302,7 +302,7 @@ void I_SetSfxVolume(float volume)
 // priority, it is ignored. Pitching (that is, increased speed of playback)
 // is set, but currently not used by mixing.
 //
-int I_StartSound(int id, float vol, int sep, int pitch, bool loop)
+int32_t I_StartSound(int32_t id, float vol, int32_t sep, int32_t pitch, bool loop)
 {
     if (!sound_initialized)
         return -1;
@@ -311,7 +311,7 @@ int I_StartSound(int id, float vol, int sep, int pitch, bool loop)
 
     // find a free channel, starting from the first after
     // the last channel we used
-    int channel = nextchannel;
+    int32_t channel = nextchannel;
 
     do
     {
@@ -337,7 +337,7 @@ int I_StartSound(int id, float vol, int sep, int pitch, bool loop)
     return channel;
 }
 
-void I_StopSound(int handle)
+void I_StopSound(int32_t handle)
 {
     if (!sound_initialized)
         return;
@@ -347,7 +347,7 @@ void I_StopSound(int handle)
     Mix_HaltChannel(handle);
 }
 
-int I_SoundIsPlaying(int handle)
+int32_t I_SoundIsPlaying(int32_t handle)
 {
     if (!sound_initialized)
         return 0;
@@ -355,7 +355,7 @@ int I_SoundIsPlaying(int handle)
     return Mix_Playing(handle);
 }
 
-void I_UpdateSoundParams(int handle, float vol, int sep, int pitch)
+void I_UpdateSoundParams(int32_t handle, float vol, int32_t sep, int32_t pitch)
 {
     if (!sound_initialized)
         return;
@@ -366,7 +366,7 @@ void I_UpdateSoundParams(int handle, float vol, int sep, int pitch)
     if (!snd_crossover)
         sep = 255 - sep;
 
-    int volume = (int)((float)MIX_MAX_VOLUME * basevolume * vol);
+    int32_t volume = (int32_t)((float)MIX_MAX_VOLUME * basevolume * vol);
 
     if (volume < 0)
         volume = 0;
@@ -432,7 +432,7 @@ void I_InitSound()
     // of handling it automatically behind the scenes, Mixer might initialize
     // with a broken audio buffer instead.  Using this function instead works
     // around the problem.
-    if (Mix_OpenAudioDevice((int)snd_samplerate, AUDIO_S16SYS, 2, 1024, NULL, SDL_AUDIO_ALLOW_FREQUENCY_CHANGE) < 0)
+    if (Mix_OpenAudioDevice((int32_t)snd_samplerate, AUDIO_S16SYS, 2, 1024, NULL, SDL_AUDIO_ALLOW_FREQUENCY_CHANGE) < 0)
 #endif
     {
         Printf(PRINT_ERROR, "I_InitSound: Error initializing SDL_mixer: %s\n", Mix_GetError());
@@ -460,7 +460,7 @@ void I_InitSound()
 
     // Half of fix for stopping wrong sound, these need to be false
     // to be regarded as empty (they'd be initialised to something weird)
-    for (int i = 0; i < NUM_CHANNELS; i++)
+    for (int32_t i = 0; i < NUM_CHANNELS; i++)
         channel_in_use[i] = false;
 }
 

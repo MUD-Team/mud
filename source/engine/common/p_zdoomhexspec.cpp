@@ -35,7 +35,7 @@ EXTERN_CVAR(sv_allowexit)
 EXTERN_CVAR(sv_fragexitswitch)
 EXTERN_CVAR(sv_forcewater)
 
-bool P_CrossZDoomSpecialLine(line_t *line, int side, AActor *thing, bool bossaction)
+bool P_CrossZDoomSpecialLine(line_t *line, int32_t side, AActor *thing, bool bossaction)
 {
     // Do not teleport on the wrong side
     if (side)
@@ -74,7 +74,7 @@ bool P_CrossZDoomSpecialLine(line_t *line, int side, AActor *thing, bool bossact
     return false;
 }
 
-bool P_ActivateZDoomLine(line_t *line, AActor *mo, int side, uint32_t activationType)
+bool P_ActivateZDoomLine(line_t *line, AActor *mo, int32_t side, uint32_t activationType)
 {
     bool buttonSuccess;
 
@@ -123,7 +123,7 @@ void P_CollectSecretZDoom(sector_t *sector, player_t *player)
     P_CollectSecretCommon(sector, player);
 }
 
-bool P_TestActivateZDoomLine(line_t *line, AActor *mo, int side, uint32_t activationType)
+bool P_TestActivateZDoomLine(line_t *line, AActor *mo, int32_t side, uint32_t activationType)
 {
     uint32_t lineActivation;
 
@@ -221,9 +221,9 @@ void P_PlayerInZDoomSector(player_t *player)
 
     sector_t *sector = player->mo->subsector->sector;
 
-    static const int heretic_carry[5] = {2048 * 5, 2048 * 10, 2048 * 25, 2048 * 30, 2048 * 35};
+    static const int32_t heretic_carry[5] = {2048 * 5, 2048 * 10, 2048 * 25, 2048 * 30, 2048 * 35};
 
-    static const int hexen_carry[3] = {2048 * 5, 2048 * 10, 2048 * 25};
+    static const int32_t hexen_carry[3] = {2048 * 5, 2048 * 10, 2048 * 25};
 
     if (sector->damageamount > 0)
     {
@@ -269,7 +269,7 @@ void P_PlayerInZDoomSector(player_t *player)
         P_ThrustMobj(player->mo, 0, 2048 * 28);
         break;
     case Scroll_Strife_Current:
-        int     anglespeed;
+        int32_t     anglespeed;
         fixed_t carryspeed;
         angle_t angle;
 
@@ -363,7 +363,7 @@ bool P_ActorInZDoomSector(AActor *actor)
 
 void P_SpawnZDoomGeneralizedSpecials(sector_t *sector)
 {
-    int damage_bits = (sector->special & ZDOOM_DAMAGE_MASK) >> 8;
+    int32_t damage_bits = (sector->special & ZDOOM_DAMAGE_MASK) >> 8;
 
     switch (damage_bits & 3)
     {
@@ -601,9 +601,9 @@ void P_SpawnZDoomSectorSpecial(sector_t *sector)
                                                         {0, -1},  {0, -2},  {0, -4},  {1, 0},  {2, 0},  {4, 0},
                                                         {1, 1},   {2, 2},   {4, 4},   {-1, 1}, {-2, 2}, {-4, 4},
                                                         {-1, -1}, {-2, -2}, {-4, -4}, {1, -1}, {2, -2}, {4, -4}};
-            int                i                     = sector->special - Scroll_North_Slow;
-            int                dx                    = hexenScrollies[i][0] * (FRACUNIT / 2);
-            int                dy                    = hexenScrollies[i][1] * (FRACUNIT / 2);
+            int32_t                i                     = sector->special - Scroll_North_Slow;
+            int32_t                dx                    = hexenScrollies[i][0] * (FRACUNIT / 2);
+            int32_t                dy                    = hexenScrollies[i][1] * (FRACUNIT / 2);
 
             new DScroller(DScroller::sc_floor, dx, dy, -1, sector - sectors, 0);
             // Hexen scrolling floors cause the player to move
@@ -624,11 +624,11 @@ void P_SpawnZDoomSectorSpecial(sector_t *sector)
     }
 }
 
-void P_SpawnZDoomExtra(int i)
+void P_SpawnZDoomExtra(int32_t i)
 {
     switch (lines[i].special)
     {
-        int       s;
+        int32_t       s;
         sector_t *sec;
 
     // killough 3/7/98:
@@ -708,7 +708,7 @@ void P_SpawnZDoomExtra(int i)
             if (IgnoreSpecial)
                 break;
 
-            int damage = P_AproxDistance(lines[i].dx, lines[i].dy) >> FRACBITS;
+            int32_t damage = P_AproxDistance(lines[i].dx, lines[i].dy) >> FRACBITS;
             for (s = -1; (s = P_FindSectorFromTag(lines[i].args[0], s)) >= 0;)
             {
                 sectors[s].damageamount   = damage;
@@ -738,12 +738,12 @@ void P_SpawnZDoomExtra(int i)
 }
 
 // Initialize the scrollers
-void P_SpawnZDoomScroller(line_t *l, int i)
+void P_SpawnZDoomScroller(line_t *l, int32_t i)
 {
     fixed_t dx      = 0;             // direction and speed of scrolling
     fixed_t dy      = 0;
-    int     control = -1, accel = 0; // no control sector or acceleration
-    int     special = l->special;
+    int32_t     control = -1, accel = 0; // no control sector or acceleration
+    int32_t     special = l->special;
 
     // killough 3/7/98: Types 245-249 are same as 250-254 except that the
     // first side's sector's heights cause scrolling when they change, and
@@ -780,7 +780,7 @@ void P_SpawnZDoomScroller(line_t *l, int i)
 
     switch (special)
     {
-        int s;
+        int32_t s;
 
     case Scroll_Ceiling:
         if (IgnoreSpecial)
@@ -899,7 +899,7 @@ void P_SpawnZDoomFriction(line_t *l)
 {
     if (l->special == Sector_SetFriction)
     {
-        int value;
+        int32_t value;
 
         if (l->args[1])
             value = l->args[1] <= 200 ? l->args[1] : 200;
@@ -914,7 +914,7 @@ void P_SpawnZDoomFriction(line_t *l)
 
 void P_SpawnZDoomPusher(line_t *l)
 {
-    int s;
+    int32_t s;
 
     switch (l->special)
     {
@@ -955,7 +955,7 @@ void P_SpawnZDoomPusher(line_t *l)
     }
 }
 
-void P_PostProcessZDoomSidedefSpecial(side_t *sd, mapsidedef_t *msd, sector_t *sec, int i)
+void P_PostProcessZDoomSidedefSpecial(side_t *sd, mapsidedef_t *msd, sector_t *sec, int32_t i)
 {
     switch (sd->special)
     {
@@ -984,7 +984,7 @@ void P_PostProcessZDoomSidedefSpecial(side_t *sd, mapsidedef_t *msd, sector_t *s
                     GetSpecialLights(((argb_t)color).getr(), ((argb_t)color).getg(), ((argb_t)color).getb(),
                                      ((argb_t)fog).getr(), ((argb_t)fog).getg(), ((argb_t)fog).getb());
 
-                for (int s = 0; s < numsectors; s++)
+                for (int32_t s = 0; s < numsectors; s++)
                 {
                     if (sectors[s].tag == sd->tag)
                         sectors[s].colormap = colormap;
@@ -1012,7 +1012,7 @@ void P_PostProcessZDoomSidedefSpecial(side_t *sd, mapsidedef_t *msd, sector_t *s
     }
 }
 
-bool P_ExecuteZDoomLineSpecial(int special, int16_t *args, line_t *line, int side, AActor *mo)
+bool P_ExecuteZDoomLineSpecial(int32_t special, int16_t *args, line_t *line, int32_t side, AActor *mo)
 {
     return LineSpecials[special](line, mo, args[0], args[1], args[2], args[3], args[4]);
 }
@@ -1048,7 +1048,7 @@ void P_PostProcessZDoomLinedefSpecial(line_t *line)
 {
     switch (line->special)
     {                     // killough 4/11/98: handle special types
-        int j;
+        int32_t j;
     case TranslucentLine: // killough 4/11/98: translucent 2s textures
 #if 0
 				lump = sides[*line->sidenum].special;		// translucency from sidedef

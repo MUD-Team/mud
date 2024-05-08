@@ -62,7 +62,7 @@ static struct DownloadState
     Websites        checkurls;
     size_t          checkurlidx;
     std::string     checkfilename;
-    int             checkfails;
+    int32_t             checkfails;
     DownloadState()
         : state(STATE_SHUTDOWN), check(NULL), transfer(NULL), url(""), filename(""), hash(), flags(0), checkurls(),
           checkurlidx(0), checkfilename(""), checkfails(0)

@@ -74,7 +74,7 @@ static size_t curlHeader(char *buffer, size_t size, size_t nitems, void *userdat
 //
 // https://curl.haxx.se/libcurl/c/CURLOPT_DEBUGFUNCTION.html
 //
-static int curlDebug(CURL *handle, curl_infotype type, char *data, size_t size, void *userptr)
+static int32_t curlDebug(CURL *handle, curl_infotype type, char *data, size_t size, void *userptr)
 {
     std::string str = std::string(data, size);
 
@@ -168,12 +168,12 @@ bool OTransferCheck::start()
     curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, OTransferCheck::curlWrite);
     curl_multi_add_handle(m_curlm, m_curl);
 
-    int running;
+    int32_t running;
     curl_multi_perform(m_curlm, &running);
     if (running < 1)
     {
         // Transfer isn't running right after we enabled it, error out.
-        int      queuelen;
+        int32_t      queuelen;
         CURLMsg *msg = curl_multi_info_read(m_curlm, &queuelen);
         if (msg == NULL)
         {
@@ -211,13 +211,13 @@ void OTransferCheck::stop()
  */
 bool OTransferCheck::tick()
 {
-    int running;
+    int32_t running;
     curl_multi_perform(m_curlm, &running);
     if (running > 0)
         return true;
 
     // We're done.  Was the transfer successful, or an error?
-    int      queuelen;
+    int32_t      queuelen;
     CURLMsg *msg = curl_multi_info_read(m_curlm, &queuelen);
     if (msg == NULL)
     {
@@ -258,7 +258,7 @@ bool OTransferCheck::tick()
 //
 // https://curl.haxx.se/libcurl/c/CURLOPT_PROGRESSFUNCTION.html
 //
-int OTransfer::curlProgress(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow)
+int32_t OTransfer::curlProgress(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow)
 {
     static_cast<OTransfer *>(clientp)->m_progress.dltotal = dltotal;
     static_cast<OTransfer *>(clientp)->m_progress.dlnow   = dlnow;
@@ -291,7 +291,7 @@ void OTransfer::setURL(const std::string &src)
  * @param dest Destination file path, passed to fopen.
  * @return 0 on success, or the value of errno after the failed fopen on failure.
  */
-int OTransfer::setOutputFile(const std::string &dest)
+int32_t OTransfer::setOutputFile(const std::string &dest)
 {
     // We download to the partial file and move it later.
     m_filename = dest;
@@ -335,12 +335,12 @@ bool OTransfer::start()
     // curl_easy_setopt(m_curl, CURLOPT_DEBUGFUNCTION, curlDebug);
     curl_multi_add_handle(m_curlm, m_curl);
 
-    int running;
+    int32_t running;
     curl_multi_perform(m_curlm, &running);
     if (running < 1)
     {
         // Transfer isn't running right after we enabled it, error out.
-        int      queuelen;
+        int32_t      queuelen;
         CURLMsg *msg = curl_multi_info_read(m_curlm, &queuelen);
         if (msg == NULL)
         {
@@ -378,13 +378,13 @@ void OTransfer::stop()
  */
 bool OTransfer::tick()
 {
-    int running;
+    int32_t running;
     curl_multi_perform(m_curlm, &running);
     if (running > 0)
         return true;
 
     // We're done.  Was the transfer successful, or an error?
-    int      queuelen;
+    int32_t      queuelen;
     CURLMsg *msg = curl_multi_info_read(m_curlm, &queuelen);
     if (msg == NULL)
     {
@@ -427,7 +427,7 @@ bool OTransfer::tick()
         return false;
     }
 
-    int ok = rename(m_filePart.c_str(), m_filename.c_str());
+    int32_t ok = rename(m_filePart.c_str(), m_filename.c_str());
     if (ok != 0)
     {
         // See if we can write a file with a partial hash.

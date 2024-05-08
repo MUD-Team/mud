@@ -36,9 +36,9 @@
 struct OFileLine
 {
     const char *file;
-    int         line;
+    int32_t         line;
 
-    static OFileLine create(const char *file, const int line)
+    static OFileLine create(const char *file, const int32_t line)
     {
         OFileLine rvo = {file, line};
         return rvo;
@@ -234,7 +234,7 @@ class OZone
     /**
      * Dealloc all members
      */
-    void deallocTags(const int lowtag, const int hightag)
+    void deallocTags(const int32_t lowtag, const int32_t hightag)
     {
         for (MemoryBlockTable::iterator it = m_heap.begin(); it != m_heap.end();)
         {
@@ -288,7 +288,7 @@ void Z_Init()
 //
 // Z_Free2
 //
-void Z_Free2(void *ptr, const char *file, int line)
+void Z_Free2(void *ptr, const char *file, int32_t line)
 {
     g_zone.deallocPtr(ptr, OFileLine::create(file, line));
 }
@@ -300,7 +300,7 @@ void Z_Free2(void *ptr, const char *file, int line)
 #define MINFRAGMENT 64
 #define ALIGN       8
 
-void *Z_Malloc2(size_t size, const zoneTag_e tag, void *user, const char *file, const int line)
+void *Z_Malloc2(size_t size, const zoneTag_e tag, void *user, const char *file, const int32_t line)
 {
     return g_zone.alloc(size, tag, user, OFileLine::create(file, line));
 }
@@ -316,12 +316,12 @@ void Z_FreeTags(const zoneTag_e lowtag, const zoneTag_e hightag)
 //
 // Z_ChangeTag
 //
-void Z_ChangeTag2(void *ptr, const zoneTag_e tag, const char *file, int line)
+void Z_ChangeTag2(void *ptr, const zoneTag_e tag, const char *file, int32_t line)
 {
     return ::g_zone.changeTag(ptr, tag, OFileLine::create(file, line));
 }
 
-void Z_ChangeOwner2(void *ptr, void *user, const char *file, int line)
+void Z_ChangeOwner2(void *ptr, void *user, const char *file, int32_t line)
 {
     return ::g_zone.changeOwner(ptr, user, OFileLine::create(file, line));
 }
@@ -337,7 +337,7 @@ void Z_DumpHeap(const zoneTag_e lowtag, const zoneTag_e hightag)
 
 BEGIN_COMMAND(dumpheap)
 {
-    int lo = INT32_MIN, hi = INT32_MAX;
+    int32_t lo = INT32_MIN, hi = INT32_MAX;
 
     if (argc >= 2)
     {

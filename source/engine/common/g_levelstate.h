@@ -39,7 +39,7 @@ struct WinInfo
     };
 
     WinType type;
-    int     id;
+    int32_t     id;
 
     WinInfo() : type(WIN_UNKNOWN), id(0)
     {
@@ -71,16 +71,16 @@ class LevelState
           m_setStateCB(NULL)
     {
     }
-    int                  getCountdown() const;
+    int32_t                  getCountdown() const;
     team_t               getDefendingTeam() const;
-    int                  getIngameStartTime() const;
-    int                  getJoinTimeLeft() const;
-    int                  getRound() const;
+    int32_t                  getIngameStartTime() const;
+    int32_t                  getJoinTimeLeft() const;
+    int32_t                  getRound() const;
     LevelState::States   getState() const;
     const char          *getStateString() const;
     WinInfo              getWinInfo() const;
     void                 setStateCB(LevelState::SetStateCB cb);
-    void                 setWinner(WinInfo::WinType type, int id);
+    void                 setWinner(WinInfo::WinType type, int32_t id);
     void                 reset();
     void                 restart();
     void                 forceStart();
@@ -93,9 +93,9 @@ class LevelState
 
   private:
     LevelState::States     m_state;
-    int                    m_countdownDoneTime;
-    int                    m_ingameStartTime;
-    int                    m_roundNumber;
+    int32_t                    m_countdownDoneTime;
+    int32_t                    m_ingameStartTime;
+    int32_t                    m_roundNumber;
     WinInfo                m_lastWininfo;
     LevelState::SetStateCB m_setStateCB;
 
@@ -107,11 +107,11 @@ class LevelState
 struct SerializedLevelState
 {
     LevelState::States state;
-    int                countdown_done_time;
-    int                ingame_start_time;
-    int                round_number;
+    int32_t                countdown_done_time;
+    int32_t                ingame_start_time;
+    int32_t                round_number;
     WinInfo::WinType   last_wininfo_type;
-    int                last_wininfo_id;
+    int32_t                last_wininfo_id;
 };
 
 extern LevelState levelstate;

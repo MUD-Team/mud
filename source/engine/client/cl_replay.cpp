@@ -32,8 +32,8 @@
 #include "p_local.h"
 #include "p_mobj.h"
 
-extern int world_index;
-extern int last_svgametic;
+extern int32_t world_index;
+extern int32_t last_svgametic;
 
 //
 // ClientReplay::getInstance
@@ -92,7 +92,7 @@ bool ClientReplay::wasReplayed()
 // Records a netid and gametic for an item that was picked up,
 // but did not exist on the clientside.
 //
-void ClientReplay::recordReplayItem(int tic, const uint32_t netId)
+void ClientReplay::recordReplayItem(int32_t tic, const uint32_t netId)
 {
     itemReplayStack.push_back(std::make_pair(tic, netId));
 }
@@ -102,9 +102,9 @@ void ClientReplay::recordReplayItem(int tic, const uint32_t netId)
 //
 // Deletes a replay item from the replay queue.
 //
-void ClientReplay::removeReplayItem(const std::pair<int, uint32_t> replayItem)
+void ClientReplay::removeReplayItem(const std::pair<int32_t, uint32_t> replayItem)
 {
-    std::vector<std::pair<int, uint32_t>>::iterator it = itemReplayStack.begin();
+    std::vector<std::pair<int32_t, uint32_t>>::iterator it = itemReplayStack.begin();
     while (it != itemReplayStack.end())
     {
         if (replayItem == *it)
@@ -149,7 +149,7 @@ void ClientReplay::itemReplay()
         replayed          = false;
     }
 
-    std::vector<std::pair<int, uint32_t>>::iterator it = itemReplayStack.begin();
+    std::vector<std::pair<int32_t, uint32_t>>::iterator it = itemReplayStack.begin();
     while (it != itemReplayStack.end())
     {
         if (it->first + MAX_REPLAY_TIC_LENGTH < ::last_svgametic)
@@ -182,7 +182,7 @@ void ClientReplay::itemReplay()
 
         replayed = true;
 
-        int ticDelta = (::last_svgametic - firstReadyTic);
+        int32_t ticDelta = (::last_svgametic - firstReadyTic);
 
         firstReadyTic = 0;
 
@@ -191,7 +191,7 @@ void ClientReplay::itemReplay()
         // and do nothing if it wasn't going to switch our weapon anyway.
         if (P_SpecialIsWeapon(mo) && state == readystate && weaponSwitch)
         {
-            for (int i = 0; i < ticDelta; ++i)
+            for (int32_t i = 0; i < ticDelta; ++i)
             {
                 P_MovePsprites(&player);
             }

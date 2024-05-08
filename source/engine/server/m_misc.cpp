@@ -83,7 +83,7 @@ BEGIN_COMMAND(savecfg)
 }
 END_COMMAND(savecfg)
 
-extern int cvar_defflags;
+extern int32_t cvar_defflags;
 EXTERN_CVAR(dimamount)
 
 /**
@@ -167,7 +167,7 @@ bool M_WriteJSON(const char *filename, Json::Value &value, bool styled)
         out_string = fast_writer.write(value);
     }
 
-    int written = PHYSFS_writeBytes(json_out, out_string.data(), out_string.size());
+    int32_t written = PHYSFS_writeBytes(json_out, out_string.data(), out_string.size());
 
     PHYSFS_close(json_out);
 

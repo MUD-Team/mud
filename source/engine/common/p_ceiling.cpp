@@ -258,7 +258,7 @@ DCeiling::DCeiling(sector_t *sec) : DMovingCeiling(sec), m_Status(init)
 {
 }
 
-DCeiling::DCeiling(sector_t *sec, fixed_t speed1, fixed_t speed2, int silent) : DMovingCeiling(sec), m_Status(init)
+DCeiling::DCeiling(sector_t *sec, fixed_t speed1, fixed_t speed2, int32_t silent) : DMovingCeiling(sec), m_Status(init)
 {
     m_Crush = NO_CRUSH;
     m_Speed = m_Speed1 = speed1;
@@ -266,7 +266,7 @@ DCeiling::DCeiling(sector_t *sec, fixed_t speed1, fixed_t speed2, int silent) : 
     m_Silent           = silent;
 }
 
-DCeiling::DCeiling(sector_t *sec, line_t *line, int silent, int speed) : DMovingCeiling(sec), m_Status(init)
+DCeiling::DCeiling(sector_t *sec, line_t *line, int32_t silent, int32_t speed) : DMovingCeiling(sec), m_Status(init)
 {
     fixed_t targheight;
 
@@ -307,7 +307,7 @@ DCeiling::DCeiling(sector_t *sec, line_t *line, int silent, int speed) : DMoving
     m_Speed2 = m_Speed;
 }
 
-DCeiling::DCeiling(sector_t *sec, line_t *line, int speed, int target, int crush, int change, int direction, int model)
+DCeiling::DCeiling(sector_t *sec, line_t *line, int32_t speed, int32_t target, int32_t crush, int32_t change, int32_t direction, int32_t model)
     : DMovingCeiling(sec), m_Status(init)
 {
     fixed_t targheight;
@@ -487,7 +487,7 @@ DCeiling *DCeiling::Clone(sector_t *sec) const
 // Restart a ceiling that's in-stasis
 // [RH] Passed a tag instead of a line and rewritten to use list
 //
-void P_ActivateInStasisCeiling(int tag)
+void P_ActivateInStasisCeiling(int32_t tag)
 {
     DCeiling                  *scan;
     TThinkerIterator<DCeiling> iterator;
@@ -502,7 +502,7 @@ void P_ActivateInStasisCeiling(int tag)
     }
 }
 
-bool EV_ZDoomCeilingCrushStop(int tag, bool remove)
+bool EV_ZDoomCeilingCrushStop(int32_t tag, bool remove)
 {
     bool                       rtn = false;
     DCeiling                  *scan;
@@ -529,10 +529,10 @@ bool EV_ZDoomCeilingCrushStop(int tag, bool remove)
     return rtn;
 }
 
-bool P_SpawnZDoomCeiling(DCeiling::ECeiling, line_t *, int, fixed_t, fixed_t, fixed_t, int, int, int, crushmode_e);
+bool P_SpawnZDoomCeiling(DCeiling::ECeiling, line_t *, int32_t, fixed_t, fixed_t, fixed_t, int32_t, int32_t, int32_t, crushmode_e);
 
 bool EV_DoZDoomCeiling(DCeiling::ECeiling type, line_t *line, uint8_t tag, fixed_t speed, fixed_t speed2, fixed_t height,
-                       int crush, uint8_t silent, int change, crushmode_e crushmode)
+                       int32_t crush, uint8_t silent, int32_t change, crushmode_e crushmode)
 {
     return P_SpawnZDoomCeiling(type, line, tag, speed, speed2, height, crush, silent, change, crushmode);
 }
@@ -541,10 +541,10 @@ bool EV_DoZDoomCeiling(DCeiling::ECeiling type, line_t *line, uint8_t tag, fixed
 // P_SpawnZDoomCeiling
 // Move a ceiling up/down and all around!
 //
-bool P_SpawnZDoomCeiling(DCeiling::ECeiling type, line_t *line, int tag, fixed_t speed, fixed_t speed2, fixed_t height,
-                         int crush, int silent, int change, crushmode_e crushmode)
+bool P_SpawnZDoomCeiling(DCeiling::ECeiling type, line_t *line, int32_t tag, fixed_t speed, fixed_t speed2, fixed_t height,
+                         int32_t crush, int32_t silent, int32_t change, crushmode_e crushmode)
 {
-    int       secnum;
+    int32_t       secnum;
     bool      rtn;
     sector_t *sec;
     DCeiling *ceiling;
@@ -626,7 +626,7 @@ bool P_SpawnZDoomCeiling(DCeiling::ECeiling type, line_t *line, int tag, fixed_t
             break;
 
         case DCeiling::ceilMoveToValue: {
-            int diff = height - ceilingheight;
+            int32_t diff = height - ceilingheight;
 
             targheight = height;
             if (diff < 0)
@@ -799,10 +799,10 @@ bool P_SpawnZDoomCeiling(DCeiling::ECeiling type, line_t *line, int tag, fixed_t
 // Move a ceiling up/down and all around!
 //
 // [RH] Added tag, speed, speed2, height, crush, silent, change params
-bool EV_DoCeiling(DCeiling::ECeiling type, line_t *line, int tag, fixed_t speed, fixed_t speed2, fixed_t height,
-                  bool crush, int silent, int change)
+bool EV_DoCeiling(DCeiling::ECeiling type, line_t *line, int32_t tag, fixed_t speed, fixed_t speed2, fixed_t height,
+                  bool crush, int32_t silent, int32_t change)
 {
-    int       secnum;
+    int32_t       secnum;
     bool      rtn;
     sector_t *sec;
     DCeiling *ceiling;
@@ -884,7 +884,7 @@ bool EV_DoCeiling(DCeiling::ECeiling type, line_t *line, int tag, fixed_t speed,
             break;
 
         case DCeiling::ceilMoveToValue: {
-            int diff = height - ceilingheight;
+            int32_t diff = height - ceilingheight;
 
             if (diff < 0)
             {
@@ -1052,7 +1052,7 @@ bool EV_DoCeiling(DCeiling::ECeiling type, line_t *line, int tag, fixed_t speed,
 //
 bool EV_DoGenCeiling(line_t *line)
 {
-    int       secnum;
+    int32_t       secnum;
     bool      rtn;
     bool      manual;
     fixed_t   targheight;
@@ -1062,13 +1062,13 @@ bool EV_DoGenCeiling(line_t *line)
 
     // parse the bit fields in the line's special type
 
-    int Crsh = (value & CeilingCrush) >> CeilingCrushShift;
-    int ChgT = (value & CeilingChange) >> CeilingChangeShift;
-    int Targ = (value & CeilingTarget) >> CeilingTargetShift;
-    int Dirn = (value & CeilingDirection) >> CeilingDirectionShift;
-    int ChgM = (value & CeilingModel) >> CeilingModelShift;
-    int Sped = (value & CeilingSpeed) >> CeilingSpeedShift;
-    int Trig = (value & TriggerType) >> TriggerTypeShift;
+    int32_t Crsh = (value & CeilingCrush) >> CeilingCrushShift;
+    int32_t ChgT = (value & CeilingChange) >> CeilingChangeShift;
+    int32_t Targ = (value & CeilingTarget) >> CeilingTargetShift;
+    int32_t Dirn = (value & CeilingDirection) >> CeilingDirectionShift;
+    int32_t ChgM = (value & CeilingModel) >> CeilingModelShift;
+    int32_t Sped = (value & CeilingSpeed) >> CeilingSpeedShift;
+    int32_t Trig = (value & TriggerType) >> TriggerTypeShift;
 
     rtn = false;
 
@@ -1122,7 +1122,7 @@ bool EV_DoGenCeiling(line_t *line)
 //
 bool EV_DoGenCrusher(line_t *line)
 {
-    int       secnum;
+    int32_t       secnum;
     bool      rtn;
     bool      manual;
     fixed_t   targheight;
@@ -1132,9 +1132,9 @@ bool EV_DoGenCrusher(line_t *line)
 
     // parse the bit fields in the line's special type
 
-    int Slnt = (value & CrusherSilent) >> CrusherSilentShift;
-    int Sped = (value & CrusherSpeed) >> CrusherSpeedShift;
-    int Trig = (value & TriggerType) >> TriggerTypeShift;
+    int32_t Slnt = (value & CrusherSilent) >> CrusherSilentShift;
+    int32_t Sped = (value & CrusherSpeed) >> CrusherSpeedShift;
+    int32_t Trig = (value & TriggerType) >> TriggerTypeShift;
 
     rtn = false;
 
@@ -1182,7 +1182,7 @@ bool EV_DoGenCrusher(line_t *line)
 // Stop a ceiling from crushing!
 // [RH] Passed a tag instead of a line and rewritten to use list
 //
-bool EV_CeilingCrushStop(int tag)
+bool EV_CeilingCrushStop(int32_t tag)
 {
     bool                       rtn = false;
     DCeiling                  *scan;

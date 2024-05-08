@@ -35,7 +35,7 @@
 
 void R_SpanInitData();
 
-extern int          *walllights;
+extern int32_t          *walllights;
 extern dyncolormap_t NormalLight;
 
 // [Russell] - Server expects these to exist
@@ -45,22 +45,22 @@ uint8_t  bosstable[256];
 
 fixed_t FocalLengthX;
 fixed_t FocalLengthY;
-int     viewangleoffset;
+int32_t     viewangleoffset;
 
 // increment every time a check is made
-int validcount = 1;
+int32_t validcount = 1;
 
-int centerx;
-int centery;
+int32_t centerx;
+int32_t centery;
 
 fixed_t centerxfrac;
 fixed_t centeryfrac;
 fixed_t yaspectmul;
 
 // just for profiling purposes
-int framecount;
-int linecount;
-int loopcount;
+int32_t framecount;
+int32_t linecount;
+int32_t loopcount;
 
 fixed_t viewx;
 fixed_t viewy;
@@ -81,7 +81,7 @@ AActor *camera; // [RH] camera to draw from. doesn't have to be a player
 // maps the visible view angles to screen X coordinates,
 // flattening the arc to a flat projection plane.
 // There will be many angles mapped to the same X.
-int viewangletox[FINEANGLES / 2];
+int32_t viewangletox[FINEANGLES / 2];
 
 // The xtoviewangleangle[] table maps a screen pixel
 // to the lowest viewangle that maps back to x ranges
@@ -90,15 +90,15 @@ angle_t *xtoviewangle;
 
 const fixed_t *finecosine = &finesine[FINEANGLES / 4];
 
-int scalelight[LIGHTLEVELS][MAXLIGHTSCALE];
-int scalelightfixed[MAXLIGHTSCALE];
-int zlight[LIGHTLEVELS][MAXLIGHTZ];
+int32_t scalelight[LIGHTLEVELS][MAXLIGHTSCALE];
+int32_t scalelightfixed[MAXLIGHTSCALE];
+int32_t zlight[LIGHTLEVELS][MAXLIGHTZ];
 
-int lightscalexmul; // [RH] used to keep hires modes dark enough
-int lightscaleymul;
+int32_t lightscalexmul; // [RH] used to keep hires modes dark enough
+int32_t lightscaleymul;
 
 // bumped light from gun blasts
-int extralight;
+int32_t extralight;
 
 // [RH] ignore extralight and fullbright
 bool foggy;
@@ -118,9 +118,9 @@ void (*tlatedlucentcolfunc)(void);
 void (*spanfunc)(void);
 
 void (*hcolfunc_pre)(void);
-void (*hcolfunc_post1)(int hx, int sx, int yl, int yh);
-void (*hcolfunc_post2)(int hx, int sx, int yl, int yh);
-void (*hcolfunc_post4)(int sx, int yl, int yh);
+void (*hcolfunc_post1)(int32_t hx, int32_t sx, int32_t yl, int32_t yh);
+void (*hcolfunc_post2)(int32_t hx, int32_t sx, int32_t yl, int32_t yh);
+void (*hcolfunc_post4)(int32_t sx, int32_t yl, int32_t yh);
 
 #define R_P2ATHRESHOLD (INT_MAX / 4)
 
@@ -226,7 +226,7 @@ angle_t R_PointToAngle(fixed_t x, fixed_t y)
 
 void R_RotatePoint(fixed_t x, fixed_t y, angle_t ang, fixed_t &tx, fixed_t &ty)
 {
-    int index = ang >> ANGLETOFINESHIFT;
+    int32_t index = ang >> ANGLETOFINESHIFT;
 
     tx = FixedMul(x, finecosine[index]) - FixedMul(y, finesine[index]);
     ty = FixedMul(x, finesine[index]) + FixedMul(y, finecosine[index]);

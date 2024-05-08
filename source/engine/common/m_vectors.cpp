@@ -477,7 +477,7 @@ void M_ActorMomentumToVec3Fixed(v3fixed_t *dest, const AActor *thing)
 //
 // Calculates the normalized direction vector from ang and pitch
 //
-void M_AngleToVec3f(v3float_t *dest, angle_t ang, int pitch)
+void M_AngleToVec3f(v3float_t *dest, angle_t ang, int32_t pitch)
 {
     dest->x = FIXED2FLOAT(finecosine[ang >> ANGLETOFINESHIFT]);
     dest->y = FIXED2FLOAT(finesine[ang >> ANGLETOFINESHIFT]);
@@ -485,7 +485,7 @@ void M_AngleToVec3f(v3float_t *dest, angle_t ang, int pitch)
     M_NormalizeVec3f(dest, dest);
 }
 
-void M_AngleToVec3(v3double_t *dest, angle_t ang, int pitch)
+void M_AngleToVec3(v3double_t *dest, angle_t ang, int32_t pitch)
 {
     dest->x = FIXED2DOUBLE(finecosine[ang >> ANGLETOFINESHIFT]);
     dest->y = FIXED2DOUBLE(finesine[ang >> ANGLETOFINESHIFT]);

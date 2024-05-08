@@ -36,7 +36,7 @@ template <class T> class TArray
         Count = 0;
         Array = NULL;
     }
-    TArray(int max)
+    TArray(int32_t max)
     {
         Most  = max;
         Count = 0;

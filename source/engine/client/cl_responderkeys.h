@@ -23,27 +23,29 @@
 
 #pragma once
 
+#include <stdint.h>
+
 // Movement Keys
-bool Key_IsUpKey(int key, bool numlock);
-bool Key_IsDownKey(int key, bool numlock);
-bool Key_IsLeftKey(int key, bool numlock);
-bool Key_IsRightKey(int key, bool numlock);
+bool Key_IsUpKey(int32_t key, bool numlock);
+bool Key_IsDownKey(int32_t key, bool numlock);
+bool Key_IsLeftKey(int32_t key, bool numlock);
+bool Key_IsRightKey(int32_t key, bool numlock);
 
-bool Key_IsPageUpKey(int key, bool numlock);
-bool Key_IsPageDownKey(int key, bool numlock);
-bool Key_IsHomeKey(int key, bool numlock);
-bool Key_IsEndKey(int key, bool numlock);
-bool Key_IsInsKey(int key, bool numlock);
-bool Key_IsDelKey(int key, bool numlock);
+bool Key_IsPageUpKey(int32_t key, bool numlock);
+bool Key_IsPageDownKey(int32_t key, bool numlock);
+bool Key_IsHomeKey(int32_t key, bool numlock);
+bool Key_IsEndKey(int32_t key, bool numlock);
+bool Key_IsInsKey(int32_t key, bool numlock);
+bool Key_IsDelKey(int32_t key, bool numlock);
 
-bool Key_IsAcceptKey(int key);
-bool Key_IsCancelKey(int key);
-bool Key_IsMenuKey(int key);
-bool Key_IsYesKey(int key);
-bool Key_IsNoKey(int key);
-bool Key_IsUnbindKey(int key);
+bool Key_IsAcceptKey(int32_t key);
+bool Key_IsCancelKey(int32_t key);
+bool Key_IsMenuKey(int32_t key);
+bool Key_IsYesKey(int32_t key);
+bool Key_IsNoKey(int32_t key);
+bool Key_IsUnbindKey(int32_t key);
 
-bool Key_IsSpyPrevKey(int key);
-bool Key_IsSpyNextKey(int key);
+bool Key_IsSpyPrevKey(int32_t key);
+bool Key_IsSpyNextKey(int32_t key);
 
-bool Key_IsTabulationKey(int key);
+bool Key_IsTabulationKey(int32_t key);

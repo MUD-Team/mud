@@ -161,7 +161,7 @@ extern uint8_t Actions[NUM_ACTIONS];
 struct ActionBits
 {
     uint32_t key;
-    int          index;
+    int32_t          index;
     char         name[12];
 };
 

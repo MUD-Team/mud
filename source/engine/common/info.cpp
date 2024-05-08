@@ -7507,7 +7507,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
 void D_Init_DEHEXTRA_Frames(void)
 {
     // [Blair] Combine all the state tables.
-    for (int i = 0; i < NUMSTATES; i++)
+    for (int32_t i = 0; i < NUMSTATES; i++)
     {
         if (i <= S_MUSHROOM)
         {
@@ -7543,11 +7543,11 @@ void D_Init_DEHEXTRA_Frames(void)
 
     // NIGHTMARE! stuff
     // Set the flag for nightmare frames
-    for (int i = S_SARG_RUN1; i <= S_SARG_PAIN2; ++i)
+    for (int32_t i = S_SARG_RUN1; i <= S_SARG_PAIN2; ++i)
         states[i].flags |= STATEF_SKILL5FAST;
 
     // Start all MBF21 content here.
-    for (int i = 0; i < NUMMOBJTYPES; i++)
+    for (int32_t i = 0; i < NUMMOBJTYPES; i++)
     {
         mobjinfo[i].altspeed         = NO_ALTSPEED;
         mobjinfo[i].infighting_group = IG_DEFAULT;

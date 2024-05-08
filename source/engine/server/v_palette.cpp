@@ -36,7 +36,7 @@ dyncolormap_t NormalLight;
 /* Palette management stuff */
 /****************************/
 
-palindex_t V_BestColor(const argb_t *palette_colors, int r, int g, int b)
+palindex_t V_BestColor(const argb_t *palette_colors, int32_t r, int32_t g, int32_t b)
 {
     return 0;
 }
@@ -88,7 +88,7 @@ translationref_t::translationref_t(const uint8_t *table) : m_table(table), m_pla
 {
 }
 
-translationref_t::translationref_t(const uint8_t *table, const int player_id) : m_table(table), m_player_id(player_id)
+translationref_t::translationref_t(const uint8_t *table, const int32_t player_id) : m_table(table), m_player_id(player_id)
 {
 }
 
@@ -102,7 +102,7 @@ shaderef_t::shaderef_t(const shaderef_t &other)
 {
 }
 
-shaderef_t::shaderef_t(const shademap_t *const colors, const int mapnum) : m_colors(colors), m_mapnum(mapnum)
+shaderef_t::shaderef_t(const shademap_t *const colors, const int32_t mapnum) : m_colors(colors), m_mapnum(mapnum)
 {
 #if ODAMEX_DEBUG
     // NOTE(jsd): Arbitrary value picked here because we don't record the max number of colormaps for dynamic ones... or
@@ -161,7 +161,7 @@ void BuildDefaultShademap(const palette_t *pal, shademap_t &maps)
 {
 }
 
-dyncolormap_t *GetSpecialLights(int lr, int lg, int lb, int fr, int fg, int fb)
+dyncolormap_t *GetSpecialLights(int32_t lr, int32_t lg, int32_t lb, int32_t fr, int32_t fg, int32_t fb)
 {
     argb_t         color(lr, lg, lb);
     argb_t         fade(fr, fg, fb);

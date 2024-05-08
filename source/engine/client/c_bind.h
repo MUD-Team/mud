@@ -36,7 +36,7 @@ struct OBinding
 class OKeyBindings
 {
   private:
-    typedef OHashTable<int, std::string> BindingTable;
+    typedef OHashTable<int32_t, std::string> BindingTable;
 
   public:
     BindingTable Binds;
@@ -51,11 +51,11 @@ class OKeyBindings
     void UnbindACommand(const char *str);
     void UnbindAll();
 
-    void ChangeBinding(const char *str, int newone); // Stuff used by the customize controls menu
+    void ChangeBinding(const char *str, int32_t newone); // Stuff used by the customize controls menu
 
-    const std::string &GetBind(int key);             // Returns string bound to given key (NULL if none)
-    std::string        GetNameKeys(int first, int second);
-    int                GetKeysForCommand(const char *cmd, int *first, int *second);
+    const std::string &GetBind(int32_t key);             // Returns string bound to given key (NULL if none)
+    std::string        GetNameKeys(int32_t first, int32_t second);
+    int32_t                GetKeysForCommand(const char *cmd, int32_t *first, int32_t *second);
     std::string        GetKeynameFromCommand(const char *cmd, bool bTwoEntries = false);
 
     void ArchiveBindings(PHYSFS_File *f);

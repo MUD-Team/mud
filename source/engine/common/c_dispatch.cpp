@@ -134,9 +134,9 @@ class ActionKeyTracker
 
 static ActionKeyTracker action_key_tracker;
 
-static int ListActionCommands(void)
+static int32_t ListActionCommands(void)
 {
-    int i;
+    int32_t i;
 
     for (i = 0; i < NUM_ACTIONS; i++)
     {
@@ -165,14 +165,14 @@ uint32_t MakeKey(const char *s)
 // the key could not be found. This uses binary search,
 // actionbits[] must be sorted in ascending order.
 
-int GetActionBit(uint32_t key)
+int32_t GetActionBit(uint32_t key)
 {
-    int min = 0;
-    int max = NUM_ACTIONS - 1;
+    int32_t min = 0;
+    int32_t max = NUM_ACTIONS - 1;
 
     while (min <= max)
     {
-        int          mid    = (min + max) / 2;
+        int32_t          mid    = (min + max) / 2;
         uint32_t seekey = actionbits[mid].key;
 
         if (seekey == key)
@@ -195,7 +195,7 @@ void C_DoCommand(const char *cmd, uint32_t key)
     char            *args, *arg, *realargs;
     const char      *data;
     DConsoleCommand *com;
-    int              check = -1;
+    int32_t              check = -1;
 
     data = ParseString(cmd);
     if (!data)
@@ -559,7 +559,7 @@ bool ValidEscape(char data)
 // found in the Quake2 source distribution
 const char *ParseString2(const char *data)
 {
-    int len;
+    int32_t len;
 
     len          = 0;
     com_token[0] = 0;
@@ -680,7 +680,7 @@ DConsoleCommand::DConsoleCommand(const char *name)
     if (firstTime)
     {
         char tname[16];
-        int  i;
+        int32_t  i;
 
         firstTime = false;
 
@@ -806,9 +806,9 @@ std::string C_QuoteString(const std::string &argstr)
     return buffer.str();
 }
 
-static int DumpHash(bool aliases)
+static int32_t DumpHash(bool aliases)
 {
-    int count = 0;
+    int32_t count = 0;
 
     for (command_map_t::iterator i = Commands().begin(), e = Commands().end(); i != e; ++i)
     {
@@ -898,7 +898,7 @@ END_COMMAND(alias)
 
 BEGIN_COMMAND(cmdlist)
 {
-    int count;
+    int32_t count;
 
     count = ListActionCommands();
     count += DumpHash(false);
@@ -914,14 +914,14 @@ END_COMMAND(cmdlist)
 void C_ExecCmdLineParams(bool onlyset, bool onlylogfile)
 {
     size_t cmdlen, argstart;
-    int    didlogfile = 0;
+    int32_t    didlogfile = 0;
 
     for (size_t currArg = 1; currArg < Args.NumArgs();)
     {
         if (*Args.GetArg(currArg++) == '+')
         {
-            int setComp     = stricmp(Args.GetArg(currArg - 1) + 1, "set");
-            int logfileComp = stricmp(Args.GetArg(currArg - 1) + 1, "logfile");
+            int32_t setComp     = stricmp(Args.GetArg(currArg - 1) + 1, "set");
+            int32_t logfileComp = stricmp(Args.GetArg(currArg - 1) + 1, "logfile");
             if ((onlyset && setComp) || (onlylogfile && logfileComp) || (!onlyset && !setComp) ||
                 (!onlylogfile && !logfileComp))
             {
@@ -1021,8 +1021,8 @@ BEGIN_COMMAND(stoplog)
 }
 END_COMMAND(stoplog)
 
-bool P_StartScript(AActor *who, line_t *where, int script, const char *map, int lineSide, int arg0, int arg1, int arg2,
-                   int always);
+bool P_StartScript(AActor *who, line_t *where, int32_t script, const char *map, int32_t lineSide, int32_t arg0, int32_t arg1, int32_t arg2,
+                   int32_t always);
 
 BEGIN_COMMAND(puke)
 {
@@ -1032,8 +1032,8 @@ BEGIN_COMMAND(puke)
     }
     else
     {
-        int script = atoi(argv[1]);
-        int arg0 = 0, arg1 = 0, arg2 = 0;
+        int32_t script = atoi(argv[1]);
+        int32_t arg0 = 0, arg1 = 0, arg2 = 0;
 
         if (argc > 2)
         {

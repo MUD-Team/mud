@@ -80,7 +80,7 @@ extern size_t got_heapsize;
 void D_CheckNetGame(void);
 void D_DoomLoop(void);
 
-extern int           testingmode;
+extern int32_t           testingmode;
 extern bool          gameisdead;
 extern bool          M_DemoNoPlay; // [RH] if true, then skip any demos in the loop
 extern DThinker      ThinkerCap;
@@ -92,11 +92,11 @@ const char *D_DrawIcon; // [RH] Patch name of icon to draw on next refresh
 char    startmap[8];
 bool    autostart;
 event_t events[MAXEVENTS];
-int     eventhead;
-int     eventtail;
+int32_t     eventhead;
+int32_t     eventtail;
 bool    demotest = false;
 
-static int pagetic;
+static int32_t pagetic;
 
 EXTERN_CVAR(sv_allowexit)
 EXTERN_CVAR(sv_nomonsters)
@@ -267,7 +267,7 @@ void D_PageDrawer()
     {
         return;
     }
-    int             surface_width = primary_surface->getWidth(), surface_height = primary_surface->getHeight();
+    int32_t             surface_width = primary_surface->getWidth(), surface_height = primary_surface->getHeight();
     primary_surface->clear(); // ensure black background in matted modes
 }
 
@@ -539,7 +539,7 @@ void D_DoomMain()
     p = Args.CheckParm("-warp");
     if (p && p < Args.NumArgs() - (1 + (gameinfo.flags & GI_MAPxx ? 0 : 1)))
     {
-        int ep, map;
+        int32_t ep, map;
 
         if (gameinfo.flags & GI_MAPxx)
         {

@@ -79,7 +79,7 @@ void STACK_ARGS call_terms(void)
         TermFuncs.top().first(), TermFuncs.pop();
 }
 
-int main(int argc, char *argv[])
+int32_t main(int32_t argc, char *argv[])
 {
     // [AM] Set crash callbacks, so we get something useful from crashes.
 #ifdef NDEBUG
@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
 
             std::string str;
             StrFormat(str, "Odamex %s\n", NiceVersion());
-            const int ok = PHYSFS_writeBytes(fh, str.data(), str.size());
+            const int32_t ok = PHYSFS_writeBytes(fh, str.data(), str.size());
             if (ok != str.size())
             {
                 PHYSFS_deinit();

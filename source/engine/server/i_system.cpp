@@ -264,7 +264,7 @@ void I_Yield()
 // I_WaitVBL is never used to actually synchronize to the
 // vertical blank. Instead, it's used for delay purposes.
 //
-void I_WaitVBL(int count)
+void I_WaitVBL(int32_t count)
 {
     I_Sleep(1000000LL * 1000LL * count / 70);
 }
@@ -273,7 +273,7 @@ void I_WaitVBL(int count)
 // SubsetLanguageIDs
 //
 #ifdef _WIN32
-static void SubsetLanguageIDs(LCID id, LCTYPE type, int idx)
+static void SubsetLanguageIDs(LCID id, LCTYPE type, int32_t idx)
 {
     char  buf[8];
     LCID  langid;
@@ -320,7 +320,7 @@ void I_FinishClockCalibration()
 //
 // I_Quit
 //
-static int has_exited;
+static int32_t has_exited;
 
 void STACK_ARGS I_Quit(void)
 {
@@ -359,7 +359,7 @@ void STACK_ARGS I_FatalError(const char *error, ...)
         va_list argptr;
         va_start(argptr, error);
 #ifdef _WIN32
-        int index = vsprintf(errortext, error, argptr);
+        int32_t index = vsprintf(errortext, error, argptr);
         sprintf(errortext + index, "\nGetLastError = %ld", GetLastError());
 #else
         vsprintf(errortext, error, argptr);
@@ -395,13 +395,13 @@ char DoomStartupTitle[256] = {0};
 
 void I_SetTitleString(const char *title)
 {
-    int i;
+    int32_t i;
 
     for (i = 0; title[i]; i++)
         DoomStartupTitle[i] = title[i] | 0x80;
 }
 
-void I_PrintStr(int xp, const char *cp, int count, bool scroll)
+void I_PrintStr(int32_t xp, const char *cp, int32_t count, bool scroll)
 {
     char string[4096];
 
@@ -418,7 +418,7 @@ void I_PrintStr(int xp, const char *cp, int count, bool scroll)
 // I_ConsoleInput
 //
 #ifdef _WIN32
-int ShutdownNow();
+int32_t ShutdownNow();
 
 std::string I_ConsoleInput(void)
 {
@@ -432,7 +432,7 @@ std::string I_ConsoleInput(void)
 
     while (kbhit() && len < sizeof(text))
     {
-        int ch = getch();
+        int32_t ch = getch();
 
         // Handle special keys
         switch (ch)
@@ -503,7 +503,7 @@ std::string I_ConsoleInput(void)
 {
     std::string ret;
     static char text[1024] = {0};
-    int         len;
+    int32_t         len;
 
     fd_set fdr;
     FD_ZERO(&fdr);

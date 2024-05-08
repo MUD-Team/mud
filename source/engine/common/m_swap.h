@@ -66,7 +66,7 @@ inline static uint32_t LELONG(uint32_t x)
 
 inline static int32_t LELONG(int32_t x)
 {
-    return (int)((((uint32_t)x) >> 24) | ((((uint32_t)x) >> 8) & 0xff00) |
+    return (int32_t)((((uint32_t)x) >> 24) | ((((uint32_t)x) >> 8) & 0xff00) |
                  ((((uint32_t)x) << 8) & 0xff0000) | (((uint32_t)x) << 24));
 }
 

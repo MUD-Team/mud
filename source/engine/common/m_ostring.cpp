@@ -485,42 +485,42 @@ OString OString::substr(size_t pos, size_t len) const
 // OString::compare
 // ------------------------------------------------------------------------
 
-int OString::compare(size_t pos, size_t len, const OString &other) const
+int32_t OString::compare(size_t pos, size_t len, const OString &other) const
 {
     return getString().compare(pos, len, other.getString());
 }
 
-int OString::compare(size_t pos, size_t len, const OString &other, size_t subpos, size_t sublen) const
+int32_t OString::compare(size_t pos, size_t len, const OString &other, size_t subpos, size_t sublen) const
 {
     return getString().compare(pos, len, other.getString(), subpos, sublen);
 }
 
-int OString::compare(const std::string &str) const
+int32_t OString::compare(const std::string &str) const
 {
     return getString().compare(str);
 }
 
-int OString::compare(size_t pos, size_t len, const std::string &str) const
+int32_t OString::compare(size_t pos, size_t len, const std::string &str) const
 {
     return getString().compare(pos, len, str);
 }
 
-int OString::compare(size_t pos, size_t len, const std::string &str, size_t subpos, size_t sublen) const
+int32_t OString::compare(size_t pos, size_t len, const std::string &str, size_t subpos, size_t sublen) const
 {
     return getString().compare(pos, len, str, subpos, sublen);
 }
 
-int OString::compare(const char *s) const
+int32_t OString::compare(const char *s) const
 {
     return getString().compare(s);
 }
 
-int OString::compare(size_t pos, size_t len, const char *s) const
+int32_t OString::compare(size_t pos, size_t len, const char *s) const
 {
     return getString().compare(pos, len, s);
 }
 
-int OString::compare(size_t pos, size_t len, const char *s, size_t n) const
+int32_t OString::compare(size_t pos, size_t len, const char *s, size_t n) const
 {
     return getString().compare(pos, len, s, n);
 }

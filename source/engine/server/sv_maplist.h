@@ -39,7 +39,7 @@ class Maplist
     bool                         shuffled;
     size_t                       s_index;
     std::vector<size_t>          s_maplist;
-    std::map<int, uint64_t>         timeout;
+    std::map<int32_t, uint64_t>         timeout;
     uint8_t                         version;
     void                         shuffle(void);
     void                         update_shuffle_index(void);
@@ -68,10 +68,10 @@ class Maplist
     bool set_index(const size_t &index);
     void set_shuffle(const bool setting);
     // Timeout
-    bool pid_timeout(const int index);
-    bool pid_cached(const int index);
-    void set_timeout(const int index);
-    void clear_timeout(const int index);
+    bool pid_timeout(const int32_t index);
+    bool pid_cached(const int32_t index);
+    void set_timeout(const int32_t index);
+    void clear_timeout(const int32_t index);
 
     // Lobby
     void            set_lobbymap(maplist_entry_t map);

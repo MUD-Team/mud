@@ -379,21 +379,21 @@ class OString
     // compare
     // ------------------------------------------------------------------------
 
-    inline int compare(const OString &other) const
+    inline int32_t compare(const OString &other) const
     {
         if (mId == other.mId)
             return 0;
         return getString().compare(other.getString());
     }
 
-    int compare(size_t pos, size_t len, const OString &other) const;
-    int compare(size_t pos, size_t len, const OString &other, size_t subpos, size_t sublen) const;
-    int compare(const std::string &str) const;
-    int compare(size_t pos, size_t len, const std::string &str) const;
-    int compare(size_t pos, size_t len, const std::string &str, size_t subpos, size_t sublen) const;
-    int compare(const char *s) const;
-    int compare(size_t pos, size_t len, const char *s) const;
-    int compare(size_t pos, size_t len, const char *s, size_t n) const;
+    int32_t compare(size_t pos, size_t len, const OString &other) const;
+    int32_t compare(size_t pos, size_t len, const OString &other, size_t subpos, size_t sublen) const;
+    int32_t compare(const std::string &str) const;
+    int32_t compare(size_t pos, size_t len, const std::string &str) const;
+    int32_t compare(size_t pos, size_t len, const std::string &str, size_t subpos, size_t sublen) const;
+    int32_t compare(const char *s) const;
+    int32_t compare(size_t pos, size_t len, const char *s) const;
+    int32_t compare(size_t pos, size_t len, const char *s, size_t n) const;
 
     // ------------------------------------------------------------------------
     // equals

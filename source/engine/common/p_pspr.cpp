@@ -42,7 +42,7 @@
 #define WEAPONTOP    32 * FRACUNIT
 
 void A_FireRailgun(AActor *mo);
-void M_LogWDLEvent(int mod);
+void M_LogWDLEvent(int32_t mod);
 
 EXTERN_CVAR(sv_infiniteammo)
 EXTERN_CVAR(sv_allowpwo)
@@ -190,7 +190,7 @@ void P_SetPspritePtr(player_t *player, pspdef_t *psp, statenum_t stnum)
     // an initial state of 0 could cycle through
 }
 
-void P_SetPsprite(player_t *player, int position, statenum_t stnum)
+void P_SetPsprite(player_t *player, int32_t position, statenum_t stnum)
 {
     P_SetPspritePtr(player, &player->psprites[position], stnum);
 }
@@ -237,7 +237,7 @@ void P_BringUpWeapon(player_t *player)
 bool P_EnoughAmmo(player_t *player, weapontype_t weapon, bool switching = false)
 {
     ammotype_t ammotype = weaponinfo[weapon].ammotype;
-    int        count    = 1; // default amount of ammo for most weapons
+    int32_t        count    = 1; // default amount of ammo for most weapons
 
     // [SL] Fix for when DeHackEd doesn't patch minammo
     count = MAX(weaponinfo[weapon].minammo, weaponinfo[weapon].ammouse);
@@ -314,11 +314,11 @@ weapontype_t P_GetNextWeapon(player_t *player, bool forward)
     if (!item)
         return wp_nochange;
 
-    int selected_weapon = ITEM_INDEX(item);
+    int32_t selected_weapon = ITEM_INDEX(item);
 
-    for (int i = 1; i <= num_items; i++)
+    for (int32_t i = 1; i <= num_items; i++)
     {
-        int index;
+        int32_t index;
         if (forward)
             index = (selected_weapon + i) % num_items;
         else // traverse backwards
@@ -413,7 +413,7 @@ static void DecreaseAmmo(player_t *player)
     if (!sv_infiniteammo)
     {
         ammotype_t ammonum = weaponinfo[player->readyweapon].ammotype;
-        int        amount  = weaponinfo[player->readyweapon].ammouse;
+        int32_t        amount  = weaponinfo[player->readyweapon].ammouse;
 
         if (ammonum < NUMAMMO)
             player->ammo[ammonum] -= amount;
@@ -613,8 +613,8 @@ void A_GunFlash(AActor *mo)
 void A_Punch(AActor *mo)
 {
     angle_t angle;
-    int     damage;
-    int     slope;
+    int32_t     damage;
+    int32_t     slope;
 
     player_t *player = mo->player;
 
@@ -653,7 +653,7 @@ void A_Punch(AActor *mo)
 void A_Saw(AActor *mo)
 {
     angle_t angle;
-    int     damage;
+    int32_t     damage;
 
     player_t *player = mo->player;
 
@@ -728,7 +728,7 @@ void A_FireBFG(AActor *mo)
 
     // [RH] bfg can be forced to not use freeaim
     angle_t storedpitch   = player->mo->pitch;
-    int     storedaimdist = player->userinfo.aimdist;
+    int32_t     storedaimdist = player->userinfo.aimdist;
 
     DecreaseAmmo(player);
 
@@ -758,7 +758,7 @@ void A_FireBFG(AActor *mo)
 void A_FireOldBFG(AActor *mo)
 {
     /* [AM] Not implemented...yet.
-    int type = MT_PLASMA1;
+    int32_t type = MT_PLASMA1;
 
     if (weapon_recoil && !(player->mo->flags & MF_NOCLIP))
     P_Thrust(player, ANG180 + player->mo->angle,
@@ -774,12 +774,12 @@ void A_FireOldBFG(AActor *mo)
     angle_t an = mo->angle;
     angle_t an1 = ((P_Random(pr_bfg) & 127) - 64) * (ANG90 / 768) + an;
     angle_t an2 = ((P_Random(pr_bfg) & 127) - 64) * (ANG90 / 640) + ANG90;
-    extern int autoaim;
+    extern int32_t autoaim;
 
     if (autoaim || !beta_emulation)
     {
         // killough 8/2/98: make autoaiming prefer enemies
-        int mask = MF_FRIEND;
+        int32_t mask = MF_FRIEND;
         fixed_t slope;
         do
         {
@@ -836,7 +836,7 @@ void A_WeaponJump(AActor *mo)
 //
 void A_CheckAmmo(AActor *mo)
 {
-    int        amount;
+    int32_t        amount;
     ammotype_t type;
 
     player_t        *player = mo->player;
@@ -862,7 +862,7 @@ void A_CheckAmmo(AActor *mo)
 //
 void A_ConsumeAmmo(AActor *mo)
 {
-    int        amount;
+    int32_t        amount;
     ammotype_t type;
 
     player_t        *player = mo->player;
@@ -946,7 +946,7 @@ void A_WeaponProjectile(AActor *mo)
 {
     fixed_t type, angle, pitch, spawnofs_xy, spawnofs_z;
     AActor *proj;
-    int     an;
+    int32_t     an;
 
     player_t        *player = mo->player;
     struct pspdef_s *psp    = &player->psprites[player->psprnum];
@@ -975,8 +975,8 @@ void A_WeaponProjectile(AActor *mo)
 //
 void A_WeaponBulletAttack(AActor *mo)
 {
-    int hspread, vspread, numbullets, damagebase, damagemod;
-    int i, damage, angle, slope;
+    int32_t hspread, vspread, numbullets, damagebase, damagemod;
+    int32_t i, damage, angle, slope;
 
     player_t        *player = mo->player;
     struct pspdef_s *psp    = &player->psprites[player->psprnum];
@@ -1001,9 +1001,9 @@ void A_WeaponBulletAttack(AActor *mo)
 
     for (i = 0; i < numbullets; i++)
     {
-        int bangle = angle;
+        int32_t bangle = angle;
         damage     = (P_Random() % damagemod + 1) * damagebase;
-        bangle     = angle + (int)player->mo->angle + P_RandomHitscanAngle(hspread);
+        bangle     = angle + (int32_t)player->mo->angle + P_RandomHitscanAngle(hspread);
         slope      = bulletslope + P_RandomHitscanSlope(vspread);
 
         P_LineAttack(player->mo, bangle, MISSILERANGE, slope, damage);
@@ -1021,9 +1021,9 @@ void A_WeaponBulletAttack(AActor *mo)
 //
 void A_WeaponMeleeAttack(AActor *mo)
 {
-    int     damagebase, damagemod, zerkfactor, hitsound, range;
+    int32_t     damagebase, damagemod, zerkfactor, hitsound, range;
     angle_t angle;
-    int     t, slope, damage;
+    int32_t     t, slope, damage;
 
     player_t        *player = mo->player;
     struct pspdef_s *psp    = &player->psprites[player->psprnum];
@@ -1089,7 +1089,7 @@ void A_WeaponSound(AActor *mo)
     if (!psp->state)
         return;
 
-    int sndmap = psp->state->args[0];
+    int32_t sndmap = psp->state->args[0];
 
     if (sndmap >= ARRAY_LENGTH(SoundMap))
     {
@@ -1132,11 +1132,11 @@ void A_FirePlasma(AActor *mo)
 //
 // [RH] A_FireRailgun
 //
-static int RailOffset;
+static int32_t RailOffset;
 
 void A_FireRailgun(AActor *mo)
 {
-    int damage;
+    int32_t damage;
 
     player_t *player = mo->player;
     DecreaseAmmo(player);
@@ -1257,7 +1257,7 @@ void P_FireHitscan(player_t *player, size_t quantity, spreadtype_t spread)
 
     for (size_t i = 0; i < quantity; i++)
     {
-        int damage = 5 * (P_Random(player->mo) % 3 + 1);
+        int32_t damage = 5 * (P_Random(player->mo) % 3 + 1);
 
         // [SL] Don't do damage if the client is predicting bullet puffs
         if (predict_puffs)
@@ -1398,9 +1398,9 @@ void A_Light2(AActor *mo)
 //
 void A_BFGSpray(AActor *mo)
 {
-    int     i;
-    int     j;
-    int     damage;
+    int32_t     i;
+    int32_t     j;
+    int32_t     damage;
     angle_t an;
 
     if (!serverside)
@@ -1453,7 +1453,7 @@ void A_BFGsound(AActor *mo)
 void P_SetupPsprites(player_t *player)
 {
     // remove all psprites
-    for (int i = 0; i < NUMPSPRITES; i++)
+    for (int32_t i = 0; i < NUMPSPRITES; i++)
         player->psprites[i].state = NULL;
 
     // spawn the gun
@@ -1468,7 +1468,7 @@ void P_SetupPsprites(player_t *player)
 //
 void P_MovePsprites(player_t *player)
 {
-    for (int i = 0; i < NUMPSPRITES; i++)
+    for (int32_t i = 0; i < NUMPSPRITES; i++)
     {
         pspdef_t *psp = &player->psprites[i];
 
@@ -1519,7 +1519,7 @@ void A_CloseShotgun2(AActor *mo)
 //
 // Immediately changes a players weapon to a new weapon and new animation state
 //
-void A_ForceWeaponFire(AActor *mo, weapontype_t weapon, int tic)
+void A_ForceWeaponFire(AActor *mo, weapontype_t weapon, int32_t tic)
 {
     if (!mo || !mo->player)
         return;

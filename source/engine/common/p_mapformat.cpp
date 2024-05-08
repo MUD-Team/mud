@@ -52,7 +52,7 @@ enum triggertype
 // Migrate some non-hexen data to hexen format, and other misc flags.
 void P_MigrateActorInfo(void)
 {
-    int         i;
+    int32_t         i;
     static bool migrated = false;
 
     // Set MF2_PASSMOBJ on dehacked monsters
@@ -128,7 +128,7 @@ bool MapFormat::actor_in_special_sector(AActor *actor)
         return P_ActorInCompatibleSector(actor);
 }
 
-void MapFormat::spawn_scroller(line_t *line, int i)
+void MapFormat::spawn_scroller(line_t *line, int32_t i)
 {
     if (map_format.zdoom)
         P_SpawnZDoomScroller(line, i);
@@ -152,7 +152,7 @@ void MapFormat::spawn_pusher(line_t *line)
         P_SpawnCompatiblePusher(line);
 }
 
-void MapFormat::spawn_extra(int i)
+void MapFormat::spawn_extra(int32_t i)
 {
     if (map_format.zdoom)
         P_SpawnZDoomExtra(i);
@@ -160,7 +160,7 @@ void MapFormat::spawn_extra(int i)
         P_SpawnCompatibleExtra(i);
 }
 
-bool MapFormat::cross_special_line(line_t *line, int side, AActor *thing, bool bossaction)
+bool MapFormat::cross_special_line(line_t *line, int32_t side, AActor *thing, bool bossaction)
 {
     if (map_format.zdoom)
         return P_CrossZDoomSpecialLine(line, side, thing, bossaction);
@@ -168,7 +168,7 @@ bool MapFormat::cross_special_line(line_t *line, int side, AActor *thing, bool b
         return P_CrossCompatibleSpecialLine(line, side, thing, bossaction);
 }
 
-void MapFormat::post_process_sidedef_special(side_t *sd, mapsidedef_t *msd, sector_t *sec, int i)
+void MapFormat::post_process_sidedef_special(side_t *sd, mapsidedef_t *msd, sector_t *sec, int32_t i)
 {
     if (map_format.zdoom)
         P_PostProcessZDoomSidedefSpecial(sd, msd, sec, i);
@@ -418,7 +418,7 @@ bool P_IsCompatibleBlueDoorLine(const int16_t special)
     if (map_format.getZDoom())
         return false;
 
-    int  lock        = (special & LockedKey) >> LockedKeyShift;
+    int32_t  lock        = (special & LockedKey) >> LockedKeyShift;
     bool genericlock = false;
 
     if (lock == BCard || lock == BSkull)
@@ -432,7 +432,7 @@ bool P_IsCompatibleRedDoorLine(const int16_t special)
     if (map_format.getZDoom())
         return false;
 
-    int  lock        = (special & LockedKey) >> LockedKeyShift;
+    int32_t  lock        = (special & LockedKey) >> LockedKeyShift;
     bool genericlock = false;
 
     if (lock == RCard || lock == RSkull)
@@ -446,7 +446,7 @@ bool P_IsCompatibleYellowDoorLine(const int16_t special)
     if (map_format.getZDoom())
         return false;
 
-    int  lock        = (special & LockedKey) >> LockedKeyShift;
+    int32_t  lock        = (special & LockedKey) >> LockedKeyShift;
     bool genericlock = false;
 
     if (lock == YCard || lock == YSkull)

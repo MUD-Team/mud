@@ -31,8 +31,8 @@
 
 #define MAX_CHATSTR_LEN 128
 
-int            PrintString(int printlevel, const char *string);
-int STACK_ARGS Printf_Bold(const char *format, ...);
+int32_t            PrintString(int32_t printlevel, const char *string);
+int32_t STACK_ARGS Printf_Bold(const char *format, ...);
 
 void C_AddTabCommand(const char *name);
 void C_RemoveTabCommand(const char *name);

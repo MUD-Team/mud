@@ -98,7 +98,7 @@ struct ticcmd_t
         readByte(in.begin() + 11, impulse);
     }
 
-    int tic;     // the client's tic when this cmd was sent
+    int32_t tic;     // the client's tic when this cmd was sent
 
     uint8_t  buttons;
     int16_t pitch; // up/down. currently just a y-sheering amount

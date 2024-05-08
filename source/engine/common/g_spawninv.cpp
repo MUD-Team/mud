@@ -39,15 +39,15 @@ extern const char *weaponnames[];
 struct spawnInventory_t
 {
     bool         isdefault;
-    int          health;
-    int          armorpoints;
-    int          armortype;
+    int32_t          health;
+    int32_t          armorpoints;
+    int32_t          armortype;
     weapontype_t readyweapon;
     bool         weaponowned[NUMWEAPONS];
-    int          ammo[NUMAMMO];
+    int32_t          ammo[NUMAMMO];
     bool         berserk;
     bool         backpack;
-    int          invul;
+    int32_t          invul;
 
     spawnInventory_t()
         : isdefault(false), health(100), armorpoints(0), armortype(0), readyweapon(NUMWEAPONS), berserk(false),
@@ -68,7 +68,7 @@ struct spawnInventory_t
 
 // Berserk time that prevents showing any red.  If you want to show a teensy
 // bit of red, you're going to need to send the player's powers on map change.
-const int INV_BERSERK_TIME = 64 * 12;
+const int32_t INV_BERSERK_TIME = 64 * 12;
 
 /**
  * @brief Convert a string form of a boolean to an actual boolean.
@@ -122,7 +122,7 @@ static char WeaponTypeToChar(const weapontype_t type)
 /**
  * @brief Turn a weapon character into its type index.
  */
-static int WeaponTypeFromChar(const char ch)
+static int32_t WeaponTypeFromChar(const char ch)
 {
     if (ch >= '1' && ch <= '7')
         return ch - '1';
@@ -235,7 +235,7 @@ static void InvSetHealth(spawnInventory_t &inv, const std::string &value)
 /**
  * @brief Set armor of a given type from a string.
  */
-static void InvSetArmor(spawnInventory_t &inv, const int type, const std::string &value)
+static void InvSetArmor(spawnInventory_t &inv, const int32_t type, const std::string &value)
 {
     inv.armortype   = type;
     inv.armorpoints = MAX(0, atoi(value.c_str()));
@@ -250,7 +250,7 @@ static bool InvSetReadyWeapon(spawnInventory_t &inv, const std::string &value)
     if (value.empty())
         return false;
 
-    int weap = WeaponTypeFromChar(value.at(0));
+    int32_t weap = WeaponTypeFromChar(value.at(0));
     if (weap == INT32_MIN)
         return false;
 
@@ -271,7 +271,7 @@ static bool InvSetWeapons(spawnInventory_t &inv, const std::string &value)
 
     for (std::string::const_iterator it = value.begin(); it != value.end(); ++it)
     {
-        int owned = WeaponTypeFromChar(*it);
+        int32_t owned = WeaponTypeFromChar(*it);
         if (owned == INT32_MIN)
             return false;
 

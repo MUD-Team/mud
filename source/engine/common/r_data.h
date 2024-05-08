@@ -28,8 +28,8 @@
 #include "r_state.h"
 
 // Retrieve column data for span blitting.
-tallpost_t *R_GetPatchColumn(patch_t *patch, int colnum);
-tallpost_t *R_GetTextureColumn(texhandle_t texnum, int colnum);
+tallpost_t *R_GetPatchColumn(patch_t *patch, int32_t colnum);
+tallpost_t *R_GetTextureColumn(texhandle_t texnum, int32_t colnum);
 size_t      R_CalculateNewPatchSize(patch_t *patch, size_t length);
 void R_ConvertPatch(patch_t *newpatch, patch_t *rawpatch);
 
@@ -40,13 +40,13 @@ void R_PrecacheLevel(void);
 void R_InitColormaps();
 void R_ShutdownColormaps();
 
-int  R_ColormapNumForName(const char *name);         // killough 4/4/98
+int32_t  R_ColormapNumForName(const char *name);         // killough 4/4/98
 void R_ReinitColormap();
 void R_ForceDefaultColormap(const char *name);
 void R_SetDefaultColormap(const char *name);         // [RH] change normal fadetable
 
 argb_t R_BlendForColormap(uint32_t mapnum);      // [RH] return calculated blend for a colormap
-int    R_ColormapForBlend(const argb_t blend_color); // [SL] return colormap that has the blend color
+int32_t    R_ColormapForBlend(const argb_t blend_color); // [SL] return colormap that has the blend color
 
 extern shademap_t realcolormaps;                     // [RH] make the colormaps externally visible
 extern size_t     numfakecmaps;

@@ -27,34 +27,34 @@
 #include "res_texture.h"
 
 // Visplane related.
-extern int *lastopening;
+extern int32_t *lastopening;
 
-typedef void (*planefunction_t)(int top, int bottom);
+typedef void (*planefunction_t)(int32_t top, int32_t bottom);
 
 extern planefunction_t floorfunc;
 extern planefunction_t ceilingfunc_t;
 
-extern int *floorclip;
-extern int *ceilingclip;
-extern int *floorclipinitial;
-extern int *ceilingclipinitial;
+extern int32_t *floorclip;
+extern int32_t *ceilingclip;
+extern int32_t *floorclipinitial;
+extern int32_t *ceilingclipinitial;
 
 extern fixed_t *yslope;
 
 void R_InitPlanes(void);
 void R_ClearPlanes(void);
 
-void R_MapPlane(int y, int x1, int x2);
+void R_MapPlane(int32_t y, int32_t x1, int32_t x2);
 
-void R_MakeSpans(int x, int t1, int b1, int t2, int b2);
+void R_MakeSpans(int32_t x, int32_t t1, int32_t b1, int32_t t2, int32_t b2);
 
 void R_DrawPlanes(void);
 
-visplane_t *R_FindPlane(plane_t secplane, texhandle_t picnum, int lightlevel,
+visplane_t *R_FindPlane(plane_t secplane, texhandle_t picnum, int32_t lightlevel,
                         fixed_t xoffs, // killough 2/28/98: add x-y offsets
                         fixed_t yoffs, fixed_t xscale, fixed_t yscale, angle_t angle);
 
-visplane_t *R_CheckPlane(visplane_t *pl, int start, int stop);
+visplane_t *R_CheckPlane(visplane_t *pl, int32_t start, int32_t stop);
 
 // [RH] Added for multires support
 bool R_PlaneInitData(IRenderSurface *surface);

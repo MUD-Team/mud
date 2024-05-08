@@ -42,7 +42,7 @@
 // may be changed without affecting compatibility.
 //
 
-static int P_PointOnSide(fixed_t x, fixed_t y, node_t *node)
+static int32_t P_PointOnSide(fixed_t x, fixed_t y, node_t *node)
 {
     if (!node->dx)
         return x <= node->x ? node->dy > 0 : node->dy < 0;
@@ -68,8 +68,8 @@ static int P_PointOnSide(fixed_t x, fixed_t y, node_t *node)
 subsector_t *P_PointInSubsector(fixed_t x, fixed_t y)
 {
     node_t *node;
-    int     side;
-    int     nodenum;
+    int32_t     side;
+    int32_t     nodenum;
 
     // single subsector is a special case
     if (!numnodes)
@@ -94,10 +94,10 @@ AActor::ActorBlockMapListNode::ActorBlockMapListNode(AActor *mo) : actor(mo)
 
 void AActor::ActorBlockMapListNode::Link()
 {
-    int left   = (actor->x - actor->radius - bmaporgx) >> MAPBLOCKSHIFT;
-    int right  = (actor->x + actor->radius - bmaporgx) >> MAPBLOCKSHIFT;
-    int top    = (actor->y - actor->radius - bmaporgy) >> MAPBLOCKSHIFT;
-    int bottom = (actor->y + actor->radius - bmaporgy) >> MAPBLOCKSHIFT;
+    int32_t left   = (actor->x - actor->radius - bmaporgx) >> MAPBLOCKSHIFT;
+    int32_t right  = (actor->x + actor->radius - bmaporgx) >> MAPBLOCKSHIFT;
+    int32_t top    = (actor->y - actor->radius - bmaporgy) >> MAPBLOCKSHIFT;
+    int32_t bottom = (actor->y + actor->radius - bmaporgy) >> MAPBLOCKSHIFT;
 
     // do not ignore actors only *partially* outside blockmap
     // e.g. do not ignore an actor just because its left edge is off the left
@@ -121,9 +121,9 @@ void AActor::ActorBlockMapListNode::Link()
 
         // [SL] 2012-05-15 - Add the actor to the blocklinks list for all of the
         // blockmaps it overlaps, not just the blockmap for the actor's center point.
-        for (int bmy = top; bmy <= bottom; bmy++)
+        for (int32_t bmy = top; bmy <= bottom; bmy++)
         {
-            for (int bmx = left; bmx <= right; bmx++)
+            for (int32_t bmx = left; bmx <= right; bmx++)
             {
                 // killough 8/11/98: simpler scheme using pointer-to-pointer prev
                 // pointers, allows head nodes to be treated like everything else
@@ -152,9 +152,9 @@ void AActor::ActorBlockMapListNode::Link()
 
 void AActor::ActorBlockMapListNode::Unlink()
 {
-    for (int bmy = originy; bmy < originy + blockcnty; bmy++)
+    for (int32_t bmy = originy; bmy < originy + blockcnty; bmy++)
     {
-        for (int bmx = originx; bmx < originx + blockcntx; bmx++)
+        for (int32_t bmx = originx; bmx < originx + blockcntx; bmx++)
         {
             // killough 8/11/98: simpler scheme using pointers-to-pointers for prev
             // pointers, allows head node pointers to be treated like everything else
@@ -178,7 +178,7 @@ void AActor::ActorBlockMapListNode::Unlink()
     }
 }
 
-AActor *AActor::ActorBlockMapListNode::Next(int bmx, int bmy)
+AActor *AActor::ActorBlockMapListNode::Next(int32_t bmx, int32_t bmy)
 {
     if (bmx < 0 || bmx >= bmapwidth || bmy < 0 || bmy >= bmapheight)
         return NULL;
@@ -194,7 +194,7 @@ void AActor::ActorBlockMapListNode::clear()
     memset(next, 0, sizeof(next));
 }
 
-size_t AActor::ActorBlockMapListNode::getIndex(int bmx, int bmy)
+size_t AActor::ActorBlockMapListNode::getIndex(int32_t bmx, int32_t bmy)
 {
     // range check
     if (bmx < originx || bmx > originx + blockcntx - 1 || bmy < originy || bmy > originy + blockcnty - 1)
@@ -250,7 +250,7 @@ fixed_t P_AproxDistance2(AActor *a, AActor *b)
 // P_PointOnLineSide
 // Returns 0 (front) or 1 (back)
 //
-int P_PointOnLineSide(fixed_t x, fixed_t y, const line_t *line)
+int32_t P_PointOnLineSide(fixed_t x, fixed_t y, const line_t *line)
 {
     // Make use of vector cross product
     return int64_t(y - line->v1->y) * int64_t(line->dx) + int64_t(line->v1->x - x) * int64_t(line->dy) >= 0;
@@ -261,10 +261,10 @@ int P_PointOnLineSide(fixed_t x, fixed_t y, const line_t *line)
 // Considers the line to be infinite
 // Returns side 0 or 1, -1 if box crosses the line.
 //
-int P_BoxOnLineSide(const fixed_t *tmbox, const line_t *ld)
+int32_t P_BoxOnLineSide(const fixed_t *tmbox, const line_t *ld)
 {
-    int p1 = 0;
-    int p2 = 0;
+    int32_t p1 = 0;
+    int32_t p2 = 0;
 
     switch (ld->slopetype)
     {
@@ -306,7 +306,7 @@ int P_BoxOnLineSide(const fixed_t *tmbox, const line_t *ld)
 // P_PointOnDivlineSide
 // Returns 0 (front) or 1 (back).
 //
-int P_PointOnDivlineSide(fixed_t x, fixed_t y, const divline_t *line)
+int32_t P_PointOnDivlineSide(fixed_t x, fixed_t y, const divline_t *line)
 {
     // Make use of vector cross product
     return int64_t(y - line->y) * int64_t(line->dx) + int64_t(line->x - x) * int64_t(line->dy) >= 0;
@@ -541,13 +541,13 @@ void AActor::SetOrigin(fixed_t ix, fixed_t iy, fixed_t iz)
 //
 extern polyblock_t **PolyBlockMap;
 
-bool P_BlockLinesIterator(int x, int y, bool (*func)(line_t *))
+bool P_BlockLinesIterator(int32_t x, int32_t y, bool (*func)(line_t *))
 {
     if (x < 0 || y < 0 || x >= bmapwidth || y >= bmapheight)
         return true;
 
-    int  offset = *(blockmap + (bmapwidth * y + x));
-    int *list   = blockmaplump + offset;
+    int32_t  offset = *(blockmap + (bmapwidth * y + x));
+    int32_t *list   = blockmaplump + offset;
 
     /* [RH] Polyobj stuff from Hexen --> */
     polyblock_t *polyLink;
@@ -561,7 +561,7 @@ bool P_BlockLinesIterator(int x, int y, bool (*func)(line_t *))
         {
             if (polyLink->polyobj && polyLink->polyobj->validcount != validcount)
             {
-                int     i;
+                int32_t     i;
                 seg_t **tempSeg               = polyLink->polyobj->segs;
                 polyLink->polyobj->validcount = validcount;
 
@@ -608,7 +608,7 @@ bool P_BlockLinesIterator(int x, int y, bool (*func)(line_t *))
 //
 // P_BlockThingsIterator
 //
-bool P_BlockThingsIterator(int x, int y, bool (*func)(AActor *), AActor *actor)
+bool P_BlockThingsIterator(int32_t x, int32_t y, bool (*func)(AActor *), AActor *actor)
 {
     if (x < 0 || y < 0 || x >= bmapwidth || y >= bmapheight)
         return true;
@@ -634,7 +634,7 @@ TArray<intercept_t> intercepts;
 
 divline_t trace;
 bool      earlyout;
-int       ptflags;
+int32_t       ptflags;
 
 //
 // PIT_AddLineIntercepts.
@@ -648,8 +648,8 @@ int       ptflags;
 //
 bool PIT_AddLineIntercepts(line_t *ld)
 {
-    int       s1;
-    int       s2;
+    int32_t       s1;
+    int32_t       s2;
     fixed_t   frac;
     divline_t dl;
 
@@ -700,8 +700,8 @@ bool PIT_AddThingIntercepts(AActor *thing)
     fixed_t x2;
     fixed_t y2;
 
-    int s1;
-    int s2;
+    int32_t s1;
+    int32_t s2;
 
     bool tracepositive;
 
@@ -797,7 +797,7 @@ bool P_TraverseIntercepts(traverser_t func, fixed_t maxfrac)
 // Returns true if the traverser function returns true
 // for all lines.
 //
-bool P_PathTraverse(fixed_t x1, fixed_t y1, fixed_t x2, fixed_t y2, int flags, bool (*trav)(intercept_t *))
+bool P_PathTraverse(fixed_t x1, fixed_t y1, fixed_t x2, fixed_t y2, int32_t flags, bool (*trav)(intercept_t *))
 {
     fixed_t xt1;
     fixed_t yt1;
@@ -812,13 +812,13 @@ bool P_PathTraverse(fixed_t x1, fixed_t y1, fixed_t x2, fixed_t y2, int flags, b
     fixed_t xintercept;
     fixed_t yintercept;
 
-    int mapx;
-    int mapy;
+    int32_t mapx;
+    int32_t mapy;
 
-    int mapxstep;
-    int mapystep;
+    int32_t mapxstep;
+    int32_t mapystep;
 
-    int count;
+    int32_t count;
 
     earlyout = flags & PT_EARLYOUT;
 
@@ -1082,7 +1082,7 @@ bool P_ActorInFOV(AActor *origin, AActor *mo, float f, fixed_t dist)
 //
 // distance is in MAPBLOCKUNITS
 
-static AActor *RoughBlockCheck(AActor *mo, int index, angle_t fov)
+static AActor *RoughBlockCheck(AActor *mo, int32_t index, angle_t fov)
 {
     AActor *link;
 
@@ -1147,17 +1147,17 @@ static AActor *RoughBlockCheck(AActor *mo, int index, angle_t fov)
     return NULL;
 }
 
-AActor *P_RoughTargetSearch(AActor *mo, angle_t fov, int distance)
+AActor *P_RoughTargetSearch(AActor *mo, angle_t fov, int32_t distance)
 {
-    int     blockX;
-    int     blockY;
-    int     startX, startY;
-    int     blockIndex;
-    int     firstStop;
-    int     secondStop;
-    int     thirdStop;
-    int     finalStop;
-    int     count;
+    int32_t     blockX;
+    int32_t     blockY;
+    int32_t     startX, startY;
+    int32_t     blockIndex;
+    int32_t     firstStop;
+    int32_t     secondStop;
+    int32_t     thirdStop;
+    int32_t     finalStop;
+    int32_t     count;
     AActor *target;
 
     startX = (mo->x - bmaporgx) >> MAPBLOCKSHIFT;

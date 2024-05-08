@@ -186,11 +186,11 @@ class cvar_t
         return m_MaxValue;
     }
 
-    // return m_Value as an int, rounded to the nearest integer because
+    // return m_Value as an int32_t, rounded to the nearest integer because
     // casting truncates instead of rounding
-    int asInt() const
+    int32_t asInt() const
     {
-        return static_cast<int>(m_Value >= 0.0f ? m_Value + 0.5f : m_Value - 0.5f);
+        return static_cast<int32_t>(m_Value >= 0.0f ? m_Value + 0.5f : m_Value - 0.5f);
     }
 
     inline void Callback()

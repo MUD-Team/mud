@@ -26,6 +26,7 @@
 #pragma once
 
 #include <stddef.h>
+#include <stdint.h>
 
 //
 // ZONE MEMORY
@@ -51,23 +52,23 @@ void Z_FreeTags(const zoneTag_e lowtag, const zoneTag_e hightag);
 void Z_DumpHeap(const zoneTag_e lowtag, const zoneTag_e hightag);
 
 // Don't use these, use the macros instead!
-void *Z_Malloc2(size_t size, const zoneTag_e tag, void *user, const char *file, const int line);
-void  Z_Free2(void *ptr, const char *file, int line);
-void  Z_Discard2(void **ptr, const char *file, int line);
-void  Z_ChangeTag2(void *ptr, const zoneTag_e tag, const char *file, int line);
-void  Z_ChangeOwner2(void *ptr, void *user, const char *file, int line);
+void *Z_Malloc2(size_t size, const zoneTag_e tag, void *user, const char *file, const int32_t line);
+void  Z_Free2(void *ptr, const char *file, int32_t line);
+void  Z_Discard2(void **ptr, const char *file, int32_t line);
+void  Z_ChangeTag2(void *ptr, const zoneTag_e tag, const char *file, int32_t line);
+void  Z_ChangeOwner2(void *ptr, void *user, const char *file, int32_t line);
 
 typedef struct memblock_s
 {
     size_t             size; // including the header and possibly tiny fragments
     void             **user; // NULL if a free block
-    int                tag;  // PU_FREE if this is free  [ML] 12/4/06: Readded from Chocodoom
-    int                id;   // should be ZONEID
+    int32_t                tag;  // PU_FREE if this is free  [ML] 12/4/06: Readded from Chocodoom
+    int32_t                id;   // should be ZONEID
     struct memblock_s *next;
     struct memblock_s *prev;
 } memblock_t;
 
-inline void Z_ChangeTag2(const void *ptr, const zoneTag_e tag, const char *file, int line)
+inline void Z_ChangeTag2(const void *ptr, const zoneTag_e tag, const char *file, int32_t line)
 {
     Z_ChangeTag2(const_cast<void *>(ptr), tag, file, line);
 }
@@ -81,7 +82,7 @@ inline void Z_ChangeTag2(const void *ptr, const zoneTag_e tag, const char *file,
  * @param file Filename passed in from __FILE__ macro.
  * @param line Line number passed in from __LINE__ macro.
  */
-template <typename P> inline void Z_Discard2(P ptr, const char *file, int line)
+template <typename P> inline void Z_Discard2(P ptr, const char *file, int32_t line)
 {
     if (*ptr == NULL)
     {

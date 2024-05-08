@@ -38,7 +38,7 @@ typedef line_s line_t;
 
 class PlayerSnapshotManager;
 
-extern int gametic;
+extern int32_t gametic;
 
 #define NUM_SNAPSHOTS 32
 
@@ -54,7 +54,7 @@ extern int gametic;
 class Snapshot
 {
   public:
-    Snapshot(int time = -1);
+    Snapshot(int32_t time = -1);
     virtual ~Snapshot(){};
 
     bool operator==(const Snapshot &other) const;
@@ -97,17 +97,17 @@ class Snapshot
         mExtrapolated = val;
     }
 
-    int getTime() const
+    int32_t getTime() const
     {
         return mTime;
     }
-    void setTime(int time)
+    void setTime(int32_t time)
     {
         mTime = time;
     }
 
   private:
-    int  mTime;
+    int32_t  mTime;
     bool mValid;
 
     bool mAuthoritative;
@@ -126,8 +126,8 @@ class Snapshot
 class ActorSnapshot : public Snapshot
 {
   public:
-    ActorSnapshot(int time = -1);
-    ActorSnapshot(int time, const AActor *mo);
+    ActorSnapshot(int32_t time = -1);
+    ActorSnapshot(int32_t time, const AActor *mo);
     virtual ~ActorSnapshot(){};
 
     bool operator==(const ActorSnapshot &other) const;
@@ -180,27 +180,27 @@ class ActorSnapshot : public Snapshot
     {
         return mFloorZ;
     }
-    int getReactionTime() const
+    int32_t getReactionTime() const
     {
         return mReactionTime;
     }
-    int getWaterLevel() const
+    int32_t getWaterLevel() const
     {
         return mWaterLevel;
     }
-    int getFlags() const
+    int32_t getFlags() const
     {
         return mFlags;
     }
-    int getFlags2() const
+    int32_t getFlags2() const
     {
         return mFlags2;
     }
-    int getFlags3() const
+    int32_t getFlags3() const
     {
         return mFlags3;
     }
-    int getFrame() const
+    int32_t getFrame() const
     {
         return mFrame;
     }
@@ -271,37 +271,37 @@ class ActorSnapshot : public Snapshot
         mFields |= ACT_FLOORZ;
     }
 
-    void setReactionTime(int val)
+    void setReactionTime(int32_t val)
     {
         mReactionTime = val;
         mFields |= ACT_REACTIONTIME;
     }
 
-    void setWaterLevel(int val)
+    void setWaterLevel(int32_t val)
     {
         mWaterLevel = val;
         mFields |= ACT_WATERLEVEL;
     }
 
-    void setFlags(int val)
+    void setFlags(int32_t val)
     {
         mFlags = val;
         mFields |= ACT_FLAGS;
     }
 
-    void setFlags2(int val)
+    void setFlags2(int32_t val)
     {
         mFlags2 = val;
         mFields |= ACT_FLAGS2;
     }
 
-    void setFlags3(int val)
+    void setFlags3(int32_t val)
     {
         mFlags3 = val;
         mFields |= ACT_FLAGS3;
     }
 
-    void setFrame(int val)
+    void setFrame(int32_t val)
     {
         mFrame = val;
         mFields |= ACT_FRAME;
@@ -344,13 +344,13 @@ class ActorSnapshot : public Snapshot
     fixed_t mCeilingZ;
     fixed_t mFloorZ;
 
-    int mReactionTime;
-    int mWaterLevel;
+    int32_t mReactionTime;
+    int32_t mWaterLevel;
 
-    int mFlags;
-    int mFlags2;
-    int mFlags3;
-    int mFrame;
+    int32_t mFlags;
+    int32_t mFlags2;
+    int32_t mFlags3;
+    int32_t mFrame;
 };
 
 // ============================================================================
@@ -362,8 +362,8 @@ class ActorSnapshot : public Snapshot
 class PlayerSnapshot : public Snapshot
 {
   public:
-    PlayerSnapshot(int time = -1);
-    PlayerSnapshot(int time, player_t *player);
+    PlayerSnapshot(int32_t time = -1);
+    PlayerSnapshot(int32_t time, player_t *player);
     virtual ~PlayerSnapshot(){};
 
     bool operator==(const PlayerSnapshot &other) const;
@@ -380,7 +380,7 @@ class PlayerSnapshot : public Snapshot
     {
         return mDeltaViewHeight;
     }
-    int getJumpTime() const
+    int32_t getJumpTime() const
     {
         return mJumpTime;
     }
@@ -429,27 +429,27 @@ class PlayerSnapshot : public Snapshot
     {
         return mActorSnap.getFloorZ();
     }
-    int getReactionTime() const
+    int32_t getReactionTime() const
     {
         return mActorSnap.getReactionTime();
     }
-    int getWaterLevel() const
+    int32_t getWaterLevel() const
     {
         return mActorSnap.getWaterLevel();
     }
-    int getFlags() const
+    int32_t getFlags() const
     {
         return mActorSnap.getFlags();
     }
-    int getFlags2() const
+    int32_t getFlags2() const
     {
         return mActorSnap.getFlags2();
     }
-    int getFlags3() const
+    int32_t getFlags3() const
     {
         return mActorSnap.getFlags3();
     }
-    int getFrame() const
+    int32_t getFrame() const
     {
         return mActorSnap.getFrame();
     }
@@ -544,37 +544,37 @@ class PlayerSnapshot : public Snapshot
         mFields |= PLY_ONGROUND;
     }
 
-    void setReactionTime(int val)
+    void setReactionTime(int32_t val)
     {
         mActorSnap.setReactionTime(val);
         mFields |= PLY_REACTIONTIME;
     }
 
-    void setFlags(int val)
+    void setFlags(int32_t val)
     {
         mActorSnap.setFlags(val);
         mFields |= PLY_FLAGS;
     }
 
-    void setFlags2(int val)
+    void setFlags2(int32_t val)
     {
         mActorSnap.setFlags2(val);
         mFields |= PLY_FLAGS2;
     }
 
-    void setFlags3(int val)
+    void setFlags3(int32_t val)
     {
         mActorSnap.setFlags3(val);
         mFields |= PLY_FLAGS3;
     }
 
-    void setFrame(int val)
+    void setFrame(int32_t val)
     {
         mActorSnap.setFrame(val);
         mFields |= PLY_FRAME;
     }
 
-    void setWaterLevel(int val)
+    void setWaterLevel(int32_t val)
     {
         mActorSnap.setWaterLevel(val);
         mFields |= PLY_WATERLEVEL;
@@ -592,7 +592,7 @@ class PlayerSnapshot : public Snapshot
         mFields |= PLY_DELTAVIEWHEIGHT;
     }
 
-    void setJumpTime(int val)
+    void setJumpTime(int32_t val)
     {
         mJumpTime = val;
         mFields |= PLY_JUMPTIME;
@@ -631,7 +631,7 @@ class PlayerSnapshot : public Snapshot
 
     fixed_t mViewHeight;
     fixed_t mDeltaViewHeight;
-    int     mJumpTime;
+    int32_t     mJumpTime;
 };
 
 // ============================================================================
@@ -647,22 +647,22 @@ class PlayerSnapshotManager
 
     void clearSnapshots();
 
-    int getMostRecentTime() const
+    int32_t getMostRecentTime() const
     {
         return mMostRecent;
     }
 
     void           addSnapshot(const PlayerSnapshot &snap);
-    PlayerSnapshot getSnapshot(int time) const;
+    PlayerSnapshot getSnapshot(int32_t time) const;
 
   private:
-    bool           mValidSnapshot(int time) const;
-    int            mFindValidSnapshot(int starttime, int endtime) const;
-    PlayerSnapshot mInterpolateSnapshots(int from, int to, int time) const;
-    PlayerSnapshot mExtrapolateSnapshot(int from, int time) const;
+    bool           mValidSnapshot(int32_t time) const;
+    int32_t            mFindValidSnapshot(int32_t starttime, int32_t endtime) const;
+    PlayerSnapshot mInterpolateSnapshots(int32_t from, int32_t to, int32_t time) const;
+    PlayerSnapshot mExtrapolateSnapshot(int32_t from, int32_t time) const;
 
     PlayerSnapshot mSnaps[NUM_SNAPSHOTS];
-    int            mMostRecent;
+    int32_t            mMostRecent;
 };
 
 // ============================================================================
@@ -674,8 +674,8 @@ class PlayerSnapshotManager
 class SectorSnapshot : public Snapshot
 {
   public:
-    SectorSnapshot(int time = -1);
-    SectorSnapshot(int time, sector_t *sector);
+    SectorSnapshot(int32_t time = -1);
+    SectorSnapshot(int32_t time, sector_t *sector);
     virtual ~SectorSnapshot(){};
 
     void clear();
@@ -693,19 +693,19 @@ class SectorSnapshot : public Snapshot
     {
         mSector = val;
     }
-    void setCeilingType(int val)
+    void setCeilingType(int32_t val)
     {
         mCeilingType = val;
     }
-    void setFloorType(int val)
+    void setFloorType(int32_t val)
     {
         mFloorType = val;
     }
-    void setCeilingTag(int val)
+    void setCeilingTag(int32_t val)
     {
         mCeilingTag = val;
     }
-    void setFloorTag(int val)
+    void setFloorTag(int32_t val)
     {
         mFloorTag = val;
     }
@@ -741,19 +741,19 @@ class SectorSnapshot : public Snapshot
     {
         mFloorDestination = val;
     }
-    void setCeilingDirection(int val)
+    void setCeilingDirection(int32_t val)
     {
         mCeilingDirection = val;
     }
-    void setFloorDirection(int val)
+    void setFloorDirection(int32_t val)
     {
         mFloorDirection = val;
     }
-    void setCeilingOldDirection(int val)
+    void setCeilingOldDirection(int32_t val)
     {
         mCeilingOldDirection = val;
     }
-    void setFloorOldDirection(int val)
+    void setFloorOldDirection(int32_t val)
     {
         mFloorOldDirection = val;
     }
@@ -801,35 +801,35 @@ class SectorSnapshot : public Snapshot
     {
         mSilent = val;
     }
-    void setCeilingWait(int val)
+    void setCeilingWait(int32_t val)
     {
         mCeilingWait = val;
     }
-    void setFloorWait(int val)
+    void setFloorWait(int32_t val)
     {
         mFloorWait = val;
     }
-    void setCeilingCounter(int val)
+    void setCeilingCounter(int32_t val)
     {
         mCeilingCounter = val;
     }
-    void setFloorCounter(int val)
+    void setFloorCounter(int32_t val)
     {
         mFloorCounter = val;
     }
-    void setResetCounter(int val)
+    void setResetCounter(int32_t val)
     {
         mResetCounter = val;
     }
-    void setCeilingStatus(int val)
+    void setCeilingStatus(int32_t val)
     {
         mCeilingStatus = val;
     }
-    void setFloorStatus(int val)
+    void setFloorStatus(int32_t val)
     {
         mFloorStatus = val;
     }
-    void setOldFloorStatus(int val)
+    void setOldFloorStatus(int32_t val)
     {
         mOldFloorStatus = val;
     }
@@ -841,23 +841,23 @@ class SectorSnapshot : public Snapshot
     {
         mCrusherSpeed2 = val;
     }
-    void setStepTime(int val)
+    void setStepTime(int32_t val)
     {
         mStepTime = val;
     }
-    void setPerStepTime(int val)
+    void setPerStepTime(int32_t val)
     {
         mPerStepTime = val;
     }
-    void setPauseTime(int val)
+    void setPauseTime(int32_t val)
     {
         mPauseTime = val;
     }
-    void setOrgHeight(int val)
+    void setOrgHeight(int32_t val)
     {
         mOrgHeight = val;
     }
-    void setDelay(int val)
+    void setDelay(int32_t val)
     {
         mDelay = val;
     }
@@ -869,11 +869,11 @@ class SectorSnapshot : public Snapshot
     {
         mFloorOffset = val;
     }
-    void setCeilingChange(int val)
+    void setCeilingChange(int32_t val)
     {
         mCeilingChange = val;
     }
-    void setFloorChange(int val)
+    void setFloorChange(int32_t val)
     {
         mFloorChange = val;
     }
@@ -890,19 +890,19 @@ class SectorSnapshot : public Snapshot
     {
         return mSector;
     }
-    int getCeilingType() const
+    int32_t getCeilingType() const
     {
         return mCeilingType;
     }
-    int getFloorType() const
+    int32_t getFloorType() const
     {
         return mFloorType;
     }
-    int getCeilingTag() const
+    int32_t getCeilingTag() const
     {
         return mCeilingTag;
     }
-    int getFloorTag() const
+    int32_t getFloorTag() const
     {
         return mFloorTag;
     }
@@ -938,19 +938,19 @@ class SectorSnapshot : public Snapshot
     {
         return mFloorDestination;
     }
-    int getCeilingDirection() const
+    int32_t getCeilingDirection() const
     {
         return mCeilingDirection;
     }
-    int getFloorDirection() const
+    int32_t getFloorDirection() const
     {
         return mFloorDirection;
     }
-    int getCeilingOldDirection() const
+    int32_t getCeilingOldDirection() const
     {
         return mCeilingOldDirection;
     }
-    int getFloorOldDirection() const
+    int32_t getFloorOldDirection() const
     {
         return mFloorOldDirection;
     }
@@ -998,35 +998,35 @@ class SectorSnapshot : public Snapshot
     {
         return mSilent;
     }
-    int getCeilingWait() const
+    int32_t getCeilingWait() const
     {
         return mCeilingWait;
     }
-    int getFloorWait() const
+    int32_t getFloorWait() const
     {
         return mFloorWait;
     }
-    int getCeilingCounter() const
+    int32_t getCeilingCounter() const
     {
         return mCeilingCounter;
     }
-    int getFloorCounter() const
+    int32_t getFloorCounter() const
     {
         return mFloorCounter;
     }
-    int getResetCounter() const
+    int32_t getResetCounter() const
     {
         return mResetCounter;
     }
-    int getCeilingStatus() const
+    int32_t getCeilingStatus() const
     {
         return mCeilingStatus;
     }
-    int getFloorStatus() const
+    int32_t getFloorStatus() const
     {
         return mFloorStatus;
     }
-    int getOldFloorStatus() const
+    int32_t getOldFloorStatus() const
     {
         return mOldFloorStatus;
     }
@@ -1038,23 +1038,23 @@ class SectorSnapshot : public Snapshot
     {
         return mCrusherSpeed1;
     }
-    int getStepTime() const
+    int32_t getStepTime() const
     {
         return mStepTime;
     }
-    int getPerStepTime() const
+    int32_t getPerStepTime() const
     {
         return mPerStepTime;
     }
-    int getPauseTime() const
+    int32_t getPauseTime() const
     {
         return mPauseTime;
     }
-    int getOrgHeight() const
+    int32_t getOrgHeight() const
     {
         return mOrgHeight;
     }
-    int getDelay() const
+    int32_t getDelay() const
     {
         return mDelay;
     }
@@ -1066,11 +1066,11 @@ class SectorSnapshot : public Snapshot
     {
         return mFloorOffset;
     }
-    int getCeilingChange() const
+    int32_t getCeilingChange() const
     {
         return mCeilingChange;
     }
-    int getFloorChange() const
+    int32_t getFloorChange() const
     {
         return mFloorChange;
     }
@@ -1081,10 +1081,10 @@ class SectorSnapshot : public Snapshot
 
     sector_t *mSector;
 
-    int     mCeilingType;
-    int     mFloorType;
-    int     mCeilingTag;
-    int     mFloorTag;
+    int32_t     mCeilingType;
+    int32_t     mFloorType;
+    int32_t     mCeilingTag;
+    int32_t     mFloorTag;
     line_t *mCeilingLine;
     line_t *mFloorLine;
 
@@ -1097,11 +1097,11 @@ class SectorSnapshot : public Snapshot
     fixed_t mCeilingDestination;
     fixed_t mFloorDestination;
 
-    int mCeilingDirection;
-    int mFloorDirection;
+    int32_t mCeilingDirection;
+    int32_t mFloorDirection;
 
-    int mCeilingOldDirection;
-    int mFloorOldDirection;
+    int32_t mCeilingOldDirection;
+    int32_t mFloorOldDirection;
 
     int16_t mCeilingTexture;
     int16_t mFloorTexture;
@@ -1118,29 +1118,29 @@ class SectorSnapshot : public Snapshot
     bool mCeilingCrush;
     bool mFloorCrush;
     bool mSilent;
-    int  mCeilingWait;
-    int  mFloorWait;
-    int  mCeilingCounter;
-    int  mFloorCounter;
-    int  mResetCounter;
-    int  mCeilingStatus;
-    int  mFloorStatus;
-    int  mOldFloorStatus;
+    int32_t  mCeilingWait;
+    int32_t  mFloorWait;
+    int32_t  mCeilingCounter;
+    int32_t  mFloorCounter;
+    int32_t  mResetCounter;
+    int32_t  mCeilingStatus;
+    int32_t  mFloorStatus;
+    int32_t  mOldFloorStatus;
 
     fixed_t mCrusherSpeed1;
     fixed_t mCrusherSpeed2;
 
-    int mStepTime;
-    int mPerStepTime;
-    int mPauseTime;
-    int mOrgHeight;
-    int mDelay;
+    int32_t mStepTime;
+    int32_t mPerStepTime;
+    int32_t mPauseTime;
+    int32_t mOrgHeight;
+    int32_t mDelay;
 
     fixed_t mFloorLip;
     fixed_t mFloorOffset;
 
-    int mCeilingChange;
-    int mFloorChange;
+    int32_t mCeilingChange;
+    int32_t mFloorChange;
 };
 
 // ============================================================================
@@ -1157,19 +1157,19 @@ class SectorSnapshotManager
     bool empty();
     void clearSnapshots();
 
-    int getMostRecentTime() const
+    int32_t getMostRecentTime() const
     {
         return mMostRecent;
     }
 
     void           addSnapshot(const SectorSnapshot &snap);
-    SectorSnapshot getSnapshot(int time) const;
+    SectorSnapshot getSnapshot(int32_t time) const;
 
   private:
-    bool mValidSnapshot(int time) const;
+    bool mValidSnapshot(int32_t time) const;
 
     SectorSnapshot mSnaps[NUM_SNAPSHOTS];
-    int            mMostRecent;
+    int32_t            mMostRecent;
 };
 
 // ============================================================================

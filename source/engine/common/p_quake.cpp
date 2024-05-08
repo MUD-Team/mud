@@ -33,15 +33,15 @@ class DEarthquake : public DThinker
     DECLARE_SERIAL(DEarthquake, DThinker);
 
   public:
-    DEarthquake(AActor *center, int intensity, int duration, int damrad, int tremrad);
+    DEarthquake(AActor *center, int32_t intensity, int32_t duration, int32_t damrad, int32_t tremrad);
     virtual void RunThink();
     virtual void DestroyedPointer(DObject *obj);
 
     AActor *m_Spot;
     fixed_t m_TremorBox[4];
     fixed_t m_DamageBox[4];
-    int     m_Intensity;
-    int     m_Countdown;
+    int32_t     m_Intensity;
+    int32_t     m_Countdown;
 
   private:
     DEarthquake()
@@ -59,7 +59,7 @@ void DEarthquake::DestroyedPointer(DObject *obj)
 
 void DEarthquake::Serialize(FArchive &arc)
 {
-    int i;
+    int32_t i;
 
     if (arc.IsStoring())
     {
@@ -91,7 +91,7 @@ void DEarthquake::RunThink()
                 if (!(level.time & 7) && mo->x >= m_DamageBox[BOXLEFT] && mo->x < m_DamageBox[BOXRIGHT] &&
                     mo->y >= m_DamageBox[BOXTOP] && mo->y < m_DamageBox[BOXBOTTOM])
                 {
-                    int mult = 1024 * m_Intensity;
+                    int32_t mult = 1024 * m_Intensity;
                     P_DamageMobj(mo, NULL, NULL, m_Intensity / 2, MOD_UNKNOWN);
                     mo->momx += (P_Random() - 128) * mult;
                     mo->momy += (P_Random() - 128) * mult;
@@ -125,7 +125,7 @@ static void setbox(fixed_t *box, AActor *c, fixed_t size)
         box[BOXLEFT] = box[BOXRIGHT] = box[BOXTOP] = box[BOXBOTTOM] = 0;
 }
 
-DEarthquake::DEarthquake(AActor *center, int intensity, int duration, int damrad, int tremrad)
+DEarthquake::DEarthquake(AActor *center, int32_t intensity, int32_t duration, int32_t damrad, int32_t tremrad)
 {
     m_Spot = center;
     setbox(m_TremorBox, center, tremrad * FRACUNIT * 64);
@@ -134,7 +134,7 @@ DEarthquake::DEarthquake(AActor *center, int intensity, int duration, int damrad
     m_Countdown = duration;
 }
 
-bool P_StartQuake(int tid, int intensity, int duration, int damrad, int tremrad)
+bool P_StartQuake(int32_t tid, int32_t intensity, int32_t duration, int32_t damrad, int32_t tremrad)
 {
     AActor *center = NULL;
     bool    res    = false;

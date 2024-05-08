@@ -41,15 +41,15 @@
  * @return 0 if they are compatible, -1 if the server is on the older verison
  *         1 if the client is on the older version.
  */
-int VersionCompat(const int server, const int client)
+int32_t VersionCompat(const int32_t server, const int32_t client)
 {
     // Early-out if versions are identical.
     if (server == client)
         return 0;
 
-    int sv_maj, sv_min, sv_pat;
+    int32_t sv_maj, sv_min, sv_pat;
     BREAKVER(server, sv_maj, sv_min, sv_pat);
-    int cl_maj, cl_min, cl_pat;
+    int32_t cl_maj, cl_min, cl_pat;
     BREAKVER(client, cl_maj, cl_min, cl_pat);
 
     // Major version must be identical, client is allowed to have a newer
@@ -98,17 +98,17 @@ int VersionCompat(const int server, const int client)
  * @param email E-mail address of server host.
  * @return String message, or blank string if compatible.
  */
-std::string VersionMessage(const int server, const int client, const char *email)
+std::string VersionMessage(const int32_t server, const int32_t client, const char *email)
 {
     std::string rvo, buf;
 
-    int cmp = VersionCompat(server, client);
+    int32_t cmp = VersionCompat(server, client);
     if (!cmp)
         return rvo;
 
-    int sv_maj, sv_min, sv_pat;
+    int32_t sv_maj, sv_min, sv_pat;
     BREAKVER(server, sv_maj, sv_min, sv_pat);
-    int cl_maj, cl_min, cl_pat;
+    int32_t cl_maj, cl_min, cl_pat;
     BREAKVER(client, cl_maj, cl_min, cl_pat);
 
     StrFormat(buf, "Your version of Odamex %d.%d.%d does not match the server version %d.%d.%d.\n", cl_maj, cl_min,
@@ -152,7 +152,7 @@ source_files_t &get_source_files()
     return *source_files.get();
 }
 
-file_version::file_version(const char *uid, const char *id, const char *pp, int l, const char *t, const char *d)
+file_version::file_version(const char *uid, const char *id, const char *pp, int32_t l, const char *t, const char *d)
 {
     std::stringstream rs(id), ss;
     std::string       p = pp;

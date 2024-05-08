@@ -313,7 +313,7 @@ DDoor::DDoor(sector_t *sector) : DMovingCeiling(sector), m_Status(init), m_Line(
 //		and made them more general to support the new specials.
 
 // [RH] SpawnDoor: Helper function for EV_DoDoor
-DDoor::DDoor(sector_t *sec, line_t *ln, EVlDoor type, fixed_t speed, int delay) : DMovingCeiling(sec), m_Status(init)
+DDoor::DDoor(sector_t *sec, line_t *ln, EVlDoor type, fixed_t speed, int32_t delay) : DMovingCeiling(sec), m_Status(init)
 {
     m_Type         = type;
     m_TopWait      = delay;
@@ -362,7 +362,7 @@ DDoor::DDoor(sector_t *sec, line_t *ln, EVlDoor type, fixed_t speed, int delay) 
 }
 
 // [Blair] Boom Generic locked Door Type
-DDoor::DDoor(sector_t *sec, line_t *ln, int kind, int trigger, int speed) : DMovingCeiling(sec), m_Status(init)
+DDoor::DDoor(sector_t *sec, line_t *ln, int32_t kind, int32_t trigger, int32_t speed) : DMovingCeiling(sec), m_Status(init)
 {
     m_Line         = ln;
     m_TopWait      = VDOORWAIT;
@@ -400,7 +400,7 @@ DDoor::DDoor(sector_t *sec, line_t *ln, int kind, int trigger, int speed) : DMov
 }
 
 // [Blair] Boom Generic Door Type
-DDoor::DDoor(sector_t *sec, line_t *ln, int delay, int kind, int trigger, int speed)
+DDoor::DDoor(sector_t *sec, line_t *ln, int32_t delay, int32_t kind, int32_t trigger, int32_t speed)
     : DMovingCeiling(sec), m_Status(init)
 {
     m_Line         = ln;
@@ -482,7 +482,7 @@ DDoor::DDoor(sector_t *sec, line_t *ln, int delay, int kind, int trigger, int sp
 }
 
 // [Blair] ZDoom-compatible door type
-DDoor::DDoor(sector_t *sec, line_t *ln, EVlDoor type, fixed_t speed, int topwait, uint8_t lighttag, int topcountdown)
+DDoor::DDoor(sector_t *sec, line_t *ln, EVlDoor type, fixed_t speed, int32_t topwait, uint8_t lighttag, int32_t topcountdown)
     : DMovingCeiling(sec), m_Status(init)
 {
     m_Type         = type;
@@ -543,10 +543,10 @@ DDoor *DDoor::Clone(sector_t *sec) const
     return door;
 }
 
-bool EV_DoDoor(DDoor::EVlDoor type, line_t *line, AActor *thing, int tag, int speed, int delay, card_t lock)
+bool EV_DoDoor(DDoor::EVlDoor type, line_t *line, AActor *thing, int32_t tag, int32_t speed, int32_t delay, card_t lock)
 {
     bool      rtn = false;
-    int       secnum;
+    int32_t       secnum;
     sector_t *sec;
     DDoor    *door;
 
@@ -686,8 +686,8 @@ void P_SpawnDoorRaiseIn5Mins(sector_t *sec)
     door->m_Status       = DDoor::init;
 }
 
-bool EV_DoZDoomDoor(DDoor::EVlDoor type, line_t *line, AActor *mo, uint8_t tag, uint8_t speed_byte, int topwait,
-                    zdoom_lock_t lock, uint8_t lightTag, bool boomgen, int topcountdown)
+bool EV_DoZDoomDoor(DDoor::EVlDoor type, line_t *line, AActor *mo, uint8_t tag, uint8_t speed_byte, int32_t topwait,
+                    zdoom_lock_t lock, uint8_t lightTag, bool boomgen, int32_t topcountdown)
 {
     sector_t *sec;
     fixed_t   speed;
@@ -768,7 +768,7 @@ bool EV_DoZDoomDoor(DDoor::EVlDoor type, line_t *line, AActor *mo, uint8_t tag, 
     }
     else
     {
-        int  secnum  = -1;
+        int32_t  secnum  = -1;
         bool retcode = false;
 
         while ((secnum = P_FindSectorFromTag(tag, secnum)) >= 0)
@@ -797,7 +797,7 @@ bool EV_DoZDoomDoor(DDoor::EVlDoor type, line_t *line, AActor *mo, uint8_t tag, 
 //
 bool EV_DoGenDoor(line_t *line)
 {
-    int       secnum;
+    int32_t       secnum;
     bool      rtn;
     sector_t *sec;
     bool      manual;
@@ -805,10 +805,10 @@ bool EV_DoGenDoor(line_t *line)
 
     // parse the bit fields in the line's special type
 
-    int Dely = (value & DoorDelay) >> DoorDelayShift;
-    int Kind = (value & DoorKind) >> DoorKindShift;
-    int Sped = (value & DoorSpeed) >> DoorSpeedShift;
-    int Trig = (value & TriggerType) >> TriggerTypeShift;
+    int32_t Dely = (value & DoorDelay) >> DoorDelayShift;
+    int32_t Kind = (value & DoorKind) >> DoorKindShift;
+    int32_t Sped = (value & DoorSpeed) >> DoorSpeedShift;
+    int32_t Trig = (value & TriggerType) >> TriggerTypeShift;
 
     rtn = 0;
 
@@ -869,7 +869,7 @@ bool EV_DoGenDoor(line_t *line)
 //
 bool EV_DoGenLockedDoor(line_t *line)
 {
-    int       secnum;
+    int32_t       secnum;
     bool      rtn;
     sector_t *sec;
     bool      manual;
@@ -878,9 +878,9 @@ bool EV_DoGenLockedDoor(line_t *line)
 
     // parse the bit fields in the line's special type
 
-    int Kind = (value & LockedKind) >> LockedKindShift;
-    int Sped = (value & LockedSpeed) >> LockedSpeedShift;
-    int Trig = (value & TriggerType) >> TriggerTypeShift;
+    int32_t Kind = (value & LockedKind) >> LockedKindShift;
+    int32_t Sped = (value & LockedSpeed) >> LockedSpeedShift;
+    int32_t Trig = (value & TriggerType) >> TriggerTypeShift;
 
     rtn = 0;
 

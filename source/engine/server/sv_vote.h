@@ -32,7 +32,7 @@ class Vote
     uint32_t                 countdown;
     std::string                  error;
     vote_result_t                result;
-    std::map<int, vote_result_t> tally;
+    std::map<int32_t, vote_result_t> tally;
     std::string                  votestring;
 
   public:

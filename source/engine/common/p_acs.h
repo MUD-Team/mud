@@ -65,33 +65,33 @@ enum ACSFormat
 class FBehavior
 {
   public:
-    FBehavior(uint8_t *object, int len);
+    FBehavior(uint8_t *object, int32_t len);
     ~FBehavior();
 
     bool        IsGood();
     uint8_t       *FindChunk(uint32_t id) const;
     uint8_t       *NextChunk(uint8_t *chunk) const;
-    int        *FindScript(int number) const;
+    int32_t        *FindScript(int32_t number) const;
     void        PrepLocale(uint32_t userpref, uint32_t userdef, uint32_t syspref, uint32_t sysdef);
     const char *LookupString(uint32_t index, uint32_t ofs = 0) const;
     const char *LocalizeString(uint32_t index) const;
-    void        StartTypedScripts(uint16_t type, AActor *activator, int arg0 = 0, int arg1 = 0, int arg2 = 0,
+    void        StartTypedScripts(uint16_t type, AActor *activator, int32_t arg0 = 0, int32_t arg1 = 0, int32_t arg2 = 0,
                                   bool always = true) const;
-    uint32_t       PC2Ofs(int *pc) const
+    uint32_t       PC2Ofs(int32_t *pc) const
     {
         return (uint8_t *)pc - Data;
     }
-    int *Ofs2PC(uint32_t ofs) const
+    int32_t *Ofs2PC(uint32_t ofs) const
     {
-        return (int *)(Data + ofs);
+        return (int32_t *)(Data + ofs);
     }
     ACSFormat GetFormat() const
     {
         return Format;
     }
-    ScriptFunction *GetFunction(int funcnum) const;
-    int             GetArrayVal(int arraynum, int index) const;
-    void            SetArrayVal(int arraynum, int index, int value);
+    ScriptFunction *GetFunction(int32_t funcnum) const;
+    int32_t             GetArrayVal(int32_t arraynum, int32_t index) const;
+    void            SetArrayVal(int32_t arraynum, int32_t index, int32_t value);
 
   private:
     struct ArrayInfo;
@@ -99,18 +99,18 @@ class FBehavior
     ACSFormat Format;
 
     uint8_t      *Data;
-    int        DataSize;
+    int32_t        DataSize;
     uint8_t      *Chunks;
     uint8_t      *Scripts;
-    int        NumScripts;
+    int32_t        NumScripts;
     uint8_t      *Functions;
-    int        NumFunctions;
+    int32_t        NumFunctions;
     ArrayInfo *Arrays;
-    int        NumArrays;
+    int32_t        NumArrays;
     uint32_t      LanguageNeutral;
     uint32_t      Localized;
 
-    static int STACK_ARGS SortScripts(const void *a, const void *b);
+    static int32_t STACK_ARGS SortScripts(const void *a, const void *b);
     void                  AddLanguage(uint32_t lang);
     uint32_t                 FindLanguage(uint32_t lang, bool ignoreregion) const;
     uint32_t                *CheckIfInList(uint32_t lang);
@@ -383,19 +383,19 @@ class DLevelScript : public DObject
         PCODE_COMMAND_COUNT
     };
 
-    static void ACS_SetLineTexture(int *args, uint8_t argCount);
+    static void ACS_SetLineTexture(int32_t *args, uint8_t argCount);
     static void ACS_ClearInventory(AActor *actor);
     static void ACS_Print(uint8_t pcd, AActor *actor, const char *print);
-    static void ACS_ChangeMusic(uint8_t pcd, AActor *activator, int *args, uint8_t argCount);
-    static void ACS_StartSound(uint8_t pcd, AActor *activator, int *args, uint8_t argCount);
-    static void ACS_SetLineBlocking(int *args, uint8_t argCount);
-    static void ACS_SetLineMonsterBlocking(int *args, uint8_t argCount);
-    static void ACS_SetLineSpecial(int *args, uint8_t argCount);
-    static void ACS_SetThingSpecial(int *args, uint8_t argCount);
-    static void ACS_FadeRange(AActor *activator, int *args, uint8_t argCount);
+    static void ACS_ChangeMusic(uint8_t pcd, AActor *activator, int32_t *args, uint8_t argCount);
+    static void ACS_StartSound(uint8_t pcd, AActor *activator, int32_t *args, uint8_t argCount);
+    static void ACS_SetLineBlocking(int32_t *args, uint8_t argCount);
+    static void ACS_SetLineMonsterBlocking(int32_t *args, uint8_t argCount);
+    static void ACS_SetLineSpecial(int32_t *args, uint8_t argCount);
+    static void ACS_SetThingSpecial(int32_t *args, uint8_t argCount);
+    static void ACS_FadeRange(AActor *activator, int32_t *args, uint8_t argCount);
     static void ACS_CancelFade(AActor *activator);
-    static void ACS_ChangeFlat(uint8_t pcd, int *args, uint8_t argCount);
-    static void ACS_SoundSequence(int *args, uint8_t argCount);
+    static void ACS_ChangeFlat(uint8_t pcd, int32_t *args, uint8_t argCount);
+    static void ACS_SoundSequence(int32_t *args, uint8_t argCount);
 
     // Some constants used by ACS scripts
     enum
@@ -471,7 +471,7 @@ class DLevelScript : public DObject
         SCRIPT_ModulusBy0,
     };
 
-    DLevelScript(AActor *who, line_t *where, int num, int *code, int lineSide, int arg0, int arg1, int arg2, int always,
+    DLevelScript(AActor *who, line_t *where, int32_t num, int32_t *code, int32_t lineSide, int32_t arg0, int32_t arg1, int32_t arg2, int32_t always,
                  bool delay);
 
     void RunScript();
@@ -490,47 +490,47 @@ class DLevelScript : public DObject
 
   protected:
     DLevelScript *next, *prev;
-    int           script;
-    int           sp;
-    int           localvars[LOCAL_SIZE];
-    int          *pc;
+    int32_t           script;
+    int32_t           sp;
+    int32_t           localvars[LOCAL_SIZE];
+    int32_t          *pc;
     EScriptState  state;
-    int           statedata;
+    int32_t           statedata;
     AActor       *activator;
     line_t       *activationline;
-    int           lineSide;
-    int           stringstart;
+    int32_t           lineSide;
+    int32_t           stringstart;
 
-    inline void PushToStack(int val);
+    inline void PushToStack(int32_t val);
 
     void        Link();
     void        Unlink();
     void        PutLast();
     void        PutFirst();
-    static int  Random(int min, int max);
-    static int  ThingCount(int type, int tid);
-    static void ChangeFlat(int tag, int name, bool floorOrCeiling);
-    static int  CountPlayers();
-    static void SetLineTexture(int lineid, int side, int position, int name);
+    static int32_t  Random(int32_t min, int32_t max);
+    static int32_t  ThingCount(int32_t type, int32_t tid);
+    static void ChangeFlat(int32_t tag, int32_t name, bool floorOrCeiling);
+    static int32_t  CountPlayers();
+    static void SetLineTexture(int32_t lineid, int32_t side, int32_t position, int32_t name);
 
-    static int DoSpawn(int type, fixed_t x, fixed_t y, fixed_t z, int tid, int angle);
-    static int DoSpawnSpot(int type, int spot, int tid, int angle);
+    static int32_t DoSpawn(int32_t type, fixed_t x, fixed_t y, fixed_t z, int32_t tid, int32_t angle);
+    static int32_t DoSpawnSpot(int32_t type, int32_t spot, int32_t tid, int32_t angle);
 
-    static void SetLineBlocking(int lineid, int flags);
-    static void SetLineMonsterBlocking(int lineid, int toggle);
-    static void SetLineSpecial(int lineid, int special, int arg1, int arg2, int arg3, int arg4, int arg5);
-    static void ActivateLineSpecial(uint8_t special, line_t *line, AActor *activator, int arg0, int arg1, int arg2,
-                                    int arg3, int arg4);
-    static void ChangeMusic(uint8_t pcd, AActor *activator, int index, int loop);
-    static void StartSound(uint8_t pcd, AActor *activator, int channel, int index, int volume, int attenuation);
-    static void StartSectorSound(uint8_t pcd, sector_t *sector, int channel, int index, int volume, int attenuation);
-    static void StartThingSound(uint8_t pcd, AActor *actor, int channel, int index, int volume, int attenuation);
-    static void SetThingSpecial(AActor *actor, int special, int arg1, int arg2, int arg3, int arg4, int arg5);
+    static void SetLineBlocking(int32_t lineid, int32_t flags);
+    static void SetLineMonsterBlocking(int32_t lineid, int32_t toggle);
+    static void SetLineSpecial(int32_t lineid, int32_t special, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4, int32_t arg5);
+    static void ActivateLineSpecial(uint8_t special, line_t *line, AActor *activator, int32_t arg0, int32_t arg1, int32_t arg2,
+                                    int32_t arg3, int32_t arg4);
+    static void ChangeMusic(uint8_t pcd, AActor *activator, int32_t index, int32_t loop);
+    static void StartSound(uint8_t pcd, AActor *activator, int32_t channel, int32_t index, int32_t volume, int32_t attenuation);
+    static void StartSectorSound(uint8_t pcd, sector_t *sector, int32_t channel, int32_t index, int32_t volume, int32_t attenuation);
+    static void StartThingSound(uint8_t pcd, AActor *actor, int32_t channel, int32_t index, int32_t volume, int32_t attenuation);
+    static void SetThingSpecial(AActor *actor, int32_t special, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4, int32_t arg5);
     static void CancelFade(AActor *actor);
-    static void StartSoundSequence(sector_t *sec, int index);
+    static void StartSoundSequence(sector_t *sec, int32_t index);
 
-    static void DoFadeTo(AActor *who, int r, int g, int b, int a, fixed_t time);
-    static void DoFadeRange(AActor *who, int r1, int g1, int b1, int a1, int r2, int g2, int b2, int a2, fixed_t time);
+    static void DoFadeTo(AActor *who, int32_t r, int32_t g, int32_t b, int32_t a, fixed_t time);
+    static void DoFadeRange(AActor *who, int32_t r1, int32_t g1, int32_t b1, int32_t a1, int32_t r2, int32_t g2, int32_t b2, int32_t a2, fixed_t time);
 
   private:
     DLevelScript();
@@ -583,9 +583,9 @@ struct acsdefered_s
         defsuspend,
         defterminate
     } type;
-    int script;
-    int arg0, arg1, arg2;
-    int playernum;
+    int32_t script;
+    int32_t arg0, arg1, arg2;
+    int32_t playernum;
 };
 typedef struct acsdefered_s acsdefered_t;
 
