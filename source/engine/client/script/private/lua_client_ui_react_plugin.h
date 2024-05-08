@@ -9,8 +9,8 @@ class Rml::Element;
 class MUDReactEventListener : public Rml::EventListener
 {
   public:
-    MUDReactEventListener(Rml::Element *element, const std::string &event, int functionIndex)
-        : mEvent(event), mElement(element), mFunctionIndex(functionIndex)
+    MUDReactEventListener(Rml::Element *element, const std::string &event, bool capturePhase, int functionIndex)
+        : mEvent(event), mCapturePhase(capturePhase), mElement(element), mFunctionIndex(functionIndex)
     {
     }
 
@@ -30,10 +30,10 @@ class MUDReactEventListener : public Rml::EventListener
     void ProcessEvent(Rml::Event &event) override;
 
     std::string   mEvent;
+    bool          mCapturePhase;
     Rml::Element *mElement;
     int           mFunctionIndex;
 };
-
 
 class MUDReactPlugin : public Rml::Plugin
 {
@@ -115,7 +115,7 @@ class MUDReactPlugin : public Rml::Plugin
 
     std::set<std::string> mKnownTypes;
 
-    std::map<Rml::Element *, std::vector<MUDReactEventListener*>> mReactListeners;
+    std::map<Rml::Element *, std::vector<MUDReactEventListener *>> mReactListeners;
 
     static MUDReactPlugin *mInstance;
 };

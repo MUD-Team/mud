@@ -131,17 +131,6 @@ void MUDReactPlugin::ProcessElement(DeferredElement *deferred, Rml::Element *par
         I_FatalError("MUD React: No current element");
     }
 
-    auto itr = mReactListeners.find(current);
-    if (itr != mReactListeners.end())
-    {
-        for (auto listener : itr->second)
-        {
-            listener->mElement->RemoveEventListener(listener->mEvent, listener);
-        }
-
-        itr->second.clear();
-    }
-
     // current properties
     lua_getfield(g_L, LUA_REGISTRYINDEX, "__mud_react_element_properties");
     lua_pushinteger(g_L, deferred->renderKey);
@@ -174,7 +163,9 @@ void MUDReactPlugin::ProcessElement(DeferredElement *deferred, Rml::Element *par
                 lua_settable(g_L, -3);
                 lua_pop(g_L, 1);
 
-                MUDReactEventListener *listener = new MUDReactEventListener(current, event, mCurrentFunctionIndex++);
+                bool capturePhase = true;
+
+                MUDReactEventListener *listener = new MUDReactEventListener(current, event, capturePhase, mCurrentFunctionIndex++);
 
                 auto itr = mReactListeners.find(current);
                 if (itr == mReactListeners.end())
@@ -187,7 +178,7 @@ void MUDReactPlugin::ProcessElement(DeferredElement *deferred, Rml::Element *par
                     itr->second.push_back(listener);
                 }
 
-                current->AddEventListener(event, listener, true);
+                current->AddEventListener(event, listener, capturePhase);
             }
 
             lua_pop(g_L, 1);
@@ -359,17 +350,17 @@ void MUDReactPlugin::Render()
     lua_setfield(g_L, LUA_REGISTRYINDEX, "__mud_react_element_functions");
 
     // remove current event listeners, todo, optimize
-    /*
+    
     for (auto listeners : mReactListeners)
     {
         for (auto listener : listeners.second)
         {
-            listener->mElement->RemoveEventListener(listener->mEvent, listener);
+            listener->mElement->RemoveEventListener(listener->mEvent, listener, listener->mCapturePhase);
         }
     }
 
     mReactListeners.clear();
-    */
+    
 
     if (lua_pcall(g_L, 0, 1, 0) != 0)
     {
