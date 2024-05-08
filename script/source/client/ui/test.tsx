@@ -39,8 +39,8 @@ export const test = () => {
         <div>
             {`From MUD React! ${counter++} `}
         </div>
-        {(doit < 50) && <div class="button" style="margin:12dp;" click={() => onNewGame("1")} >Press Me</div>}
-        <div class="button" style="margin:12dp;" click={() => onNewGame("2")} >Press Me 2</div>
+        {(doit < 50) && <div key="button1" class="button" style="margin:12dp;" click={() => onNewGame("1")} >Press Me</div>}
+        <div key="button2" class="button" style="margin:12dp;" click={() => onNewGame("2")} >Press Me 2</div>
     </div>
 
 }

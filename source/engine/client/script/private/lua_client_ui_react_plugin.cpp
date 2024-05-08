@@ -3,43 +3,22 @@
 
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/ElementText.h>
-#include <RmlUi/Core/EventListener.h>
 #include <i_system.h>
 
-class MUDReactEventListener : public Rml::EventListener
+
+static lua_State *g_L                       = nullptr;
+MUDReactPlugin   *MUDReactPlugin::mInstance = nullptr;
+
+// Calls the associated Lua function.
+void MUDReactEventListener::ProcessEvent(Rml::Event &event)
 {
-  public:
-    MUDReactEventListener(Rml::Element *element, luabridge::LuaRef &&function) : function(function)
-    {
-    }
-
-    virtual ~MUDReactEventListener()
-    {
-    }
-
-    // Deletes itself, which also unreferences the Lua function.
-    void OnDetach(Rml::Element *element) override
-    {
-        // We consider this listener owned by its element, so we must delete ourselves when
-        // we detach (probably because element was removed).
-        delete this;
-    }
-
-    // Calls the associated Lua function.
-    void ProcessEvent(Rml::Event &event) override
-    {
-        function.call();
-    }
-
-  private:
-    luabridge::LuaRef     function;
-    Rml::Element         *attached       = nullptr;
-    Rml::ElementDocument *owner_document = nullptr;
-};
-
-static lua_State *g_L = nullptr;
-
-MUDReactPlugin *MUDReactPlugin::mInstance = nullptr;
+    int top = lua_gettop(g_L);
+    lua_getfield(g_L, LUA_REGISTRYINDEX, "__mud_react_element_functions");
+    lua_pushnumber(g_L, mFunctionIndex);
+    lua_gettable(g_L, -2);
+    lua_pcall(g_L, 0, 0, 0);
+    lua_settop(g_L, top);
+}
 
 MUDReactPlugin::MUDReactPlugin(lua_State *lua_state) : mRenderDocument(nullptr), mRenderParent(nullptr)
 {
@@ -99,17 +78,18 @@ void MUDReactPlugin::ProcessElement(DeferredElement *deferred, Rml::Element *par
             if (currentTagName == "#text")
             {
                 current = cache->element;
-
-                if (cache->key != deferred->key)
-                {
-                    ((Rml::ElementText *)current)->SetText(deferred->text);
-                }
-                
+                ((Rml::ElementText *)current)->SetText(deferred->text);
             }
             else if (currentTagName == deferred->type)
             {
                 current = cache->element;
             }
+        }
+        else
+        {
+            cache->element->GetParentNode()->RemoveChild(cache->element);
+            cache->element = nullptr;
+            cache->parent  = nullptr;
         }
     }
 
@@ -151,6 +131,17 @@ void MUDReactPlugin::ProcessElement(DeferredElement *deferred, Rml::Element *par
         I_FatalError("MUD React: No current element");
     }
 
+    auto itr = mReactListeners.find(current);
+    if (itr != mReactListeners.end())
+    {
+        for (auto listener : itr->second)
+        {
+            listener->mElement->RemoveEventListener(listener->mEvent, listener);
+        }
+
+        itr->second.clear();
+    }
+
     // current properties
     lua_getfield(g_L, LUA_REGISTRYINDEX, "__mud_react_element_properties");
     lua_pushinteger(g_L, deferred->renderKey);
@@ -173,12 +164,30 @@ void MUDReactPlugin::ProcessElement(DeferredElement *deferred, Rml::Element *par
                 current->SetAttribute<std::string>(key, value.cast<std::string>().value());
             }
 
-            if (value.isFunction() && (!cache || current != cache->element))
+            if (value.isFunction())
             {
-                MUDReactEventListener *listener = new MUDReactEventListener(current, std::move(value));
-                current->AddEventListener(key, listener, true);
-                // curElement->AddEventListener(key, +[]{}, false);
-                // curElement->SetAttribute<std::string>(key, value.cast<std::string>().value());
+                const std::string &event = key;
+
+                lua_getfield(g_L, LUA_REGISTRYINDEX, "__mud_react_element_functions");
+                lua_pushnumber(g_L, mCurrentFunctionIndex);
+                auto result = luabridge::push<luabridge::LuaRef>(g_L, value);
+                lua_settable(g_L, -3);
+                lua_pop(g_L, 1);
+
+                MUDReactEventListener *listener = new MUDReactEventListener(current, event, mCurrentFunctionIndex++);
+
+                auto itr = mReactListeners.find(current);
+                if (itr == mReactListeners.end())
+                {
+                    mReactListeners.insert((std::pair<Rml::Element *, std::vector<MUDReactEventListener *>>(
+                        current, std::vector<MUDReactEventListener *>{{listener}})));
+                }
+                else
+                {
+                    itr->second.push_back(listener);
+                }
+
+                current->AddEventListener(event, listener, true);
             }
 
             lua_pop(g_L, 1);
@@ -195,14 +204,11 @@ void MUDReactPlugin::ProcessElement(DeferredElement *deferred, Rml::Element *par
                        (cache && (i < cache->children.size())) ? &cache->children[i] : nullptr);
     }
 
-    if (cache && cache->element)
+    if (cache)
     {
-        Rml::Element *child = cache->element->GetChild(deferred->children.size());
-        while (child)
+        for (size_t i = deferred->children.size(); i < cache->children.size(); i++)
         {
-            Rml::Element *next = child->GetNextSibling();
-            child->GetParentNode()->RemoveChild(child);
-            child = next;
+            cache->children[i].element->GetParentNode()->RemoveChild(cache->children[i].element);
         }
     }
 }
@@ -301,9 +307,6 @@ MUDReactPlugin::DeferredElement MUDReactPlugin::DeferCreateElement()
     {
         if (child.isBool() && !child.cast<bool>().value())
         {
-            // DeferredElement   cdefer;
-            // cdefer.skip = true;
-            // defer.children.push_back(cdefer);
             continue;
         }
 
@@ -344,13 +347,29 @@ void MUDReactPlugin::Render()
     RMLUI_ASSERT(parentPtr && *parentPtr);
     RMLUI_ASSERT(lua_isfunction(g_L, 3));
 
-    mRenderDocument   = *documentPtr;
-    mRenderParent     = *parentPtr;
-    mCurrentRenderKey = 0;
+    mRenderDocument       = *documentPtr;
+    mRenderParent         = *parentPtr;
+    mCurrentRenderKey     = 0;
+    mCurrentFunctionIndex = 0;
 
-    // this is going to GC functions and stuff stored in props
     lua_newtable(g_L);
     lua_setfield(g_L, LUA_REGISTRYINDEX, "__mud_react_element_properties");
+
+    lua_newtable(g_L);
+    lua_setfield(g_L, LUA_REGISTRYINDEX, "__mud_react_element_functions");
+
+    // remove current event listeners, todo, optimize
+    /*
+    for (auto listeners : mReactListeners)
+    {
+        for (auto listener : listeners.second)
+        {
+            listener->mElement->RemoveEventListener(listener->mEvent, listener);
+        }
+    }
+
+    mReactListeners.clear();
+    */
 
     if (lua_pcall(g_L, 0, 1, 0) != 0)
     {

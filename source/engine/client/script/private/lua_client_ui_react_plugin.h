@@ -1,9 +1,39 @@
 #pragma once
 #include <LuaBridge.h>
+#include <RmlUi/Core/EventListener.h>
 #include <RmlUi/Core/Plugin.h>
 
 class Rml::ElementDocument;
 class Rml::Element;
+
+class MUDReactEventListener : public Rml::EventListener
+{
+  public:
+    MUDReactEventListener(Rml::Element *element, const std::string &event, int functionIndex)
+        : mEvent(event), mElement(element), mFunctionIndex(functionIndex)
+    {
+    }
+
+    virtual ~MUDReactEventListener()
+    {
+    }
+
+    // Deletes itself, which also unreferences the Lua function.
+    void OnDetach(Rml::Element *element) override
+    {
+        // We consider this listener owned by its element, so we must delete ourselves when
+        // we detach (probably because element was removed).
+        delete this;
+    }
+
+    // Calls the associated Lua function.
+    void ProcessEvent(Rml::Event &event) override;
+
+    std::string   mEvent;
+    Rml::Element *mElement;
+    int           mFunctionIndex;
+};
+
 
 class MUDReactPlugin : public Rml::Plugin
 {
@@ -21,15 +51,11 @@ class MUDReactPlugin : public Rml::Plugin
 
         void Clear()
         {
-            type.clear();
-            key.clear();
             children.clear();
-            element   = nullptr;
-            parent = nullptr;
+            element = nullptr;
+            parent  = nullptr;
         }
 
-        std::string               type;
-        std::string               key;
         Rml::Element             *parent;
         Rml::Element             *element;
         std::vector<CacheElement> children;
@@ -85,8 +111,11 @@ class MUDReactPlugin : public Rml::Plugin
 
     DeferredElement mDeferred;
     int             mCurrentRenderKey;
+    int             mCurrentFunctionIndex;
 
     std::set<std::string> mKnownTypes;
+
+    std::map<Rml::Element *, std::vector<MUDReactEventListener*>> mReactListeners;
 
     static MUDReactPlugin *mInstance;
 };
