@@ -13,10 +13,11 @@ static void LUA_Sandbox(lua_State *L);
 static int  LUA_DbgNOP(lua_State *L);
 static int  LUA_MsgHandler(lua_State *L);
 static int  LUA_LuaRequire(lua_State *L);
-static int  LUA_DoFile(lua_State *L, const std::string &filepath, const char *source, size_t source_length);
+static void  LUA_DoFile(lua_State *L, const std::string &filepath, const char *source, size_t source_length);
 
 // TODO: Fixme
 static std::vector<std::string> requirePaths;
+static std::vector<std::string> requireFiles;
 
 lua_State *LUA_OpenState()
 {
@@ -74,7 +75,7 @@ void LUA_CloseState(lua_State *L)
     lua_close(L);
 }
 
-int LUA_DoFile(lua_State *L, const std::string &filepath)
+void LUA_DoFile(lua_State *L, const std::string &filepath)
 {
     std::string path;
     M_ExtractFilePath(filepath, path);
@@ -83,6 +84,7 @@ int LUA_DoFile(lua_State *L, const std::string &filepath)
     {
         path.append("/");
     }
+
     requirePaths.push_back(path);
 
     if (!filepath.size())
@@ -113,49 +115,52 @@ int LUA_DoFile(lua_State *L, const std::string &filepath)
     PHYSFS_close(fp);
 
     buffer[length] = 0;
-    int result     = LUA_DoFile(L, filepath, buffer, length);
+    LUA_DoFile(L, filepath, buffer, length);
     delete[] buffer;
 
-    requirePaths.pop_back();
-    return result;
+    requirePaths.pop_back();    
 }
 
-int LUA_DoFile(lua_State *L, const std::string &filepath, const char *source, size_t source_length)
-{
+void LUA_DoFile(lua_State *L, const std::string &filepath, const char *source, size_t source_length)
+{    
+    int top = lua_gettop(L);
+    
     if (true) // lua_debug.d_)
     {
         lua_getglobal(L, "__lua_debugger_source");
         lua_getfield(L, -1, filepath.c_str());
         if (lua_isstring(L, -1))
         {
-            I_Error("LUA: Redundant execution of %s", filepath.c_str());
+            I_Error("LUA: Redundant execution of %s, circular require issue?", filepath.c_str());
             lua_pop(L, 2);
-            return 0;
+            return;
         }
         lua_pop(L, 1);
         lua_pushstring(L, source);
         lua_setfield(L, -2, filepath.c_str());
         lua_pop(L, 1);
     }
-    int top    = lua_gettop(L);
+        
     int status = luaL_loadbuffer(L, source, source_length, (std::string("@") + filepath).c_str());
 
     if (status != LUA_OK)
     {
-        I_Error(StrFormat("LUA: Error compiling %s : %s\n", filepath.c_str() ? filepath.c_str() : "???", lua_tostring(L, -1)).c_str());
+        I_Error(StrFormat("LUA: Error compiling %s : %s\n", filepath.c_str() ? filepath.c_str() : "???",
+                          lua_tostring(L, -1))
+                    .c_str());
     }
-
+    
     if (true) // lua_debug.d_)
     {
         status = dbg_pcall(L, 0, LUA_MULTRET, 0);
     }
     else
     {
-        int base = lua_gettop(L);             // function index
+
+        int32_t base = lua_gettop(L);             // function index
         lua_pushcfunction(L, LUA_MsgHandler); // push message handler */
         lua_insert(L, base);                  // put it under function and args */
         status = lua_pcall(L, 0, LUA_MULTRET, base);
-        lua_remove(L, base);
     }
 
     if (status != LUA_OK)
@@ -164,7 +169,37 @@ int LUA_DoFile(lua_State *L, const std::string &filepath, const char *source, si
                 lua_tostring(L, -1));
     }
 
-    return lua_gettop(L) - top;
+    int nresult =  lua_gettop(L) - top;
+    
+    if (!nresult) 
+    {
+        lua_newtable(L);
+    }
+
+    // todo: handle non-table cases, tricky due to cyclical imports, we assume table now
+    assert(lua_istable(L, -1));
+
+    const int source_table = lua_gettop(L);
+
+    // copy into the module table, so we can support cicular imports
+
+    lua_getglobal(L, "__mud_modules");
+    lua_pushstring(L, filepath.c_str());
+    lua_gettable(L, -2);
+    if (!lua_istable(L, -1))
+    {
+        I_Error("LUA: Bad lua module table");
+    }
+    
+    lua_pushnil(L);
+    while (lua_next(L, source_table) != 0)
+    {
+        lua_pushvalue(L, -2);
+        lua_insert(L, -2);
+        lua_settable(L, -4);
+    }
+
+    lua_settop(L, top);
 }
 
 static int LUA_LuaRequire(lua_State *L)
@@ -204,33 +239,78 @@ static int LUA_LuaRequire(lua_State *L)
         }
     }
 
+    if (std::find(requireFiles.begin(), requireFiles.end(), path) != requireFiles.end())
+    {
+        std::string requires;
+        for (const std::string& p : requireFiles)
+        {
+            requires += p;
+            requires += " => ";
+        }
+
+        requires += path;
+
+        I_Error("Circular dependency: %s", requires.c_str());
+    }
+
+    requireFiles.push_back(path);
+
+
     lua_getglobal(L, "__mud_modules");
     lua_getfield(L, -1, path.c_str());
 
     if (!lua_isnil(L, -1))
     {
         lua_remove(L, -2);
+        lua_insert(L, -2);
         assert(lua_gettop(L) == 2);
-        return 1;
+        assert(lua_istable(L, -2));
+        assert(lua_isstring(L, -1));
+
+        requireFiles.pop_back();
+        return 2;
     }
 
     lua_pop(L, 1);
 
-    int result = LUA_DoFile(L, path.c_str());
+    lua_newtable(L);
+    lua_setfield(L, -2, path.c_str());
 
-    if (result == 0)
-    {
-        lua_newtable(L);
-        result = 1;
-    }
+    lua_pop(L, 1);
 
-    lua_pushvalue(L, -1);
-    lua_setfield(L, -3, path.c_str());
+    LUA_DoFile(L, path.c_str());
+
+    lua_getglobal(L, "__mud_modules");
+    lua_getfield(L, -1, path.c_str());
     lua_remove(L, -2);
 
+    lua_insert(L, -2);
+
+    assert(lua_istable(L, -2));
+    assert(lua_isstring(L, -1));
+    
     // result and the name
     assert(lua_gettop(L) == 2);
-    return result;
+    requireFiles.pop_back();
+    return 2;
+}
+
+int LUA_RequireFile(lua_State *L, const std::string &filepath)
+{
+    std::string path;
+    M_ExtractFilePath(filepath, path);
+    std::replace(path.begin(), path.end(), '\\', '/');
+    if (path.back() != '/')
+    {
+        path.append("/");
+    }
+
+    requirePaths.push_back(path);
+    lua_getglobal(L, "require");
+    lua_pushstring(L, filepath.c_str());
+    int status = lua_pcall(L, 1, LUA_MULTRET, -2);
+    requirePaths.pop_back();
+    return 1;
 }
 
 int LUA_MsgHandler(lua_State *L)
@@ -313,14 +393,14 @@ int         LUA_DbgNOP(lua_State *L)
     if (!dbg_nop_warn)
     {
         dbg_nop_warn = true;
-#ifdef CLIENT_APP        
+#ifdef CLIENT_APP
         I_Warning("LUA: dbg() called without lua_debug being set.  Please check that "
                   "a stray dbg call didn't get left "
                   "in source.");
 #else
         Printf("WARNING: LUA: dbg() called without lua_debug being set.  Please check that "
-                  "a stray dbg call didn't get left "
-                  "in source.");
+               "a stray dbg call didn't get left "
+               "in source.");
 #endif
     }
     return 0;

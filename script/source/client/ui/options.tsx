@@ -1,4 +1,72 @@
 
+import app, { AppState, IAppState } from "./app"
+
+export const Options = () => {
+    return <div>
+        <div style="padding-left: 128dp; padding-top: 64dp;" ></div>
+        <div class="center">
+            <div class="center-menu">
+                <div style="font-size: 48dp;font-weight: 800; color:#d39266;">Options</div>
+                <div id="new_game" class="button" style="margin: 16dp auto;" click={() => {
+                    app.state = AppState.MainMenu;
+                }}>Back</div>
+            </div>
+        </div>
+        <div>
+            <tabset id="menu">
+                <tab>Display</tab>
+                <panel id="display" data-model="display_options">
+                    <table>
+                        <tr>
+                            <td>
+                                <div class="option">
+                                    <div>Display Resolution</div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="option">
+                                    <div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="option">
+
+                                </div>
+                            </td>
+
+                        </tr>
+                    </table>
+                </panel>
+            </tabset>
+        </div>
+        </div>
+}
+
+
+        function on_key_up(ev: RmlEvent) {
+    // keycode 81 is escape, todo make a nice table for looking up by names
+    if (ev.parameters.key_identifier == 81) {
+            ev.StopPropagation()
+        app.state = AppState.MainMenu
+    }
+}
+
+const createOptions = (context: RmlContext): IAppState => {
+
+    const document = context.LoadDocument("index.rml");
+        document.AddEventListener("keyup", on_key_up, true)
+
+        return {
+            document: document,
+        component: Options,
+        state: AppState.Options
+    }
+}
+
+        export default createOptions
+
+/*
 import main_menu from "./main_menu"
 
 let options_document: RmlElementDocument;
@@ -97,3 +165,4 @@ function On_Options_Menu() {
 export default {
     load: load
 }
+*/

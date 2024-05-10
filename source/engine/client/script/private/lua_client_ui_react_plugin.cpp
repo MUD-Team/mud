@@ -5,7 +5,6 @@
 #include <RmlUi/Core/ElementText.h>
 #include <i_system.h>
 
-
 static lua_State *g_L                       = nullptr;
 MUDReactPlugin   *MUDReactPlugin::mInstance = nullptr;
 
@@ -27,7 +26,7 @@ MUDReactPlugin::MUDReactPlugin(lua_State *lua_state) : mRenderDocument(nullptr),
 
     mInstance = this;
 
-    std::vector<std::string> knownTypes{"div"};
+    std::vector<std::string> knownTypes{"div", "tabset", "tab", "panel", "table", "tr", "td", "select", "option"};
     mKnownTypes.insert(knownTypes.begin(), knownTypes.end());
 }
 
@@ -97,15 +96,15 @@ void MUDReactPlugin::ProcessElement(DeferredElement *deferred, Rml::Element *par
     {
         Rml::ElementPtr nelement = nullptr;
 
-        if (deferred->type == "div")
-        {
-            nelement = mRenderDocument->CreateElement(deferred->type);
-        }
-        else if (deferred->type == "#text")
+        if (deferred->type == "#text")
         {
             nelement = mRenderDocument->CreateTextNode(deferred->text);
         }
-
+        else
+        {
+            nelement = mRenderDocument->CreateElement(deferred->type);
+        }
+        
         deferred->element = nelement.get();
         deferred->element->SetAttribute<std::string>("key", deferred->key);
 
@@ -115,8 +114,12 @@ void MUDReactPlugin::ProcessElement(DeferredElement *deferred, Rml::Element *par
     {
         deferred->element = current;
 
+        // todo, clear element to defaults
+        current->SetAttribute<std::string>("class", "");
+
         if (current->GetParentNode() != parent)
         {
+            cache->parent       = nullptr;
             Rml::ElementPtr ptr = current->GetParentNode()->RemoveChild(current);
             parent->AppendChild(std::move(ptr));
         }
@@ -165,7 +168,8 @@ void MUDReactPlugin::ProcessElement(DeferredElement *deferred, Rml::Element *par
 
                 bool capturePhase = true;
 
-                MUDReactEventListener *listener = new MUDReactEventListener(current, event, capturePhase, mCurrentFunctionIndex++);
+                MUDReactEventListener *listener =
+                    new MUDReactEventListener(current, event, capturePhase, mCurrentFunctionIndex++);
 
                 auto itr = mReactListeners.find(current);
                 if (itr == mReactListeners.end())
@@ -199,7 +203,13 @@ void MUDReactPlugin::ProcessElement(DeferredElement *deferred, Rml::Element *par
     {
         for (size_t i = deferred->children.size(); i < cache->children.size(); i++)
         {
-            cache->children[i].element->GetParentNode()->RemoveChild(cache->children[i].element);
+            if (cache->parent)
+            {
+                Rml::Element *element = cache->children[i].element;
+                Rml::Element *parent  = element->GetParentNode();
+                RMLUI_ASSERT(parent);
+                parent->RemoveChild(element);
+            }
         }
     }
 }
@@ -223,53 +233,7 @@ MUDReactPlugin::DeferredElement MUDReactPlugin::DeferCreateElement()
         children.push_back(luabridge::get<luabridge::LuaRef>(g_L, i).value());
     }
 
-    if (type.isFunction())
-    {
-        luabridge::LuaResult result = type.call();
-        if (result.hasFailed())
-        {
-            I_FatalError("MUD React: %s", result.errorMessage().c_str());
-        }
-        if (result.size() != 1)
-        {
-            I_FatalError("MUD React: Functional component returned %u values", result.size());
-        }
-        if (!result[0].isUserdata())
-        {
-            I_FatalError("MUD React: Functional component returned non-user data: %s", result[0].tostring());
-        }
-
-        DeferredElement *d = result[0].cast<DeferredElement *>().valueOr(nullptr);
-
-        if (!d)
-        {
-            I_FatalError("MUD React: Functional component could't get DeferredElement");
-        }
-
-        d->renderKey = mCurrentRenderKey++;
-
-        return *d;
-    }
-
-    if (type.isString())
-    {
-        std::string stype = type.cast<std::string>().value();
-
-        if (mKnownTypes.find(stype) == mKnownTypes.end())
-        {
-            defer.type      = "#text";
-            defer.text      = stype;
-            defer.key       = stype;
-            defer.renderKey = mCurrentRenderKey++;
-            return defer;
-        }
-        else
-        {
-            defer.type = stype;
-        }
-    }
-
-    defer.renderKey = mCurrentRenderKey++;
+    int renderKey = mCurrentRenderKey++;
 
     // props
     luabridge::LuaRef props(g_L);
@@ -284,7 +248,7 @@ MUDReactPlugin::DeferredElement MUDReactPlugin::DeferCreateElement()
     {
         defer.key = props["key"].cast<std::string>().valueOr("");
         lua_getfield(g_L, LUA_REGISTRYINDEX, "__mud_react_element_properties");
-        lua_pushinteger(g_L, defer.renderKey);
+        lua_pushinteger(g_L, renderKey);
         luabridge::Result result = luabridge::push(g_L, props);
         if (!result)
         {
@@ -294,13 +258,85 @@ MUDReactPlugin::DeferredElement MUDReactPlugin::DeferCreateElement()
         lua_pop(g_L, 1);
     }
 
+    if (type.isFunction())
+    {
+        if (defer.key.size())
+        {
+            lua_pushstring(g_L, defer.key.c_str());
+            lua_setglobal(g_L, "__mud_react_component_key");
+            lua_pushnumber(g_L, defer.renderKey);
+            lua_setglobal(g_L, "__mud_react_component_render_key");
+        }
+        
+        luabridge::LuaResult result = type.call(props);
+
+        if (defer.key.size())
+        {
+            lua_pushnil(g_L);
+            lua_setglobal(g_L, "__mud_react_component_key");
+            lua_pushnil(g_L);
+            lua_setglobal(g_L, "__mud_react_component_render_key");
+        }
+
+        if (result.hasFailed())
+        {
+            I_FatalError("MUD React: %s", result.errorMessage().c_str());
+        }
+        if (result.size() != 1)
+        {
+            I_FatalError("MUD React: Functional component returned %u values", result.size());
+        }
+
+        if (result[0].isNil())
+        {
+            DeferredElement d;
+            d.skip = true;
+            return d;
+        }
+
+        if (!result[0].isUserdata())
+        {
+            I_FatalError("MUD React: Functional component returned non-user data: %s", result[0].tostring());
+        }
+
+        DeferredElement *d = result[0].cast<DeferredElement *>().valueOr(nullptr);
+
+        if (!d)
+        {
+            I_FatalError("MUD React: Functional component could't get DeferredElement");
+        }
+
+        d->renderKey = renderKey;
+
+        return *d;
+    }
+
+    if (type.isString())
+    {
+        std::string stype = type.cast<std::string>().value();
+
+        if (mKnownTypes.find(stype) == mKnownTypes.end())
+        {
+            defer.type      = "#text";
+            defer.text      = stype;
+            defer.key       = stype;
+            defer.renderKey = renderKey;
+            return defer;
+        }
+        else
+        {
+            defer.type = stype;
+        }
+    }
+
+    defer.renderKey = renderKey;
+
     for (auto child : children)
     {
         if (child.isBool() && !child.cast<bool>().value())
         {
             continue;
         }
-
         if (child.isString())
         {
             const std::string value = child.cast<std::string>().valueOr("");
@@ -318,7 +354,9 @@ MUDReactPlugin::DeferredElement MUDReactPlugin::DeferCreateElement()
             I_FatalError("Unknown MUD React child type");
         }
 
-        defer.children.push_back(*d);
+        if (!d->skip) {
+            defer.children.push_back(*d);
+        }
     }
 
     return defer;
@@ -349,8 +387,12 @@ void MUDReactPlugin::Render()
     lua_newtable(g_L);
     lua_setfield(g_L, LUA_REGISTRYINDEX, "__mud_react_element_functions");
 
+    lua_newtable(g_L);
+    lua_setfield(g_L, LUA_REGISTRYINDEX, "__mud_react_dirty_render_keys");
+
+
     // remove current event listeners, todo, optimize
-    
+
     for (auto listeners : mReactListeners)
     {
         for (auto listener : listeners.second)
@@ -360,7 +402,6 @@ void MUDReactPlugin::Render()
     }
 
     mReactListeners.clear();
-    
 
     if (lua_pcall(g_L, 0, 1, 0) != 0)
     {
@@ -397,6 +438,11 @@ void MUDReactPlugin::FinishRender()
     mDeferred.Clear();
 }
 
+void MUDReactPlugin::HookUseState()
+{
+    __debugbreak();
+}
+
 void MUDReactPlugin::OnInitialise()
 {
     RMLUI_ASSERT(g_L);
@@ -426,6 +472,13 @@ void MUDReactPlugin::OnInitialise()
                 RMLUI_ASSERT(mInstance);
                 mInstance->Render();
             })
+        .addFunction(
+            "nativeHookUseState",
+            +[]() {
+                RMLUI_ASSERT(mInstance);
+                mInstance->HookUseState();
+            })
+
         .endNamespace()
         .endNamespace()
         .endNamespace();
@@ -438,7 +491,6 @@ void MUDReactPlugin::OnShutdown()
 
 void MUDReactPlugin::OnElementCreate(Rml::Element *element)
 {
-    Rml::Element *yay = element;
 }
 
 void MUDReactPlugin::OnElementDestroy(Rml::Element *element)

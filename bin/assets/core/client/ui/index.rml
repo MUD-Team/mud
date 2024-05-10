@@ -1,7 +1,7 @@
 <rml>
 
     <head>
-        <link type="text/rcss" href="common.rcss" />
+        <link type="text/rcss" href="style.rcss" />
         <style>
             body {
                 display: block;
@@ -47,19 +47,49 @@
             div.button:active {
                 border-color: #fff;
             }
+            
+            .option {
+                display: inline-block;
+            }
+
+            tab {
+                margin: 8dp
+            }
+
+            .option {
+                font-weight: 800;
+                display: flex;
+                flex-shrink: 0;
+                justify-content: flex-start;
+                align-items: center;
+                padding-left: 16dp;
+                height: 48dp
+            }
+
+            tr {
+                border: 2dp #999;
+
+            }
+
+            td {
+                border-right: 2dp #999;
+            }
+
+            panel {
+                padding: 16dp
+            }
+
+            button {
+                margin-top: 18dp;
+                font-size: 18dp;
+                font-weight: 800;
+            }
+        
         </style>
 
     </head>
 
     <body>
-        <div style="padding-left: 128dp; padding-top: 128dp;" id="react-root"></div>
-        <div class="center">
-            <div class="center-menu">
-                <div style="font-size: 48dp;font-weight: 800; color:#d39266;">MUD</div>
-                <div id="new_game" class="button" style="margin: 16dp auto;" onclick="On_New_Game()">New Game</div>
-                <div id="quit" class="button" style="margin: 16dp auto;" onclick="On_Options_Menu()">Options</div>
-                <div id="quit" class="button" style="margin: 16dp auto;" onclick="mud.add_command('quit')">Quit</div>
-            </div>
-        </div>
+        <div id="react-root"></div>
     </body>
 </rml>

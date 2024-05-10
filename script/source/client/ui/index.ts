@@ -1,21 +1,23 @@
 
 import console from "./console"
-import main_menu from "./main_menu"
-import player_view from "./player_view"
-import options from "./options"
+import "./react"
+import app, { AppState } from "./app"
+import createMainMenu from "./main_menu"
+import createOptions from "./options"
 
 const video = mud.video
 const ui = mud.ui
 
 const play_context = rmlui.CreateContext("play", Vector2i.new(video.width, video.height))
-
 console.load(play_context)
-main_menu.load(play_context)
-options.load(play_context)
-player_view.load(play_context)
 
-function begin_frame() {
-    main_menu.render()
+app.registerState(createMainMenu(play_context));
+app.registerState(createOptions(play_context));
+
+app.state = AppState.MainMenu;
+
+function begin_frame() {     
+    app.render()
     ui.begin_frame()
     play_context.Update()
 }
@@ -26,8 +28,8 @@ function end_frame() {
 }
 
 function On_Map_Loaded() {
-    main_menu.on_map_loaded()
-    player_view.on_map_loaded()
+    //main_menu.on_map_loaded()
+    //player_view.on_map_loaded()
 }
 
 // HACK!

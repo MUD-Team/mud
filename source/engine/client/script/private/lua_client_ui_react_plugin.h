@@ -70,6 +70,7 @@ class MUDReactPlugin : public Rml::Plugin
 
         void Clear()
         {
+            skip = false;
             type.clear();
             key.clear();
             text.clear();
@@ -78,6 +79,7 @@ class MUDReactPlugin : public Rml::Plugin
             renderKey = -1;
         }
 
+        bool skip;
         std::string                  type;
         std::string                  key;
         std::string                  text;
@@ -92,6 +94,8 @@ class MUDReactPlugin : public Rml::Plugin
 
     void OnShutdown() override;
 
+    // Elements
+
     void OnElementCreate(Rml::Element *element) override;
 
     void OnElementDestroy(Rml::Element *element) override;
@@ -101,6 +105,11 @@ class MUDReactPlugin : public Rml::Plugin
     void ProcessElement(DeferredElement *deferred, Rml::Element *parent, CacheElement *cache);
 
     DeferredElement DeferCreateElement();
+
+    // Hooks
+    void HookUseState();
+
+    // Render
 
     void Render();
 

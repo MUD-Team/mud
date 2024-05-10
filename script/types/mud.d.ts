@@ -41,10 +41,26 @@ declare namespace mud.ui {
     export function end_frame(this: void): void;
 }
 
+
+
 declare namespace mud.ui.react {
+
+    type EffectCallback = () => any;
+    type DependencyList = readonly unknown[];
+
+    interface FunctionComponent<P = {}> {
+        (
+            props: P & { key: string },
+        ): any // return type
+    }
+
+    type FC<P = {}> = FunctionComponent<P>;
+
     export function createElement(this: void, type: string | Function, props?: any, ...children: any[]): any;
     export function render(this: void, document: RmlElementDocument, parent: RmlElement, root: Function): void;
+    //export function useState(this: void, initialValue: any): [any, (value: any) => void];
 }
+
 
 
 // RmlUi
@@ -102,6 +118,13 @@ declare const rmlui: {
 declare namespace JSX {
     interface IntrinsicElements {
         div: any,
-        button: any
+        tabset: any,
+        tab: any,
+        panel: any,
+        table:any,
+        tr:any,
+        td:any,
+        select:any,
+        option:any
     }
 }

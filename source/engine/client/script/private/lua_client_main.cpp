@@ -95,7 +95,7 @@ void LUA_OpenClientState()
     LUA_OpenClientUI(clientState);
     LUA_OpenClientGame(clientState);
 
-    LUA_DoFile(clientState, "script/client/main.lua");
+    LUA_RequireFile(clientState, "client/main");
 }
 
 void LUA_CloseClientState()
