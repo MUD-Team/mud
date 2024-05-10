@@ -19,6 +19,8 @@ static void  LUA_DoFile(lua_State *L, const std::string &filepath, const char *s
 static std::vector<std::string> requirePaths;
 static std::vector<std::string> requireFiles;
 
+static bool lua_debug = false;
+
 lua_State *LUA_OpenState()
 {
     // we could specify a lua allocator, which would be a good idea to hook up
@@ -53,7 +55,7 @@ lua_State *LUA_OpenState()
 
     LUA_OpenCommonState(L);
 
-    if (true) // lua_debug.d_)
+    if (lua_debug)
     {
         lua_newtable(L);
         lua_setglobal(L, "__lua_debugger_source");
@@ -125,7 +127,7 @@ void LUA_DoFile(lua_State *L, const std::string &filepath, const char *source, s
 {    
     int top = lua_gettop(L);
     
-    if (true) // lua_debug.d_)
+    if (lua_debug)
     {
         lua_getglobal(L, "__lua_debugger_source");
         lua_getfield(L, -1, filepath.c_str());
@@ -150,7 +152,7 @@ void LUA_DoFile(lua_State *L, const std::string &filepath, const char *source, s
                     .c_str());
     }
     
-    if (true) // lua_debug.d_)
+    if (lua_debug)
     {
         status = dbg_pcall(L, 0, LUA_MULTRET, 0);
     }
@@ -313,7 +315,7 @@ int LUA_RequireFile(lua_State *L, const std::string &filepath)
     return 1;
 }
 
-int LUA_MsgHandler(lua_State *L)
+static int LUA_MsgHandler(lua_State *L)
 {
     const char *msg = lua_tostring(L, 1);
     if (msg == nullptr)
@@ -374,7 +376,7 @@ void LUA_Sandbox(lua_State *L)
     LUA_SandboxModule(L, "_G", base_functions);
 
     // if debugging is enabled, load debug/io libs and sandbox
-    if (true) // lua_debug.d_)
+    if (lua_debug)
     {
         // open the debug library and io libraries
         luaL_requiref(L, LUA_DBLIBNAME, luaopen_debug, 1);
@@ -419,7 +421,7 @@ void LUA_CallGlobalFunction(lua_State *L, const char *function_name)
     int top = lua_gettop(L);
     lua_getglobal(L, function_name);
     int status = 0;
-    if (true) // lua_debug.d_)
+    if (lua_debug)
     {
         status = dbg_pcall(L, 0, 0, 0);
     }

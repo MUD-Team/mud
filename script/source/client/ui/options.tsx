@@ -1,17 +1,13 @@
 
 import app, { AppState, IAppState } from "./app"
 
+const displayOptions = mud.options.get_display_options();
+
+
 export const Options = () => {
+
     return <div>
         <div style="padding-left: 128dp; padding-top: 64dp;" ></div>
-        <div class="center">
-            <div class="center-menu">
-                <div style="font-size: 48dp;font-weight: 800; color:#d39266;">Options</div>
-                <div id="new_game" class="button" style="margin: 16dp auto;" click={() => {
-                    app.state = AppState.MainMenu;
-                }}>Back</div>
-            </div>
-        </div>
         <div>
             <tabset id="menu">
                 <tab>Display</tab>
@@ -26,6 +22,9 @@ export const Options = () => {
                             <td>
                                 <div class="option">
                                     <div>
+                                        <select>
+                                            {displayOptions.modes.map(m => <option>{`${m.width} x ${m.height}`}</option>)}
+                                        </select>
                                     </div>
                                 </div>
                             </td>

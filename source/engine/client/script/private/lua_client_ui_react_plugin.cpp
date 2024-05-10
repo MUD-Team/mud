@@ -230,7 +230,21 @@ MUDReactPlugin::DeferredElement MUDReactPlugin::DeferCreateElement()
     std::vector<luabridge::LuaRef> children;
     for (int i = 3; i <= top; i++)
     {
-        children.push_back(luabridge::get<luabridge::LuaRef>(g_L, i).value());
+        luabridge::LuaRef child = luabridge::get<luabridge::LuaRef>(g_L, i).value();
+        if (child.isTable())
+        {
+            int length = child.length();
+            for (int i = 0; i < length; i++)
+            {
+                children.push_back(child[i + 1]);    
+            }
+        }
+        else
+        {
+            children.push_back(child);
+        }
+
+        
     }
 
     int renderKey = mCurrentRenderKey++;
@@ -403,10 +417,10 @@ void MUDReactPlugin::Render()
 
     mReactListeners.clear();
 
-    if (lua_pcall(g_L, 0, 1, 0) != 0)
-    {
-        I_FatalError("MUD React Render: %s", lua_tostring(g_L, -1));
-    }
+    lua_call(g_L, 0, 1);
+    //{
+    //    I_FatalError("MUD React Render: %s", lua_tostring(g_L, -1));
+    //}
 
     // result
     DeferredElement *deferred = luabridge::get<DeferredElement *>(g_L, -1).valueOr(nullptr);

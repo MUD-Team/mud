@@ -25,10 +25,23 @@ declare namespace mud.video {
 }
 
 declare namespace mud.options {
+
+    type DisplayMode =  {
+        id: number;
+        width: number;
+        height: number;
+    }
+
+    type DisplayModeOptions = {
+        current_mode: number;
+        modes: DisplayMode[];
+    }
+
+
     export function get_input_options(this: void): any;
     export function set_input_options(this: void, options: any): void;
 
-    export function get_display_options(this: void): any;
+    export function get_display_options(this: void): DisplayModeOptions;
     export function set_display_options(this: void, options: any): void;
 
     export function get_sound_options(this: void): any;
