@@ -4,6 +4,7 @@ import app, { AppState, IAppState } from "./app"
 const displayOptions = mud.options.get_display_options();
 
 
+
 export const Options = () => {
 
     return <div>
@@ -11,7 +12,7 @@ export const Options = () => {
         <div>
             <tabset id="menu">
                 <tab>Display</tab>
-                <panel id="display" data-model="display_options">
+                <panel id="display">
                     <table>
                         <tr>
                             <td>
@@ -22,8 +23,8 @@ export const Options = () => {
                             <td>
                                 <div class="option">
                                     <div>
-                                        <select>
-                                            {displayOptions.modes.map(m => <option>{`${m.width} x ${m.height}`}</option>)}
+                                        <select change={(ev:RmlElement) => { }}>
+                                            {displayOptions.modes.map((m, index) => <option value={index.toString()}  /*selected={index == 1 ? true : undefined}*/>{`${m.width} x ${m.height}`}</option>)}
                                         </select>
                                     </div>
                                 </div>
@@ -39,31 +40,39 @@ export const Options = () => {
                 </panel>
             </tabset>
         </div>
-        </div>
+    </div>
 }
 
 
-        function on_key_up(ev: RmlEvent) {
+function on_key_up(ev: RmlEvent) {
     // keycode 81 is escape, todo make a nice table for looking up by names
     if (ev.parameters.key_identifier == 81) {
-            ev.StopPropagation()
+        //ev.StopPropagation()
         app.state = AppState.MainMenu
     }
 }
 
-const createOptions = (context: RmlContext): IAppState => {
+const createOptions = () => {
+
+    const context = app.context;
 
     const document = context.LoadDocument("index.rml");
-        document.AddEventListener("keyup", on_key_up, true)
+    document.AddEventListener("keyup", on_key_up, true)
 
-        return {
-            document: document,
+    const state = {
+        document: document,
         component: Options,
         state: AppState.Options
     }
+
+    app.registerState(state);
+
+    app.context.OpenDataModel("display_options", {})
+
+
 }
 
-        export default createOptions
+export default createOptions
 
 /*
 import main_menu from "./main_menu"

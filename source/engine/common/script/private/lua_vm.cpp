@@ -19,7 +19,7 @@ static void  LUA_DoFile(lua_State *L, const std::string &filepath, const char *s
 static std::vector<std::string> requirePaths;
 static std::vector<std::string> requireFiles;
 
-static bool lua_debug = false;
+static bool lua_debug = true;
 
 lua_State *LUA_OpenState()
 {

@@ -3,7 +3,10 @@
 
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/ElementText.h>
+#include <RmlUi/Core/Elements/ElementFormControlSelect.h>
+#include <RmlUi/Lua/Utilities.h>
 #include <i_system.h>
+
 
 static lua_State *g_L                       = nullptr;
 MUDReactPlugin   *MUDReactPlugin::mInstance = nullptr;
@@ -15,7 +18,27 @@ void MUDReactEventListener::ProcessEvent(Rml::Event &event)
     lua_getfield(g_L, LUA_REGISTRYINDEX, "__mud_react_element_functions");
     lua_pushnumber(g_L, mFunctionIndex);
     lua_gettable(g_L, -2);
-    lua_pcall(g_L, 0, 0, 0);
+
+    RMLUI_ASSERT(lua_isfunction(g_L, -1));
+
+    lua_newtable(g_L);
+
+    Rml::Element *target = event.GetTargetElement();
+    if (target)
+    {
+        Rml::Lua::LuaType<Rml::Element>::push(g_L, target, false);
+        lua_setfield(g_L, -2, "target");
+    }
+
+    lua_pushstring(g_L, event.GetType().c_str());
+    lua_setfield(g_L, -2, "type");
+    const Rml::Dictionary &params = event.GetParameters();
+    for (auto p : params)
+    {
+        Rml::Lua::PushVariant(g_L, &p.second);
+        lua_setfield(g_L, -2, p.first.c_str());
+    }
+    lua_call(g_L, 1, 0);
     lua_settop(g_L, top);
 }
 
@@ -71,6 +94,11 @@ void MUDReactPlugin::ProcessElement(DeferredElement *deferred, Rml::Element *par
     {
         currentKey     = cache->element->GetAttribute<std::string>("key", "");
         currentTagName = cache->element->GetTagName();
+        if (currentTagName == "panels")
+        {
+            // time for virtual DOM
+            __debugbreak();
+        }
 
         if (deferred->type == currentTagName)
         {
@@ -104,7 +132,7 @@ void MUDReactPlugin::ProcessElement(DeferredElement *deferred, Rml::Element *par
         {
             nelement = mRenderDocument->CreateElement(deferred->type);
         }
-        
+
         deferred->element = nelement.get();
         deferred->element->SetAttribute<std::string>("key", deferred->key);
 
@@ -141,28 +169,50 @@ void MUDReactPlugin::ProcessElement(DeferredElement *deferred, Rml::Element *par
     if (lua_istable(g_L, -1))
     {
         lua_pushnil(g_L);
-        while (lua_next(g_L, -2) != 0)
+        while (lua_next(g_L, -2))
         {
-            std::string       key   = luabridge::get<std::string>(g_L, -2).valueOr("");
-            luabridge::LuaRef value = luabridge::get<luabridge::LuaRef>(g_L, -1).value();
+            RMLUI_ASSERT(lua_isstring(g_L, -2));
+            std::string key = lua_tostring(g_L, -2);
 
-            if (value.isBool())
+            if (lua_isboolean(g_L, -1))
             {
-                current->SetAttribute<bool>(key, value.cast<bool>().value());
+                current->SetAttribute<bool>(key, lua_toboolean(g_L, -1) ? true : false);
+            }
+            
+            if (lua_isstring(g_L, -1))
+            {
+                int top = lua_gettop(g_L);
+                if (key == "one")
+                {
+                    __debugbreak();
+                }
+                std::string value = lua_tostring(g_L, -1);
+                current->SetAttribute<std::string>(key, value);
+                int ntop = lua_gettop(g_L);
+                if (ntop != top)
+                {
+                    if (lua_isstring(g_L, -1))
+                    {
+                        const char* hm = lua_tostring(g_L, -1);
+                        __debugbreak();
+                    }                    
+                    if (lua_istable(g_L, -1))
+                    {
+                        const char* hm = lua_tostring(g_L, -1);                    
+                        __debugbreak();
+                    }                    
+
+                }
+                lua_settop(g_L, top);
             }
 
-            if (value.isString())
-            {
-                current->SetAttribute<std::string>(key, value.cast<std::string>().value());
-            }
-
-            if (value.isFunction())
+            if (lua_isfunction(g_L, -1))
             {
                 const std::string &event = key;
 
                 lua_getfield(g_L, LUA_REGISTRYINDEX, "__mud_react_element_functions");
                 lua_pushnumber(g_L, mCurrentFunctionIndex);
-                auto result = luabridge::push<luabridge::LuaRef>(g_L, value);
+                lua_pushvalue(g_L, -3);
                 lua_settable(g_L, -3);
                 lua_pop(g_L, 1);
 
@@ -191,6 +241,26 @@ void MUDReactPlugin::ProcessElement(DeferredElement *deferred, Rml::Element *par
 
     // result and __mud_react_element_properties
     lua_pop(g_L, 2);
+
+    if (current->GetTagName() == "select")
+    {
+        Rml::ElementFormControlSelect *select = (Rml::ElementFormControlSelect *)current;
+
+        // simple case, needs consideration for changing options in virtual dom rewrite
+        if (!select->GetNumOptions())
+        {
+            for (size_t i = 0; i < deferred->children.size(); i++)
+            {
+                DeferredElement *child = &deferred->children[i];
+
+                RMLUI_ASSERT(child->type == "option");
+                ProcessElement(child, deferred->element,
+                               (cache && (i < cache->children.size())) ? &cache->children[i] : nullptr);
+            }
+        }
+
+        return;
+    }
 
     for (size_t i = 0; i < deferred->children.size(); i++)
     {
@@ -236,38 +306,29 @@ MUDReactPlugin::DeferredElement MUDReactPlugin::DeferCreateElement()
             int length = child.length();
             for (int i = 0; i < length; i++)
             {
-                children.push_back(child[i + 1]);    
+                children.push_back(child[i + 1]);
             }
         }
         else
         {
             children.push_back(child);
         }
-
-        
     }
 
     int renderKey = mCurrentRenderKey++;
-
-    // props
-    luabridge::LuaRef props(g_L);
-    if (top > 1)
+    
+    if (lua_istable(g_L, 2))
     {
-        auto propsResult = luabridge::get<luabridge::LuaRef>(g_L, 2);
-        RMLUI_ASSERT(propsResult);
-        props = propsResult.value();
-    }
+        lua_getfield(g_L, 2, "key");
+        if (lua_isstring(g_L, -1))
+        {
+            defer.key = lua_tostring(g_L, -1);
+        }
+        lua_pop(g_L, 1);
 
-    if (props.isTable())
-    {
-        defer.key = props["key"].cast<std::string>().valueOr("");
         lua_getfield(g_L, LUA_REGISTRYINDEX, "__mud_react_element_properties");
         lua_pushinteger(g_L, renderKey);
-        luabridge::Result result = luabridge::push(g_L, props);
-        if (!result)
-        {
-            I_FatalError("MUD React: Error pushing element properties %s", result.message().c_str());
-        }
+        lua_pushvalue(g_L, 2);
         lua_settable(g_L, -3);
         lua_pop(g_L, 1);
     }
@@ -281,8 +342,8 @@ MUDReactPlugin::DeferredElement MUDReactPlugin::DeferCreateElement()
             lua_pushnumber(g_L, defer.renderKey);
             lua_setglobal(g_L, "__mud_react_component_render_key");
         }
-        
-        luabridge::LuaResult result = type.call(props);
+
+        luabridge::LuaResult result = type.call(lua_istable(g_L, 2) ? luabridge::get<luabridge::LuaRef>(g_L, 2).value() : luabridge::newTable(g_L));
 
         if (defer.key.size())
         {
@@ -368,7 +429,8 @@ MUDReactPlugin::DeferredElement MUDReactPlugin::DeferCreateElement()
             I_FatalError("Unknown MUD React child type");
         }
 
-        if (!d->skip) {
+        if (!d->skip)
+        {
             defer.children.push_back(*d);
         }
     }
@@ -403,7 +465,6 @@ void MUDReactPlugin::Render()
 
     lua_newtable(g_L);
     lua_setfield(g_L, LUA_REGISTRYINDEX, "__mud_react_dirty_render_keys");
-
 
     // remove current event listeners, todo, optimize
 

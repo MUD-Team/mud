@@ -9,14 +9,18 @@ const video = mud.video
 const ui = mud.ui
 
 const play_context = rmlui.CreateContext("play", Vector2i.new(video.width, video.height))
+app.context = play_context;
+
 console.load(play_context)
 
-app.registerState(createMainMenu(play_context));
-app.registerState(createOptions(play_context));
+createMainMenu();
+createOptions();
 
-app.state = AppState.MainMenu;
+app.state = AppState.Options;
 
 function begin_frame() {     
+
+    collectgarbage()
     app.render()
     ui.begin_frame()
     play_context.Update()

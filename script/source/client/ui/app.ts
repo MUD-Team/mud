@@ -31,6 +31,17 @@ class App {
         render(state.document, state.document.GetElementById("react-root"), state.component)
     }
 
+    get context(): RmlContext {
+        assert(this._context);
+        return this._context!;
+    }
+
+    set context(context: RmlContext) {
+        assert(!this._context);
+        this._context = context;
+    }
+
+
     get state() {
         return this._state;
     }
@@ -53,9 +64,10 @@ class App {
     }
 
     private _state = AppState.None;
+    private _context?: RmlContext;
 
     private states = new Map<AppState, IAppState>();
-    
+
 }
 
 export default new App();

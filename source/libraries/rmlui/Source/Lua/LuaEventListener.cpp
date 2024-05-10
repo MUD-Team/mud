@@ -59,6 +59,7 @@ LuaEventListener::LuaEventListener(const String& code, Element* element) : Event
 	// compile,execute,and save the function
 	if (!Interpreter::LoadString(function, code) || !Interpreter::ExecuteCall(0, 1))
 	{
+		lua_settop(L, top);
 		return;
 	}
 

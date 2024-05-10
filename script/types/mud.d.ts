@@ -79,9 +79,8 @@ declare namespace mud.ui.react {
 // RmlUi
 declare const Vector2i: any;
 
-declare type RmlEvent = {
-    StopPropagation: () => void;
-
+declare type RmlEvent = {    
+    target: any;
     parameters: any;
 }
 

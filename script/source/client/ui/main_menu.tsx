@@ -9,7 +9,7 @@ export const MainMenu = () => {
                 <div id="new_game" class="button" style="margin: 16dp auto;" click={() => {
                 }}>New Game</div>
 
-                <div id="quit" class="button" style="margin: 16dp auto;" click={() => { 
+                <div id="quit" class="button" style="margin: 16dp auto;" click={() => {
                     app.state = AppState.Options;
                 }}>Options</div>
 
@@ -19,13 +19,17 @@ export const MainMenu = () => {
     </div>
 }
 
-const createMainMenu = (context: RmlContext): IAppState => {
+const createMainMenu = () => {
 
-    return {
+    const context = app.context;
+
+    const state = {
         document: context.LoadDocument("index.rml"),
         component: MainMenu,
         state: AppState.MainMenu
     }
+    app.registerState(state);
+
 }
 
 export default createMainMenu
