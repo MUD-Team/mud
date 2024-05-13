@@ -57,7 +57,7 @@
 
 #include "md5.h"
 
-#include "odamex.h"
+#include "mud_includes.h"
 
 // [AM] Handled by odamex.h.
 // #include <cstring>

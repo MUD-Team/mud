@@ -4,10 +4,11 @@
 // $Id: 5cec40df1dc7e08ac018a55f000d3d23ff112e87 $
 //
 // Copyright (C) 2012 by Alex Mayfield.
+// Copyright (C) 2024 by The MUD Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
+// as published by the Free Software Foundation; either version 3
 // of the License, or (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,

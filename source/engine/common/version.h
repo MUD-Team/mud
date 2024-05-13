@@ -4,10 +4,11 @@
 // $Id: fa6514f762ffa23c68ed2026a564cb4f88f5e087 $
 //
 // Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2024 by The MUD Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
+// as published by the Free Software Foundation; either version 3
 // of the License, or (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
@@ -27,11 +28,11 @@
 #include <string>
 
 #if defined(CLIENT_APP)
-#define GAMEEXE "odamex"
+#define GAMEEXE "mud-client"
 #elif defined(SERVER_APP)
-#define GAMEEXE "odasrv"
+#define GAMEEXE "mud-server"
 #else
-#error "Odamex is not client or server"
+#error "MUD is not client or server"
 #endif
 
 /**
@@ -79,7 +80,7 @@
 #define DOTVERSIONSTR "10.4.0"
 #define GAMEVER       (MAKEVER(10, 4, 0))
 
-#define COPYRIGHTSTR "Copyright (C) 2006-2023 The Odamex Team"
+#define COPYRIGHTSTR "Copyright (C) 2024 The MUD Team"
 
 #define SERVERMAJ (VERMAJ(gameversion))
 #define SERVERMIN (VERMIN(gameversion))

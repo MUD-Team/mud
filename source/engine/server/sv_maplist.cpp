@@ -4,10 +4,11 @@
 // $Id: e1baa2180989f13a2c07da0bc5c53c6a0f04543a $
 //
 // Copyright (C) 2012 by Alex Mayfield.
+// Copyright (C) 2024 by The MUD Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
+// as published by the Free Software Foundation; either version 3
 // of the License, or (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
@@ -31,7 +32,7 @@
 #include "i_system.h"
 #include "m_fileio.h"
 #include "m_random.h"
-#include "odamex.h"
+#include "mud_includes.h"
 #include "sv_main.h"
 #include "svc_message.h"
 #include "w_wad.h"

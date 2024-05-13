@@ -5,10 +5,11 @@
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2024 by The MUD Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
+// as published by the Free Software Foundation; either version 3
 // of the License, or (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
@@ -47,7 +48,7 @@ typedef BOOL(WINAPI *SetAffinityFunc)(HANDLE hProcess, DWORD mask);
 #include "i_system.h"
 #include "m_argv.h"
 #include "m_fileio.h"
-#include "odamex.h"
+#include "mud_includes.h"
 #include "z_zone.h"
 
 // [Russell] - Don't need SDLmain library
@@ -124,12 +125,12 @@ int32_t main(int32_t argc, char *argv[])
         if (::Args.CheckParm("--version"))
         {
 #ifdef _WIN32
-            PHYSFS_File *fh = PHYSFS_openWrite("odamex-version.txt");
+            PHYSFS_File *fh = PHYSFS_openWrite("mud-version.txt");
             if (!fh)
                 exit(EXIT_FAILURE);
 
             std::string str;
-            StrFormat(str, "Odamex %s\n", NiceVersion());
+            StrFormat(str, "MUD %s\n", NiceVersion());
             const int32_t ok = PHYSFS_writeBytes(fh, str.data(), str.size());
             if (ok != str.size())
             {
@@ -140,7 +141,7 @@ int32_t main(int32_t argc, char *argv[])
             PHYSFS_close(fh);
             PHYSFS_deinit();
 #else
-            printf("Odamex %s\n", NiceVersion());
+            printf("MUD Client %s\n", NiceVersion());
 #endif
             exit(EXIT_SUCCESS);
         }
@@ -162,10 +163,10 @@ int32_t main(int32_t argc, char *argv[])
             CON.open(CON_FILE, std::ios::in);
         }
 
-        // denis - if argv[1] starts with "odamex://"
+        // denis - if argv[1] starts with "mud://"
         if (argc == 2 && argv && argv[1])
         {
-            const char *protocol = "odamex://";
+            const char *protocol = "mud://";
             const char *uri      = argv[1];
 
             if (strncmp(uri, protocol, strlen(protocol)) == 0)

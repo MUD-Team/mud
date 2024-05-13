@@ -4,10 +4,11 @@
 // $Id: 96cdfad7f2e4da98d7d50996a95f6421c88a17f2 $
 //
 // Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2024 by The MUD Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
+// as published by the Free Software Foundation; either version 3
 // of the License, or (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
@@ -27,7 +28,7 @@
 #include "d_event.h"
 #include "g_levelstate.h"
 #include "m_wdlstats.h"
-#include "odamex.h"
+#include "mud_includes.h"
 #include "svc_message.h"
 
 EXTERN_CVAR(g_gametypename)

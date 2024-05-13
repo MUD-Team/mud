@@ -5,10 +5,11 @@
 //
 // Copyright (C) 1998-2011 by Randy Heit (ZDoom 1.23).
 // Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2024 by The MUD Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
+// as published by the Free Software Foundation; either version 3
 // of the License, or (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
@@ -25,7 +26,7 @@
 #include "stringenums.h"
 
 #include "hashtable.h"
-#include "odamex.h"
+#include "mud_includes.h"
 
 const OString D_DEVSTR                 = "D_DEVSTR";
 const OString D_CDROM                  = "D_CDROM";

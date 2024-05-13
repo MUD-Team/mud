@@ -6,10 +6,10 @@
 #define VOS_NT  0x00040000L
 #define VS_FF_DEBUG 0x00000001L
 
-#define ODAMEX_DESC "Odamex Client"
-#define ODAMEX_EXE "odamex.exe"
-#define ODAMEX_INTERNAL "odamex"
-#define ODAMEX_NAME "Odamex Client"
+#define MUD_DESC "MUD Client"
+#define MUD_EXE "mud-client.exe"
+#define MUD_INTERNAL "mud"
+#define MUD_NAME "MUD Client"
 
 1 ICON "@CMAKE_SOURCE_DIR@/client/sdl/odamex.ico"
 2 ICON "@CMAKE_SOURCE_DIR@/client/sdl/odademo.ico"
@@ -35,12 +35,12 @@ FILESUBTYPE 0
     BLOCK "040904E4"
     {
       VALUE "CompanyName", "@PROJECT_COMPANY@"
-      VALUE "FileDescription", ODAMEX_DESC
+      VALUE "FileDescription", MUD_DESC
       VALUE "FileVersion", "@PROJECT_VERSION@"
-      VALUE "InternalName", ODAMEX_INTERNAL
-      VALUE "LegalCopyright", "ODAMEX and its likeness are Copyright � @PROJECT_COPYRIGHT@ by @PROJECT_COMPANY@."
-      VALUE "OriginalFilename", ODAMEX_EXE
-      VALUE "ProductName", ODAMEX_NAME
+      VALUE "InternalName", MUD_INTERNAL
+      VALUE "LegalCopyright", "MUD and its likeness are Copyright � @PROJECT_COPYRIGHT@ by @PROJECT_COMPANY@."
+      VALUE "OriginalFilename", MUD_EXE
+      VALUE "ProductName", MUD_NAME
       VALUE "ProductVersion", "@PROJECT_VERSION@"
     }
   }

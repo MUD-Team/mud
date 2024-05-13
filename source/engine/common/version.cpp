@@ -4,10 +4,11 @@
 // $Id: 62250214a4d5acf352604fb339b4519eff86bbe4 $
 //
 // Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2024 by The MUD Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
+// as published by the Free Software Foundation; either version 3
 // of the License, or (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
@@ -30,7 +31,7 @@
 #ifndef ODAMEX_NO_GITVER
 #include "git_describe.h"
 #endif
-#include "odamex.h"
+#include "mud_includes.h"
 
 /**
  * @brief Compare two "packed" versions of Odamex to see if they are expected
@@ -312,7 +313,7 @@ BEGIN_COMMAND(version)
     if (argc == 1)
     {
         // distribution
-        Printf(PRINT_HIGH, "Odamex v%s - %s\n", NiceVersion(), COPYRIGHTSTR);
+        Printf(PRINT_HIGH, "MUD v%s - %s\n", NiceVersion(), COPYRIGHTSTR);
     }
     else
     {
