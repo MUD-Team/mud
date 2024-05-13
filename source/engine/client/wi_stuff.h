@@ -5,6 +5,7 @@
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2024 by The MUD Team.
 //
 // This source is available for distribution and/or modification
 // only under the terms of the DOOM Source Code License as

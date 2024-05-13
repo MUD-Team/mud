@@ -4,10 +4,11 @@
 // $Id: 25030e69c04cf79de4ba44196b68f720c997911c $
 //
 // Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2024 by The MUD Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
+// as published by the Free Software Foundation; either version 3
 // of the License, or (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
@@ -23,7 +24,7 @@
 #include "c_dispatch.h"
 #include "cmdlib.h"
 #include "hashtable.h"
-#include "odamex.h"
+#include "mud_includes.h"
 
 typedef std::vector<std::string> StringList;
 

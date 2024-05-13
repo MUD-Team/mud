@@ -4,10 +4,11 @@
 // $Id: ea7ff4f73190620a04ce3724c108a65c33493a42 $
 //
 // Copyright (C) 2012 by Alex Mayfield.
+// Copyright (C) 2024 by The MUD Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
+// as published by the Free Software Foundation; either version 3
 // of the License, or (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
@@ -31,7 +32,7 @@
 #include "cmdlib.h"
 #include "i_net.h"
 #include "i_system.h"
-#include "odamex.h"
+#include "mud_includes.h"
 
 //////// MAPLIST CACHE METHODS (Private) ////////
 

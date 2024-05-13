@@ -5,7 +5,7 @@
  * Copyright (C) WildMIDI Developers  2015-2016
  * ADLMIDI Library API: Copyright (c) 2015-2023 Vitaly Novichkov
  * <admin@wohlnet.ru>
- * Copyright (c) 2024 The EDGE Team.
+ * Copyright (c) 2024 The MUD Team.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License

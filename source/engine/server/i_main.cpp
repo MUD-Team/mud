@@ -5,10 +5,11 @@
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2024 by The MUD Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
+// as published by the Free Software Foundation; either version 3
 // of the License, or (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
@@ -43,7 +44,7 @@
 // #include "resource.h"
 #include "mmsystem.h"
 #endif
-#include "odamex.h"
+#include "mud_includes.h"
 #include "z_zone.h"
 
 void AddCommandString(std::string cmd);
@@ -160,7 +161,7 @@ int32_t __cdecl main(int32_t argc, char *argv[])
 
         if (::Args.CheckParm("--version"))
         {
-            printf("Odamex %s\n", NiceVersion());
+            printf("MUD Server %s\n", NiceVersion());
             exit(EXIT_SUCCESS);
         }
 
@@ -294,7 +295,7 @@ int32_t main(int32_t argc, char **argv)
 
         if (::Args.CheckParm("--version"))
         {
-            printf("Odamex %s\n", NiceVersion());
+            printf("MUD Server %s\n", NiceVersion());
             PHYSFS_deinit();
             exit(EXIT_SUCCESS);
         }

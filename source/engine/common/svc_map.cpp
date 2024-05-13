@@ -4,10 +4,11 @@
 // $Id: f3b63afb2d83dcfe5a0e4ec02a80bbe4397bc4ee $
 //
 // Copyright (C) 2021 by Alex Mayfield.
+// Copyright (C) 2024 by The MUD Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
+// as published by the Free Software Foundation; either version 3
 // of the License, or (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
@@ -24,7 +25,7 @@
 
 #include "hashtable.h"
 #include "i_net.h"
-#include "odamex.h"
+#include "mud_includes.h"
 #include "server.pb.h"
 
 typedef OHashTable<int32_t, const google::protobuf::Descriptor *> SVCHeaderMap;

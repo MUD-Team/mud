@@ -5,10 +5,11 @@
 //
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
 // Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2024 by The MUD Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
+// as published by the Free Software Foundation; either version 3
 // of the License, or (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
@@ -21,7 +22,7 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#include "mud_includes.h"
 
 // Server settings
 // ---------------
@@ -161,7 +162,7 @@ CVAR(sv_unblockplayers, "0",
      "Allows players to walk through other players, and player projectiles to pass through teammates.", CVARTYPE_BOOL,
      CVAR_SERVERARCHIVE | CVAR_LATCH | CVAR_SERVERINFO)
 
-CVAR(sv_hostname, "Untitled Odamex Server", "Server name to appear on masters, clients and launchers", CVARTYPE_STRING,
+CVAR(sv_hostname, "Untitled MUD Server", "Server name to appear on masters, clients and launchers", CVARTYPE_STRING,
      CVAR_SERVERARCHIVE | CVAR_NOENABLEDISABLE | CVAR_SERVERINFO)
 
 CVAR(sv_downloadsites, "", "A list of websites to download WAD files from, separated by spaces", CVARTYPE_STRING,
