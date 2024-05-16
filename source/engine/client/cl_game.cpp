@@ -25,7 +25,6 @@
 
 #include <math.h> // for pow()
 
-#include "am_map.h"
 #include "c_bind.h"
 #include "c_console.h"
 #include "c_dispatch.h"
@@ -46,7 +45,6 @@
 #include "m_random.h"
 #include "minilzo.h"
 #include "mud_includes.h"
-#include "p_horde.h"
 #include "p_local.h"
 #include "p_saveg.h"
 #include "p_tick.h"
@@ -57,7 +55,6 @@
 #include "script/lua_client_public.h"
 #include "v_video.h"
 #include "w_wad.h"
-#include "wi_stuff.h"
 #include "z_zone.h"
 
 
@@ -653,7 +650,7 @@ bool G_Responder(event_t *ev)
         {
 
             if (!cmd || (strnicmp(cmd, "menu_", 5) && stricmp(cmd, "toggleconsole") && stricmp(cmd, "sizeup") &&
-                         stricmp(cmd, "sizedown") && stricmp(cmd, "togglemap") && stricmp(cmd, "spynext") &&
+                         stricmp(cmd, "sizedown") && stricmp(cmd, "spynext") &&
                          stricmp(cmd, "chase") && stricmp(cmd, "+showscores") && stricmp(cmd, "bumpgamma") &&
                          stricmp(cmd, "screenshot") && stricmp(cmd, "stepmode") && stricmp(cmd, "step")))
             {
@@ -675,10 +672,6 @@ bool G_Responder(event_t *ev)
     {
         if (C_DoSpectatorKey(ev))
             return true;
-
-        if (!viewactive)
-            if (AM_Responder(ev))
-                return true; // automap ate it
     }
 
     switch (ev->type)
@@ -718,12 +711,6 @@ bool G_Responder(event_t *ev)
 
         break;
     }
-
-    // [RH] If the view is active, give the automap a chance at
-    // the events *last* so that any bound keys get precedence.
-
-    if (gamestate == GS_LEVEL && viewactive)
-        return AM_Responder(ev);
 
     if (ev->type == ev_keydown || ev->type == ev_mouse || ev->type == ev_joystick)
         return true;
@@ -948,7 +935,6 @@ void G_Ticker(void)
             ClientReplay::getInstance().itemReplay();
         }
         P_Ticker();
-        AM_Ticker();
         break;
 
     default:
@@ -1331,7 +1317,6 @@ void G_DoLoadGame(void)
     G_SerializeSnapshots(arc);
     P_SerializeRNGState(arc);
     P_SerializeACSDefereds(arc);
-    P_SerializeHorde(arc);
 
     multiplayer = false;
 
@@ -1356,8 +1341,6 @@ void G_DoLoadGame(void)
 
     if (text[9] != 0x1d)
         I_Error("Bad savegame");
-
-    P_HordePostLoad();
 }
 
 //
@@ -1422,7 +1405,6 @@ void G_DoSaveGame()
     G_SerializeSnapshots(arc);
     P_SerializeRNGState(arc);
     P_SerializeACSDefereds(arc);
-    P_SerializeHorde(arc);
 
     arc << level.time;
 

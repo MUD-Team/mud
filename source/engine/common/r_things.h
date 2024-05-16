@@ -84,10 +84,6 @@ extern int32_t    *mceilingclip;
 extern fixed_t spryscale;
 extern fixed_t sprtopscreen;
 
-extern fixed_t pspritexscale;
-extern fixed_t pspriteyscale;
-extern fixed_t pspritexiscale;
-
 void R_SortVisSprites();
 void R_AddSprites(sector_t *sec, int32_t lightlevel, int32_t fakeside);
 void R_ClearSprites();

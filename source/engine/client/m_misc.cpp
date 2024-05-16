@@ -79,11 +79,6 @@ void STACK_ARGS M_SaveDefaults()
         Bindings.ArchiveBindings(f);
         DoubleBindings.ArchiveBindings(f);
 
-        str = "\n// --- Automap Bindings ---\n\n";
-        str.append("unambind all\n");
-        PHYSFS_writeBytes(f, str.data(), str.size());
-        AutomapBindings.ArchiveBindings(f);
-
         // Archive all aliases
         str = "\n// --- Aliases ---\n\n";
         PHYSFS_writeBytes(f, str.data(), str.size());
@@ -175,9 +170,7 @@ void M_LoadDefaults(void)
 
 const char *GetShortGameModeString()
 {
-    if (G_IsHordeMode())
-        return "HORDE";
-    else if (sv_gametype == GM_COOP && !::multiplayer)
+    if (sv_gametype == GM_COOP && !::multiplayer)
         return "SOLO";
     else if (sv_gametype == GM_COOP)
         return "COOP";

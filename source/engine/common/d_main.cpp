@@ -70,18 +70,8 @@ float maxfps = 35.0f;
 //
 std::string D_GetTitleString()
 {
-    if (gamemission == pack_tnt)
-        return "DOOM 2: TNT - Evilution";
-    if (gamemission == pack_plut)
-        return "DOOM 2: Plutonia Experiment";
-    if (gamemission == chex)
-        return "Chex Quest";
-    if (gamemission == retail_freedoom)
-        return "Ultimate FreeDoom";
     if (gamemission == commercial_freedoom)
         return "FreeDoom";
-    if (gamemission == commercial_hacx)
-        return "HACX";
 
     return gameinfo.titleString;
 }
@@ -335,7 +325,7 @@ bool D_DoomWadReboot(const OWantFiles &newwadfiles)
         D_LoadResourceFiles(newwadfiles);
 
         // get skill / episode / map from parms
-        strcpy(startmap, (gameinfo.flags & GI_MAPxx) ? "MAP01" : "E1M1");
+        strcpy(startmap, "MAP01");
 
         D_Init();
     }
@@ -360,7 +350,7 @@ bool D_DoomWadReboot(const OWantFiles &newwadfiles)
             LoadResolvedFiles(oldwadfiles);
 
             // get skill / episode / map from parms
-            strcpy(startmap, (gameinfo.flags & GI_MAPxx) ? "MAP01" : "E1M1");
+            strcpy(startmap, "MAP01");
 
             D_Init();
         }

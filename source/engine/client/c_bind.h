@@ -65,9 +65,9 @@ class OKeyBindings
 void C_BindingsInit();
 void C_BindDefaults();
 
-// DoKey now have a binding responder, used to switch between Binds and Automap binds
+// DoKey now have a binding responder, used to switch between Binds
 bool C_DoKey(event_t *ev, OKeyBindings *binds, OKeyBindings *doublebinds);
 
 void C_ReleaseKeys();
 
-extern OKeyBindings Bindings, DoubleBindings, AutomapBindings;
+extern OKeyBindings Bindings, DoubleBindings;

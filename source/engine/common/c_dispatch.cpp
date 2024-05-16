@@ -65,18 +65,12 @@ struct ActionBits actionbits[NUM_ACTIONS] = {
     {0x021fe, ACTION_MOVEUP, "moveup"},
     {0x02315, ACTION_STRAFE, "strafe"},
     {0x041c4, ACTION_FORWARD, "forward"},
-    {0x07cfa, ACTION_AUTOMAP_PANUP, "am_panup"},
     {0x08126, ACTION_FASTTURN, "fastturn"},
     {0x08788, ACTION_LOOKDOWN, "lookdown"},
     {0x088c4, ACTION_MOVELEFT, "moveleft"},
     {0x088c8, ACTION_MOVEDOWN, "movedown"},
-    {0x0fc5c, ACTION_AUTOMAP_ZOOMIN, "am_zoomin"},
     {0x11268, ACTION_MOVERIGHT, "moveright"},
-    {0x1f4b4, ACTION_AUTOMAP_PANLEFT, "am_panleft"},
-    {0x1f4b8, ACTION_AUTOMAP_PANDOWN, "am_pandown"},
-    {0x1f952, ACTION_AUTOMAP_ZOOMOUT, "am_zoomout"},
     {0x2314d, ACTION_SHOWSCORES, "showscores"},
-    {0x3ea48, ACTION_AUTOMAP_PANRIGHT, "am_panright"},
 };
 uint8_t Actions[NUM_ACTIONS];
 

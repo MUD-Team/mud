@@ -26,103 +26,6 @@
 #include "mud_includes.h"
 #include "s_sound.h"
 
-// Automap
-// -------
-
-CVAR(am_followplayer, "1", "", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
-
-CVAR(am_rotate, "0", "", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
-
-CVAR_RANGE(am_overlay, "0", "", CVARTYPE_BYTE, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE, 0.0f, 3.0f)
-
-CVAR(am_showsecrets, "1", "", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
-
-CVAR(am_showmonsters, "1", "", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
-
-CVAR(am_showitems, "1", "", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
-
-CVAR(am_showtime, "1", "", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
-
-CVAR(am_classicmapstring, "0", "", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
-
-CVAR(am_usecustomcolors, "0", "", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
-
-CVAR(am_ovshare, "0", "", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
-
-CVAR(am_backcolor, "00 00 3a", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
-CVAR(am_yourcolor, "d8 e8 fc", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
-CVAR(am_wallcolor, "00 8b ff", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
-CVAR(am_tswallcolor, "10 32 7e", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
-CVAR(am_fdwallcolor, "1a 1a 8a", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
-CVAR(am_cdwallcolor, "00 00 5a", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
-CVAR(am_thingcolor, "dark grey", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
-CVAR(am_thingcolor_item, "navy", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
-CVAR(am_thingcolor_countitem, "sky blue", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
-CVAR(am_thingcolor_monster, "74 fc 6c", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
-CVAR(am_thingcolor_nocountmonster, "yellow", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
-CVAR(am_thingcolor_friend, "dark green", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
-CVAR(am_thingcolor_projectile, "orange", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
-CVAR(am_gridcolor, "44 44 88", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
-CVAR(am_xhaircolor, "80 80 80", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
-CVAR(am_notseencolor, "00 22 6e", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
-CVAR(am_lockedcolor, "bb bb bb", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
-CVAR(am_exitcolor, "ff ff 00", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
-CVAR(am_teleportcolor, "ff a3 00", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
-CVAR(am_ovyourcolor, "d8 e8 fc", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
-CVAR(am_ovwallcolor, "00 8b ff", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
-CVAR(am_ovtswallcolor, "10 32 7e", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
-CVAR(am_ovfdwallcolor, "1a 1a 8a", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
-CVAR(am_ovcdwallcolor, "00 00 5a", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
-CVAR(am_ovthingcolor, "dark grey", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
-CVAR(am_ovthingcolor_item, "navy", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
-CVAR(am_ovthingcolor_countitem, "sky blue", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
-CVAR(am_ovthingcolor_monster, "74 fc 6c", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
-CVAR(am_ovthingcolor_nocountmonster, "yellow", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
-CVAR(am_ovthingcolor_friend, "dark green", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
-CVAR(am_ovthingcolor_projectile, "orange", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
-CVAR(am_ovgridcolor, "44 44 88", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
-CVAR(am_ovxhaircolor, "80 80 80", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
-CVAR(am_ovnotseencolor, "00 22 6e", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
-CVAR(am_ovlockedcolor, "bb bb bb", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
-CVAR(am_ovexitcolor, "ff ff 00", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
-CVAR(am_ovteleportcolor, "ff a3 00", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
 // Console
 // -------
 
@@ -399,8 +302,6 @@ CVAR_RANGE(hud_feedtime, "3.0", "How long entries show in the event feed, in sec
            CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE, 1.0, 10.0)
 CVAR(hud_feedobits, "1", "Show obituaries in the event feed.", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
 
-CVAR(hud_hordeinfo_debug, "0", "Show debugging information for horde.", CVARTYPE_BOOL, CVAR_NULL)
-
 // GhostlyDeath <November 2, 2008> -- someone had the order wrong (0-9!)
 CVAR(chatmacro1, "I'm ready to kick butt!", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
 CVAR(chatmacro2, "I'm OK.", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
@@ -482,9 +383,6 @@ CVAR(			r_drawhitboxes, "0", "Draws a box outlining every actor's hitboxes",
 				CVARTYPE_BOOL, CVAR_NULL)
 #endif
 
-CVAR_RANGE(r_drawplayersprites, "1", "Weapon Transparency", CVARTYPE_FLOAT, CVAR_ARCHIVE | CVAR_NOENABLEDISABLE, 0.0f,
-           1.0f)
-
 CVAR(r_particles, "1", "Draw particles", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
 
 CVAR_RANGE_FUNC_DECL(r_stretchsky, "2", "Stretch sky textures. (0 - always off, 1 - always on, 2 - auto)",
@@ -501,8 +399,6 @@ CVAR_FUNC_DECL(r_forceteamcolor, "0", "Changes the color of all teammates to the
                CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
 
 CVAR_FUNC_DECL(r_teamcolor, "40 cf 00", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-
-CVAR_RANGE(r_wipetype, "1", "", CVARTYPE_BYTE, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE, 0.0f, 3.0f)
 
 CVAR_RANGE(r_painintensity, "0.5", "Intensity of red pain effect", CVARTYPE_FLOAT,
            CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE, 0.0f, 1.0f)

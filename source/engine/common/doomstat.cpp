@@ -29,9 +29,9 @@
 #include "mud_includes.h"
 #include "p_acs.h"
 
-// Game Mode - identify IWAD as shareware, retail etc.
+// Game Mode - identify IWAD
 GameMode_t    gamemode    = undetermined;
-GameMission_t gamemission = doom;
+GameMission_t gamemission = none;
 
 // Language.
 CVAR_FUNC_IMPL(language)

@@ -332,158 +332,6 @@ void AddFile(const OResFile &file)
 }
 
 //
-//
-// IsMarker
-//
-// (from BOOM)
-//
-//
-
-static bool IsMarker(const lumpinfo_t *lump, const char *marker)
-{
-    return (lump->namespc == ns_global) &&
-           (!strncmp(lump->name, marker, 8) || (*(lump->name) == *marker && !strncmp(lump->name + 1, marker, 7)));
-}
-
-//
-// W_MergeLumps
-//
-// Merge multiple tagged groups into one
-// Basically from BOOM, too, although I tried to write it independently.
-//
-
-void W_MergeLumps(const char *start, const char *end, int32_t space)
-{
-    char        ustart[8], uend[8];
-    lumpinfo_t *newlumpinfos;
-    uint32_t    newlumps, oldlumps;
-    bool        insideBlock;
-    uint32_t    flatHack, i;
-
-    strncpy(ustart, start, 8);
-    strncpy(uend, end, 8);
-
-    std::transform(ustart, ustart + sizeof(ustart), ustart, toupper);
-    std::transform(uend, uend + sizeof(uend), uend, toupper);
-
-    // Some pwads use an icky hack to get flats with regular Doom.
-    // This tries to detect them.
-    flatHack = 0;
-    if (!strcmp("F_START", ustart) && !Args.CheckParm("-noflathack"))
-    {
-        int32_t      fudge = 0;
-        uint32_t start = 0;
-
-        for (i = 0; i < numlumps; i++)
-        {
-            if (IsMarker(lumpinfo + i, ustart))
-                fudge++, start = i;
-            else if (IsMarker(lumpinfo + i, uend))
-                fudge--, flatHack = i;
-        }
-        if (start > flatHack)
-            fudge--;
-        if (fudge >= 0)
-            flatHack = 0;
-    }
-
-    newlumpinfos = new lumpinfo_t[numlumps];
-
-    newlumps    = 0;
-    oldlumps    = 0;
-    insideBlock = false;
-
-    for (i = 0; i < numlumps; i++)
-    {
-        if (!insideBlock)
-        {
-            // Check if this is the start of a block
-            if (IsMarker(lumpinfo + i, ustart))
-            {
-                insideBlock = true;
-
-                // Create start marker if we haven't already
-                if (!newlumps)
-                {
-                    newlumps++;
-                    strncpy(newlumpinfos[0].name, ustart, 8);
-                    newlumpinfos[0].handle   = NULL;
-                    newlumpinfos[0].position = newlumpinfos[0].size = 0;
-                    newlumpinfos[0].namespc                         = ns_global;
-                }
-            }
-            else
-            {
-                // Copy lumpinfo down this list
-                lumpinfo[oldlumps++] = lumpinfo[i];
-            }
-        }
-        else
-        {
-            // Check if this is the end of a block
-            if (flatHack)
-            {
-                if (flatHack == i)
-                {
-                    insideBlock = false;
-                    flatHack    = 0;
-                }
-                else
-                {
-                    if (lumpinfo[i].size != 4096)
-                    {
-                        lumpinfo[oldlumps++] = lumpinfo[i];
-                    }
-                    else
-                    {
-                        newlumpinfos[newlumps]           = lumpinfo[i];
-                        newlumpinfos[newlumps++].namespc = space;
-                    }
-                }
-            }
-            else if (i && lumpinfo[i].handle != lumpinfo[i - 1].handle)
-            {
-                // Blocks cannot span multiple files
-                insideBlock          = false;
-                lumpinfo[oldlumps++] = lumpinfo[i];
-            }
-            else if (IsMarker(lumpinfo + i, uend))
-            {
-                // It is. We'll add the end marker once
-                // we've processed everything.
-                insideBlock = false;
-            }
-            else
-            {
-                newlumpinfos[newlumps]           = lumpinfo[i];
-                newlumpinfos[newlumps++].namespc = space;
-            }
-        }
-    }
-
-    // Now copy the merged lumps to the end of the old list
-    // and create the end marker entry.
-
-    if (newlumps)
-    {
-        if (oldlumps + newlumps > numlumps)
-            lumpinfo = (lumpinfo_t *)Realloc(lumpinfo, oldlumps + newlumps);
-
-        memcpy(lumpinfo + oldlumps, newlumpinfos, sizeof(lumpinfo_t) * newlumps);
-
-        numlumps = oldlumps + newlumps;
-
-        strncpy(lumpinfo[numlumps].name, uend, 8);
-        lumpinfo[numlumps].handle   = NULL;
-        lumpinfo[numlumps].position = lumpinfo[numlumps].size = 0;
-        lumpinfo[numlumps].namespc                            = ns_global;
-        numlumps++;
-    }
-
-    delete[] newlumpinfos;
-}
-
-//
 // W_InitMultipleFiles
 // Pass a null terminated list of files to use.
 // All files are optional, but at least one file
@@ -518,17 +366,6 @@ void W_InitMultipleFiles(const OResFiles &files)
 
     if (!numlumps)
         I_Error("W_InitFiles: no files found");
-
-    // [RH] Set namespace markers to global for everything
-    for (size_t i = 0; i < numlumps; i++)
-        lumpinfo[i].namespc = ns_global;
-
-    // [RH] Merge sprite and flat groups.
-    //		(We don't need to bother with patches, since
-    //		Doom doesn't use markers to identify them.)
-    W_MergeLumps("S_START", "S_END", ns_sprites); // denis - fixme - security
-    W_MergeLumps("F_START", "F_END", ns_flats);
-    W_MergeLumps("C_START", "C_END", ns_colormaps);
 
     // set up caching
     M_Free(lumpcache);
@@ -591,7 +428,7 @@ int32_t W_HandleToLump(const lumpHandle_t handle)
 //
 // [SL] taken from prboom-plus
 //
-int32_t W_CheckNumForName(const char *name, int32_t namespc)
+int32_t W_CheckNumForName(const char *name)
 {
     // Hash function maps the name to one of possibly numlump chains.
     // It has been tuned so that the average chain length never exceeds 2.
@@ -599,13 +436,7 @@ int32_t W_CheckNumForName(const char *name, int32_t namespc)
     // proff 2001/09/07 - check numlumps==0, this happens when called before WAD loaded
     int32_t i = (numlumps == 0) ? (-1) : (lumpinfo[W_LumpNameHash(name) % numlumps].index);
 
-    // We search along the chain until end, looking for case-insensitive
-    // matches which also match a namespace tag. Separate hash tables are
-    // not used for each namespace, because the performance benefit is not
-    // worth the overhead, considering namespace collisions are rare in
-    // Doom wads.
-
-    while (i >= 0 && (strnicmp(lumpinfo[i].name, name, 8) || lumpinfo[i].namespc != namespc))
+    while (i >= 0 && strnicmp(lumpinfo[i].name, name, 8))
         i = lumpinfo[i].next;
 
     // Return the matching lump, or -1 if none found.
@@ -616,9 +447,9 @@ int32_t W_CheckNumForName(const char *name, int32_t namespc)
 // W_GetNumForName
 // Calls W_CheckNumForName, but bombs out if not found.
 //
-int32_t W_GetNumForName(const char *name, int32_t namespc)
+int32_t W_GetNumForName(const char *name)
 {
-    int32_t i = W_CheckNumForName(name, namespc);
+    int32_t i = W_CheckNumForName(name);
 
     if (i == -1)
     {
@@ -767,96 +598,6 @@ void *W_CacheLumpNum(uint32_t lump, const zoneTag_e tag)
 void *W_CacheLumpName(const char *name, const zoneTag_e tag)
 {
     return W_CacheLumpNum(W_GetNumForName(name), tag);
-}
-
-//
-// W_CachePatch
-//
-// [SL] Reads and caches a patch from disk. This takes care of converting the
-// patch from the standard Doom format of posts with 1-byte lengths and offsets
-// to a new format for posts that uses 2-byte lengths and offsets.
-//
-patch_t *W_CachePatch(uint32_t lumpnum, const zoneTag_e tag)
-{
-    if (lumpnum >= numlumps)
-        I_Error("W_CachePatch: %u >= numlumps", lumpnum);
-
-    if (!lumpcache[lumpnum])
-    {
-        // temporary storage of the raw patch in the old format
-        uint8_t *rawlumpdata = new uint8_t[W_LumpLength(lumpnum)];
-
-        W_ReadLump(lumpnum, rawlumpdata);
-        patch_t *rawpatch = (patch_t *)(rawlumpdata);
-
-        size_t newlumplen = R_CalculateNewPatchSize(rawpatch, W_LumpLength(lumpnum));
-
-        if (newlumplen > 0)
-        {
-            // valid patch
-            lumpcache[lumpnum] = (uint8_t *)Z_Malloc(newlumplen + 1, tag, &lumpcache[lumpnum]);
-            patch_t *newpatch  = (patch_t *)lumpcache[lumpnum];
-            *((uint8_t *)lumpcache[lumpnum] + newlumplen) = 0;
-
-            R_ConvertPatch(newpatch, rawpatch);
-        }
-        else
-        {
-            // invalid patch - just create a header with width = 0, height = 0
-            lumpcache[lumpnum] = Z_Malloc(sizeof(patch_t), tag, &lumpcache[lumpnum]);
-            memset(lumpcache[lumpnum], 0, sizeof(patch_t));
-        }
-
-        delete[] rawlumpdata;
-    }
-    else
-    {
-        Z_ChangeTag(lumpcache[lumpnum], tag);
-    }
-
-    // denis - todo - would be good to check whether the patch violates W_LumpLength here
-    // denis - todo - would be good to check for width/height == 0 here, and maybe replace those with a valid patch
-
-    return (patch_t *)lumpcache[lumpnum];
-}
-
-patch_t *W_CachePatch(const char *name, const zoneTag_e tag)
-{
-    return W_CachePatch(W_GetNumForName(name), tag);
-    // denis - todo - would be good to replace non-existant patches with a default '404' patch
-}
-
-/**
- * @brief Cache a patch by lump number and return a handle to it.
- */
-lumpHandle_t W_CachePatchHandle(const int32_t lumpNum, const zoneTag_e tag)
-{
-    W_CachePatch(lumpNum, tag);
-    return W_LumpToHandle(lumpNum);
-}
-
-/**
- * @brief Cache a patch by name and namespace and return a handle to it.
- */
-lumpHandle_t W_CachePatchHandle(const char *name, const zoneTag_e tag, const int32_t ns)
-{
-    return W_CachePatchHandle(W_GetNumForName(name, ns), tag);
-}
-
-/**
- * @brief Resolve a handle into a patch_t, or an empty patch if the
- *        lump was missing or from a previous generation.
- */
-patch_t *W_ResolvePatchHandle(const lumpHandle_t lump)
-{
-    int32_t lumpnum = W_HandleToLump(lump);
-    if (lumpnum == -1)
-    {
-        static patch_t empty;
-        memset(&empty, 0, sizeof(patch_t));
-        return &empty;
-    }
-    return static_cast<patch_t *>(lumpcache[lumpnum]);
 }
 
 //

@@ -41,15 +41,6 @@ extern fixed_t FocalLengthX, FocalLengthY;
 #define MINZ        (FRACUNIT * 4)
 #define BASEYCENTER (100)
 
-//
-// Sprite rotation 0 is facing the viewer,
-//	rotation 1 is one angle turn CLOCKWISE around the axis.
-// This is not the same as the angle,
-//	which increases counter clockwise (protractor).
-//
-fixed_t pspritexscale;
-fixed_t pspriteyscale;
-fixed_t pspritexiscale;
 // fixed_t		sky1scale;			// [RH] Sky 1 scale factor
 //  [ML] 5/11/06 - Removed sky2
 int32_t *spritelights;
@@ -57,7 +48,6 @@ int32_t *spritelights;
 #define MAX_SPRITE_FRAMES 29 // [RH] Macro-ized as in BOOM.
 #define SPRITE_NEEDS_INFO INT32_MAX
 
-EXTERN_CVAR(r_drawplayersprites)
 EXTERN_CVAR(r_softinvulneffect)
 EXTERN_CVAR(r_particles)
 
@@ -628,213 +618,6 @@ void R_AddSprites(sector_t *sec, int32_t lightlevel, int32_t fakeside)
     }
 }
 
-EXTERN_CVAR(sv_allowmovebob)
-EXTERN_CVAR(cl_movebob)
-
-fixed_t P_CalculateWeaponBobX(player_t *player, float scale_amount);
-fixed_t P_CalculateWeaponBobY(player_t *player, float scale_amount);
-
-//
-// R_DrawPSprite
-//
-void R_DrawPSprite(pspdef_t *psp, uint32_t flags)
-{
-    fixed_t        tx;
-    int32_t            x1;
-    int32_t            x2;
-    spritedef_t   *sprdef;
-    spriteframe_t *sprframe;
-    texhandle_t    tex_id;
-    bool           flip;
-    vissprite_t   *vis;
-    vissprite_t    avis;
-
-    const float bob_amount = ((clientside && sv_allowmovebob) || (clientside && serverside)) ? cl_movebob : 1.0f;
-    fixed_t     sx         = P_CalculateWeaponBobX(&displayplayer(), bob_amount);
-    fixed_t     sy         = P_CalculateWeaponBobY(&displayplayer(), bob_amount);
-
-    // decide which patch to use
-#ifdef RANGECHECK
-    if ((uint32_t)psp->state->sprite >= (uint32_t)numsprites)
-    {
-        DPrintf("R_DrawPSprite: invalid sprite number %i\n", psp->state->sprite);
-        return;
-    }
-#endif
-    sprdef = &sprites[psp->state->sprite];
-#ifdef RANGECHECK
-    if ((psp->state->frame & FF_FRAMEMASK) >= sprdef->numframes)
-    {
-        DPrintf("R_DrawPSprite: invalid sprite frame %i : %i\n", psp->state->sprite, psp->state->frame);
-        return;
-    }
-#endif
-    sprframe = &sprdef->spriteframes[psp->state->frame & FF_FRAMEMASK];
-
-    tex_id = sprframe->texes[0];
-    flip = static_cast<bool>(sprframe->flip[0]);
-
-    if (sprframe->width[0] == SPRITE_NEEDS_INFO)
-        R_CacheSprite(sprdef); // [RH] speeds up game startup time
-
-    // calculate edges of the shape
-    tx = sx - ((320 / 2) << FRACBITS);
-
-    tx -= sprframe->offset[0]; // [RH] Moved out of spriteoffset[]
-    x1 = (centerxfrac + FixedMul(tx, pspritexscale)) >> FRACBITS;
-
-    // off the right side
-    if (x1 > viewwidth)
-        return;
-
-    tx += sprframe->width[0]; // [RH] Moved out of spritewidth[]
-    x2 = ((centerxfrac + FixedMul(tx, pspritexscale)) >> FRACBITS) - 1;
-
-    // off the left side
-    if (x2 < 0)
-        return;
-
-    // store information in a vissprite
-    vis            = &avis;
-    vis->mobjflags = flags;
-
-// [RH] +0x6000 helps it meet the screen bottom
-//		at higher resolutions while still being in
-//		the right spot at 320x200.
-// denis - bump to 0x9000
-#define WEAPONTWEAK (0x9000)
-
-    vis->texturemid = (BASEYCENTER << FRACBITS) + FRACUNIT / 2 -
-                      (sy + WEAPONTWEAK - sprframe->topoffset[0]); // [RH] Moved out of spritetopoffset[]
-    vis->x1           = x1 < 0 ? 0 : x1;
-    vis->x2           = x2 >= viewwidth ? viewwidth - 1 : x2;
-    vis->xscale       = pspritexscale;
-    vis->yscale       = pspriteyscale;
-    vis->translation  = translationref_t(); // [RH] Use default colors
-    vis->translucency = r_drawplayersprites * FRACUNIT;
-    vis->mo           = NULL;
-    vis->spectator    = false;
-
-    if (flip)
-    {
-        vis->xiscale   = -pspritexiscale;
-        vis->startfrac = sprframe->width[0] - 1; // [RH] Moved out of spritewidth[]
-    }
-    else
-    {
-        vis->xiscale   = pspritexiscale;
-        vis->startfrac = 0;
-    }
-
-    if (vis->x1 > x1)
-        vis->startfrac += vis->xiscale * (vis->x1 - x1);
-
-    vis->tex_id = tex_id;
-
-    if (fixedlightlev)
-    {
-        vis->colormap = basecolormap.with(fixedlightlev);
-    }
-    else if (fixedcolormap.isValid())
-    {
-        // fixed color
-        vis->colormap = fixedcolormap;
-    }
-    else if (psp->state->frame & FF_FULLBRIGHT)
-    {
-        // full bright
-        vis->colormap = basecolormap; // [RH] use basecolormap
-    }
-    else
-    {
-        // local light
-        vis->colormap = basecolormap.with(spritelights[MAXLIGHTSCALE - 1]); // [RH] add basecolormap
-    }
-    if (camera->player &&
-        (camera->player->powers[pw_invisibility] > 4 * 32 || camera->player->powers[pw_invisibility] & 8))
-    {
-        // shadow draw
-        vis->mobjflags = MF_SHADOW;
-    }
-
-    if (r_softinvulneffect)
-    {
-        if (camera->player &&
-            (camera->player->powers[pw_invulnerability] > 4 * 32 || camera->player->powers[pw_invulnerability] & 8))
-        {
-            // draw invuln palette on vissprite only
-            // and don't include sector colored lighting because it creates strange colors.
-            const palette_t *pal = V_GetDefaultPalette();
-            vis->colormap        = shaderef_t(&pal->maps, INVERSECOLORMAP);
-        }
-    }
-
-    // Don't display the weapon sprite if using spectating without spynext
-    if (consoleplayer().spectator && displayplayer_id == consoleplayer_id)
-        return;
-
-    R_DrawVisSprite(vis, vis->x1, vis->x2);
-}
-
-//
-// R_DrawPlayerSprites
-//
-void R_DrawPlayerSprites()
-{
-    MUD_ZoneScoped;    
-    
-    static sector_t tempsec;
-    int32_t             floorlight, ceilinglight;
-
-    if (!camera || !camera->subsector)
-        return;
-
-    if (!r_drawplayersprites || !camera->player || (consoleplayer().cheats & CF_CHASECAM))
-        return;
-
-    sector_t *sec = R_FakeFlat(camera->subsector->sector, &tempsec, &floorlight, &ceilinglight, false);
-
-    // [RH] set foggy flag
-    foggy = level.fadeto_color[0] || level.fadeto_color[1] || level.fadeto_color[2] || level.fadeto_color[3] ||
-            sec->colormap->fade;
-
-    // [RH] set basecolormap
-    basecolormap = sec->colormap->maps;
-
-    // get light level
-    const int32_t lightnum = ((floorlight + ceilinglight) >> (LIGHTSEGSHIFT + 1)) + (foggy ? 0 : extralight);
-
-    if (lightnum < 0)
-        spritelights = scalelight[0];
-    else if (lightnum >= LIGHTLEVELS)
-        spritelights = scalelight[LIGHTLEVELS - 1];
-    else
-        spritelights = scalelight[lightnum];
-
-    // clip to screen bounds
-    mfloorclip   = viewheightarray;
-    mceilingclip = negonearray;
-
-    {
-        int32_t       i;
-        pspdef_t *psp;
-        int32_t       centerhack = centery;
-
-        centery     = (viewheight >> 1) + 1; // Ch0wW : Fix for the weapon sprite's offset.
-        centeryfrac = centery << FRACBITS;
-
-        // add all active psprites
-        for (i = 0, psp = camera->player->psprites; i < NUMPSPRITES; i++, psp++)
-        {
-            if (psp->state)
-                R_DrawPSprite(psp, 0);
-        }
-
-        centery     = centerhack;
-        centeryfrac = centerhack << FRACBITS;
-    }
-}
-
 //
 // R_SortVisSprites
 //
@@ -1033,9 +816,6 @@ void R_DrawMasked(void)
     for (ds = ds_p; ds-- > drawsegs;) // new -- killough
         if (ds->midposts)
             R_RenderMaskedSegRange(ds, ds->x1, ds->x2);
-
-    // draw the psprites on top of everything
-    R_DrawPlayerSprites();
 }
 
 void R_InitParticles(void)

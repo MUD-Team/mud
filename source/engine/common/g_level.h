@@ -42,7 +42,6 @@
  */
 typedef uint32_t levelFlags_t;
 
-const static levelFlags_t LEVEL_NOINTERMISSION  = BIT(0);
 const static levelFlags_t LEVEL_DOUBLESKY       = BIT(2);
 const static levelFlags_t LEVEL_NOSOUNDCLIPPING = BIT(3);
 
@@ -293,7 +292,6 @@ struct level_locals_t
 typedef uint32_t clusterFlags_t;
 
 const static clusterFlags_t CLUSTER_HUB            = BIT(0);
-const static clusterFlags_t CLUSTER_EXITTEXTISLUMP = BIT(1);
 
 struct bossaction_t
 {
@@ -309,14 +307,9 @@ struct bossaction_t
 struct cluster_info_t
 {
     int32_t       cluster;
-    OLumpName messagemusic;
-    OLumpName finaleflat;
-    char     *exittext;
-    char     *entertext;
     int32_t       flags;
-    OLumpName finalepic;
 
-    cluster_info_t() : cluster(0), messagemusic(""), finaleflat(""), exittext(NULL), entertext(NULL), flags(0)
+    cluster_info_t() : cluster(0), flags(0)
     {
     }
 

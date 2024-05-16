@@ -32,7 +32,6 @@
 #include "m_wdlstats.h"
 #include "mud_includes.h"
 #include "p_acs.h"
-#include "p_horde.h"
 #include "p_inter.h"
 #include "p_lnspec.h"
 #include "p_local.h"
@@ -68,7 +67,6 @@ int32_t MeansOfDeath;
 int32_t maxammo[NUMAMMO]  = {200, 50, 300, 50};
 int32_t clipammo[NUMAMMO] = {10, 4, 20, 1};
 
-void AM_Stop(void);
 void SV_SpawnMobj(AActor *mobj);
 void SV_UpdateFrags(player_t &player);
 void SV_TouchSpecial(AActor *special, player_t *player);
@@ -541,21 +539,6 @@ static void P_GiveCarePack(player_t *player)
     if (!::serverside)
         return;
 
-    // Which weapons will we need ammo for?
-    bool hasWeap[NUMAMMO] = {false, false, false, false};
-    for (size_t i = 0; i < NUMWEAPONS; i++)
-    {
-        const ammotype_t ammo = ::weaponinfo[i].ammotype;
-        if (ammo == am_noammo)
-        {
-            continue;
-        }
-        if (player->weaponowned[i])
-        {
-            hasWeap[ammo] = true;
-        }
-    }
-
     // We get "blocks" of inventory to give out.
     int32_t         blocks = 4;
     std::string message, midmessage;
@@ -568,27 +551,34 @@ static void P_GiveCarePack(player_t *player)
         blocks -= 1;
     }
 
-    // Players who are extremely low on ammo for a weapon they are holding
-    // always get ammo for that weapon.
-    const hordeDefine_t::ammos_t &ammos = P_HordeAmmos();
-    for (size_t i = 0; i < ammos.size(); i++)
+    // Which weapons will we need ammo for?
+    bool hasWeap[NUMAMMO] = {false, false, false, false};
+    for (size_t i = 0; i < NUMWEAPONS; i++)
     {
-        const ammotype_t ammo = ammos.at(i);
         if (blocks < 1)
         {
             break;
         }
-
+        const ammotype_t ammo = ::weaponinfo[i].ammotype;
+        if (ammo == am_noammo)
+        {
+            continue;
+        }
+        if (player->weaponowned[i])
+        {
+            hasWeap[ammo] = true;
+        }
         // Don't stockpile ammo for weapons we don't have.
         if (!hasWeap[ammo])
         {
             continue;
         }
 
+        // Players who are extremely low on ammo for a weapon they are holding
+        // always get ammo for that weapon.
         // Missle clip is a bit stingy, so we double our handouts.
         const int32_t   lowLimit   = ammomulti[ammo] * 2;
         const float giveAmount = static_cast<float>(ammomulti[ammo] * 5);
-
         if (player->ammo[ammo] < ::clipammo[ammo] * lowLimit)
         {
             P_GiveAmmo(player, ammo, giveAmount);
@@ -603,81 +593,24 @@ static void P_GiveCarePack(player_t *player)
         blocks -= 1;
     }
 
-    // Give the player a missing weapon - just one.
-    if (blocks >= 1)
-    {
-        const hordeDefine_t::weapons_t &weapons = P_HordeWeapons();
-        for (size_t i = 0; i < weapons.size(); i++)
-        {
-            // No weapon is a special case that means give the player
-            // berserk strength (without the health).
-            if (weapons.at(i) == wp_none && player->powers[pw_strength] < 1)
-            {
-                player->powers[pw_strength] = 1;
-                blocks -= 1;
-
-                message    = "You found a berserk stim in this supply cache!";
-                midmessage = "Got berserk";
-                break;
-            }
-            else if (weapons.at(i) != wp_none && !player->weaponowned[weapons.at(i)])
-            {
-                P_GiveWeapon(player, weapons.at(i), false);
-                blocks -= 1;
-
-                message = "You found a weapon in this supply cache!";
-                switch (weapons.at(i))
-                {
-                case wp_chainsaw:
-                    midmessage = "Got Chainsaw";
-                    break;
-                case wp_pistol:
-                    midmessage = "Got Pistol";
-                    break;
-                case wp_shotgun:
-                    midmessage = "Got Shotgun";
-                    break;
-                case wp_chaingun:
-                    midmessage = "Got Chaingun";
-                    break;
-                case wp_missile:
-                    midmessage = "Got Rocket Launcher";
-                    // [AM] Default missile clip is stingy.
-                    P_GiveAmmo(player, am_misl, 2);
-                    break;
-                case wp_plasma:
-                    midmessage = "Got Plasmagun";
-                    break;
-                case wp_bfg:
-                    midmessage = "Got BFG9000";
-                    break;
-                case wp_supershotgun:
-                    midmessage = "Got Super Shotgun";
-                    break;
-                }
-
-                break;
-            }
-        }
-    }
-
     // Hand out some ammo for all held weapons - that's always appreciated.
-    // If there are fewer than four ammos, we hand out more for the ones
-    // we have.
-    if (blocks >= 1 && !ammos.empty())
+     for (size_t i = 0; i < NUMWEAPONS; i++)
     {
-        for (size_t i = 0; i < 4; i++)
+        if (blocks < 1)
         {
-            const ammotype_t ammo = ammos.at(i % ammos.size());
-
-            // Don't stockpile ammo for weapons we don't have.
-            if (!hasWeap[ammo])
-            {
-                continue;
-            }
-
-            P_GiveAmmo(player, ammo, ammomulti[ammo]);
+            break;
         }
+        const ammotype_t ammo = ::weaponinfo[i].ammotype;
+        if (ammo == am_noammo)
+        {
+            continue;
+        }
+        // Don't stockpile ammo for weapons we don't have.
+        if (!hasWeap[ammo])
+        {
+            continue;
+        }
+        P_GiveAmmo(player, ammo, ammomulti[ammo]);
         blocks -= 1;
     }
 
@@ -1743,21 +1676,12 @@ void P_KillMobj(AActor *source, AActor *target, AActor *inflictor, bool joinkill
 
         tplayer->suicidedelay = SuicideDelay;
         tplayer->death_time   = level.time;
-
-        if (target == consoleplayer().camera)
-        {
-            // don't die in auto map, switch view prior to dying
-            AM_Stop();
-        }
     }
 
     if (target->health > 0) // denis - when this function is used standalone
     {
         target->health = 0;
     }
-
-    P_RemoveHealthPool(target);
-    P_QueueCorpseForDestroy(target);
 
     if (target->info->xdeathstate && target->health < target->info->gibhealth)
     {
@@ -1802,11 +1726,6 @@ void P_KillMobj(AActor *source, AActor *target, AActor *inflictor, bool joinkill
     // Check survival endgame
     if (target->player && level.time)
         G_LivesCheckEndGame();
-
-    if (gamemode == retail_chex) // [ML] Chex Quest mode - monsters don't drop items
-    {
-        return;
-    }
 
     // Drop stuff.
     // This determines the kind of object spawned
@@ -2137,8 +2056,6 @@ void P_DamageMobj(AActor *target, AActor *inflictor, AActor *source, int32_t dam
             // Calculate amount of HP to take away from the boss pool
             int32_t low          = std::max(target->health - damage, 0);
             int32_t actualdamage = target->health - low;
-
-            P_AddDamagePool(target, actualdamage);
 
             target->health -= damage; // do the damage to monsters.
             if (splayer)

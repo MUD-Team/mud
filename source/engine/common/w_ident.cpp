@@ -221,22 +221,11 @@ static FileIdentificationManager identtab;
 //
 void W_ConfigureGameInfo(const OResFile &iwad)
 {
-    extern gameinfo_t SharewareGameInfo;
-    extern gameinfo_t RegisteredGameInfo;
-    extern gameinfo_t RetailGameInfo;
     extern gameinfo_t CommercialGameInfo;
-    extern gameinfo_t RetailBFGGameInfo;
-    extern gameinfo_t CommercialBFGGameInfo;
 
     const OString idname = identtab.identify(iwad);
 
-    if (idname.find(OStringToUpper(OString(FREEDOOM1_PREFIX))) == 0)
-    {
-        gamemode    = retail;
-        gameinfo    = RetailGameInfo;
-        gamemission = retail_freedoom;
-    }
-    else if (idname.find(OStringToUpper(OString(FREEDOOM2_PREFIX))) == 0)
+    if (idname.find(OStringToUpper(OString(FREEDOOM2_PREFIX))) == 0)
     {
         gamemode    = commercial;
         gameinfo    = CommercialGameInfo;
@@ -247,12 +236,6 @@ void W_ConfigureGameInfo(const OResFile &iwad)
         gamemode    = commercial;
         gameinfo    = CommercialGameInfo;
         gamemission = commercial_freedoom;
-    }
-    else
-    {
-        gamemode    = undetermined;
-        gameinfo    = SharewareGameInfo;
-        gamemission = doom;
     }
 }
 

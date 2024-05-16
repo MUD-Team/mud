@@ -104,7 +104,6 @@ static void InitMap()
     MapProto(svc_maplist_update, odaproto::svc::MaplistUpdate::descriptor());
     MapProto(svc_maplist_index, odaproto::svc::MaplistIndex::descriptor());
     MapProto(svc_toast, odaproto::svc::Toast::descriptor());
-    MapProto(svc_hordeinfo, odaproto::svc::HordeInfo::descriptor());
 }
 
 /**

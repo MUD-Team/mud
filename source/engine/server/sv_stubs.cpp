@@ -60,10 +60,6 @@ void WeaponPickupMessage(AActor *toucher, weapontype_t &Weapon)
 {
 }
 
-void AM_Stop(void)
-{
-}
-
 void RefreshPalettes(void)
 {
 }

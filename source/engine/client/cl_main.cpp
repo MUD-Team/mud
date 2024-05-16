@@ -280,7 +280,6 @@ bool   P_CheckMissileSpawn(AActor *th);
 void     P_PlayerLookUpDown(player_t *p);
 team_t   D_TeamByName(const char *team);
 gender_t D_GenderByName(const char *gender);
-void     AM_Stop();
 
 //
 // CL_CalculateWorldIndexSync
@@ -359,7 +358,6 @@ void CL_QuitNetGame2(const netQuitReason_e reason, const char *file, const int32
     connected    = false;
     gameaction   = ga_nothing;
     noservermsgs = false;
-    AM_Stop();
 
     serverside = clientside = true;
     network_game            = false;

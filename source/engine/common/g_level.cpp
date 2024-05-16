@@ -226,14 +226,6 @@ cluster_info_t &ClusterInfos::at(size_t i)
 // Clear all cluster definitions
 void ClusterInfos::clear()
 {
-    // Free all strings.
-    for (_ClusterInfoArray::iterator it = m_infos.begin(); it != m_infos.end(); ++it)
-    {
-        free(it->exittext);
-        it->exittext = NULL;
-        free(it->entertext);
-        it->entertext = NULL;
-    }
     return m_infos.clear();
 }
 
@@ -401,10 +393,7 @@ BEGIN_COMMAND(map)
             // [Russell] - gamemode is always the better option compared to above
             if (argc == 2)
             {
-                if ((gameinfo.flags & GI_MAPxx))
-                    sprintf(mapname, "MAP%02i", atoi(argv[1]));
-                else
-                    sprintf(mapname, "E%cM%c", argv[1][0], argv[1][1]);
+                sprintf(mapname, "MAP%02i", atoi(argv[1]));
             }
 
             if (W_CheckNumForName(mapname) == -1)
@@ -442,19 +431,7 @@ END_COMMAND(map)
 char *CalcMapName(int32_t episode, int32_t level)
 {
     static char lumpname[9];
-
-    if (gameinfo.flags & GI_MAPxx)
-    {
-        sprintf(lumpname, "MAP%02d", level);
-    }
-    else
-    {
-        lumpname[0] = 'E';
-        lumpname[1] = '0' + episode;
-        lumpname[2] = 'M';
-        lumpname[3] = '0' + level;
-        lumpname[4] = 0;
-    }
+    sprintf(lumpname, "MAP%02d", level);
     return lumpname;
 }
 
@@ -685,9 +662,6 @@ void G_InitLevelLocals()
 
     R_ExitLevel();
 
-    NormalLight.maps = shaderef_t(&realcolormaps, 0);
-    // NormalLight.maps = shaderef_t(&DefaultPalette->maps, 0);
-
     level.gravity    = sv_gravity;
     level.aircontrol = static_cast<fixed_t>(sv_aircontrol * 65536.f);
     G_AirControlChanged();
@@ -703,15 +677,6 @@ void G_InitLevelLocals()
     ::level.info    = (level_info_t *)&info;
     ::level.skypic2 = info.skypic2;
     memcpy(::level.fadeto_color, info.fadeto_color, 4);
-
-    if (::level.fadeto_color[0] || ::level.fadeto_color[1] || ::level.fadeto_color[2] || ::level.fadeto_color[3])
-    {
-        NormalLight.maps = shaderef_t(&V_GetDefaultPalette()->maps, 0);
-    }
-    else
-    {
-        R_ForceDefaultColormap(info.fadetable.c_str());
-    }
 
     memcpy(::level.outsidefog_color, info.outsidefog_color, 4);
 
@@ -901,7 +866,6 @@ BEGIN_COMMAND(mapinfo)
 
     // Stringify the set level flags.
     std::string flags;
-    flags += (info.flags & LEVEL_NOINTERMISSION ? " NOINTERMISSION" : "");
     flags += (info.flags & LEVEL_DOUBLESKY ? " DOUBLESKY" : "");
     flags += (info.flags & LEVEL_NOSOUNDCLIPPING ? " NOSOUNDCLIPPING" : "");
     flags += (info.flags & LEVEL_MAP07SPECIAL ? " MAP07SPECIAL" : "");
@@ -955,29 +919,10 @@ BEGIN_COMMAND(clusterinfo)
     }
 
     Printf(PRINT_HIGH, "Cluster: %d\n", info.cluster);
-    Printf(PRINT_HIGH, "Message Music: %s\n", info.messagemusic.c_str());
-    Printf(PRINT_HIGH, "Message Flat: %s\n", info.finaleflat.c_str());
-    if (info.exittext)
-    {
-        Printf(PRINT_HIGH, "- = Exit Text = -\n%s\n- = = = -\n", info.exittext);
-    }
-    else
-    {
-        Printf(PRINT_HIGH, "Exit Text: None\n");
-    }
-    if (info.entertext)
-    {
-        Printf(PRINT_HIGH, "- = Enter Text = -\n%s\n- = = = -\n", info.entertext);
-    }
-    else
-    {
-        Printf(PRINT_HIGH, "Enter Text: None\n");
-    }
 
     // Stringify the set cluster flags.
     std::string flags;
     flags += (info.flags & CLUSTER_HUB ? " HUB" : "");
-    flags += (info.flags & CLUSTER_EXITTEXTISLUMP ? " EXITTEXTISLUMP" : "");
 
     if (flags.length() > 0)
     {

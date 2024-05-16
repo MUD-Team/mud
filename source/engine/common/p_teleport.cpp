@@ -176,15 +176,6 @@ bool EV_Teleport(int32_t tid, int32_t tag, int32_t arg0, int32_t side, AActor *t
     if (!P_TeleportMove(thing, m->x, m->y, destz, false))
         return false;
 
-    // fraggle: this was changed in final doom,
-    // problem between normal doom2 1.9 and final doom
-    // Note that although chex.exe is based on Final Doom,
-    // it does not have this quirk.
-    // [AM] For z-teleports, the destination sets the height, don't
-    //      override it here.
-    if (m->type == MT_TELEPORTMAN && (gamemission < pack_tnt || gamemission == chex))
-        thing->z = thing->floorz;
-
     if (player)
         player->viewz = thing->z + thing->player->viewheight;
 
@@ -277,20 +268,10 @@ bool EV_LineTeleport(line_t *line, int32_t side, AActor *thing)
 
                 fixed_t destz;
 
-                if ((gamemission == pack_tnt || gamemission == pack_plut || gamemission == chex))
-                    destz = m->z; // Make sure we have the original Z-Height bug on Final Doom.
-                else
-                    destz = (m->type == MT_TELEPORTMAN) ? P_FloorHeight(m) : m->z;
+                destz = (m->type == MT_TELEPORTMAN) ? P_FloorHeight(m) : m->z;
 
                 if (!P_TeleportMove(thing, m->x, m->y, destz, false))
                     return false;
-
-                // fraggle: this was changed in final doom,
-                // problem between normal doom2 1.9 and final doom
-                // Note that although chex.exe is based on Final Doom,
-                // it does not have this quirk.
-                if (gamemission < pack_tnt || gamemission == chex)
-                    thing->z = thing->floorz;
 
                 if (player)
                     player->viewz = thing->z + thing->player->viewheight;

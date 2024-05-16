@@ -5,8 +5,6 @@
 #include "c_pch.h"
 #include "cl_download.h"
 #include "cl_main.h"
-#include "f_finale.h"
-#include "f_wipe.h"
 #include "hu_stuff.h"
 #include "i_input.h"
 #include "i_music.h"

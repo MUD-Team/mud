@@ -33,9 +33,8 @@ CVAR_RANGE(sv_gametype, "0",
            "// 0 = Cooperative\n"
            "// 1 = Deathmatch\n"
            "// 2 = Team Deathmatch\n"
-           "// 3 = Capture The Flag\n"
-           "// 4 = Horde\n",
-           CVARTYPE_BYTE, CVAR_SERVERARCHIVE | CVAR_SERVERINFO | CVAR_LATCH | CVAR_NOENABLEDISABLE, 0.0f, 4.0f)
+           "// 3 = Capture The Flag\n",
+           CVARTYPE_BYTE, CVAR_SERVERARCHIVE | CVAR_SERVERINFO | CVAR_LATCH | CVAR_NOENABLEDISABLE, 0.0f, 3.0f)
 
 CVAR(sv_friendlyfire, "1",
      "When set, players can injure others on the same team, "
@@ -234,30 +233,6 @@ CVAR_RANGE(g_thingfilter, "0",
 
 CVAR(g_resetinvonexit, "0", "Always reset players to their starting inventory on level exit", CVARTYPE_BOOL,
      CVAR_SERVERARCHIVE | CVAR_SERVERINFO | CVAR_NOENABLEDISABLE)
-
-CVAR(g_horde_waves, "5", "Number of horde waves per map", CVARTYPE_INT,
-     CVAR_SERVERARCHIVE | CVAR_SERVERINFO | CVAR_NOENABLEDISABLE)
-
-CVAR(g_horde_mintotalhp, "4.0", "Multiplier for minimum spawned health at a time", CVARTYPE_FLOAT,
-     CVAR_SERVERARCHIVE | CVAR_SERVERINFO | CVAR_NOENABLEDISABLE)
-
-CVAR(g_horde_maxtotalhp, "10.0", "Multiplier for maximum spawned health at a time", CVARTYPE_FLOAT,
-     CVAR_SERVERARCHIVE | CVAR_SERVERINFO | CVAR_NOENABLEDISABLE)
-
-CVAR(g_horde_goalhp, "8.0", "Goal health multiplier for a given round", CVARTYPE_FLOAT,
-     CVAR_SERVERARCHIVE | CVAR_SERVERINFO | CVAR_NOENABLEDISABLE)
-
-CVAR_RANGE(g_horde_spawnempty_min, "1", "Minimum number of seconds it takes to spawn a monster in an empty horde map",
-           CVARTYPE_INT, CVAR_SERVERARCHIVE | CVAR_SERVERINFO | CVAR_NOENABLEDISABLE, 1, 60)
-
-CVAR_RANGE(g_horde_spawnempty_max, "3", "Maximum number of seconds it takes to spawn a monster in an empty horde map",
-           CVARTYPE_INT, CVAR_SERVERARCHIVE | CVAR_SERVERINFO | CVAR_NOENABLEDISABLE, 1, 60)
-
-CVAR_RANGE(g_horde_spawnfull_min, "2", "Minimum number of seconds it takes to spawn a monster in a full horde map",
-           CVARTYPE_INT, CVAR_SERVERARCHIVE | CVAR_SERVERINFO | CVAR_NOENABLEDISABLE, 1, 60)
-
-CVAR_RANGE(g_horde_spawnfull_max, "6", "Maximum number of seconds it takes to spawn a monster in a full horde map",
-           CVARTYPE_INT, CVAR_SERVERARCHIVE | CVAR_SERVERINFO | CVAR_NOENABLEDISABLE, 1, 60)
 
 // Game mode options commonized from the server
 //     At some point, replace "sv_" with "g_"

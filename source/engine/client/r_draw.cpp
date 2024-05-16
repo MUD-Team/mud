@@ -209,99 +209,33 @@ uint8_t         bosstable[256];
 
 static void R_BuildFontTranslation(int32_t color_num, argb_t start_color, argb_t end_color)
 {
-    const palindex_t chexstart_index = 0x70;
-    const palindex_t chexend_index   = 0x7F;
-    const palindex_t hacxstart_index = 0xC3;
-    const palindex_t hacxmid1_index  = 0xCF;
-    const palindex_t hacxmid2_index  = 0xF0;
-    const palindex_t hacxend_index   = 0xF2;
     const palindex_t start_index     = 0xB0;
     const palindex_t end_index       = 0xBF;
-    const int32_t        index_range     = end_index - start_index + 1;
+    const int32_t    index_range     = end_index - start_index + 1;
 
     palindex_t *dest = (palindex_t *)Ranges + color_num * 256;
 
-    if (gamemode == retail_chex)
-    {
-        for (int32_t index = 0; index < chexstart_index; index++)
-            dest[index] = index;
-        for (int32_t index = chexend_index + 1; index < 256; index++)
-            dest[index] = index;
-    }
-    else if (gamemission == commercial_hacx)
-    {
-        for (int32_t index = 0; index < hacxstart_index; index++)
-            dest[index] = index;
-        for (int32_t index = hacxmid1_index + 1; index < hacxmid2_index; index++)
-            dest[index] = index;
-        for (int32_t index = hacxend_index + 1; index < 256; index++)
-            dest[index] = index;
-    }
-    else
-    {
-        for (int32_t index = 0; index < start_index; index++)
-            dest[index] = index;
-        for (int32_t index = end_index + 1; index < 256; index++)
-            dest[index] = index;
-    }
+    for (int32_t index = 0; index < start_index; index++)
+        dest[index] = index;
+    for (int32_t index = end_index + 1; index < 256; index++)
+        dest[index] = index;
 
     int32_t r_diff = end_color.getr() - start_color.getr();
     int32_t g_diff = end_color.getg() - start_color.getg();
     int32_t b_diff = end_color.getb() - start_color.getb();
-    int32_t hacxtrack;
 
-    if (gamemode == retail_chex)
+    for (palindex_t index = start_index; index <= end_index; index++)
     {
-        for (palindex_t index = chexstart_index; index <= chexend_index; index++)
-        {
-            int32_t i = index - chexstart_index;
+        int32_t i = index - start_index;
 
-            int32_t r = start_color.getr() + i * r_diff / index_range;
-            int32_t g = start_color.getg() + i * g_diff / index_range;
-            int32_t b = start_color.getb() + i * b_diff / index_range;
+        int32_t r = start_color.getr() + i * r_diff / index_range;
+        int32_t g = start_color.getg() + i * g_diff / index_range;
+        int32_t b = start_color.getb() + i * b_diff / index_range;
 
-            dest[index] = V_BestColor(V_GetDefaultPalette()->basecolors, r, g, b);
-        }
-
-        dest[0x2C] = dest[0x2D] = dest[0x2F] = dest[chexend_index];
+        dest[index] = V_BestColor(V_GetDefaultPalette()->basecolors, r, g, b);
     }
-    else if (gamemission == commercial_hacx)
-    {
-        for (palindex_t index = hacxstart_index; index <= hacxend_index; index++)
-        {
-            if (index > hacxmid1_index && index < hacxmid2_index)
-                index = hacxmid2_index;
 
-            if (index <= hacxmid1_index)
-                hacxtrack = hacxstart_index;
-            else
-                hacxtrack = hacxmid2_index - (hacxmid1_index - hacxstart_index + 1);
-            int32_t i = index - hacxtrack;
-
-            int32_t r = start_color.getr() + i * r_diff / index_range;
-            int32_t g = start_color.getg() + i * g_diff / index_range;
-            int32_t b = start_color.getb() + i * b_diff / index_range;
-
-            dest[index] = V_BestColor(V_GetDefaultPalette()->basecolors, r, g, b);
-        }
-
-        dest[0x2C] = dest[0x2D] = dest[0x2F] = dest[hacxend_index];
-    }
-    else
-    {
-        for (palindex_t index = start_index; index <= end_index; index++)
-        {
-            int32_t i = index - start_index;
-
-            int32_t r = start_color.getr() + i * r_diff / index_range;
-            int32_t g = start_color.getg() + i * g_diff / index_range;
-            int32_t b = start_color.getb() + i * b_diff / index_range;
-
-            dest[index] = V_BestColor(V_GetDefaultPalette()->basecolors, r, g, b);
-        }
-
-        dest[0x2C] = dest[0x2D] = dest[0x2F] = dest[end_index];
-    }
+    dest[0x2C] = dest[0x2D] = dest[0x2F] = dest[end_index];
 }
 
 /**

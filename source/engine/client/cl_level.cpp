@@ -25,7 +25,6 @@
 
 #include <set>
 
-#include "am_map.h"
 #include "c_console.h"
 #include "c_dispatch.h"
 #include "cl_main.h"
@@ -52,7 +51,6 @@
 #include "s_sound.h"
 #include "v_video.h"
 #include "w_wad.h"
-#include "wi_stuff.h"
 #include "z_zone.h"
 #include "script/lua_client_public.h"
 
@@ -267,8 +265,6 @@ void G_InitNew(const char *mapname)
         level.inttimeleft = 0;
     }
 
-    AM_Stop();
-
     usergame   = true; // will be set false if a demo
     paused     = false;
     viewactive = true;
@@ -321,7 +317,7 @@ void G_ExitLevel(int32_t position, int32_t drawscores)
 void G_SecretExitLevel(int32_t position, int32_t drawscores)
 {
     // IF NO WOLF3D LEVELS, NO SECRET EXIT!
-    if ((gameinfo.flags & GI_MAPxx) && (W_CheckNumForName("map31") < 0))
+    if (W_CheckNumForName("map31") < 0)
         secretexit = false;
     else
         secretexit = true;
@@ -347,8 +343,6 @@ void G_DoCompleted(void)
         getLevelInfos().findByName(level.mapname).flags |= LEVEL_VISITED;
     }
 
-    AM_Stop();
-
     wminfo.epsd = level.cluster - 1; // Only used for DOOM I.
     strncpy(wminfo.lname0, level.info->pname.c_str(), 8);
     strncpy(wminfo.current, level.mapname.c_str(), 8);
@@ -362,7 +356,7 @@ void G_DoCompleted(void)
     {
         wminfo.next[0] = 0;
 
-        if (!level.endpic.empty() && level.flags & LEVEL_NOINTERMISSION)
+        if (!level.endpic.empty())
         {
             gameaction = ga_nothing;
             return;
@@ -447,7 +441,7 @@ void G_DoCompleted(void)
 
         if (sv_gametype == GM_COOP)
         {
-            if (level.flags & LEVEL_NOINTERMISSION && strnicmp(level.nextmap.c_str(), "EndGame", 7) == 0)
+            if (strnicmp(level.nextmap.c_str(), "EndGame", 7) == 0)
             {
                 if (!multiplayer)
                 {
@@ -468,7 +462,7 @@ void G_DoCompleted(void)
     gamestate  = GS_NONE;
     viewactive = false;
 
-    WI_Start(&wminfo);
+    G_WorldDone();
 }
 
 //
@@ -615,44 +609,9 @@ void G_DoLoadLevel(int32_t position)
 //
 void G_WorldDone()
 {
-    LevelInfos   &levels   = getLevelInfos();
-    ClusterInfos &clusters = getClusterInfos();
-
     gameaction = ga_worlddone;
 
     R_ExitLevel();
-
-    if (level.flags & LEVEL_CHANGEMAPCHEAT)
-        return;
-
-    cluster_info_t &thiscluster = clusters.findByCluster(level.cluster);
-
-
-    if (!strnicmp(level.nextmap.c_str(), "EndGame", 7))
-    {
-        AM_Stop();
-    }
-    else
-    {
-        // Figure out if we took a secret exit.
-        cluster_info_t &nextcluster = (secretexit)
-                                          ? clusters.findByCluster(levels.findByName(::level.secretmap).cluster)
-                                          : clusters.findByCluster(levels.findByName(::level.nextmap).cluster);
-
-        if (nextcluster.cluster != level.cluster && sv_gametype == GM_COOP)
-        {
-            // Only start the finale if the next level's cluster is different
-            // than the current one and we're not in deathmatch.
-            if (nextcluster.entertext)
-            {
-                AM_Stop();
-            }
-            else if (thiscluster.exittext)
-            {
-                AM_Stop();
-            }
-        }
-    }
 }
 
 VERSION_CONTROL(g_level_cpp, "$Id: 8d389e20812e7e5a63177c6e71c8e8355d10bfd5 $")

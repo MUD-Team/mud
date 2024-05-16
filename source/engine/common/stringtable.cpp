@@ -40,12 +40,7 @@
  */
 static bool IfGameZDoom(const std::string &str)
 {
-    if (!stricmp(str.c_str(), "doom") && ::gamemode != retail_chex && ::gamemode != undetermined)
-    {
-        return true;
-    }
-
-    if (!stricmp(str.c_str(), "chex") && ::gamemode == retail_chex)
+    if (!stricmp(str.c_str(), "doom") && ::gamemode != undetermined)
     {
         return true;
     }

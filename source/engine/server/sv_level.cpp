@@ -41,7 +41,6 @@
 #include "minilzo.h"
 #include "mud_includes.h"
 #include "p_acs.h"
-#include "p_hordespawn.h"
 #include "p_local.h"
 #include "p_mobj.h"
 #include "p_saveg.h"
@@ -190,23 +189,15 @@ std::string G_NextMap()
         next = level.secretmap.c_str();
     }
 
-    // NES - exiting a Doom 1 episode moves to the next episode,
-    // rather than always going back to E1M1
-    if (iequals(next.substr(0, 7), "EndGame") || (gamemode == retail_chex && iequals(level.nextmap.c_str(), "E1M6")))
+    if (iequals(next.substr(0, 7), "EndGame"))
     {
-        if (gameinfo.flags & GI_MAPxx || gamemode == shareware ||
-            (!sv_loopepisode && ((gamemode == registered && level.cluster == 3) ||
-                                 ((gameinfo.flags & GI_MENUHACK_RETAIL) && level.cluster == 4))))
-        {
-            next = CalcMapName(1, 1);
-        }
-        else if (sv_loopepisode)
+        if (sv_loopepisode)
         {
             next = CalcMapName(level.cluster, 1);
         }
         else
         {
-            next = CalcMapName(level.cluster + 1, 1);
+            next = CalcMapName(1, 1);
         }
     }
     return next;
@@ -539,9 +530,6 @@ void G_ExitLevel(int32_t position, int32_t drawscores)
     secretexit = false;
 
     gameaction = ga_completed;
-
-    // denis - this will skip wi_stuff and allow some time for finale text
-    // G_WorldDone();
 }
 
 // Here's for the german edition.
@@ -556,15 +544,12 @@ void G_SecretExitLevel(int32_t position, int32_t drawscores)
     mapchange = TICRATE * sv_intermissionlimit; // wait n seconds, defaults to 10
 
     // IF NO WOLF3D LEVELS, NO SECRET EXIT!
-    if ((gameinfo.flags & GI_MAPxx) && (W_CheckNumForName("map31") < 0))
+    if (W_CheckNumForName("map31") < 0)
         secretexit = false;
     else
         secretexit = true;
 
     gameaction = ga_completed;
-
-    // denis - this will skip wi_stuff and allow some time for finale text
-    // G_WorldDone();
 }
 
 void G_DoCompleted()
@@ -693,9 +678,6 @@ void G_DoResetLevel(bool full_reset)
     // [SL] always reset the time (for now at least)
     level.time        = 0;
     level.inttimeleft = mapchange / TICRATE;
-
-    // [AM] Clear horde spawns - they will be repopulated later.
-    P_HordeClearSpawns();
 
     // Reset the respawned monster count
     level.respawned_monsters = 0;
@@ -864,49 +846,7 @@ void G_DoLoadLevel(int32_t position)
 //
 void G_WorldDone(void)
 {
-    LevelInfos   &levels   = getLevelInfos();
-    ClusterInfos &clusters = getClusterInfos();
 
-    // gameaction = ga_worlddone;
-
-    if (level.flags & LEVEL_CHANGEMAPCHEAT)
-        return;
-
-    const char     *finaletext  = NULL;
-    cluster_info_t &thiscluster = clusters.findByCluster(level.cluster);
-    if (!strnicmp(level.nextmap.c_str(), "EndGame", 7))
-    {
-        //		F_StartFinale (thiscluster->messagemusic, thiscluster->finaleflat, thiscluster->exittext); // denis -
-        // fixme - what should happen on the server?
-        finaletext = thiscluster.exittext;
-    }
-    else
-    {
-        cluster_info_t &nextcluster = (secretexit)
-                                          ? clusters.findByCluster(levels.findByName(::level.secretmap).cluster)
-                                          : clusters.findByCluster(levels.findByName(::level.nextmap).cluster);
-
-        if (nextcluster.cluster != level.cluster && sv_gametype == GM_COOP)
-        {
-            // Only start the finale if the next level's cluster is different
-            // than the current one and we're not in deathmatch.
-            if (nextcluster.entertext)
-            {
-                //				F_StartFinale (nextcluster->messagemusic, nextcluster->finaleflat,
-                // nextcluster->entertext); // denis - fixme
-                finaletext = nextcluster.entertext;
-            }
-            else if (thiscluster.exittext)
-            {
-                //				F_StartFinale (thiscluster->messagemusic, thiscluster->finaleflat,
-                // thiscluster->exittext); // denis - fixme
-                finaletext = thiscluster.exittext;
-            }
-        }
-    }
-
-    if (finaletext)
-        mapchange += strlen(finaletext) * 2;
 }
 
 VERSION_CONTROL(g_level_cpp, "$Id: b56e5c37ed54d0d475c9b7bab21e138deaf883b2 $")

@@ -41,8 +41,6 @@
 #include "md5.h"
 #include "mud_includes.h"
 #include "p_acs.h"
-#include "p_horde.h"
-#include "p_hordespawn.h"
 #include "p_lnspec.h"
 #include "p_local.h"
 #include "p_mapformat.h"
@@ -603,7 +601,6 @@ void P_LoadThings(int32_t lump)
     mapthing_t *mt     = (mapthing_t *)data;
     mapthing_t *lastmt = (mapthing_t *)(data + W_LumpLength(lump));
 
-    P_HordeClearSpawns();
     playerstarts.clear();
     voodoostarts.clear();
     DeathMatchStarts.clear();
@@ -675,7 +672,6 @@ void P_LoadThings2(int32_t lump, int32_t position)
     mapthing2_t *mt     = (mapthing2_t *)data;
     mapthing2_t *lastmt = (mapthing2_t *)(data + W_LumpLength(lump));
 
-    P_HordeClearSpawns();
     playerstarts.clear();
     voodoostarts.clear();
     DeathMatchStarts.clear();
@@ -1080,24 +1076,14 @@ void P_SetTransferHeightBlends(side_t *sd, const mapsidedef_t *msd)
         }
 
         *blend_color = argb_t(0, 255, 255, 255);
-        *texture_num = TextureManager::NO_TEXTURE_HANDLE;
-
-        int32_t colormap_index = R_ColormapNumForName(texture_name);
-        if (colormap_index != 0)
+        *texture_num = texturemanager.getHandle(texture_name, Texture::TEX_TEXTURE);
+        if (*texture_num == TextureManager::NOT_FOUND_TEXTURE_HANDLE)
         {
-            *blend_color = R_BlendForColormap(colormap_index);
-        }
-        else
-        {
-            *texture_num = texturemanager.getHandle(texture_name, Texture::TEX_TEXTURE);
-            if (*texture_num == TextureManager::NOT_FOUND_TEXTURE_HANDLE)
-            {
-                *texture_num = TextureManager::NO_TEXTURE_HANDLE;
-                if (strnicmp(texture_name, "WATERMAP", 8) == 0)
-                    *blend_color = argb_t(0x80, 0, 0x4F, 0xA5);
-                else
-                    *blend_color = P_GetColorFromTextureName(texture_name);
-            }
+            *texture_num = TextureManager::NO_TEXTURE_HANDLE;
+            if (strnicmp(texture_name, "WATERMAP", 8) == 0)
+                *blend_color = argb_t(0x80, 0, 0x4F, 0xA5);
+            else
+                *blend_color = P_GetColorFromTextureName(texture_name);
         }
     }
 }
@@ -1818,8 +1804,6 @@ void P_SetupLevel(const char *lumpname, int32_t position)
 
     // [AM] Every new level starts with fresh netids.
     P_ClearAllNetIds();
-
-    // UNUSED W_Profile ();
 
     // find map num
     lumpnum = W_GetNumForName(lumpname);

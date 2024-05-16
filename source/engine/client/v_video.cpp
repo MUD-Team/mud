@@ -374,7 +374,7 @@ static bool V_DoSetResolution()
 //
 void STACK_ARGS V_Close()
 {
-    R_ShutdownColormaps();
+
 }
 
 //
@@ -422,19 +422,6 @@ void V_Init()
         I_FatalError("Failed to initialize display");
 
     V_InitPalette("PLAYPAL.pal");
-
-    if (realcolormaps.colormap)
-        Z_Free(realcolormaps.colormap);
-    if (realcolormaps.shademap)
-        Z_Free(realcolormaps.shademap);
-
-    R_InitColormaps();   
-
-    // For automap
-    // This uses the smaller of the two results. It's still not ideal but at least
-    // this allows hud_scaletext to have some purpose...
-     //int32_t surface_width = I_GetSurfaceWidth(), surface_height = I_GetSurfaceHeight();
-    //CleanXfac = CleanYfac = std::max(1, std::min(surface_width / 320, surface_height / 200));
 
     R_InitColumnDrawers();
 

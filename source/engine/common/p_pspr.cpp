@@ -47,7 +47,6 @@ void M_LogWDLEvent(int32_t mod);
 
 EXTERN_CVAR(sv_infiniteammo)
 EXTERN_CVAR(sv_allowpwo)
-EXTERN_CVAR(cl_centerbobonfire)
 
 const char *weaponnames[] = {"Fist",       "Pistol",  "Shotgun",  "Chaingun",     "Rocket Launcher",
                              "Plasma Gun", "BFG9000", "Chainsaw", "Super Shotgun"};
@@ -79,72 +78,6 @@ weaponstate_t P_GetWeaponState(player_t *player)
 
     // must be in one of the many attack states...
     return atkstate;
-}
-
-//
-// P_CalculateWeaponBobX
-//
-// Returns the player's weapon position in the x-axis after applying movebob
-// scaling.
-//
-fixed_t P_CalculateWeaponBobX(player_t *player, float scale_amount)
-{
-    struct pspdef_s *psp = &player->psprites[player->psprnum];
-
-    weaponstate_t weaponstate = P_GetWeaponState(player);
-
-    fixed_t center_sx = FRACUNIT;
-    if (weaponstate != readystate && psp->state && psp->state->misc1)
-        center_sx = psp->state->misc1 << FRACBITS;
-
-    if (weaponstate == readystate)
-    {
-        uint32_t angle_index = (128 * level.time) & FINEMASK;
-        return center_sx + scale_amount * FixedMul(player->bob, finecosine[angle_index]);
-    }
-
-    if (weaponstate == atkstate && cl_centerbobonfire)
-    {
-        return FRACUNIT;
-    }
-
-    // scale the weapon's distance away from center
-    return center_sx + scale_amount * (psp->sx - center_sx);
-}
-
-//
-// P_CalculateWeaponBobY
-//
-// Returns the player's weapon position in the y-axis after applying movebob
-// scaling.
-//
-fixed_t P_CalculateWeaponBobY(player_t *player, float scale_amount)
-{
-    struct pspdef_s *psp = &player->psprites[player->psprnum];
-
-    weaponstate_t weaponstate = P_GetWeaponState(player);
-
-    // return the actual weapon y-position when raising or lowering
-    if (weaponstate == upstate || weaponstate == downstate)
-        return psp->sy;
-
-    fixed_t center_sy = WEAPONTOP;
-    if (weaponstate != readystate && psp->state && psp->state->misc1)
-        center_sy = psp->state->misc2 << FRACBITS;
-
-    if (weaponstate == readystate)
-    {
-        uint32_t angle_index = ((128 * level.time) & FINEMASK) & (FINEANGLES / 2 - 1);
-        return center_sy + scale_amount * FixedMul(player->bob, finesine[angle_index]);
-    }
-
-    if (weaponstate == atkstate && cl_centerbobonfire)
-    {
-        return psp->sy;
-    }
-
-    // scale the weapon's distance away from center
-    return center_sy + scale_amount * (psp->sy - center_sy);
 }
 
 //
@@ -331,11 +264,7 @@ weapontype_t P_GetNextWeapon(player_t *player, bool forward)
             continue;
         if (!player->ammo[weaponinfo[itemlist[index].offset].ammotype])
             continue;
-        if (itemlist[index].offset == wp_plasma && gamemode == shareware)
-            continue;
-        if (itemlist[index].offset == wp_bfg && gamemode == shareware)
-            continue;
-        if (itemlist[index].offset == wp_supershotgun && gamemode != commercial && gamemode != commercial_bfg)
+        if (itemlist[index].offset == wp_supershotgun && gamemode != commercial)
             continue;
         return (weapontype_t)itemlist[index].offset;
     }
@@ -496,10 +425,6 @@ void A_WeaponReady(AActor *mo)
     }
     else
         player->attackdown = false;
-
-    // bob the weapon based on movement speed
-    psp->sx = P_CalculateWeaponBobX(player, 1.0f);
-    psp->sy = P_CalculateWeaponBobY(player, 1.0f);
 }
 
 //

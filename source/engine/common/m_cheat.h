@@ -45,7 +45,6 @@ struct cheatseq_t
 // keycheat handlers
 bool CHEAT_AddKey(cheatseq_t *cheat, uint8_t key, bool *eat);
 
-bool CHEAT_AutoMap(cheatseq_t *cheat);
 bool CHEAT_ChangeLevel(cheatseq_t *cheat);
 bool CHEAT_IdMyPos(cheatseq_t *cheat);
 bool CHEAT_BeholdMenu(cheatseq_t *cheat);
