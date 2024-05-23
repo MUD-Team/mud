@@ -57,6 +57,12 @@ MIT - https://opensource.org/license/mit
 ----------------------------------------------------------------------------------
 
 ----------------------------------------------------------------------------------
+debugger.lua - (c) Scott Lembcke and Howling Moon Software
+MIT - https://opensource.org/license/mit
+https://github.com/slembcke/debugger.lua
+----------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------
 Protocol Buffers - (c) Google LLC
 MIT - https://opensource.org/license/mit
 https://github.com/protocolbuffers/protobuf
@@ -66,6 +72,12 @@ https://github.com/protocolbuffers/protobuf
 curl - (c) Daniel Stenberg and contributors
 The curl license
 https://curl.se/docs/copyright.html
+----------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------
+Tracy Profiler - (c) Bartosz Taudul 
+BSD-3-Clause - https://opensource.org/license/bsd-3-clause
+https://github.com/wolfpld/tracy
 ----------------------------------------------------------------------------------
 
 ----------------------------------------------------------------------------------
