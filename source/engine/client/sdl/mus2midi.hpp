@@ -9,7 +9,7 @@
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
- * License as published by the Free Software Foundation; either
+ * as published by the Free Software Foundation; either
  * version 3 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
@@ -227,9 +227,9 @@ static int32_t ConvertMusToMidi(uint8_t *in, uint32_t insize, uint8_t **out, uin
     uint8_t                    *cur, *end;
     uint32_t                    track_size_pos, begin_track_pos, current_pos;
     int32_t                     delta_time; /* Delta time for midi event */
-    int32_t                         temp, ret = -1;
-    int32_t                         channel_volume[kMusMidiMaxChannels];
-    int32_t                         channelMap[kMusMidiMaxChannels], currentChannel;
+    int32_t                     temp, ret = -1;
+    int32_t                     channel_volume[kMusMidiMaxChannels];
+    int32_t                     channelMap[kMusMidiMaxChannels], currentChannel;
 
     if (insize < sizeof(MusHeader))
     {

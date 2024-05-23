@@ -94,6 +94,70 @@ https://github.com/open-source-parsers/jsoncpp
 
 ----------------------------------------------------------------------------------
 zlib - (c) Jean-loup Gailly and Mark Adler
-Zlib - https://opensource.org/license/zlib
+zlib - https://opensource.org/license/zlib
 https://github.com/madler/zlib
+----------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------
+BW_Midi_Sequencer - (c) Vitaly Novichkov
+MIT - https://opensource.org/license/mit
+https://github.com/Wohlstand/BW_Midi_Sequencer
+----------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------
+MUS2MIDI - (c) Bret Curtis, WildMIDI Developers, Vitaly Novichkov
+LGPL-2.1 - https://opensource.org/license/lgpl-2-1
+https://github.com/Wohlstand/BW_Midi_Sequencer
+----------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------
+stb_image - (c) Sean Barrett
+MIT - https://opensource.org/license/mit
+https://github.com/nothings/stb
+----------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------
+stb_image_write - (c) Sean Barrett
+MIT - https://opensource.org/license/mit
+https://github.com/nothings/stb
+----------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------
+PHYSFS - (c) Ryan C. Gordon
+zlib - https://opensource.org/license/zlib
+https://github.com/icculus/physfs
+----------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------
+miniLZO - (c) Markus Franz Xaver Johannes Oberhumer
+GPL-2.0 - https://opensource.org/license/gpl-2-0
+https://www.oberhumer.com/opensource/lzo/
+----------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------
+LuaBridge - (c) Lucio Asnaghi
+MIT - https://opensource.org/license/mit
+https://github.com/kunitoki/LuaBridge3
+----------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------
+CRC32 - (c) Stephan Brumme
+zlib - https://opensource.org/license/zlib
+https://github.com/stbrumme/crc32
+----------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------
+MD5 - (c) Aladdin Enterprises
+Aladdin Enterprises MD5 License
+----------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------
+GNU C Library - (c) Free Software Foundation
+LGPL-2.1 - https://opensource.org/license/lgpl-2-1
+https://sourceware.org/glibc/
+----------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------
+timegm - (c) Kungliga Tekniska Högskolan
+BSD-3-Clause - https://opensource.org/license/bsd-3-clause
 ----------------------------------------------------------------------------------
