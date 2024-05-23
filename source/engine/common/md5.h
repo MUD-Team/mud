@@ -53,6 +53,8 @@
 #ifndef md5_INCLUDED
 #define md5_INCLUDED
 
+#include <stdint.h>
+
 #include <string>
 
 //-----------------------------------------------------------------------------

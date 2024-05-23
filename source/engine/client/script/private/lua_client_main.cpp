@@ -121,7 +121,7 @@ void LUA_OpenClientState()
 
 void LUA_CloseClientState()
 {
-    if (!nullptr)
+    if (!clientState)
     {
         return;
     }

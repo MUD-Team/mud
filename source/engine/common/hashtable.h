@@ -24,9 +24,12 @@
 
 #pragma once
 
+#include <stdint.h>
+
 #include <cassert>
 #include <string>
 #include <utility>
+#include <cstddef>
 
 // ============================================================================
 //

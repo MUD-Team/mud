@@ -23,6 +23,8 @@
 
 #pragma once
 
+#include <stdint.h>
+
 #include <string>
 
 class OLumpName

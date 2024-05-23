@@ -24,6 +24,8 @@
 
 #pragma once
 
+#include <stdint.h>
+
 #include "doomtype.h"
 #include "r_defs.h"
 #include "r_intrin.h"
@@ -158,13 +160,13 @@ void r_dimpatchD_SSE2(IRenderSurface *, argb_t color, int32_t alpha, int32_t x1,
 #ifdef __MMX__
 void R_DrawSpanD_MMX(void);
 void R_DrawSlopeSpanD_MMX(void);
-void r_dimpatchD_MMX(IWindowSurface *, argb_t color, int32_t alpha, int32_t x1, int32_t y1, int32_t w, int32_t h);
+void r_dimpatchD_MMX(IRenderSurface *, argb_t color, int32_t alpha, int32_t x1, int32_t y1, int32_t w, int32_t h);
 #endif
 
 #ifdef __ALTIVEC__
 void R_DrawSpanD_ALTIVEC(void);
 void R_DrawSlopeSpanD_ALTIVEC(void);
-void r_dimpatchD_ALTIVEC(IWindowSurface *, argb_t color, int32_t alpha, int32_t x1, int32_t y1, int32_t w, int32_t h);
+void r_dimpatchD_ALTIVEC(IRenderSurface *, argb_t color, int32_t alpha, int32_t x1, int32_t y1, int32_t w, int32_t h);
 #endif
 
 // Vectorizable function pointers:

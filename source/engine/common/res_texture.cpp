@@ -372,6 +372,9 @@ void TextureManager::startup()
             StdStringToUpper(base);
             // Base should already be guaranteed 6 or 8 in length if we are here
             uint32_t frame = base[4] - 'A';
+            // '\' frame fix - Dasho
+            if (base[4] == '^')
+                frame = '\\' - 'A';
 			uint32_t rotation = base[5] - '0';
             texturemanager.mSpriteFilenames.push_back(StrFormat("sprites/%s", file->second.c_str()));
 			texhandle_t tex_id = texturemanager.mSpriteFilenames.size() | 0x00040000ul; // Sprite Handle Mask
@@ -381,6 +384,9 @@ void TextureManager::startup()
             if (base.size() == 8)
             {
                 frame = base[6] - 'A';
+                // '\' frame fix - Dasho
+                if (base[6] == '^')
+                    frame = '\\' - 'A';
                 rotation = base[7] - '0';
                 R_InstallSpriteTex(tex_id, frame, rotation, true);
             }
