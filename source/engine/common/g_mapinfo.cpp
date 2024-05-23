@@ -195,7 +195,7 @@ bool ContainsMapInfoTopLevel(const OScanner &os)
            os.compareTokenNoCase("clusterdef") || os.compareTokenNoCase("episode") ||
            os.compareTokenNoCase("clearepisodes") || os.compareTokenNoCase("skill") ||
            os.compareTokenNoCase("clearskills") || os.compareTokenNoCase("gameinfo") ||
-           os.compareTokenNoCase("intermission") || os.compareTokenNoCase("automap");
+           os.compareTokenNoCase("intermission");
 }
 
 void MustGetStringName(OScanner &os, const char *name)
@@ -359,14 +359,6 @@ int32_t ParseStandardUmapInfoProperty(OScanner &os, level_pwad_info_t *mape)
     else if (!stricmp(pname.c_str(), "enterpic"))
     {
         ParseOLumpName(os, mape->enterpic);
-    }
-    else if (!stricmp(pname.c_str(), "nointermission"))
-    {
-        os.mustScanBool();
-        if (os.getTokenBool())
-        {
-            mape->flags |= LEVEL_NOINTERMISSION;
-        }
     }
     else if (!stricmp(pname.c_str(), "partime"))
     {
@@ -573,45 +565,13 @@ void ParseUMapInfoFile(const char *filename)
                 info.endpic  = "$CAST";
                 info.nextmap = "EndGameC";
             }
-            else if (info.mapname == "E1M8")
-            {
-                info.endpic  = gamemode == retail ? "CREDIT" : "HELP2";
-                info.nextmap = "EndGameC";
-            }
-            else if (info.mapname == "E2M8")
-            {
-                info.endpic  = "VICTORY";
-                info.nextmap = "EndGame2";
-            }
-            else if (info.mapname == "E3M8")
-            {
-                info.endpic  = "$BUNNY";
-                info.nextmap = "EndGame3";
-            }
-            else if (info.mapname == "E4M8")
-            {
-                info.endpic  = "ENDPIC";
-                info.nextmap = "EndGame4";
-            }
-            else if (gamemission == chex && info.mapname == "E1M5")
-            {
-                info.endpic  = "CREDIT";
-                info.nextmap = "EndGame1";
-            }
             else
             {
                 char arr[9] = "";
                 int32_t  ep, map;
                 ValidateMapName(info.mapname.c_str(), &ep, &map);
                 map++;
-                if (gamemode == commercial)
-                {
-                    sprintf(arr, "MAP%02d", map);
-                }
-                else
-                {
-                    sprintf(arr, "E%dM%d", ep, map);
-                }
+                sprintf(arr, "MAP%02d", map);
                 info.nextmap = arr;
             }
         }
@@ -1268,21 +1228,6 @@ void MIType_SpecialAction_KillMonsters(OScanner &os, bool doEquals, void *data, 
 }
 
 //
-void MIType_AutomapBase(OScanner &os, bool doEquals, void *data, uint32_t flags, uint32_t flags2)
-{
-    ParseMapInfoHelper<std::string>(os, doEquals);
-
-    if (os.compareTokenNoCase("doom"))
-        AM_SetBaseColorDoom();
-    else if (os.compareTokenNoCase("raven"))
-        AM_SetBaseColorRaven();
-    else if (os.compareTokenNoCase("strife"))
-        AM_SetBaseColorStrife();
-    else
-        os.warning("base expected \"doom\", \"heretic\", or \"strife\"; got %s", os.getToken().c_str());
-}
-
-//
 bool ScanAndCompareString(OScanner &os, std::string cmp)
 {
     os.scan();
@@ -1307,109 +1252,6 @@ bool ScanAndSetRealNum(OScanner &os, fixed_t &num)
     num = FLOAT2FIXED(os.getTokenFloat());
 
     return true;
-}
-
-// Scans through and interprets a file of lines
-bool InterpretLines(const std::string &name, std::vector<mline_t> &lines)
-{
-    lines.clear();
-
-    std::string filepath = StrFormat("lumps/%s.dat", name.c_str());
-
-    PHYSFS_File *rawinfo = PHYSFS_openRead(filepath.c_str());
-
-    if (rawinfo == NULL)
-        I_FatalError("Error opening %s mapinfo file", filepath.c_str());
-
-    std::string buffer;
-    buffer.resize(PHYSFS_fileLength(rawinfo));
-
-    if (PHYSFS_readBytes(rawinfo, (void *)buffer.data(), buffer.size()) != buffer.size())
-    {
-        PHYSFS_close(rawinfo);
-        I_FatalError("Error reading %s mapinfo file", filepath.c_str());
-    }
-
-    PHYSFS_close(rawinfo);
-
-    if (!buffer.empty())
-    {
-        const OScannerConfig config = {
-            name.c_str(), // lumpName
-            false,        // semiComments
-            true,         // cComments
-        };
-        OScanner os = OScanner::openBuffer(config, buffer.data(), buffer.data() + buffer.size());
-
-        while (os.scan())
-        {
-            os.unScan();
-            mline_t ml;
-
-            if (!ScanAndCompareString(os, "("))
-                break;
-            if (!ScanAndSetRealNum(os, ml.a.x))
-                break;
-            if (!ScanAndCompareString(os, ","))
-                break;
-            if (!ScanAndSetRealNum(os, ml.a.y))
-                break;
-            if (!ScanAndCompareString(os, ")"))
-                break;
-            if (!ScanAndCompareString(os, ","))
-                break;
-            if (!ScanAndCompareString(os, "("))
-                break;
-            if (!ScanAndSetRealNum(os, ml.b.x))
-                break;
-            if (!ScanAndCompareString(os, ","))
-                break;
-            if (!ScanAndSetRealNum(os, ml.b.y))
-                break;
-            if (!ScanAndCompareString(os, ")"))
-                break;
-
-            lines.push_back(ml);
-        }
-    }
-    else
-        return false;
-
-    return true;
-}
-
-//
-void MIType_MapArrows(OScanner &os, bool doEquals, void *data, uint32_t flags, uint32_t flags2)
-{
-    ParseMapInfoHelper<std::string>(os, doEquals);
-
-    std::string maparrow = os.getToken();
-
-    if (!InterpretLines(maparrow, gameinfo.mapArrow))
-        os.warning("Map arrow lump \"%s\" could not be found", maparrow.c_str());
-
-    os.scan();
-    if (os.compareToken(","))
-    {
-        os.mustScan();
-        maparrow = os.getToken();
-
-        if (!InterpretLines(maparrow, gameinfo.mapArrowCheat))
-            os.warning("Map arrow lump \"%s\" could not be found", maparrow.c_str());
-    }
-    else
-    {
-        os.unScan();
-    }
-}
-
-//
-void MIType_MapKey(OScanner &os, bool doEquals, void *data, uint32_t flags, uint32_t flags2)
-{
-    ParseMapInfoHelper<std::string>(os, doEquals);
-
-    const std::string name = os.getToken();
-    InterpretLines(name, *static_cast<std::vector<mline_t> *>(data));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1475,7 +1317,6 @@ template <> struct MapInfoDataSetter<level_pwad_info_t>
         ENTRY3("titlepatch", &MIType_LumpName, &ref.pname)
         ENTRY3("par", &MIType_Int, &ref.partime)
         ENTRY3("music", &MIType_MusicLumpName, &ref.music)
-        ENTRY4("nointermission", &MIType_SetFlag, &ref.flags, LEVEL_NOINTERMISSION)
         ENTRY4("doublesky", &MIType_SetFlag, &ref.flags, LEVEL_DOUBLESKY)
         ENTRY4("nosoundclipping", &MIType_SetFlag, &ref.flags, LEVEL_NOSOUNDCLIPPING)
         ENTRY4("allowmonstertelefrags", &MIType_SetFlag, &ref.flags, LEVEL_MONSTERSTELEFRAG)
@@ -1532,14 +1373,7 @@ template <> struct MapInfoDataSetter<cluster_info_t>
     MapInfoDataSetter(cluster_info_t &ref)
     {
         mapInfoDataContainer.reserve(7);
-
-        ENTRY3("entertext", &MIType_ClusterString, &ref.entertext)
-        ENTRY3("exittext", &MIType_ClusterString, &ref.exittext)
-        ENTRY4("exittextislump", &MIType_SetFlag, &ref.flags, CLUSTER_EXITTEXTISLUMP)
-        ENTRY3("music", &MIType_MusicLumpName, &ref.messagemusic)
-        ENTRY3("flat", &MIType_$LumpName, &ref.finaleflat)
         ENTRY4("hub", &MIType_SetFlag, &ref.flags, CLUSTER_HUB)
-        ENTRY3("pic", &MIType_$LumpName, &ref.finalepic)
     }
 };
 
@@ -1551,18 +1385,8 @@ template <> struct MapInfoDataSetter<gameinfo_t>
     MapInfoDataSetter()
     {
         mapInfoDataContainer.reserve(7);
-
-        ENTRY3("advisorytime", &MIType_Float, &gameinfo.advisoryTime)
         // ENTRY3("chatsound",			)
-        ENTRY3("pagetime", &MIType_Float, &gameinfo.pageTime)
-        ENTRY3("finaleflat", &MIType_LumpName, &gameinfo.finaleFlat)
-        ENTRY3("finalemusic", &MIType_$LumpName, &gameinfo.finaleMusic)
         ENTRY3("titlemusic", &MIType_$LumpName, &gameinfo.titleMusic)
-        ENTRY3("titlepage", &MIType_LumpName, &gameinfo.titlePage)
-        ENTRY3("titletime", &MIType_Float, &gameinfo.titleTime)
-        ENTRY2("maparrow", &MIType_MapArrows)
-        ENTRY3("cheatkey", &MIType_MapKey, &gameinfo.cheatKey)
-        ENTRY3("easykey", &MIType_MapKey, &gameinfo.easyKey)
     }
 };
 
@@ -1665,10 +1489,6 @@ void ParseEpisodeInfo(OScanner &os)
     {
         // Teaser lump
         os.mustScan();
-        if (gameinfo.flags & GI_SHAREWARE)
-        {
-            map = os.getToken();
-        }
         os.mustScan();
     }
     else
@@ -1853,43 +1673,6 @@ template <> struct MapInfoDataSetter<SkillInfo>
     }
 };
 
-struct automap_dummy
-{
-};
-
-// Automap
-template <> struct MapInfoDataSetter<automap_dummy>
-{
-    MapInfoDataContainer mapInfoDataContainer;
-
-    MapInfoDataSetter()
-    {
-        ENTRY2("base", &MIType_AutomapBase)
-        ENTRY3("showlocks", &MIType_Bool, &gameinfo.showLocks)
-        ENTRY3("background", &MIType_String, &gameinfo.defaultAutomapColors.Background)
-        ENTRY3("yourcolor", &MIType_String, &gameinfo.defaultAutomapColors.YourColor)
-        ENTRY3("wallcolor", &MIType_String, &gameinfo.defaultAutomapColors.WallColor)
-        ENTRY3("twosidedwallcolor", &MIType_String, &gameinfo.defaultAutomapColors.TSWallColor)
-        ENTRY3("floordiffwallcolor", &MIType_String, &gameinfo.defaultAutomapColors.FDWallColor)
-        ENTRY3("ceilingdiffwallcolor", &MIType_String, &gameinfo.defaultAutomapColors.CDWallColor)
-        ENTRY3("thingcolor", &MIType_String, &gameinfo.defaultAutomapColors.ThingColor)
-        ENTRY3("thingcolor_item", &MIType_String, &gameinfo.defaultAutomapColors.ThingColor_Item)
-        ENTRY3("thingcolor_countitem", &MIType_String, &gameinfo.defaultAutomapColors.ThingColor_CountItem)
-        ENTRY3("thingcolor_monster", &MIType_String, &gameinfo.defaultAutomapColors.ThingColor_Monster)
-        ENTRY3("thingcolor_nocountmonster", &MIType_String, &gameinfo.defaultAutomapColors.ThingColor_NoCountMonster)
-        ENTRY3("thingcolor_friend", &MIType_String, &gameinfo.defaultAutomapColors.ThingColor_Friend)
-        ENTRY3("thingcolor_projectile", &MIType_String, &gameinfo.defaultAutomapColors.ThingColor_Projectile)
-        ENTRY3("secretwallcolor", &MIType_String, &gameinfo.defaultAutomapColors.SecretWallColor)
-        ENTRY3("gridcolor", &MIType_String, &gameinfo.defaultAutomapColors.GridColor)
-        ENTRY3("xhaircolor", &MIType_String, &gameinfo.defaultAutomapColors.XHairColor)
-        ENTRY3("notseencolor", &MIType_String, &gameinfo.defaultAutomapColors.NotSeenColor)
-        ENTRY3("lockedcolor", &MIType_String, &gameinfo.defaultAutomapColors.LockedColor)
-        ENTRY3("almostbackgroundcolor", &MIType_String, &gameinfo.defaultAutomapColors.AlmostBackground)
-        ENTRY3("intrateleportcolor", &MIType_String, &gameinfo.defaultAutomapColors.TeleportColor)
-        ENTRY3("exitcolor", &MIType_String, &gameinfo.defaultAutomapColors.ExitColor)
-    }
-};
-
 static void ParseMapInfoFile(const char *filename)
 {
     LevelInfos   &levels   = getLevelInfos();
@@ -1947,9 +1730,9 @@ static void ParseMapInfoFile(const char *filename)
                 sprintf(map_name, "MAP%02d", map);
                 SKYFLATNAME[5] = 0;
                 HexenHack      = true;
-                // Hexen levels are automatically nointermission
-                // and even lighting and no auto sound sequences
-                levelflags |= LEVEL_NOINTERMISSION | LEVEL_EVENLIGHTING | LEVEL_SNDSEQTOTALCTRL;
+                // Hexen levels are automatically even lighting
+                // and no auto sound sequences
+                levelflags |= LEVEL_EVENLIGHTING | LEVEL_SNDSEQTOTALCTRL;
             }
 
             // Find the level.
@@ -2050,17 +1833,6 @@ static void ParseMapInfoFile(const char *filename)
             MapInfoDataSetter<void> setter;
             ParseMapInfoLower<void>(os, setter);
         }
-        else if (os.compareTokenNoCase("automap"))
-        {
-            MapInfoDataSetter<automap_dummy> setter;
-            ParseMapInfoLower<automap_dummy>(os, setter);
-        }
-        else if (os.compareTokenNoCase("automap_overlay"))
-        {
-            // Not implemented
-            MapInfoDataSetter<void> setter;
-            ParseMapInfoLower<void>(os, setter);
-        }
         else
         {
             os.error("Unimplemented top-level type \"%s\"", os.getToken().c_str());
@@ -2086,13 +1858,7 @@ void G_ParseMapInfo()
 
     switch (gamemission)
     {
-    case doom:
-    case retail_freedoom:
-        baseinfoname = "_D1NFO";
-        break;
-    case doom2:
     case commercial_freedoom:
-    case commercial_hacx:
         baseinfoname = "_D2NFO";
         break;
     case none:

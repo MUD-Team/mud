@@ -32,9 +32,10 @@
 #include "c_vote.h"
 #include "com_misc.h"
 #include "d_player.h"
+#include "g_level.h"
 #include "g_levelstate.h"
 #include "i_net.h"
-#include "p_horde.h"
+#include "m_resfile.h"
 #include "p_spec.h"
 #include "r_state.h"
 #include "server.pb.h"
@@ -133,4 +134,3 @@ odaproto::svc::Maplist            SVC_Maplist(const maplist_status_t status);
 odaproto::svc::MaplistUpdate      SVC_MaplistUpdate(const maplist_status_t status, const maplist_qrows_t *maplist);
 odaproto::svc::MaplistIndex       SVC_MaplistIndex(const uint8_t count, const size_t this_index, const size_t next_index);
 odaproto::svc::Toast              SVC_Toast(const toast_t &toast);
-odaproto::svc::HordeInfo          SVC_HordeInfo(const hordeInfo_t &horde);

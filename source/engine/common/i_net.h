@@ -254,8 +254,7 @@ enum svc_t
     svc_maplist,               // [AM] - Return a maplist status.
     svc_maplist_update,        // [AM] - Send the entire maplist to the client in chunks.
     svc_maplist_index,         // [AM] - Send the current and next map index to the client.
-    svc_toast,
-    svc_hordeinfo
+    svc_toast
 };
 
 static const size_t svc_max = 255;

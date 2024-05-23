@@ -43,7 +43,6 @@
 
 #include "c_dispatch.h"
 #include "g_game.h"
-#include "g_horde.h"
 #include "g_mapinfo.h"
 #include "gi.h"
 #include "gstrings.h"
@@ -80,12 +79,7 @@ void daemon_init();
 
 void D_DoomLoop(void);
 
-extern gameinfo_t SharewareGameInfo;
-extern gameinfo_t RegisteredGameInfo;
-extern gameinfo_t RetailGameInfo;
 extern gameinfo_t CommercialGameInfo;
-extern gameinfo_t RetailBFGGameInfo;
-extern gameinfo_t CommercialBFGGameInfo;
 
 extern bool          gameisdead;
 extern DThinker      ThinkerCap;
@@ -153,7 +147,6 @@ void D_Init()
 
     // Load palette and set up colormaps
     V_InitPalette("PLAYPAL.pal");
-    R_InitColormaps();
 
     Res_InitTextureManager();
 
@@ -168,7 +161,6 @@ void D_Init()
     G_ParseMapInfo();
     G_ParseMusInfo();
     S_ParseSndInfo();
-    G_ParseHordeDefs();
 
     if (first_time)
         Printf(PRINT_HIGH, "P_Init: Init Playloop state.\n");
@@ -199,8 +191,6 @@ void STACK_ARGS D_Shutdown()
 
     // close all open WAD files
     W_Close();
-
-    R_ShutdownColormaps();
 
     Res_ShutdownTextureManager();
 
@@ -307,7 +297,7 @@ void D_DoomMain()
         sv_fastmonsters = 1;
 
     // get skill / episode / map from parms
-    strcpy(startmap, (gameinfo.flags & GI_MAPxx) ? "MAP01" : "E1M1");
+    strcpy(startmap, "MAP01");
 
     const char *val = Args.CheckValue("-skill");
     if (val)
@@ -346,20 +336,12 @@ void D_DoomMain()
 #endif
 
     p = Args.CheckParm("-warp");
-    if (p && p < Args.NumArgs() - (1 + (gameinfo.flags & GI_MAPxx ? 0 : 1)))
+    if (p && p < Args.NumArgs() - 1)
     {
         int32_t ep, map;
 
-        if (gameinfo.flags & GI_MAPxx)
-        {
-            ep  = 1;
-            map = atoi(Args.GetArg(p + 1));
-        }
-        else
-        {
-            ep  = Args.GetArg(p + 1)[0] - '0';
-            map = Args.GetArg(p + 2)[0] - '0';
-        }
+        ep  = 1;
+        map = atoi(Args.GetArg(p + 1));
 
         strncpy(startmap, CalcMapName(ep, map), 8);
     }

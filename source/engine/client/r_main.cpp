@@ -27,7 +27,6 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include "am_map.h"
 #include "i_video.h"
 #include "m_random.h"
 #include "m_vectors.h"
@@ -808,24 +807,13 @@ void R_SetupFrame(player_t *player)
             new_sector_blend_color = sec->midmap;
 
         // [RH] Don't override testblend unless entering a sector with a
-        //		blend different from the previous sector's. Same goes with
-        //		NormalLight's maps pointer.
+        //		blend different from the previous sector's.
         if (new_sector_blend_color != R_GetSectorBlend())
-        {
             R_SetSectorBlend(new_sector_blend_color);
-
-            // use colormap lumps in 8bpp mode instead of blends
-            int32_t colormap_num = 0;
-            // if (IRenderSurface::getCurrentRenderSurface()->getBitsPerPixel() == 8)
-            //     colormap_num = R_ColormapForBlend(new_sector_blend_color);
-
-            NormalLight.maps = shaderef_t(&realcolormaps, (NUMCOLORMAPS + 1) * colormap_num);
-        }
     }
     else
     {
         R_ClearSectorBlend();
-        NormalLight.maps = shaderef_t(&realcolormaps, 0);
     }
 
     fixedcolormap        = shaderef_t();
@@ -1204,10 +1192,6 @@ static void R_InitViewWindow()
     else
         crvwidth = cswidth;
 
-    pspritexscale  = ((crvwidth / 2) * FRACUNIT) / 160;
-    pspriteyscale  = FixedMul(pspritexscale, yaspectmul);
-    pspritexiscale = FixedDiv(FRACUNIT, pspritexscale);
-
     // Precalculate all row offsets.
     for (int32_t i = 0; i < surface_width; i++)
     {
@@ -1240,7 +1224,7 @@ static void R_InitViewWindow()
 //
 bool R_BorderVisible()
 {
-    return setblocks < 10 && !AM_ClassicAutomapVisible();
+    return setblocks < 10;
 }
 
 //
@@ -1250,7 +1234,7 @@ bool R_BorderVisible()
 //
 bool R_StatusBarVisible()
 {
-    return setblocks <= 10 || AM_ClassicAutomapVisible();
+    return setblocks <= 10;
 }
 
 //
@@ -1272,7 +1256,6 @@ bool R_DemoBarInvisible()
 void R_ExitLevel()
 {
     R_ClearSectorBlend();
-    NormalLight.maps = shaderef_t(&realcolormaps, 0);
 
     blend_color = fargb_t(0.0f, 255.0f, 255.0f, 255.0f);
     V_ForceBlend(blend_color);

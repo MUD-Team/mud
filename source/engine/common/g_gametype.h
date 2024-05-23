@@ -53,7 +53,6 @@ bool               G_CanShowObituary();
 bool               G_CanTickGameplay();
 bool               G_IsLevelState(LevelState::States state);
 bool               G_IsDefendingTeam(team_t team);
-bool               G_IsHordeMode();
 bool               G_IsCoopGame();
 bool               G_IsFFAGame();
 bool               G_IsMatchDuelGame();

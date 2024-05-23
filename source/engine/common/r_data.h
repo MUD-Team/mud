@@ -38,18 +38,4 @@ void R_ConvertPatch(patch_t *newpatch, patch_t *rawpatch);
 void R_InitData(void);
 void R_PrecacheLevel(void);
 
-void R_InitColormaps();
-void R_ShutdownColormaps();
-
-int32_t  R_ColormapNumForName(const char *name);         // killough 4/4/98
-void R_ReinitColormap();
-void R_ForceDefaultColormap(const char *name);
-void R_SetDefaultColormap(const char *name);         // [RH] change normal fadetable
-
-argb_t R_BlendForColormap(uint32_t mapnum);      // [RH] return calculated blend for a colormap
-int32_t    R_ColormapForBlend(const argb_t blend_color); // [SL] return colormap that has the blend color
-
-extern shademap_t realcolormaps;                     // [RH] make the colormaps externally visible
-extern size_t     numfakecmaps;
-
 uint32_t SlopeDiv(uint32_t num, uint32_t den);

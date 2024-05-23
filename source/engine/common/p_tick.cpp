@@ -26,7 +26,6 @@
 #include "c_effect.h"
 #include "mud_includes.h"
 #include "p_acs.h"
-#include "p_horde.h"
 #include "p_local.h"
 #include "p_unlag.h"
 
@@ -59,9 +58,6 @@ void P_Ticker(void)
         players.begin()->viewz != 1)
         return;
 #endif
-
-    if (serverside)
-        P_RunHordeTics();
 
     if (clientside)
         P_ThinkParticles(); // [RH] make the particles think

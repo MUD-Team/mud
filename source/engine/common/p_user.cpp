@@ -921,11 +921,7 @@ void P_PlayerThink(player_t *player)
         if ((newweapon >= 0 && newweapon < NUMWEAPONS) && player->weaponowned[newweapon] &&
             newweapon != player->readyweapon)
         {
-            // NEVER go to plasma or BFG in shareware,
-            if ((newweapon != wp_plasma && newweapon != wp_bfg) || (gamemode != shareware))
-            {
-                player->pendingweapon = newweapon;
-            }
+            player->pendingweapon = newweapon;
         }
     }
 

@@ -389,6 +389,7 @@ void TextureManager::startup()
 		R_InstallSprite(sprnames[i], i);
 	}
 
+    generateNoTexture();
     generateNotFoundTexture();
 
     if (clientside)
@@ -693,6 +694,20 @@ void TextureManager::updateAnimatedTextures()
         Texture       *warped_texture   = mWarpDefs[i].warped_texture;
         Res_WarpTexture(warped_texture, original_texture);
     }
+}
+
+//
+// TextureManager::generateNoTexture
+//
+// Generates an empty "texture" with dimensions 0x0 to prevent null access
+// for certain functions
+//
+void TextureManager::generateNoTexture()
+{
+    const int32_t width = 0, height = 0;
+
+    const texhandle_t handle  = NO_TEXTURE_HANDLE;
+    Texture          *texture = createTexture(handle, width, height);
 }
 
 //

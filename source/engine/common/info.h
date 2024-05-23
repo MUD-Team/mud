@@ -1456,7 +1456,7 @@ typedef enum
     S_WPGF1, // Waypoint - Green flag
     S_WPGF2,
 
-    S_CARE,  // Horde - Care Package
+    S_CARE,  // Care Package
 
     S_NOWEAPONUP,
     S_NOWEAPONDOWN,

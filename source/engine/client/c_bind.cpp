@@ -58,7 +58,7 @@ OBinding DefaultBindings[] = {
     {"mouse3", "+forward"},     {"mouse4", "+jump"}, // <- So is this <- change to jump
     {"mouse5", "+speed"},                            // <- new for +speed
     {"joy1", "+jump"},          {"joy2", "+use"},
-    {"joy5", "+showscores"},    {"joy8", "togglemap"},
+    {"joy5", "+showscores"},
     {"joy9", "ready"},          {"joy10", "weapprev"},
     {"joy11", "weapnext"},      {"joy20", "+use"},
     {"joy21", "+attack"},       {"mwheelup", "weapprev"},
@@ -68,7 +68,7 @@ OBinding DefaultBindings[] = {
     {"f5", "menu_display"}, // <- More useful than just changing the detail level
     {"f6", "quicksave"},        {"f7", "menu_endgame"},
     {"f8", "togglemessages"},   {"f9", "quickload"},
-    {"f10", "menu_quit"},       {"tab", "togglemap"},
+    {"f10", "menu_quit"},
     {"pause", "pause"},         {"sysrq", "screenshot"}, // <- Also known as the Print Screen key
     {"print", "screenshot"},                             // <- AZERTY equivalent
     {"t", "messagemode"},       {"enter", "messagemode"},
@@ -79,24 +79,7 @@ OBinding DefaultBindings[] = {
     {"home", "ready"},          {"end", "spectate"},
     {"m", "changeteams"},       {NULL, NULL}};
 
-/* Special bindings for the automap
- */
-OBinding DefaultAutomapBindings[] = {{"g", "am_grid"},
-                                     {"m", "am_setmark"},
-                                     {"c", "am_clearmarks"},
-                                     {"f", "am_togglefollow"},
-                                     {"=", "+am_zoomin"},
-                                     {"kp+", "+am_zoomin"},
-                                     {"-", "+am_zoomout"},
-                                     {"kp-", "+am_zoomout"},
-                                     {"uparrow", "+am_panup"},
-                                     {"downarrow", "+am_pandown"},
-                                     {"leftarrow", "+am_panleft"},
-                                     {"rightarrow", "+am_panright"},
-                                     {"0", "am_big"},
-                                     {NULL, NULL}};
-
-OKeyBindings Bindings, DoubleBindings, AutomapBindings;
+OKeyBindings Bindings, DoubleBindings;
 
 struct KeyState
 {
@@ -454,14 +437,12 @@ void C_BindingsInit(void)
 {
     Bindings.SetBindingType("bind");
     DoubleBindings.SetBindingType("doublebind");
-    AutomapBindings.SetBindingType("ambind");
 }
 
 // Bind default bindings
 void C_BindDefaults(void)
 {
     Bindings.SetBinds(DefaultBindings);
-    AutomapBindings.SetBinds(DefaultAutomapBindings);
 }
 
 // Bind command
@@ -513,35 +494,6 @@ BEGIN_COMMAND(undoublebind)
         DoubleBindings.UnbindKey(argv[1]);
 }
 END_COMMAND(undoublebind)
-
-// Automapbind command
-BEGIN_COMMAND(ambind)
-{
-    AutomapBindings.BindAKey(argc, argv, "Current automap bindings: ");
-}
-END_COMMAND(ambind)
-
-BEGIN_COMMAND(unambind)
-{
-    if (argc < 2)
-    {
-        Printf(PRINT_WARNING, "Unbinds an automap key. \"all\" unbinds every automap key.\n");
-        Printf(PRINT_WARNING, "Usage: unambind <key>\n");
-        return;
-    }
-
-    if (argc > 1)
-    {
-
-        std::string lostr = StdStringToLower(argv[1]);
-
-        if (iequals(lostr, "all"))
-            AutomapBindings.UnbindAll();
-        else
-            AutomapBindings.UnbindKey(argv[1]);
-    }
-}
-END_COMMAND(unambind)
 
 // Other commands
 BEGIN_COMMAND(binddefaults)

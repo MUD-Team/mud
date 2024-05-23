@@ -28,10 +28,8 @@
 #include <stdlib.h>
 
 #ifdef CLIENT_APP
-#include "am_map.h"
 #include "c_dispatch.h"
 #include "cl_main.h"
-extern bool automapactive;
 #endif
 #include "d_items.h"
 #include "d_player.h"
@@ -57,20 +55,6 @@ static uint8_t cheat_xlate_table[256];
 #ifdef CLIENT_APP
 
 //-------------
-// THESE ARE MAINLY FOR THE CLIENT
-// Smashing Pumpkins Into Small Piles Of Putrid Debris.
-bool CHEAT_AutoMap(cheatseq_t *cheat)
-{
-    if (automapactive)
-    {
-        if (!multiplayer || G_IsCoopGame())
-            am_cheating = (am_cheating + 1) % 3;
-
-        return true;
-    }
-    return false;
-}
-
 bool CHEAT_ChangeLevel(cheatseq_t *cheat)
 {
     char buf[16];
@@ -79,12 +63,7 @@ bool CHEAT_ChangeLevel(cheatseq_t *cheat)
     if (multiplayer)
         return false;
 
-    // [ML] Chex mode: always set the episode number to 1.
-    // FIXME: This is probably a horrible hack, it sure looks like one at least
-    if (gamemode == retail_chex)
-        snprintf(buf, sizeof(buf), "map 1%c", cheat->Args[1]);
-    else
-        snprintf(buf, sizeof(buf), "map %c%c\n", cheat->Args[0], cheat->Args[1]);
+    snprintf(buf, sizeof(buf), "map %c%c\n", cheat->Args[0], cheat->Args[1]);
 
     AddCommandString(buf);
     return true;
@@ -123,10 +102,7 @@ bool CHEAT_SetGeneric(cheatseq_t *cheat)
 
     if (cheat->Args[0] == CHT_NOCLIP)
     {
-        if (cheat->Args[1] == 0 && gamemode != shareware && gamemode != registered && gamemode != retail &&
-            gamemode != retail_bfg)
-            return true;
-        else if (cheat->Args[1] == 1 && gamemode != commercial && gamemode != commercial_bfg)
+        if (cheat->Args[1] == 0)
             return true;
     }
 

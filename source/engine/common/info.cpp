@@ -1305,7 +1305,7 @@ state_t odastates[NUMSTATES - S_GIB0] = {
     {SPR_WPGF, 0, 1, NULL, S_WPGF2, 0, 0},             // S_WPGF1 - Waypoint Green Flag
     {SPR_WPGF, 1, 1, NULL, S_WPGF1, 0, 0},             // S_WPGF2
 
-    {SPR_CARE, 0, -1, NULL, S_NULL, 0, 0},             // S_CARE - Horde Care Package
+    {SPR_CARE, 0, -1, NULL, S_NULL, 0, 0},             // S_CARE - Care Package
 
     {SPR_TNT1, 0, 1, A_Raise, S_NOWEAPON, 0, 0},       // S_NOWEAPONUP
     {SPR_TNT1, 0, 1, A_Lower, S_NOWEAPON, 0, 0},       // S_NOWEAPONDOWN

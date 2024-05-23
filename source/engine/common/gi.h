@@ -24,18 +24,9 @@
 
 #pragma once
 
-#include "am_map.h"
 #include "olumpname.h"
 #include "s_sound.h"
 
-#define GI_MAPxx               0x00000001
-#define GI_PAGESARERAW         0x00000002
-#define GI_SHAREWARE           0x00000004
-#define GI_NOLOOPFINALEMUSIC   0x00000008
-#define GI_INFOINDEXED         0x00000010
-#define GI_MENUHACK            0x00000060
-#define GI_MENUHACK_RETAIL     0x00000020
-#define GI_MENUHACK_COMMERCIAL 0x00000060
 #define GI_NOCRAZYDEATH        0x00000080
 
 typedef struct
@@ -55,40 +46,12 @@ typedef struct
 typedef struct
 {
     int32_t       flags;
-    OLumpName titlePage;
-    char      creditPage1[8];
-    char      creditPage2[8];
     OLumpName titleMusic;
-    float     titleTime;
-    float     advisoryTime;
-    float     pageTime;
     char      chatSound[MAX_SNDNAME + 1];
-    OLumpName finaleMusic;
-    OLumpName finaleFlat;
-    char      finalePage1[8];
-    char      finalePage2[8];
-    char      finalePage3[8];
-    union {
-        char infoPage[3][8];
-        struct
-        {
-            char basePage[8];
-            int32_t  numPages;
-        } indexed;
-    } info;
     char          quitSound[MAX_SNDNAME + 1];
-    int32_t           maxSwitch;
+    int32_t       maxSwitch;
     char          borderFlat[8];
     gameborder_t *border;
-
-    // automap features
-    am_default_colors_t  defaultAutomapColors;
-    am_colors_t          currentAutomapColors;
-    bool                 showLocks; // not implemented
-    std::vector<mline_t> mapArrow;
-    std::vector<mline_t> mapArrowCheat;
-    std::vector<mline_t> cheatKey;
-    std::vector<mline_t> easyKey;
 
     char titleString[64];
 } gameinfo_t;

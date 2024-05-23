@@ -145,14 +145,7 @@ enum
 
     // Joystick actions
     ACTION_FASTTURN,
-
-    // Automap actions
-    ACTION_AUTOMAP_PANUP,
-    ACTION_AUTOMAP_PANLEFT,
-    ACTION_AUTOMAP_PANDOWN,
-    ACTION_AUTOMAP_PANRIGHT,
-    ACTION_AUTOMAP_ZOOMIN,
-    ACTION_AUTOMAP_ZOOMOUT,
+    
     // NUM
     NUM_ACTIONS
 };

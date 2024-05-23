@@ -199,6 +199,7 @@ class TextureManager
 
     // initialization routines
     void clear();
+    void generateNoTexture();
     void generateNotFoundTexture();
     void readAnimDefLump();
     void readAnimatedLump();

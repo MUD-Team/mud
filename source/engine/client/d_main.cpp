@@ -37,7 +37,6 @@
 #endif
 #include <math.h>
 
-#include "am_map.h"
 #include "c_bind.h"
 #include "c_console.h"
 #include "c_dispatch.h"
@@ -46,7 +45,6 @@
 #include "cl_main.h"
 #include "d_main.h"
 #include "g_game.h"
-#include "g_horde.h"
 #include "g_mapinfo.h"
 #include "gi.h"
 #include "gstrings.h"
@@ -72,7 +70,6 @@
 #include "v_video.h"
 #include "w_ident.h"
 #include "w_wad.h"
-#include "wi_stuff.h"
 #include "z_zone.h"
 #include "script/lua_client_public.h"
 
@@ -153,8 +150,7 @@ void D_PostEvent(const event_t *ev)
 //
 // D_DisplayTicker
 //
-// Called once every gametic to provide timing for display functions such
-// as screenwipes.
+// Called once every gametic to provide timing for display functions
 //
 void D_DisplayTicker()
 {
@@ -195,9 +191,6 @@ void D_Display()
 
         // Drawn to R_GetRenderingSurface()
         // R_RenderPlayerView(&displayplayer());
-
-        // if (AM_ClassicAutomapVisible() || AM_OverlayAutomapVisible())
-        //     AM_Drawer();
 
         // C_DrawMid();
         // C_DrawGMid();
@@ -336,7 +329,6 @@ void D_Init()
     G_ParseMapInfo();
     G_ParseMusInfo();
     S_ParseSndInfo();
-    G_ParseHordeDefs();
 
     // init the menu subsystem
     if (first_time)
@@ -389,9 +381,6 @@ void STACK_ARGS D_Shutdown()
     // stop sound effects and music
     S_Stop();
     S_Deinit();
-
-    // shutdown automap
-    AM_Stop();
 
     DThinker::DestroyAllThinkers();
 
@@ -531,27 +520,19 @@ void D_DoomMain()
     g_resetinvonexit = Args.CheckParm("-pistolstart");
 
     // get skill / episode / map from parms
-    strcpy(startmap, (gameinfo.flags & GI_MAPxx) ? "MAP01" : "E1M1");
+    strcpy(startmap, "MAP01");
 
     const char *val = Args.CheckValue("-skill");
     if (val)
         sv_skill.Set(val[0] - '0');
 
     p = Args.CheckParm("-warp");
-    if (p && p < Args.NumArgs() - (1 + (gameinfo.flags & GI_MAPxx ? 0 : 1)))
+    if (p && p < Args.NumArgs() - 1)
     {
         int32_t ep, map;
 
-        if (gameinfo.flags & GI_MAPxx)
-        {
-            ep  = 1;
-            map = atoi(Args.GetArg(p + 1));
-        }
-        else
-        {
-            ep  = Args.GetArg(p + 1)[0] - '0';
-            map = Args.GetArg(p + 2)[0] - '0';
-        }
+        ep  = 1;
+        map = atoi(Args.GetArg(p + 1));
 
         strncpy(startmap, CalcMapName(ep, map), 8);
         autostart = true;
@@ -613,9 +594,6 @@ void D_DoomMain()
     else if (gamestate != GS_CONNECTING)
     {
         D_StartTitle();                 // start up intro loop
-
-        if (gamemode == commercial_bfg) // DOOM 2 BFG Edtion
-            AddCommandString("menu_main");
     }
 
     void LUA_MainLoop();

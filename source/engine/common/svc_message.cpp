@@ -1498,23 +1498,4 @@ odaproto::svc::Toast SVC_Toast(const toast_t &toast)
     return msg;
 }
 
-odaproto::svc::HordeInfo SVC_HordeInfo(const hordeInfo_t &horde)
-{
-    odaproto::svc::HordeInfo msg;
-
-    msg.set_state(horde.state);
-    msg.set_wave(horde.wave);
-    msg.set_wave_time(horde.waveTime);
-    msg.set_boss_time(horde.bossTime);
-    msg.set_define_id(horde.defineID);
-    msg.set_legacy_id(horde.legacyID);
-    msg.set_spawned_health(horde.spawnedHealth);
-    msg.set_killed_health(horde.killedHealth);
-    msg.set_boss_health(horde.bossHealth);
-    msg.set_boss_damage(horde.bossDamage);
-    msg.set_wave_start_health(horde.waveStartHealth);
-
-    return msg;
-}
-
 VERSION_CONTROL(svc_message, "$Id: 079fcf420bf14a4b83fc95f26c5eacc7337c8f30 $")

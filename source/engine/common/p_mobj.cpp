@@ -37,8 +37,6 @@
 #include "m_vectors.h"
 #include "m_wdlstats.h"
 #include "mud_includes.h"
-#include "p_horde.h"
-#include "p_hordespawn.h"
 #include "p_lnspec.h"
 #include "p_local.h"
 #include "p_mapformat.h"
@@ -392,10 +390,6 @@ void AActor::Destroy()
     SV_SendDestroyActor(this);
 
     actor_by_netid.erase(netid);
-
-    // Remove from health pool.
-    if (!::savegamerestore)
-        P_RemoveHealthPool(this);
 
     // Add special to item respawn queue if it is destined to be respawned
     if ((flags & MF_SPECIAL) && !(flags & MF_DROPPED) && spawnpoint.type > 0)
@@ -2167,14 +2161,6 @@ AActor *P_SpawnMissile(AActor *source, AActor *dest, mobjtype_t type)
     th->target = source->ptr(); // where it came from
     an         = P_PointToAngle(source->x, source->y, dest_x, dest_y);
 
-    // Horde boss? Make their projectiles look bossy
-    if (source->oflags & MFO_BOSSPOOL)
-    {
-        th->oflags |= MFO_FULLBRIGHT;
-        th->effects     = FX_YELLOWFOUNTAIN;
-        th->translation = translationref_t(&bosstable[0]);
-    }
-
     // fuzzy player
     if (dest_flags & MF_SHADOW)
         an += P_RandomDiff() << 20;
@@ -2599,7 +2585,7 @@ void P_SpawnMapThing(mapthing2_t *mthing, int32_t position)
         if (mthing->args[0] != position)
             return;
 
-        if ((G_IsCoopGame() || G_UsesCoopSpawns()) && !G_IsHordeMode())
+        if (G_IsCoopGame() || G_UsesCoopSpawns())
             M_LogWDLPlayerSpawn(mthing);
 
         size_t playernum = P_GetMapThingPlayerNumber(mthing);
@@ -2680,12 +2666,6 @@ void P_SpawnMapThing(mapthing2_t *mthing, int32_t position)
             P_PointInSubsector(mthing->x << FRACBITS, mthing->y << FRACBITS)->sector->seqType = type;
         }
         return;
-    }
-
-    if (P_IsHordeThing(mthing->type))
-    {
-        i                         = MT_HORDESPAWN;
-        ::level.detected_gametype = GM_HORDE;
     }
 
     // [RH] Determine if it is an old ambient thing, and if so,
