@@ -1414,7 +1414,7 @@ void G_DoSaveGame()
     for (i = 0; i < NUM_GLOBALVARS; i++)
         arc << ACS_GlobalVars[i];
 
-    arc << (u_int8_t)0x1d; // consistancy marker
+    arc << (uint8_t)0x1d; // consistancy marker
 
     gameaction         = ga_nothing;
     savedescription[0] = 0;

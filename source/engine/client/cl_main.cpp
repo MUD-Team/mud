@@ -119,7 +119,7 @@ NetCommand localcmds[MAXSAVETICS];
 //extern NetGraph netgraph;
 
 // [SL] 2012-03-07 - Players that were teleported during the current gametic
-std::set<u_int8_t> teleported_players;
+std::set<uint8_t> teleported_players;
 
 // [SL] 2012-04-06 - moving sector snapshots received from the server
 std::map<uint16_t, SectorSnapshotManager> sector_snaps;
@@ -447,8 +447,8 @@ void        CL_CheckDisplayPlayer(void);
 //
 void CL_CheckDisplayPlayer(void)
 {
-    static u_int8_t previd = consoleplayer_id;
-    u_int8_t        newid  = 0;
+    static uint8_t previd = consoleplayer_id;
+    uint8_t        newid  = 0;
 
     // [jsd]: try to spy on player by name when connected if spyplayername is set:
     if (spyplayername.length() > 0)
@@ -943,7 +943,7 @@ BEGIN_COMMAND(netcmd)
 
     // Pass additional arguments as separate strings.  Avoids argument
     // parsing at the opposite end.
-    u_int8_t netargc = MIN<size_t>(argc - 2, 0xFF);
+    uint8_t netargc = MIN<size_t>(argc - 2, 0xFF);
     MSG_WriteByte(&net_buffer, netargc);
     for (size_t i = 0; i < netargc; i++)
     {
@@ -1281,18 +1281,18 @@ bool CL_PrepareConnect()
     bool recv_teamplay_stats = 0;
     gameversiontosend        = 0;
 
-    u_int8_t playercount = MSG_ReadByte(); // players
+    uint8_t playercount = MSG_ReadByte(); // players
     MSG_ReadByte();                    // max_players
 
     std::string server_map  = MSG_ReadString();
-    u_int8_t        server_wads = MSG_ReadByte();
+    uint8_t        server_wads = MSG_ReadByte();
 
     Printf("Found server at %s.\n\n", NET_AdrToString(::serveraddr));
     Printf("> Hostname: %s\n", server_host.c_str());
 
     std::vector<std::string> newwadnames;
     newwadnames.reserve(server_wads);
-    for (u_int8_t i = 0; i < server_wads; i++)
+    for (uint8_t i = 0; i < server_wads; i++)
     {
         newwadnames.push_back(MSG_ReadString());
     }
@@ -1301,7 +1301,7 @@ bool CL_PrepareConnect()
     MSG_ReadByte();                        // skill
     recv_teamplay_stats |= MSG_ReadBool(); // teamplay    
 
-    for (u_int8_t i = 0; i < playercount; i++)
+    for (uint8_t i = 0; i < playercount; i++)
     {
         MSG_ReadString();
         MSG_ReadShort();
@@ -1311,7 +1311,7 @@ bool CL_PrepareConnect()
 
     OWantFiles newwadfiles;
     newwadfiles.resize(server_wads);
-    for (u_int8_t i = 0; i < server_wads; i++)
+    for (uint8_t i = 0; i < server_wads; i++)
     {
         OWantFile        &file    = newwadfiles.at(i);
         const std::string hashStr = MSG_ReadString();
@@ -1466,7 +1466,7 @@ bool CL_Connect()
     serverside           = false;
     simulated_connection = false;
 
-    u_int8_t flags = MSG_ReadByte();
+    uint8_t flags = MSG_ReadByte();
     if (flags & SVF_UNUSED_MASK)
     {
         Printf(PRINT_WARNING, "Protocol flag bits (%u) were not understood.", flags);
@@ -1656,7 +1656,7 @@ bool CL_ReadPacketHeader()
     MSG_WriteLong(&net_buffer, sequence);
 
     // Flag bits.
-    u_int8_t flags = MSG_ReadByte();
+    uint8_t flags = MSG_ReadByte();
     if (flags & SVF_UNUSED_MASK)
     {
         Printf(PRINT_WARNING, "Protocol flag bits (%u) were not understood.", flags);
@@ -1677,7 +1677,7 @@ void CL_Clear()
     MSG_ReadChunk(left);
 }
 
-static std::string SVCName(u_int8_t header)
+static std::string SVCName(uint8_t header)
 {
     std::string svc = ::svc_info[header].getName();
     if (svc.empty())
