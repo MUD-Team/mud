@@ -247,7 +247,7 @@ void daemon_init(void)
         pidfile = "doomsv.pid";
 
     pid  = getpid();
-    fpid = PHYSFS_openWrite(pidfile.c_str(), "w");
+    fpid = PHYSFS_openWrite(pidfile.c_str());
     if (fpid)
     {
         std::string str = StrFormat("%d\n", pid);

@@ -23,6 +23,7 @@
 //-----------------------------------------------------------------------------
 
 #include <math.h>
+#include <cstring>
 
 #include "i_system.h"
 #include "m_mempool.h"
