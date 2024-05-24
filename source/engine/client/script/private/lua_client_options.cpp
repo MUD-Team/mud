@@ -55,7 +55,7 @@ class LuaOptions
                              luabridge::LuaRef options = luabridge::newTable(L);
 
                              // display modes
-                             luabridge::LuaRef &modes = luabridge::newTable(L);
+                             luabridge::LuaRef modes = luabridge::newTable(L);
                              options["current_mode"]  = buildDisplayModes(L, modes);
                              options["modes"]         = modes;
 

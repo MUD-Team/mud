@@ -55,7 +55,7 @@ static inline uintptr_t R_GetBytesUntilAligned(void *data, uintptr_t alignment)
 
 // Direct rendering (32-bit) functions for ALTIVEC optimization:
 
-void r_dimpatchD_ALTIVEC(IWindowSurface *surface, argb_t color, int32_t alpha, int32_t x1, int32_t y1, int32_t w, int32_t h)
+void r_dimpatchD_ALTIVEC(IRenderSurface *surface, argb_t color, int32_t alpha, int32_t x1, int32_t y1, int32_t w, int32_t h)
 {
     int32_t surface_pitch_pixels = surface->getPitchInPixels();
     int32_t line_inc             = surface_pitch_pixels - w;

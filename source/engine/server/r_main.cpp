@@ -25,6 +25,7 @@
 //-----------------------------------------------------------------------------
 
 #include <math.h>
+#include <climits>
 
 #include "m_bbox.h"
 #include "m_random.h"

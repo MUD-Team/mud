@@ -23,7 +23,7 @@
 //		Pending weapon.
 //
 //-----------------------------------------------------------------------------
-
+#include <climits>
 #include "c_dispatch.h"
 #include "cmdlib.h"
 #include "d_event.h"

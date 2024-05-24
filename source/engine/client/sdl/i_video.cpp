@@ -328,7 +328,7 @@ void I_SetVideoMode(const IVideoMode &requested_mode)
 //
 bool I_VideoInitialized()
 {
-    bool UI_RenderInitialized();
+    extern bool UI_RenderInitialized();
     return video_subsystem != NULL && I_GetWindow() != NULL && UI_RenderInitialized();
 }
 
