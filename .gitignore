@@ -5,6 +5,7 @@ vcpkg_installed
 *.exe
 *.WAD
 *.wad
-
+bin/mud-client*
+bin/mud-server*
 
 freedoom2*

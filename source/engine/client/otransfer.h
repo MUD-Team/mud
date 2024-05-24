@@ -31,6 +31,7 @@
 #include "curl/curl.h"
 #include "ohash.h"
 #include "physfs.h"
+#include <cstddef>
 
 struct OTransferProgress
 {
