@@ -366,10 +366,7 @@ void D_Init()
 // Should be called prior to D_Init when loading a new set of WADs.
 //
 void STACK_ARGS D_Shutdown()
-{
-
-    LUA_CloseClientState();
-
+{    
     if (gamestate == GS_LEVEL)
         G_ExitLevel(0, 0);
 
@@ -472,6 +469,8 @@ void D_DoomMain()
     D_AddWadCommandLineFiles(newwadfiles);
 
     D_LoadResourceFiles(newwadfiles);
+
+    atterm(LUA_CloseClientState);
 
     Printf(PRINT_HIGH, "I_Init: Init hardware.\n");
     atterm(I_ShutdownHardware);

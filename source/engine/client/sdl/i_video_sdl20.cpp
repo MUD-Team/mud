@@ -203,9 +203,7 @@ ISDL20Window::ISDL20Window(uint16_t width, uint16_t height, uint8_t bpp, EWindow
 ISDL20Window::~ISDL20Window()
 {
     if (mSDLWindow)
-        SDL_DestroyWindow(mSDLWindow);
-
-    UI_Shutdown();        
+        SDL_DestroyWindow(mSDLWindow);\
 }
 
 //

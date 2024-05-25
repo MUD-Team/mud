@@ -44,7 +44,7 @@
 #include "win32inc.h"
 #endif // _WIN32
 
-#include "script/lua_client_public.h"
+#include "ui/ui_public.h"
 
 // Declared in doomtype.h as part of argb_t
 uint8_t argb_t::a_num, argb_t::r_num, argb_t::g_num, argb_t::b_num;
@@ -339,6 +339,8 @@ bool I_VideoInitialized()
 //
 void STACK_ARGS I_ShutdownHardware()
 {
+    UI_Shutdown();       
+
     delete video_subsystem;
     video_subsystem = NULL;
 }
