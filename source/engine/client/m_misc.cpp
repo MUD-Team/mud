@@ -237,15 +237,15 @@ std::string M_ExpandTokens(const std::string &str)
             break;
         }
         case 'w':
-            if (wadfiles.size() == 2)
+            if (wadfiles.size() == 1)
             {
                 // We're playing an IWAD map
-                buffer << wadfiles[1].getBasename();
+                buffer << wadfiles[0].getBasename();
             }
-            else if (wadfiles.size() > 2)
+            else if (wadfiles.size() > 1)
             {
                 // We're playing a PWAD map
-                buffer << wadfiles[2].getBasename();
+                buffer << wadfiles[1].getBasename();
             }
             break;
         case 'm':

@@ -289,7 +289,7 @@ bool G_LoadWad(const OWantFiles &newwadfiles, const std::string &mapname)
     // Did we switch IWAD files?
     if (AddedIWAD && !::wadfiles.empty())
     {
-        if (newwadfiles.at(0).getBasename() != wadfiles.at(1).getBasename())
+        if (newwadfiles.at(0).getBasename() != wadfiles.at(0).getBasename())
         {
             Reboot = true;
         }
@@ -298,7 +298,7 @@ bool G_LoadWad(const OWantFiles &newwadfiles, const std::string &mapname)
     // Do the sizes of the WAD lists not match up?
     if (!Reboot)
     {
-        if (::wadfiles.size() - 2 != newwadfiles.size() - (AddedIWAD ? 1 : 0))
+        if (::wadfiles.size() != newwadfiles.size())
         {
             Reboot = true;
         }
@@ -307,9 +307,9 @@ bool G_LoadWad(const OWantFiles &newwadfiles, const std::string &mapname)
     // Do our WAD lists match up exactly?
     if (!Reboot)
     {
-        for (size_t i = 2, j = (AddedIWAD ? 1 : 0); i < ::wadfiles.size() && j < newwadfiles.size(); i++, j++)
+        for (size_t i = 0; i < ::wadfiles.size() && i < newwadfiles.size(); i++)
         {
-            if (!(newwadfiles.at(j).getBasename() == ::wadfiles.at(i).getBasename()))
+            if (!(newwadfiles.at(i).getBasename() == ::wadfiles.at(i).getBasename()))
             {
                 Reboot = true;
                 break;
