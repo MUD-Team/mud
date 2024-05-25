@@ -119,7 +119,7 @@ void LUA_OpenClientState()
     LUA_DoFile(clientState, "client/scripts/main.lua");
 }
 
-void LUA_CloseClientState()
+void STACK_ARGS LUA_CloseClientState()
 {
     if (!clientState)
     {
