@@ -5,6 +5,7 @@ vcpkg_installed
 *.exe
 *.WAD
 *.wad
+.DS_Store
 bin/mud-client*
 bin/mud-server*
 

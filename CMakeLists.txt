@@ -4,7 +4,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 if ("${CMAKE_TOOLCHAIN_FILE}" MATCHES "vcpkg.cmake")
-    if (CMAKE_HOST_UNIX)
+    if (APPLE)
+        include ("vcpkg_triplets/vcpkg-triplets-mac.cmake")
+    elseif (CMAKE_HOST_UNIX)
         include ("vcpkg_triplets/vcpkg-triplets-linux.cmake")
     elseif ("${CMAKE_GENERATOR}" MATCHES "MinGW Makefiles") # for some reason the regular (MINGW) CMake check fails here - Dasho
         include ("vcpkg_triplets/vcpkg-triplets-mingw.cmake")
