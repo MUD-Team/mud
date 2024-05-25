@@ -352,8 +352,6 @@ void D_Init()
         Printf(PRINT_HIGH, "ST_Init: Init status bar.\n");    
 
     first_time = false;
-
-    LUA_OpenClientState();
 }
 
 //
@@ -481,6 +479,8 @@ void D_DoomMain()
     // Base systems have been inited; enable cvar callbacks
     cvar_t::EnableCallbacks();
 
+    LUA_OpenClientState();
+\
     // [RH] User-configurable startup strings. Because BOOM does.
     if (GStrings(STARTUP1)[0])
         Printf(PRINT_HIGH, "%s\n", GStrings(STARTUP1));
