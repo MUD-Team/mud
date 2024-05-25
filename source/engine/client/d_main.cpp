@@ -66,7 +66,6 @@
 #include "res_texture.h"
 #include "s_sound.h"
 #include "stats.h"
-#include "ui_public.h"
 #include "v_video.h"
 #include "w_ident.h"
 #include "w_wad.h"
@@ -311,8 +310,6 @@ void D_Init()
     Z_Init();
     if (first_time)
         Printf("Z_Init: Using native allocator with OZone bookkeeping.\n");
-
-    UI_Initialize();        
 
     // Load palette and set up colormaps
     V_Init();    

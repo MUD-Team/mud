@@ -73,6 +73,7 @@
 #include "mud_includes.h"
 #include "v_video.h"
 #include "w_wad.h"
+#include "ui_public.h"
 
 ticcmd_t  emptycmd;
 ticcmd_t *I_BaseTiccmd(void)
@@ -361,6 +362,8 @@ void I_Init(void)
 {
     I_InitSound();
     I_InitHardware();
+    UI_Initialize();
+
 }
 
 void I_FinishClockCalibration()
