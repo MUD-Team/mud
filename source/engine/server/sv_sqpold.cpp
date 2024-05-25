@@ -163,9 +163,9 @@ void SV_SendServerInfo()
     if (numwads > 0xff)
         numwads = 0xff;
 
-    MSG_WriteByte(&ml_message, numwads - 1);
+    MSG_WriteByte(&ml_message, numwads);
 
-    for (i = 1; i < numwads; ++i)
+    for (i = 0; i < numwads; ++i)
         MSG_WriteString(&ml_message, wadfiles[i].getBasename().c_str());
 
     MSG_WriteBool(&ml_message, (sv_gametype == GM_DM || sv_gametype == GM_TEAMDM));

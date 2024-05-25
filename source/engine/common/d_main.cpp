@@ -274,16 +274,34 @@ static bool CheckWantedMatchesLoaded(const OWantFiles &newwadfiles)
 {
     // Cheking sizes is a good first approximation.
 
-    if (newwadfiles.size() + 1 != ::wadfiles.size())
+    if (newwadfiles.size() != ::wadfiles.size())
     {
         return false;
     }
 
-    // Check WAD hashes
-    for (OWantFiles::const_iterator it = newwadfiles.begin(); it != newwadfiles.end(); ++it)
+    for (size_t idx = 0; idx < ::wadfiles.size(); idx++)
     {
-        size_t idx = it - newwadfiles.begin();
-        if (it->getWantedMD5() != ::wadfiles.at(idx).getMD5())
+        const OMD5Hash &wadfilehash = ::wadfiles.at(idx).getMD5();
+        const OMD5Hash &newfilehash = newwadfiles.at(idx).getWantedMD5();
+        // Wadfile hash empty? If the existing wadfile is a path 
+        // just check basenames for equality and hope they have the same content for now - Dasho
+        if (wadfilehash.empty())
+        {
+            if (::wadfiles.at(idx).getType() != OFILE_FOLDER)
+                return false;
+            else if (!newfilehash.empty()) // should be empty if also a path
+                return false;
+            else if (::wadfiles.at(idx).getBasename() != newwadfiles.at(idx).getBasename())
+                return false;
+        }
+        // Don't think our "wanted files" do any MD5 stuff yet, so if the wanted file hash is empty
+        // just check basenames - Dasho
+        else if (newfilehash.empty())
+        {
+            if (::wadfiles.at(idx).getBasename() != newwadfiles.at(idx).getBasename())
+                return false;
+        }
+        else if (wadfilehash != newfilehash)
         {
             return false;
         }
