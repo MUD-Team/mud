@@ -88,6 +88,16 @@ class Texture
         return mHeight;
     }
 
+    uint32_t getWidthBits() const
+    {
+        return mWidthBits;
+    }
+
+    uint32_t getHeightBits() const
+    {
+        return mHeightBits;
+    }
+
     fixed_t getFracHeight() const
     {
         return mFracHeight;
@@ -148,6 +158,9 @@ class Texture
 
     int16_t mOffsetX;
     int16_t mOffsetY;
+
+    uint8_t	mWidthBits;
+	uint8_t	mHeightBits;
 
     uint8_t *mData;
 };

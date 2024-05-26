@@ -52,8 +52,8 @@ planefunction_t ceilingfunc;
 // Here comes the obnoxious "visplane".
 #define MAXVISPLANES 128 /* must be a power of 2 */
 
-static const float flatwidth  = 64.0f;
-static const float flatheight = 64.0f;
+static float flatwidth  = 64.0f;
+static float flatheight = 64.0f;
 
 static visplane_t  *visplanes[MAXVISPLANES]; // killough
 static visplane_t  *freetail;                // killough
@@ -599,7 +599,12 @@ void R_DrawPlanes(void)
             else
             {
                 dspan.color += 4; // [RH] color if r_drawflat is 1
-                dspan.source = texturemanager.getTexture(pl->picnum)->getData();
+                const Texture *tex = texturemanager.getTexture(pl->picnum);
+                dspan.source = tex->getData();
+                dspan.texture_width_bits = tex->getWidthBits();
+                dspan.texture_height_bits = tex->getHeightBits();
+                flatheight = (float)tex->getHeight();
+                flatwidth = (float)tex->getWidth();
 
                 // [RH] warp a flat if desired
                 /*if (flatwarp[useflatnum])

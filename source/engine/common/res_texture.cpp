@@ -174,6 +174,8 @@ void Texture::init(int32_t width, int32_t height)
 {
     mWidth      = width;
     mHeight     = height;
+    mWidthBits  = Log2(width);
+	mHeightBits = Log2(height);
     mFracHeight = height << FRACBITS;
     int32_t j = 0;
     for (j = 1; j * 2 <= width; j <<= 1)
@@ -1124,13 +1126,6 @@ void TextureManager::cacheFlat(texhandle_t handle)
         delete[] filedata;
         PHYSFS_close(rawflat);
         I_FatalError("TexureManager::cacheFlat: %s is malformed!\n", mFlatFilenames[filenum-1].c_str());
-    }
-
-    if (width != height)
-    {
-        delete[] filedata;
-        PHYSFS_close(rawflat);
-        I_FatalError("TexureManager::cacheFlat: %s is not square!\n", mFlatFilenames[filenum-1].c_str());
     }
 
     if (!clientside)

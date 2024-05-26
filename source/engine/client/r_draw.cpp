@@ -685,17 +685,27 @@ static forceinline void R_DrawLevelSpanGeneric(PIXEL_T *dest, const drawspan_t &
     if (count <= 0)
         return;
 
-    dsfixed_t       xfrac = drawspan.xfrac;
-    dsfixed_t       yfrac = drawspan.yfrac;
-    const dsfixed_t xstep = drawspan.xstep;
-    const dsfixed_t ystep = drawspan.ystep;
+    // These are intentionally swapped - Dasho
+    const uint32_t width_bits = dspan.texture_height_bits;
+	const uint32_t height_bits = dspan.texture_width_bits;
+
+	const uint32_t umask = ((1 << width_bits) - 1) << height_bits;
+	const uint32_t vmask = (1 << height_bits) - 1;
+	// TODO: don't shift the values of ufrac and vfrac by 10 in R_MapLevelPlane
+	const int32_t ushift = FRACBITS - height_bits + 10;
+	const int32_t vshift = FRACBITS + 10;
+
+    dsfixed_t       vfrac = drawspan.xfrac;
+    dsfixed_t       ufrac = drawspan.yfrac;
+    const dsfixed_t vstep = drawspan.xstep;
+    const dsfixed_t ustep = drawspan.ystep;
 
     COLORFUNC colorfunc(drawspan);
 
     do
     {
         // Current texture index in u,v.
-        const int32_t spot = ((yfrac >> (32 - 6 - 6)) & (63 * 64)) + (xfrac >> (32 - 6));
+        const uint32_t spot = ((ufrac >> ushift) & umask) | ((vfrac >> vshift) & vmask); 
 
         // Lookup pixel from flat texture tile,
         //  re-index using light/colormap.
@@ -704,8 +714,8 @@ static forceinline void R_DrawLevelSpanGeneric(PIXEL_T *dest, const drawspan_t &
         dest++;
 
         // Next step in u,v.
-        xfrac += xstep;
-        yfrac += ystep;
+        vfrac += vstep;
+        ufrac += ustep;
     } while (--count);
 }
 
@@ -744,6 +754,15 @@ static forceinline void R_DrawSlopedSpanGeneric(PIXEL_T *dest, const drawspan_t 
 
     int32_t ltindex = 0;
 
+    // These are intentionally swapped - Dasho
+    const uint32_t width_bits = dspan.texture_height_bits;
+	const uint32_t height_bits = dspan.texture_width_bits;
+
+	const uint32_t vmask = ((1 << width_bits) - 1) << height_bits;
+	const uint32_t umask = (1 << height_bits) - 1;
+	const int32_t vshift = FRACBITS - height_bits;
+	const int32_t ushift = FRACBITS;
+
     shaderef_t colormap;
     COLORFUNC  colorfunc(drawspan);
 
@@ -773,7 +792,7 @@ static forceinline void R_DrawSlopedSpanGeneric(PIXEL_T *dest, const drawspan_t 
         {
             colormap = drawspan.slopelighting[ltindex++];
 
-            const int32_t spot = ((vfrac >> 10) & 0xFC0) | ((ufrac >> 16) & 63);
+            const uint32_t spot = ((ufrac >> ushift) & umask) | ((vfrac >> vshift) & vmask);
             colorfunc(source[spot], dest);
             dest++;
             ufrac += ustep;
@@ -809,7 +828,7 @@ static forceinline void R_DrawSlopedSpanGeneric(PIXEL_T *dest, const drawspan_t 
         {
             colormap = drawspan.slopelighting[ltindex++];
 
-            const int32_t spot = ((vfrac >> 10) & 0xFC0) | ((ufrac >> 16) & 63);
+            const uint32_t spot = ((ufrac >> ushift) & umask) | ((vfrac >> vshift) & vmask);
             colorfunc(source[spot], dest);
             dest++;
             ufrac += ustep;
