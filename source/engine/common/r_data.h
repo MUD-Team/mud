@@ -31,8 +31,6 @@
 // Retrieve column data for span blitting.
 tallpost_t *R_GetPatchColumn(patch_t *patch, int32_t colnum);
 tallpost_t *R_GetTextureColumn(texhandle_t texnum, int32_t colnum);
-size_t      R_CalculateNewPatchSize(patch_t *patch, size_t length);
-void R_ConvertPatch(patch_t *newpatch, patch_t *rawpatch);
 
 // I/O, setting up the stuff.
 void R_InitData(void);

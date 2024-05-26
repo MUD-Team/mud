@@ -171,6 +171,14 @@ void mem_fclose(MEMFILE *stream)
     Z_Free(stream);
 }
 
+uint8_t *mem_get_buf_and_close(MEMFILE *stream)
+{
+    uint8_t *buf = stream->buf;
+    stream->buf = NULL;
+    Z_Free(stream);
+    return buf;
+}
+
 long mem_ftell(MEMFILE *stream)
 {
     return stream->position;
