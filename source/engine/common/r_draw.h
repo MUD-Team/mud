@@ -72,6 +72,8 @@ typedef struct
     int32_t x1;
     int32_t x2;
 
+    uint32_t texture_width_bits;
+	uint32_t texture_height_bits;
     dsfixed_t xfrac;
     dsfixed_t yfrac;
     dsfixed_t xstep;

@@ -49,7 +49,7 @@
 // patch conversion structs
 struct texpost_t
 {
-    uint8_t         row_off;
+    uint16_t             row_off;
     std::vector<uint8_t> pixels;
 };
 
@@ -174,6 +174,8 @@ void Texture::init(int32_t width, int32_t height)
 {
     mWidth      = width;
     mHeight     = height;
+    mWidthBits  = Log2(width);
+	mHeightBits = Log2(height);
     mFracHeight = height << FRACBITS;
     int32_t j = 0;
     for (j = 1; j * 2 <= width; j <<= 1)
@@ -213,7 +215,7 @@ void TextureManager::clear()
     for (HandleMap::iterator it = mHandleMap.begin(); it != mHandleMap.end(); ++it)
         if (it->second)
         {
-           delete[] it->second->mData;
+           Z_Free(it->second->mData);
            delete it->second;
         }
 
@@ -225,7 +227,7 @@ void TextureManager::clear()
     for (size_t i = 0; i < mWarpDefs.size(); i++)
         if (mWarpDefs[i].original_texture)
         {
-            delete[] mWarpDefs[i].original_texture->mData;
+            Z_Free(mWarpDefs[i].original_texture->mData);
             delete mWarpDefs[i].original_texture;
         }
 
@@ -735,7 +737,7 @@ void TextureManager::generateNotFoundTexture()
         const argb_t     color2(0, 255, 255); // yellow
         const palindex_t color1_index = V_BestColor(V_GetDefaultPalette()->basecolors, color1);
         const palindex_t color2_index = V_BestColor(V_GetDefaultPalette()->basecolors, color2);
-        texture->mData = new uint8_t[width * height];
+        texture->mData = (uint8_t *)Z_Malloc(width * height, PU_STATIC, 0);
 
         for (int32_t x = 0; x < width / 2; x++)
         {
@@ -788,7 +790,7 @@ void TextureManager::freeTexture(texhandle_t texhandle)
         const Texture *texture = it->second;
         if (texture != NULL)
         {
-            delete[] texture->mData;
+            Z_Free(texture->mData);
             delete texture;
         }
 
@@ -898,7 +900,7 @@ void TextureManager::cacheSprite(texhandle_t handle)
 
         delete[] filedata;
 
-        // Convert image to column/post structure
+        // Convert image to column/tallpost structure
         std::vector<texcolumn_t> columns;
         int32_t pixel_step = bpp * width;
 
@@ -910,7 +912,6 @@ void TextureManager::cacheSprite(texhandle_t handle)
             texpost_t   post;
             post.row_off   = 0;
             bool ispost    = false;
-            bool first_254 = true; // First 254 pixels should use absolute offsets
             uint8_t *pixel = decoded_img + c * bpp;
 
             offset          = c;
@@ -932,30 +933,6 @@ void TextureManager::cacheSprite(texhandle_t handle)
                     }
                 }
 
-                // Taller images cannot be expressed without tall patch support.
-                // If we're at offset 254, create a dummy post for tall doom gfx support
-                else if (row_off == 254)
-                {
-                    // Finish current post if any
-                    if (ispost)
-                    {
-                        col.posts.push_back(post);
-                        post.pixels.clear();
-                        ispost = false;
-                    }
-
-                    // Begin relative offsets
-                    first_254 = false;
-
-                    // Create dummy post
-                    post.row_off = 254;
-                    col.posts.push_back(post);
-
-                    // Clear post
-                    row_off = 0;
-                    ispost  = false;
-                }
-
                 argb_t color(bpp == 4 ? *(pixel+3) : 255, *pixel, *(pixel+1), *(pixel+2));
 
                 // If the current pixel is not transparent, add it to the current post
@@ -966,10 +943,6 @@ void TextureManager::cacheSprite(texhandle_t handle)
                     {
                         // Set offset
                         post.row_off = row_off;
-
-                        // Reset offset if we're in relative offsets mode
-                        if (!first_254)
-                            row_off = 0;
 
                         // Start post
                         ispost = true;
@@ -1035,41 +1008,27 @@ void TextureManager::cacheSprite(texhandle_t handle)
             for (auto& post : columns[c].posts)
             {
                 // Write row offset
-                mem_fwrite(&post.row_off, 1, 1, newpatch);
+                mem_fwrite(&post.row_off, 2, 1, newpatch);
 
                 // Write no. of pixels
-                uint8_t npix = post.pixels.size();
-                mem_fwrite(&npix, 1, 1, newpatch);
-
-                // Write unused byte
-                uint8_t temp = (npix > 0) ? post.pixels[0] : 0;
-                mem_fwrite(&temp, 1, 1, newpatch);
+                uint16_t npix = post.pixels.size();
+                mem_fwrite(&npix, 2, 1, newpatch);
 
                 // Write pixels
                 for (auto& pixel : post.pixels)
                     mem_fwrite(&pixel, 1, 1, newpatch);
-
-                // Write unused byte
-                temp = (npix > 0) ? post.pixels.back() : 0;
-                mem_fwrite(&temp, 1, 1, newpatch);
             }
 
-            // Write '255' row to signal end of column
-            uint8_t temp = 255;
-            mem_fwrite(&temp, 1, 1, newpatch);
+            // Write 0xFFFF row to signal end of column
+            uint16_t temp = 0xFFFF;
+            mem_fwrite(&temp, sizeof(uint16_t), 1, newpatch);
         }
 
         // Now we write column offsets
         mem_fseek(newpatch, 8, MEM_SEEK_SET);
         mem_fwrite(col_offsets.data(), columns.size() * 4, 1, newpatch);
 
-        uint8_t *newnewpatch = new uint8_t[R_CalculateNewPatchSize((patch_t*)mem_fgetbuf(newpatch), mem_fsize(newpatch))+1];
-
-        R_ConvertPatch((patch_t *)newnewpatch, (patch_t *)mem_fgetbuf(newpatch));
-
-        mem_fclose(newpatch);
-
-        texture->mData = newnewpatch;
+        texture->mData = mem_get_buf_and_close(newpatch);
     }
 }
 
@@ -1126,13 +1085,6 @@ void TextureManager::cacheFlat(texhandle_t handle)
         I_FatalError("TexureManager::cacheFlat: %s is malformed!\n", mFlatFilenames[filenum-1].c_str());
     }
 
-    if (width != height)
-    {
-        delete[] filedata;
-        PHYSFS_close(rawflat);
-        I_FatalError("TexureManager::cacheFlat: %s is not square!\n", mFlatFilenames[filenum-1].c_str());
-    }
-
     if (!clientside)
     {
         Texture *texture = createTexture(handle, width, height);
@@ -1160,7 +1112,7 @@ void TextureManager::cacheFlat(texhandle_t handle)
         uint32_t pixel_step = width * bpp;
 
         Texture *texture = createTexture(handle, width, height);
-        texture->mData = new uint8_t[width * height];
+        texture->mData = (uint8_t *)Z_Malloc(width * height, PU_STATIC, 0);
         memset(texture->mData, 0, width * height);
 
         for (uint32_t x = 0; x < width; x++)
@@ -1290,7 +1242,7 @@ void TextureManager::cacheTexture(texhandle_t handle)
 
         delete[] filedata;
 
-        // Convert image to column/post structure
+        // Convert image to column/tallpost structure
         std::vector<texcolumn_t> columns;
         int32_t pixel_step = bpp * width;
 
@@ -1302,7 +1254,6 @@ void TextureManager::cacheTexture(texhandle_t handle)
             texpost_t   post;
             post.row_off   = 0;
             bool ispost    = false;
-            bool first_254 = true; // First 254 pixels should use absolute offsets
             uint8_t *pixel = decoded_img + c * bpp;
 
             offset          = c;
@@ -1324,30 +1275,6 @@ void TextureManager::cacheTexture(texhandle_t handle)
                     }
                 }
 
-                // Taller images cannot be expressed without tall patch support.
-                // If we're at offset 254, create a dummy post for tall doom gfx support
-                else if (row_off == 254)
-                {
-                    // Finish current post if any
-                    if (ispost)
-                    {
-                        col.posts.push_back(post);
-                        post.pixels.clear();
-                        ispost = false;
-                    }
-
-                    // Begin relative offsets
-                    first_254 = false;
-
-                    // Create dummy post
-                    post.row_off = 254;
-                    col.posts.push_back(post);
-
-                    // Clear post
-                    row_off = 0;
-                    ispost  = false;
-                }
-
                 argb_t color(bpp == 4 ? *(pixel+3) : 255, *pixel, *(pixel+1), *(pixel+2));
 
                 // If the current pixel is not transparent, add it to the current post
@@ -1358,10 +1285,6 @@ void TextureManager::cacheTexture(texhandle_t handle)
                     {
                         // Set offset
                         post.row_off = row_off;
-
-                        // Reset offset if we're in relative offsets mode
-                        if (!first_254)
-                            row_off = 0;
 
                         // Start post
                         ispost = true;
@@ -1427,41 +1350,27 @@ void TextureManager::cacheTexture(texhandle_t handle)
             for (auto& post : columns[c].posts)
             {
                 // Write row offset
-                mem_fwrite(&post.row_off, 1, 1, newpatch);
+                mem_fwrite(&post.row_off, 2, 1, newpatch);
 
                 // Write no. of pixels
-                uint8_t npix = post.pixels.size();
-                mem_fwrite(&npix, 1, 1, newpatch);
-
-                // Write unused byte
-                uint8_t temp = (npix > 0) ? post.pixels[0] : 0;
-                mem_fwrite(&temp, 1, 1, newpatch);
+                uint16_t npix = post.pixels.size();
+                mem_fwrite(&npix, 2, 1, newpatch);
 
                 // Write pixels
                 for (auto& pixel : post.pixels)
                     mem_fwrite(&pixel, 1, 1, newpatch);
-
-                // Write unused byte
-                temp = (npix > 0) ? post.pixels.back() : 0;
-                mem_fwrite(&temp, 1, 1, newpatch);
             }
 
-            // Write '255' row to signal end of column
-            uint8_t temp = 255;
-            mem_fwrite(&temp, 1, 1, newpatch);
+            // Write 0xFFFF row to signal end of column
+            uint16_t temp = 0xFFFF;
+            mem_fwrite(&temp, sizeof(uint16_t), 1, newpatch);
         }
 
         // Now we write column offsets
         mem_fseek(newpatch, 8, MEM_SEEK_SET);
         mem_fwrite(col_offsets.data(), columns.size() * 4, 1, newpatch);
 
-        uint8_t *newnewpatch = new uint8_t[R_CalculateNewPatchSize((patch_t*)mem_fgetbuf(newpatch), mem_fsize(newpatch))+1];
-
-        R_ConvertPatch((patch_t *)newnewpatch, (patch_t *)mem_fgetbuf(newpatch));
-
-        mem_fclose(newpatch);
-
-        texture->mData = newnewpatch;
+        texture->mData = mem_get_buf_and_close(newpatch);
     }
 }
 

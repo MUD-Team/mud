@@ -76,12 +76,13 @@ void R_DrawSpanD_SSE2(void)
 
     shaderef_t colormap = dspan.colormap;
 
-    const int32_t texture_width_bits = 6, texture_height_bits = 6;
+    const uint32_t ubits = dspan.texture_height_bits;
+    const uint32_t vbits = dspan.texture_width_bits;
 
-    const uint32_t umask = ((1 << texture_width_bits) - 1) << texture_height_bits;
-    const uint32_t vmask = (1 << texture_height_bits) - 1;
+    const uint32_t umask = ((1 << ubits) - 1) << vbits;
+    const uint32_t vmask = (1 << vbits) - 1;
     // TODO: don't shift the values of ufrac and vfrac by 10 in R_MapLevelPlane
-    const int32_t ushift = FRACBITS - texture_height_bits + 10;
+    const int32_t ushift = FRACBITS - vbits + 10;
     const int32_t vshift = FRACBITS + 10;
 
     int32_t align = R_GetBytesUntilAligned(dest, 16) / sizeof(argb_t);
@@ -193,6 +194,14 @@ void R_DrawSlopeSpanD_SSE2(void)
 
     int32_t ltindex = 0; // index into the lighting table
 
+    const uint32_t ubits = dspan.texture_height_bits;
+	const uint32_t vbits = dspan.texture_width_bits;
+
+	const uint32_t vmask = ((1 << ubits) - 1) << vbits;
+	const uint32_t umask = (1 << vbits) - 1;
+	const int32_t vshift = FRACBITS - vbits;
+	const int32_t ushift = FRACBITS;
+
     // Blit the bulk in batches of SPANJUMP columns:
     while (count >= SPANJUMP)
     {
@@ -221,7 +230,7 @@ void R_DrawSlopeSpanD_SSE2(void)
         while ((((size_t)dest) & 15) && (incount > 0))
         {
             const shaderef_t &colormap = dspan.slopelighting[ltindex++];
-            *dest                      = colormap.shade(src[((vfrac >> 10) & 0xFC0) | ((ufrac >> 16) & 63)]);
+            *dest                      = colormap.shade(src[((ufrac >> ushift) & umask) | ((vfrac >> vshift) & vmask)]);
             dest++;
             ufrac += ustep;
             vfrac += vstep;
@@ -235,10 +244,10 @@ void R_DrawSlopeSpanD_SSE2(void)
             {
                 for (int32_t i = 0; i < rounds; ++i, incount -= 4)
                 {
-                    const int32_t spot0 = (((vfrac + vstep * 0) >> 10) & 0xFC0) | (((ufrac + ustep * 0) >> 16) & 63);
-                    const int32_t spot1 = (((vfrac + vstep * 1) >> 10) & 0xFC0) | (((ufrac + ustep * 1) >> 16) & 63);
-                    const int32_t spot2 = (((vfrac + vstep * 2) >> 10) & 0xFC0) | (((ufrac + ustep * 2) >> 16) & 63);
-                    const int32_t spot3 = (((vfrac + vstep * 3) >> 10) & 0xFC0) | (((ufrac + ustep * 3) >> 16) & 63);
+                    const int32_t spot0 = (((ufrac + ustep * 0) >> ushift) & umask) | (((vfrac + vstep * 0) >> vshift) & vmask);
+                    const int32_t spot1 = (((ufrac + ustep * 1) >> ushift) & umask) | (((vfrac + vstep * 0) >> vshift) & vmask);
+                    const int32_t spot2 = (((ufrac + ustep * 2) >> ushift) & umask) | (((vfrac + vstep * 0) >> vshift) & vmask);
+                    const int32_t spot3 = (((ufrac + ustep * 3) >> ushift) & umask) | (((vfrac + vstep * 0) >> vshift) & vmask);
 
                     const __m128i finalColors = _mm_setr_epi32(dspan.slopelighting[ltindex + 0].shade(src[spot0]),
                                                                dspan.slopelighting[ltindex + 1].shade(src[spot1]),
@@ -260,7 +269,7 @@ void R_DrawSlopeSpanD_SSE2(void)
             while (incount--)
             {
                 const shaderef_t &colormap = dspan.slopelighting[ltindex++];
-                const int32_t         spot     = ((vfrac >> 10) & 0xFC0) | ((ufrac >> 16) & 63);
+                const int32_t         spot     = ((ufrac >> ushift) & umask) | ((vfrac >> vshift) & vmask);
                 *dest                      = colormap.shade(src[spot]);
                 dest++;
 
@@ -299,7 +308,7 @@ void R_DrawSlopeSpanD_SSE2(void)
         while (incount--)
         {
             const shaderef_t &colormap = dspan.slopelighting[ltindex++];
-            *dest                      = colormap.shade(src[((vfrac >> 10) & 0xFC0) | ((ufrac >> 16) & 63)]);
+            *dest                      = colormap.shade(src[((ufrac >> ushift) & umask) | ((vfrac >> vshift) & vmask)]);
             dest++;
             ufrac += ustep;
             vfrac += vstep;

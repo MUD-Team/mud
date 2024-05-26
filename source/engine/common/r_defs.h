@@ -480,62 +480,7 @@ struct node_s
 };
 typedef node_s node_t;
 
-// posts are runs of non masked source pixels
-struct post_t
-{
-    uint8_t topdelta; // -1 is the last post in a column
-    uint8_t length;   // length data bytes follows
-
-    /**
-     * @brief Return the post's absolute topdelta accounting for tall
-     *        patches, which treat topdelta as relative.
-     *
-     * @param lastAbs Last absolute topdelta.
-     */
-    int32_t abs(const int32_t lastAbs) const
-    {
-        if (topdelta <= lastAbs)
-            return lastAbs + topdelta;
-        else
-            return topdelta;
-    }
-
-    /**
-     * @brief Size of the post, including header.
-     */
-    uint32_t size() const
-    {
-        return length + 3;
-    }
-
-    /**
-     * @brief Return a pointer to post data.
-     */
-    uint8_t *data() const
-    {
-        return (uint8_t *)(this) + 3;
-    }
-
-    /**
-     * @brief Return a pointer to the next post in the column.
-     */
-    post_t *next() const
-    {
-        return (post_t *)((uint8_t *)this + length + 4);
-    }
-
-    /**
-     * @brief Check if the post ends the column.
-     */
-    bool end() const
-    {
-        return topdelta == 0xFF;
-    }
-};
-
-// column_t is a list of 0 or more post_t, (byte)-1 terminated
-typedef post_t column_t;
-
+// tallposts are runs of non masked source pixels
 struct tallpost_t
 {
     uint16_t topdelta;
@@ -632,10 +577,6 @@ struct patch_s
     uint32_t datastart() const
     {
         return 8 + 4 * width();
-    }
-    post_t *post(const uint32_t ofs)
-    {
-        return (post_t *)((uint8_t *)this + ofs);
     }
     tallpost_t *tallpost(const uint32_t ofs)
     {
