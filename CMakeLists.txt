@@ -17,9 +17,6 @@ endif()
 
 project(MUD VERSION 0.1)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
-
 find_package(CURL REQUIRED)
 find_package(jsoncpp CONFIG REQUIRED)
 find_package(protobuf CONFIG REQUIRED)
