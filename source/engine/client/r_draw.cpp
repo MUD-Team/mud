@@ -685,14 +685,13 @@ static forceinline void R_DrawLevelSpanGeneric(PIXEL_T *dest, const drawspan_t &
     if (count <= 0)
         return;
 
-    // These are intentionally swapped - Dasho
-    const uint32_t width_bits = dspan.texture_height_bits;
-	const uint32_t height_bits = dspan.texture_width_bits;
+    const uint32_t ubits = dspan.texture_height_bits;
+	const uint32_t vbits = dspan.texture_width_bits;
 
-	const uint32_t umask = ((1 << width_bits) - 1) << height_bits;
-	const uint32_t vmask = (1 << height_bits) - 1;
+	const uint32_t umask = ((1 << ubits) - 1) << vbits;
+	const uint32_t vmask = (1 << vbits) - 1;
 	// TODO: don't shift the values of ufrac and vfrac by 10 in R_MapLevelPlane
-	const int32_t ushift = FRACBITS - height_bits + 10;
+	const int32_t ushift = FRACBITS - vbits + 10;
 	const int32_t vshift = FRACBITS + 10;
 
     dsfixed_t       vfrac = drawspan.xfrac;
@@ -754,13 +753,12 @@ static forceinline void R_DrawSlopedSpanGeneric(PIXEL_T *dest, const drawspan_t 
 
     int32_t ltindex = 0;
 
-    // These are intentionally swapped - Dasho
-    const uint32_t width_bits = dspan.texture_height_bits;
-	const uint32_t height_bits = dspan.texture_width_bits;
+    const uint32_t ubits = dspan.texture_height_bits;
+	const uint32_t vbits = dspan.texture_width_bits;
 
-	const uint32_t vmask = ((1 << width_bits) - 1) << height_bits;
-	const uint32_t umask = (1 << height_bits) - 1;
-	const int32_t vshift = FRACBITS - height_bits;
+	const uint32_t vmask = ((1 << ubits) - 1) << vbits;
+	const uint32_t umask = (1 << vbits) - 1;
+	const int32_t vshift = FRACBITS - vbits;
 	const int32_t ushift = FRACBITS;
 
     shaderef_t colormap;

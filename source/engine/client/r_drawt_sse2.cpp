@@ -76,14 +76,13 @@ void R_DrawSpanD_SSE2(void)
 
     shaderef_t colormap = dspan.colormap;
 
-    // These are intentionally swapped - Dasho
-    const uint32_t width_bits = dspan.texture_height_bits;
-    const uint32_t height_bits = dspan.texture_width_bits;
+    const uint32_t ubits = dspan.texture_height_bits;
+    const uint32_t vbits = dspan.texture_width_bits;
 
-    const uint32_t umask = ((1 << width_bits) - 1) << height_bits;
-    const uint32_t vmask = (1 << height_bits) - 1;
+    const uint32_t umask = ((1 << ubits) - 1) << vbits;
+    const uint32_t vmask = (1 << vbits) - 1;
     // TODO: don't shift the values of ufrac and vfrac by 10 in R_MapLevelPlane
-    const int32_t ushift = FRACBITS - height_bits + 10;
+    const int32_t ushift = FRACBITS - vbits + 10;
     const int32_t vshift = FRACBITS + 10;
 
     int32_t align = R_GetBytesUntilAligned(dest, 16) / sizeof(argb_t);
@@ -195,13 +194,12 @@ void R_DrawSlopeSpanD_SSE2(void)
 
     int32_t ltindex = 0; // index into the lighting table
 
-    // These are intentionally swapped - Dasho
-    const uint32_t width_bits = dspan.texture_height_bits;
-	const uint32_t height_bits = dspan.texture_width_bits;
+    const uint32_t ubits = dspan.texture_height_bits;
+	const uint32_t vbits = dspan.texture_width_bits;
 
-	const uint32_t vmask = ((1 << width_bits) - 1) << height_bits;
-	const uint32_t umask = (1 << height_bits) - 1;
-	const int32_t vshift = FRACBITS - height_bits;
+	const uint32_t vmask = ((1 << ubits) - 1) << vbits;
+	const uint32_t umask = (1 << vbits) - 1;
+	const int32_t vshift = FRACBITS - vbits;
 	const int32_t ushift = FRACBITS;
 
     // Blit the bulk in batches of SPANJUMP columns:
