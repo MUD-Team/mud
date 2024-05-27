@@ -68,6 +68,16 @@ void V_RefreshColormaps()
 {
 }
 
+void V_DynamicLightsCleanup()
+{
+
+}
+
+void V_DynamicPaletteAddImage(uint8_t *raw_rgba_pixels, int32_t width, int32_t height)
+{
+    
+}
+
 CVAR_FUNC_IMPL(sv_allowwidescreen)
 {
 }

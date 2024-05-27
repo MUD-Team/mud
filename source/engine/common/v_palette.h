@@ -78,16 +78,10 @@ argb_t alphablend1a(const argb_t from, const argb_t to, const int32_t toa);
 // 0 <=   toa <= 256
 argb_t alphablend2a(const argb_t from, const int32_t froma, const argb_t to, const int32_t toa);
 
-void V_InitPalette(const char *filename);
+void V_InitPalette();
 
 const palette_t *V_GetDefaultPalette();
 const palette_t *V_GetGamePalette();
-
-//
-// V_RestoreScreenPalette
-//
-// Restore original screen palette from current gamma level
-void V_RestoreScreenPalette();
 
 // V_RefreshColormaps()
 //
@@ -100,25 +94,15 @@ void BuildDefaultColorAndShademap(const palette_t *pal, shademap_t &maps);
 // Sets up the default shademaps (no colormaps) based on the given palette:
 void BuildDefaultShademap(const palette_t *pal, shademap_t &maps);
 
-// V_SetBlend()
-//	input: blendr: red component of blend
-//		   blendg: green component of blend
-//		   blendb: blue component of blend
-//		   blenda: alpha component of blend
-//
-void V_SetBlend(const argb_t color);
-
-// V_ForceBlend()
-//
-// Normally, V_SetBlend() does nothing if the new blend is the
-// same as the old. This function will performing the blending
-// even if the blend hasn't changed.
-void V_ForceBlend(const argb_t color);
-
-void V_ResetPalette();
-
 // Colorspace conversion RGB <-> HSV
 fahsv_t V_RGBtoHSV(const fargb_t &color);
 fargb_t V_HSVtoRGB(const fahsv_t &color);
 
 dyncolormap_t *GetSpecialLights(int32_t lr, int32_t lg, int32_t lb, int32_t fr, int32_t fg, int32_t fb);
+
+void V_DynamicLightsCleanup();
+
+void V_DynamicPaletteShutdown();
+
+void V_DynamicPaletteAddImage(uint8_t *raw_rgba_pixels, int32_t width, int32_t height);
+void V_DynamicPaletteProcess();

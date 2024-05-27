@@ -334,7 +334,6 @@ void G_DoCompleted(void)
         if (it->ingame())
             G_PlayerFinishLevel(*it);
 
-    V_RestoreScreenPalette();
     R_ExitLevel();
 
     // [RH] Mark this level as having been visited

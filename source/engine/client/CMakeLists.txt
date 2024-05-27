@@ -20,7 +20,7 @@ add_executable(mud-client WIN32 ${CLIENT_SOURCES} ${CLIENT_UI_SOURCES} ${CLIENT_
 set_target_properties(mud-client PROPERTIES DEBUG_POSTFIX "_DEBUG")
 set_target_properties(mud-client PROPERTIES RELWITHDEBINFO_POSTFIX "_RELWITHDEBINFO")
 
-set (MUD_CLIENT_LIBRARIES minilzo physfs-static lua luabridge)
+set (MUD_CLIENT_LIBRARIES libimagequant minilzo physfs-static lua luabridge)
 
 if (MUD_PROFILING)
   set (MUD_CLIENT_LIBRARIES ${MUD_CLIENT_LIBRARIES} tracy)

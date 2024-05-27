@@ -6,6 +6,6 @@ if (MUD_PROFILING)
     add_subdirectory(tracy)
 endif()
 
+add_subdirectory(libimagequant)
 add_subdirectory(rmlui)
-
 add_subdirectory(luabridge)

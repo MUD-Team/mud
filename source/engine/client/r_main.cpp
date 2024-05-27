@@ -38,6 +38,7 @@
 #include "stats.h"
 #include "v_video.h"
 #include "z_zone.h"
+#include "res_texture.h"
 
 void R_BeginInterpolation(fixed_t amount);
 void R_EndInterpolation();
@@ -953,6 +954,8 @@ void R_RenderPlayerView(player_t *player)
     if (!viewactive)
         return;
 
+    V_DynamicPaletteProcess();    
+
     R_SetupFrame(player);
 
     // Clear buffers.
@@ -1222,10 +1225,6 @@ bool R_DemoBarInvisible()
 void R_ExitLevel()
 {
     R_ClearSectorBlend();
-
-    blend_color = fargb_t(0.0f, 255.0f, 255.0f, 255.0f);
-    V_ForceBlend(blend_color);
-
     r_underwater = false;
 }
 

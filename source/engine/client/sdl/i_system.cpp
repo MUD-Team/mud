@@ -363,7 +363,6 @@ void I_Init(void)
     I_InitSound();
     I_InitHardware();
     UI_Initialize();
-
 }
 
 void I_FinishClockCalibration()

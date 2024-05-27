@@ -32,6 +32,7 @@
 #include "cmdlib.h"
 #include "i_system.h"
 #include "i_video.h"
+#include "libimagequant.h"
 #include "m_alloc.h"
 #include "m_fileio.h"
 #include "mud_includes.h"
@@ -81,6 +82,10 @@ EXTERN_CVAR(gammalevel)
 EXTERN_CVAR(vid_gammatype)
 EXTERN_CVAR(r_painintensity)
 EXTERN_CVAR(sv_allowredscreen)
+
+static void V_GammaAdjustPalette(palette_t *palette);
+static void BuildColoredLights(shademap_t *maps, const int32_t lr, const int32_t lg, const int32_t lb, const int32_t fr,
+                               const int32_t fg, const int32_t fb);
 
 dyncolormap_t NormalLight;
 
@@ -150,6 +155,128 @@ shaderef_t::shaderef_t(const shademap_t *const colors, const int32_t mapnum) : m
 
 // ----------------------------------------------------------------------------
 //
+// Dynamic Palette Generation
+//
+// ----------------------------------------------------------------------------
+
+struct DynamicPaletteEntry
+{
+    liq_attr  *handle;
+    liq_image *image;
+};
+
+struct SpecialLightEntry
+{
+    dyncolormap_t *colormap;
+    int32_t        lr;
+    int32_t        lg;
+    int32_t        lb;
+    int32_t        fr;
+    int32_t        fg;
+    int32_t        fb;
+};
+
+static std::vector<DynamicPaletteEntry> pal_entries;
+static std::vector<SpecialLightEntry>   pal_light_entries;
+
+static bool pal_dirty = false;
+
+void V_DynamicLightsCleanup()
+{
+    NormalLight.next = nullptr;
+    pal_light_entries.clear();
+}
+
+void V_DynamicPaletteShutdown()
+{
+    for (auto entry : pal_entries)
+    {
+        liq_image_destroy(entry.image);
+        liq_attr_destroy(entry.handle);
+    }
+
+    pal_entries.clear();
+    pal_light_entries.clear();
+}
+ 
+
+void V_DynamicPaletteAddImage(uint8_t *raw_rgba_pixels, int32_t width, int32_t height)
+{
+    pal_dirty              = true;
+    liq_attr  *handle      = liq_attr_create();
+    liq_image *input_image = liq_image_create_rgba(handle, raw_rgba_pixels, width, height, 0);
+    pal_entries.push_back({handle, input_image});
+}
+
+void V_DynamicPaletteProcess()
+{
+    if (!pal_dirty)
+    {
+        return;
+    }
+
+    pal_dirty = false;
+
+    if (!pal_entries.size())
+    {
+        return;
+    }
+
+    liq_attr      *histogram_attr = liq_attr_create();
+    liq_histogram *histogram      = liq_histogram_create(histogram_attr);
+
+    for (auto t : pal_entries)
+    {
+        liq_histogram_add_image(histogram, histogram_attr, t.image);
+    }
+
+    liq_result *res;
+    liq_error   err = liq_histogram_quantize(histogram, histogram_attr, &res);
+
+    if (err != LIQ_OK)
+    {
+        I_Error("V_DynamicPaletteEndUpdate: Error creating histogram");
+    }
+
+    const liq_palette *palette = liq_get_palette(res);
+
+    for (int32_t i = 0; i < palette->count; i++)
+    {
+        default_palette.basecolors[i] =
+            argb_t(palette->entries[i].a, palette->entries[i].r, palette->entries[i].g, palette->entries[i].b);
+    }
+
+    for (int32_t i = palette->count; i < 256; i++)
+    {
+        default_palette.basecolors[i] = argb_t(255, 0, 0, 0);
+    }
+
+    liq_result_destroy(res);
+    liq_histogram_destroy(histogram);
+    liq_attr_destroy(histogram_attr);
+
+    V_GammaAdjustPalette(&default_palette);
+
+    V_RefreshColormaps();
+
+    assert(default_palette.maps.colormap != NULL);
+    assert(default_palette.maps.shademap != NULL);
+    V_Palette = shaderef_t(&default_palette.maps, 0);
+
+    game_palette = default_palette;
+
+    texturemanager.invalidateTextureMapping();
+    texturemanager.remapTextures();
+
+    for (auto light : pal_light_entries)
+    {
+        shademap_t *map = (shademap_t *)light.colormap->maps.map();
+        BuildColoredLights(map, light.lr, light.lg, light.lb, light.fr, light.fg, light.fb);
+    }
+}
+
+// ----------------------------------------------------------------------------
+//
 // Gamma Correction
 //
 // ----------------------------------------------------------------------------
@@ -175,9 +302,9 @@ EXTERN_CVAR(gammalevel)
 class GammaStrategy
 {
   public:
-    virtual float min() const                                        = 0;
-    virtual float max() const                                        = 0;
-    virtual float increment(float level) const                       = 0;
+    virtual float min() const                                           = 0;
+    virtual float max() const                                           = 0;
+    virtual float increment(float level) const                          = 0;
     virtual void  generateGammaTable(uint8_t *table, float level) const = 0;
 };
 
@@ -278,7 +405,7 @@ void V_IncrementGammaLevel()
 //
 // V_GammaAdjustPalette
 //
-static void V_GammaAdjustPalette(palette_t *palette)
+void V_GammaAdjustPalette(palette_t *palette)
 {
     const argb_t *from = palette->basecolors;
     argb_t       *to   = palette->colors;
@@ -295,9 +422,9 @@ static void V_GammaAdjustPalette(palette_t *palette)
 //
 static void V_UpdateGammaLevel(float level)
 {
-    static float lastgammalevel = 0.0f;
-    static int32_t   lasttype       = -1; // ensure this gets set up the first time
-    int32_t          type           = vid_gammatype;
+    static float   lastgammalevel = 0.0f;
+    static int32_t lasttype       = -1; // ensure this gets set up the first time
+    int32_t        type           = vid_gammatype;
 
     if (lastgammalevel != level || lasttype != type)
     {
@@ -309,9 +436,6 @@ static void V_UpdateGammaLevel(float level)
 
         gammastrat->generateGammaTable(gammatable, level);
         V_GammaAdjustPalette(&default_palette);
-
-        V_RestoreScreenPalette();
-
         V_RefreshColormaps();
     }
 }
@@ -363,11 +487,6 @@ BEGIN_COMMAND(bumpgamma)
         Printf(PRINT_HIGH, "Gamma correction level %g\n", gammalevel.value());
 }
 END_COMMAND(bumpgamma)
-
-// [Russell] - Restore original screen palette from current gamma level
-void V_RestoreScreenPalette()
-{
-}
 
 //
 // V_BestColor
@@ -460,7 +579,7 @@ argb_t V_GetColorFromString(const std::string &input_string)
     // if not a valid color name, try to parse the color channel values
     const char *str = color_name_string.empty() == false ? color_name_string.c_str() : input_string.c_str();
 
-    int32_t         c[3], i, p;
+    int32_t     c[3], i, p;
     char        val[5];
     const char *s, *g;
 
@@ -505,12 +624,8 @@ argb_t V_GetColorFromString(const std::string &input_string)
 //
 // Initializes the default palette, loading the raw palette lump resource.
 //
-void V_InitPalette(const char *filename)
+void V_InitPalette()
 {
-    std::string palfile = StrFormat("lumps/%s", filename);
-
-    if (!M_FileExists(palfile))
-        I_FatalError("Could not initialize %s palette file", palfile.c_str());
 
     current_palette_num = -1;
 
@@ -519,77 +634,21 @@ void V_InitPalette(const char *filename)
     if (default_palette.maps.shademap)
         delete[] default_palette.maps.shademap;
 
-    PHYSFS_File *rawpal = PHYSFS_openRead(palfile.c_str());
-
-    if (rawpal == NULL)
-        I_FatalError("Could not open %s palette file", palfile.c_str());
-
-    uint8_t *data = new uint8_t[PHYSFS_fileLength(rawpal)];
-
-    if (PHYSFS_readBytes(rawpal, data, PHYSFS_fileLength(rawpal)) != PHYSFS_fileLength(rawpal))
-    {
-        PHYSFS_close(rawpal);
-        delete[] data;
-        I_FatalError("Could not read %s palette file", palfile.c_str());
-    }
-
-    PHYSFS_close(rawpal);
-
     default_palette.maps.colormap = new palindex_t[(NUMCOLORMAPS + 1) * 256];
     default_palette.maps.shademap = new argb_t[(NUMCOLORMAPS + 1) * 256];
 
     for (int32_t i = 0; i < 256; i++)
-        default_palette.basecolors[i] = argb_t(255, data[i * 3 + 0], data[i * 3 + 1], data[i * 3 + 2]);
-
-    delete[] data;
+        default_palette.basecolors[i] = argb_t(255, 255, 255, 255);
 
     V_GammaAdjustPalette(&default_palette);
 
-    V_ForceBlend(argb_t(0, 255, 255, 255));
-
     V_RefreshColormaps();
-
-    V_ResetPalette();
 
     assert(default_palette.maps.colormap != NULL);
     assert(default_palette.maps.shademap != NULL);
     V_Palette = shaderef_t(&default_palette.maps, 0);
 
     game_palette = default_palette;
-}
-
-// This is based (loosely) on the ColorShiftPalette()
-// function from the dcolors.c file in the Doom utilities.
-static void V_DoBlending(argb_t *dest, const argb_t *source, argb_t color)
-{
-    if (color.geta() == 0)
-    {
-        if (source != dest)
-            memcpy(dest, source, 256 * sizeof(argb_t));
-    }
-    else
-    {
-        for (int32_t i = 0; i < 256; i++, source++, dest++)
-        {
-            int32_t fromr = source->getr();
-            int32_t fromg = source->getg();
-            int32_t fromb = source->getb();
-
-            int32_t toa = color.geta();
-            int32_t tor = color.getr();
-            int32_t tog = color.getg();
-            int32_t tob = color.getb();
-
-            int32_t dr = tor - fromr;
-            int32_t dg = tog - fromg;
-            int32_t db = tob - fromb;
-
-            argb_t newcolor(source->geta(), fromr + ((dr * toa) >> 8), fromg + ((dg * toa) >> 8),
-                            fromb + ((db * toa) >> 8));
-
-            *dest = newcolor;
-        }
-    }
 }
 
 static const float lightScale(float a)
@@ -609,7 +668,7 @@ void BuildLightRamp(shademap_t &maps)
     // Build light ramp:
     for (l = 0; l < 256; ++l)
     {
-        int32_t a        = (int32_t)(255 * lightScale(l / 255.0f));
+        int32_t a    = (int32_t)(255 * lightScale(l / 255.0f));
         maps.ramp[l] = a;
     }
 }
@@ -647,9 +706,10 @@ void BuildDefaultColorAndShademap(const palette_t *pal, shademap_t &maps)
     // build special maps (e.g. invulnerability)
     for (int32_t c = 0; c < 256; c++)
     {
-        int32_t grayint = (int32_t)(255.0f * clamp(1.0f - (palette[c].getr() * 0.00116796875f +
-                                                   palette[c].getg() * 0.00229296875f + palette[c].getb() * 0.0005625f),
-                                           0.0f, 1.0f));
+        int32_t grayint =
+            (int32_t)(255.0f * clamp(1.0f - (palette[c].getr() * 0.00116796875f + palette[c].getg() * 0.00229296875f +
+                                             palette[c].getb() * 0.0005625f),
+                                     0.0f, 1.0f));
 
         argb_t color(255, grayint, grayint, grayint);
         colormap[c] = V_BestColor(palette, color);
@@ -688,9 +748,10 @@ void BuildDefaultShademap(const palette_t *pal, shademap_t &maps)
     // build special maps (e.g. invulnerability)
     for (int32_t c = 0; c < 256; c++)
     {
-        int32_t grayint = (int32_t)(255.0f * clamp(1.0f - (palette[c].getr() * 0.00116796875f +
-                                                   palette[c].getg() * 0.00229296875f + palette[c].getb() * 0.0005625f),
-                                           0.0f, 1.0f));
+        int32_t grayint =
+            (int32_t)(255.0f * clamp(1.0f - (palette[c].getr() * 0.00116796875f + palette[c].getg() * 0.00229296875f +
+                                             palette[c].getb() * 0.0005625f),
+                                     0.0f, 1.0f));
 
         argb_t color(255, grayint, grayint, grayint);
         shademap[c] = V_GammaCorrect(color);
@@ -708,59 +769,6 @@ void V_RefreshColormaps()
     NormalLight.color = argb_t(255, 255, 255, 255);
     NormalLight.fade =
         argb_t(level.fadeto_color[0], level.fadeto_color[1], level.fadeto_color[2], level.fadeto_color[3]);
-}
-
-//
-// V_AddBlend
-//
-// Blends an ARGB color with an existing ARGB color blend.
-//
-// [RH] This is from Q2.
-// [SL] Modified slightly to use fargb_t types.
-//
-static void V_AddBlend(fargb_t &blend, const fargb_t &newcolor)
-{
-    if (newcolor.geta() <= 0.0f)
-        return;
-
-    float a          = blend.geta() + newcolor.geta() * (1.0f - blend.geta());
-    float old_amount = blend.geta() / a;
-
-    blend.seta(a);
-    blend.setr(blend.getr() * old_amount + newcolor.getr() * (1.0f - old_amount));
-    blend.setg(blend.getg() * old_amount + newcolor.getg() * (1.0f - old_amount));
-    blend.setb(blend.getb() * old_amount + newcolor.getb() * (1.0f - old_amount));
-}
-
-//
-// V_ForceBlend
-//
-// Normally, V_SetBlend does nothing if the new blend is the
-// same as the old. This function will perform the blending
-// even if the blend hasn't changed.
-//
-void V_ForceBlend(const argb_t color)
-{
-}
-
-//
-// V_SetBlend
-//
-// Sets the global blending color and blends the color with the default
-// palette and passes the palette to the video hardware (in 8bpp mode).
-//
-//
-void V_SetBlend(const argb_t color)
-{
-    // Don't do anything if the new blend is the same as the old
-    if (blend_color.geta() == 0 && color.geta() == 0)
-        return;
-
-    if (blend_color.geta() == color.geta() && blend_color.getr() == color.getr() &&
-        blend_color.getg() == color.getg() && blend_color.getb() == color.getb())
-        return;
-
-    V_ForceBlend(color);
 }
 
 BEGIN_COMMAND(testblend)
@@ -881,8 +889,8 @@ fargb_t V_HSVtoRGB(const fahsv_t &color)
 /****** Colored Lighting Stuffs (Sorry, 8-bit only) ******/
 
 // Builds NUMCOLORMAPS colormaps lit with the specified color
-static void BuildColoredLights(shademap_t *maps, const int32_t lr, const int32_t lg, const int32_t lb, const int32_t fr, const int32_t fg,
-                               const int32_t fb)
+void BuildColoredLights(shademap_t *maps, const int32_t lr, const int32_t lg, const int32_t lb, const int32_t fr,
+                        const int32_t fg, const int32_t fb)
 {
     // The default palette is assumed to contain the maps for white light.
     if (!maps)
@@ -903,7 +911,7 @@ static void BuildColoredLights(shademap_t *maps, const int32_t lr, const int32_t
             uint32_t r = (palette_colors[c].getr() * (NUMCOLORMAPS - l) + fr * l + NUMCOLORMAPS / 2) / NUMCOLORMAPS;
             uint32_t g = (palette_colors[c].getg() * (NUMCOLORMAPS - l) + fg * l + NUMCOLORMAPS / 2) / NUMCOLORMAPS;
             uint32_t b = (palette_colors[c].getb() * (NUMCOLORMAPS - l) + fb * l + NUMCOLORMAPS / 2) / NUMCOLORMAPS;
-            argb_t       color(255, r * lr / 255, g * lg / 255, b * lb / 255);
+            argb_t   color(255, r * lr / 255, g * lg / 255, b * lb / 255);
 
             shademap[c] = V_GammaCorrect(color);
             colormap[c] = V_BestColor(palette_colors, color);
@@ -943,6 +951,8 @@ dyncolormap_t *GetSpecialLights(int32_t lr, int32_t lg, int32_t lb, int32_t fr, 
 
     BuildColoredLights(maps, lr, lg, lb, fr, fg, fb);
 
+    pal_light_entries.push_back({colormap, lr, lg, lb, fr, fg, fb});
+
     return colormap;
 }
 
@@ -961,20 +971,6 @@ BEGIN_COMMAND(testcolor)
     }
 }
 END_COMMAND(testcolor)
-
-//
-// V_ResetPalette
-//
-// Resets the palette back to the default palette.
-//
-void V_ResetPalette()
-{
-    if (I_VideoInitialized())
-    {
-        fargb_t blend(0.0f, 0.0f, 0.0f, 0.0f);
-        V_SetBlend(blend);
-    }
-}
 
 static constexpr uint8_t x11r6rgb[] = {
     33,  32,  36,  88,  67,  111, 110, 115, 111, 114, 116, 105, 117, 109, 58,  32,  114, 103, 98,  46,  116, 120, 116,
@@ -1777,8 +1773,8 @@ static constexpr uint8_t x11r6rgb[] = {
 //
 std::string V_GetColorStringByName(const std::string &name)
 {
-    char *rgbNames, *data, descr[5 * 3];
-    int32_t   c[3], step;
+    char   *rgbNames, *data, descr[5 * 3];
+    int32_t c[3], step;
 
     rgbNames = (char *)x11r6rgb;
 
