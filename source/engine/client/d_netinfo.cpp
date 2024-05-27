@@ -202,10 +202,6 @@ void D_SetupUserInfo(void)
     coninfo->color[1] = color.getr();
     coninfo->color[2] = color.getg();
     coninfo->color[3] = color.getb();
-
-    // update color translation
-    if (!connected)
-        R_BuildPlayerTranslation(consoleplayer_id, color);
 }
 
 void D_UserInfoChanged(cvar_t *cvar)

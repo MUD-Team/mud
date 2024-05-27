@@ -52,8 +52,6 @@ typedef struct
 
     fixed_t translevel;
 
-    translationref_t translation;
-
     palindex_t color; // for r_drawflat
 } drawcolumn_t;
 
@@ -112,13 +110,6 @@ extern void (*R_DrawFuzzColumn)(void);
 // [RH] Draw translucent column;
 extern void (*R_DrawTranslucentColumn)(void);
 
-// Draw with color translation tables,
-//	for player sprite rendering,
-//	Green/Red/Blue/Indigo shirts.
-extern void (*R_DrawTranslatedColumn)(void);
-
-extern void (*R_DrawTlatedLucentColumn)(void);
-
 // Span blitting for rows, floor/ceiling.
 // No Sepctre effect needed.
 extern void (*R_DrawSpan)(void);
@@ -175,36 +166,3 @@ void r_dimpatchD_ALTIVEC(IRenderSurface *, argb_t color, int32_t alpha, int32_t 
 extern void (*R_DrawSpanD)(void);
 extern void (*R_DrawSlopeSpanD)(void);
 extern void (*r_dimpatchD)(IRenderSurface *surface, argb_t color, int32_t alpha, int32_t x1, int32_t y1, int32_t w, int32_t h);
-
-extern uint8_t   bosstable[256];
-extern uint8_t  *translationtables;
-extern argb_t translationRGB[MAXPLAYERS + 1][16];
-
-enum
-{
-    TRANSLATION_Shaded,
-    TRANSLATION_Players,
-    TRANSLATION_PlayersExtra,
-    TRANSLATION_Standard,
-    TRANSLATION_LevelScripted,
-    TRANSLATION_Decals,
-
-    NUM_TRANSLATION_TABLES
-};
-
-#define TRANSLATION(a, b) (((a) << 8) | (b))
-
-const int32_t MAX_ACS_TRANSLATIONS = 32;
-
-// Initialize color translation tables,
-//	for player rendering etc.
-void R_InitTranslationTables(void);
-void R_FreeTranslationTables(void);
-
-void R_CopyTranslationRGB(int32_t fromplayer, int32_t toplayer);
-
-// [RH] Actually create a player's translation table.
-void R_BuildPlayerTranslation(int32_t player, argb_t dest_color);
-
-// [Nes] Classic player translation table.
-void R_BuildClassicPlayerTranslation(int32_t player, int32_t color);

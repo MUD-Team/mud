@@ -554,7 +554,6 @@ static void CL_SpawnMobj(const odaproto::svc::SpawnMobj *msg)
     {
         mo->oflags |= MFO_FULLBRIGHT;
         mo->effects     = FX_YELLOWFOUNTAIN;
-        mo->translation = translationref_t(&::bosstable[0]);
     }
 
     AActor *tracer = NULL;
@@ -651,7 +650,6 @@ static void CL_SpawnMobj(const odaproto::svc::SpawnMobj *msg)
         if (mo->oflags)
         {
             mo->effects     = FX_YELLOWFOUNTAIN;
-            mo->translation = translationref_t(&::bosstable[0]);
         }
     }
 
@@ -853,8 +851,6 @@ static void CL_UserInfo(const odaproto::svc::UserInfo *msg)
 
     p->GameTime = msg->join_time();
 
-    R_BuildPlayerTranslation(p->id, CL_GetPlayerColor(p));
-
     // [SL] 2012-04-30 - Were we looking through a teammate's POV who changed
     // to the other team?
     // [SL] 2012-05-24 - Were we spectating a teammate before we changed teams?
@@ -993,7 +989,6 @@ static void CL_SpawnPlayer(const odaproto::svc::SpawnPlayer *msg)
     mobj->momx = mobj->momy = mobj->momz = 0;
 
     // set color translations for player sprites
-    mobj->translation = translationref_t(translationtables + 256 * playernum, playernum);
     mobj->angle       = angle;
     mobj->pitch       = 0;
     mobj->player      = p;

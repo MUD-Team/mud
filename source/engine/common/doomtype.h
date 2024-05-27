@@ -480,48 +480,6 @@ class fahsv_t
 //
 // ----------------------------------------------------------------------------
 
-class translationref_t
-{
-    const palindex_t *m_table;
-    int32_t               m_player_id;
-
-  public:
-    translationref_t();
-    translationref_t(const translationref_t &other);
-    translationref_t(const palindex_t *table);
-    translationref_t(const palindex_t *table, const int32_t player_id);
-
-    palindex_t        tlate(const uint8_t c) const;
-    int32_t               getPlayerID() const;
-    const palindex_t *getTable() const;
-
-    operator bool() const;
-};
-
-forceinline palindex_t translationref_t::tlate(const uint8_t c) const
-{
-#if ODAMEX_DEBUG
-    if (m_table == NULL)
-        throw CFatalError("translationref_t::tlate() called with NULL m_table");
-#endif
-    return m_table[c];
-}
-
-forceinline int32_t translationref_t::getPlayerID() const
-{
-    return m_player_id;
-}
-
-forceinline const uint8_t *translationref_t::getTable() const
-{
-    return m_table;
-}
-
-forceinline translationref_t::operator bool() const
-{
-    return m_table != NULL;
-}
-
 typedef struct
 {
     palindex_t *colormap;  // Colormap for 8-bit
@@ -561,8 +519,6 @@ struct shaderef_t
     const shademap_t *map() const;
     int32_t               mapnum() const;
     uint8_t              ramp() const;
-
-    argb_t tlate(const translationref_t &translation, const uint8_t c) const;
 
     bool operator==(const shaderef_t &other) const;
 };
@@ -625,10 +581,6 @@ template <typename pixel_t> static forceinline pixel_t rt_rawcolor(const shadere
 // rt_mapcolor does color mapping.
 template <typename pixel_t> static forceinline pixel_t rt_mapcolor(const shaderef_t &pal, const uint8_t c);
 
-// rt_tlatecolor does color mapping and translation.
-template <typename pixel_t>
-static forceinline pixel_t rt_tlatecolor(const shaderef_t &pal, const translationref_t &translation, const uint8_t c);
-
 // rt_blend2 does alpha blending between two colors.
 template <typename pixel_t>
 static forceinline pixel_t rt_blend2(const pixel_t bg, const int32_t bga, const pixel_t fg, const int32_t fga);
@@ -652,17 +604,4 @@ template <> forceinline palindex_t rt_mapcolor<palindex_t>(const shaderef_t &pal
 template <> forceinline argb_t rt_mapcolor<argb_t>(const shaderef_t &pal, const uint8_t c)
 {
     return pal.shade(c);
-}
-
-template <>
-forceinline palindex_t rt_tlatecolor<palindex_t>(const shaderef_t &pal, const translationref_t &translation,
-                                                 const uint8_t c)
-{
-    return translation.tlate(pal.index(c));
-}
-
-template <>
-forceinline argb_t rt_tlatecolor<argb_t>(const shaderef_t &pal, const translationref_t &translation, const uint8_t c)
-{
-    return pal.tlate(translation, c);
 }

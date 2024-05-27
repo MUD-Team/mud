@@ -202,42 +202,30 @@ argb_t CL_GetPlayerColor(player_t *player)
     return CL_ShadePlayerColor(base_color, shade_color);
 }
 
-static void CL_RebuildAllPlayerTranslations()
-{
-    for (Players::iterator it = players.begin(); it != players.end(); ++it)
-        R_BuildPlayerTranslation(it->id, CL_GetPlayerColor(&*it));
-}
-
 CVAR_FUNC_IMPL(r_enemycolor)
 {
     // cache the color whenever the user changes it
     enemycolor = argb_t(V_GetColorFromString(var));
-    CL_RebuildAllPlayerTranslations();
 }
 
 CVAR_FUNC_IMPL(r_teamcolor)
 {
     // cache the color whenever the user changes it
     teamcolor = argb_t(V_GetColorFromString(var));
-    CL_RebuildAllPlayerTranslations();
 }
 
 CVAR_FUNC_IMPL(r_forceenemycolor)
 {
-    CL_RebuildAllPlayerTranslations();
 }
 
 CVAR_FUNC_IMPL(r_forceteamcolor)
 {
-    CL_RebuildAllPlayerTranslations();
 }
 
 CVAR_FUNC_IMPL(cl_team)
 {
     if (var.asInt() >= sv_teamsinplay)
         var.Set(sv_teamsinplay.asInt() - 1);
-
-    CL_RebuildAllPlayerTranslations();
 }
 
 EXTERN_CVAR(sv_maxplayers)
@@ -1084,8 +1072,6 @@ void CL_SendUserInfo(void)
     {
         MSG_WriteByte(&net_buffer, coninfo->weapon_prefs[i]);
     }
-
-    CL_RebuildAllPlayerTranslations(); // Refresh Player Translations AFTER sending the new status to the server.
 }
 
 //
@@ -1163,11 +1149,6 @@ void CL_SpectatePlayer(player_t &player, bool spectate)
 
         ClientReplay::getInstance().reset();
 
-        CL_RebuildAllPlayerTranslations();
-    }
-    else
-    {
-        R_BuildPlayerTranslation(player.id, CL_GetPlayerColor(&player));
     }
 
     P_ClearPlayerPowerups(player); // Remove all current powerups

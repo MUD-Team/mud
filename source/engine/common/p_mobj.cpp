@@ -117,7 +117,7 @@ AActor::AActor()
       dropoffz(0), floorsector(NULL), radius(0), height(0), momx(0), momy(0), momz(0), validcount(0),
       type(MT_UNKNOWNTHING), info(NULL), tics(0), on_conveyor(false), state(NULL), damage(0), flags(0), flags2(0),
       flags3(0), oflags(0), special1(0), special2(0), health(0), movedir(0), movecount(0), visdir(0), reactiontime(0),
-      threshold(0), player(NULL), lastlook(0), special(0), inext(NULL), iprev(NULL), translation(translationref_t()),
+      threshold(0), player(NULL), lastlook(0), special(0), inext(NULL), iprev(NULL),
       translucency(0), waterlevel(0), gear(0), onground(false), touching_sectorlist(NULL), deadtic(0), oldframe(0),
       rndindex(0), netid(0), tid(0), bmapnode(this), baseline_set(false)
 {
@@ -138,7 +138,7 @@ AActor::AActor(const AActor &other)
       special2(other.special2), health(other.health), movedir(other.movedir), movecount(other.movecount),
       visdir(other.visdir), reactiontime(other.reactiontime), threshold(other.threshold), player(other.player),
       lastlook(other.lastlook), special(other.special), inext(other.inext), iprev(other.iprev),
-      translation(other.translation), translucency(other.translucency), waterlevel(other.waterlevel), gear(other.gear),
+      translucency(other.translucency), waterlevel(other.waterlevel), gear(other.gear),
       onground(other.onground), touching_sectorlist(other.touching_sectorlist), deadtic(other.deadtic),
       oldframe(other.oldframe), rndindex(other.rndindex), netid(other.netid), tid(other.tid), bmapnode(other.bmapnode),
       baseline_set(false)
@@ -198,7 +198,6 @@ AActor &AActor::operator=(const AActor &other)
     lastlook            = other.lastlook;
     inext               = other.inext;
     iprev               = other.iprev;
-    translation         = other.translation;
     translucency        = other.translucency;
     waterlevel          = other.waterlevel;
     gear                = other.gear;
@@ -230,7 +229,7 @@ AActor::AActor(fixed_t ix, fixed_t iy, fixed_t iz, mobjtype_t itype)
       dropoffz(0), floorsector(NULL), radius(0), height(0), momx(0), momy(0), momz(0), validcount(0),
       type(MT_UNKNOWNTHING), info(NULL), tics(0), on_conveyor(false), state(NULL), damage(0), flags(0), flags2(0),
       flags3(0), oflags(0), special1(0), special2(0), health(0), movedir(0), movecount(0), visdir(0), reactiontime(0),
-      threshold(0), player(NULL), lastlook(0), special(0), inext(NULL), iprev(NULL), translation(translationref_t()),
+      threshold(0), player(NULL), lastlook(0), special(0), inext(NULL), iprev(NULL),
       translucency(0), waterlevel(0), gear(0), onground(false), touching_sectorlist(NULL), deadtic(0), oldframe(0),
       rndindex(0), netid(0), tid(0), bmapnode(this), baseline_set(false)
 {
@@ -792,9 +791,6 @@ void AActor::RunThink()
 
 void AActor::Serialize(FArchive &arc)
 {
-    const uint32_t TLATE_NONE = 0xFFFFFFFF;
-    const uint32_t TLATE_BOSS = 0xFFFFFFFE;
-
     Super::Serialize(arc);
     if (arc.IsStoring())
     {
@@ -818,23 +814,6 @@ void AActor::Serialize(FArchive &arc)
             /*<< goal ? goal->netid : 0*/
             << (uint32_t)0 << translucency << waterlevel << gear;
 
-        // NOTE(jsd): This is pretty awful right here:
-        //       [AM] I am now part of the problem.
-        if (translation)
-        {
-            if (translation.getTable() == ::bosstable)
-            {
-                arc << TLATE_BOSS;
-            }
-            else
-            {
-                arc << (uint32_t)(translation.getTable() - ::translationtables);
-            }
-        }
-        else
-        {
-            arc << TLATE_NONE;
-        }
         spawnpoint.Serialize(arc);
         baseline.Serialize(arc);
     }
@@ -865,27 +844,6 @@ void AActor::Serialize(FArchive &arc)
 
         P_SetThingId(this, newnetid);
 
-        uint32_t trans;
-        arc >> trans;
-        if (trans == TLATE_NONE)
-        {
-            translation = translationref_t();
-        }
-        else if (trans == TLATE_BOSS)
-        {
-            translation = translationref_t(::bosstable);
-        }
-        else
-        {
-            if ((trans / 256) <= MAXPLAYERS)
-            {
-                translation = translationref_t(::translationtables + trans, trans / 256);
-            }
-            else
-            {
-                translation = translationref_t(::translationtables + trans);
-            }
-        }
         spawnpoint.Serialize(arc);
         baseline.Serialize(arc);
         if (type >= NUMMOBJTYPES)

@@ -195,8 +195,6 @@ void R_ForceViewWindowResize();
 void R_ResetDrawFuncs();
 void R_SetFuzzDrawFuncs();
 void R_SetLucentDrawFuncs();
-void R_SetTranslatedDrawFuncs();
-void R_SetTranslatedLucentDrawFuncs();
 
 inline uint8_t shaderef_t::ramp() const
 {
@@ -205,54 +203,6 @@ inline uint8_t shaderef_t::ramp() const
 
     int32_t index = clamp(m_mapnum * 256 / NUMCOLORMAPS, 0, 255);
     return m_colors->ramp[index];
-}
-
-extern argb_t translationRGB[MAXPLAYERS + 1][16];
-
-inline argb_t shaderef_t::tlate(const translationref_t &translation, const uint8_t c) const
-{
-    const palindex_t range_start = 0x70;
-    const palindex_t range_stop  = 0x7F;
-
-    int32_t pid = translation.getPlayerID();
-
-    // Not a player color translation:
-    if (pid == -1)
-        return shade(translation.tlate(c));
-
-    // Special effect:
-    if (m_mapnum >= NUMCOLORMAPS)
-        return shade(translation.tlate(c));
-
-    // Is a player color translation, but not a player color index:
-    if (c < range_start || c > range_stop)
-        return shade(c);
-
-    // Default to white light:
-    argb_t lightcolor = argb_t(255, 255, 255);
-    argb_t fadecolor(level.fadeto_color[0], level.fadeto_color[1], level.fadeto_color[2], level.fadeto_color[3]);
-
-    // Use the dynamic lighting's light color if we have one:
-    if (m_dyncolormap != NULL)
-    {
-        lightcolor = m_dyncolormap->color;
-        fadecolor  = m_dyncolormap->fade;
-    }
-
-    // Find the shading for the custom player colors:
-    argb_t trancolor = translationRGB[pid][c - range_start];
-
-    uint32_t r = (trancolor.getr() * lightcolor.getr() * (NUMCOLORMAPS - m_mapnum) / 255 +
-                      fadecolor.getr() * m_mapnum + NUMCOLORMAPS / 2) /
-                     NUMCOLORMAPS;
-    uint32_t g = (trancolor.getg() * lightcolor.getg() * (NUMCOLORMAPS - m_mapnum) / 255 +
-                      fadecolor.getg() * m_mapnum + NUMCOLORMAPS / 2) /
-                     NUMCOLORMAPS;
-    uint32_t b = (trancolor.getb() * lightcolor.getb() * (NUMCOLORMAPS - m_mapnum) / 255 +
-                      fadecolor.getb() * m_mapnum + NUMCOLORMAPS / 2) /
-                     NUMCOLORMAPS;
-
-    return argb_t(gammatable[r], gammatable[g], gammatable[b]);
 }
 
 void R_DrawLine(const v3fixed_t *inpt1, const v3fixed_t *inpt2, uint8_t color);
