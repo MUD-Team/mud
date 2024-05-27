@@ -363,7 +363,6 @@ void I_Init(void)
     I_InitSound();
     I_InitHardware();
     UI_Initialize();
-    V_DynamicPaletteInit();
 }
 
 void I_FinishClockCalibration()

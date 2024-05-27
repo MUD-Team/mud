@@ -84,6 +84,8 @@ EXTERN_CVAR(r_painintensity)
 EXTERN_CVAR(sv_allowredscreen)
 
 static void V_GammaAdjustPalette(palette_t *palette);
+static void BuildColoredLights(shademap_t *maps, const int32_t lr, const int32_t lg, const int32_t lb, const int32_t fr,
+                               const int32_t fg, const int32_t fb);
 
 dyncolormap_t NormalLight;
 
@@ -163,15 +165,26 @@ struct DynamicPaletteEntry
     liq_image *image;
 };
 
-// static liq_attr                        *pal_histogram_attr = nullptr;
-// static liq_histogram                   *pal_histogram      = nullptr;
-static std::vector<DynamicPaletteEntry> pal_entries;
-static bool                             pal_dirty = false;
-
-void V_DynamicPaletteInit()
+struct SpecialLightEntry
 {
-    // pal_histogram_attr = liq_attr_create();
-    // pal_histogram      = liq_histogram_create(pal_histogram_attr);
+    dyncolormap_t *colormap;
+    int32_t        lr;
+    int32_t        lg;
+    int32_t        lb;
+    int32_t        fr;
+    int32_t        fg;
+    int32_t        fb;
+};
+
+static std::vector<DynamicPaletteEntry> pal_entries;
+static std::vector<SpecialLightEntry>   pal_light_entries;
+
+static bool pal_dirty = false;
+
+void V_DynamicLightsCleanup()
+{
+    NormalLight.next = nullptr;
+    pal_light_entries.clear();
 }
 
 void V_DynamicPaletteShutdown()
@@ -264,6 +277,12 @@ void V_DynamicPaletteProcess()
 
     texturemanager.invalidateTextureMapping();
     texturemanager.remapTextures();
+
+    for (auto light : pal_light_entries)
+    {
+        shademap_t *map = (shademap_t *)light.colormap->maps.map();
+        BuildColoredLights(map, light.lr, light.lg, light.lb, light.fr, light.fg, light.fb);
+    }
 }
 
 // ----------------------------------------------------------------------------
@@ -625,7 +644,6 @@ void V_InitPalette()
     if (default_palette.maps.shademap)
         delete[] default_palette.maps.shademap;
 
-
     default_palette.maps.colormap = new palindex_t[(NUMCOLORMAPS + 1) * 256];
     default_palette.maps.shademap = new argb_t[(NUMCOLORMAPS + 1) * 256];
 
@@ -881,8 +899,8 @@ fargb_t V_HSVtoRGB(const fahsv_t &color)
 /****** Colored Lighting Stuffs (Sorry, 8-bit only) ******/
 
 // Builds NUMCOLORMAPS colormaps lit with the specified color
-static void BuildColoredLights(shademap_t *maps, const int32_t lr, const int32_t lg, const int32_t lb, const int32_t fr,
-                               const int32_t fg, const int32_t fb)
+void BuildColoredLights(shademap_t *maps, const int32_t lr, const int32_t lg, const int32_t lb, const int32_t fr,
+                        const int32_t fg, const int32_t fb)
 {
     // The default palette is assumed to contain the maps for white light.
     if (!maps)
@@ -942,6 +960,8 @@ dyncolormap_t *GetSpecialLights(int32_t lr, int32_t lg, int32_t lb, int32_t fr, 
     NormalLight.next = colormap;
 
     BuildColoredLights(maps, lr, lg, lb, fr, fg, fb);
+
+    pal_light_entries.push_back({colormap, lr, lg, lb, fr, fg, fb});
 
     return colormap;
 }

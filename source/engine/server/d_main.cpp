@@ -202,7 +202,7 @@ void STACK_ARGS D_Shutdown()
 
     // [AM] All of our dyncolormaps are freed, tidy up so we
     //      don't follow wild pointers.
-    NormalLight.next = NULL;
+    V_DynamicLightsCleanup();        
 }
 
 void D_Init_DEHEXTRA_Frames(void);

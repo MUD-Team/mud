@@ -100,7 +100,8 @@ fargb_t V_HSVtoRGB(const fahsv_t &color);
 
 dyncolormap_t *GetSpecialLights(int32_t lr, int32_t lg, int32_t lb, int32_t fr, int32_t fg, int32_t fb);
 
-void V_DynamicPaletteInit();
+void V_DynamicLightsCleanup();
+
 void V_DynamicPaletteShutdown();
 
 void V_DynamicPaletteAddImage(uint8_t *raw_rgba_pixels, int32_t width, int32_t height);
