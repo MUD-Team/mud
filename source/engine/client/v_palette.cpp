@@ -189,16 +189,6 @@ void V_DynamicLightsCleanup()
 
 void V_DynamicPaletteShutdown()
 {
-    // if (pal_histogram)
-    //{
-    //     liq_histogram_destroy(pal_histogram);
-    // }
-
-    // if (pal_histogram_attr)
-    // {
-    //     liq_attr_destroy(pal_histogram_attr);
-    // }
-
     for (auto entry : pal_entries)
     {
         liq_image_destroy(entry.image);
@@ -206,9 +196,9 @@ void V_DynamicPaletteShutdown()
     }
 
     pal_entries.clear();
-    // pal_histogram      = nullptr;
-    // pal_histogram_attr = nullptr;
+    pal_light_entries.clear();
 }
+ 
 
 void V_DynamicPaletteAddImage(uint8_t *raw_rgba_pixels, int32_t width, int32_t height)
 {
