@@ -80,8 +80,6 @@ int32_t viewwindowy;
 void (*R_DrawColumn)(void);
 void (*R_DrawFuzzColumn)(void);
 void (*R_DrawTranslucentColumn)(void);
-void (*R_DrawTranslatedColumn)(void);
-void (*R_DrawTlatedLucentColumn)(void);
 void (*R_DrawSpan)(void);
 void (*R_DrawSlopeSpan)(void);
 void (*R_FillColumn)(void);
@@ -190,54 +188,6 @@ current value >> 19. When asm-optimised, this should be the fastest
 algorithm that uses RGB tables.
 */
 
-// ============================================================================
-//
-// Indexed-color Translation Table
-//
-// Used to draw player sprites with the green colorramp mapped to others.
-// Could be used with different translation tables, e.g. the lighter colored
-// version of the BaronOfHell, the HellKnight, uses identical sprites, kinda
-// brightened up.
-//
-// ============================================================================
-
-uint8_t        *translationtables;
-argb_t       translationRGB[MAXPLAYERS + 1][16];
-uint8_t        *Ranges;
-static uint8_t *translationtablesmem = NULL;
-uint8_t         bosstable[256];
-
-static void R_BuildFontTranslation(int32_t color_num, argb_t start_color, argb_t end_color)
-{
-    const palindex_t start_index     = 0xB0;
-    const palindex_t end_index       = 0xBF;
-    const int32_t    index_range     = end_index - start_index + 1;
-
-    palindex_t *dest = (palindex_t *)Ranges + color_num * 256;
-
-    for (int32_t index = 0; index < start_index; index++)
-        dest[index] = index;
-    for (int32_t index = end_index + 1; index < 256; index++)
-        dest[index] = index;
-
-    int32_t r_diff = end_color.getr() - start_color.getr();
-    int32_t g_diff = end_color.getg() - start_color.getg();
-    int32_t b_diff = end_color.getb() - start_color.getb();
-
-    for (palindex_t index = start_index; index <= end_index; index++)
-    {
-        int32_t i = index - start_index;
-
-        int32_t r = start_color.getr() + i * r_diff / index_range;
-        int32_t g = start_color.getg() + i * g_diff / index_range;
-        int32_t b = start_color.getb() + i * b_diff / index_range;
-
-        dest[index] = V_BestColor(V_GetDefaultPalette()->basecolors, r, g, b);
-    }
-
-    dest[0x2C] = dest[0x2D] = dest[0x2F] = dest[end_index];
-}
-
 /**
  * @brief Apply a soft light filter using Pegtop's formula.
  *
@@ -253,174 +203,6 @@ static uint8_t SoftLight(const uint8_t bot, const uint8_t top)
     const float b   = top / 255.f;
     const float res = (1.f - 2.f * b) * pow(a, 2.f) + (2.f * b * a);
     return res * 255;
-}
-
-//
-// R_InitTranslationTables
-//
-// Creates the translation tables to map
-//	the green color ramp to gray, brown, red.
-// Assumes a given structure of the PLAYPAL.
-// Could be read from a lump instead.
-//
-void R_InitTranslationTables()
-{
-    R_FreeTranslationTables();
-
-    // Boss translation is a yellow tint.
-    argb_t top(0xff, 0xff, 0x73);
-    for (size_t i = 0; i < ARRAY_LENGTH(::bosstable); i++)
-    {
-        const argb_t bot = V_GetDefaultPalette()->basecolors[i];
-        const argb_t mul(SoftLight(bot.getr(), top.getr()), SoftLight(bot.getg(), top.getg()),
-                         SoftLight(bot.getb(), top.getb()));
-
-        ::bosstable[i] = V_BestColor(V_GetDefaultPalette()->basecolors, mul);
-    }
-
-    translationtablesmem = new uint8_t[256 * (MAXPLAYERS + 3 + 22) + 255]; // denis - fixme - magic numbers?
-
-    // [Toke - fix13]
-    // denis - cleaned this up somewhat
-    translationtables = (uint8_t *)(((ptrdiff_t)translationtablesmem + 255) & ~255);
-
-    // [RH] Each player now gets their own translation table
-    //		(soon to be palettes). These are set up during
-    //		netgame arbitration and as-needed rather than
-    //		in here. We do, however load some text translation
-    //		tables from our PWAD (ala BOOM).
-
-    for (int32_t i = 0; i < 256; i++)
-        translationtables[i] = i;
-
-    // Set up default translationRGB tables:
-    const palette_t *pal = V_GetDefaultPalette();
-    for (int32_t i = 0; i < MAXPLAYERS; ++i)
-    {
-        for (int32_t j = 0x70; j < 0x80; ++j)
-            translationRGB[i][j - 0x70] = pal->basecolors[j];
-    }
-
-    for (int32_t i = 1; i < MAXPLAYERS + 3; i++)
-        memcpy(translationtables + i * 256, translationtables, 256);
-
-    // create translation tables for dehacked patches that expect them
-    for (int32_t i = 0x70; i < 0x80; i++)
-    {
-        // map green ramp to gray, brown, red
-        translationtables[i + (MAXPLAYERS + 0) * 256] = 0x60 + (i & 0xf);
-        translationtables[i + (MAXPLAYERS + 1) * 256] = 0x40 + (i & 0xf);
-        translationtables[i + (MAXPLAYERS + 2) * 256] = 0x20 + (i & 0xf);
-    }
-
-    Ranges = translationtables + (MAXPLAYERS + 3) * 256;
-
-    R_BuildFontTranslation(CR_BRICK, argb_t(0xFF, 0xB8, 0xB8), argb_t(0x47, 0x00, 0x00));
-    R_BuildFontTranslation(CR_TAN, argb_t(0xFF, 0xEB, 0xDF), argb_t(0x33, 0x2B, 0x13));
-    R_BuildFontTranslation(CR_GRAY, argb_t(0xEF, 0xEF, 0xEF), argb_t(0x27, 0x27, 0x27));
-    R_BuildFontTranslation(CR_GREEN, argb_t(0x77, 0xFF, 0x6F), argb_t(0x0B, 0x17, 0x07));
-    R_BuildFontTranslation(CR_BROWN, argb_t(0xBF, 0xA7, 0x8F), argb_t(0x53, 0x3F, 0x2F));
-    R_BuildFontTranslation(CR_GOLD, argb_t(0xFF, 0xFF, 0x73), argb_t(0x73, 0x2B, 0x00));
-    R_BuildFontTranslation(CR_RED, argb_t(0xFF, 0x00, 0x00), argb_t(0x3F, 0x00, 0x00));
-    R_BuildFontTranslation(CR_BLUE, argb_t(0x00, 0x00, 0xFF), argb_t(0x00, 0x00, 0x27));
-    R_BuildFontTranslation(CR_ORANGE, argb_t(0xFF, 0x80, 0x00), argb_t(0x20, 0x00, 0x00));
-    R_BuildFontTranslation(CR_WHITE, argb_t(0xFF, 0xFF, 0xFF), argb_t(0x24, 0x24, 0x24));
-    R_BuildFontTranslation(CR_YELLOW, argb_t(0xFC, 0xD0, 0x43), argb_t(0x27, 0x27, 0x27));
-    R_BuildFontTranslation(CR_BLACK, argb_t(0x50, 0x50, 0x50), argb_t(0x13, 0x13, 0x13));
-    R_BuildFontTranslation(CR_LIGHTBLUE, argb_t(0xB4, 0xB4, 0xFF), argb_t(0x00, 0x00, 0x73));
-    R_BuildFontTranslation(CR_CREAM, argb_t(0xFF, 0xD7, 0xBB), argb_t(0xCF, 0x83, 0x53));
-    R_BuildFontTranslation(CR_OLIVE, argb_t(0x7B, 0x7F, 0x50), argb_t(0x2F, 0x37, 0x1F));
-    R_BuildFontTranslation(CR_DARKGREEN, argb_t(0x43, 0x93, 0x37), argb_t(0x0B, 0x17, 0x07));
-    R_BuildFontTranslation(CR_DARKRED, argb_t(0xAF, 0x2B, 0x2B), argb_t(0x2B, 0x00, 0x00));
-    R_BuildFontTranslation(CR_DARKBROWN, argb_t(0xA3, 0x6B, 0x3F), argb_t(0x1F, 0x17, 0x0B));
-    R_BuildFontTranslation(CR_PURPLE, argb_t(0xCF, 0x00, 0xCF), argb_t(0x23, 0x00, 0x23));
-    R_BuildFontTranslation(CR_DARKGRAY, argb_t(0x8B, 0x8B, 0x8B), argb_t(0x23, 0x23, 0x23));
-    R_BuildFontTranslation(CR_CYAN, argb_t(0x00, 0xF0, 0xF0), argb_t(0x00, 0x1F, 0x1F));
-}
-
-void R_FreeTranslationTables(void)
-{
-    delete[] translationtablesmem;
-    translationtablesmem = NULL;
-}
-
-// [Nes] Vanilla player translation table.
-void R_BuildClassicPlayerTranslation(int32_t player, int32_t color)
-{
-    const palette_t *pal = V_GetDefaultPalette();
-    int32_t              i;
-
-    if (color == 1) // Indigo
-        for (i = 0x70; i < 0x80; i++)
-        {
-            translationtables[i + (player * 256)] = 0x60 + (i & 0xf);
-            translationRGB[player][i - 0x70]      = pal->basecolors[translationtables[i + (player * 256)]];
-        }
-    else if (color == 2) // Brown
-        for (i = 0x70; i < 0x80; i++)
-        {
-            translationtables[i + (player * 256)] = 0x40 + (i & 0xf);
-            translationRGB[player][i - 0x70]      = pal->basecolors[translationtables[i + (player * 256)]];
-        }
-    else if (color == 3) // Red
-        for (i = 0x70; i < 0x80; i++)
-        {
-            translationtables[i + (player * 256)] = 0x20 + (i & 0xf);
-            translationRGB[player][i - 0x70]      = pal->basecolors[translationtables[i + (player * 256)]];
-        }
-}
-
-void R_CopyTranslationRGB(int32_t fromplayer, int32_t toplayer)
-{
-    for (int32_t i = 0x70; i < 0x80; ++i)
-    {
-        translationRGB[toplayer][i - 0x70]      = translationRGB[fromplayer][i - 0x70];
-        translationtables[i + (toplayer * 256)] = translationtables[i + (fromplayer * 256)];
-    }
-}
-
-// [RH] Create a player's translation table based on
-//		a given mid-range color.
-void R_BuildPlayerTranslation(int32_t player, argb_t dest_color)
-{
-    const palette_t *pal   = V_GetDefaultPalette();
-    uint8_t            *table = &translationtables[player * 256];
-
-    fahsv_t hsv_temp = V_RGBtoHSV(dest_color);
-    float   h = hsv_temp.geth(), s = hsv_temp.gets(), v = hsv_temp.getv();
-
-    s -= 0.23f;
-    if (s < 0.0f)
-        s = 0.0f;
-    float sdelta = 0.014375f;
-
-    v += 0.1f;
-    if (v > 1.0f)
-        v = 1.0f;
-    float vdelta = -0.05882f;
-
-    for (int32_t i = 0x70; i < 0x80; i++)
-    {
-        argb_t color(V_HSVtoRGB(fahsv_t(h, s, v)));
-
-        // Set up RGB values for 32bpp translation:
-        translationRGB[player][i - 0x70] = color;
-        table[i]                         = V_BestColor(pal->basecolors, color);
-
-        s += sdelta;
-        if (s > 1.0f)
-        {
-            s      = 1.0f;
-            sdelta = 0.0f;
-        }
-
-        v += vdelta;
-        if (v < 0.0f)
-        {
-            v      = 0.0f;
-            vdelta = 0.0f;
-        }
-    }
 }
 
 // ============================================================================
@@ -936,42 +718,6 @@ class DirectTranslucentColormapFunc
     int32_t               fga, bga;
 };
 
-class DirectTranslatedColormapFunc
-{
-  public:
-    DirectTranslatedColormapFunc(const drawcolumn_t &drawcolumn)
-        : colormap(drawcolumn.colormap), translation(drawcolumn.translation)
-    {
-    }
-
-    forceinline void operator()(uint8_t c, argb_t *dest) const
-    {
-        *dest = colormap.tlate(translation, c);
-    }
-
-  private:
-    const shaderef_t       &colormap;
-    const translationref_t &translation;
-};
-
-class DirectTranslatedTranslucentColormapFunc
-{
-  public:
-    DirectTranslatedTranslucentColormapFunc(const drawcolumn_t &drawcolumn)
-        : tlatefunc(drawcolumn), translation(drawcolumn.translation)
-    {
-    }
-
-    forceinline void operator()(uint8_t c, argb_t *dest) const
-    {
-        tlatefunc(translation.tlate(c), dest);
-    }
-
-  private:
-    DirectTranslucentColormapFunc tlatefunc;
-    const translationref_t       &translation;
-};
-
 class DirectSlopeColormapFunc
 {
   public:
@@ -1049,32 +795,6 @@ void R_DrawFuzzColumnD()
 void R_DrawTranslucentColumnD()
 {
     R_DrawColumnGeneric<argb_t, DirectTranslucentColormapFunc>(FB_COLDEST_D, dcol);
-}
-
-//
-// R_DrawTranslatedColumnD
-//
-// Renders a column to the 32bpp ARGB8888 screen buffer with color-remapping
-// from the source buffer dcol.source and scaled by dcol.iscale. The translation
-// table is supplied by dcol.translation. Shading is performed using dcol.colormap.
-//
-void R_DrawTranslatedColumnD()
-{
-    R_DrawColumnGeneric<argb_t, DirectTranslatedColormapFunc>(FB_COLDEST_D, dcol);
-}
-
-//
-// R_DrawTlatedLucentColumnD
-//
-// Renders a translucent column to the 32bpp ARGB8888 screen buffer with
-// color-remapping from the source buffer dcol.source and scaled by dcol.iscale.
-// The translation table is supplied by dcol.translation and the amount of
-// translucency is controlled by dcol.translevel. Shading is performed using
-// dcol.colormap.
-//
-void R_DrawTlatedLucentColumnD()
-{
-    R_DrawColumnGeneric<argb_t, DirectTranslatedTranslucentColormapFunc>(FB_COLDEST_D, dcol);
 }
 
 // ----------------------------------------------------------------------------
@@ -1326,8 +1046,6 @@ void R_InitColumnDrawers()
     R_DrawColumn             = R_DrawColumnD;
     R_DrawFuzzColumn         = R_DrawFuzzColumnD;
     R_DrawTranslucentColumn  = R_DrawTranslucentColumnD;
-    R_DrawTranslatedColumn   = R_DrawTranslatedColumnD;
-    R_DrawTlatedLucentColumn = R_DrawTlatedLucentColumnD;
     R_DrawSlopeSpan          = R_DrawSlopeSpanD;
     R_DrawSpan               = R_DrawSpanD;
     R_FillColumn             = R_FillColumnD;

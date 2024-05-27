@@ -607,8 +607,7 @@ void R_Init()
     R_InitData();
     R_SetViewSize((int32_t)screenblocks);
     R_InitPlanes();
-    R_InitTranslationTables();
-
+    
     R_InitParticles(); // [RH] Setup particle engine
 
     framecount = 0;
@@ -619,7 +618,7 @@ void R_Init()
 //
 void STACK_ARGS R_Shutdown()
 {
-    R_FreeTranslationTables();
+    
 }
 
 //
@@ -937,39 +936,6 @@ void R_SetLucentDrawFuncs()
         colfunc = R_DrawTranslucentColumn;
     }
 }
-
-void R_SetTranslatedDrawFuncs()
-{
-    if (nodrawers)
-    {
-        R_SetBlankDrawFuncs();
-    }
-    else if (r_drawflat)
-    {
-        R_SetFlatDrawFuncs();
-    }
-    else
-    {
-        colfunc = R_DrawTranslatedColumn;
-    }
-}
-
-void R_SetTranslatedLucentDrawFuncs()
-{
-    if (nodrawers)
-    {
-        R_SetBlankDrawFuncs();
-    }
-    else if (r_drawflat)
-    {
-        R_SetFlatDrawFuncs();
-    }
-    else
-    {
-        colfunc = R_DrawTlatedLucentColumn;
-    }
-}
-
 //
 // R_RenderPlayerView
 //

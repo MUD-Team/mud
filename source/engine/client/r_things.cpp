@@ -169,7 +169,6 @@ void SpriteColumnBlaster()
 void R_DrawVisSprite(vissprite_t *vis, int32_t x1, int32_t x2)
 {
     bool fuzz_effect = false;
-    bool translated  = false;
     bool lucent      = false;
 
     if (vis->yscale <= 0)
@@ -205,21 +204,6 @@ void R_DrawVisSprite(vissprite_t *vis, int32_t x1, int32_t x2)
 
     dcol.colormap = vis->colormap;
 
-    if (vis->translation)
-    {
-        translated       = true;
-        dcol.translation = vis->translation;
-    }
-    else if (vis->mobjflags & MF_TRANSLATION)
-    {
-        // [RH] MF_TRANSLATION is still available for DeHackEd patches that
-        //		used it, but the prefered way to change a thing's colors
-        //		is now with the palette field.
-        translated       = true;
-        dcol.translation = translationref_t(translationtables + (MAXPLAYERS - 1) * 256 +
-                                            ((vis->mobjflags & MF_TRANSLATION) >> (MF_TRANSSHIFT - 8)));
-    }
-
     if (vis->mobjflags & MF_SHADOW)
     {
         // [RH] I use MF_SHADOW to recognize fuzz effect now instead of
@@ -240,12 +224,8 @@ void R_DrawVisSprite(vissprite_t *vis, int32_t x1, int32_t x2)
 
     if (fuzz_effect)
         R_SetFuzzDrawFuncs();
-    else if (lucent && translated)
-        R_SetTranslatedLucentDrawFuncs();
     else if (lucent)
         R_SetLucentDrawFuncs();
-    else if (translated)
-        R_SetTranslatedDrawFuncs();
 
     dcol.iscale     = 0xffffffffu / (uint32_t)vis->yscale;
     dcol.texturemid = vis->texturemid;
@@ -549,7 +529,6 @@ void R_ProjectSprite(AActor *thing, int32_t fakeside)
 
     vis->mobjflags    = thing->flags;
     vis->spectator    = thing->oflags & MFO_SPECTATOR;
-    vis->translation  = thing->translation; // [RH] thing translation table
     vis->translucency = thing->translucency;
     vis->tex_id       = tex_id;
     vis->tex_patch    = patch;
@@ -889,7 +868,6 @@ void R_ProjectParticle(particle_t *particle, const sector_t *sector, int32_t fak
     if (vis == NULL)
         return;
 
-    vis->translation = translationref_t();
     vis->startfrac   = particle->color;
     vis->tex_id      = NO_PARTICLE;
     vis->mobjflags   = particle->trans;

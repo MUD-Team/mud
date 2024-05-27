@@ -623,7 +623,6 @@ struct vissprite_s
     int32_t  mobjflags;
     bool spectator;               // [Blair] Mark if this visprite belongs to a spectator.
 
-    translationref_t translation; // [RH] for translation;
     sector_t        *heightsec;   // killough 3/27/98: height sector for underwater/fake ceiling
     fixed_t          translucency;
     uint8_t             FakeFlat;    // [RH] which side of fake/floor ceiling sprite is on

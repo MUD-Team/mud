@@ -46,9 +46,6 @@ void V_AdjustVideoMode();
 // The color to fill with for #4 and #5 above
 extern int32_t V_ColorFill;
 
-// The color map for #1 and #2 above
-extern translationref_t V_ColorMap;
-
 void V_MarkRect(int32_t x, int32_t y, int32_t width, int32_t height);
 
 // Returns the closest color to the one desired. String

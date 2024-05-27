@@ -76,23 +76,6 @@ void V_InitPalette(const char *lumpname)
     }
 }
 
-translationref_t::translationref_t() : m_table(NULL), m_player_id(-1)
-{
-}
-
-translationref_t::translationref_t(const translationref_t &other)
-    : m_table(other.m_table), m_player_id(other.m_player_id)
-{
-}
-
-translationref_t::translationref_t(const uint8_t *table) : m_table(table), m_player_id(-1)
-{
-}
-
-translationref_t::translationref_t(const uint8_t *table, const int32_t player_id) : m_table(table), m_player_id(player_id)
-{
-}
-
 shaderef_t::shaderef_t() : m_colors(NULL), m_mapnum(-1), m_colormap(NULL), m_shademap(NULL)
 {
 }

@@ -198,7 +198,7 @@ enum mobjflag_t
     // Player sprites in multiplayer modes are modified
     //  using an internal color lookup table for re-indexing.
     // If 0x4 0x8 or 0xc, use a translation table for player colormaps
-    MF_TRANSLATION = 0xc000000,
+    // MF_TRANSLATION = 0xc000000,
 
     MF_TOUCHY  = BIT(28), // MBF - UNUSED FOR NOW
     MF_BOUNCES = BIT(29), // MBF - PARTIAL IMPLEMENTATION
@@ -512,7 +512,6 @@ class AActor : public DThinker
     PlayerBitField players_aware;
 
     AActorPtr        goal;         // Monster's goal if not chasing anything
-    translationref_t translation;  // Translation table (or NULL)
     fixed_t          translucency; // 65536=fully opaque, 0=fully invisible
     uint8_t             waterlevel;   // 0=none, 1=feet, 2=waist, 3=eyes
     int16_t            gear;         // killough 11/98: used in torque simulation

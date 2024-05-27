@@ -77,15 +77,6 @@ void P_SpawnPlayer(player_t &player, mapthing2_t *mthing)
     //		mobj = new AActor(mthing->x << FRACBITS, mthing->y << FRACBITS, ONFLOORZ, MT_PLAYER);
     mobj = new AActor(mthing->x << FRACBITS, mthing->y << FRACBITS, ONFLOORZ, MT_PLAYER);
 
-    // set color translations for player sprites
-    // [RH] Different now: MF_TRANSLATION is not used.
-    mobj->translation = translationref_t(translationtables + 256 * player.id, player.id);
-    if (player.id == consoleplayer_id)
-    {
-        // NOTE(jsd): Copy the player setup menu's translation to the player_id's:
-        R_CopyTranslationRGB(0, player.id);
-    }
-
     //	if (player.deadspectator && player.mo)
     //	{
     //		mobj->angle = player.mo->angle;
