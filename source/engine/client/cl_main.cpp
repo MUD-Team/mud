@@ -375,9 +375,6 @@ void CL_QuitNetGame2(const netQuitReason_e reason, const char *file, const int32
 
     recv_full_update = false;
 
-    // Reset the palette to default
-    V_ResetPalette();
-
     cvar_t::C_RestoreCVars();
 
     switch (reason)

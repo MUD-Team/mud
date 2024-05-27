@@ -146,7 +146,7 @@ void D_Init()
         Printf("Z_Init: Using native allocator with OZone bookkeeping.\n");
 
     // Load palette and set up colormaps
-    V_InitPalette("PLAYPAL.pal");
+    V_InitPalette();
 
     Res_InitTextureManager();
 

@@ -59,7 +59,7 @@ const palette_t *V_GetGamePalette()
     return &default_palette;
 }
 
-void V_InitPalette(const char *lumpname)
+void V_InitPalette()
 {
     static bool initialized = false;
 

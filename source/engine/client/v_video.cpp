@@ -421,7 +421,7 @@ void V_Init()
     if (!I_VideoInitialized())
         I_FatalError("Failed to initialize display");
 
-    V_InitPalette("PLAYPAL.pal");
+    V_InitPalette();
 
     R_InitColumnDrawers();
 
