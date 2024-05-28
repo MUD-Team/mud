@@ -46,6 +46,8 @@
 #include "v_video.h"
 #include "w_wad.h"
 
+static constexpr uint16_t column_end = 0xFFFF;
+
 // patch conversion structs
 struct texpost_t
 {
@@ -186,7 +188,7 @@ void Texture::init(int32_t width, int32_t height)
     mScaleX    = FRACUNIT;
     mScaleY    = FRACUNIT;
     mData      = NULL;
-    mARGBData  = NULL;    
+    mARGBData  = NULL;
 }
 
 // ============================================================================
@@ -758,13 +760,14 @@ void TextureManager::generateNotFoundTexture()
 // Allocates memory for a new texture and returns a pointer to it. The texture
 // is inserted into mHandlesMap for future retrieval.
 //
-Texture *TextureManager::createTexture(texhandle_t texhandle, Texture::TextureSourceType type, int32_t width, int32_t height)
+Texture *TextureManager::createTexture(texhandle_t texhandle, Texture::TextureSourceType type, int32_t width,
+                                       int32_t height)
 {
     width  = std::min<int32_t>(width, Texture::MAX_TEXTURE_WIDTH);
     height = std::min<int32_t>(height, Texture::MAX_TEXTURE_HEIGHT);
 
     Texture *texture = new Texture;
-    texture->mType = type;
+    texture->mType   = type;
     texture->init(width, height);
 
     texture->mHandle = texhandle;
@@ -856,7 +859,7 @@ void TextureManager::cacheSprite(texhandle_t handle)
 
     if (!clientside)
     {
-        Texture *texture = createTexture(handle,  Texture::TextureSourceType::TEX_SPRITE, width, height);
+        Texture *texture = createTexture(handle, Texture::TextureSourceType::TEX_SPRITE, width, height);
         delete[] filedata;
         PHYSFS_close(rawsprite);
     }
@@ -873,8 +876,8 @@ void TextureManager::cacheSprite(texhandle_t handle)
 
         V_DynamicPaletteAddImage(decoded_img, width, height);
 
-        Texture *texture  = createTexture(handle, Texture::TextureSourceType::TEX_SPRITE, width, height);
-        
+        Texture *texture = createTexture(handle, Texture::TextureSourceType::TEX_SPRITE, width, height);
+
         // temporary PNG grAb chunk check
         int32_t i = 0;
         int32_t j = 0;
@@ -1014,7 +1017,7 @@ void TextureManager::remapTextures()
                 }
                 else
                 {
-                    generateColumns(it->second);                    
+                    generateColumns(it->second);
                 }
             }
         }
@@ -1039,8 +1042,9 @@ void TextureManager::remapFlat(Texture *texture)
         return;
     }
 
-    int32_t  bpp        = 4;
-    uint32_t pixel_step = width * bpp;
+    int32_t       bpp             = 4;
+    uint32_t      pixel_step      = width * bpp;
+    const argb_t *current_palette = V_GetDefaultPalette()->basecolors;
 
     if (texture->mData)
     {
@@ -1057,10 +1061,10 @@ void TextureManager::remapFlat(Texture *texture)
 
         for (uint32_t y = 0; y < height; y++)
         {
-            argb_t color(bpp == 4 ? *(pixel + 3) : 255, *pixel, *(pixel + 1), *(pixel + 2));
+            uint8_t alpha = *(pixel + 3);
 
-            if (color.geta() != 0)
-                *dest = V_BestColor(V_GetDefaultPalette()->basecolors, color);
+            if (alpha != 0)
+                *dest = V_BestColor(current_palette, {alpha, *pixel, *(pixel + 1), *(pixel + 2)});
 
             dest += width;
             pixel += pixel_step;
@@ -1097,9 +1101,10 @@ void TextureManager::generateColumns(Texture *texture)
         I_FatalError("TextureManager::generateColumns - no raw image data");
     }
 
-    int32_t width  = texture->getWidth();
-    int32_t height = texture->getHeight();
-    int32_t bpp    = 4;
+    int32_t       width           = texture->getWidth();
+    int32_t       height          = texture->getHeight();
+    int32_t       bpp             = 4;
+    const argb_t *current_palette = V_GetDefaultPalette()->basecolors;
 
     if (texture->mData)
     {
@@ -1111,7 +1116,6 @@ void TextureManager::generateColumns(Texture *texture)
     int32_t                  pixel_step = bpp * width;
 
     // Go through columns
-    uint32_t offset = 0;
     for (int32_t c = 0; c < width; c++)
     {
         texcolumn_t col;
@@ -1120,29 +1124,13 @@ void TextureManager::generateColumns(Texture *texture)
         bool     ispost = false;
         uint8_t *pixel  = texture->mARGBData + c * bpp;
 
-        offset          = c;
         uint8_t row_off = 0;
         for (int32_t r = 0; r < height; r++)
         {
-            // For vanilla-compatible dimensions, use a split at 128 to prevent tiling.
-            if (height < 256)
-            {
-                if (row_off == 128)
-                {
-                    // Finish current post if any
-                    if (ispost)
-                    {
-                        col.posts.push_back(post);
-                        post.pixels.clear();
-                        ispost = false;
-                    }
-                }
-            }
-
-            argb_t color(bpp == 4 ? *(pixel + 3) : 255, *pixel, *(pixel + 1), *(pixel + 2));
+            uint8_t alpha = *(pixel + 3);
 
             // If the current pixel is not transparent, add it to the current post
-            if (color.geta() != 0)
+            if (alpha != 0)
             {
                 // If we're not currently building a post, begin one and set its offset
                 if (!ispost)
@@ -1155,7 +1143,7 @@ void TextureManager::generateColumns(Texture *texture)
                 }
 
                 // Add the pixel to the post
-                post.pixels.push_back(V_BestColor(V_GetDefaultPalette()->basecolors, color));
+                post.pixels.push_back(V_BestColor(current_palette, {alpha, *pixel, *(pixel + 1), *(pixel + 2)}));
             }
             else if (ispost)
             {
@@ -1167,7 +1155,6 @@ void TextureManager::generateColumns(Texture *texture)
             }
 
             // Go to next row
-            offset += width;
             pixel += pixel_step;
             row_off++;
         }
@@ -1178,9 +1165,6 @@ void TextureManager::generateColumns(Texture *texture)
 
         // Add the column data
         columns.push_back(col);
-
-        // Go to next column
-        offset++;
     }
 
     // Write doom gfx data to output
@@ -1223,8 +1207,7 @@ void TextureManager::generateColumns(Texture *texture)
         }
 
         // Write 0xFFFF row to signal end of column
-        uint16_t temp = 0xFFFF;
-        mem_fwrite(&temp, sizeof(uint16_t), 1, newpatch);
+        mem_fwrite(&column_end, 2, 1, newpatch);
     }
 
     // Now we write column offsets
@@ -1292,7 +1275,7 @@ void TextureManager::cacheTexture(texhandle_t handle)
 
         V_DynamicPaletteAddImage(decoded_img, width, height);
 
-        Texture *texture  = createTexture(handle, Texture::TextureSourceType::TEX_TEXTURE, width, height);
+        Texture *texture = createTexture(handle, Texture::TextureSourceType::TEX_TEXTURE, width, height);
 
         // temporary PNG grAb chunk check
         int32_t i = 0;

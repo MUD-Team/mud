@@ -143,7 +143,7 @@ class Texture
 
     Texture();
 
-    void          init(int32_t width, int32_t height);
+    void init(int32_t width, int32_t height);
 
     texhandle_t mHandle;
 
@@ -159,8 +159,8 @@ class Texture
     int16_t mOffsetX;
     int16_t mOffsetY;
 
-    uint8_t	mWidthBits;
-	uint8_t	mHeightBits;
+    uint8_t mWidthBits;
+    uint8_t mHeightBits;
 
     TextureSourceType mType;
 
@@ -210,14 +210,14 @@ class TextureManager
 
     void remapTextures();
     void invalidateTextureMapping();
-    
+
     static const texhandle_t NO_TEXTURE_HANDLE        = 0x0;
     static const texhandle_t NOT_FOUND_TEXTURE_HANDLE = 0x1;
 
   private:
-    static const uint32_t FLAT_HANDLE_MASK        = 0x00020000ul;
-    static const uint32_t SPRITE_HANDLE_MASK      = 0x00040000ul;
-    static const uint32_t TEXTURE_HANDLE_MASK     = 0x00080000ul;
+    static const uint32_t FLAT_HANDLE_MASK    = 0x00020000ul;
+    static const uint32_t SPRITE_HANDLE_MASK  = 0x00040000ul;
+    static const uint32_t TEXTURE_HANDLE_MASK = 0x00080000ul;
 
     // initialization routines
     void clear();
@@ -226,29 +226,29 @@ class TextureManager
     void readAnimDefLump();
     void readAnimatedLump();
 
-    void remapFlat(Texture* texture);
-    void generateColumns(Texture* texture);
+    void remapFlat(Texture *texture);
+    void generateColumns(Texture *texture);
 
     // sprites
-    texhandle_t getSpriteHandle(const OString &name);
-    void        cacheSprite(texhandle_t handle);
+    texhandle_t                           getSpriteHandle(const OString &name);
+    void                                  cacheSprite(texhandle_t handle);
     typedef OHashTable<OString, uint32_t> EnumeratedSpriteMap;
-    EnumeratedSpriteMap                       mEnumeratedSpriteMap;
-    std::vector<std::string>                  mSpriteFilenames;
+    EnumeratedSpriteMap                   mEnumeratedSpriteMap;
+    std::vector<std::string>              mSpriteFilenames;
 
     // flats
-    texhandle_t getFlatHandle(const OString &name);
-    void        cacheFlat(texhandle_t handle);
+    texhandle_t                           getFlatHandle(const OString &name);
+    void                                  cacheFlat(texhandle_t handle);
     typedef OHashTable<OString, uint32_t> EnumeratedFlatMap;
-    EnumeratedFlatMap                         mEnumeratedFlatMap;
-    std::vector<std::string>                  mFlatFilenames;
+    EnumeratedFlatMap                     mEnumeratedFlatMap;
+    std::vector<std::string>              mFlatFilenames;
 
     // wall textures
-    texhandle_t getTextureHandle(const OString &name);
-    void        cacheTexture(texhandle_t handle);
+    texhandle_t                           getTextureHandle(const OString &name);
+    void                                  cacheTexture(texhandle_t handle);
     typedef OHashTable<OString, uint32_t> EnumeratedTextureMap;
-    EnumeratedTextureMap                      mEnumeratedTextureMap;
-    std::vector<std::string>                  mTextureFilenames;
+    EnumeratedTextureMap                  mEnumeratedTextureMap;
+    std::vector<std::string>              mTextureFilenames;
 
     // maps texture handles to Texture*
     typedef OHashTable<texhandle_t, Texture *> HandleMap;
@@ -259,13 +259,13 @@ class TextureManager
     struct anim_t
     {
         static const uint32_t MAX_ANIM_FRAMES = 32;
-        texhandle_t               basepic;
-        int16_t                     numframes;
-        uint8_t                      countdown;
-        uint8_t                      curframe;
-        uint8_t                      speedmin[MAX_ANIM_FRAMES];
-        uint8_t                      speedmax[MAX_ANIM_FRAMES];
-        texhandle_t               framepic[MAX_ANIM_FRAMES];
+        texhandle_t           basepic;
+        int16_t               numframes;
+        uint8_t               countdown;
+        uint8_t               curframe;
+        uint8_t               speedmin[MAX_ANIM_FRAMES];
+        uint8_t               speedmax[MAX_ANIM_FRAMES];
+        texhandle_t           framepic[MAX_ANIM_FRAMES];
     };
 
     std::vector<anim_t> mAnimDefs;
