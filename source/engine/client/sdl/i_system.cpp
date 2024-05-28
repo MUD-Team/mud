@@ -299,30 +299,6 @@ void I_WaitVBL(int32_t count)
     I_Sleep(1000000LL * 1000LL * count / 70);
 }
 
-//
-// SubsetLanguageIDs
-//
-#if defined _WIN32
-static void SubsetLanguageIDs(LCID id, LCTYPE type, int32_t idx)
-{
-    char  buf[8];
-    LCID  langid;
-    char *idp;
-
-    if (!GetLocaleInfo(id, type, buf, 8))
-        return;
-    langid = MAKELCID(strtoul(buf, NULL, 16), SORT_DEFAULT);
-    if (!GetLocaleInfo(langid, LOCALE_SABBREVLANGNAME, buf, 8))
-        return;
-    idp = (char *)(&LanguageIDs[idx]);
-    memset(idp, 0, 4);
-    idp[0] = tolower(buf[0]);
-    idp[1] = tolower(buf[1]);
-    idp[2] = tolower(buf[2]);
-    idp[3] = 0;
-}
-#endif
-
 EXTERN_CVAR(language)
 
 void SetLanguageIDs()
@@ -331,23 +307,52 @@ void SetLanguageIDs()
 
     if (strcmp(langid, "auto") == 0)
     {
-#if defined _WIN32
-        memset(LanguageIDs, 0, sizeof(LanguageIDs));
-        SubsetLanguageIDs(LOCALE_USER_DEFAULT, LOCALE_ILANGUAGE, 0);
-        SubsetLanguageIDs(LOCALE_USER_DEFAULT, LOCALE_IDEFAULTLANGUAGE, 1);
-        SubsetLanguageIDs(LOCALE_SYSTEM_DEFAULT, LOCALE_ILANGUAGE, 2);
-        SubsetLanguageIDs(LOCALE_SYSTEM_DEFAULT, LOCALE_IDEFAULTLANGUAGE, 3);
-#else
-        // Default to US English on non-windows systems
-        // FIXME: Use SDL Locale support if available.
-        langid = "enu";
-#endif
+        // Just set the first preferred language. Is there a use case
+        // for doing anything else right now? - Dasho
+        SDL_Locale *pref_langs = SDL_GetPreferredLocales();
+        if (pref_langs && pref_langs->language != NULL) // NULL language means end of array; country is optional
+        {
+            size_t length = strlen(pref_langs->language);
+            if (length >= 3)
+            {
+                uint32_t lang = MAKE_ID(tolower(pref_langs->language[0]), tolower(pref_langs->language[1]), tolower(pref_langs->language[2]), '\0');
+                LanguageIDs[0] = lang;
+                LanguageIDs[1] = lang;
+                LanguageIDs[2] = lang;
+                LanguageIDs[3] = lang;
+            }
+            else if (pref_langs->country != NULL)
+            {
+                uint32_t lang = MAKE_ID(tolower(pref_langs->language[0]), tolower(pref_langs->language[1]), tolower(pref_langs->country[0]), '\0');
+                LanguageIDs[0] = lang;
+                LanguageIDs[1] = lang;
+                LanguageIDs[2] = lang;
+                LanguageIDs[3] = lang;
+            }
+            else
+            {
+                uint32_t lang = MAKE_ID(tolower(pref_langs->language[0]), tolower(pref_langs->language[1]), '\0', '\0');
+                LanguageIDs[0] = lang;
+                LanguageIDs[1] = lang;
+                LanguageIDs[2] = lang;
+                LanguageIDs[3] = lang;
+            }
+            SDL_free(pref_langs);
+        }
+        else  // Default (English)
+        {
+            uint32_t lang  = MAKE_ID('*', '*', '\0', '\0');
+            LanguageIDs[0] = lang;
+            LanguageIDs[1] = lang;
+            LanguageIDs[2] = lang;
+            LanguageIDs[3] = lang;
+        }
     }
     else
     {
         char slang[4] = {'\0', '\0', '\0', '\0'};
         strncpy(slang, langid, ARRAY_LENGTH(slang) - 1);
-        uint32_t lang  = MAKE_ID(slang[0], slang[1], slang[2], slang[3]);
+        uint32_t lang  = MAKE_ID(tolower(slang[0]), tolower(slang[1]), tolower(slang[2]), tolower(slang[3]));
         LanguageIDs[0] = lang;
         LanguageIDs[1] = lang;
         LanguageIDs[2] = lang;

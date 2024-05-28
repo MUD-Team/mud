@@ -270,30 +270,6 @@ void I_WaitVBL(int32_t count)
     I_Sleep(1000000LL * 1000LL * count / 70);
 }
 
-//
-// SubsetLanguageIDs
-//
-#ifdef _WIN32
-static void SubsetLanguageIDs(LCID id, LCTYPE type, int32_t idx)
-{
-    char  buf[8];
-    LCID  langid;
-    char *idp;
-
-    if (!GetLocaleInfo(id, type, buf, 8))
-        return;
-    langid = MAKELCID(strtoul(buf, NULL, 16), SORT_DEFAULT);
-    if (!GetLocaleInfo(langid, LOCALE_SABBREVLANGNAME, buf, 8))
-        return;
-    idp = (char *)(&LanguageIDs[idx]);
-    memset(idp, 0, 4);
-    idp[0] = tolower(buf[0]);
-    idp[1] = tolower(buf[1]);
-    idp[2] = tolower(buf[2]);
-    idp[3] = 0;
-}
-#endif
-
 EXTERN_CVAR(language)
 
 // Force the language to English (default)
