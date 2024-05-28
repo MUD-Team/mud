@@ -337,7 +337,6 @@ void SetLanguageIDs()
                 LanguageIDs[2] = lang;
                 LanguageIDs[3] = lang;
             }
-            SDL_free(pref_langs);
         }
         else  // Default (English)
         {
@@ -347,6 +346,8 @@ void SetLanguageIDs()
             LanguageIDs[2] = lang;
             LanguageIDs[3] = lang;
         }
+        if (pref_langs)
+            SDL_free(pref_langs);
     }
     else
     {
