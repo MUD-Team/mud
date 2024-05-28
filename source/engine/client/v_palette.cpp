@@ -41,6 +41,10 @@
 #include "w_wad.h"
 #include "z_zone.h"
 
+void V_PaletteCache_Init();
+void V_PaletteCache_Shutdown();
+void V_PaletteCache_GetPalette(std::vector<uint8_t> &palette);
+
 static palette_t  default_palette;
 static palette_t  game_palette;
 static shaderef_t V_Palette;
@@ -150,128 +154,6 @@ shaderef_t::shaderef_t(const shademap_t *const colors, const int32_t mapnum) : m
         m_colormap    = NULL;
         m_shademap    = NULL;
         m_dyncolormap = NULL;
-    }
-}
-
-// ----------------------------------------------------------------------------
-//
-// Dynamic Palette Generation
-//
-// ----------------------------------------------------------------------------
-
-struct DynamicPaletteEntry
-{
-    liq_attr  *handle;
-    liq_image *image;
-};
-
-struct SpecialLightEntry
-{
-    dyncolormap_t *colormap;
-    int32_t        lr;
-    int32_t        lg;
-    int32_t        lb;
-    int32_t        fr;
-    int32_t        fg;
-    int32_t        fb;
-};
-
-static std::vector<DynamicPaletteEntry> pal_entries;
-static std::vector<SpecialLightEntry>   pal_light_entries;
-
-static bool pal_dirty = false;
-
-void V_DynamicLightsCleanup()
-{
-    NormalLight.next = nullptr;
-    pal_light_entries.clear();
-}
-
-void V_DynamicPaletteShutdown()
-{
-    for (auto entry : pal_entries)
-    {
-        liq_image_destroy(entry.image);
-        liq_attr_destroy(entry.handle);
-    }
-
-    pal_entries.clear();
-    pal_light_entries.clear();
-}
- 
-
-void V_DynamicPaletteAddImage(uint8_t *raw_rgba_pixels, int32_t width, int32_t height)
-{
-    pal_dirty              = true;
-    liq_attr  *handle      = liq_attr_create();
-    liq_image *input_image = liq_image_create_rgba(handle, raw_rgba_pixels, width, height, 0);
-    pal_entries.push_back({handle, input_image});
-}
-
-void V_DynamicPaletteProcess()
-{
-    if (!pal_dirty)
-    {
-        return;
-    }
-
-    pal_dirty = false;
-
-    if (!pal_entries.size())
-    {
-        return;
-    }
-
-    liq_attr      *histogram_attr = liq_attr_create();
-    liq_histogram *histogram      = liq_histogram_create(histogram_attr);
-
-    for (auto t : pal_entries)
-    {
-        liq_histogram_add_image(histogram, histogram_attr, t.image);
-    }
-
-    liq_result *res;
-    liq_error   err = liq_histogram_quantize(histogram, histogram_attr, &res);
-
-    if (err != LIQ_OK)
-    {
-        I_Error("V_DynamicPaletteEndUpdate: Error creating histogram");
-    }
-
-    const liq_palette *palette = liq_get_palette(res);
-
-    for (int32_t i = 0; i < palette->count; i++)
-    {
-        default_palette.basecolors[i] =
-            argb_t(palette->entries[i].a, palette->entries[i].r, palette->entries[i].g, palette->entries[i].b);
-    }
-
-    for (int32_t i = palette->count; i < 256; i++)
-    {
-        default_palette.basecolors[i] = argb_t(255, 0, 0, 0);
-    }
-
-    liq_result_destroy(res);
-    liq_histogram_destroy(histogram);
-    liq_attr_destroy(histogram_attr);
-
-    V_GammaAdjustPalette(&default_palette);
-
-    V_RefreshColormaps();
-
-    assert(default_palette.maps.colormap != NULL);
-    assert(default_palette.maps.shademap != NULL);
-    V_Palette = shaderef_t(&default_palette.maps, 0);
-
-    game_palette = default_palette;
-
-    texturemanager.invalidateTextureMapping();
-    texturemanager.remapTextures();
-
-    for (auto light : pal_light_entries)
-    {
-        shademap_t *map = (shademap_t *)light.colormap->maps.map();
-        BuildColoredLights(map, light.lr, light.lg, light.lb, light.fr, light.fg, light.fb);
     }
 }
 
@@ -627,6 +509,10 @@ argb_t V_GetColorFromString(const std::string &input_string)
 void V_InitPalette()
 {
 
+    V_PaletteCache_Init();
+    std::vector<uint8_t> palette;
+    V_PaletteCache_GetPalette(palette);
+    
     current_palette_num = -1;
 
     if (default_palette.maps.colormap)
@@ -638,7 +524,7 @@ void V_InitPalette()
     default_palette.maps.shademap = new argb_t[(NUMCOLORMAPS + 1) * 256];
 
     for (int32_t i = 0; i < 256; i++)
-        default_palette.basecolors[i] = argb_t(255, 255, 255, 255);
+        default_palette.basecolors[i] = argb_t(255, palette[i * 3], palette[i * 3 + 1], palette[i * 3 + 2]);
 
     V_GammaAdjustPalette(&default_palette);
 
@@ -950,9 +836,7 @@ dyncolormap_t *GetSpecialLights(int32_t lr, int32_t lg, int32_t lb, int32_t fr, 
     NormalLight.next = colormap;
 
     BuildColoredLights(maps, lr, lg, lb, fr, fg, fb);
-
-    pal_light_entries.push_back({colormap, lr, lg, lb, fr, fg, fb});
-
+    
     return colormap;
 }
 

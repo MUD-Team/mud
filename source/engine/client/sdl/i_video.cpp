@@ -339,7 +339,6 @@ bool I_VideoInitialized()
 //
 void STACK_ARGS I_ShutdownHardware()
 {
-    V_DynamicPaletteShutdown();
     UI_Shutdown();       
 
     delete video_subsystem;

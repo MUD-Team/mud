@@ -166,9 +166,6 @@ class Texture
 
     // indexed data (flats) or patch data (walls/sprites)
     uint8_t *mData;
-
-    // argb data
-    uint8_t *mARGBData;
 };
 
 // ============================================================================
@@ -208,9 +205,6 @@ class TextureManager
     Texture *createTexture(texhandle_t handle, Texture::TextureSourceType type, int32_t width, int32_t height);
     void     freeTexture(texhandle_t handle);
 
-    void remapTextures();
-    void invalidateTextureMapping();
-
     static const texhandle_t NO_TEXTURE_HANDLE        = 0x0;
     static const texhandle_t NOT_FOUND_TEXTURE_HANDLE = 0x1;
 
@@ -226,8 +220,8 @@ class TextureManager
     void readAnimDefLump();
     void readAnimatedLump();
 
-    void remapFlat(Texture *texture);
-    void generateColumns(Texture *texture);
+    void remapFlat(Texture *texture, uint8_t *argbData);
+    void generateColumns(Texture *texture, uint8_t *argbData);
 
     // sprites
     texhandle_t                           getSpriteHandle(const OString &name);

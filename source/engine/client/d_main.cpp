@@ -395,7 +395,7 @@ void STACK_ARGS D_Shutdown()
 
     // [AM] All of our dyncolormaps are freed, tidy up so we
     //      don't follow wild pointers.
-    V_DynamicLightsCleanup();
+    NormalLight.next = nullptr;
 }
 
 void C_DoCommand(const char *cmd, uint32_t key);

@@ -31,7 +31,7 @@ if (WIN32)
 endif()
 
 
-target_link_libraries(mud-client PRIVATE mudproto ${MUD_CLIENT_LIBRARIES} RmlCore RmlDebugger RmlLua CURL::libcurl JsonCpp::JsonCpp protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite
+target_link_libraries(mud-client PRIVATE mudproto ${MUD_CLIENT_LIBRARIES} RmlCore RmlDebugger RmlLua Poco::Util Poco::Foundation CURL::libcurl JsonCpp::JsonCpp protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite
                       $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
                       $<IF:$<TARGET_EXISTS:SDL2_mixer::SDL2_mixer>,SDL2_mixer::SDL2_mixer,SDL2_mixer::SDL2_mixer-static>
                       $<IF:$<TARGET_EXISTS:fluidlite::fluidlite>,fluidlite::fluidlite,fluidlite::fluidlite-static>)

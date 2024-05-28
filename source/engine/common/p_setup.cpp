@@ -1801,7 +1801,7 @@ void P_SetupLevel(const char *lumpname, int32_t position)
     Z_FreeTags(PU_LEVEL, PU_LEVELMAX);
     g_ValidLevel     = false; // [AM] False until the level is loaded.
     // [RH] Z_FreeTags frees all the custom colormaps
-    V_DynamicLightsCleanup();
+    NormalLight.next = nullptr;
 
     // [AM] Every new level starts with fresh netids.
     P_ClearAllNetIds();
