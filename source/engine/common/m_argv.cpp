@@ -35,6 +35,7 @@
 // Need for wide string arg stuff - Dasho
 // Must go after win32inc.h...should we just throw it in there?
 #include <shellapi.h>
+#include "Poco/UnicodeConverter.h"
 #endif
 
 IMPLEMENT_CLASS(DArgs, DObject)
@@ -95,8 +96,7 @@ void DArgs::CopyArgs(uint32_t argc, char **argv)
     {
         if (win_argv[i] == NULL)
             I_FatalError("Error parsing command line arguments!\n");
-        args[i].resize(wcslen(win_argv[i]) * 2);
-        PHYSFS_utf8FromUtf16((const PHYSFS_uint16 *)win_argv[i], (char *)args[i].data(), args[i].size());
+        Poco::UnicodeConverter::convert(win_argv[i], args[i]);
     }
 
     LocalFree(win_argv);

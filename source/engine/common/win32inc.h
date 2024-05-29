@@ -48,10 +48,6 @@
 #undef PlaySound
 #endif
 
-// POSIX functions
-#include <ctime>
-char  *strptime(const char *buf, const char *fmt, struct tm *timeptr);
-
 #if (defined _MSC_VER)
 #define strncasecmp _strnicmp
 #endif

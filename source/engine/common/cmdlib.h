@@ -56,10 +56,10 @@ struct OTimespan
     }
 };
 
-int32_t  ParseHex(const char *str);
-int32_t  ParseNum(const char *str);
-bool IsNum(const char *str); // [RH] added
-bool IsRealNum(const char *str);
+int32_t ParseHex(const char *str);
+int32_t ParseNum(const char *str);
+bool    IsNum(const char *str); // [RH] added
+bool    IsRealNum(const char *str);
 
 // [Russell] Returns 0 if strings are the same, optional parameter for case
 // sensitivity
@@ -96,13 +96,10 @@ StringTokens                     TokenizeString(const std::string &str, const st
 
 FORMAT_PRINTF(2, 3) void STACK_ARGS StrFormat(std::string &out, const char *fmt, ...);
 FORMAT_PRINTF(1, 2) std::string STACK_ARGS StrFormat(const char *fmt, ...);
-void STACK_ARGS VStrFormat(std::string &out, const char *fmt, va_list va);
+void STACK_ARGS        VStrFormat(std::string &out, const char *fmt, va_list va);
 std::string STACK_ARGS VStrFormat(const char *fmt, va_list va);
 
 void StrFormatBytes(std::string &out, size_t bytes);
-bool StrFormatISOTime(std::string &s, const tm *utc_tm);
-bool StrParseISOTime(const std::string &s, tm *utc_tm);
-bool StrToTime(std::string str, time_t &tim);
 
 void TicsToTime(OTimespan &span, int32_t time, bool ceilsec = false);
 
