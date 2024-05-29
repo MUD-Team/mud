@@ -41,7 +41,7 @@ enum
     LANGIDX_SysDefault
 };
 extern uint32_t LanguageIDs[4];
-extern void  SetLanguageIDs();
+extern void     SetLanguageIDs();
 
 void I_BeginRead(void);
 void I_EndRead(void);
@@ -79,8 +79,30 @@ ticcmd_t *I_BaseTiccmd(void);
 // Clean exit, displays sell blurb.
 void STACK_ARGS I_Quit(void);
 
-void STACK_ARGS          I_Warning(const char *warning, ...);
-void STACK_ARGS          I_Error(const char *error, ...);
+void I_CallAssert(const char *file, int line, const char *message, ...);
+
+// Define the MUD assertion macros.
+#if !defined MUD_DEBUG
+
+#define I_ASSERT(x, m, ...)
+#define I_VERIFY(x, m, ...)                                                                                                 \
+    if (!(x))                                                                                                          \
+    {                                                                                                                  \
+        I_CallAssert(__FILE__, __LINE__, m, __VA_ARGS__);                                                                          \
+    }
+#else
+
+#define I_ASSERT(x, m, ...)                                                                                                 \
+    if (!(x))                                                                                                          \
+    {                                                                                                                  \
+        I_CallAssert(__FILE__, __LINE__, m, __VA_ARGS__);                                                                          \
+    }
+
+#define I_VERIFY(x, m, ...) I_ASSERT(x, m, __VA_ARGS__)
+#endif
+
+void STACK_ARGS I_Warning(const char *warning, ...);
+void STACK_ARGS I_Error(const char *error, ...);
 
 void addterm(void(STACK_ARGS *func)(void), const char *name);
 #define atterm(t) addterm(t, #t)

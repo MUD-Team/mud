@@ -203,9 +203,9 @@ int32_t main(int32_t argc, char *argv[])
         //		#endif
 
         atterm(I_Quit);
-        atterm(DObject::StaticShutdown);
+        atterm(DObject::StaticShutdown);        
 
-        D_DoomMain(); // Usually does not return
+        D_DoomMain(); // Usually does not return        
 
         // If D_DoomMain does return (as is the case with the +demotest parameter)
         // proper termination needs to occur -- Hyper_Eye
@@ -217,9 +217,7 @@ int32_t main(int32_t argc, char *argv[])
         if (LOG.is_open())
         {
             LOG << "=== ERROR: " << error.GetMsg() << " ===\n\n";
-        }
-
-        I_ErrorMessageBox(error.GetMsg().c_str());
+        }        
 
         call_terms();
         PHYSFS_deinit();

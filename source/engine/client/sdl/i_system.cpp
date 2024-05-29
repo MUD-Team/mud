@@ -67,13 +67,14 @@
 #include "i_sound.h"
 #include "i_system.h"
 #include "i_video.h"
+#include "i_video_sdl20.h"
 #include "m_argv.h"
 #include "m_fileio.h"
 #include "m_misc.h"
 #include "mud_includes.h"
+#include "ui_public.h"
 #include "v_video.h"
 #include "w_wad.h"
-#include "ui_public.h"
 
 ticcmd_t  emptycmd;
 ticcmd_t *I_BaseTiccmd(void)
@@ -150,8 +151,8 @@ void *I_ZoneBase(size_t *size)
     // Die if the system has insufficient memory
     if (got_heapsize < min_heapsize)
         I_Error("I_ZoneBase: Insufficient memory available! Minimum size "
-                     "is %lu MB but got %lu MB instead",
-                     min_heapsize, got_heapsize);
+                "is %lu MB but got %lu MB instead",
+                min_heapsize, got_heapsize);
 
     return zone;
 }
@@ -315,7 +316,8 @@ void SetLanguageIDs()
             size_t length = strlen(pref_langs->language);
             if (length >= 3)
             {
-                uint32_t lang = MAKE_ID(tolower(pref_langs->language[0]), tolower(pref_langs->language[1]), tolower(pref_langs->language[2]), '\0');
+                uint32_t lang  = MAKE_ID(tolower(pref_langs->language[0]), tolower(pref_langs->language[1]),
+                                         tolower(pref_langs->language[2]), '\0');
                 LanguageIDs[0] = lang;
                 LanguageIDs[1] = lang;
                 LanguageIDs[2] = lang;
@@ -323,7 +325,8 @@ void SetLanguageIDs()
             }
             else if (pref_langs->country != NULL)
             {
-                uint32_t lang = MAKE_ID(tolower(pref_langs->language[0]), tolower(pref_langs->language[1]), tolower(pref_langs->country[0]), '\0');
+                uint32_t lang  = MAKE_ID(tolower(pref_langs->language[0]), tolower(pref_langs->language[1]),
+                                         tolower(pref_langs->country[0]), '\0');
                 LanguageIDs[0] = lang;
                 LanguageIDs[1] = lang;
                 LanguageIDs[2] = lang;
@@ -338,7 +341,7 @@ void SetLanguageIDs()
                 LanguageIDs[3] = lang;
             }
         }
-        else  // Default (English)
+        else // Default (English)
         {
             uint32_t lang  = MAKE_ID('*', '*', '\0', '\0');
             LanguageIDs[0] = lang;
@@ -402,9 +405,45 @@ void STACK_ARGS I_Quit(void)
 //
 bool gameisdead;
 
-#define MAX_ERRORTEXT 1024
+#define MAX_ERRORTEXT 8192
 
 void STACK_ARGS call_terms(void);
+
+#ifdef MUD_RELEASE
+#define I_BREAK
+#else
+#if defined(_WIN32)
+#if defined(__MINGW32__)
+#define I_BREAK                                                                                                        \
+    {                                                                                                                  \
+        asm("int $0x03");                                                                                              \
+    }
+#elif defined(_MSC_VER)
+#define I_BREAK                                                                                                        \
+    {                                                                                                                  \
+        __debugbreak();                                                                                                \
+    }
+#else
+#define I_BREAK
+#endif
+#elif defined(__APPLE_CC__)
+#define I_BREAK                                                                                                        \
+    {                                                                                                                  \
+        __builtin_trap();                                                                                              \
+    }
+#elif defined(UNIX)
+#if defined __GNUC__
+#define I_BREAK                                                                                                        \
+    {                                                                                                                  \
+        __builtin_trap();                                                                                              \
+    }
+#else
+#define I_BREAK
+#endif
+#else
+#define I_BREAK
+#endif
+#endif
 
 void STACK_ARGS I_Error(const char *error, ...)
 {
@@ -430,6 +469,8 @@ void STACK_ARGS I_Error(const char *error, ...)
             snprintf(messagetext, ARRAY_LENGTH(messagetext), "%s\n", errortext);
         }
         va_end(argptr);
+
+        I_ErrorMessageBox(messagetext);
 
         throw CFatalError(messagetext);
     }
@@ -458,8 +499,6 @@ void STACK_ARGS I_Error(const char *error, ...)
     }
     va_end(argptr);
 
-    I_ErrorMessageBox(messagetext);
-
     abort();
 }
 
@@ -473,6 +512,20 @@ void STACK_ARGS I_Warning(const char *warning, ...)
     va_end(argptr);
 
     Printf(PRINT_WARNING, "\n%s\n", warningtext);
+}
+
+void I_CallAssert(const char *file, int line, const char *message, ...)
+{
+    va_list argptr;
+    char    asserttext[MAX_ERRORTEXT];
+    va_start(argptr, message);
+    vsprintf(asserttext, message, argptr);
+    va_end(argptr);
+
+    char infotext[MAX_ERRORTEXT];
+    snprintf(infotext, MAX_ERRORTEXT, "%s\n\nfile: %s line: %i", asserttext, file, line);
+
+    I_Error(infotext);
 }
 
 char DoomStartupTitle[256] = {0};
@@ -502,7 +555,7 @@ std::string I_GetClipboardText()
     std::string ret;
 
     Display *dis    = XOpenDisplay(NULL);
-    int32_t      screen = DefaultScreen(dis);
+    int32_t  screen = DefaultScreen(dis);
 
     if (!dis)
     {
@@ -539,7 +592,7 @@ std::string I_GetClipboardText()
         }
 
         Atom    type;
-        int32_t     format, result;
+        int32_t format, result;
         u_long  len, bytes_left, temp;
         u_char *data;
 
@@ -746,7 +799,7 @@ std::string I_ConsoleInput(void)
 {
     std::string ret;
     static char text[1024] = {0};
-    int32_t         len;
+    int32_t     len;
 
     fd_set fdr;
     FD_ZERO(&fdr);
@@ -813,10 +866,49 @@ const char *ODAMEX_ERROR_TITLE = "MUD " DOTVERSIONSTR " Fatal Error";
 
 void I_ErrorMessageBox(const char *message)
 {
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, ODAMEX_ERROR_TITLE, message, NULL);
+    bool debugger = false;
+
+#if defined (MUD_DEBUG) && (defined(_MSC_VER) || defined(__MINGW32__))
+    if (IsDebuggerPresent())
+    {
+        debugger = true;
+    }
+#endif
+
+    if (!debugger)
+    {
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, ODAMEX_ERROR_TITLE, message, NULL);
+    }
+    else
+    {
+        const SDL_MessageBoxButtonData buttons[] = {
+            {SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 1, "Ok"},
+            {0, 0, "Debug"},
+        };
+
+        ISDL20Window *iwindow = (ISDL20Window *)I_GetWindow();
+
+        const SDL_MessageBoxData messagebox_data = {
+            SDL_MESSAGEBOX_ERROR,                        /* .flags */
+            iwindow ? iwindow->getSDLWindow() : nullptr, /* .window */
+            "MUD Error",                                 /* .title */
+            message,                                     /* .message */
+            SDL_arraysize(buttons),                      /* .numbuttons */
+            buttons,                                     /* .buttons */
+            nullptr                                      /* .colorScheme */
+        };
+
+        int buttonid;
+        SDL_ShowMessageBox(&messagebox_data, &buttonid);
+
+        if (buttonid == 0)
+        {
+            I_BREAK;
+        }
+    }
 }
 
-#elif defined(WIN32)
+#elif defined(_MSCVER)
 
 void I_ErrorMessageBox(const char *message)
 {
