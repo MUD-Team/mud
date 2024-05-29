@@ -221,24 +221,7 @@ void D_DoomLoop(void)
 {
     while (1)
     {
-        try
-        {
-            D_RunTics(CL_RunTics, CL_DisplayTics);
-        }
-        catch (CRecoverableError &error)
-        {
-            Printf(PRINT_ERROR, "\nERROR: %s\n", error.GetMsg().c_str());
-
-            CL_QuitNetGame(NQ_SILENT);
-
-            G_ClearSnapshots();
-
-            DThinker::DestroyAllThinkers();
-
-            ::players.clear();
-
-            ::gameaction = ga_nothing;
-        }
+        D_RunTics(CL_RunTics, CL_DisplayTics);
     }
 }
 
@@ -420,7 +403,7 @@ void D_DoomMain()
     M_FindResponseFile();             // [ML] 23/1/07 - Add Response file support back in
 
     if (lzo_init() != LZO_E_OK)       // [RH] Initialize the minilzo package.
-        I_FatalError("Could not initialize LZO routines");
+        I_Error("Could not initialize LZO routines");
 
     C_ExecCmdLineParams(false, true); // [Nes] test for +logfile command
 

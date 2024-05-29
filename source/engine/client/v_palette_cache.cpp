@@ -86,7 +86,7 @@ class PaletteCache
 
             if (!imageFile)
             {
-                I_FatalError("Unable to read image file %s", filename.c_str());
+                I_Error("Unable to read image file %s", filename.c_str());
             }
 
             PHYSFS_sint64 filelen = PHYSFS_fileLength(imageFile);
@@ -97,7 +97,7 @@ class PaletteCache
             {
                 delete[] filedata;
                 PHYSFS_close(imageFile);
-                I_FatalError("PaletteCache::generatePalette: Error reading %s\n", filename.c_str());
+                I_Error("PaletteCache::generatePalette: Error reading %s\n", filename.c_str());
             }
 
             PHYSFS_close(imageFile);
@@ -112,7 +112,7 @@ class PaletteCache
             if (!data.pixels)
             {
                 delete[] filedata;
-                I_FatalError("PaletteCache::generatePalette: Error loading %s\n", filename.c_str());
+                I_Error("PaletteCache::generatePalette: Error loading %s\n", filename.c_str());
             }
 
             delete[] filedata;
@@ -130,7 +130,7 @@ class PaletteCache
 
         if (err != LIQ_OK)
         {
-            I_FatalError("PaletteCache::generatePalette: Error quantizing histogram");
+            I_Error("PaletteCache::generatePalette: Error quantizing histogram");
         }
 
         const liq_palette *palette = liq_get_palette(res);
@@ -194,7 +194,7 @@ class PaletteCache
         PHYSFS_File *file = PHYSFS_openWrite(cache_file);
         if (!file)
         {
-            I_FatalError("PaletteCache: Error opening %s for write", cache_file);
+            I_Error("PaletteCache: Error opening %s for write", cache_file);
         }
 
         PHYSFS_writeBytes(file, json.str().c_str(), json.str().size());
@@ -214,7 +214,7 @@ class PaletteCache
 
         if (!file)
         {
-            I_FatalError("PaletteCache: Error opening %s", cache_file);
+            I_Error("PaletteCache: Error opening %s", cache_file);
         }
 
         PHYSFS_sint64 size = PHYSFS_fileLength(file);
@@ -224,7 +224,7 @@ class PaletteCache
 
             if (PHYSFS_readBytes(file, (void *)buffer, size) != size)
             {
-                I_FatalError("PaletteCache: Error reading %s", cache_file);
+                I_Error("PaletteCache: Error reading %s", cache_file);
             }
 
             MemoryInputStream contents((const char *)buffer, size);

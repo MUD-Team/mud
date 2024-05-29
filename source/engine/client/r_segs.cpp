@@ -783,7 +783,7 @@ void R_StoreWallRange(int32_t start, int32_t stop)
 
 #ifdef RANGECHECK
     if (start >= viewwidth || start > stop)
-        I_FatalError("Bad R_StoreWallRange: %i to %i", start, stop);
+        I_Error("Bad R_StoreWallRange: %i to %i", start, stop);
 #endif
 
     int32_t count = stop - start + 1;

@@ -786,7 +786,7 @@ END_COMMAND(errorout)
 
 BEGIN_COMMAND(fatalout)
 {
-    I_FatalError("fatalout was run from the console");
+    I_Error("fatalout was run from the console");
 }
 END_COMMAND(fatalout)
 
