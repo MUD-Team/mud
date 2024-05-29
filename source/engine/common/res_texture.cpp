@@ -188,7 +188,6 @@ void Texture::init(int32_t width, int32_t height)
     mScaleX    = FRACUNIT;
     mScaleY    = FRACUNIT;
     mData      = NULL;
-    mARGBData  = NULL;
 }
 
 // ============================================================================
@@ -795,11 +794,6 @@ void TextureManager::freeTexture(texhandle_t texhandle)
         if (texture != NULL)
         {
             Z_Free(texture->mData);
-            if (texture->mARGBData)
-            {
-                // TODO: this is coming in from stb image, we could override alloc/free there to use zone memory
-                free(texture->mARGBData);
-            }
             delete texture;
         }
 
@@ -874,8 +868,6 @@ void TextureManager::cacheSprite(texhandle_t handle)
             I_FatalError("TexureManager::cacheSprite: Error decoding %s\n", mSpriteFilenames[filenum - 1].c_str());
         }
 
-        V_DynamicPaletteAddImage(decoded_img, width, height);
-
         Texture *texture = createTexture(handle, Texture::TextureSourceType::TEX_SPRITE, width, height);
 
         // temporary PNG grAb chunk check
@@ -903,9 +895,9 @@ void TextureManager::cacheSprite(texhandle_t handle)
 
         delete[] filedata;
 
-        texture->mARGBData = decoded_img;
-        generateColumns(texture);
+        generateColumns(texture, decoded_img);
         PHYSFS_close(rawsprite);
+        free(decoded_img);
     }
 }
 
@@ -979,13 +971,11 @@ void TextureManager::cacheFlat(texhandle_t handle)
             I_FatalError("TexureManager::cacheFlat: Error decoding %s\n", mFlatFilenames[filenum - 1].c_str());
         }
 
-        V_DynamicPaletteAddImage(decoded_img, width, height);
-
         Texture *texture = createTexture(handle, Texture::TextureSourceType::TEX_FLAT, width, height);
 
         delete[] filedata;
-        texture->mARGBData = decoded_img;
-        remapFlat(texture);
+        remapFlat(texture, decoded_img);
+        free(decoded_img);
         PHYSFS_close(rawflat);
     }
 }
@@ -1003,28 +993,7 @@ texhandle_t TextureManager::getTextureHandle(const OString &name)
     return NOT_FOUND_TEXTURE_HANDLE;
 }
 
-void TextureManager::remapTextures()
-{
-    for (HandleMap::iterator it = mHandleMap.begin(); it != mHandleMap.end(); ++it)
-    {
-        if (it->second)
-        {
-            if (!it->second->mData)
-            {
-                if (it->second->mType == Texture::TextureSourceType::TEX_FLAT)
-                {
-                    remapFlat(it->second);
-                }
-                else
-                {
-                    generateColumns(it->second);
-                }
-            }
-        }
-    }
-}
-
-void TextureManager::remapFlat(Texture *texture)
+void TextureManager::remapFlat(Texture *texture, uint8_t *argbData)
 {
 
     if (texture->mType != Texture::TextureSourceType::TEX_FLAT)
@@ -1035,7 +1004,7 @@ void TextureManager::remapFlat(Texture *texture)
     int32_t width  = texture->getWidth();
     int32_t height = texture->getHeight();
 
-    if (!texture->mARGBData || !width || !height)
+    if (!width || !height)
     {
         // I_Warning("TextureManager::remapFlat - texture id %i, p: %p, width: %i, height: %i", texture->getHandle(),
         // texture, width, height);
@@ -1057,7 +1026,7 @@ void TextureManager::remapFlat(Texture *texture)
     for (uint32_t x = 0; x < width; x++)
     {
         uint8_t *dest  = texture->mData + x;
-        uint8_t *pixel = texture->mARGBData + x * bpp;
+        uint8_t *pixel = argbData + x * bpp;
 
         for (uint32_t y = 0; y < height; y++)
         {
@@ -1072,33 +1041,11 @@ void TextureManager::remapFlat(Texture *texture)
     }
 }
 
-void TextureManager::invalidateTextureMapping()
-{
-
-    for (HandleMap::iterator it = mHandleMap.begin(); it != mHandleMap.end(); ++it)
-    {
-        if (it->second)
-        {
-            if (it->second->mData)
-            {
-                Z_Free(it->second->mData);
-            }
-
-            it->second->mData = nullptr;
-        }
-    }
-}
-
-void TextureManager::generateColumns(Texture *texture)
+void TextureManager::generateColumns(Texture *texture, uint8_t *argbData)
 {
     if (texture->mType == Texture::TextureSourceType::TEX_FLAT)
     {
         I_FatalError("TextureManager::generateColumns - non-patch texture supplied");
-    }
-
-    if (!texture->mARGBData)
-    {
-        I_FatalError("TextureManager::generateColumns - no raw image data");
     }
 
     int32_t       width           = texture->getWidth();
@@ -1122,7 +1069,7 @@ void TextureManager::generateColumns(Texture *texture)
         texpost_t   post;
         post.row_off    = 0;
         bool     ispost = false;
-        uint8_t *pixel  = texture->mARGBData + c * bpp;
+        uint8_t *pixel  = argbData + c * bpp;
 
         uint8_t row_off = 0;
         for (int32_t r = 0; r < height; r++)
@@ -1273,8 +1220,6 @@ void TextureManager::cacheTexture(texhandle_t handle)
             I_FatalError("TexureManager::cacheTexture: Error decoding %s\n", mTextureFilenames[filenum - 1].c_str());
         }
 
-        V_DynamicPaletteAddImage(decoded_img, width, height);
-
         Texture *texture = createTexture(handle, Texture::TextureSourceType::TEX_TEXTURE, width, height);
 
         // temporary PNG grAb chunk check
@@ -1302,9 +1247,9 @@ void TextureManager::cacheTexture(texhandle_t handle)
 
         delete[] filedata;
 
-        texture->mARGBData = decoded_img;
-        generateColumns(texture);
+        generateColumns(texture, decoded_img);
         PHYSFS_close(rawtex);
+        free(decoded_img);
     }
 }
 

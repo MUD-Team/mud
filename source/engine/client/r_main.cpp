@@ -954,8 +954,6 @@ void R_RenderPlayerView(player_t *player)
     if (!viewactive)
         return;
 
-    V_DynamicPaletteProcess();    
-
     R_SetupFrame(player);
 
     // Clear buffers.
