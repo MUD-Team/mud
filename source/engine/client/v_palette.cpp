@@ -512,7 +512,7 @@ void V_InitPalette()
     V_PaletteCache_Init();
     std::vector<uint8_t> palette;
     V_PaletteCache_GetPalette(palette);
-    
+
     current_palette_num = -1;
 
     if (default_palette.maps.colormap)
@@ -836,7 +836,7 @@ dyncolormap_t *GetSpecialLights(int32_t lr, int32_t lg, int32_t lb, int32_t fr, 
     NormalLight.next = colormap;
 
     BuildColoredLights(maps, lr, lg, lb, fr, fg, fb);
-    
+
     return colormap;
 }
 
