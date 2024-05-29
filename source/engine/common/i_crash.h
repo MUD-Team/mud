@@ -25,4 +25,3 @@
 #pragma once
 
 void I_SetCrashCallbacks();
-void I_SetCrashDir(const char *crashdir);

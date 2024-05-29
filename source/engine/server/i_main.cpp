@@ -165,17 +165,6 @@ int32_t __cdecl main(int32_t argc, char *argv[])
             exit(EXIT_SUCCESS);
         }
 
-        const char *crashdir = ::Args.CheckValue("-crashdir");
-        if (crashdir)
-        {
-            I_SetCrashDir(crashdir);
-        }
-        else
-        {
-            std::string writedir = M_GetWriteDir();
-            I_SetCrashDir(writedir.c_str());
-        }
-
         const char *CON_FILE = Args.CheckValue("-confile");
         if (CON_FILE)
             CON.open(CON_FILE, std::ios::in);
@@ -298,17 +287,6 @@ int32_t main(int32_t argc, char **argv)
             printf("MUD Server %s\n", NiceVersion());
             PHYSFS_deinit();
             exit(EXIT_SUCCESS);
-        }
-
-        const char *crashdir = ::Args.CheckValue("-crashdir");
-        if (crashdir)
-        {
-            I_SetCrashDir(crashdir);
-        }
-        else
-        {
-            std::string writedir = M_GetWriteDir();
-            I_SetCrashDir(writedir.c_str());
         }
 
         const char *CON_FILE = Args.CheckValue("-confile");
