@@ -732,6 +732,8 @@ bool IsHexString(const std::string &str, const size_t len)
             continue;
         if (*it >= 'A' && *it <= 'F')
             continue;
+        if (*it >= 'a' && *it <= 'f')
+            continue;
         return false;
     }
     return true;
