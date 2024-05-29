@@ -87,12 +87,6 @@ https://github.com/freetype/freetype/blob/master/docs/FTL.TXT
 ----------------------------------------------------------------------------------
 
 ----------------------------------------------------------------------------------
-JsonCpp - (c) Baptiste Lepilleur
-MIT - https://opensource.org/license/mit
-https://github.com/open-source-parsers/jsoncpp
-----------------------------------------------------------------------------------
-
-----------------------------------------------------------------------------------
 zlib - (c) Jean-loup Gailly and Mark Adler
 zlib - https://opensource.org/license/zlib
 https://github.com/madler/zlib
@@ -158,6 +152,11 @@ https://sourceware.org/glibc/
 ----------------------------------------------------------------------------------
 
 ----------------------------------------------------------------------------------
-timegm - (c) Kungliga Tekniska Högskolan
+strptime - (c) Kungliga Tekniska Högskolan
 BSD-3-Clause - https://opensource.org/license/bsd-3-clause
+----------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------
+Poco - (c) Applied Informatics Software Engineering GmbH and Contributors
+Boost Software License - https://opensource.org/license/bsl-1-0
 ----------------------------------------------------------------------------------

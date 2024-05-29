@@ -57,7 +57,6 @@
 #include "r_local.h"
 #include "r_sky.h"
 #include "s_sound.h"
-#include "sv_banlist.h"
 #include "sv_main.h"
 #include "v_video.h"
 #include "w_ident.h"
@@ -324,9 +323,6 @@ void D_DoomMain()
     // [RH] Now that all game subsystems have been initialized,
     // do all commands on the command line other than +set
     C_ExecCmdLineParams(false, false);
-
-    // [AM] Initialize banlist
-    SV_InitBanlist();
 
     Printf(PRINT_HIGH, "========== MUD Server Initialized ==========\n");
 

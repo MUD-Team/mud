@@ -6,7 +6,6 @@
             "default-features": false
         },
         "freetype",        
-        "jsoncpp",
         "poco",
         "lua",
         "protobuf",
