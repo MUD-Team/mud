@@ -1,6 +1,7 @@
 build
 vcpkg_installed
 .vscode/settings.json
+.vscode/cmake-kits.json
 *.pdb
 *.exe
 *.WAD

@@ -30,7 +30,6 @@
 
 #if defined _WIN32 && defined _MSC_VER && !defined _DEBUG
 
-#define CRASH_DIR_LEN 1024
 #include "win32inc.h"
 #include <DbgHelp.h>
 #include <new.h>
@@ -38,16 +37,12 @@
 
 #include <exception>
 
+#include "cmdlib.h"
 #include "i_crash.h"
 #include "i_system.h"
 #include "m_fileio.h"
+#include "physfs.h"
 #include "mud_includes.h"
-
-
-/**
- * @brief An array containing the directory where crashes are written to.
- */
-static TCHAR gCrashDir[CRASH_DIR_LEN];
 
 // Fucntion pointer for MiniDumpWriteDump.
 typedef BOOL(WINAPI *MINIDUMPWRITEDUMP)(HANDLE hProcess, DWORD dwPid, HANDLE hFile, MINIDUMP_TYPE DumpType,
@@ -59,7 +54,7 @@ typedef BOOL(WINAPI *MINIDUMPWRITEDUMP)(HANDLE hProcess, DWORD dwPid, HANDLE hFi
 void writeMinidump(EXCEPTION_POINTERS *exceptionPtrs)
 {
     // Grab the debugging library.
-    HMODULE dbghelp = LoadLibrary("dbghelp.dll");
+    HMODULE dbghelp = LoadLibrary(L"dbghelp.dll");
     if (dbghelp == NULL)
     {
         // We can't load the debugging library - oh well.
@@ -77,10 +72,12 @@ void writeMinidump(EXCEPTION_POINTERS *exceptionPtrs)
     // Open a file to write our dump into.
     SYSTEMTIME dt;
     GetSystemTime(&dt);
-    char filename[CRASH_DIR_LEN];
-    sprintf_s(filename, sizeof(filename), "%s\\%s_g%s_%u_%4d%02d%02dT%02d%02d%02d.dmp", ::gCrashDir, GAMEEXE,
+    std::string filename = StrFormat("%s\\%s_g%s_%lu_%4d%02d%02dT%02d%02d%02d.dmp", M_GetWriteDir().c_str(), GAMEEXE,
               GitShortHash(), GetCurrentProcessId(), dt.wYear, dt.wMonth, dt.wDay, dt.wHour, dt.wMinute, dt.wSecond);
-    HANDLE hFile = CreateFile(filename, GENERIC_WRITE, FILE_SHARE_READ, 0, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, 0);
+    std::wstring wide_filename;
+    wide_filename.resize(filename.size() * 2);
+    PHYSFS_utf8ToUtf16(filename.data(), (PHYSFS_uint16 *)wide_filename.data(), wide_filename.size());
+    HANDLE hFile = CreateFileW(wide_filename.c_str(), GENERIC_WRITE, FILE_SHARE_READ, 0, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, 0);
     if (hFile == INVALID_HANDLE_VALUE)
     {
         // We couldn't create a dump file - oh well.
@@ -181,7 +178,7 @@ void I_SetCrashCallbacks()
     SetUnhandledExceptionFilter(sehCallback);
 
     // Intercept calls to std::terminate().
-    set_terminate(terminateCallback);
+    std::set_terminate(terminateCallback);
 
     // Pure virtual function calls.
     _set_purecall_handler(purecallCallback);
@@ -197,36 +194,6 @@ void I_SetCrashCallbacks()
     signal(SIGABRT, signalCallback);
     signal(SIGFPE, signalCallback);
     signal(SIGSEGV, signalCallback);
-}
-
-void I_SetCrashDir(const char *crashdir)
-{
-    std::string homedir;
-    TCHAR       testfile[MAX_PATH];
-
-    // Check to see if our crash dir is too big.
-    size_t len = strlen(crashdir);
-    if (len > CRASH_DIR_LEN)
-    {
-        I_FatalError("Crash directory \"%s\" is too long.  Please pass a correct -crashout param.", crashdir);
-        abort();
-    }
-
-    // Check to see if we can write to our crash directory.
-    UINT res = GetTempFileName(crashdir, "crash", 0, testfile);
-    if (res == 0 || res == ERROR_BUFFER_OVERFLOW)
-    {
-        I_FatalError("Crash directory \"%s\" is not writable.  Please point -crashout to "
-                     "a directory with write permissions.",
-                     crashdir);
-        abort();
-    }
-
-    // We don't need the temporary file anymore.
-    DeleteFile(testfile);
-
-    // Copy the crash directory.
-    memcpy(::gCrashDir, crashdir, len);
 }
 
 #endif

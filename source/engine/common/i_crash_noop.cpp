@@ -34,9 +34,4 @@ void I_SetCrashCallbacks()
     // Not implemented.
 }
 
-void I_SetCrashDir(const char *crashdir)
-{
-    // Not implemented.
-}
-
 #endif
