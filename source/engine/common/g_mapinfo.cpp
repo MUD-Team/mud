@@ -110,7 +110,7 @@ void SkipUnknownBlock(OScanner &os)
 
 template <typename T> void MustGet(OScanner &os)
 {
-    I_FatalError("Templated function MustGet templated with non-existant specialized type!");
+    I_Error("Templated function MustGet templated with non-existant specialized type!");
 }
 
 // ensure token is int32_t
@@ -507,7 +507,7 @@ void ParseUMapInfoFile(const char *filename)
     PHYSFS_File *rawinfo = PHYSFS_openRead(filepath.c_str());
 
     if (rawinfo == NULL)
-        I_FatalError("Error opening %s umapinfo file", filepath.c_str());
+        I_Error("Error opening %s umapinfo file", filepath.c_str());
 
     std::string buffer;
     buffer.resize(PHYSFS_fileLength(rawinfo));
@@ -515,7 +515,7 @@ void ParseUMapInfoFile(const char *filename)
     if (PHYSFS_readBytes(rawinfo, (void *)buffer.data(), buffer.size()) != buffer.size())
     {
         PHYSFS_close(rawinfo);
-        I_FatalError("Error reading %s umapinfo file", filepath.c_str());
+        I_Error("Error reading %s umapinfo file", filepath.c_str());
     }
 
     PHYSFS_close(rawinfo);
@@ -1685,7 +1685,7 @@ static void ParseMapInfoFile(const char *filename)
     PHYSFS_File *rawinfo = PHYSFS_openRead(filepath.c_str());
 
     if (rawinfo == NULL)
-        I_FatalError("Error opening %s mapinfo file", filepath.c_str());
+        I_Error("Error opening %s mapinfo file", filepath.c_str());
 
     std::string buffer;
     buffer.resize(PHYSFS_fileLength(rawinfo));
@@ -1693,7 +1693,7 @@ static void ParseMapInfoFile(const char *filename)
     if (PHYSFS_readBytes(rawinfo, (void *)buffer.data(), buffer.size()) != buffer.size())
     {
         PHYSFS_close(rawinfo);
-        I_FatalError("Error reading %s mapinfo file", filepath.c_str());
+        I_Error("Error reading %s mapinfo file", filepath.c_str());
     }
 
     PHYSFS_close(rawinfo);
@@ -1886,7 +1886,7 @@ void G_ParseMapInfo()
     }
 
     if (episodenum == 0)
-        I_FatalError("%s: You cannot use clearepisodes in a MAPINFO if you do not define any "
+        I_Error("%s: You cannot use clearepisodes in a MAPINFO if you do not define any "
                      "new episodes after it.",
                      __FUNCTION__);
 
@@ -1894,7 +1894,7 @@ void G_ParseMapInfo()
         defaultskillmenu = skillnum - 1;
 
     if (skillnum == 0)
-        I_FatalError("%s: You cannot use clearskills in a MAPINFO if you do not define any "
+        I_Error("%s: You cannot use clearskills in a MAPINFO if you do not define any "
                      "new skills after it.",
                      __FUNCTION__);
 }

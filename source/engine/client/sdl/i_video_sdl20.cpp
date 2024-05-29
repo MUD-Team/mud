@@ -75,7 +75,7 @@ static void I_AddSDL20VideoModes(IVideoModeList *modelist, int32_t bpp)
     int32_t display_mode_count = SDL_GetNumDisplayModes(display_index);
     if (display_mode_count < 1)
     {
-        I_FatalError("SDL_GetNumDisplayModes failed: %s", SDL_GetError());
+        I_Error("SDL_GetNumDisplayModes failed: %s", SDL_GetError());
         return;
     }
 
@@ -83,7 +83,7 @@ static void I_AddSDL20VideoModes(IVideoModeList *modelist, int32_t bpp)
     {
         if (SDL_GetDisplayMode(display_index, i, &mode) != 0)
         {
-            I_FatalError("SDL_GetDisplayMode failed: %s", SDL_GetError());
+            I_Error("SDL_GetDisplayMode failed: %s", SDL_GetError());
             return;
         }
 
@@ -117,7 +117,7 @@ ISDL20VideoCapabilities::ISDL20VideoCapabilities() : IVideoCapabilities(), mNati
     SDL_DisplayMode sdl_display_mode;
     if (SDL_GetDesktopDisplayMode(display_index, &sdl_display_mode) != 0)
     {
-        I_FatalError("SDL_GetDesktopDisplayMode failed: %s", SDL_GetError());
+        I_Error("SDL_GetDesktopDisplayMode failed: %s", SDL_GetError());
         return;
     }
 
@@ -188,7 +188,7 @@ ISDL20Window::ISDL20Window(uint16_t width, uint16_t height, uint8_t bpp, EWindow
                                   SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, window_flags);
 
     if (mSDLWindow == NULL)
-        I_FatalError("I_InitVideo: unable to create window: %s\n", SDL_GetError());
+        I_Error("I_InitVideo: unable to create window: %s\n", SDL_GetError());
 
     SDL_SetWindowMinimumSize(mSDLWindow, 320, 200);
 
@@ -674,7 +674,7 @@ ISDL20VideoSubsystem::ISDL20VideoSubsystem() : IVideoSubsystem()
 
     if (linked.major != compiled.major || linked.minor != compiled.minor)
     {
-        I_FatalError("SDL version conflict (%d.%d.%d vs %d.%d.%d dll)\n", compiled.major, compiled.minor,
+        I_Error("SDL version conflict (%d.%d.%d vs %d.%d.%d dll)\n", compiled.major, compiled.minor,
                      compiled.patch, linked.major, linked.minor, linked.patch);
         return;
     }
@@ -687,7 +687,7 @@ ISDL20VideoSubsystem::ISDL20VideoSubsystem() : IVideoSubsystem()
 
     if (SDL_InitSubSystem(SDL_INIT_VIDEO) == -1)
     {
-        I_FatalError("Could not initialize SDL video.\n");
+        I_Error("Could not initialize SDL video.\n");
         return;
     }
 

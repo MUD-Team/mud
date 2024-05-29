@@ -120,7 +120,7 @@ void UIRenderInterface::setMode(uint16_t width, uint16_t height, const PixelForm
     
 
     if (mRenderer == NULL)
-        I_FatalError("I_InitVideo: unable to create SDL2 renderer: %s\n", SDL_GetError());
+        I_Error("I_InitVideo: unable to create SDL2 renderer: %s\n", SDL_GetError());
 
     const IVideoMode &native_mode = I_GetVideoCapabilities()->getNativeMode();
     SDL_RenderSetLogicalSize(mRenderer, mWidth, mHeight);

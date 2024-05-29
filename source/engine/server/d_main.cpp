@@ -98,26 +98,7 @@ void D_DoomLoop(void)
 {
     while (1)
     {
-        try
-        {
-            D_RunTics(SV_RunTics, SV_DisplayTics);
-        }
-        catch (CRecoverableError &error)
-        {
-            Printf("ERROR: %s\n", error.GetMsg().c_str());
-            Printf("sleeping for 10 seconds before map reload...");
-
-            // denis - drop clients
-            SV_SendDisconnectSignal();
-
-            // denis - sleep 10 seconds to conserve server resources (in case of recurring problem)
-            I_Sleep(10 * 1000LL * 1000LL * 1000LL);
-
-            // denis - reload with current settings
-            G_ChangeMap();
-
-            // denis - todo - throw I_FatalError if this keeps happening
-        }
+        D_RunTics(SV_RunTics, SV_DisplayTics);
     }
 }
 
@@ -227,7 +208,7 @@ void D_DoomMain()
     M_FindResponseFile();             // [ML] 23/1/07 - Add Response file support back in
 
     if (lzo_init() != LZO_E_OK)       // [RH] Initialize the minilzo package.
-        I_FatalError("Could not initialize LZO routines");
+        I_Error("Could not initialize LZO routines");
 
     C_ExecCmdLineParams(false, true); // [Nes] test for +logfile command
 

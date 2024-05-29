@@ -87,14 +87,14 @@ void DArgs::CopyArgs(uint32_t argc, char **argv)
     wchar_t **win_argv = CommandLineToArgvW(GetCommandLineW(), &win_argc);
 
     if (!win_argv)
-        I_FatalError("Could not retrieve command line arguments!\n");
+        I_Error("Could not retrieve command line arguments!\n");
 
     args.resize(win_argc);
 
     for (i = 0; i < win_argc; i++)
     {
         if (win_argv[i] == NULL)
-            I_FatalError("Error parsing command line arguments!\n");
+            I_Error("Error parsing command line arguments!\n");
         args[i].resize(wcslen(win_argv[i]) * 2);
         PHYSFS_utf8FromUtf16((const PHYSFS_uint16 *)win_argv[i], (char *)args[i].data(), args[i].size());
     }

@@ -41,14 +41,6 @@ class CDoomError
     std::string m_Message;
 };
 
-class CRecoverableError : public CDoomError
-{
-  public:
-    CRecoverableError(std::string message) : CDoomError(message)
-    {
-    }
-};
-
 class CFatalError : public CDoomError
 {
   public:

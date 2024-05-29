@@ -149,7 +149,7 @@ void *I_ZoneBase(size_t *size)
 
     // Die if the system has insufficient memory
     if (got_heapsize < min_heapsize)
-        I_FatalError("I_ZoneBase: Insufficient memory available! Minimum size "
+        I_Error("I_ZoneBase: Insufficient memory available! Minimum size "
                      "is %lu MB but got %lu MB instead",
                      min_heapsize, got_heapsize);
 
@@ -406,7 +406,7 @@ bool gameisdead;
 
 void STACK_ARGS call_terms(void);
 
-NORETURN void STACK_ARGS I_FatalError(const char *error, ...)
+void STACK_ARGS I_Error(const char *error, ...)
 {
     char errortext[MAX_ERRORTEXT];
     char messagetext[MAX_ERRORTEXT];
@@ -457,37 +457,6 @@ NORETURN void STACK_ARGS I_FatalError(const char *error, ...)
         snprintf(messagetext, ARRAY_LENGTH(messagetext), "Error while shutting down, aborting:\n%s\n", errortext);
     }
     va_end(argptr);
-
-    I_ErrorMessageBox(messagetext);
-
-    abort();
-}
-
-void STACK_ARGS I_Error(const char *error, ...)
-{
-    va_list argptr;
-    char    errortext[MAX_ERRORTEXT];
-    char    messagetext[MAX_ERRORTEXT];
-
-    va_start(argptr, error);
-    vsnprintf(errortext, ARRAY_LENGTH(errortext), error, argptr);
-    va_end(argptr);
-
-    if (!has_exited)
-    {
-        throw CRecoverableError(errortext);
-    }
-
-    // Recursive atterm, we've used up all our chances.
-    if (SDL_GetError()[0] != '\0')
-    {
-        snprintf(messagetext, ARRAY_LENGTH(messagetext),
-                 "Error while shutting down, aborting:\n%s\nLast SDL Error:\n%s\n", errortext, SDL_GetError());
-    }
-    else
-    {
-        snprintf(messagetext, ARRAY_LENGTH(messagetext), "Error while shutting down, aborting:\n%s\n", errortext);
-    }
 
     I_ErrorMessageBox(messagetext);
 

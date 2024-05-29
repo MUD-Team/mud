@@ -134,7 +134,7 @@ static bool FindIWAD(OResFile &out)
 {
     char **rc = PHYSFS_enumerateFiles("/");
     char **i;
-    bool found_iwad = false;
+    bool   found_iwad = false;
 
     if (rc == NULL)
         return false;
@@ -174,10 +174,10 @@ static void LoadResolvedFiles(const OResFiles &newwadfiles)
 {
     if (newwadfiles.size() < 1)
     {
-        I_FatalError("Tried to load resources without an IWAD.");
+        I_Error("Tried to load resources without an IWAD.");
     }
 
-    ::wadfiles   = newwadfiles;
+    ::wadfiles = newwadfiles;
 
     // Now scan the contents of the IWAD to determine which one it is
     W_ConfigureGameInfo(::wadfiles.at(0));
@@ -251,8 +251,8 @@ void D_LoadResourceFiles(const OWantFiles &newwadfiles)
 
     if (!got_next_iwad)
     {
-        I_FatalError("Could not resolve an IWAD file.  Please ensure at least "
-                     "one IWAD is someplace where Odamex can find it.\n");
+        I_Error("Could not resolve an IWAD file.  Please ensure at least "
+                "one IWAD is someplace where Odamex can find it.\n");
     }
 
     resolved_wads.insert(resolved_wads.begin(), next_iwad);
@@ -283,7 +283,7 @@ static bool CheckWantedMatchesLoaded(const OWantFiles &newwadfiles)
     {
         const OMD5Hash &wadfilehash = ::wadfiles.at(idx).getMD5();
         const OMD5Hash &newfilehash = newwadfiles.at(idx).getWantedMD5();
-        // Wadfile hash empty? If the existing wadfile is a path 
+        // Wadfile hash empty? If the existing wadfile is a path
         // just check basenames for equality and hope they have the same content for now - Dasho
         if (wadfilehash.empty())
         {
@@ -336,61 +336,21 @@ bool D_DoomWadReboot(const OWantFiles &newwadfiles)
     ::gamestate              = GS_STARTUP; // prevent console from trying to use nonexistant font
 
     // Load all the WAD and DEH/BEX files
-    OResFiles   oldwadfiles   = ::wadfiles;
-    std::string failmsg;
-    try
-    {
-        D_LoadResourceFiles(newwadfiles);
+    OResFiles   oldwadfiles = ::wadfiles;
 
-        // get skill / episode / map from parms
-        strcpy(startmap, "MAP01");
+    D_LoadResourceFiles(newwadfiles);
 
-        D_Init();
-    }
-    catch (CRecoverableError &error)
-    {
-        failmsg = error.GetMsg();
-    }
+    // get skill / episode / map from parms
+    strcpy(startmap, "MAP01");
 
-    if (!failmsg.empty())
-    {
-        // Uh oh, loading the new resource set failed for some reason.
-        Printf(PRINT_WARNING,
-               "Could not load new resource files.\n%s\nReloading previous resource "
-               "set...\n",
-               failmsg.c_str());
-
-        D_Shutdown();
-
-        std::string fatalmsg;
-        try
-        {
-            LoadResolvedFiles(oldwadfiles);
-
-            // get skill / episode / map from parms
-            strcpy(startmap, "MAP01");
-
-            D_Init();
-        }
-        catch (CRecoverableError &error)
-        {
-            // Something is seriously wrong.
-            fatalmsg = error.GetMsg();
-        }
-        if (!fatalmsg.empty())
-        {
-            I_FatalError("Failed to load new resource files, then ran into error when "
-                         "loading original resource files:\n%s\n",
-                         fatalmsg.c_str());
-        }
-    }
+    D_Init();
 
     // preserve state
     ::lastWadRebootSuccess = ::missingfiles.empty();
 
     ::gamestate = oldgamestate; // GS_STARTUP would prevent netcode connecting properly
 
-    return ::missingfiles.empty() && failmsg.empty();
+    return ::missingfiles.empty();
 }
 
 //
@@ -520,7 +480,7 @@ class CappedTaskScheduler : public TaskScheduler
 
   private:
     void (*mTask)();
-    const int32_t     mMaxCount;
+    const int32_t mMaxCount;
     const dtime_t mFrameDuration;
     dtime_t       mAccumulator;
     dtime_t       mFrameStartTime;

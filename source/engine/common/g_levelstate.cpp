@@ -359,7 +359,7 @@ void LevelState::tic()
     switch (m_state)
     {
     case LevelState::UNKNOWN:
-        I_FatalError("Tried to tic unknown LevelState.\n");
+        I_Error("Tried to tic unknown LevelState.\n");
         break;
     case LevelState::PREROUND_COUNTDOWN:
         // Once the timer has run out, start the round.

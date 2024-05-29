@@ -82,7 +82,7 @@ std::string M_GetUserFileName(const std::string &file)
     // Still an absolute path?  If so, stop here.
     if (M_IsAbsolutePath(path))
     {
-        I_FatalError("Attempting to write to %s, which is outside of the write directory at %s\n", file.c_str(),
+        I_Error("Attempting to write to %s, which is outside of the write directory at %s\n", file.c_str(),
                      M_GetWriteDir().c_str());
     }
 

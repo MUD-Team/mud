@@ -92,14 +92,14 @@ int32_t main(int32_t argc, char *argv[])
 
 #if defined(UNIX)
         if (!getuid() || !geteuid())
-            I_FatalError("root user detected, quitting odamex immediately");
+            I_Error("root user detected, quitting odamex immediately");
 #endif
 
         // [ML] 2007/9/3: From Eternity (originally chocolate Doom) Thanks SoM & fraggle!
         ::Args.SetArgs(argc, argv);
 
         if (PHYSFS_init(::Args.GetArg(0)) == 0)
-            I_FatalError("Could not initialize PHYSFS:\n%d\n", PHYSFS_getLastErrorCode());
+            I_Error("Could not initialize PHYSFS:\n%d\n", PHYSFS_getLastErrorCode());
 
         PHYSFS_setWriteDir(M_GetWriteDir().c_str());
         // Ensure certain directories exist in the write folder
@@ -180,7 +180,7 @@ int32_t main(int32_t argc, char *argv[])
 #endif
 
         if (SDL_Init(sdl_flags) == -1)
-            I_FatalError("Could not initialize SDL:\n%s\n", SDL_GetError());
+            I_Error("Could not initialize SDL:\n%s\n", SDL_GetError());
 
         atterm(SDL_Quit);
 

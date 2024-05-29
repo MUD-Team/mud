@@ -142,7 +142,7 @@ int32_t __cdecl main(int32_t argc, char *argv[])
         ::Args.SetArgs(argc, argv);
 
         if (PHYSFS_init(::Args.GetArg(0)) == 0)
-            I_FatalError("Could not initialize PHYSFS:\n%d\n", PHYSFS_getLastErrorCode());
+            I_Error("Could not initialize PHYSFS:\n%d\n", PHYSFS_getLastErrorCode());
 
         PHYSFS_setWriteDir(M_GetWriteDir().c_str());
         // Ensure certain directories exist in the write folder
@@ -255,7 +255,7 @@ int32_t main(int32_t argc, char **argv)
     try
     {
         if (!getuid() || !geteuid())
-            I_FatalError("root user detected, quitting odamex immediately");
+            I_Error("root user detected, quitting odamex immediately");
 
         int32_t r_euid = seteuid(getuid());
 
@@ -265,7 +265,7 @@ int32_t main(int32_t argc, char **argv)
         ::Args.SetArgs(argc, argv);
 
         if (PHYSFS_init(::Args.GetArg(0)) == 0)
-            I_FatalError("Could not initialize PHYSFS:\n%d\n", PHYSFS_getLastErrorCode());
+            I_Error("Could not initialize PHYSFS:\n%d\n", PHYSFS_getLastErrorCode());
 
         PHYSFS_setWriteDir(M_GetWriteDir().c_str());
         // Ensure certain directories exist in the write folder

@@ -1247,7 +1247,7 @@ void S_ParseSndInfo()
         PHYSFS_File *rawinfo = PHYSFS_openRead("lumps/SNDINFO.txt");
 
         if (rawinfo == NULL)
-            I_FatalError("Error opening lumps/SNDINFO.txt file");
+            I_Error("Error opening lumps/SNDINFO.txt file");
 
         std::string buffer;
         buffer.resize(PHYSFS_fileLength(rawinfo));
@@ -1255,7 +1255,7 @@ void S_ParseSndInfo()
         if (PHYSFS_readBytes(rawinfo, (void *)buffer.data(), buffer.size()) != buffer.size())
         {
             PHYSFS_close(rawinfo);
-            I_FatalError("Error reading lumps/SNDINFO.txt file");
+            I_Error("Error reading lumps/SNDINFO.txt file");
         }
 
         PHYSFS_close(rawinfo);
