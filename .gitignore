@@ -11,3 +11,4 @@ bin/mud-client*
 bin/mud-server*
 
 freedoom2*
+imgui.ini
