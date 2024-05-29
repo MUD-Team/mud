@@ -40,21 +40,3 @@ bool OMD5Hash::makeFromHexStr(OMD5Hash &out, const std::string &hash)
 
     return false;
 }
-
-/**
- * @brief Populate an OCRC32Hash with the passed hex string.
- *
- * @param out FileHash to populate.
- * @param hash Hex string to populate with.
- * @return True if the hash was populated, otherwise false.
- */
-bool OCRC32Sum::makeFromHexStr(OCRC32Sum &out, const std::string &hash)
-{
-    if (IsHexString(hash, 8))
-    {
-        out.m_hash = StdStringToUpper(hash);
-        return true;
-    }
-
-    return false;
-}

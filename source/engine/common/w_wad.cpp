@@ -40,7 +40,6 @@
 #include <sstream>
 
 #include "cmdlib.h"
-#include "crc32.h"
 #include "i_system.h"
 #include "m_argv.h"
 #include "m_fileio.h"
@@ -126,41 +125,6 @@ void uppercopy(char *to, const char *from)
         to[i] = toupper(from[i]);
     for (; i < 8; i++)
         to[i] = 0;
-}
-
-/**
- * @brief Calculate a CRC32 hash from a file.
- *
- * @param filename Filename of file to hash.
- * @return Output hash, or blank if file could not be found.
- */
-OCRC32Sum W_CRC32(const std::string &filename)
-{
-    OCRC32Sum rvo;
-
-    const int32_t file_chunk_size = 8192;
-    PHYSFS_File     *fp       = PHYSFS_openRead(filename.c_str());
-
-    if (!fp)
-        return rvo;
-
-    uint32_t      n = 0;
-    uint8_t buf[file_chunk_size];
-    uint32_t      crc = 0;
-
-    while ((n = PHYSFS_readBytes(fp, buf, sizeof(buf))))
-    {
-        crc = crc32_fast(buf, n, crc);
-    }
-
-    PHYSFS_close(fp);
-
-    std::string hashStr;
-
-    StrFormat(hashStr, "%08X", crc);
-
-    OCRC32Sum::makeFromHexStr(rvo, hashStr);
-    return rvo; // bubble up failure
 }
 
 // denis - Standard MD5SUM

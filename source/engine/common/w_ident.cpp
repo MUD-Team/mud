@@ -121,11 +121,9 @@ class FileIdentificationManager
     //
     // Adds identification information for a known file.
     //
-    void addFile(const OString &idname, const OString &filename, const OString &crc32, const OString &md5,
+    void addFile(const OString &idname, const OString &filename, const OString &md5,
                  const OString &group, bool commercial, const bool iwad, const bool deprecated, const int32_t weight)
     {
-        OCRC32Sum crc32Hash;
-        OCRC32Sum::makeFromHexStr(crc32Hash, crc32);
         OMD5Hash md5Hash;
         OMD5Hash::makeFromHexStr(md5Hash, md5);
 
@@ -160,12 +158,11 @@ class FileIdentificationManager
     const OString identify(const OResFile &file)
     {
         // This function for now is severely crippled and will work under the
-        // assumption that we are only loading Freedoom 1 or 2 - Dasho
+        // assumption that we are only loading Freedoom 2 - Dasho
 
-        static const int32_t  NUM_CHECKLUMPS                = 2;
+        static const int32_t  NUM_CHECKLUMPS                = 1;
         static const char checklumps[NUM_CHECKLUMPS][8] = {
-            {'E', '1', 'M', '1'},                     // 0
-            {'M', 'A', 'P', '0', '1'},                // 1
+            {'M', 'A', 'P', '0', '1'},                // 0
         };
 
         bool lumpsfound[NUM_CHECKLUMPS] = {0};
@@ -175,9 +172,7 @@ class FileIdentificationManager
             if (lumps.exists(std::string(checklumps[i], 8)))
                 lumpsfound[i] = true;
 
-        if (lumpsfound[0]) // E1M1
-            return OStringToUpper(OString(FREEDOOM1_PREFIX));
-        else if (lumpsfound[1]) // MAP01
+        if (lumpsfound[0]) // MAP01
             return OStringToUpper(OString(FREEDOOM2_PREFIX));
         else
             return "UNKNOWN";
@@ -196,9 +191,6 @@ class FileIdentificationManager
 
     typedef SArray<fileIdentifier_t> IdentifierTable;
     IdentifierTable                  mIdentifiers;
-
-    typedef OHashTable<OCRC32Sum, IdType> CRC32SumLookupTable;
-    CRC32SumLookupTable                   mCRC32SumLookup;
 
     typedef OHashTable<OMD5Hash, IdType> Md5SumLookupTable;
     Md5SumLookupTable                    mMd5SumLookup;
