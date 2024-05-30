@@ -4,16 +4,24 @@
 #include <Poco/Util/Subsystem.h>
 #include <SDL.h>
 
+#ifdef UNIX
+// for getuid and geteuid
+#include <sys/types.h>
+#include <unistd.h>
+#endif
+
 #include <stack>
 
 #include "cl_main.h"
 #include "d_main.h"
+#include "i_crash.h"
 #include "i_input.h"
 #include "i_sound.h"
 #include "i_system.h"
 #include "m_argv.h"
 #include "m_fileio.h"
 #include "mud_includes.h"
+
 
 using Poco::Activity;
 using Poco::Util::Application;
@@ -172,7 +180,6 @@ class MUDEngine : public Subsystem
     }
 
     bool mInitialized = false;
-
 };
 
 void CL_Engine_Init()
