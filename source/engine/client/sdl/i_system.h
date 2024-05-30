@@ -77,7 +77,7 @@ ticcmd_t *I_BaseTiccmd(void);
 
 // Called by M_Responder when quit is selected.
 // Clean exit, displays sell blurb.
-void STACK_ARGS I_Quit(void);
+void I_Quit(void);
 
 void I_CallAssert(const char *file, int line, const char *message, ...);
 
@@ -103,9 +103,6 @@ void I_CallAssert(const char *file, int line, const char *message, ...);
 
 void STACK_ARGS I_Warning(const char *warning, ...);
 void STACK_ARGS I_Error(const char *error, ...);
-
-void addterm(void(STACK_ARGS *func)(void), const char *name);
-#define atterm(t) addterm(t, #t)
 
 // Repaint the pre-game console
 void I_PaintConsole(void);

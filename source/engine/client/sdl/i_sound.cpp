@@ -449,8 +449,6 @@ void I_InitSound()
     Printf("I_InitSound: Using %d channels (freq:%d, fmt:%d, chan:%d)\n", Mix_AllocateChannels(NUM_CHANNELS),
            mixer_freq, mixer_format, mixer_channels);
 
-    atterm(I_ShutdownSound);
-
     sound_initialized = true;
 
     SDL_PauseAudio(0);
@@ -465,7 +463,7 @@ void I_InitSound()
         channel_in_use[i] = false;
 }
 
-void STACK_ARGS I_ShutdownSound(void)
+void I_ShutdownSound(void)
 {
     if (!sound_initialized)
         return;

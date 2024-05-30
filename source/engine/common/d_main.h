@@ -72,5 +72,6 @@ void D_AddWadCommandLineFiles(OWantFiles &out);
 
 std::string D_GetTitleString();
 
-void            D_Init();
-void STACK_ARGS D_Shutdown();
+void D_Init();
+void D_Shutdown();
+void D_DoomMainShutdown();

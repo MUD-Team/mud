@@ -383,7 +383,7 @@ void I_FinishClockCalibration()
 //
 static int32_t has_exited;
 
-void STACK_ARGS I_Quit(void)
+void I_Quit(void)
 {
     has_exited = 1; /* Prevent infinitely recursive exits -- killough */
 
@@ -472,14 +472,12 @@ void STACK_ARGS I_Error(const char *error, ...)
 
         I_ErrorMessageBox(messagetext);
 
-        throw CFatalError(messagetext);
+        throw CDoomError(messagetext);
     }
 
     if (!has_exited)    // If it hasn't exited yet, exit now -- killough
     {
         has_exited = 1; // Prevent infinitely recursive exits -- killough
-
-        call_terms();
 
         exit(EXIT_FAILURE);
     }

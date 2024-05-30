@@ -69,6 +69,7 @@ bool CL_Connect();
 void CL_SendCheat(int32_t cheats);
 void CL_SendGiveCheat(const char *item);
 
+bool CL_QuitRequested();
 void CL_DisplayTics();
 void CL_RunTics();
 

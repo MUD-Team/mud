@@ -192,10 +192,10 @@ int32_t __cdecl main(int32_t argc, char *argv[])
     {
         if (LOG.is_open())
         {
-            LOG << "=== ERROR: " << error.GetMsg() << " ===\n\n";
+            LOG << "=== ERROR: " << error.message().c_str() << " ===\n\n";
         }
 
-        fprintf(stderr, "=== ERROR: %s ===\n\n", error.GetMsg().c_str());
+        fprintf(stderr, "=== ERROR: %s ===\n\n", error.message().c_str());
 
         call_terms();
         PHYSFS_deinit();

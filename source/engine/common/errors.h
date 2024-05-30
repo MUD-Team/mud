@@ -24,27 +24,10 @@
 
 #pragma once
 
-#include <string>
+#include <Poco/Exception.h>
 
-class CDoomError
-{
-  public:
-    CDoomError(std::string message) : m_Message(message)
-    {
-    }
-    std::string GetMsg(void) const
-    {
-        return m_Message;
-    }
+#define DOOM_EXCEPTION_API
 
-  private:
-    std::string m_Message;
-};
+POCO_DECLARE_EXCEPTION(DOOM_EXCEPTION_API, CDoomError, Poco::Exception)
 
-class CFatalError : public CDoomError
-{
-  public:
-    CFatalError(std::string message) : CDoomError(message)
-    {
-    }
-};
+

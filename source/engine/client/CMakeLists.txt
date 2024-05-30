@@ -10,15 +10,21 @@ file(GLOB CLIENT_SOURCES *.cpp *.h)
 file(GLOB CLIENT_SDL_SOURCES sdl/*.cpp sdl/*.h)
 file(GLOB CLIENT_UI_SOURCES ui/private/*.cpp)
 file(GLOB CLIENT_SCRIPT_SOURCES script/private/*.cpp)
+file(GLOB CLIENT_APP_SOURCES app/*.cpp)
 
 get_target_property(COMMON_SOURCES engine-common INTERFACE_SOURCES)
 
 # Client includes
 include_directories(./ ./sdl ./ui ../common ../../libraries/physfs ../../libraries/stb)
 
-add_executable(mud-client WIN32 ${CLIENT_SOURCES} ${CLIENT_UI_SOURCES} ${CLIENT_SCRIPT_SOURCES} ${CLIENT_SDL_SOURCES} ${COMMON_SOURCES})
+add_executable(mud-client WIN32 ${CLIENT_SOURCES} ${CLIENT_UI_SOURCES} ${CLIENT_SCRIPT_SOURCES} ${CLIENT_SDL_SOURCES} ${COMMON_SOURCES} ${CLIENT_APP_SOURCES})
 set_target_properties(mud-client PROPERTIES DEBUG_POSTFIX "_DEBUG")
 set_target_properties(mud-client PROPERTIES RELWITHDEBINFO_POSTFIX "_RELWITHDEBINFO")
+
+if(MSVC)
+  set_target_properties(mud-client PROPERTIES LINK_FLAGS "/ENTRY:wmainCRTStartup")
+endif()
+
 
 set (MUD_CLIENT_LIBRARIES imgui libimagequant minilzo physfs-static lua luabridge)
 

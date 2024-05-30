@@ -161,7 +161,7 @@ void DObject::RemoveFromArray()
     }
 }
 
-void STACK_ARGS DObject::StaticShutdown()
+void DObject::StaticShutdown()
 {
     Inactive = true;
 

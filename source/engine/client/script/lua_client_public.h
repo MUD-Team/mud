@@ -25,7 +25,7 @@
 #include "doomtype.h"
 
 void LUA_OpenClientState();
-void STACK_ARGS LUA_CloseClientState();
+void LUA_CloseClientState();
 void LUA_ClientGameTicker();
 
 void LUA_CallGlobalClientFunction(const char* function_name);

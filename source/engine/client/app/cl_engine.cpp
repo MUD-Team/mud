@@ -1,102 +1,93 @@
-// Emacs style mode select   -*- C++ -*-
-//-----------------------------------------------------------------------------
-//
-// $Id: 267b62faf29499aa138ecca58d833e7613365323 $
-//
-// Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
-// Copyright (C) 2024 by The MUD Team.
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 3
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-//
-// DESCRIPTION:
-//	Main program, simply calls D_DoomMain high level loop.
-//
-//-----------------------------------------------------------------------------
 
-// denis - todo - remove
-#include "win32inc.h"
-#ifdef _WIN32
-#undef GetMessage
-typedef BOOL(WINAPI *SetAffinityFunc)(HANDLE hProcess, DWORD mask);
-#else
-#include <sched.h>
-#endif // WIN32
-#ifdef UNIX
-// for getuid and geteuid
-#include <sys/types.h>
-#include <unistd.h>
-#endif
+#include <Poco/Activity.h>
+#include <Poco/Util/Application.h>
+#include <Poco/Util/Subsystem.h>
+#include <SDL.h>
 
-#include <iostream>
-#include <new>
 #include <stack>
 
-#include "c_console.h"
+#include "cl_main.h"
 #include "d_main.h"
-#include "i_crash.h"
-#include "i_sdl.h"
+#include "i_input.h"
+#include "i_sound.h"
 #include "i_system.h"
 #include "m_argv.h"
 #include "m_fileio.h"
 #include "mud_includes.h"
-#include "z_zone.h"
 
-// [Russell] - Don't need SDLmain library
-#ifdef _WIN32
-#undef main
-#endif // WIN32
 
-// Use main() on windows for msvc
-#if defined(_MSC_VER)
-#pragma comment(linker, "/subsystem:windows /ENTRY:mainCRTStartup")
-#endif
+using Poco::Activity;
+using Poco::Util::Application;
+using Poco::Util::Subsystem;
 
-EXTERN_CVAR(r_centerwindow)
-
+// clean me up
 DArgs Args;
 
-// functions to be called at shutdown are stored in this stack
-typedef void(STACK_ARGS *term_func_t)(void);
-std::stack<std::pair<term_func_t, std::string>> TermFuncs;
-
-void addterm(void(STACK_ARGS *func)(), const char *name)
+/*
+class ClientTicActivity
 {
-    TermFuncs.push(std::pair<term_func_t, std::string>(func, name));
-}
-
-void STACK_ARGS call_terms(void)
-{
-    while (!TermFuncs.empty())
-        TermFuncs.top().first(), TermFuncs.pop();
-}
-
-int32_t main(int32_t argc, char *argv[])
-{
-    // [AM] Set crash callbacks, so we get something useful from crashes.
-#ifdef NDEBUG
-    I_SetCrashCallbacks();
-#endif
-
-    try
+  public:
+    ClientTicActivity() : mActivity(this, &ClientTicActivity::runActivity)
     {
+    }
+
+    void start()
+    {
+        mActivity.start();
+    }
+
+    void stop()
+    {
+        mActivity.stop();
+        mActivity.wait();
+    }
+
+  protected:
+    void runActivity()
+    {
+        while (!mActivity.isStopped())
+        {
+            D_RunTics(CL_RunTics, CL_DisplayTics);
+        }
+    }
+
+  private:
+    Activity<ClientTicActivity> mActivity;
+};
+*/
+
+class MUDEngine : public Subsystem
+{
+  public:
+    MUDEngine()
+    {
+    }
+
+    const char *name() const
+    {
+        return "MUDEngine";
+    }
+
+  protected:
+    void initialize(Application &app)
+    {
+        // [AM] Set crash callbacks, so we get something useful from crashes.
+#ifdef NDEBUG
+        I_SetCrashCallbacks();
+#endif
 
 #if defined(UNIX)
         if (!getuid() || !geteuid())
             I_Error("root user detected, quitting odamex immediately");
 #endif
 
-        // [ML] 2007/9/3: From Eternity (originally chocolate Doom) Thanks SoM & fraggle!
-        ::Args.SetArgs(argc, argv);
+        std::vector<const char *> cstrings;
+        cstrings.reserve(app.argv().size());
+
+        std::transform(app.argv().begin(), app.argv().end(), std::back_inserter(cstrings),
+                       [](const auto &string) { return string.c_str(); });
+
+        ::Args.SetArgs(cstrings.size(), (char **)cstrings.data());
 
         if (PHYSFS_init(::Args.GetArg(0)) == 0)
             I_Error("Could not initialize PHYSFS:\n%d\n", PHYSFS_getLastErrorCode());
@@ -115,8 +106,12 @@ int32_t main(int32_t argc, char *argv[])
         PHYSFS_mount(M_GetWriteDir().c_str(), NULL, 0);
 
         PHYSFS_mount(M_GetBinaryDir().append("assets").append(PATHSEP).append("core").c_str(), NULL, 0);
-        PHYSFS_mount(M_GetBinaryDir().append("assets").append(PATHSEP).append("core").append(PATHSEP).append("common").c_str(), NULL, 0);
-        PHYSFS_mount(M_GetBinaryDir().append("assets").append(PATHSEP).append("core").append(PATHSEP).append("client").c_str(), NULL, 0);
+        PHYSFS_mount(
+            M_GetBinaryDir().append("assets").append(PATHSEP).append("core").append(PATHSEP).append("common").c_str(),
+            NULL, 0);
+        PHYSFS_mount(
+            M_GetBinaryDir().append("assets").append(PATHSEP).append("core").append(PATHSEP).append("client").c_str(),
+            NULL, 0);
         PHYSFS_mount(M_GetWriteDir().append("assets").append(PATHSEP).append("downloads").c_str(), NULL, 0);
 
         // TODO: configurable with -game and root config json
@@ -152,6 +147,7 @@ int32_t main(int32_t argc, char *argv[])
             CON.open(CON_FILE, std::ios::in);
         }
 
+        /*
         // denis - if argv[1] starts with "mud://"
         if (argc == 2 && argv && argv[1])
         {
@@ -170,6 +166,7 @@ int32_t main(int32_t argc, char *argv[])
                 Args.AppendArg(location.substr(0, term).c_str());
             }
         }
+        */
 
         uint32_t sdl_flags = SDL_INIT_TIMER;
 
@@ -181,8 +178,6 @@ int32_t main(int32_t argc, char *argv[])
 
         if (SDL_Init(sdl_flags) == -1)
             I_Error("Could not initialize SDL:\n%s\n", SDL_GetError());
-
-        atterm(SDL_Quit);
 
         /*
         killough 1/98:
@@ -202,41 +197,30 @@ int32_t main(int32_t argc, char *argv[])
         //		atexit (call_terms);
         //		#endif
 
-        atterm(I_Quit);
-        atterm(DObject::StaticShutdown);        
+        // todo: this is more initialization
+        D_DoomMain();
 
-        D_DoomMain(); // Usually does not return        
+        // mClientTics.start();
+    }
 
-        // If D_DoomMain does return (as is the case with the +demotest parameter)
-        // proper termination needs to occur -- Hyper_Eye
-        call_terms();
+    void uninitialize()
+    {
+
+        D_DoomMainShutdown();
+
+        I_ShutdownSound();
+        I_ShutdownInput();        
+        DObject::StaticShutdown();
+
+        I_Quit();
+        SDL_Quit();
         PHYSFS_deinit();
     }
-    catch (CDoomError &error)
-    {
-        if (LOG.is_open())
-        {
-            LOG << "=== ERROR: " << error.GetMsg() << " ===\n\n";
-        }        
 
-        call_terms();
-        PHYSFS_deinit();
-        exit(EXIT_FAILURE);
-    }
-#ifndef _DEBUG
-    catch (...)
-    {
-        // If an exception is thrown, be sure to do a proper shutdown.
-        // This is especially important if we are in fullscreen mode,
-        // because the OS will only show the alert box if we are in
-        // windowed mode. Graphics gets shut down first in case something
-        // goes wrong calling the cleanup functions.
-        call_terms();
-        // Now let somebody who understands the exception deal with it.
-        throw;
-    }
-#endif
-    return 0;
+    // ClientTicActivity mClientTics;
+};
+
+void CL_Engine_Init()
+{
+    Application::instance().addSubsystem(new MUDEngine());
 }
-
-VERSION_CONTROL(i_main_cpp, "$Id: 267b62faf29499aa138ecca58d833e7613365323 $")

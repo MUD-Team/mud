@@ -32,7 +32,7 @@
 void I_InitSound();
 
 // ... shut down and relase at program termination.
-void STACK_ARGS I_ShutdownSound(void);
+void I_ShutdownSound(void);
 
 void I_SetSfxVolume(float volume);
 

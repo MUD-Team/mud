@@ -529,8 +529,6 @@ bool I_InitInput()
     if (Args.CheckParm("-nomouse"))
         nomouse = true;
 
-    atterm(I_ShutdownInput);
-
 #if defined(SDL20)
     input_subsystem = new ISDL20InputSubsystem();
 #endif
@@ -553,7 +551,7 @@ bool I_InitInput()
 //
 // I_ShutdownInput
 //
-void STACK_ARGS I_ShutdownInput()
+void I_ShutdownInput()
 {
     input_subsystem->disableTextEntry();
 
