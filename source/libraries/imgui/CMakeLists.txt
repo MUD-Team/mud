@@ -1,9 +1,10 @@
 set (IMGUI_SOURCES
-    imgui_demo.cpp 
-    imgui_draw.cpp 
-    imgui_tables.cpp 
-    imgui_widgets.cpp 
+    imgui_demo.cpp
+    imgui_draw.cpp
+    imgui_tables.cpp
+    imgui_widgets.cpp
     imgui.cpp
+    cimgui.cpp
     backend/imgui_impl_sdl2.cpp
     backend/imgui_impl_sdlrenderer2.cpp
 )
