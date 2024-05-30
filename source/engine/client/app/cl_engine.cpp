@@ -15,46 +15,12 @@
 #include "m_fileio.h"
 #include "mud_includes.h"
 
-
 using Poco::Activity;
 using Poco::Util::Application;
 using Poco::Util::Subsystem;
 
 // clean me up
 DArgs Args;
-
-/*
-class ClientTicActivity
-{
-  public:
-    ClientTicActivity() : mActivity(this, &ClientTicActivity::runActivity)
-    {
-    }
-
-    void start()
-    {
-        mActivity.start();
-    }
-
-    void stop()
-    {
-        mActivity.stop();
-        mActivity.wait();
-    }
-
-  protected:
-    void runActivity()
-    {
-        while (!mActivity.isStopped())
-        {
-            D_RunTics(CL_RunTics, CL_DisplayTics);
-        }
-    }
-
-  private:
-    Activity<ClientTicActivity> mActivity;
-};
-*/
 
 class MUDEngine : public Subsystem
 {
@@ -117,29 +83,31 @@ class MUDEngine : public Subsystem
         // TODO: configurable with -game and root config json
         PHYSFS_mount(M_GetBinaryDir().append("assets").append(PATHSEP).append("example").c_str(), NULL, 0);
 
-        if (::Args.CheckParm("--version"))
-        {
-#ifdef _WIN32
-            PHYSFS_File *fh = PHYSFS_openWrite("mud-version.txt");
-            if (!fh)
-                exit(EXIT_FAILURE);
+        /*
+                if (::Args.CheckParm("--version"))
+                {
+        #ifdef _WIN32
+                    PHYSFS_File *fh = PHYSFS_openWrite("mud-version.txt");
+                    if (!fh)
+                        exit(EXIT_FAILURE);
 
-            std::string str;
-            StrFormat(str, "MUD %s\n", NiceVersion());
-            const int32_t ok = PHYSFS_writeBytes(fh, str.data(), str.size());
-            if (ok != str.size())
-            {
-                PHYSFS_deinit();
-                exit(EXIT_FAILURE);
-            }
+                    std::string str;
+                    StrFormat(str, "MUD %s\n", NiceVersion());
+                    const int32_t ok = PHYSFS_writeBytes(fh, str.data(), str.size());
+                    if (ok != str.size())
+                    {
+                        PHYSFS_deinit();
+                        exit(EXIT_FAILURE);
+                    }
 
-            PHYSFS_close(fh);
-            PHYSFS_deinit();
-#else
-            printf("MUD Client %s\n", NiceVersion());
-#endif
-            exit(EXIT_SUCCESS);
-        }
+                    PHYSFS_close(fh);
+                    PHYSFS_deinit();
+        #else
+                    printf("MUD Client %s\n", NiceVersion());
+        #endif
+                    exit(EXIT_SUCCESS);
+                }
+        */
 
         const char *CON_FILE = ::Args.CheckValue("-confile");
         if (CON_FILE)
@@ -179,37 +147,23 @@ class MUDEngine : public Subsystem
         if (SDL_Init(sdl_flags) == -1)
             I_Error("Could not initialize SDL:\n%s\n", SDL_GetError());
 
-        /*
-        killough 1/98:
-
-          This fixes some problems with exit handling
-          during abnormal situations.
-
-            The old code called I_Quit() to end program,
-            while now I_Quit() is installed as an exit
-            handler and exit() is called to exit, either
-            normally or abnormally.
-        */
-
-        // But avoid calling this on windows!
-        // Good on some platforms, useless on others
-        //		#ifndef _WIN32
-        //		atexit (call_terms);
-        //		#endif
-
         // todo: this is more initialization
         D_DoomMain();
 
-        // mClientTics.start();
+        mInitialized = true;
     }
 
     void uninitialize()
     {
+        if (!mInitialized)
+        {
+            return;
+        }
 
         D_DoomMainShutdown();
 
         I_ShutdownSound();
-        I_ShutdownInput();        
+        I_ShutdownInput();
         DObject::StaticShutdown();
 
         I_Quit();
@@ -217,7 +171,8 @@ class MUDEngine : public Subsystem
         PHYSFS_deinit();
     }
 
-    // ClientTicActivity mClientTics;
+    bool mInitialized = false;
+
 };
 
 void CL_Engine_Init()

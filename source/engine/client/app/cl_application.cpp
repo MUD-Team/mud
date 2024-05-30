@@ -1,12 +1,12 @@
 
-#include "d_main.h"
-#include "cl_main.h"
-
 #include <Poco/Glob.h>
 #include <Poco/Util/Application.h>
 #include <Poco/Util/HelpFormatter.h>
 #include <Poco/Util/Option.h>
 #include <Poco/Util/OptionSet.h>
+
+#include "cl_main.h"
+#include "d_main.h"
 
 using Poco::Util::Application;
 using Poco::Util::HelpFormatter;
@@ -27,8 +27,15 @@ class MUDClientApp : public Application
   protected:
     void initialize(Application &self)
     {
-        CL_Engine_Init();
-        Application::initialize(self);
+        try
+        {
+            CL_Engine_Init();
+            Application::initialize(self);
+        }
+        catch (CDoomError &error)
+        {
+            exit(-1);
+        }
     }
 
     void defineOptions(OptionSet &options)
@@ -65,7 +72,14 @@ class MUDClientApp : public Application
 
         while (!CL_QuitRequested())
         {
-            D_RunTics(CL_RunTics, CL_DisplayTics);
+            try
+            {
+                D_RunTics(CL_RunTics, CL_DisplayTics);
+            }
+            catch (CDoomError &error)
+            {
+                break;
+            }
         }
 
         return Application::EXIT_OK;
