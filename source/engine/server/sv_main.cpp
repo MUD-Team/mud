@@ -61,7 +61,6 @@
 #include "p_unlag.h"
 #include "s_sound.h"
 #include "server.pb.h"
-#include "sv_banlist.h"
 #include "sv_maplist.h"
 #include "sv_master.h"
 #include "sv_sqp.h"
@@ -1834,14 +1833,6 @@ void SV_ConnectClient()
     // [SL] Read and ignore deprecated client rate. Clients now always use sv_maxrate.
     MSG_ReadLong();
     cl->rate = int32_t(sv_maxrate);
-
-    // Check if the IP is banned from our list or not.
-    if (SV_BanCheck(cl))
-    {
-        cl->displaydisconnect = false;
-        SV_DropClient(*player);
-        return;
-    }
 
     // Check if the user entered a good password (if any)
     std::string passhash = MSG_ReadString();
@@ -4082,7 +4073,6 @@ void SV_RunTics()
         }
     }
 
-    SV_BanlistTics();
     SV_UpdateMaster();
 
     // only run game-related tickers if the server isn't frozen

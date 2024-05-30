@@ -111,7 +111,6 @@ class OWantFile
 {
     std::string m_wantedpath;
     OMD5Hash    m_wantedMD5;
-    OCRC32Sum   m_wantedCRC32;
     std::string m_basename;
     std::string m_extension;
 

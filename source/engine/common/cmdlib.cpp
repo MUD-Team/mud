@@ -65,8 +65,8 @@ char *copystring(const char *s)
 char *COM_Parse(
     char *data) // denis - todo - security com_token overrun needs expert check, i have just put simple bounds on len
 {
-    int32_t    c;
-    size_t len;
+    int32_t c;
+    size_t  len;
 
     len          = 0;
     com_token[0] = 0;
@@ -140,7 +140,7 @@ skipwhite:
 //
 int32_t ParseHex(const char *hex)
 {
-    int32_t         num = 0;
+    int32_t     num = 0;
     const char *str = hex;
 
     while (*str)
@@ -414,7 +414,7 @@ void STACK_ARGS VStrFormat(std::string &out, const char *fmt, va_list va)
 std::string STACK_ARGS VStrFormat(const char *fmt, va_list va)
 {
     std::string ret_string;
-    va_list va2;
+    va_list     va2;
     va_copy(va2, va);
 
     // Get desired length of buffer.
@@ -471,172 +471,6 @@ void StrFormatBytes(std::string &out, size_t bytes)
         StrFormat(out, "%.2f %s", checkbytes, BYTE_MAGS[magnitude]);
     else
         StrFormat(out, "%.0f %s", checkbytes, BYTE_MAGS[magnitude]);
-}
-
-// [AM] Format a tm struct as an ISO8601-compliant extended format string.
-//      Assume that the input time is in UTC.
-bool StrFormatISOTime(std::string &s, const tm *utc_tm)
-{
-    char buffer[21];
-    if (!strftime(buffer, 21, "%Y-%m-%dT%H:%M:%SZ", utc_tm))
-    {
-        return false;
-    }
-    s = buffer;
-    return true;
-}
-
-// [AM] Parse an ISO8601-formatted string time into a tm* struct.
-bool StrParseISOTime(const std::string &s, tm *utc_tm)
-{
-    if (!strptime(s.c_str(), "%Y-%m-%dT%H:%M:%SZ", utc_tm))
-    {
-        return false;
-    }
-    return true;
-}
-
-// [AM] Turn a string representation of a length of time into a time_t
-//      relative to the current time.
-bool StrToTime(std::string str, time_t &tim)
-{
-    tim = time(NULL);
-    str = TrimString(str);
-    str = StdStringToLower(str);
-
-    if (str.empty())
-    {
-        return false;
-    }
-
-    // We use 0 as a synonym for forever.
-    if (str.compare(std::string("eternity").substr(0, str.size())) == 0 ||
-        str.compare(std::string("forever").substr(0, str.size())) == 0 ||
-        str.compare(std::string("permanent").substr(0, str.size())) == 0)
-    {
-        tim = 0;
-        return true;
-    }
-
-    // Gather tokens from string representation.
-    typedef std::pair<uint16_t, std::string> token_t;
-    typedef std::vector<token_t>                   tokens_t;
-    tokens_t                                       tokens;
-
-    size_t i, j;
-    size_t size = str.size();
-    i = j = 0;
-
-    while (i < size)
-    {
-        uint16_t num = 0;
-        std::string    timeword;
-
-        // Grab a number.
-        j = i;
-        while (str[j] >= '0' && str[j] <= '9' && j < size)
-        {
-            j++;
-        }
-
-        if (i == j)
-        {
-            // There is no number.
-            return false;
-        }
-
-        if (!(j < size))
-        {
-            // We were expecting a number but ran off the end of the string.
-            return false;
-        }
-
-        std::istringstream num_buffer(str.substr(i, j - i));
-        num_buffer >> num;
-
-        i = j;
-
-        // Skip whitespace
-        while ((str[i] == ' ') && i < size)
-        {
-            i++;
-            j++;
-        }
-
-        // Grab a time word
-        while (str[j] >= 'a' && str[j] <= 'z' && j < size)
-        {
-            j++;
-        }
-
-        if (i == j)
-        {
-            // There is no time word.
-            return false;
-        }
-
-        timeword = str.substr(i, j - i);
-        i        = j;
-
-        // Push to tokens vector
-        token_t token;
-        token.first  = num;
-        token.second = timeword;
-        tokens.push_back(token);
-
-        // Skip whitespace and commas.
-        while ((str[i] == ' ' || str[i] == ',') && i < size)
-        {
-            i++;
-        }
-    }
-
-    for (tokens_t::iterator it = tokens.begin(); it != tokens.end(); ++it)
-    {
-        if (it->second.compare(std::string("seconds").substr(0, it->second.size())) == 0)
-        {
-            tim += it->first;
-        }
-        else if (it->second.compare("secs") == 0)
-        {
-            tim += it->first;
-        }
-        else if (it->second.compare(std::string("minutes").substr(0, it->second.size())) == 0)
-        {
-            tim += it->first * 60;
-        }
-        else if (it->second.compare("mins") == 0)
-        {
-            tim += it->first * 60;
-        }
-        else if (it->second.compare(std::string("hours").substr(0, it->second.size())) == 0)
-        {
-            tim += it->first * 3600;
-        }
-        else if (it->second.compare(std::string("days").substr(0, it->second.size())) == 0)
-        {
-            tim += it->first * 86400;
-        }
-        else if (it->second.compare(std::string("weeks").substr(0, it->second.size())) == 0)
-        {
-            tim += it->first * 604800;
-        }
-        else if (it->second.compare(std::string("months").substr(0, it->second.size())) == 0)
-        {
-            tim += it->first * 2592000;
-        }
-        else if (it->second.compare(std::string("years").substr(0, it->second.size())) == 0)
-        {
-            tim += it->first * 31536000;
-        }
-        else
-        {
-            // Unrecognized timeword
-            return false;
-        }
-    }
-
-    return true;
 }
 
 /**
@@ -731,6 +565,8 @@ bool IsHexString(const std::string &str, const size_t len)
         if (*it >= '0' && *it <= '9')
             continue;
         if (*it >= 'A' && *it <= 'F')
+            continue;
+        if (*it >= 'a' && *it <= 'f')
             continue;
         return false;
     }
@@ -867,9 +703,9 @@ double Remap(const double value, const double low1, const double high1, const do
 uint32_t Log2(uint32_t n)
 {
 #define LT(n) n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n
-    static const int8_t LogTable256[256] = {
-        -1,    0,     1,     1,     2,     2,     2,     2,     3,     3,     3,     3,     3,     3,     3,    3,
-        LT(4), LT(5), LT(5), LT(6), LT(6), LT(6), LT(6), LT(7), LT(7), LT(7), LT(7), LT(7), LT(7), LT(7), LT(7)};
+    static const int8_t LogTable256[256] = {-1,    0,     1,     1,     2,     2,     2,     2,     3,     3,     3,
+                                            3,     3,     3,     3,     3,     LT(4), LT(5), LT(5), LT(6), LT(6), LT(6),
+                                            LT(6), LT(7), LT(7), LT(7), LT(7), LT(7), LT(7), LT(7), LT(7)};
 
     uint32_t t, tt; // temporaries
 
@@ -893,7 +729,7 @@ float NextAfter(const float from, const float to)
     const float x = from;
     const float y = to;
     union {
-        float        f;
+        float    f;
         uint32_t i;
     } u;
     if (isnan(y) || isnan(x))

@@ -24,8 +24,6 @@
 
 #pragma once
 
-#include <json/json.h>
-
 #include "actor.h"
 #include "d_player.h"
 #include "g_gametype.h"
@@ -98,9 +96,6 @@ void SV_SendDamagePlayer(player_t *player, AActor *inflictor, int32_t healthDama
 void SV_SendDamageMobj(AActor *target, int32_t pain);
 // Tells clients to remove an actor from the world as it doesn't exist anymore
 void SV_SendDestroyActor(AActor *mo);
-
-bool M_ReadJSON(Json::Value &json, const char *filename);
-bool M_WriteJSON(const char *filename, Json::Value &value, bool styled);
 
 // [AM] Coinflip
 void CMD_CoinFlip(std::string &result);
