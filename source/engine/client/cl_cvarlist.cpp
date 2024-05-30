@@ -403,6 +403,8 @@ CVAR_FUNC_DECL(r_teamcolor, "40 cf 00", "", CVARTYPE_STRING, CVAR_CLIENTARCHIVE 
 CVAR_RANGE(r_painintensity, "0.5", "Intensity of red pain effect", CVARTYPE_FLOAT,
            CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE, 0.0f, 1.0f)
 
+CVAR_FUNC_DECL(r_imgui, "0", "Test for imgui", CVARTYPE_BOOL, 0);
+
 CVAR(r_viewsize, "0", "Set to the current video resolution", CVARTYPE_STRING, CVAR_NOSET | CVAR_NOENABLEDISABLE)
 
 CVAR_FUNC_DECL(vid_defwidth, "1280", "", CVARTYPE_WORD, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)

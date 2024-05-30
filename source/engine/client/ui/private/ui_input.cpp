@@ -45,6 +45,14 @@ void UIInput::postEvent(SDL_Event &ev)
 
 void UIInput::processEvents()
 {
+
+	bool UI_IMGUI_HandleInput(const std::vector<SDL_Event> &events);
+	if (UI_IMGUI_HandleInput(mSDLEvents))
+	{
+		mSDLEvents.clear();
+		return;
+	}
+
     Rml::Context *context = Rml::GetContext("play");
     if (!context)
     {

@@ -47,6 +47,8 @@ UIRenderInterface::UIRenderInterface()
 
 UIRenderInterface::~UIRenderInterface()
 {
+    void UI_IMGUI_Shutdown();
+    UI_IMGUI_Shutdown();
 }
 
 void UIRenderInterface::BeginFrame()
@@ -62,6 +64,9 @@ void UIRenderInterface::BeginFrame()
     SDL_SetRenderDrawColor(mRenderer, 0, 0, 0, 255);
     SDL_RenderClear(mRenderer);
     SDL_SetRenderDrawBlendMode(mRenderer, mBlendMode);
+
+    void UI_IMGUI_BeginFrame();
+    UI_IMGUI_BeginFrame();
 }
 
 void UIRenderInterface::EndFrame()
@@ -70,6 +75,10 @@ void UIRenderInterface::EndFrame()
     {
         return;
     }
+
+    void UI_IMGUI_EndFrame();
+    UI_IMGUI_EndFrame();
+
 
     SDL_RenderPresent(mRenderer);
 }
@@ -133,6 +142,9 @@ void UIRenderInterface::setMode(uint16_t width, uint16_t height, const PixelForm
     SDL_DisplayMode sdl_mode;
     SDL_GetWindowDisplayMode(mWindow->mSDLWindow, &sdl_mode);
     mSDLDisplayFormat = sdl_mode.format;
+
+    void UI_IMGUI_Init();
+    UI_IMGUI_Init();
 
     // Fixme:  THIS DOES NOT BELONG HERE
     void UI_LoadCore();

@@ -38,7 +38,7 @@ class UIRenderInterface : public Rml::RenderInterface
     virtual ~UIRenderInterface();
 
     Rml::CompiledGeometryHandle CompileGeometry(Rml::Span<const Rml::Vertex> vertices,
-                                                Rml::Span<const int32_t>         indices) override;
+                                                Rml::Span<const int32_t>     indices) override;
     void                        ReleaseGeometry(Rml::CompiledGeometryHandle geometry) override;
     void                        RenderGeometry(Rml::CompiledGeometryHandle handle, Rml::Vector2f translation,
                                                Rml::TextureHandle texture) override;
@@ -63,7 +63,7 @@ class UIRenderInterface : public Rml::RenderInterface
         return mPlayerViewTexture;
     }
 
-    SDL_Renderer* getRenderer() const
+    SDL_Renderer *getRenderer() const
     {
         return mRenderer;
     }
@@ -83,11 +83,21 @@ class UIRenderInterface : public Rml::RenderInterface
         return mHeight;
     }
 
+    ISDL20Window *getSDLWindow()
+    {
+        return mWindow;
+    }
+
+    SDL_Renderer *getSDLRenderer()
+    {
+        return mRenderer;
+    }
+
   private:
     struct GeometryView
     {
         Rml::Span<const Rml::Vertex> vertices;
-        Rml::Span<const int32_t>         indices;
+        Rml::Span<const int32_t>     indices;
     };
 
     // Rendering surface
