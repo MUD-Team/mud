@@ -161,3 +161,9 @@ https://sourceware.org/glibc/
 timegm - (c) Kungliga Tekniska Högskolan
 BSD-3-Clause - https://opensource.org/license/bsd-3-clause
 ----------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------
+Dear ImGui - (c)  Omar Cornut
+MIT - https://opensource.org/license/mit
+https://github.com/ocornut/imgui
+----------------------------------------------------------------------------------
