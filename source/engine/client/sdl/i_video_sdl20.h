@@ -150,6 +150,9 @@ class ISDL20Window : public IWindow
 
     virtual std::string getVideoDriverName() const;
 
+    SDL_Window* getSDLWindow() const { return mSDLWindow; }
+
+
   private:
     // disable copy constructor and assignment operator
     ISDL20Window(const ISDL20Window &);
@@ -168,7 +171,7 @@ class ISDL20Window : public IWindow
     uint16_t    getCurrentHeight() const;
     EWindowMode getCurrentWindowMode() const;
 
-    SDL_Window *mSDLWindow;    
+    SDL_Window *mSDLWindow;
 
     IVideoMode  mVideoMode;
     PixelFormat mPixelFormat;
@@ -179,7 +182,7 @@ class ISDL20Window : public IWindow
     bool mMouseFocus;
     bool mKeyboardFocus;
 
-    int32_t mAcceptResizeEventsTime;    
+    int32_t mAcceptResizeEventsTime;
 };
 
 // ****************************************************************************

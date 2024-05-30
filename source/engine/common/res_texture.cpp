@@ -251,7 +251,7 @@ void TextureManager::startup()
     char **i;
 
     if (rc == NULL)
-        I_FatalError("TextureManager::startup: No flats found in /flats!\n");
+        I_Error("TextureManager::startup: No flats found in /flats!\n");
 
     for (i = rc; *i != NULL; i++)
     {
@@ -291,7 +291,7 @@ void TextureManager::startup()
     i;
 
     if (rc == NULL)
-        I_FatalError("TextureManager::startup: No textures found in /textures!\n");
+        I_Error("TextureManager::startup: No textures found in /textures!\n");
 
     for (i = rc; *i != NULL; i++)
     {
@@ -338,7 +338,7 @@ void TextureManager::startup()
     rc = PHYSFS_enumerateFiles("sprites");
 
     if (rc == NULL)
-        I_FatalError("R_InitSpriteDefs: No sprites found in /sprites!\n");
+        I_Error("R_InitSpriteDefs: No sprites found in /sprites!\n");
 
     std::unordered_multimap<std::string, std::string> sprite_files;
 
@@ -822,13 +822,13 @@ void TextureManager::cacheSprite(texhandle_t handle)
     uint32_t filenum = (handle & ~SPRITE_HANDLE_MASK);
 
     if (filenum - 1 >= mSpriteFilenames.size())
-        I_FatalError("TextureManager::cacheSprite: Invalid handle %d requested (%d is highest valid handle)\n",
+        I_Error("TextureManager::cacheSprite: Invalid handle %d requested (%d is highest valid handle)\n",
                      filenum - 1, mSpriteFilenames.size() - 1);
 
     PHYSFS_File *rawsprite = PHYSFS_openRead(mSpriteFilenames[filenum - 1].c_str());
 
     if (rawsprite == NULL)
-        I_FatalError("TextureManager::cacheSprite: Error opening %s\n", mSpriteFilenames[filenum - 1].c_str());
+        I_Error("TextureManager::cacheSprite: Error opening %s\n", mSpriteFilenames[filenum - 1].c_str());
 
     uint32_t filelen = PHYSFS_fileLength(rawsprite);
 
@@ -837,7 +837,7 @@ void TextureManager::cacheSprite(texhandle_t handle)
     {
         delete[] filedata;
         PHYSFS_close(rawsprite);
-        I_FatalError("TexureManager::cacheSprite: Error reading %s\n", mSpriteFilenames[filenum - 1].c_str());
+        I_Error("TexureManager::cacheSprite: Error reading %s\n", mSpriteFilenames[filenum - 1].c_str());
     }
 
     int32_t height = 0;
@@ -848,7 +848,7 @@ void TextureManager::cacheSprite(texhandle_t handle)
     {
         delete[] filedata;
         PHYSFS_close(rawsprite);
-        I_FatalError("TexureManager::cacheSprite: %s is malformed!\n", mSpriteFilenames[filenum - 1].c_str());
+        I_Error("TexureManager::cacheSprite: %s is malformed!\n", mSpriteFilenames[filenum - 1].c_str());
     }
 
     if (!clientside)
@@ -865,7 +865,7 @@ void TextureManager::cacheSprite(texhandle_t handle)
         {
             delete[] filedata;
             PHYSFS_close(rawsprite);
-            I_FatalError("TexureManager::cacheSprite: Error decoding %s\n", mSpriteFilenames[filenum - 1].c_str());
+            I_Error("TexureManager::cacheSprite: Error decoding %s\n", mSpriteFilenames[filenum - 1].c_str());
         }
 
         Texture *texture = createTexture(handle, Texture::TextureSourceType::TEX_SPRITE, width, height);
@@ -925,13 +925,13 @@ void TextureManager::cacheFlat(texhandle_t handle)
     uint32_t filenum = (handle & ~FLAT_HANDLE_MASK);
 
     if (filenum - 1 >= mFlatFilenames.size())
-        I_FatalError("TextureManager::cacheFlat: Invalid handle %d requested (%d is highest valid handle)\n",
+        I_Error("TextureManager::cacheFlat: Invalid handle %d requested (%d is highest valid handle)\n",
                      filenum - 1, mFlatFilenames.size() - 1);
 
     PHYSFS_File *rawflat = PHYSFS_openRead(mFlatFilenames[filenum - 1].c_str());
 
     if (rawflat == NULL)
-        I_FatalError("TextureManager::cacheFlat: Error opening %s\n", mFlatFilenames[filenum - 1].c_str());
+        I_Error("TextureManager::cacheFlat: Error opening %s\n", mFlatFilenames[filenum - 1].c_str());
 
     uint32_t filelen = PHYSFS_fileLength(rawflat);
 
@@ -940,7 +940,7 @@ void TextureManager::cacheFlat(texhandle_t handle)
     {
         delete[] filedata;
         PHYSFS_close(rawflat);
-        I_FatalError("TexureManager::cacheFlat: Error reading %s\n", mFlatFilenames[filenum - 1].c_str());
+        I_Error("TexureManager::cacheFlat: Error reading %s\n", mFlatFilenames[filenum - 1].c_str());
     }
 
     int32_t height = 0;
@@ -951,7 +951,7 @@ void TextureManager::cacheFlat(texhandle_t handle)
     {
         delete[] filedata;
         PHYSFS_close(rawflat);
-        I_FatalError("TexureManager::cacheFlat: %s is malformed!\n", mFlatFilenames[filenum - 1].c_str());
+        I_Error("TexureManager::cacheFlat: %s is malformed!\n", mFlatFilenames[filenum - 1].c_str());
     }
 
     if (!clientside)
@@ -968,7 +968,7 @@ void TextureManager::cacheFlat(texhandle_t handle)
         {
             delete[] filedata;
             PHYSFS_close(rawflat);
-            I_FatalError("TexureManager::cacheFlat: Error decoding %s\n", mFlatFilenames[filenum - 1].c_str());
+            I_Error("TexureManager::cacheFlat: Error decoding %s\n", mFlatFilenames[filenum - 1].c_str());
         }
 
         Texture *texture = createTexture(handle, Texture::TextureSourceType::TEX_FLAT, width, height);
@@ -998,7 +998,7 @@ void TextureManager::remapFlat(Texture *texture, uint8_t *argbData)
 
     if (texture->mType != Texture::TextureSourceType::TEX_FLAT)
     {
-        I_FatalError("TextureManager::remapFlat - patch texture supplied");
+        I_Error("TextureManager::remapFlat - patch texture supplied");
     }
 
     int32_t width  = texture->getWidth();
@@ -1045,7 +1045,7 @@ void TextureManager::generateColumns(Texture *texture, uint8_t *argbData)
 {
     if (texture->mType == Texture::TextureSourceType::TEX_FLAT)
     {
-        I_FatalError("TextureManager::generateColumns - non-patch texture supplied");
+        I_Error("TextureManager::generateColumns - non-patch texture supplied");
     }
 
     int32_t       width           = texture->getWidth();
@@ -1174,13 +1174,13 @@ void TextureManager::cacheTexture(texhandle_t handle)
     uint32_t filenum = (handle & ~TEXTURE_HANDLE_MASK);
 
     if (filenum - 1 >= mTextureFilenames.size())
-        I_FatalError("TextureManager::cacheTexture: Invalid handle %d requested (%d is highest valid handle)\n",
+        I_Error("TextureManager::cacheTexture: Invalid handle %d requested (%d is highest valid handle)\n",
                      filenum - 1, mTextureFilenames.size() - 1);
 
     PHYSFS_File *rawtex = PHYSFS_openRead(mTextureFilenames[filenum - 1].c_str());
 
     if (rawtex == NULL)
-        I_FatalError("TextureManager::cacheTexture: Error opening %s\n", mTextureFilenames[filenum - 1].c_str());
+        I_Error("TextureManager::cacheTexture: Error opening %s\n", mTextureFilenames[filenum - 1].c_str());
 
     uint32_t filelen = PHYSFS_fileLength(rawtex);
 
@@ -1189,7 +1189,7 @@ void TextureManager::cacheTexture(texhandle_t handle)
     {
         delete[] filedata;
         PHYSFS_close(rawtex);
-        I_FatalError("TexureManager::cacheTexture: Error reading %s\n", mTextureFilenames[filenum - 1].c_str());
+        I_Error("TexureManager::cacheTexture: Error reading %s\n", mTextureFilenames[filenum - 1].c_str());
     }
 
     int32_t height = 0;
@@ -1200,7 +1200,7 @@ void TextureManager::cacheTexture(texhandle_t handle)
     {
         delete[] filedata;
         PHYSFS_close(rawtex);
-        I_FatalError("TexureManager::cacheTexture: %s is malformed!\n", mTextureFilenames[filenum - 1].c_str());
+        I_Error("TexureManager::cacheTexture: %s is malformed!\n", mTextureFilenames[filenum - 1].c_str());
     }
 
     if (!clientside)
@@ -1217,7 +1217,7 @@ void TextureManager::cacheTexture(texhandle_t handle)
         {
             delete[] filedata;
             PHYSFS_close(rawtex);
-            I_FatalError("TexureManager::cacheTexture: Error decoding %s\n", mTextureFilenames[filenum - 1].c_str());
+            I_Error("TexureManager::cacheTexture: Error decoding %s\n", mTextureFilenames[filenum - 1].c_str());
         }
 
         Texture *texture = createTexture(handle, Texture::TextureSourceType::TEX_TEXTURE, width, height);

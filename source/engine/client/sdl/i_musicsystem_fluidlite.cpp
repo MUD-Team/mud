@@ -43,7 +43,7 @@ static void fluidError(int32_t level, char *message, void *data)
 {
     (void)level;
     (void)data;
-    I_FatalError("Fluidlite: %s\n", message);
+    I_Error("Fluidlite: %s\n", message);
 }
 
 static void *fluidFileOpen(fluid_fileapi_t *fileapi, const char *filename)

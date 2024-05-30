@@ -88,7 +88,7 @@ void DArgs::CopyArgs(uint32_t argc, char **argv)
     wchar_t **win_argv = CommandLineToArgvW(GetCommandLineW(), &win_argc);
 
     if (!win_argv)
-        I_FatalError("Could not retrieve command line arguments!\n");
+        I_Error("Could not retrieve command line arguments!\n");
 
     args.resize(win_argc);
 

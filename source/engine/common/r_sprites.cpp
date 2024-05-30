@@ -74,7 +74,7 @@ void R_CacheSprite(spritedef_t *sprite)
 void R_InstallSpriteTex(const texhandle_t tex_id, uint32_t frame, uint32_t rot, bool flipped)
 {
 	if (frame >= MAX_SPRITE_FRAMES || rot > 8)
-		I_FatalError ("R_InstallSpriteTex: Bad frame characters in resource ID %i", (int32_t)tex_id);
+		I_Error ("R_InstallSpriteTex: Bad frame characters in resource ID %i", (int32_t)tex_id);
 
 	if (static_cast<int32_t>(frame) > maxframe)
 		maxframe = frame;
@@ -130,7 +130,7 @@ void R_InstallSprite(const char* name, int32_t num)
 		{
 		case -1:
 			// no rotations were found for that frame at all
-			I_FatalError("R_InstallSprite: No patches found for %s frame %c", sprname,
+			I_Error("R_InstallSprite: No patches found for %s frame %c", sprname,
 			             frame + 'A');
 			break;
 
@@ -144,7 +144,7 @@ void R_InstallSprite(const char* name, int32_t num)
 				for (int32_t rotation = 0; rotation < 8; rotation++)
 				{
 					if (sprtemp[frame].texes[rotation] == TextureManager::NO_TEXTURE_HANDLE)
-						I_FatalError(
+						I_Error(
 						    "R_InstallSprite: Sprite %s frame %c is missing rotations",
 						    sprname, frame + 'A');
 				}

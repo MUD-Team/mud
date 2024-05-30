@@ -83,7 +83,7 @@ void V_AdjustVideoMode()
 
         // Change screen mode.
         if (!V_DoSetResolution())
-            I_FatalError("Could not change screen mode");
+            I_Error("Could not change screen mode");
 
         // Recalculate various view parameters.
         R_ForceViewWindowResize();
@@ -419,7 +419,7 @@ void V_Init()
     }
 
     if (!I_VideoInitialized())
-        I_FatalError("Failed to initialize display");
+        I_Error("Failed to initialize display");
 
     V_InitPalette();
 

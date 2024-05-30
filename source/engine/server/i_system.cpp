@@ -135,7 +135,7 @@ void *I_ZoneBase(size_t *size)
 
     // Die if the system has insufficient memory
     if (got_heapsize < min_heapsize)
-        I_FatalError("I_ZoneBase: Insufficient memory available! Minimum size "
+        I_Error("I_ZoneBase: Insufficient memory available! Minimum size "
                      "is %lu MB but got %lu MB instead",
                      min_heapsize, got_heapsize);
 
@@ -324,7 +324,7 @@ bool gameisdead;
 
 void STACK_ARGS call_terms(void);
 
-void STACK_ARGS I_FatalError(const char *error, ...)
+void STACK_ARGS I_Error(const char *error, ...)
 {
     static bool alreadyThrown = false;
     gameisdead                = true;
@@ -354,18 +354,6 @@ void STACK_ARGS I_FatalError(const char *error, ...)
 
         exit(EXIT_FAILURE);
     }
-}
-
-void STACK_ARGS I_Error(const char *error, ...)
-{
-    va_list argptr;
-    char    errortext[MAX_ERRORTEXT];
-
-    va_start(argptr, error);
-    vsprintf(errortext, error, argptr);
-    va_end(argptr);
-
-    throw CRecoverableError(errortext);
 }
 
 char DoomStartupTitle[256] = {0};

@@ -221,7 +221,7 @@ void StringTable::loadStringsFile(const char *filename, const bool engOnly)
     PHYSFS_File *rawlang = PHYSFS_openRead(filepath.c_str());
 
     if (rawlang == NULL)
-        I_FatalError("Error opening %s language file", filepath.c_str());
+        I_Error("Error opening %s language file", filepath.c_str());
 
     size_t len          = PHYSFS_fileLength(rawlang);
     char  *languageLump = new char[len + 1];
@@ -230,7 +230,7 @@ void StringTable::loadStringsFile(const char *filename, const bool engOnly)
     {
         PHYSFS_close(rawlang);
         delete[] languageLump;
-        I_FatalError("Error reading %s language file", filepath.c_str());
+        I_Error("Error reading %s language file", filepath.c_str());
     }
 
     PHYSFS_close(rawlang);

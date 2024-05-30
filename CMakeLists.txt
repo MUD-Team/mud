@@ -30,6 +30,13 @@ set( CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/bin )
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_SOURCE_DIR}/bin )
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/bin )
 
+add_compile_definitions(
+      $<$<CONFIG:Debug>:MUD_DEBUG>
+      $<$<CONFIG:RelWithDebInfo>:MUD_DEBUG>
+      $<$<CONFIG:Release>:MUD_RELEASE>
+      $<$<CONFIG:MinSizeRel>:MUD_RELEASE>
+)
+
 option(MUD_SANITIZE "Enable code sanitizing" OFF)
 option(MUD_PROFILING "Enable Profiling" OFF)
 

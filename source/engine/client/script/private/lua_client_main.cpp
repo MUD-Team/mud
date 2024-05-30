@@ -32,32 +32,11 @@
 #include "lua_client_private.h"
 #include "script/lua_public.h"
 
-
 static lua_State *clientState = nullptr;
 
 static void RunTics()
 {
-    try
-    {
-        D_RunTics(CL_RunTics, CL_DisplayTics);
-    }
-    catch (CRecoverableError &error)
-    {
-        Printf(PRINT_ERROR, "\nERROR: %s\n", error.GetMsg().c_str());
-
-        // [AM] In case an error is caused by a console command.
-        // C_ClearCommand();
-
-        CL_QuitNetGame(NQ_SILENT);
-
-        G_ClearSnapshots();
-
-        DThinker::DestroyAllThinkers();
-
-        ::players.clear();
-
-        ::gameaction = ga_nothing;
-    }
+    D_RunTics(CL_RunTics, CL_DisplayTics);
 }
 
 static void MUD_AllocConsole()
@@ -90,7 +69,7 @@ class LuaClientMain
             .addFunction("run_tics", RunTics)
             .addFunction("download_tick", CL_DownloadTick)
             .addProperty("headless", I_IsHeadless)
-            .addProperty("nodrawers", &nodrawers)            
+            .addProperty("nodrawers", &nodrawers)
             .endNamespace()
             .endNamespace();
     }
@@ -139,8 +118,7 @@ void LUA_Display()
     LUA_CallGlobalFunction(clientState, "Display");
 }
 
-
-void LUA_CallGlobalClientFunction(const char* function_name)
+void LUA_CallGlobalClientFunction(const char *function_name)
 {
     LUA_CallGlobalFunction(clientState, function_name);
 }

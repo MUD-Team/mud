@@ -92,7 +92,7 @@ SOCKET UDPsocket(void)
     // allocate a socket
     s = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (s == INVALID_SOCKET)
-        I_FatalError("can't create socket");
+        I_Error("can't create socket");
 
     return s;
 }
@@ -119,7 +119,7 @@ void BindToLocalPort(SOCKET s, u_short wanted)
 
         if (next > wanted + 32)
         {
-            I_FatalError("BindToPort: error");
+            I_Error("BindToPort: error");
             return;
         }
     } while (v == SOCKET_ERROR);
@@ -958,7 +958,7 @@ void InitNetCommon(void)
 
     BindToLocalPort(inet_socket, localport);
     if (ioctlsocket(inet_socket, FIONBIO, &_true) == -1)
-        I_FatalError("UDPsocket: ioctl FIONBIO: %s", strerror(errno));
+        I_Error("UDPsocket: ioctl FIONBIO: %s", strerror(errno));
 
     // enter message information into message info structs
     InitNetMessageFormats();

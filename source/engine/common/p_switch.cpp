@@ -92,13 +92,13 @@ static int32_t  numswitches;
 void P_InitSwitchList(void)
 {
     if (!M_FileExists("lumps/SWITCHES.lmp"))
-        I_FatalError("Missing lumps/SWITCHES.lmp");    
+        I_Error("Missing lumps/SWITCHES.lmp");    
 
     PHYSFS_File *rawswitches = PHYSFS_openRead("lumps/SWITCHES.lmp");
 
     if (rawswitches == NULL)
     {
-        I_FatalError("Error opening lumps/SWITCHES.lmp"); 
+        I_Error("Error opening lumps/SWITCHES.lmp"); 
     }
 
     uint8_t *alphSwitchList = new uint8_t[PHYSFS_fileLength(rawswitches)];
@@ -107,7 +107,7 @@ void P_InitSwitchList(void)
     {
         PHYSFS_close(rawswitches);
         delete[] alphSwitchList;
-        I_FatalError("Error reading lumps/SWITCHES.lmp"); 
+        I_Error("Error reading lumps/SWITCHES.lmp"); 
     }
     
     PHYSFS_close(rawswitches);

@@ -59,7 +59,7 @@ bool            I_VideoInitialized();
 void I_SetVideoMode(const IVideoMode &video_mode);
 
 const IVideoCapabilities *I_GetVideoCapabilities();
-int32_t                       I_GetMonitorCount();
+int32_t                   I_GetMonitorCount();
 IWindow                  *I_GetWindow();
 
 IRenderSurface *I_AllocateSurface(int32_t width, int32_t height, int32_t bpp);
@@ -362,11 +362,11 @@ class IRenderSurface
         assert(mLocks >= 0 && mLocks < 100);
     }
 
-    static IRenderSurface* getCurrentRenderSurface() 
+    static IRenderSurface *getCurrentRenderSurface()
     {
         return mCurrentRenderSurface;
     }
-    static void setCurrentRenderSurface(IRenderSurface* surface)
+    static void setCurrentRenderSurface(IRenderSurface *surface)
     {
         mCurrentRenderSurface = surface;
     }
@@ -391,7 +391,7 @@ class IRenderSurface
 
     int16_t mLocks;
 
-    static IRenderSurface* mCurrentRenderSurface;
+    static IRenderSurface *mCurrentRenderSurface;
 };
 
 // ****************************************************************************
@@ -471,7 +471,6 @@ class IWindow
     {
         return "";
     }
-
 };
 
 // ============================================================================
