@@ -95,7 +95,7 @@ void DArgs::CopyArgs(uint32_t argc, char **argv)
     for (i = 0; i < win_argc; i++)
     {
         if (win_argv[i] == NULL)
-            I_FatalError("Error parsing command line arguments!\n");
+            I_Error("Error parsing command line arguments!\n");
         Poco::UnicodeConverter::convert(win_argv[i], args[i]);
     }
 
