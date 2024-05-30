@@ -87,12 +87,6 @@ https://github.com/freetype/freetype/blob/master/docs/FTL.TXT
 ----------------------------------------------------------------------------------
 
 ----------------------------------------------------------------------------------
-JsonCpp - (c) Baptiste Lepilleur
-MIT - https://opensource.org/license/mit
-https://github.com/open-source-parsers/jsoncpp
-----------------------------------------------------------------------------------
-
-----------------------------------------------------------------------------------
 zlib - (c) Jean-loup Gailly and Mark Adler
 zlib - https://opensource.org/license/zlib
 https://github.com/madler/zlib
@@ -141,23 +135,6 @@ https://github.com/kunitoki/LuaBridge3
 ----------------------------------------------------------------------------------
 
 ----------------------------------------------------------------------------------
-CRC32 - (c) Stephan Brumme
-zlib - https://opensource.org/license/zlib
-https://github.com/stbrumme/crc32
-----------------------------------------------------------------------------------
-
-----------------------------------------------------------------------------------
-MD5 - (c) Aladdin Enterprises
-Aladdin Enterprises MD5 License
-----------------------------------------------------------------------------------
-
-----------------------------------------------------------------------------------
-GNU C Library - (c) Free Software Foundation
-LGPL-2.1 - https://opensource.org/license/lgpl-2-1
-https://sourceware.org/glibc/
-----------------------------------------------------------------------------------
-
-----------------------------------------------------------------------------------
-timegm - (c) Kungliga Tekniska Högskolan
-BSD-3-Clause - https://opensource.org/license/bsd-3-clause
+Poco - (c) Applied Informatics Software Engineering GmbH and Contributors
+Boost Software License - https://opensource.org/license/bsl-1-0
 ----------------------------------------------------------------------------------

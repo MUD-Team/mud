@@ -72,25 +72,6 @@ class OMD5Hash : public OHash
     static bool makeFromHexStr(OMD5Hash &out, const std::string &hash);
 };
 
-class OCRC32Sum : public OHash
-{
-  protected:
-    void concrete()
-    {
-    }
-
-  public:
-    static bool makeFromHexStr(OCRC32Sum &out, const std::string &hash);
-};
-
-template <> struct hashfunc<OCRC32Sum>
-{
-    uint32_t operator()(const OCRC32Sum &str) const
-    {
-        return __hash_cstring(str.getHexCStr());
-    }
-};
-
 template <> struct hashfunc<OMD5Hash>
 {
     uint32_t operator()(const OMD5Hash &str) const

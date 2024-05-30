@@ -18,7 +18,6 @@ endif()
 project(MUD VERSION 0.1)
 
 find_package(CURL REQUIRED)
-find_package(jsoncpp CONFIG REQUIRED)
 find_package(protobuf CONFIG REQUIRED)
 find_package(SDL2 CONFIG REQUIRED)
 find_package(SDL2_mixer CONFIG REQUIRED)
