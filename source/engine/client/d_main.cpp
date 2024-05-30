@@ -250,7 +250,7 @@ void D_PageDrawer()
 //
 // D_Close
 //
-void STACK_ARGS D_Close()
+void D_Close()
 {
     D_ClearTaskSchedulers();
 }
@@ -343,7 +343,7 @@ void D_Init()
 // Called to shutdown subsystems when unloading a set of WAD resource files.
 // Should be called prior to D_Init when loading a new set of WADs.
 //
-void STACK_ARGS D_Shutdown()
+void D_Shutdown()
 {    
     if (gamestate == GS_LEVEL)
         G_ExitLevel(0, 0);
@@ -384,6 +384,15 @@ void STACK_ARGS D_Shutdown()
 void C_DoCommand(const char *cmd, uint32_t key);
 void D_Init_DEHEXTRA_Frames(void);
 
+void D_DoomMainShutdown()
+{
+    D_Close();
+    D_Shutdown();
+    I_ShutdownHardware();
+    LUA_CloseClientState();    
+    CL_DownloadShutdown();
+}
+
 //
 // D_DoomMain
 //
@@ -392,8 +401,6 @@ void D_DoomMain()
     uint32_t p;
 
     gamestate = GS_STARTUP;
-
-    atterm(D_Close);
 
     // [RH] Initialize items. Still only used for the give command. :-(
     InitItems();
@@ -446,17 +453,13 @@ void D_DoomMain()
 
     D_AddWadCommandLineFiles(newwadfiles);
 
-    D_LoadResourceFiles(newwadfiles);
+    D_LoadResourceFiles(newwadfiles);    
 
-    atterm(LUA_CloseClientState);
-
-    Printf(PRINT_HIGH, "I_Init: Init hardware.\n");
-    atterm(I_ShutdownHardware);
+    Printf(PRINT_HIGH, "I_Init: Init hardware.\n");    
     I_Init();
     I_InitInput();
 
-    // [SL] Call init routines that need to be reinitialized every time WAD changes
-    atterm(D_Shutdown);
+    // [SL] Call init routines that need to be reinitialized every time WAD changes    
     D_Init();
 
     // Base systems have been inited; enable cvar callbacks
@@ -533,7 +536,6 @@ void D_DoomMain()
 
     // Initialize HTTP subsystem
     CL_DownloadInit();
-    atterm(CL_DownloadShutdown);
 
     Printf(PRINT_HIGH, "D_CheckNetGame: Checking network game status.\n");
     D_CheckNetGame();
@@ -574,8 +576,8 @@ void D_DoomMain()
         D_StartTitle();                 // start up intro loop
     }
 
-    void LUA_MainLoop();
-    LUA_MainLoop();
+    //void LUA_MainLoop();
+    //LUA_MainLoop();
     
     //D_DoomLoop(); // never returns
 }

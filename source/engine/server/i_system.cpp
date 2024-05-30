@@ -343,7 +343,7 @@ void STACK_ARGS I_Error(const char *error, ...)
 #endif
         va_end(argptr);
 
-        throw CFatalError(errortext);
+        throw CDoomError(errortext);
     }
 
     if (!has_exited)    // If it hasn't exited yet, exit now -- killough

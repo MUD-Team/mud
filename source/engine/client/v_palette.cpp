@@ -114,7 +114,7 @@ shaderef_t::shaderef_t(const shademap_t *const colors, const int32_t mapnum) : m
     {
         char tmp[100];
         sprintf(tmp, "32bpp: shaderef_t::shaderef_t() called with mapnum = %d, which looks too large", m_mapnum);
-        throw CFatalError(tmp);
+        throw CDoomError(tmp);
     }
 #endif
 

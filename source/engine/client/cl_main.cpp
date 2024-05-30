@@ -994,12 +994,17 @@ BEGIN_COMMAND(spy)
 }
 END_COMMAND(spy)
 
-void STACK_ARGS call_terms(void);
+
+static bool quit_requested = false;
+
+bool CL_QuitRequested()
+{
+    return quit_requested;
+}
 
 void CL_QuitCommand()
 {
-    call_terms();
-    exit(EXIT_SUCCESS);
+    quit_requested = true;
 }
 
 BEGIN_COMMAND(quit)

@@ -98,7 +98,7 @@ void LUA_OpenClientState()
     LUA_DoFile(clientState, "client/scripts/main.lua");
 }
 
-void STACK_ARGS LUA_CloseClientState()
+void LUA_CloseClientState()
 {
     if (!clientState)
     {

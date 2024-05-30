@@ -383,7 +383,7 @@ void I_FinishClockCalibration()
 //
 static int32_t has_exited;
 
-void STACK_ARGS I_Quit(void)
+void I_Quit(void)
 {
     has_exited = 1; /* Prevent infinitely recursive exits -- killough */
 
@@ -450,56 +450,23 @@ void STACK_ARGS I_Error(const char *error, ...)
     char errortext[MAX_ERRORTEXT];
     char messagetext[MAX_ERRORTEXT];
 
-    static bool alreadyThrown = false;
-    gameisdead                = true;
-
-    if (!alreadyThrown) // ignore all but the first message -- killough
-    {
-        alreadyThrown = true;
-        va_list argptr;
-        va_start(argptr, error);
-        int32_t index = vsnprintf(errortext, ARRAY_LENGTH(errortext), error, argptr);
-        if (SDL_GetError()[0] != '\0')
-        {
-            snprintf(messagetext, ARRAY_LENGTH(messagetext), "%s\nLast SDL Error:\n%s\n", errortext, SDL_GetError());
-            SDL_ClearError();
-        }
-        else
-        {
-            snprintf(messagetext, ARRAY_LENGTH(messagetext), "%s\n", errortext);
-        }
-        va_end(argptr);
-
-        I_ErrorMessageBox(messagetext);
-
-        throw CFatalError(messagetext);
-    }
-
-    if (!has_exited)    // If it hasn't exited yet, exit now -- killough
-    {
-        has_exited = 1; // Prevent infinitely recursive exits -- killough
-
-        call_terms();
-
-        exit(EXIT_FAILURE);
-    }
-
-    // Recursive atterm, we've used up all our chances.
     va_list argptr;
     va_start(argptr, error);
     int32_t index = vsnprintf(errortext, ARRAY_LENGTH(errortext), error, argptr);
     if (SDL_GetError()[0] != '\0')
     {
-        snprintf(messagetext, ARRAY_LENGTH(messagetext),
-                 "Error while shutting down, aborting:\n%s\nLast SDL Error:\n%s\n", errortext, SDL_GetError());
+        snprintf(messagetext, ARRAY_LENGTH(messagetext), "%s\nLast SDL Error:\n%s\n", errortext, SDL_GetError());
+        SDL_ClearError();
     }
     else
     {
-        snprintf(messagetext, ARRAY_LENGTH(messagetext), "Error while shutting down, aborting:\n%s\n", errortext);
+        snprintf(messagetext, ARRAY_LENGTH(messagetext), "%s\n", errortext);
     }
     va_end(argptr);
 
-    abort();
+    I_ErrorMessageBox(messagetext);
+
+    throw CDoomError(messagetext);
 }
 
 void STACK_ARGS I_Warning(const char *warning, ...)
@@ -868,7 +835,7 @@ void I_ErrorMessageBox(const char *message)
 {
     bool debugger = false;
 
-#if defined (MUD_DEBUG) && (defined(_MSC_VER) || defined(__MINGW32__))
+#if defined(MUD_DEBUG) && (defined(_MSC_VER) || defined(__MINGW32__))
     if (IsDebuggerPresent())
     {
         debugger = true;

@@ -18,9 +18,10 @@ function Display()
     ui.end_frame()
     video.finish_refresh()
 end
-
+--[[
 function MainLoop()
     while true do
         client.run_tics()
     end
 end
+]]--

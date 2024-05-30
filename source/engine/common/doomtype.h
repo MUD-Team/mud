@@ -537,9 +537,9 @@ forceinline palindex_t shaderef_t::index(const palindex_t c) const
 {
 #if ODAMEX_DEBUG
     if (m_colors == NULL)
-        throw CFatalError("shaderef_t::index(): Bad shaderef_t");
+        throw CDoomError("shaderef_t::index(): Bad shaderef_t");
     if (m_colors->colormap == NULL)
-        throw CFatalError("shaderef_t::index(): colormap == NULL!");
+        throw CDoomError("shaderef_t::index(): colormap == NULL!");
 #endif
 
     return m_colormap[c];
@@ -549,9 +549,9 @@ forceinline argb_t shaderef_t::shade(const palindex_t c) const
 {
 #if ODAMEX_DEBUG
     if (m_colors == NULL)
-        throw CFatalError("shaderef_t::shade(): Bad shaderef_t");
+        throw CDoomError("shaderef_t::shade(): Bad shaderef_t");
     if (m_colors->shademap == NULL)
-        throw CFatalError("shaderef_t::shade(): shademap == NULL!");
+        throw CDoomError("shaderef_t::shade(): shademap == NULL!");
 #endif
 
     return m_shademap[c];

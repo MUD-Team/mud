@@ -207,7 +207,7 @@ class DObject
 
     uint32_t ObjectFlags;
 
-    static void STACK_ARGS StaticShutdown();
+    static void StaticShutdown();
 
   private:
     static TArray<DObject *> Objects;

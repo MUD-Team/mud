@@ -66,7 +66,7 @@ DSectorEffect::DSectorEffect(sector_t *sector)
 // then set the sector of the subclass to the passed sector.
 DSectorEffect *DSectorEffect::Clone(sector_t *sector) const
 {
-    throw CFatalError("DSectorEffect::Clone() called as a base class.");
+    throw CDoomError("DSectorEffect::Clone() called as a base class.");
 }
 
 void DSectorEffect::Serialize(FArchive &arc)

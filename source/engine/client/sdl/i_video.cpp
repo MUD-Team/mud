@@ -337,7 +337,7 @@ bool I_VideoInitialized()
 //
 // Destroys the application window and frees its memory.
 //
-void STACK_ARGS I_ShutdownHardware()
+void I_ShutdownHardware()
 {
     UI_Shutdown();       
 

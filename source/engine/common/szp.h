@@ -74,7 +74,7 @@ template <typename T> class szp
     inline T *operator->()
     {
         if (!naive || !*naive)
-            throw CFatalError("szp pointer was NULL");
+            throw CDoomError("szp pointer was NULL");
 
         return *naive;
     }
@@ -92,7 +92,7 @@ template <typename T> class szp
     void update_all(T *target)
     {
         if (!naive)
-            throw CFatalError("szp pointer was NULL on update_all");
+            throw CDoomError("szp pointer was NULL on update_all");
 
         // all copies already have naive, so their pointers will update too
         *naive = target;
