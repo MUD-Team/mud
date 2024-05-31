@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <unordered_map>
 
+#include "Poco/Buffer.h"
 #include "cmdlib.h"
 #include "i_system.h"
 #include "m_fileio.h"
@@ -457,10 +458,10 @@ void TextureManager::readAnimDefLump()
     if (rawinfo == NULL)
         return;
 
-    std::string buffer;
-    buffer.resize(PHYSFS_fileLength(rawinfo));
+    uint32_t filelen = PHYSFS_fileLength(rawinfo);
+    Poco::Buffer<char> buffer(filelen);
 
-    if (PHYSFS_readBytes(rawinfo, (void *)buffer.data(), buffer.size()) != buffer.size())
+    if (PHYSFS_readBytes(rawinfo, buffer.begin(), filelen) != filelen)
     {
         PHYSFS_close(rawinfo);
         return;
@@ -473,7 +474,7 @@ void TextureManager::readAnimDefLump()
         false,      // semiComments
         true,       // cComments
     };
-    OScanner os = OScanner::openBuffer(config, buffer.data(), buffer.data() + buffer.size());
+    OScanner os = OScanner::openBuffer(config, buffer.begin(), buffer.end());
 
     while (os.scan())
     {
@@ -610,13 +611,23 @@ void TextureManager::readAnimDefLump()
 //
 void TextureManager::readAnimatedLump()
 {
-    uint8_t *filedata = NULL;
-    int32_t  filelen  = M_ReadFile("lumps/ANIMATED.lmp", &filedata);
+    PHYSFS_File *rawinfo = PHYSFS_openRead("lumps/ANIMATED.lmp");
 
-    if (filelen <= 0 || filedata == NULL)
+    if (rawinfo == NULL)
         return;
 
-    for (uint8_t *ptr = filedata; *ptr != 255; ptr += 23)
+    uint32_t filelen = PHYSFS_fileLength(rawinfo);
+    Poco::Buffer<uint8_t> filedata(filelen);
+
+    if (PHYSFS_readBytes(rawinfo, filedata.begin(), filelen) != filelen)
+    {
+        PHYSFS_close(rawinfo);
+        return;
+    }
+
+    PHYSFS_close(rawinfo);
+
+    for (uint8_t *ptr = filedata.begin(); *ptr != 255; ptr += 23)
     {
         anim_t anim;
 
@@ -652,8 +663,6 @@ void TextureManager::readAnimatedLump()
 
         mAnimDefs.push_back(anim);
     }
-
-    Z_Free(filedata);
 }
 
 //
@@ -832,10 +841,9 @@ void TextureManager::cacheSprite(texhandle_t handle)
 
     uint32_t filelen = PHYSFS_fileLength(rawsprite);
 
-    uint8_t *filedata = new uint8_t[filelen];
-    if (PHYSFS_readBytes(rawsprite, filedata, filelen) != filelen)
+    Poco::Buffer<uint8_t> filedata(filelen);
+    if (PHYSFS_readBytes(rawsprite, filedata.begin(), filelen) != filelen)
     {
-        delete[] filedata;
         PHYSFS_close(rawsprite);
         I_Error("TexureManager::cacheSprite: Error reading %s\n", mSpriteFilenames[filenum - 1].c_str());
     }
@@ -844,9 +852,8 @@ void TextureManager::cacheSprite(texhandle_t handle)
     int32_t width  = 0;
     int32_t bpp    = 0;
 
-    if (!stbi_info_from_memory(filedata, filelen, &width, &height, &bpp))
+    if (!stbi_info_from_memory(filedata.begin(), filelen, &width, &height, &bpp))
     {
-        delete[] filedata;
         PHYSFS_close(rawsprite);
         I_Error("TexureManager::cacheSprite: %s is malformed!\n", mSpriteFilenames[filenum - 1].c_str());
     }
@@ -854,16 +861,14 @@ void TextureManager::cacheSprite(texhandle_t handle)
     if (!clientside)
     {
         Texture *texture = createTexture(handle, Texture::TextureSourceType::TEX_SPRITE, width, height);
-        delete[] filedata;
         PHYSFS_close(rawsprite);
     }
     else
     {
-        uint8_t *decoded_img = stbi_load_from_memory(filedata, filelen, &width, &height, &bpp, 4);
+        uint8_t *decoded_img = stbi_load_from_memory(filedata.begin(), filelen, &width, &height, &bpp, 4);
 
         if (!decoded_img)
         {
-            delete[] filedata;
             PHYSFS_close(rawsprite);
             I_Error("TexureManager::cacheSprite: Error decoding %s\n", mSpriteFilenames[filenum - 1].c_str());
         }
@@ -892,8 +897,6 @@ void TextureManager::cacheSprite(texhandle_t handle)
             texture->setOffsetX(x);
             texture->setOffsetY(y);
         }
-
-        delete[] filedata;
 
         generateColumns(texture, decoded_img);
         PHYSFS_close(rawsprite);
@@ -935,10 +938,9 @@ void TextureManager::cacheFlat(texhandle_t handle)
 
     uint32_t filelen = PHYSFS_fileLength(rawflat);
 
-    uint8_t *filedata = new uint8_t[filelen];
-    if (PHYSFS_readBytes(rawflat, filedata, filelen) != filelen)
+    Poco::Buffer<uint8_t> filedata(filelen);
+    if (PHYSFS_readBytes(rawflat, filedata.begin(), filelen) != filelen)
     {
-        delete[] filedata;
         PHYSFS_close(rawflat);
         I_Error("TexureManager::cacheFlat: Error reading %s\n", mFlatFilenames[filenum - 1].c_str());
     }
@@ -947,9 +949,8 @@ void TextureManager::cacheFlat(texhandle_t handle)
     int32_t width  = 0;
     int32_t bpp    = 0;
 
-    if (!stbi_info_from_memory(filedata, filelen, &width, &height, &bpp))
+    if (!stbi_info_from_memory(filedata.begin(), filelen, &width, &height, &bpp))
     {
-        delete[] filedata;
         PHYSFS_close(rawflat);
         I_Error("TexureManager::cacheFlat: %s is malformed!\n", mFlatFilenames[filenum - 1].c_str());
     }
@@ -957,23 +958,20 @@ void TextureManager::cacheFlat(texhandle_t handle)
     if (!clientside)
     {
         Texture *texture = createTexture(handle, Texture::TextureSourceType::TEX_FLAT, width, height);
-        delete[] filedata;
         PHYSFS_close(rawflat);
     }
     else
     {
-        uint8_t *decoded_img = stbi_load_from_memory(filedata, filelen, &width, &height, &bpp, 4);
+        uint8_t *decoded_img = stbi_load_from_memory(filedata.begin(), filelen, &width, &height, &bpp, 4);
 
         if (!decoded_img)
         {
-            delete[] filedata;
             PHYSFS_close(rawflat);
             I_Error("TexureManager::cacheFlat: Error decoding %s\n", mFlatFilenames[filenum - 1].c_str());
         }
 
         Texture *texture = createTexture(handle, Texture::TextureSourceType::TEX_FLAT, width, height);
 
-        delete[] filedata;
         remapFlat(texture, decoded_img);
         free(decoded_img);
         PHYSFS_close(rawflat);
@@ -1184,10 +1182,9 @@ void TextureManager::cacheTexture(texhandle_t handle)
 
     uint32_t filelen = PHYSFS_fileLength(rawtex);
 
-    uint8_t *filedata = new uint8_t[filelen];
-    if (PHYSFS_readBytes(rawtex, filedata, filelen) != filelen)
+    Poco::Buffer<uint8_t> filedata(filelen);
+    if (PHYSFS_readBytes(rawtex, filedata.begin(), filelen) != filelen)
     {
-        delete[] filedata;
         PHYSFS_close(rawtex);
         I_Error("TexureManager::cacheTexture: Error reading %s\n", mTextureFilenames[filenum - 1].c_str());
     }
@@ -1196,9 +1193,8 @@ void TextureManager::cacheTexture(texhandle_t handle)
     int32_t width  = 0;
     int32_t bpp    = 0;
 
-    if (!stbi_info_from_memory(filedata, filelen, &width, &height, &bpp))
+    if (!stbi_info_from_memory(filedata.begin(), filelen, &width, &height, &bpp))
     {
-        delete[] filedata;
         PHYSFS_close(rawtex);
         I_Error("TexureManager::cacheTexture: %s is malformed!\n", mTextureFilenames[filenum - 1].c_str());
     }
@@ -1206,16 +1202,14 @@ void TextureManager::cacheTexture(texhandle_t handle)
     if (!clientside)
     {
         Texture *texture = createTexture(handle, Texture::TextureSourceType::TEX_TEXTURE, width, height);
-        delete[] filedata;
         PHYSFS_close(rawtex);
     }
     else
     {
-        uint8_t *decoded_img = stbi_load_from_memory(filedata, filelen, &width, &height, &bpp, 4);
+        uint8_t *decoded_img = stbi_load_from_memory(filedata.begin(), filelen, &width, &height, &bpp, 4);
 
         if (!decoded_img)
         {
-            delete[] filedata;
             PHYSFS_close(rawtex);
             I_Error("TexureManager::cacheTexture: Error decoding %s\n", mTextureFilenames[filenum - 1].c_str());
         }
@@ -1244,8 +1238,6 @@ void TextureManager::cacheTexture(texhandle_t handle)
             texture->setOffsetX(x);
             texture->setOffsetY(y);
         }
-
-        delete[] filedata;
 
         generateColumns(texture, decoded_img);
         PHYSFS_close(rawtex);

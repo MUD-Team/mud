@@ -26,6 +26,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "Poco/Buffer.h"
 #include "i_system.h"
 #include "lua.hpp"
 #include "physfs.h"
@@ -44,23 +46,20 @@ static int32_t luaopen_debugger(lua_State *lua)
 	PHYSFS_sint64 length = PHYSFS_fileLength(fp);
 	assert(length > 0);
 
-	char* buffer = (char*) malloc(length + 1);
-	assert(buffer);
+    Poco::Buffer<char> buffer(length+1);
 	buffer[length] = 0;
 
-	PHYSFS_sint64 read = PHYSFS_readBytes(fp, buffer, length);
+	PHYSFS_sint64 read = PHYSFS_readBytes(fp, buffer.begin(), length);
     assert(read == length);
 
 	PHYSFS_close(fp);
 
-    if (luaL_loadbufferx(lua, buffer, length, "<debugger.lua>", nullptr) ||
+    if (luaL_loadbufferx(lua, buffer.begin(), length, "<debugger.lua>", nullptr) ||
         lua_pcall(lua, 0, LUA_MULTRET, 0))
         lua_error(lua);
 
     // Or you could load it from disk:
     // if(luaL_dofile(lua, "debugger.lua")) lua_error(lua);
-
-	free(buffer);
 
     return 1;
 }

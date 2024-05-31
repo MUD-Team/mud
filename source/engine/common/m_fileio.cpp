@@ -141,15 +141,6 @@ void M_FixPathSep(std::string &path)
     }
 }
 
-//
-// M_FileLength
-//
-// Returns the length of a file using an open descriptor
-int64_t M_FileLength(PHYSFS_File *f)
-{
-    return PHYSFS_fileLength(f);
-}
-
 /**
  * @brief Checks to see whether a file exists or not
  *
@@ -180,71 +171,6 @@ bool M_FileExistsExt(const std::string &filename, const char *ext)
     }
 
     return false;
-}
-
-//
-// M_WriteFile
-//
-// Writes a buffer to a new file, if it already exists, the file will be
-// erased and recreated with the new contents
-bool M_WriteFile(std::string filename, void *source, uint64_t length)
-{
-    PHYSFS_File *handle;
-    uint64_t        count;
-
-    handle = PHYSFS_openWrite(filename.c_str());
-
-    if (handle == NULL)
-    {
-        Printf(PRINT_HIGH, "Could not open file %s for writing\n", filename.c_str());
-        return false;
-    }
-
-    count = PHYSFS_writeBytes(handle, source, length);
-    PHYSFS_close(handle);
-
-    if (count != length)
-    {
-        Printf(PRINT_HIGH, "Failed while writing to file %s\n", filename.c_str());
-        return false;
-    }
-
-    return true;
-}
-
-//
-// M_ReadFile
-//
-// Reads a file, it will allocate storage via Z_Malloc for it and return
-// the buffer and the size.
-uint64_t M_ReadFile(std::string filename, uint8_t **buffer)
-{
-    PHYSFS_File *handle;
-    uint64_t        count, length;
-    uint8_t        *buf;
-
-    handle = PHYSFS_openRead(filename.c_str());
-
-    if (handle == NULL)
-    {
-        Printf(PRINT_HIGH, "Could not open file %s for reading\n", filename.c_str());
-        return false;
-    }
-
-    length = M_FileLength(handle);
-
-    buf   = (uint8_t *)Z_Malloc(length, PU_STATIC, NULL);
-    count = PHYSFS_readBytes(handle, buf, length);
-    PHYSFS_close(handle);
-
-    if (count != length)
-    {
-        Printf(PRINT_HIGH, "Failed while reading from file %s\n", filename.c_str());
-        return false;
-    }
-
-    *buffer = buf;
-    return length;
 }
 
 //

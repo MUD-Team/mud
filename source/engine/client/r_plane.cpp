@@ -606,49 +606,6 @@ void R_DrawPlanes(void)
                 flatheight = (float)tex->getHeight();
                 flatwidth = (float)tex->getWidth();
 
-                // [RH] warp a flat if desired
-                /*if (flatwarp[useflatnum])
-                {
-                    if (warpedflats[useflatnum] && flatwarpedwhen[useflatnum] == level.time)
-                    {
-                        Z_ChangeTag(dspan.source, PU_CACHE);
-                        dspan.source = warpedflats[useflatnum];
-                        Z_ChangeTag(dspan.source, PU_STATIC);
-                    }
-                    else
-                    {
-                        if (!warpedflats[useflatnum])
-                            warpedflats[useflatnum] = (byte *)Z_Malloc(64 * 64, PU_STATIC, &warpedflats[useflatnum]);
-
-                        static byte buffer[64];
-                        int32_t         timebase = level.time * 23;
-
-                        flatwarpedwhen[useflatnum] = level.time;
-                        byte *warped               = warpedflats[useflatnum];
-
-                        for (int32_t x = 63; x >= 0; x--)
-                        {
-                            int32_t   yt, yf = (finesine[(timebase + ((x + 17) << 7)) & FINEMASK] >> 13) & 63;
-                            byte *source = dspan.source + x;
-                            byte *dest   = warped + x;
-                            for (yt = 64; yt; yt--, yf = (yf + 1) & 63, dest += 64)
-                                *dest = *(source + (yf << 6));
-                        }
-                        timebase = level.time * 32;
-                        for (int32_t y = 63; y >= 0; y--)
-                        {
-                            int32_t   xt, xf = (finesine[(timebase + (y << 7)) & FINEMASK] >> 13) & 63;
-                            byte *source = warped + (y << 6);
-                            byte *dest   = buffer;
-                            for (xt = 64; xt; xt--, xf = (xf + 1) & 63)
-                                *dest++ = *(source + xf);
-                            memcpy(warped + (y << 6), buffer, 64);
-                        }
-                        Z_ChangeTag(dspan.source, PU_CACHE);
-                        dspan.source = warped;
-                    }
-                }*/
-
                 pl->top[pl->maxx + 1] = viewheight;
                 pl->top[pl->minx - 1] = viewheight;
 

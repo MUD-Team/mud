@@ -26,6 +26,7 @@
 
 #include <algorithm>
 
+#include "Poco/Buffer.h"
 #include "d_player.h"
 #include "dobject.h"
 #include "i_system.h"
@@ -640,12 +641,11 @@ FArchive &FArchive::operator>>(std::string &s)
         s = "";
     else
     {
-        char *cstr = new char[size];
+        Poco::Buffer<char> cstr(size);
         size--;
-        Read(cstr, size);
+        Read(cstr.begin(), size);
         cstr[size] = 0;
-        s          = cstr;
-        delete[] cstr;
+        s          = cstr.begin();
     }
     return *this;
 }

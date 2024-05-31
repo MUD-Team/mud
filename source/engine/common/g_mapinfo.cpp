@@ -19,6 +19,7 @@
 //
 //-----------------------------------------------------------------------------
 
+#include "Poco/Buffer.h"
 #include "g_episode.h"
 #include "g_skill.h"
 #include "gi.h"
@@ -509,10 +510,10 @@ void ParseUMapInfoFile(const char *filename)
     if (rawinfo == NULL)
         I_Error("Error opening %s umapinfo file", filepath.c_str());
 
-    std::string buffer;
-    buffer.resize(PHYSFS_fileLength(rawinfo));
+    uint32_t filelen = PHYSFS_fileLength(rawinfo);
+    Poco::Buffer<char> buffer(filelen);
 
-    if (PHYSFS_readBytes(rawinfo, (void *)buffer.data(), buffer.size()) != buffer.size())
+    if (PHYSFS_readBytes(rawinfo, buffer.begin(), filelen) != filelen)
     {
         PHYSFS_close(rawinfo);
         I_Error("Error reading %s umapinfo file", filepath.c_str());
@@ -525,7 +526,7 @@ void ParseUMapInfoFile(const char *filename)
         false,    // semiComments
         true,     // cComments
     };
-    OScanner os = OScanner::openBuffer(config, buffer.data(), buffer.data() + buffer.size());
+    OScanner os = OScanner::openBuffer(config, buffer.begin(), buffer.end());
 
     while (os.scan())
     {
@@ -1687,13 +1688,13 @@ static void ParseMapInfoFile(const char *filename)
     if (rawinfo == NULL)
         I_Error("Error opening %s mapinfo file", filepath.c_str());
 
-    std::string buffer;
-    buffer.resize(PHYSFS_fileLength(rawinfo));
+    uint32_t filelen = PHYSFS_fileLength(rawinfo);
+    Poco::Buffer<char> buffer(filelen);
 
-    if (PHYSFS_readBytes(rawinfo, (void *)buffer.data(), buffer.size()) != buffer.size())
+    if (PHYSFS_readBytes(rawinfo, buffer.begin(), filelen) != filelen)
     {
         PHYSFS_close(rawinfo);
-        I_Error("Error reading %s mapinfo file", filepath.c_str());
+        I_Error("Error reading %s umapinfo file", filepath.c_str());
     }
 
     PHYSFS_close(rawinfo);
@@ -1703,7 +1704,7 @@ static void ParseMapInfoFile(const char *filename)
         true,     // semiComments
         true,     // cComments
     };
-    OScanner os = OScanner::openBuffer(config, buffer.data(), buffer.data() + buffer.size());
+    OScanner os = OScanner::openBuffer(config, buffer.begin(), buffer.end());
 
     while (os.scan())
     {

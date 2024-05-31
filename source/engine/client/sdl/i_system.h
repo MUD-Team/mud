@@ -50,7 +50,7 @@ void I_EndRead(void);
 void I_Init(void);
 
 // Called by startup code
-// to get the ammount of memory to malloc
+// to get the amount of memory to malloc
 // for the zone management.
 void *I_ZoneBase(size_t *size);
 
@@ -125,8 +125,6 @@ dtime_t I_MSTime(void);
 extern char DoomStartupTitle[256];
 
 void I_FinishClockCalibration();
-
-std::string I_GetClipboardText();
 
 /**
  * @brief Show an error message box.

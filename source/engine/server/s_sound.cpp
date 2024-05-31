@@ -26,10 +26,12 @@
 
 #include <algorithm>
 
+#include "Poco/Buffer.h"
 #include "c_dispatch.h"
 #include "cmdlib.h"
 #include "i_system.h"
 #include "m_alloc.h"
+#include "m_fileio.h"
 #include "m_random.h"
 #include "mud_includes.h"
 #include "oscanner.h"
@@ -336,17 +338,30 @@ void S_ParseSndInfo()
 {
     S_ClearSoundLumps();
 
-    int32_t lump = -1;
-    while ((lump = W_FindLump("SNDINFO", lump)) != -1)
+    if (M_FileExists("lumps/SNDINFO.txt"))
     {
-        char *buffer = static_cast<char *>(W_CacheLumpNum(lump, PU_CACHE));
+        PHYSFS_File *rawinfo = PHYSFS_openRead("lumps/SNDINFO.txt");
+
+        if (rawinfo == NULL)
+            I_Error("Error opening lumps/SNDINFO.txt file");
+
+        uint32_t filelen = PHYSFS_fileLength(rawinfo);
+        Poco::Buffer<char> buffer(filelen);
+
+        if (PHYSFS_readBytes(rawinfo, (void *)buffer.begin(), filelen) != filelen)
+        {
+            PHYSFS_close(rawinfo);
+            I_Error("Error reading lumps/SNDINFO.txt file");
+        }
+
+        PHYSFS_close(rawinfo);
 
         const OScannerConfig config = {
             "SNDINFO", // lumpName
             true,      // semiComments
             true,      // cComments
         };
-        OScanner os = OScanner::openBuffer(config, buffer, buffer + W_LumpLength(lump));
+        OScanner os = OScanner::openBuffer(config, buffer.begin(), buffer.end());
 
         while (os.scan())
         {
@@ -408,7 +423,7 @@ void S_ParseSndInfo()
                     }
                     // else if (os.compareTokenNoCase("world"))
                     //{
-                    // todo
+                    //  todo
                     //}
 
                     if (os.compareTokenNoCase("continuous"))

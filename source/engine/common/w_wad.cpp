@@ -37,6 +37,7 @@
 
 #include <algorithm>
 
+#include "Poco/Buffer.h"
 #include "cmdlib.h"
 #include "i_system.h"
 #include "m_argv.h"
@@ -136,19 +137,17 @@ OMD5Hash W_MD5(const std::string &filename)
         return rvo;
 
     size_t len = PHYSFS_fileLength(fp);
-    uint8_t *buf = (uint8_t *)Z_Malloc(len, PU_CACHE, 0);
+    Poco::Buffer<uint8_t> buf(len);
 
-    if (PHYSFS_readBytes(fp, buf, len) != len)
+    if (PHYSFS_readBytes(fp, buf.begin(), len) != len)
     {
-        Z_Free(buf);
         PHYSFS_close(fp);
         return rvo;
     }
     else
         PHYSFS_close(fp);
 
-    OMD5Hash::makeFromHexStr(rvo, MD5SUM(buf, len).c_str());
-    Z_Free(buf);
+    OMD5Hash::makeFromHexStr(rvo, MD5SUM(buf.begin(), len).c_str());
     return rvo; // bubble up failure
 }
 
@@ -237,7 +236,7 @@ void AddFile(const OResFile &file)
 
         fileinfo          = new filelump_t[1];
         fileinfo->filepos = 0;
-        fileinfo->size    = M_FileLength(handle);
+        fileinfo->size    = PHYSFS_fileLength(handle);
         std::transform(lumpname.c_str(), lumpname.c_str() + 8, fileinfo->name, toupper);
 
         newlumps = 1;
@@ -250,7 +249,7 @@ void AddFile(const OResFile &file)
         header.infotableofs = LELONG(header.infotableofs);
         size_t length       = header.numlumps * sizeof(filelump_t);
 
-        if (length > (uint32_t)M_FileLength(handle))
+        if (length > (uint32_t)PHYSFS_fileLength(handle))
         {
             Printf(PRINT_WARNING, "\nbad number of lumps for %s\n", filename.c_str());
             PHYSFS_close(handle);
@@ -478,7 +477,7 @@ uint32_t W_ReadChunk(const char *file, uint32_t offs, uint32_t len, void *dest, 
 
     if (fp)
     {
-        filelen = M_FileLength(fp);
+        filelen = PHYSFS_fileLength(fp);
 
         PHYSFS_seek(fp, offs);
         read = PHYSFS_readBytes(fp, dest, len);
@@ -558,8 +557,7 @@ void *W_CacheLumpName(const char *name, const zoneTag_e tag)
 //
 // W_FindLump
 //
-// Find a named lump. Specifically allows duplicates for merging of e.g.
-// SNDINFO lumps.
+// Find a named lump.
 //
 // [SL] 2013-01-15 - Search forwards through the list of lumps in reverse pwad
 // ordering, returning older lumps with a matching name first.
