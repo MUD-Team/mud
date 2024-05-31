@@ -24,6 +24,7 @@
 
 #include "s_sndseq.h"
 
+#include "Poco/Buffer.h"
 #include "cmdlib.h"
 #include "g_mapinfo.h"
 #include "i_system.h"
@@ -440,156 +441,166 @@ void S_ParseSndSeq()
     ScriptTemp        = (uint32_t *)Malloc(MAX_SEQSIZE * sizeof(*ScriptTemp));
     ScriptTempSize    = MAX_SEQSIZE;
 
-    int32_t lump = -1;
-    while ((lump = W_FindLump("SNDSEQ", lump)) != -1)
+    PHYSFS_File *rawinfo = PHYSFS_openRead("lumps/SNDSEQ.txt");
+
+    if (rawinfo == NULL)
+        return;
+
+    uint32_t filelen = PHYSFS_fileLength(rawinfo);
+    Poco::Buffer<char> buffer(filelen);
+
+    if (PHYSFS_readBytes(rawinfo, buffer.begin(), filelen) != filelen)
     {
-        const char *buffer = static_cast<char *>(W_CacheLumpNum(lump, PU_STATIC));
+        PHYSFS_close(rawinfo);
+        return;
+    }
 
-        OScannerConfig config = {
-            "SNDSEQ", // lumpName
-            false,    // semiComments
-            true,     // cComments
-        };
-        OScanner os = OScanner::openBuffer(config, buffer, buffer + W_LumpLength(lump));
+    PHYSFS_close(rawinfo);
 
-        while (os.scan())
+    OScannerConfig config = {
+        "SNDSEQ", // lumpName
+        false,    // semiComments
+        true,     // cComments
+    };
+    OScanner os = OScanner::openBuffer(config, buffer.begin(), buffer.end());
+
+    while (os.scan())
+    {
+        std::string str = os.getToken();
+
+        if (str[0] == ':')
         {
-            std::string str = os.getToken();
-
-            if (str[0] == ':')
+            if (curseq != -1)
             {
-                if (curseq != -1)
-                {
-                    os.error("S_ParseSndSeq: Nested Script Error");
-                }
-                strncpy(name, str.substr(1).c_str(), MAX_SNDNAME);
-                for (curseq = 0; curseq < NumSequences; curseq++)
-                {
-                    if (iequals(Sequences[curseq]->name, name))
-                    {
-                        Z_Free(Sequences[curseq]);
-                        Sequences[curseq] = NULL;
-                        break;
-                    }
-                }
-                if (curseq == NumSequences)
-                    NumSequences++;
-                if (NumSequences > MaxSequences)
-                {
-                    MaxSequences = MaxSequences ? MaxSequences * 2 : 64;
-                    Sequences    = (sndseq_t **)Realloc(Sequences, MaxSequences * sizeof(*Sequences));
-                }
-                memset(ScriptTemp, 0, sizeof(*ScriptTemp) * ScriptTempSize);
-                stopsound = -1;
-                cursize   = 0;
-                continue;
+                os.error("S_ParseSndSeq: Nested Script Error");
             }
-            if (curseq == -1)
+            strncpy(name, str.substr(1).c_str(), MAX_SNDNAME);
+            for (curseq = 0; curseq < NumSequences; curseq++)
             {
-                continue;
+                if (iequals(Sequences[curseq]->name, name))
+                {
+                    Z_Free(Sequences[curseq]);
+                    Sequences[curseq] = NULL;
+                    break;
+                }
             }
-
-            switch (MustMatchString(os, SSStrings))
+            if (curseq == NumSequences)
+                NumSequences++;
+            if (NumSequences > MaxSequences)
             {
-            case SS_STRING_PLAYUNTILDONE:
-                VerifySeqPtr(cursize, 2);
-                os.mustScan();
-                ScriptTemp[cursize++] = MakeCommand(SS_CMD_PLAY, S_FindSound(os.getToken().c_str()));
-                ScriptTemp[cursize++] = SS_CMD_WAITUNTILDONE << 24;
-                break;
-
-            case SS_STRING_PLAY:
-                VerifySeqPtr(cursize, 1);
-                os.mustScan();
-                ScriptTemp[cursize++] = MakeCommand(SS_CMD_PLAY, S_FindSound(os.getToken().c_str()));
-                break;
-
-            case SS_STRING_PLAYTIME:
-                VerifySeqPtr(cursize, 2);
-                os.mustScan();
-                ScriptTemp[cursize++] = MakeCommand(SS_CMD_PLAY, S_FindSound(os.getToken().c_str()));
-                os.mustScanInt();
-                ScriptTemp[cursize++] = MakeCommand(SS_CMD_DELAY, os.getTokenInt());
-                break;
-
-            case SS_STRING_PLAYREPEAT:
-                VerifySeqPtr(cursize, 1);
-                os.mustScan();
-                ScriptTemp[cursize++] = MakeCommand(SS_CMD_PLAYREPEAT, S_FindSound(os.getToken().c_str()));
-                break;
-
-            case SS_STRING_PLAYLOOP:
-                VerifySeqPtr(cursize, 2);
-                os.mustScan();
-                ScriptTemp[cursize++] = MakeCommand(SS_CMD_PLAYLOOP, S_FindSound(os.getToken().c_str()));
-                os.mustScanInt();
-                ScriptTemp[cursize++] = os.getTokenInt();
-                break;
-
-            case SS_STRING_DELAY:
-                VerifySeqPtr(cursize, 1);
-                os.mustScanInt();
-                ScriptTemp[cursize++] = MakeCommand(SS_CMD_DELAY, os.getTokenInt());
-                break;
-
-            case SS_STRING_DELAYRAND:
-                VerifySeqPtr(cursize, 2);
-                os.mustScanInt();
-                ScriptTemp[cursize++] = MakeCommand(SS_CMD_DELAYRAND, os.getTokenInt());
-                os.mustScanInt();
-                ScriptTemp[cursize++] = os.getTokenInt();
-                break;
-
-            case SS_STRING_VOLUME:
-                VerifySeqPtr(cursize, 1);
-                os.mustScanInt();
-                ScriptTemp[cursize++] = MakeCommand(SS_CMD_VOLUME, os.getTokenInt());
-                break;
-
-            case SS_STRING_STOPSOUND:
-                VerifySeqPtr(cursize, 1);
-                os.mustScan();
-                stopsound             = S_FindSound(os.getToken().c_str());
-                ScriptTemp[cursize++] = SS_CMD_STOPSOUND << 24;
-                break;
-
-            case SS_STRING_NOSTOPCUTOFF:
-                VerifySeqPtr(cursize, 1);
-                stopsound             = -2;
-                ScriptTemp[cursize++] = SS_CMD_STOPSOUND << 24;
-                break;
-
-            case SS_STRING_ATTENUATION:
-                VerifySeqPtr(cursize, 1);
-                os.mustScan();
-                ScriptTemp[cursize++] = MakeCommand(SS_CMD_ATTENUATION, MustMatchString(os, Attenuations));
-                break;
-
-            case SS_STRING_END:
-                Sequences[curseq] = (sndseq_t *)Z_Malloc(sizeof(sndseq_t) + sizeof(int32_t) * cursize, PU_STATIC, 0);
-                strcpy(Sequences[curseq]->name, name);
-                memcpy(Sequences[curseq]->script, ScriptTemp, sizeof(int32_t) * cursize);
-                Sequences[curseq]->script[cursize] = SS_CMD_END;
-                Sequences[curseq]->stopsound       = stopsound;
-                curseq                             = -1;
-                break;
-
-            case SS_STRING_PLATFORM:
-                AssignTranslations(os, curseq, SEQ_PLATFORM);
-                break;
-
-            case SS_STRING_DOOR:
-                AssignTranslations(os, curseq, SEQ_DOOR);
-                break;
-
-            case SS_STRING_ENVIRONMENT:
-                AssignTranslations(os, curseq, SEQ_ENVIRONMENT);
-                break;
-
-            default:
-                os.error("Invalid SNDSEQ string");
-                break;
+                MaxSequences = MaxSequences ? MaxSequences * 2 : 64;
+                Sequences    = (sndseq_t **)Realloc(Sequences, MaxSequences * sizeof(*Sequences));
             }
+            memset(ScriptTemp, 0, sizeof(*ScriptTemp) * ScriptTempSize);
+            stopsound = -1;
+            cursize   = 0;
+            continue;
+        }
+        if (curseq == -1)
+        {
+            continue;
+        }
+
+        switch (MustMatchString(os, SSStrings))
+        {
+        case SS_STRING_PLAYUNTILDONE:
+            VerifySeqPtr(cursize, 2);
+            os.mustScan();
+            ScriptTemp[cursize++] = MakeCommand(SS_CMD_PLAY, S_FindSound(os.getToken().c_str()));
+            ScriptTemp[cursize++] = SS_CMD_WAITUNTILDONE << 24;
+            break;
+
+        case SS_STRING_PLAY:
+            VerifySeqPtr(cursize, 1);
+            os.mustScan();
+            ScriptTemp[cursize++] = MakeCommand(SS_CMD_PLAY, S_FindSound(os.getToken().c_str()));
+            break;
+
+        case SS_STRING_PLAYTIME:
+            VerifySeqPtr(cursize, 2);
+            os.mustScan();
+            ScriptTemp[cursize++] = MakeCommand(SS_CMD_PLAY, S_FindSound(os.getToken().c_str()));
+            os.mustScanInt();
+            ScriptTemp[cursize++] = MakeCommand(SS_CMD_DELAY, os.getTokenInt());
+            break;
+
+        case SS_STRING_PLAYREPEAT:
+            VerifySeqPtr(cursize, 1);
+            os.mustScan();
+            ScriptTemp[cursize++] = MakeCommand(SS_CMD_PLAYREPEAT, S_FindSound(os.getToken().c_str()));
+            break;
+
+        case SS_STRING_PLAYLOOP:
+            VerifySeqPtr(cursize, 2);
+            os.mustScan();
+            ScriptTemp[cursize++] = MakeCommand(SS_CMD_PLAYLOOP, S_FindSound(os.getToken().c_str()));
+            os.mustScanInt();
+            ScriptTemp[cursize++] = os.getTokenInt();
+            break;
+
+        case SS_STRING_DELAY:
+            VerifySeqPtr(cursize, 1);
+            os.mustScanInt();
+            ScriptTemp[cursize++] = MakeCommand(SS_CMD_DELAY, os.getTokenInt());
+            break;
+
+        case SS_STRING_DELAYRAND:
+            VerifySeqPtr(cursize, 2);
+            os.mustScanInt();
+            ScriptTemp[cursize++] = MakeCommand(SS_CMD_DELAYRAND, os.getTokenInt());
+            os.mustScanInt();
+            ScriptTemp[cursize++] = os.getTokenInt();
+            break;
+
+        case SS_STRING_VOLUME:
+            VerifySeqPtr(cursize, 1);
+            os.mustScanInt();
+            ScriptTemp[cursize++] = MakeCommand(SS_CMD_VOLUME, os.getTokenInt());
+            break;
+
+        case SS_STRING_STOPSOUND:
+            VerifySeqPtr(cursize, 1);
+            os.mustScan();
+            stopsound             = S_FindSound(os.getToken().c_str());
+            ScriptTemp[cursize++] = SS_CMD_STOPSOUND << 24;
+            break;
+
+        case SS_STRING_NOSTOPCUTOFF:
+            VerifySeqPtr(cursize, 1);
+            stopsound             = -2;
+            ScriptTemp[cursize++] = SS_CMD_STOPSOUND << 24;
+            break;
+
+        case SS_STRING_ATTENUATION:
+            VerifySeqPtr(cursize, 1);
+            os.mustScan();
+            ScriptTemp[cursize++] = MakeCommand(SS_CMD_ATTENUATION, MustMatchString(os, Attenuations));
+            break;
+
+        case SS_STRING_END:
+            Sequences[curseq] = (sndseq_t *)Z_Malloc(sizeof(sndseq_t) + sizeof(int32_t) * cursize, PU_STATIC, 0);
+            strcpy(Sequences[curseq]->name, name);
+            memcpy(Sequences[curseq]->script, ScriptTemp, sizeof(int32_t) * cursize);
+            Sequences[curseq]->script[cursize] = SS_CMD_END;
+            Sequences[curseq]->stopsound       = stopsound;
+            curseq                             = -1;
+            break;
+
+        case SS_STRING_PLATFORM:
+            AssignTranslations(os, curseq, SEQ_PLATFORM);
+            break;
+
+        case SS_STRING_DOOR:
+            AssignTranslations(os, curseq, SEQ_DOOR);
+            break;
+
+        case SS_STRING_ENVIRONMENT:
+            AssignTranslations(os, curseq, SEQ_ENVIRONMENT);
+            break;
+
+        default:
+            os.error("Invalid SNDSEQ string");
+            break;
         }
     }
 

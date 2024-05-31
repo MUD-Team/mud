@@ -24,6 +24,7 @@
 
 #include "stringtable.h"
 
+#include "Poco/Buffer.h"
 #include "cmdlib.h"
 #include "i_system.h"
 #include "mud_includes.h"
@@ -213,10 +214,9 @@ void StringTable::loadLanguage(const char *code, bool exactMatch, int32_t pass, 
     }
 }
 
-void StringTable::loadStringsFile(const char *filename, const bool engOnly)
+void StringTable::loadStringsFile(const bool engOnly)
 {
-    // Can't use Z_Malloc this early, so we use raw new/delete.
-    std::string filepath = StrFormat("lumps/%s.txt", filename);
+    std::string filepath = StrFormat("lumps/LANGUAGE.txt");
 
     PHYSFS_File *rawlang = PHYSFS_openRead(filepath.c_str());
 
@@ -224,12 +224,11 @@ void StringTable::loadStringsFile(const char *filename, const bool engOnly)
         I_Error("Error opening %s language file", filepath.c_str());
 
     size_t len          = PHYSFS_fileLength(rawlang);
-    char  *languageLump = new char[len + 1];
+    Poco::Buffer<char> languageLump(len + 1);
 
-    if (PHYSFS_readBytes(rawlang, languageLump, len) != len)
+    if (PHYSFS_readBytes(rawlang, languageLump.begin(), len) != len)
     {
         PHYSFS_close(rawlang);
-        delete[] languageLump;
         I_Error("Error reading %s language file", filepath.c_str());
     }
 
@@ -254,21 +253,19 @@ void StringTable::loadStringsFile(const char *filename, const bool engOnly)
             code[3] = '\0';
 
             // Try the full language code (enu).
-            loadLanguage(code, true, pass++, languageLump, len);
+            loadLanguage(code, true, pass++, languageLump.begin(), len);
 
             // Try the partial language code (en).
             code[2] = '\0';
-            loadLanguage(code, true, pass++, languageLump, len);
+            loadLanguage(code, true, pass++, languageLump.begin(), len);
 
             // Try an inexact match for all languages in the same family (en_).
-            loadLanguage(code, false, pass++, languageLump, len);
+            loadLanguage(code, false, pass++, languageLump.begin(), len);
         }
     }
 
     // Load string defaults.
-    loadLanguage("**", true, pass++, languageLump, len);
-
-    delete[] languageLump;
+    loadLanguage("**", true, pass++, languageLump.begin(), len);
 }
 
 void StringTable::prepareIndexes()
@@ -350,7 +347,7 @@ void StringTable::loadStrings(const bool engOnly)
     clearStrings();
     prepareIndexes();
 
-    loadStringsFile("LANGUAGE", engOnly);
+    loadStringsFile(engOnly);
 }
 
 //

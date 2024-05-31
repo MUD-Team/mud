@@ -27,6 +27,7 @@
 #include <algorithm>
 #include <sstream>
 
+#include "Poco/Buffer.h"
 #include "c_console.h"
 #include "cmdlib.h"
 #include "d_player.h"
@@ -186,8 +187,7 @@ bool safemode = false;
 void C_DoCommand(const char *cmd, uint32_t key)
 {
     size_t           argc, argsize;
-    char           **argv;
-    char            *args, *arg, *realargs;
+    char            *arg;
     const char      *data;
     DConsoleCommand *com;
     int32_t              check = -1;
@@ -229,8 +229,9 @@ void C_DoCommand(const char *cmd, uint32_t key)
         argc    = 1;
         argsize = strlen(com_token) + 1;
 
-        realargs = new char[strlen(data) + 1];
-        strcpy(realargs, data);
+        Poco::Buffer<char> realargs(strlen(data) + 1);
+        
+        strcpy(realargs.begin(), data);
 
         while ((data = ParseString(data)))
         {
@@ -238,10 +239,10 @@ void C_DoCommand(const char *cmd, uint32_t key)
             argsize += strlen(com_token) + 1;
         }
 
-        args = new char[argsize];
-        argv = new char *[argc];
+        Poco::Buffer<char> args(argsize);
+        Poco::Buffer<char *> argv(argc);
 
-        arg     = args;
+        arg     = args.begin();
         data    = cmd;
         argsize = 0;
         while ((data = ParseString(data)))
@@ -265,8 +266,8 @@ void C_DoCommand(const char *cmd, uint32_t key)
             if (!safemode || stricmp(argv[0], "if") == 0 || stricmp(argv[0], "exec") == 0)
             {
                 com->argc         = argc;
-                com->argv         = argv;
-                com->args         = realargs;
+                com->argv         = argv.begin();
+                com->args         = realargs.begin();
                 com->m_Instigator = consoleplayer().mo;
                 com->Run(key);
             }
@@ -289,7 +290,7 @@ void C_DoCommand(const char *cmd, uint32_t key)
                     {
                         com               = c->second;
                         com->argc         = argc + 1;
-                        com->argv         = argv - 1; // Hack
+                        com->argv         = argv.begin(); // Hack
                         com->m_Instigator = consoleplayer().mo;
                         com->Run(key);
                     }
@@ -303,7 +304,7 @@ void C_DoCommand(const char *cmd, uint32_t key)
                     {
                         com               = c->second;
                         com->argc         = argc + 1;
-                        com->argv         = argv - 1; // Hack
+                        com->argv         = argv.begin(); // Hack
                         com->m_Instigator = consoleplayer().mo;
                         com->Run();
                     }
@@ -317,9 +318,6 @@ void C_DoCommand(const char *cmd, uint32_t key)
                 Printf(PRINT_WARNING, "Unknown command \"%s\"\n", argv[0]);
             }
         }
-        delete[] argv;
-        delete[] args;
-        delete[] realargs;
     }
 }
 
@@ -334,7 +332,7 @@ void AddCommandString(const std::string &str, uint32_t key)
     const char *cend;
 
     // stores a copy of the current substring
-    char *command = new char[totallen + 1];
+    Poco::Buffer<char> command(totallen + 1);
 
     // scan for a command ending
     while (*cstart)
@@ -389,10 +387,10 @@ void AddCommandString(const std::string &str, uint32_t key)
             cend--;
 
         size_t clength = cend - cstart + 1;
-        memcpy(command, cstart, clength);
+        memcpy(command.begin(), cstart, clength);
         command[clength] = '\0';
 
-        C_DoCommand(command, key);
+        C_DoCommand(command.begin(), key);
 
         // don't parse anymore if there's a comment
         if (cp[0] == '/' && cp[1] == '/')
@@ -404,8 +402,6 @@ void AddCommandString(const std::string &str, uint32_t key)
         else
             cstart = cp;
     }
-
-    delete[] command;
 }
 
 #define MAX_EXEC_DEPTH 32

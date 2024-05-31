@@ -26,6 +26,7 @@
 
 #include <algorithm>
 
+#include "Poco/Buffer.h"
 #include "c_dispatch.h"
 #include "cl_main.h"
 #include "cmdlib.h"
@@ -1072,8 +1073,6 @@ void S_ChangeMusic(std::string musicname, int32_t looping)
         return;
     }
 
-    uint8_t  *data   = NULL;
-    size_t length = 0;
     // just test the name + .mid for now - Dasho
     // StrUpper while dealing with Freedoom lumps - remove eventually
     std::string  musicpath = StrFormat("music/%s.mid", StdStringToUpper(musicname.c_str()).c_str());
@@ -1086,13 +1085,12 @@ void S_ChangeMusic(std::string musicname, int32_t looping)
     }
     else
     {
-        length              = M_FileLength(f);
-        data                = static_cast<uint8_t *>(Malloc(length));
-        const size_t result = PHYSFS_readBytes(f, data, length);
+        uint32_t length     = PHYSFS_fileLength(f);
+        Poco::Buffer<uint8_t> data(length);
+        const size_t result = PHYSFS_readBytes(f, data.begin(), length);
         PHYSFS_close(f);
         if (result == length)
-            I_PlaySong(data, length, (looping != 0));
-        M_Free(data);
+            I_PlaySong(data.begin(), length, (looping != 0));
     }
 
     mus_playing.name = musicname;
@@ -1249,10 +1247,10 @@ void S_ParseSndInfo()
         if (rawinfo == NULL)
             I_Error("Error opening lumps/SNDINFO.txt file");
 
-        std::string buffer;
-        buffer.resize(PHYSFS_fileLength(rawinfo));
+        uint32_t filelen = PHYSFS_fileLength(rawinfo);
+        Poco::Buffer<char> buffer(filelen);
 
-        if (PHYSFS_readBytes(rawinfo, (void *)buffer.data(), buffer.size()) != buffer.size())
+        if (PHYSFS_readBytes(rawinfo, (void *)buffer.begin(), filelen) != filelen)
         {
             PHYSFS_close(rawinfo);
             I_Error("Error reading lumps/SNDINFO.txt file");
@@ -1265,7 +1263,7 @@ void S_ParseSndInfo()
             true,      // semiComments
             true,      // cComments
         };
-        OScanner os = OScanner::openBuffer(config, buffer.data(), buffer.data() + buffer.size());
+        OScanner os = OScanner::openBuffer(config, buffer.begin(), buffer.end());
 
         while (os.scan())
         {

@@ -23,6 +23,7 @@
 #include <string>
 
 #include "../lua_public.h"
+#include "Poco/Buffer.h"
 #include "cmdlib.h"
 #include "i_system.h"
 #include "lua_debugger.h"
@@ -124,9 +125,9 @@ int32_t LUA_DoFile(lua_State *L, const std::string &filepath)
         I_Error("LuaVM: Zero length file %s", filepath.c_str());
     }
 
-    char *buffer = new char[length + 1];
+    Poco::Buffer<char> buffer(length+1);
 
-    if (length != PHYSFS_readBytes(fp, buffer, length))
+    if (length != PHYSFS_readBytes(fp, buffer.begin(), length))
     {
         I_Error("LuaVM: Incorrect bytes read for file %s", filepath.c_str());
     }
@@ -134,8 +135,7 @@ int32_t LUA_DoFile(lua_State *L, const std::string &filepath)
     PHYSFS_close(fp);
 
     buffer[length] = 0;
-    int32_t result     = LUA_DoFile(L, filepath, buffer, length);
-    delete[] buffer;
+    int32_t result     = LUA_DoFile(L, filepath, buffer.begin(), length);
 
     requirePaths.pop_back();
     return result;

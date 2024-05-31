@@ -27,6 +27,7 @@
 
 #include "m_ostring.h"
 
+#include "Poco/Buffer.h"
 #include "mud_includes.h"
 
 // initialize static member variables
@@ -734,30 +735,22 @@ struct LowerFunctor
 
 template <typename FUNC> static OString OStringConverter(const char *s, size_t length)
 {
-    char  fixed_buf[1024];
-    char *dyn_buf = NULL;
+    Poco::Buffer<char> conv_buf(1024);
     char *out;
 
     const char *in = s;
     FUNC        func; // instance of the conversion functor
 
-    if (length < 1024)
-        out = fixed_buf;
-    else
-        out = dyn_buf = new char[length + 1];
+    if (length >= 1024)
+        conv_buf.resize(length + 1, false);
+
+    out = conv_buf.begin();
 
     for (size_t i = 0; i < length && *in != '\0'; i++)
         *out++ = func(*in++);
     *out = '\0';
 
-    if (length < 1024)
-        return OString(fixed_buf);
-    else
-    {
-        OString result(dyn_buf);
-        delete[] dyn_buf;
-        return result;
-    }
+    return OString(conv_buf.begin());
 }
 
 OString OStringToUpper(const char *s, size_t length)

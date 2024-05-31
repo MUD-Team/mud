@@ -24,6 +24,7 @@
 
 #include <map>
 
+#include "Poco/Buffer.h"
 #include "gi.h"
 #include "i_system.h"
 #include "mud_includes.h"
@@ -101,12 +102,12 @@ void P_InitSwitchList(void)
         I_Error("Error opening lumps/SWITCHES.lmp"); 
     }
 
-    uint8_t *alphSwitchList = new uint8_t[PHYSFS_fileLength(rawswitches)];
+    uint32_t filelen = PHYSFS_fileLength(rawswitches);
+    Poco::Buffer<uint8_t> alphSwitchList(filelen);
 
-    if (PHYSFS_readBytes(rawswitches, alphSwitchList, PHYSFS_fileLength(rawswitches)) != PHYSFS_fileLength(rawswitches))
+    if (PHYSFS_readBytes(rawswitches, alphSwitchList.begin(), PHYSFS_fileLength(rawswitches)) != PHYSFS_fileLength(rawswitches))
     {
         PHYSFS_close(rawswitches);
-        delete[] alphSwitchList;
         I_Error("Error reading lumps/SWITCHES.lmp"); 
     }
     
@@ -115,7 +116,7 @@ void P_InitSwitchList(void)
     uint8_t *list_p;
     int32_t   i;
 
-    for (i = 0, list_p = alphSwitchList; list_p[18] || list_p[19]; list_p += 20, i++)
+    for (i = 0, list_p = alphSwitchList.begin(); list_p[18] || list_p[19]; list_p += 20, i++)
         ;
 
     if (i == 0)
@@ -128,7 +129,7 @@ void P_InitSwitchList(void)
     {
         switchlist = (int32_t *)Z_Malloc(sizeof(*switchlist) * (i * 2 + 1), PU_STATIC, 0);
 
-        for (i = 0, list_p = alphSwitchList; list_p[18] || list_p[19]; list_p += 20)
+        for (i = 0, list_p = alphSwitchList.begin(); list_p[18] || list_p[19]; list_p += 20)
         {
             if (((gameinfo.maxSwitch & 15) >= (list_p[18] & 15)) && ((gameinfo.maxSwitch & ~15) == (list_p[18] & ~15)))
             {
@@ -144,8 +145,6 @@ void P_InitSwitchList(void)
         numswitches   = i / 2;
         switchlist[i] = TextureManager::NOT_FOUND_TEXTURE_HANDLE;
     }
-
-    delete[] alphSwitchList;
 }
 
 void P_DestroyButtonThinkers()

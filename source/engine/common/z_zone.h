@@ -55,9 +55,7 @@ void Z_DumpHeap(const zoneTag_e lowtag, const zoneTag_e hightag);
 // Don't use these, use the macros instead!
 void *Z_Malloc2(size_t size, const zoneTag_e tag, void *user, const char *file, const int32_t line);
 void  Z_Free2(void *ptr, const char *file, int32_t line);
-void  Z_Discard2(void **ptr, const char *file, int32_t line);
 void  Z_ChangeTag2(void *ptr, const zoneTag_e tag, const char *file, int32_t line);
-void  Z_ChangeOwner2(void *ptr, void *user, const char *file, int32_t line);
 
 typedef struct memblock_s
 {
@@ -74,26 +72,6 @@ inline void Z_ChangeTag2(const void *ptr, const zoneTag_e tag, const char *file,
     Z_ChangeTag2(const_cast<void *>(ptr), tag, file, line);
 }
 
-/**
- * @brief Discard a piece of memory from the heap without freeing it.
- *
- * @param ptr A pointer to the pointer we want to discard.  The pointer must
- *            point to something, but the pointed-to-pointer can be null,
- *            in which case nothing happens.
- * @param file Filename passed in from __FILE__ macro.
- * @param line Line number passed in from __LINE__ macro.
- */
-template <typename P> inline void Z_Discard2(P ptr, const char *file, int32_t line)
-{
-    if (*ptr == NULL)
-    {
-        return;
-    }
-
-    Z_ChangeTag2(*ptr, PU_CACHE, file, line);
-    *ptr = NULL;
-}
-
 //
 // This is used to get the local FILE:LINE info from CPP
 // prior to really calling the function in question.
@@ -106,6 +84,4 @@ template <typename P> inline void Z_Discard2(P ptr, const char *file, int32_t li
 
 #define Z_Malloc(s, t, p)   Z_Malloc2(s, t, p, __FILE__, __LINE__)
 #define Z_Free(p)           Z_Free2(p, __FILE__, __LINE__)
-#define Z_Discard(p)        Z_Discard2(p, __FILE__, __LINE__)
 #define Z_ChangeTag(p, t)   Z_ChangeTag2(p, t, __FILE__, __LINE__)
-#define Z_ChangeOwner(p, u) Z_ChangeOwner2(p, u, __FILE__, __LINE__)

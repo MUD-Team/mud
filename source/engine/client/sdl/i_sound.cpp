@@ -29,6 +29,7 @@
 #include <SDL2/SDL_mixer.h>
 #include <stdlib.h>
 
+#include "Poco/Buffer.h"
 #include "i_music.h"
 #include "i_sdl.h"
 #include "i_system.h"
@@ -219,11 +220,10 @@ static void getsfx(sfxinfo_struct *sfx)
 
     sfx->length = sfxlength;
 
-    Uint8 *data = new Uint8[sfxlength];
+    Poco::Buffer<uint8_t> data(sfxlength);
 
-    if (PHYSFS_readBytes(sfxraw, data, sfxlength) != sfxlength)
+    if (PHYSFS_readBytes(sfxraw, data.begin(), sfxlength) != sfxlength)
     {
-        delete[] data;
         PHYSFS_close(sfxraw);
         return;
     }
@@ -241,14 +241,13 @@ static void getsfx(sfxinfo_struct *sfx)
         }
         else
         {
-            chunk->abuf = perform_sdlmix_conv(data, sfxlength, &new_size);
+            chunk->abuf = perform_sdlmix_conv(data.begin(), sfxlength, &new_size);
             chunk->alen = new_size;
         }
         chunk->volume = MIX_MAX_VOLUME;
 
         sfx->data = chunk;
 
-        delete[] data;
         PHYSFS_close(sfxraw);
 
         return;
@@ -273,10 +272,9 @@ static void getsfx(sfxinfo_struct *sfx)
     chunk->abuf      = (Uint8 *)Z_Malloc(expanded_length, PU_STATIC, NULL);
     chunk->volume    = MIX_MAX_VOLUME;
 
-    ExpandSoundData((uint8_t *)data + 8, samplerate, 8, length, chunk);
+    ExpandSoundData((uint8_t *)data.begin() + 8, samplerate, 8, length, chunk);
     sfx->data = chunk;
 
-    delete[] data;
     PHYSFS_close(sfxraw);
 }
 

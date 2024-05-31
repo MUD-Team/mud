@@ -322,11 +322,6 @@ void Z_ChangeTag2(void *ptr, const zoneTag_e tag, const char *file, int32_t line
     return ::g_zone.changeTag(ptr, tag, OFileLine::create(file, line));
 }
 
-void Z_ChangeOwner2(void *ptr, void *user, const char *file, int32_t line)
-{
-    return ::g_zone.changeOwner(ptr, user, OFileLine::create(file, line));
-}
-
 //
 // Z_DumpHeap
 // Note: TFileDumpHeap( stdout ) ?

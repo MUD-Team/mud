@@ -3,6 +3,7 @@
 
 #include <unordered_map>
 
+#include "Poco/Buffer.h"
 #include "Poco/JSON/Parser.h"
 #include "Poco/MemoryStream.h"
 #include "i_system.h"
@@ -91,11 +92,10 @@ class PaletteCache
 
             PHYSFS_sint64 filelen = PHYSFS_fileLength(imageFile);
 
-            uint8_t *filedata = new uint8_t[filelen];
+            Poco::Buffer<uint8_t> filedata(filelen);
 
-            if (PHYSFS_readBytes(imageFile, filedata, filelen) != filelen)
+            if (PHYSFS_readBytes(imageFile, filedata.begin(), filelen) != filelen)
             {
-                delete[] filedata;
                 PHYSFS_close(imageFile);
                 I_Error("PaletteCache::generatePalette: Error reading %s\n", filename.c_str());
             }
@@ -107,15 +107,10 @@ class PaletteCache
             data.handle = nullptr;
             data.image  = nullptr;
 
-            data.pixels = stbi_load_from_memory(filedata, filelen, &data.width, &data.height, &bpp, 4);
+            data.pixels = stbi_load_from_memory(filedata.begin(), filelen, &data.width, &data.height, &bpp, 4);
 
             if (!data.pixels)
-            {
-                delete[] filedata;
                 I_Error("PaletteCache::generatePalette: Error loading %s\n", filename.c_str());
-            }
-
-            delete[] filedata;
 
             data.handle = liq_attr_create();
             data.image  = liq_image_create_rgba(data.handle, data.pixels, data.width, data.height, 0);
@@ -220,19 +215,18 @@ class PaletteCache
         PHYSFS_sint64 size = PHYSFS_fileLength(file);
         if (size)
         {
-            uint8_t *buffer = (uint8_t *)malloc(size);
+            Poco::Buffer<char> buffer(size);
 
-            if (PHYSFS_readBytes(file, (void *)buffer, size) != size)
+            if (PHYSFS_readBytes(file, buffer.begin(), size) != size)
             {
                 I_Error("PaletteCache: Error reading %s", cache_file);
             }
 
-            MemoryInputStream contents((const char *)buffer, size);
+            MemoryInputStream contents(buffer.begin(), size);
             Parser            parser;
             parser.parse(contents);
             auto result = parser.result();
 
-            free(buffer);
             PHYSFS_close(file);
 
             Poco::JSON::Object::Ptr obj = result.extract<Poco::JSON::Object::Ptr>();

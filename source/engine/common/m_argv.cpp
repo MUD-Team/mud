@@ -26,6 +26,7 @@
 
 #include <algorithm>
 
+#include "Poco/Buffer.h"
 #include "cmdlib.h"
 #include "i_system.h"
 #include "m_fileio.h"
@@ -264,7 +265,6 @@ void M_FindResponseFile(void)
         if (Args.GetArg(i)[0] == '@')
         {
             char **argv;
-            char  *file;
             int32_t    argc;
             int32_t    argcinresp;
             PHYSFS_File  *handle;
@@ -290,8 +290,8 @@ void M_FindResponseFile(void)
 
             Printf(PRINT_HIGH, "Found response file %s!\n", Args.GetArg(i) + 1);
             size = PHYSFS_fileLength(handle);
-            file           = new char[size + 1];
-            size_t readlen = PHYSFS_readBytes(handle, file, size);
+            Poco::Buffer<char> file(size + 1);
+            size_t readlen = PHYSFS_readBytes(handle, file.begin(), size);
             if (readlen < size)
             {
                 Printf(PRINT_HIGH, "Failed to read response file %s.\n", Args.GetArg(i) + 1);
@@ -299,14 +299,14 @@ void M_FindResponseFile(void)
             file[size] = 0;
             PHYSFS_close(handle);
 
-            argsize = ParseCommandLine(file, &argcinresp, NULL);
+            argsize = ParseCommandLine(file.begin(), &argcinresp, NULL);
             argc    = argcinresp + Args.NumArgs() - 1;
 
             if (argc != 0)
             {
-                argv    = (char **)Malloc(argc * sizeof(char *) + argsize);
-                argv[i] = (char *)argv + argc * sizeof(char *);
-                ParseCommandLine(file, NULL, argv + i);
+                Poco::Buffer<char *> argv(argc * sizeof(char *) + argsize);
+                argv[i] = (char *)argv.begin() + argc * sizeof(char *);
+                ParseCommandLine(file.begin(), NULL, argv.begin() + i);
 
                 for (index = 0; index < i; ++index)
                     argv[index] = (char *)Args.GetArg(index);
@@ -314,13 +314,9 @@ void M_FindResponseFile(void)
                 for (index = i + 1, i += argcinresp; index < Args.NumArgs(); ++index)
                     argv[i++] = (char *)Args.GetArg(index);
 
-                DArgs newargs(i, argv);
+                DArgs newargs(i, argv.begin());
                 Args = newargs;
-
-                M_Free(argv);
             }
-
-            delete[] file;
 
             // DISPLAY ARGS
             Printf("%zu command-line args:\n", Args.NumArgs());

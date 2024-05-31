@@ -34,6 +34,7 @@
 #include <map>
 #include <sstream>
 
+#include "Poco/Buffer.h"
 #include "i_system.h"
 #include "mud_includes.h"
 #include "win32inc.h"
@@ -391,21 +392,16 @@ void STACK_ARGS VStrFormat(std::string &out, const char *fmt, va_list va)
     size_t len = (size_t)chars + sizeof('\0');
 
     // Allocate the buffer.
-    char *buf = (char *)malloc(len);
-    if (buf == NULL)
-    {
-        I_Error("Could not allocate StrFormat buffer\n");
-    }
+    Poco::Buffer<char> buf(len);
 
     // Actually write to the buffer.
-    int32_t ok = vsnprintf(buf, len, fmt, va2);
+    int32_t ok = vsnprintf(buf.begin(), len, fmt, va2);
     if (ok != chars)
     {
         I_Error("Truncation detected in StrFormat\n");
     }
 
-    out = buf;
-    free(buf);
+    out = buf.begin();
 }
 
 //
@@ -426,21 +422,16 @@ std::string STACK_ARGS VStrFormat(const char *fmt, va_list va)
     size_t len = (size_t)chars + sizeof('\0');
 
     // Allocate the buffer.
-    char *buf = (char *)malloc(len);
-    if (buf == NULL)
-    {
-        I_Error("Could not allocate StrFormat buffer\n");
-    }
+    Poco::Buffer<char> buf(len);
 
     // Actually write to the buffer.
-    int32_t ok = vsnprintf(buf, len, fmt, va2);
+    int32_t ok = vsnprintf(buf.begin(), len, fmt, va2);
     if (ok != chars)
     {
         I_Error("Truncation detected in StrFormat\n");
     }
 
-    ret_string = buf;
-    free(buf);
+    ret_string = buf.begin();
     return ret_string;
 }
 

@@ -635,18 +635,18 @@ BEGIN_COMMAND(set)
     {
         cvar_t *var, *prev;
 
-        var = cvar_t::FindCVar(argv[1], &prev);
+        var = cvar_t::FindCVar(argv[0], &prev);
         if (!var)
-            var = new cvar_t(argv[1], NULL, "", CVARTYPE_NONE, CVAR_AUTO | CVAR_UNSETTABLE | cvar_defflags);
+            var = new cvar_t(argv[0], NULL, "", CVARTYPE_NONE, CVAR_AUTO | CVAR_UNSETTABLE | cvar_defflags);
 
         if (var->flags() & CVAR_NOSET)
         {
-            Printf(PRINT_HIGH, "%s is write protected.\n", argv[1]);
+            Printf(PRINT_HIGH, "%s is write protected.\n", argv[0]);
             return;
         }
         else if (multiplayer && baseapp == client && (var->flags() & CVAR_SERVERINFO))
         {
-            Printf(PRINT_HIGH, "%s is under server control.\n", argv[1]);
+            Printf(PRINT_HIGH, "%s is under server control.\n", argv[0]);
             return;
         }
 
@@ -655,24 +655,24 @@ BEGIN_COMMAND(set)
         // [AM] Introduce zdoom-standard "true" and "false"
         if (!(var->flags() & CVAR_NOENABLEDISABLE))
         {
-            if (strcmp("enabled", argv[2]) == 0 || strcmp("true", argv[2]) == 0)
+            if (strcmp("enabled", argv[1]) == 0 || strcmp("true", argv[1]) == 0)
             {
-                argv[2] = (char *)"1";
+                argv[1] = (char *)"1";
             }
-            else if (strcmp("disabled", argv[2]) == 0 || strcmp("false", argv[2]) == 0)
+            else if (strcmp("disabled", argv[1]) == 0 || strcmp("false", argv[1]) == 0)
             {
-                argv[2] = (char *)"0";
+                argv[1] = (char *)"0";
             }
         }
 
         if (var->flags() & CVAR_LATCH)
         {
             // if new value is different from current value and latched value
-            if (strcmp(var->cstring(), argv[2]) && strcmp(var->latched(), argv[2]) && gamestate == GS_LEVEL)
-                Printf(PRINT_HIGH, "%s will be changed for next game.\n", argv[1]);
+            if (strcmp(var->cstring(), argv[1]) && strcmp(var->latched(), argv[1]) && gamestate == GS_LEVEL)
+                Printf(PRINT_HIGH, "%s will be changed for next game.\n", argv[0]);
         }
 
-        var->Set(argv[2]);
+        var->Set(argv[1]);
     }
 }
 END_COMMAND(set)
@@ -688,7 +688,7 @@ BEGIN_COMMAND(get)
         return;
     }
 
-    var = cvar_t::FindCVar(argv[1], &prev);
+    var = cvar_t::FindCVar(argv[0], &prev);
 
     if (var)
     {
@@ -706,7 +706,7 @@ BEGIN_COMMAND(get)
     }
     else
     {
-        Printf(PRINT_HIGH, "\"%s\" is unset.\n", argv[1]);
+        Printf(PRINT_HIGH, "\"%s\" is unset.\n", argv[0]);
     }
 }
 END_COMMAND(get)

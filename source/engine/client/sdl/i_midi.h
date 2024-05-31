@@ -40,6 +40,7 @@
 #include <string>
 #include <vector>
 
+#include "Poco/Buffer.h"
 #include "m_memio.h"
 #include "mus2midi.hpp"
 
@@ -2949,15 +2950,9 @@ bool MidiSequencer::_ParseMus(MEMFILE *mfr)
     size_t mus_len = mem_fsize(mfr);
 
     mem_fseek(mfr, 0, MEM_SEEK_SET);
-    uint8_t *mus = (uint8_t *)malloc(mus_len);
-    if (!mus)
-    {
-        m_midi_error_string = "Out of memory!";
-        mem_fclose(mfr);
-        mfr = NULL;
-        return false;
-    }
-    fsize = mem_fread(mus, mus_len, 1, mfr) * mus_len;
+    Poco::Buffer<uint8_t> mus(mus_len);
+
+    fsize = mem_fread(mus.begin(), mus_len, 1, mfr) * mus_len;
     if (fsize < mus_len)
     {
         m_midi_error_string = "Failed to read MUS file data!\n";
@@ -2973,10 +2968,7 @@ bool MidiSequencer::_ParseMus(MEMFILE *mfr)
 
     uint8_t *mid     = nullptr;
     uint32_t mid_len = 0;
-    int32_t      m2mret  = ConvertMusToMidi(mus, (uint32_t)(mus_len), &mid, &mid_len, 0);
-
-    if (mus)
-        free(mus);
+    int32_t      m2mret  = ConvertMusToMidi(mus.begin(), (uint32_t)(mus_len), &mid, &mid_len, 0);
 
     if (m2mret < 0)
     {

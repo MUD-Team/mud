@@ -112,24 +112,11 @@ void R_PrecacheLevel(void)
     texturemanager.getTexture(sky2texture);
 
     // Precache sprites
-    uint8_t *hitlist = new uint8_t[numsprites];
-    memset(hitlist, 0, numsprites);
+    AActor                  *actor;
+    TThinkerIterator<AActor> iterator;
 
-    {
-        AActor                  *actor;
-        TThinkerIterator<AActor> iterator;
-
-        while ((actor = iterator.Next()))
-            hitlist[actor->sprite] = 1;
-    }
-
-    for (i = numsprites - 1; i >= 0; i--)
-    {
-        if (hitlist[i])
-            R_CacheSprite(sprites + i);
-    }
-
-    delete[] hitlist;
+    while ((actor = iterator.Next()))
+        R_CacheSprite(sprites + actor->sprite);
 }
 
 // Utility function,
