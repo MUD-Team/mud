@@ -302,7 +302,8 @@ int32_t S_AddSound(const char *logicalname, const char *filename)
     {
         sfxinfo_t &sfx = S_sfx[sfxid];
 
-        strcpy(sfx.filename, filename);
+        if (filename != NULL)
+            strcpy(sfx.filename, filename);
         sfx.link    = sfxinfo_t::NO_LINK;
         if (sfx.israndom)
         {
@@ -319,7 +320,8 @@ int32_t S_AddSound(const char *logicalname, const char *filename)
         strcpy(new_sfx.name, logicalname);
         new_sfx.data    = NULL;
         new_sfx.link    = sfxinfo_t::NO_LINK;
-        strcpy(new_sfx.filename, filename);
+        if (filename != NULL)
+            strcpy(new_sfx.filename, filename);
         sfxid = S_sfx.size() - 1;
     }
 
