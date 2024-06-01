@@ -27,7 +27,6 @@
 #include "p_lnspec.h"
 #include "p_local.h"
 #include "p_mapformat.h"
-#include "r_data.h"
 
 static const xlat_t SpecialTranslation[] = {
     /*   0 */ {0},

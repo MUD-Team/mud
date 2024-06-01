@@ -34,8 +34,10 @@
 #include "mud_includes.h"
 #include "p_local.h"
 #include "p_unlag.h"
+#include "r_common.h"
 #include "s_sound.h"
 #include "svc_message.h"
+
 
 #define LOWERSPEED   FRACUNIT * 6
 #define RAISESPEED   FRACUNIT * 6
@@ -171,7 +173,7 @@ void P_BringUpWeapon(player_t *player)
 bool P_EnoughAmmo(player_t *player, weapontype_t weapon, bool switching = false)
 {
     ammotype_t ammotype = weaponinfo[weapon].ammotype;
-    int32_t        count    = 1; // default amount of ammo for most weapons
+    int32_t    count    = 1; // default amount of ammo for most weapons
 
     // [SL] Fix for when DeHackEd doesn't patch minammo
     count = MAX(weaponinfo[weapon].minammo, weaponinfo[weapon].ammouse);
@@ -343,7 +345,7 @@ static void DecreaseAmmo(player_t *player)
     if (!sv_infiniteammo)
     {
         ammotype_t ammonum = weaponinfo[player->readyweapon].ammotype;
-        int32_t        amount  = weaponinfo[player->readyweapon].ammouse;
+        int32_t    amount  = weaponinfo[player->readyweapon].ammouse;
 
         if (ammonum < NUMAMMO)
             player->ammo[ammonum] -= amount;
@@ -539,8 +541,8 @@ void A_GunFlash(AActor *mo)
 void A_Punch(AActor *mo)
 {
     angle_t angle;
-    int32_t     damage;
-    int32_t     slope;
+    int32_t damage;
+    int32_t slope;
 
     player_t *player = mo->player;
 
@@ -579,7 +581,7 @@ void A_Punch(AActor *mo)
 void A_Saw(AActor *mo)
 {
     angle_t angle;
-    int32_t     damage;
+    int32_t damage;
 
     player_t *player = mo->player;
 
@@ -654,7 +656,7 @@ void A_FireBFG(AActor *mo)
 
     // [RH] bfg can be forced to not use freeaim
     angle_t storedpitch   = player->mo->pitch;
-    int32_t     storedaimdist = player->userinfo.aimdist;
+    int32_t storedaimdist = player->userinfo.aimdist;
 
     DecreaseAmmo(player);
 
@@ -762,7 +764,7 @@ void A_WeaponJump(AActor *mo)
 //
 void A_CheckAmmo(AActor *mo)
 {
-    int32_t        amount;
+    int32_t    amount;
     ammotype_t type;
 
     player_t        *player = mo->player;
@@ -788,7 +790,7 @@ void A_CheckAmmo(AActor *mo)
 //
 void A_ConsumeAmmo(AActor *mo)
 {
-    int32_t        amount;
+    int32_t    amount;
     ammotype_t type;
 
     player_t        *player = mo->player;
@@ -872,7 +874,7 @@ void A_WeaponProjectile(AActor *mo)
 {
     fixed_t type, angle, pitch, spawnofs_xy, spawnofs_z;
     AActor *proj;
-    int32_t     an;
+    int32_t an;
 
     player_t        *player = mo->player;
     struct pspdef_s *psp    = &player->psprites[player->psprnum];
@@ -928,9 +930,9 @@ void A_WeaponBulletAttack(AActor *mo)
     for (i = 0; i < numbullets; i++)
     {
         int32_t bangle = angle;
-        damage     = (P_Random() % damagemod + 1) * damagebase;
-        bangle     = angle + (int32_t)player->mo->angle + P_RandomHitscanAngle(hspread);
-        slope      = bulletslope + P_RandomHitscanSlope(vspread);
+        damage         = (P_Random() % damagemod + 1) * damagebase;
+        bangle         = angle + (int32_t)player->mo->angle + P_RandomHitscanAngle(hspread);
+        slope          = bulletslope + P_RandomHitscanSlope(vspread);
 
         P_LineAttack(player->mo, bangle, MISSILERANGE, slope, damage);
     }
@@ -947,9 +949,9 @@ void A_WeaponBulletAttack(AActor *mo)
 //
 void A_WeaponMeleeAttack(AActor *mo)
 {
-    int32_t     damagebase, damagemod, zerkfactor, hitsound, range;
+    int32_t damagebase, damagemod, zerkfactor, hitsound, range;
     angle_t angle;
-    int32_t     t, slope, damage;
+    int32_t t, slope, damage;
 
     player_t        *player = mo->player;
     struct pspdef_s *psp    = &player->psprites[player->psprnum];
@@ -1127,8 +1129,8 @@ fixed_t P_BulletSlope(AActor *mo)
     // If a target was not found, or one was found, but outside the
     // player's autoaim range, use the actor's pitch for the slope.
     if ((!linetarget || // target not found, or:
-                        (mo->player && // target found but outside of player's autoaim range
-                         abs(bulletslope - pitchslope) >= mo->player->userinfo.aimdist)))
+         (mo->player && // target found but outside of player's autoaim range
+          abs(bulletslope - pitchslope) >= mo->player->userinfo.aimdist)))
     {
         bulletslope = pitchslope;
     }
@@ -1324,9 +1326,9 @@ void A_Light2(AActor *mo)
 //
 void A_BFGSpray(AActor *mo)
 {
-    int32_t     i;
-    int32_t     j;
-    int32_t     damage;
+    int32_t i;
+    int32_t j;
+    int32_t damage;
     angle_t an;
 
     if (!serverside)

@@ -31,16 +31,17 @@
 #include "m_fixed.h"
 #include "mud_includes.h"
 #include "mud_profiling.h"
-#include "r_data.h"
+#include "r_client.h"
 #include "r_draw.h"
 #include "r_main.h"
-#include "r_client.h"
+#include "r_state.h"
 #include "res_texture.h"
 #include "w_wad.h"
 
-extern int32_t    *texturewidthmask;
-extern fixed_t FocalLengthX;
-extern fixed_t freelookviewheight;
+
+extern int32_t *texturewidthmask;
+extern fixed_t  FocalLengthX;
+extern fixed_t  freelookviewheight;
 
 EXTERN_CVAR(cl_mouselook)
 EXTERN_CVAR(r_skypalette)
@@ -48,15 +49,15 @@ EXTERN_CVAR(r_skypalette)
 //
 // sky mapping
 //
-texhandle_t     skyflatnum;
-texhandle_t     sky1texture, sky2texture;
-fixed_t skytexturemid;
-fixed_t skyscale;
+texhandle_t skyflatnum;
+texhandle_t sky1texture, sky2texture;
+fixed_t     skytexturemid;
+fixed_t     skyscale;
 int32_t     skystretch;
-fixed_t skyheight;
-fixed_t skyiscale;
+fixed_t     skyheight;
+fixed_t     skyiscale;
 
-int32_t     sky1shift, sky2shift;
+int32_t sky1shift, sky2shift;
 fixed_t sky1pos = 0, sky1speed = 0;
 fixed_t sky2pos = 0, sky2speed = 0;
 
@@ -83,7 +84,7 @@ static tallpost_t *skyposts[MAXWIDTH];
 //
 static void R_InitXToViewAngle()
 {
-    static int32_t     last_viewwidth = -1;
+    static int32_t last_viewwidth = -1;
     static fixed_t last_focx      = -1;
 
     if (viewwidth != last_viewwidth || FocalLengthX != last_focx)
@@ -91,7 +92,7 @@ static void R_InitXToViewAngle()
         if (centerx > 0)
         {
             const fixed_t hitan     = finetangent[FINEANGLES / 4 + CorrectFieldOfView / 2];
-            const int32_t     t         = std::min<int32_t>((FocalLengthX >> FRACBITS) + centerx, viewwidth);
+            const int32_t t         = std::min<int32_t>((FocalLengthX >> FRACBITS) + centerx, viewwidth);
             const fixed_t slopestep = hitan / centerx;
             const fixed_t dfocus    = FocalLengthX >> DBITS;
 
@@ -133,7 +134,8 @@ void R_InitSkyMap()
     if (gamestate != GS_LEVEL)
         return;
 
-    if (sky2texture && texturemanager.getTexture(sky1texture)->getFracHeight() != texturemanager.getTexture(sky2texture)->getFracHeight())
+    if (sky2texture && texturemanager.getTexture(sky1texture)->getFracHeight() !=
+                           texturemanager.getTexture(sky2texture)->getFracHeight())
     {
         Printf(PRINT_HIGH, "\x1f+Both sky textures must be the same height.\x1f-\n");
         sky2texture = sky1texture;
@@ -144,8 +146,7 @@ void R_InitSkyMap()
     if (fskyheight <= (128 << FRACBITS))
     {
         skytexturemid = 200 / 2 * FRACUNIT;
-        skystretch =
-            (r_stretchsky == 1) || consoleplayer().spectator || (r_stretchsky == 2 && cl_mouselook);
+        skystretch    = (r_stretchsky == 1) || consoleplayer().spectator || (r_stretchsky == 2 && cl_mouselook);
     }
     else
     {
@@ -209,9 +210,9 @@ void R_RenderSkyRange(visplane_t *pl)
     MUD_ZoneScoped;
 
     int32_t     columnmethod = 2;
-    texhandle_t     skytex;
-    fixed_t front_offset = 0;
-    angle_t skyflip      = 0;
+    texhandle_t skytex;
+    fixed_t     front_offset = 0;
+    angle_t     skyflip      = 0;
 
     if (pl->picnum == skyflatnum)
     {
@@ -226,7 +227,7 @@ void R_RenderSkyRange(visplane_t *pl)
     else
     {
         // MBF's linedef-controlled skies
-        int16_t         picnum = (pl->picnum & ~PL_SKYFLAT) - 1;
+        int16_t       picnum = (pl->picnum & ~PL_SKYFLAT) - 1;
         const line_t *line   = &lines[picnum < numlines ? picnum : 0];
 
         // Sky transferred from first sidedef
@@ -281,12 +282,12 @@ void R_RenderSkyRange(visplane_t *pl)
     // column in this range.
     for (int32_t x = pl->minx; x <= pl->maxx; x++)
     {
-        int32_t colnum  = ((((viewangle + xtoviewangle[x]) ^ skyflip) >> sky1shift) + front_offset) >> FRACBITS;
-        skyposts[x] = R_GetTextureColumn(skytex, colnum);
+        int32_t colnum = ((((viewangle + xtoviewangle[x]) ^ skyflip) >> sky1shift) + front_offset) >> FRACBITS;
+        skyposts[x]    = R_GetTextureColumn(skytex, colnum);
     }
 
-    R_RenderColumnRange(pl->minx, pl->maxx, (int32_t *)pl->top, (int32_t *)pl->bottom, skyposts, SkyColumnBlaster, false,
-                        columnmethod);
+    R_RenderColumnRange(pl->minx, pl->maxx, (int32_t *)pl->top, (int32_t *)pl->bottom, skyposts, SkyColumnBlaster,
+                        false, columnmethod);
 
     R_ResetDrawFuncs();
 }

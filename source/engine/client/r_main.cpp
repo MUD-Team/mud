@@ -24,24 +24,28 @@
 //
 //-----------------------------------------------------------------------------
 
+#include "r_main.h"
+
 #include <math.h>
 #include <stdlib.h>
 
 #include "i_video.h"
 #include "m_random.h"
 #include "m_vectors.h"
-#include "mud_profiling.h"
 #include "mud_includes.h"
+#include "mud_profiling.h"
 #include "p_local.h"
-#include "r_local.h"
-#include "r_sky.h"
-#include "r_plane.h"
+#include "r_bsp.h"
 #include "r_draw.h"
+#include "r_plane.h"
 #include "r_segs.h"
+#include "r_things.h"
+#include "r_sky.h"
+#include "res_texture.h"
 #include "stats.h"
+#include "tables.h"
 #include "v_video.h"
 #include "z_zone.h"
-#include "res_texture.h"
 
 void R_BeginInterpolation(fixed_t amount);
 void R_EndInterpolation();
@@ -79,7 +83,7 @@ int32_t validcount = 1;
 
 // [RH] colormap currently drawing with
 shaderef_t basecolormap;
-int32_t        fixedlightlev;
+int32_t    fixedlightlev;
 shaderef_t fixedcolormap;
 
 int32_t centerx;
@@ -127,7 +131,7 @@ int32_t extralight;
 bool foggy;
 
 static bool setsizeneeded = true;
-int32_t         setblocks;
+int32_t     setblocks;
 
 fixed_t freelookviewheight;
 
@@ -485,7 +489,7 @@ bool R_CheckProjectionY(int32_t &y1, int32_t &y2)
 static inline void R_DrawPixel(int32_t x, int32_t y, uint8_t color)
 {
     uint8_t *dest = dcol.destination + y * dcol.pitch_in_pixels + x;
-    *dest      = color;
+    *dest         = color;
 }
 
 //
@@ -608,10 +612,10 @@ CVAR_FUNC_IMPL(screenblocks)
 //
 void R_Init()
 {
-    R_InitData();
+    Table_InitTanToAngle();
     R_SetViewSize((int32_t)screenblocks);
     R_InitPlanes();
-    
+
     R_InitParticles(); // [RH] Setup particle engine
 
     framecount = 0;
@@ -622,7 +626,6 @@ void R_Init()
 //
 void STACK_ARGS R_Shutdown()
 {
-    
 }
 
 //
@@ -634,8 +637,8 @@ void STACK_ARGS R_Shutdown()
 subsector_t *R_PointInSubsector(fixed_t x, fixed_t y)
 {
     node_t *node;
-    int32_t     side;
-    int32_t     nodenum;
+    int32_t side;
+    int32_t nodenum;
 
     // single subsector is a special case
     if (!numnodes)
@@ -666,7 +669,7 @@ static void R_ViewShear(angle_t pitch)
     centeryfrac = (viewheight << (FRACBITS - 1)) + dy;
     centery     = centeryfrac >> FRACBITS;
 
-    int32_t     e = viewheight, i = 0;
+    int32_t e = viewheight, i = 0;
     fixed_t focus = FocalLengthY;
     fixed_t den;
 
@@ -973,11 +976,11 @@ void R_RenderPlayerView(player_t *player)
     // [SL] fill the screen with a blinking solid color to make HOM more visible
     if (r_flashhom)
     {
-        argb_t color = gametic & 8 ? argb_t(0, 0, 0) : argb_t(0, 0, 255);
-        int32_t    x1 = viewwindowx, y1 = viewwindowy;
-        int32_t    x2 = viewwindowx + viewwidth - 1, y2 = viewwindowy + viewheight - 1;
+        argb_t  color = gametic & 8 ? argb_t(0, 0, 0) : argb_t(0, 0, 255);
+        int32_t x1 = viewwindowx, y1 = viewwindowy;
+        int32_t x2 = viewwindowx + viewwidth - 1, y2 = viewwindowy + viewheight - 1;
 
-        //surface->getDefaultCanvas()->Clear(x1, y1, x2, y2, color);
+        // surface->getDefaultCanvas()->Clear(x1, y1, x2, y2, color);
     }
 
     R_BeginInterpolation(render_lerp_amount);
@@ -1008,7 +1011,7 @@ void R_RenderPlayerView(player_t *player)
         r_dimpatchD(surface, V_GammaCorrect(blend_color), blend_alpha, viewwindowx, viewwindowy, viewwidth, viewheight);
     }
 
-    R_EndInterpolation();    
+    R_EndInterpolation();
 }
 
 //
@@ -1026,7 +1029,7 @@ static void R_InitLightTables(int32_t surface_width, int32_t surface_height)
         int32_t startmap = ((LIGHTLEVELS - 1 - i) * 2) * NUMCOLORMAPS / LIGHTLEVELS;
         for (int32_t j = 0; j < MAXLIGHTSCALE; j++)
         {
-            int32_t level        = startmap - (j * surface_width) / ((viewwidth * DISTMAP));
+            int32_t level    = startmap - (j * surface_width) / ((viewwidth * DISTMAP));
             scalelight[i][j] = clamp(level, 0, NUMCOLORMAPS - 1);
         }
     }
@@ -1097,7 +1100,7 @@ int32_t R_ViewWindowY(int32_t width, int32_t height)
 static void R_InitViewWindow()
 {
     IRenderSurface *surface       = R_GetRenderingSurface();
-    int32_t             surface_width = surface->getWidth(), surface_height = surface->getHeight();
+    int32_t         surface_width = surface->getWidth(), surface_height = surface->getHeight();
 
     surface->lock();
 

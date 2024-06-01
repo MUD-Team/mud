@@ -46,7 +46,6 @@
 #include "p_saveg.h"
 #include "p_setup.h"
 #include "p_unlag.h"
-#include "r_data.h"
 #include "res_texture.h"
 #include "s_sound.h"
 #include "sv_main.h"

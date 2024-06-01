@@ -40,6 +40,7 @@
 #include "p_setup.h"
 #include "r_state.h"
 #include "s_sound.h"
+#include "r_common.h"
 
 EXTERN_CVAR(sv_allowexit)
 EXTERN_CVAR(sv_fastmonsters)

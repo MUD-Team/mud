@@ -25,7 +25,6 @@
 #include "p_mobj.h"
 
 #include "c_dispatch.h"
-#include "c_effect.h"
 #include "g_game.h"
 #include "g_gametype.h"
 #include "g_mapinfo.h"
@@ -40,9 +39,11 @@
 #include "p_lnspec.h"
 #include "p_local.h"
 #include "p_mapformat.h"
+#include "r_common.h"
 #include "s_sound.h"
 #include "v_video.h"
 #include "z_zone.h"
+
 
 void SV_UpdateMobj(AActor *mo);
 void SV_UpdateMobjState(AActor *mo);
@@ -76,9 +77,9 @@ EXTERN_CVAR(sv_teamsinplay)
 EXTERN_CVAR(g_thingfilter)
 
 mapthing2_t itemrespawnque[ITEMQUESIZE];
-int32_t         itemrespawntime[ITEMQUESIZE];
-int32_t         iquehead;
-int32_t         iquetail;
+int32_t     itemrespawntime[ITEMQUESIZE];
+int32_t     iquehead;
+int32_t     iquetail;
 
 NetIDHandler ServerNetID;
 
@@ -117,9 +118,9 @@ AActor::AActor()
       dropoffz(0), floorsector(NULL), radius(0), height(0), momx(0), momy(0), momz(0), validcount(0),
       type(MT_UNKNOWNTHING), info(NULL), tics(0), on_conveyor(false), state(NULL), damage(0), flags(0), flags2(0),
       flags3(0), oflags(0), special1(0), special2(0), health(0), movedir(0), movecount(0), visdir(0), reactiontime(0),
-      threshold(0), player(NULL), lastlook(0), special(0), inext(NULL), iprev(NULL),
-      translucency(0), waterlevel(0), gear(0), onground(false), touching_sectorlist(NULL), deadtic(0), oldframe(0),
-      rndindex(0), netid(0), tid(0), bmapnode(this), baseline_set(false)
+      threshold(0), player(NULL), lastlook(0), special(0), inext(NULL), iprev(NULL), translucency(0), waterlevel(0),
+      gear(0), onground(false), touching_sectorlist(NULL), deadtic(0), oldframe(0), rndindex(0), netid(0), tid(0),
+      bmapnode(this), baseline_set(false)
 {
     memset(args, 0, sizeof(args));
     memset(&baseline, 0, sizeof(baseline));
@@ -138,10 +139,9 @@ AActor::AActor(const AActor &other)
       special2(other.special2), health(other.health), movedir(other.movedir), movecount(other.movecount),
       visdir(other.visdir), reactiontime(other.reactiontime), threshold(other.threshold), player(other.player),
       lastlook(other.lastlook), special(other.special), inext(other.inext), iprev(other.iprev),
-      translucency(other.translucency), waterlevel(other.waterlevel), gear(other.gear),
-      onground(other.onground), touching_sectorlist(other.touching_sectorlist), deadtic(other.deadtic),
-      oldframe(other.oldframe), rndindex(other.rndindex), netid(other.netid), tid(other.tid), bmapnode(other.bmapnode),
-      baseline_set(false)
+      translucency(other.translucency), waterlevel(other.waterlevel), gear(other.gear), onground(other.onground),
+      touching_sectorlist(other.touching_sectorlist), deadtic(other.deadtic), oldframe(other.oldframe),
+      rndindex(other.rndindex), netid(other.netid), tid(other.tid), bmapnode(other.bmapnode), baseline_set(false)
 {
     memcpy(args, other.args, sizeof(args));
     memcpy(&baseline, &other.baseline, sizeof(baseline));
@@ -229,9 +229,9 @@ AActor::AActor(fixed_t ix, fixed_t iy, fixed_t iz, mobjtype_t itype)
       dropoffz(0), floorsector(NULL), radius(0), height(0), momx(0), momy(0), momz(0), validcount(0),
       type(MT_UNKNOWNTHING), info(NULL), tics(0), on_conveyor(false), state(NULL), damage(0), flags(0), flags2(0),
       flags3(0), oflags(0), special1(0), special2(0), health(0), movedir(0), movecount(0), visdir(0), reactiontime(0),
-      threshold(0), player(NULL), lastlook(0), special(0), inext(NULL), iprev(NULL),
-      translucency(0), waterlevel(0), gear(0), onground(false), touching_sectorlist(NULL), deadtic(0), oldframe(0),
-      rndindex(0), netid(0), tid(0), bmapnode(this), baseline_set(false)
+      threshold(0), player(NULL), lastlook(0), special(0), inext(NULL), iprev(NULL), translucency(0), waterlevel(0),
+      gear(0), onground(false), touching_sectorlist(NULL), deadtic(0), oldframe(0), rndindex(0), netid(0), tid(0),
+      bmapnode(this), baseline_set(false)
 {
     // Fly!!! fix it in P_RespawnSpecial
     if ((uint32_t)itype >= NUMMOBJTYPES)
@@ -739,7 +739,7 @@ void AActor::RunThink()
         v3double_t start, end;
         M_ActorPositionToVec3(&start, this);
         P_MoveActor(this);
-        M_ActorPositionToVec3(&end, this);        
+        M_ActorPositionToVec3(&end, this);
     }
     else
 #endif
@@ -821,7 +821,7 @@ void AActor::Serialize(FArchive &arc)
     {
         uint32_t dummy;
         uint32_t playerid;
-        int32_t      newnetid;
+        int32_t  newnetid;
         AActor  *tmptracer;
 
         arc >> newnetid >> x >> y >> z >> pitch >> angle
@@ -893,7 +893,7 @@ int32_t P_ThingInfoHeight(mobjinfo_t *mi)
 bool P_SetMobjState(AActor *mobj, statenum_t state, bool cl_update)
 {
     state_t *st;
-    int32_t      cycle_counter = 0;
+    int32_t  cycle_counter = 0;
 
     do
     {
@@ -2026,8 +2026,8 @@ int32_t P_FaceMobj(AActor *source, AActor *target, angle_t *delta)
 
 bool P_SeekerMissile(AActor *actor, AActor *seekTarget, angle_t thresh, angle_t turnMax, bool seekcenter)
 {
-    int32_t     dir;
-    int32_t     dist;
+    int32_t dir;
+    int32_t dist;
     angle_t delta;
     angle_t angle;
     AActor *target;
@@ -2082,7 +2082,7 @@ AActor *P_SpawnMissile(AActor *source, AActor *dest, mobjtype_t type)
 {
     AActor *th;
     angle_t an;
-    int32_t     dist;
+    int32_t dist;
     fixed_t dest_x, dest_y, dest_z, dest_flags;
 
     // denis: missile spawn code from chocolate doom
@@ -2165,8 +2165,8 @@ void P_SpawnPlayerMissile(AActor *source, mobjtype_t type)
     // If a target was not found, or one was found, but outside the
     // player's autoaim range, use the actor's pitch for the slope.
     if ((!linetarget ||     // target not found, or:
-                        (source->player && // target found but outside of player's autoaim range
-                         abs(slope - pitchslope) >= source->player->userinfo.aimdist)))
+         (source->player && // target found but outside of player's autoaim range
+          abs(slope - pitchslope) >= source->player->userinfo.aimdist)))
     {
         an    = source->angle;
         slope = pitchslope;
@@ -2222,8 +2222,8 @@ void P_SpawnMBF21PlayerMissile(AActor *source, mobjtype_t type, fixed_t angle, f
     // player's autoaim range, use the actor's pitch for the slope.
     // [Blair] Also add MBF21 pitch to the projectile.
     if ((!linetarget ||     // target not found, or:
-                        (source->player && // target found but outside of player's autoaim range
-                         abs(slope - pitchslope) >= source->player->userinfo.aimdist)))
+         (source->player && // target found but outside of player's autoaim range
+          abs(slope - pitchslope) >= source->player->userinfo.aimdist)))
     {
         an    = source->angle;
         slope = pitchslope + DegToSlope(pitch);
@@ -2504,7 +2504,7 @@ void P_SpawnMapThing(mapthing2_t *mthing, int32_t position)
             }
         }
     }
-    
+
     if (mthing->type == PO_ANCHOR_TYPE || mthing->type == PO_SPAWN_TYPE || mthing->type == PO_SPAWNCRUSH_TYPE)
     {
         polyspawns_t *polyspawn = new polyspawns_t;

@@ -26,7 +26,6 @@
 //-----------------------------------------------------------------------------
 
 #include "mud_includes.h"
-#include "r_data.h"
 #include "res_texture.h"
 
 // [ML] 5/11/06 - Remove sky2

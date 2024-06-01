@@ -23,7 +23,8 @@
 //-----------------------------------------------------------------------------
 
 #include "mud_includes.h"
-#include "r_local.h"
+#include "r_state.h"
+#include "r_common.h"
 
 bool R_AlignFlat(int32_t linenum, int32_t side, int32_t fc)
 {

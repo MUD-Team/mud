@@ -31,6 +31,9 @@
 #include "mud_includes.h"
 #include "p_lnspec.h"
 #include "p_local.h"
+#include "r_common.h"
+#include "v_palette.h"
+
 
 EXTERN_CVAR(sv_allowexit)
 
@@ -1392,10 +1395,10 @@ void P_PostProcessCompatibleSidedefSpecial(side_t *sd, mapsidedef_t *msd, sector
 
 void P_SpawnCompatibleExtra(int32_t i)
 {
-    int32_t       s;
+    int32_t   s;
     sector_t *sec;
     float     grav;
-    int32_t       damage;
+    int32_t   damage;
 
     switch (lines[i].special)
     {
@@ -1563,8 +1566,8 @@ void P_SpawnCompatibleScroller(line_t *l, int32_t i)
 
     fixed_t dx      = l->dx >> SCROLL_SHIFT; // direction and speed of scrolling
     fixed_t dy      = l->dy >> SCROLL_SHIFT;
-    int32_t     control = -1, accel = 0;         // no control sector or acceleration
-    int32_t     special = l->special;
+    int32_t control = -1, accel = 0;         // no control sector or acceleration
+    int32_t special = l->special;
 
     // killough 3/7/98: Types 245-249 are same as 250-254 except that the
     // first side's sector's heights cause scrolling when they change, and
@@ -1666,8 +1669,8 @@ void P_SpawnCompatibleFriction(line_t *l)
 {
     if (l->special == 223)
     {
-        int32_t  value;
-        bool use_thinker;
+        int32_t value;
+        bool    use_thinker;
 
         value       = P_AproxDistance(l->dx, l->dy) >> FRACBITS;
         use_thinker = true;
@@ -1678,7 +1681,7 @@ void P_SpawnCompatibleFriction(line_t *l)
 
 void P_SpawnCompatiblePusher(line_t *l)
 {
-    int32_t     s;
+    int32_t s;
     AActor *thing;
 
     switch (l->special)

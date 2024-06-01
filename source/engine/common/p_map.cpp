@@ -27,7 +27,6 @@
 
 #include <set>
 
-#include "c_effect.h"
 #include "g_gametype.h"
 #include "i_system.h"
 #include "m_alloc.h"
@@ -41,6 +40,7 @@
 #include "p_mapformat.h"
 #include "p_mobj.h"
 #include "p_unlag.h"
+#include "r_common.h"
 #include "r_state.h"
 #include "s_sound.h"
 #include "svc_message.h"
@@ -52,14 +52,14 @@ EXTERN_CVAR(sv_unblockplayers)
 
 fixed_t        tmbbox[4];
 static AActor *tmthing;
-static int32_t     tmflags;
+static int32_t tmflags;
 static fixed_t tmx;
 static fixed_t tmy;
 static fixed_t tmz;  // [RH] Needed for third dimension of teleporters
-static int32_t     pe_x; // Pain Elemental position for Lost Soul checks	// phares
-static int32_t     pe_y; // Pain Elemental position for Lost Soul checks	// phares
-static int32_t     ls_x; // Lost Soul position for Lost Soul checks		// phares
-static int32_t     ls_y; // Lost Soul position for Lost Soul checks		// phares
+static int32_t pe_x; // Pain Elemental position for Lost Soul checks	// phares
+static int32_t pe_y; // Pain Elemental position for Lost Soul checks	// phares
+static int32_t ls_x; // Lost Soul position for Lost Soul checks		// phares
+static int32_t ls_y; // Lost Soul position for Lost Soul checks		// phares
 
 // If "floatok" true, move would be ok
 // if within "tmfloorz - tmceilingz".
@@ -237,8 +237,8 @@ bool P_TeleportMove(AActor *thing, fixed_t x, fixed_t y, fixed_t z, bool telefra
 
 int32_t P_GetFriction(const AActor *mo, int32_t *frictionfactor)
 {
-    int32_t               friction   = ORIG_FRICTION;
-    int32_t               movefactor = ORIG_FRICTION_FACTOR;
+    int32_t           friction   = ORIG_FRICTION;
+    int32_t           movefactor = ORIG_FRICTION_FACTOR;
     const msecnode_t *m;
     const sector_t   *sec;
 
@@ -406,7 +406,7 @@ static // killough 3/26/98: make static
         {
             const msecnode_t *node  = tmthing->touching_sectorlist;
             bool              allow = false;
-            int32_t               count = 0;
+            int32_t           count = 0;
             while (node != NULL)
             {
                 count++;
@@ -989,7 +989,7 @@ AActor *P_CheckOnmobj(AActor *thing)
 
 bool P_TestMobjZ(AActor *actor)
 {
-    int32_t     xl, xh, yl, yh, bx, by;
+    int32_t xl, xh, yl, yh, bx, by;
     fixed_t x, y;
 
     if (actor->flags & MF_NOCLIP)
@@ -1076,7 +1076,7 @@ void P_CheckPushLines(AActor *thing)
         {
             // see which lines were pushed
             line_t *ld   = spechit[i];
-            int32_t     side = P_PointOnLineSide(thing->x, thing->y, ld);
+            int32_t side = P_PointOnLineSide(thing->x, thing->y, ld);
             CheckForPushSpecial(ld, side, thing);
         }
     }
@@ -1343,7 +1343,7 @@ void P_ApplyTorque(AActor *mo)
     int32_t flags = mo->oflags; // Remember the current state, for gear-change
 
     tmthing = mo;
-    ++validcount;           // prevents checking same line twice
+    ++validcount;               // prevents checking same line twice
 
     for (bx = xl; bx <= xh; bx++)
         for (by = yl; by <= yh; by++)
@@ -1715,7 +1715,7 @@ void P_SlideMove(AActor *mo)
     fixed_t traily;
     fixed_t newx;
     fixed_t newy;
-    int32_t     hitcount;
+    int32_t hitcount;
 
     bool walkplane;
 
@@ -1826,7 +1826,7 @@ AActor *shootthing;
 // ???: use slope for monsters?
 fixed_t shootz;
 
-int32_t     la_damage;
+int32_t la_damage;
 fixed_t attackrange;
 fixed_t aimslope;
 
@@ -2229,7 +2229,8 @@ fixed_t P_AimLineAttack(AActor *t1, angle_t angle, fixed_t distance)
  * @param  distance Distance to shoot the tracer.  Vanilla is 16 * 64 * FRACUNIT.
  * @return          Slope of the resulting shot.
  */
-fixed_t P_AutoAimLineAttack(AActor *actor, angle_t &angle, const angle_t spread, const int32_t tracers, fixed_t distance)
+fixed_t P_AutoAimLineAttack(AActor *actor, angle_t &angle, const angle_t spread, const int32_t tracers,
+                            fixed_t distance)
 {
     fixed_t slope = P_AimLineAttack(actor, angle, distance);
 
@@ -2490,7 +2491,7 @@ void P_RailAttack(AActor *source, int32_t damage, int32_t offset)
 {
     v3double_t start, end;
 
-    int32_t     angleidx = (source->angle - ANG90) >> ANGLETOFINESHIFT;
+    int32_t angleidx = (source->angle - ANG90) >> ANGLETOFINESHIFT;
     fixed_t x1       = source->x + offset * finecosine[angleidx];
     fixed_t y1       = source->y + offset * finesine[angleidx];
 
@@ -2529,21 +2530,22 @@ void P_RailAttack(AActor *source, int32_t damage, int32_t offset)
         }
     }
 
-    if (clientside)
-        P_DrawRailTrail(start, end);
-    else
+#ifdef CLIENT_APP
+    void P_DrawRailTrail(v3double_t &start, v3double_t &end);
+    P_DrawRailTrail(start, end);
+#else
+    for (Players::iterator it = players.begin(); it != players.end(); ++it)
     {
-        for (Players::iterator it = players.begin(); it != players.end(); ++it)
-        {
-            AActor *mo = it->mo;
-            if (!mo || mo == source)
-                continue;
+        AActor *mo = it->mo;
+        if (!mo || mo == source)
+            continue;
 
-            buf_t *buf = &(it->client.netbuf);
+        buf_t *buf = &(it->client.netbuf);
 
-            MSG_WriteSVC(buf, SVC_RailTrail(start, end));
-        }
+        MSG_WriteSVC(buf, SVC_RailTrail(start, end));
     }
+
+#endif
 }
 
 //
@@ -2765,7 +2767,7 @@ bool PTR_NoWayTraverse(intercept_t *in)
 //
 void P_UseLines(player_t *player)
 {
-    int32_t     angle;
+    int32_t angle;
     fixed_t x1;
     fixed_t y1;
     fixed_t x2;
@@ -2790,7 +2792,7 @@ void P_UseLines(player_t *player)
     {
         // [RH] Give sector a chance to eat the use
         sector_t *sec  = usething->subsector->sector;
-        int32_t       spac = SECSPAC_Use;
+        int32_t   spac = SECSPAC_Use;
         if (foundline)
             spac |= SECSPAC_UseWall;
         if ((!sec->SecActTarget || !A_TriggerAction(sec->SecActTarget, usething, spac)) &&
@@ -2808,12 +2810,12 @@ void P_UseLines(player_t *player)
 //
 static AActor *bombsource;
 static AActor *bombspot;
-static int32_t     bombdamage;
+static int32_t bombdamage;
 static float   bombdamagefloat;
-static int32_t     bombdistance;
+static int32_t bombdistance;
 static float   bombdistancefloat;
 static bool    DamageSource;
-static int32_t     bombmod;
+static int32_t bombmod;
 
 // [RH] Damage scale to apply to thing that shot the missile.
 static float selfthrustscale;
@@ -2960,7 +2962,7 @@ static bool PIT_ZDoomRadiusAttack(AActor *thing)
 
         fixed_t momx   = thing->momx;
         fixed_t momy   = thing->momy;
-        int32_t     damage = (int32_t)points;
+        int32_t damage = (int32_t)points;
 
         P_DamageMobj(thing, bombspot, bombsource, damage, bombmod);
 
@@ -2997,10 +2999,10 @@ static bool PIT_ZDoomRadiusAttack(AActor *thing)
 void P_RadiusAttack(AActor *spot, AActor *source, int32_t damage, int32_t distance, bool hurtSource, int32_t mod)
 {
     fixed_t dist      = (distance + MAXRADIUS) << FRACBITS;
-    int32_t     yh        = MIN<int32_t>((spot->y + dist - bmaporgy) >> MAPBLOCKSHIFT, bmapheight - 1);
-    int32_t     yl        = MAX<int32_t>((spot->y - dist - bmaporgy) >> MAPBLOCKSHIFT, 0);
-    int32_t     xh        = MIN<int32_t>((spot->x + dist - bmaporgx) >> MAPBLOCKSHIFT, bmapwidth - 1);
-    int32_t     xl        = MAX<int32_t>((spot->x - dist - bmaporgx) >> MAPBLOCKSHIFT, 0);
+    int32_t yh        = MIN<int32_t>((spot->y + dist - bmaporgy) >> MAPBLOCKSHIFT, bmapheight - 1);
+    int32_t yl        = MAX<int32_t>((spot->y - dist - bmaporgy) >> MAPBLOCKSHIFT, 0);
+    int32_t xh        = MIN<int32_t>((spot->x + dist - bmaporgx) >> MAPBLOCKSHIFT, bmapwidth - 1);
+    int32_t xl        = MAX<int32_t>((spot->x - dist - bmaporgx) >> MAPBLOCKSHIFT, 0);
     bombspot          = spot;
     bombsource        = source;
     bombdamage        = damage;
@@ -3059,8 +3061,8 @@ void P_RadiusAttack(AActor *spot, AActor *source, int32_t damage, int32_t distan
 //  the way it was and call P_ChangeSector again
 //  to undo the changes.
 //
-int32_t  crushchange;
-bool nofit;
+int32_t crushchange;
+bool    nofit;
 
 //
 // PIT_ChangeSector
@@ -3349,12 +3351,12 @@ bool PIT_GetSectors(line_t *ld)
 
 void P_CreateSecNodeList(AActor *thing, fixed_t x, fixed_t y)
 {
-    int32_t         xl;
-    int32_t         xh;
-    int32_t         yl;
-    int32_t         yh;
-    int32_t         bx;
-    int32_t         by;
+    int32_t     xl;
+    int32_t     xh;
+    int32_t     yl;
+    int32_t     yh;
+    int32_t     bx;
+    int32_t     by;
     msecnode_t *node;
 
     // First, clear out the existing m_thing fields. As each node is
@@ -3373,8 +3375,8 @@ void P_CreateSecNodeList(AActor *thing, fixed_t x, fixed_t y)
     // e.g. when a telefrag results in an item drop.
     // so we need to back up tmthing and then restore it
     AActor *last_tmthing = tmthing;
-    int32_t     last_tmx = tmx, last_tmy = tmy;
-    int32_t     last_tmbbox[4] = {tmbbox[0], tmbbox[1], tmbbox[2], tmbbox[3]};
+    int32_t last_tmx = tmx, last_tmy = tmy;
+    int32_t last_tmbbox[4] = {tmbbox[0], tmbbox[1], tmbbox[2], tmbbox[3]};
 
     tmthing = thing;
     tmx     = x;
@@ -3575,7 +3577,7 @@ v3fixed_t P_LinePlaneIntersection(const plane_t *plane, const v3fixed_t &lineorg
     v3fixed_t pt;
     M_SetVec3Fixed(&pt, INT32_MAX, INT32_MAX, INT32_MAX); // marks as invalid
 
-    if (!plane)                                     // sanity check
+    if (!plane)                                           // sanity check
         return pt;
 
     fixed_t numer =

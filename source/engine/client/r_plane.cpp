@@ -42,11 +42,12 @@
 #include "p_local.h"
 #include "r_draw.h"
 #include "r_plane.h"
-#include "r_local.h"
+
 #include "r_sky.h"
 #include "v_video.h"
 #include "w_wad.h"
 #include "z_zone.h"
+#include "r_main.h"
 
 
 planefunction_t floorfunc;

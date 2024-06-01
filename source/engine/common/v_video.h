@@ -26,7 +26,6 @@
 #pragma once
 
 #include "m_vectors.h"
-#include "r_data.h"
 #include "v_palette.h"
 
 class IRenderSurface;

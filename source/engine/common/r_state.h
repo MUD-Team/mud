@@ -26,7 +26,6 @@
 
 // Need data structure definitions.
 #include "d_player.h"
-#include "r_data.h"
 
 #define WALLFRACBITS 4
 #define WALLFRACUNIT (1 << WALLFRACBITS)
@@ -36,8 +35,8 @@
 //	for rendering.
 //
 
-extern "C" int32_t viewwidth;
-extern "C" int32_t viewheight;
+extern int32_t viewwidth;
+extern int32_t viewheight;
 
 //
 // Lookup tables for map data.

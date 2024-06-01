@@ -43,6 +43,7 @@
 #include "oscanner.h"
 #include "p_local.h"
 #include "physfs.h"
+#include "r_common.h"
 #include "s_sndseq.h"
 #include "v_video.h"
 #include "w_wad.h"
@@ -60,14 +61,14 @@ struct channel_t
     fixed_t   *pt;         // origin of sound
     fixed_t    x, y;       // origin if pt is NULL
     sfxinfo_t *sfxinfo;    // sound information (if null, channel avail.)
-    int32_t        handle;     // handle of the sound being played
-    int32_t        sound_id;
-    int32_t        entchannel; // entity's sound channel
+    int32_t    handle;     // handle of the sound being played
+    int32_t    sound_id;
+    int32_t    entchannel; // entity's sound channel
     float      attenuation;
     float      volume;
-    int32_t        priority;
+    int32_t    priority;
     bool       loop;
-    int32_t        start_time; // gametic the sound started in
+    int32_t    start_time; // gametic the sound started in
 
     void clear()
     {
@@ -217,7 +218,7 @@ static bool mus_paused;
 static struct mus_playing_t
 {
     std::string name;
-    int32_t         handle;
+    int32_t     handle;
 } mus_playing;
 
 EXTERN_CVAR(snd_musicsystem)
@@ -452,7 +453,7 @@ static void AdjustSoundParamsZDoom(const AActor *listener, fixed_t x, fixed_t y,
 {
     static const fixed_t MAX_SND_DIST = 2025 * FRACUNIT;
     static const fixed_t MIN_SND_DIST = 1 * FRACUNIT;
-    const int32_t            approx_dist  = P_AproxDistance(listener->x - x, listener->y - y);
+    const int32_t        approx_dist  = P_AproxDistance(listener->x - x, listener->y - y);
 
     if (approx_dist > MAX_SND_DIST)
     {
@@ -551,7 +552,7 @@ static int32_t ResolveSound(int32_t soundid)
         while (S_sfx[soundid].israndom)
         {
             std::vector<int32_t> &list = S_rnd[soundid];
-            soundid                = list[P_Random() % static_cast<int32_t>(list.size())];
+            soundid                    = list[P_Random() % static_cast<int32_t>(list.size())];
         }
         return soundid;
     }
@@ -565,8 +566,8 @@ static int32_t ResolveSound(int32_t soundid)
 // joek - choco's S_StartSoundAtVolume with some zdoom code
 // a bit of a whore of a funtion but she works ok
 //
-static void S_StartSound(fixed_t *pt, fixed_t x, fixed_t y, int32_t channel, int32_t sfx_id, float volume, int32_t attenuation,
-                         bool looping)
+static void S_StartSound(fixed_t *pt, fixed_t x, fixed_t y, int32_t channel, int32_t sfx_id, float volume,
+                         int32_t attenuation, bool looping)
 {
     if (volume <= 0.0f)
         return;
@@ -1085,9 +1086,9 @@ void S_ChangeMusic(std::string musicname, int32_t looping)
     }
     else
     {
-        uint32_t length     = PHYSFS_fileLength(f);
+        uint32_t              length = PHYSFS_fileLength(f);
         Poco::Buffer<uint8_t> data(length);
-        const size_t result = PHYSFS_readBytes(f, data.begin(), length);
+        const size_t          result = PHYSFS_readBytes(f, data.begin(), length);
         PHYSFS_close(f);
         if (result == length)
             I_PlaySong(data.begin(), length, (looping != 0));
@@ -1109,14 +1110,14 @@ void S_StopMusic()
 //
 // =============================== [RH]
 
-std::vector<sfxinfo_t>          S_sfx; // [RH] This is no longer defined in sounds.c
+std::vector<sfxinfo_t>                  S_sfx; // [RH] This is no longer defined in sounds.c
 std::map<int32_t, std::vector<int32_t>> S_rnd;
 
 static struct AmbientSound
 {
     uint32_t type;                   // type of ambient sound
-    int32_t      periodmin;              // # of tics between repeats
-    int32_t      periodmax;              // max # of tics for random ambients
+    int32_t  periodmin;              // # of tics between repeats
+    int32_t  periodmax;              // max # of tics for random ambients
     float    volume;                 // relative volume of sound
     float    attenuation;
     char     sound[MAX_SNDNAME + 1]; // Logical name of sound to play
@@ -1247,7 +1248,7 @@ void S_ParseSndInfo()
         if (rawinfo == NULL)
             I_Error("Error opening lumps/SNDINFO.txt file");
 
-        uint32_t filelen = PHYSFS_fileLength(rawinfo);
+        uint32_t           filelen = PHYSFS_fileLength(rawinfo);
         Poco::Buffer<char> buffer(filelen);
 
         if (PHYSFS_readBytes(rawinfo, (void *)buffer.begin(), filelen) != filelen)

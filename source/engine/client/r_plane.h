@@ -24,7 +24,6 @@
 
 #pragma once
 
-#include "r_data.h"
 #include "res_texture.h"
 
 // Visplane related.

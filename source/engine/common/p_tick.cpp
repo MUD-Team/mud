@@ -23,7 +23,6 @@
 //-----------------------------------------------------------------------------
 
 #include "c_console.h"
-#include "c_effect.h"
 #include "mud_includes.h"
 #include "p_acs.h"
 #include "p_local.h"
@@ -52,16 +51,6 @@ void P_Ticker(void)
     if (paused)
         return;
 
-#ifdef CLIENT_APP
-    // Game pauses when in the menu and not online/demo
-    if (!multiplayer && pticker_paused &&
-        players.begin()->viewz != 1)
-        return;
-#endif
-
-    if (clientside)
-        P_ThinkParticles(); // [RH] make the particles think
-
     if (clientside && serverside)
     {
         for (Players::iterator it = players.begin(); it != players.end(); ++it)
@@ -82,10 +71,7 @@ void P_Ticker(void)
 
     P_UpdateSpecials();
     P_RespawnSpecials();
-
-    if (clientside)
-        P_RunEffects(); // [RH] Run particle effects
-
+    
     // for par times
     level.time++;
 }
@@ -93,4 +79,9 @@ void P_Ticker(void)
 void P_Ticker_Pause(bool paused)
 {
     pticker_paused = paused;
+}
+
+bool P_Ticker_Paused()
+{
+    return pticker_paused;
 }

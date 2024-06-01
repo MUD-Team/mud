@@ -54,13 +54,15 @@
 #include "minilzo.h"
 #include "mud_includes.h"
 #include "p_setup.h"
-#include "r_local.h"
+#include "r_state.h"
+#include "r_common.h"
 #include "s_sound.h"
 #include "sv_main.h"
 #include "v_video.h"
 #include "w_ident.h"
 #include "w_wad.h"
 #include "z_zone.h"
+
 
 EXTERN_CVAR(sv_timelimit)
 EXTERN_CVAR(sv_nomonsters)
@@ -83,9 +85,9 @@ extern bool          gameisdead;
 extern DThinker      ThinkerCap;
 extern dyncolormap_t NormalLight;
 
-bool        devparm;                       // started game with -devparm
-char        startmap[8];
-event_t     events[MAXEVENTS];
+bool    devparm; // started game with -devparm
+char    startmap[8];
+event_t events[MAXEVENTS];
 
 std::string LOG_FILE;
 

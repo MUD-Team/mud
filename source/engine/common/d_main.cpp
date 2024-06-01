@@ -48,11 +48,12 @@
 #include "m_fileio.h"
 #include "m_resfile.h"
 #include "mud_includes.h"
-#include "r_main.h"
+#include "r_common.h"
 #include "s_sound.h"
 #include "w_ident.h"
 #include "w_wad.h"
 #include "z_zone.h"
+
 
 OResFiles  wadfiles;
 OWantFiles missingfiles;
@@ -336,7 +337,7 @@ bool D_DoomWadReboot(const OWantFiles &newwadfiles)
     ::gamestate              = GS_STARTUP; // prevent console from trying to use nonexistant font
 
     // Load all the WAD and DEH/BEX files
-    OResFiles   oldwadfiles = ::wadfiles;
+    OResFiles oldwadfiles = ::wadfiles;
 
     D_LoadResourceFiles(newwadfiles);
 

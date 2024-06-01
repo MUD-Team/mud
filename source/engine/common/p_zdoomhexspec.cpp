@@ -31,6 +31,9 @@
 #include "mud_includes.h"
 #include "p_lnspec.h"
 #include "p_local.h"
+#include "r_common.h"
+#include "v_palette.h"
+
 
 EXTERN_CVAR(sv_allowexit)
 EXTERN_CVAR(sv_fragexitswitch)
@@ -270,7 +273,7 @@ void P_PlayerInZDoomSector(player_t *player)
         P_ThrustMobj(player->mo, 0, 2048 * 28);
         break;
     case Scroll_Strife_Current:
-        int32_t     anglespeed;
+        int32_t anglespeed;
         fixed_t carryspeed;
         angle_t angle;
 
@@ -599,12 +602,12 @@ void P_SpawnZDoomSectorSpecial(sector_t *sector)
         if (sector->special >= Scroll_North_Slow && sector->special <= Scroll_SouthWest_Fast)
         {
             static int8_t hexenScrollies[24][2] = {{0, 1},   {0, 2},   {0, 4},   {-1, 0}, {-2, 0}, {-4, 0},
-                                                        {0, -1},  {0, -2},  {0, -4},  {1, 0},  {2, 0},  {4, 0},
-                                                        {1, 1},   {2, 2},   {4, 4},   {-1, 1}, {-2, 2}, {-4, 4},
-                                                        {-1, -1}, {-2, -2}, {-4, -4}, {1, -1}, {2, -2}, {4, -4}};
-            int32_t                i                     = sector->special - Scroll_North_Slow;
-            int32_t                dx                    = hexenScrollies[i][0] * (FRACUNIT / 2);
-            int32_t                dy                    = hexenScrollies[i][1] * (FRACUNIT / 2);
+                                                   {0, -1},  {0, -2},  {0, -4},  {1, 0},  {2, 0},  {4, 0},
+                                                   {1, 1},   {2, 2},   {4, 4},   {-1, 1}, {-2, 2}, {-4, 4},
+                                                   {-1, -1}, {-2, -2}, {-4, -4}, {1, -1}, {2, -2}, {4, -4}};
+            int32_t       i                     = sector->special - Scroll_North_Slow;
+            int32_t       dx                    = hexenScrollies[i][0] * (FRACUNIT / 2);
+            int32_t       dy                    = hexenScrollies[i][1] * (FRACUNIT / 2);
 
             new DScroller(DScroller::sc_floor, dx, dy, -1, sector - sectors, 0);
             // Hexen scrolling floors cause the player to move
@@ -629,7 +632,7 @@ void P_SpawnZDoomExtra(int32_t i)
 {
     switch (lines[i].special)
     {
-        int32_t       s;
+        int32_t   s;
         sector_t *sec;
 
     // killough 3/7/98:
@@ -743,8 +746,8 @@ void P_SpawnZDoomScroller(line_t *l, int32_t i)
 {
     fixed_t dx      = 0;             // direction and speed of scrolling
     fixed_t dy      = 0;
-    int32_t     control = -1, accel = 0; // no control sector or acceleration
-    int32_t     special = l->special;
+    int32_t control = -1, accel = 0; // no control sector or acceleration
+    int32_t special = l->special;
 
     // killough 3/7/98: Types 245-249 are same as 250-254 except that the
     // first side's sector's heights cause scrolling when they change, and
