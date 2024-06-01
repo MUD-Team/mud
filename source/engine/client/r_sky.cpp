@@ -34,6 +34,7 @@
 #include "r_data.h"
 #include "r_draw.h"
 #include "r_main.h"
+#include "r_client.h"
 #include "res_texture.h"
 #include "w_wad.h"
 

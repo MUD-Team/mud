@@ -31,12 +31,8 @@
 #include "oscanner.h"
 #include "p_mapformat.h"
 #include "p_setup.h"
-#include "r_sky.h"
 #include "v_video.h"
 #include "w_wad.h"
-
-/// Globals
-bool HexenHack;
 
 namespace
 {
@@ -917,14 +913,7 @@ void MIType_Sky(OScanner &os, bool doEquals, void *data, uint32_t flags, uint32_
     os.scan();
     if (IsRealNum(os.getToken().c_str()))
     {
-        /*if (HexenHack)
-        {
-            *((fixed_t *)(info + handler->data2)) = sc_Number << 8;
-        }
-         else
-        {
-            *((fixed_t *)(info + handler->data2)) = (fixed_t)(sc_Float * 65536.0f);
-        }*/
+        I_Error("Hexen wad?");
     }
     else
     {
@@ -981,18 +970,7 @@ void MIType_SCFlags(OScanner &os, bool doEquals, void *data, uint32_t flags, uin
 // Sets a cluster
 void MIType_Cluster(OScanner &os, bool doEquals, void *data, uint32_t flags, uint32_t flags2)
 {
-    ParseMapInfoHelper<int32_t>(os, doEquals);
 
-    *static_cast<int32_t *>(data) = os.getTokenInt();
-    if (HexenHack)
-    {
-        ClusterInfos   &clusters = getClusterInfos();
-        cluster_info_t &clusterH = clusters.findByCluster(os.getTokenInt());
-        if (clusterH.cluster != 0)
-        {
-            clusterH.flags |= CLUSTER_HUB;
-        }
-    }
 }
 
 // Sets a cluster string
@@ -1725,15 +1703,7 @@ static void ParseMapInfoFile(const char *filename)
 
             if (IsNum(map_name))
             {
-                // MAPNAME is a number, assume a Hexen wad
-                const int32_t map = std::atoi(map_name);
-
-                sprintf(map_name, "MAP%02d", map);
-                SKYFLATNAME[5] = 0;
-                HexenHack      = true;
-                // Hexen levels are automatically even lighting
-                // and no auto sound sequences
-                levelflags |= LEVEL_EVENLIGHTING | LEVEL_SNDSEQTOTALCTRL;
+                I_Error("Hexen wad?");
             }
 
             // Find the level.

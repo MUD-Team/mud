@@ -186,7 +186,6 @@ class DSeqSectorNode : public DSeqNode
 
 static void VerifySeqPtr(int32_t pos, int32_t need);
 static void AssignTranslations(OScanner &os, int32_t seq, seqtype_t type);
-static void AssignHexenTranslations();
 
 // PRIVATE DATA DEFINITIONS ------------------------------------------------
 
@@ -356,42 +355,6 @@ static void AssignTranslations(OScanner &os, int32_t seq, seqtype_t type)
     }
 
     os.unScan();
-}
-
-//==========================================================================
-//
-// AssignHexenTranslations
-//
-//==========================================================================
-
-static void AssignHexenTranslations()
-{
-    int32_t i, j, seq;
-
-    for (i = 0; HexenSequences[i].name; i++)
-    {
-        for (seq = 0; seq < NumSequences; seq++)
-        {
-            if (!stricmp(HexenSequences[i].name, Sequences[seq]->name))
-                break;
-        }
-        if (seq == NumSequences)
-            continue;
-
-        for (j = 0; j < 4 && HexenSequences[i].seqs[j] != HexenLastSeq; j++)
-        {
-            int32_t trans;
-
-            if (HexenSequences[i].seqs[j] & 0x40)
-                trans = 64;
-            else if (HexenSequences[i].seqs[j] & 0x80)
-                trans = 64 * 2;
-            else
-                trans = 0;
-
-            SeqTrans[trans + (HexenSequences[i].seqs[j] & 0x3f)] = seq;
-        }
-    }
 }
 
 //==========================================================================
@@ -605,9 +568,6 @@ void S_ParseSndSeq()
     }
 
     free(ScriptTemp);
-
-    if (HexenHack)
-        AssignHexenTranslations();
 }
 
 DSeqNode::~DSeqNode()

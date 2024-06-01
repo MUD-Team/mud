@@ -28,13 +28,17 @@
 #include "m_alloc.h"
 #include "m_argv.h"
 #include "m_vectors.h"
-#include "mud_profiling.h"
 #include "mud_includes.h"
+#include "mud_profiling.h"
 #include "p_local.h"
+#include "r_draw.h"
+#include "r_segs.h"
+#include "r_client.h"
 #include "r_local.h"
 #include "s_sound.h"
 #include "v_video.h"
 #include "w_wad.h"
+
 
 extern fixed_t FocalLengthX, FocalLengthY;
 
@@ -61,17 +65,17 @@ EXTERN_CVAR(r_particles)
 static tallpost_t *spriteposts[MAXWIDTH];
 
 // [RH] particle globals
-extern int32_t         NumParticles;
-extern int32_t         ActiveParticles;
-extern int32_t         InactiveParticles;
+extern int32_t     NumParticles;
+extern int32_t     ActiveParticles;
+extern int32_t     InactiveParticles;
 extern particle_t *Particles;
-TArray<uint16_t>       ParticlesInSubsec;
+TArray<uint16_t>   ParticlesInSubsec;
 
 //
 // GAME FUNCTIONS
 //
 vissprite_t *vissprite_p;
-int32_t          newvissprite;
+int32_t      newvissprite;
 
 //
 // R_ClearSprites
@@ -189,7 +193,7 @@ void R_DrawVisSprite(vissprite_t *vis, int32_t x1, int32_t x2)
     if (vis->tex_patch == NULL)
         vis->tex_patch = (patch_t *)texturemanager.getTexture(vis->tex_id)->getData();
     const int16_t patchWidth = vis->tex_patch->width();
-    const int32_t   start      = vis->startfrac >> FRACBITS;
+    const int32_t start      = vis->startfrac >> FRACBITS;
     if (start < 0 || start > patchWidth)
     {
         return;
@@ -366,7 +370,7 @@ static vissprite_t *R_GenerateVisSprite(const sector_t *sector, int32_t fakeside
 
 void R_DrawHitBox(AActor *thing)
 {
-    v3fixed_t  vertices[8];
+    v3fixed_t     vertices[8];
     const uint8_t color = 0x80;
 
     // bottom front left
@@ -437,7 +441,7 @@ void R_ProjectSprite(AActor *thing, int32_t fakeside)
     spritedef_t   *sprdef;
     spriteframe_t *sprframe;
     texhandle_t    tex_id;
-    uint32_t   rot;
+    uint32_t       rot;
     bool           flip;
 
     if (!thing)
@@ -498,16 +502,16 @@ void R_ProjectSprite(AActor *thing, int32_t fakeside)
         const angle_t ang = R_PointToAngle(thingx, thingy);
 
         // choose a different rotation based on player view
-        rot = (R_PointToAngle(thingx, thingy) - thing->angle + (uint32_t)(ANG45/2)*9) >> 29;
+        rot = (R_PointToAngle(thingx, thingy) - thing->angle + (uint32_t)(ANG45 / 2) * 9) >> 29;
 
         tex_id = sprframe->texes[rot];
-        flip = static_cast<bool>(sprframe->flip[rot]);
+        flip   = static_cast<bool>(sprframe->flip[rot]);
     }
     else
     {
         // use single rotation for all views
         tex_id = sprframe->texes[rot = 0];
-        flip = static_cast<bool>(sprframe->flip[0]);
+        flip   = static_cast<bool>(sprframe->flip[0]);
     }
 
     if (sprframe->width[rot] == SPRITE_NEEDS_INFO)
@@ -558,9 +562,9 @@ void R_ProjectSprite(AActor *thing, int32_t fakeside)
     {
         // diminished light
         int32_t index = (vis->yscale * lightscalexmul) >> LIGHTSCALESHIFT; // [RH]
-        index     = clamp(index, 0, MAXLIGHTSCALE - 1);
+        index         = clamp(index, 0, MAXLIGHTSCALE - 1);
 
-        vis->colormap = basecolormap.with(spritelights[index]);        // [RH] Use basecolormap
+        vis->colormap = basecolormap.with(spritelights[index]);            // [RH] Use basecolormap
     }
 }
 
@@ -607,9 +611,9 @@ void R_AddSprites(sector_t *sec, int32_t lightlevel, int32_t fakeside)
 //		gain compared to the old function.
 //
 
-static int32_t           vsprcount;
+static int32_t       vsprcount;
 static vissprite_t **spritesorter;
-static int32_t           spritesorter_size = 0;
+static int32_t       spritesorter_size = 0;
 
 static int32_t STACK_ARGS sv_compare(const void *arg1, const void *arg2)
 {
@@ -652,8 +656,8 @@ void R_DrawSprite(vissprite_t *spr)
     static int32_t clipbot[MAXWIDTH];
 
     drawseg_t *ds;
-    int32_t        x;
-    int32_t        r1, r2;
+    int32_t    x;
+    int32_t    r1, r2;
     fixed_t    segscale1, segscale2;
 
     int32_t  topclip = 0, botclip = viewheight;
@@ -706,8 +710,8 @@ void R_DrawSprite(vissprite_t *spr)
 
     // initialize the clipping arrays
     int32_t i = spr->x2 - spr->x1 + 1;
-    clip1 = clipbot + spr->x1;
-    clip2 = cliptop + spr->x1;
+    clip1     = clipbot + spr->x1;
+    clip2     = cliptop + spr->x1;
     do
     {
         *clip1++ = botclip;
@@ -776,7 +780,7 @@ void R_DrawSprite(vissprite_t *spr)
 void R_DrawMasked(void)
 {
     MUD_ZoneScoped;
-    
+
     drawseg_t *ds;
 
     R_SortVisSprites();
@@ -843,7 +847,7 @@ void R_FindParticleSubsectors()
     for (int32_t i = ActiveParticles; i != NO_PARTICLE; i = Particles[i].next)
     {
         subsector_t *ssec  = R_PointInSubsector(Particles[i].x, Particles[i].y);
-        int32_t          ssnum = ssec - subsectors;
+        int32_t      ssnum = ssec - subsectors;
 
         Particles[i].nextinsubsector = ParticlesInSubsec[ssnum];
         ParticlesInSubsec[ssnum]     = i;
@@ -868,11 +872,11 @@ void R_ProjectParticle(particle_t *particle, const sector_t *sector, int32_t fak
     if (vis == NULL)
         return;
 
-    vis->startfrac   = particle->color;
-    vis->tex_id      = NO_PARTICLE;
-    vis->mobjflags   = particle->trans;
-    vis->mo          = NULL;
-    vis->spectator   = false;
+    vis->startfrac = particle->color;
+    vis->tex_id    = NO_PARTICLE;
+    vis->mobjflags = particle->trans;
+    vis->mo        = NULL;
+    vis->spectator = false;
 
     // get light level
     if (fixedcolormap.isValid())

@@ -35,32 +35,10 @@
 #include "m_fileio.h"
 #include "mud_includes.h"
 #include "r_local.h"
-#include "r_sky.h"
 #include "v_palette.h"
 #include "v_video.h"
 #include "w_wad.h"
 #include "z_zone.h"
-
-//
-// R_GetPatchColumn
-//
-tallpost_t *R_GetPatchColumn(patch_t *patch, int32_t colnum)
-{
-    return (tallpost_t *)((uint8_t *)patch + LELONG(patch->columnofs[colnum]));
-}
-
-//
-// R_GetTextureColumn
-//
-tallpost_t *R_GetTextureColumn(texhandle_t texnum, int32_t colnum)
-{
-    const Texture *tex = texturemanager.getTexture(texnum);
-    colnum &= tex->getWidthMask();
-    patch_t *texpatch = (patch_t *)tex->getData();
-
-    return (tallpost_t *)((uint8_t *)texpatch + LELONG(texpatch->columnofs[colnum]));
-}
-
 //
 // R_InitData
 // Locates all the lumps
@@ -71,52 +49,6 @@ void R_InitData()
 {
     // haleyjd 01/28/10: also initialize tantoangle_acc table
     Table_InitTanToAngle();
-}
-
-//
-// R_PrecacheLevel
-// Preloads all relevant graphics for the level.
-//
-// [RH] Rewrote this using Lee Killough's code in BOOM as an example.
-
-void R_PrecacheLevel(void)
-{
-    int32_t   i;
-
-    // Precache flats.
-    for (i = numsectors - 1; i >= 0; i--)
-    {
-        texturemanager.getTexture(sectors[i].floorpic);
-        texturemanager.getTexture(sectors[i].ceilingpic);
-    }
-
-    // Precache textures.
-    for (i = numsides - 1; i >= 0; i--)
-    {
-        texturemanager.getTexture(sides[i].toptexture);
-        texturemanager.getTexture(sides[i].midtexture);
-        texturemanager.getTexture(sides[i].bottomtexture);
-    }
-
-    // Sky texture is always present.
-    // Note that F_SKY1 is the name used to
-    //	indicate a sky floor/ceiling as a flat,
-    //	while the sky texture is stored like
-    //	a wall texture, with an episode dependend
-    //	name.
-    //
-    // [RH] Possibly two sky textures now.
-    // [ML] 5/11/06 - Not anymore!
-
-    texturemanager.getTexture(sky1texture);
-    texturemanager.getTexture(sky2texture);
-
-    // Precache sprites
-    AActor                  *actor;
-    TThinkerIterator<AActor> iterator;
-
-    while ((actor = iterator.Next()))
-        R_CacheSprite(sprites + actor->sprite);
 }
 
 // Utility function,
