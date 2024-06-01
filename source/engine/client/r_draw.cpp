@@ -24,6 +24,8 @@
 //
 //-----------------------------------------------------------------------------
 
+#include "r_draw.h"
+
 #include <assert.h>
 #include <math.h>
 
@@ -36,10 +38,11 @@
 #include "mud_profiling.h"
 #include "r_intrin.h"
 #include "r_local.h"
+#include "v_textcolors.h"
 #include "v_video.h"
 #include "w_wad.h"
 #include "z_zone.h"
-#include "v_textcolors.h"
+
 
 #undef RANGECHECK
 
@@ -130,9 +133,9 @@ class FuzzTable
     }
 
   private:
-    static const size_t size = 64;
-    static const int32_t    table[FuzzTable::size];
-    int32_t                 pos;
+    static const size_t  size = 64;
+    static const int32_t table[FuzzTable::size];
+    int32_t              pos;
 };
 
 const int32_t FuzzTable::table[FuzzTable::size] = {
@@ -307,8 +310,8 @@ static forceinline void R_DrawColumnGeneric(PIXEL_T *dest, const drawcolumn_t &d
 #endif
 
     palindex_t *source = drawcolumn.source;
-    int32_t         pitch  = drawcolumn.pitch_in_pixels;
-    int32_t         count  = drawcolumn.yh - drawcolumn.yl + 1;
+    int32_t     pitch  = drawcolumn.pitch_in_pixels;
+    int32_t     count  = drawcolumn.yh - drawcolumn.yl + 1;
     if (count <= 0)
         return;
 
@@ -463,18 +466,18 @@ static forceinline void R_DrawLevelSpanGeneric(PIXEL_T *dest, const drawspan_t &
 #endif
 
     palindex_t *source = drawspan.source;
-    int32_t         count  = drawspan.x2 - drawspan.x1 + 1;
+    int32_t     count  = drawspan.x2 - drawspan.x1 + 1;
     if (count <= 0)
         return;
 
     const uint32_t ubits = dspan.texture_height_bits;
-	const uint32_t vbits = dspan.texture_width_bits;
+    const uint32_t vbits = dspan.texture_width_bits;
 
-	const uint32_t umask = ((1 << ubits) - 1) << vbits;
-	const uint32_t vmask = (1 << vbits) - 1;
-	// TODO: don't shift the values of ufrac and vfrac by 10 in R_MapLevelPlane
-	const int32_t ushift = FRACBITS - vbits + 10;
-	const int32_t vshift = FRACBITS + 10;
+    const uint32_t umask = ((1 << ubits) - 1) << vbits;
+    const uint32_t vmask = (1 << vbits) - 1;
+    // TODO: don't shift the values of ufrac and vfrac by 10 in R_MapLevelPlane
+    const int32_t ushift = FRACBITS - vbits + 10;
+    const int32_t vshift = FRACBITS + 10;
 
     dsfixed_t       vfrac = drawspan.xfrac;
     dsfixed_t       ufrac = drawspan.yfrac;
@@ -486,7 +489,7 @@ static forceinline void R_DrawLevelSpanGeneric(PIXEL_T *dest, const drawspan_t &
     do
     {
         // Current texture index in u,v.
-        const uint32_t spot = ((ufrac >> ushift) & umask) | ((vfrac >> vshift) & vmask); 
+        const uint32_t spot = ((ufrac >> ushift) & umask) | ((vfrac >> vshift) & vmask);
 
         // Lookup pixel from flat texture tile,
         //  re-index using light/colormap.
@@ -525,7 +528,7 @@ static forceinline void R_DrawSlopedSpanGeneric(PIXEL_T *dest, const drawspan_t 
 #endif
 
     palindex_t *source = drawspan.source;
-    int32_t         count  = drawspan.x2 - drawspan.x1 + 1;
+    int32_t     count  = drawspan.x2 - drawspan.x1 + 1;
     if (count <= 0)
         return;
 
@@ -536,12 +539,12 @@ static forceinline void R_DrawSlopedSpanGeneric(PIXEL_T *dest, const drawspan_t 
     int32_t ltindex = 0;
 
     const uint32_t ubits = dspan.texture_height_bits;
-	const uint32_t vbits = dspan.texture_width_bits;
+    const uint32_t vbits = dspan.texture_width_bits;
 
-	const uint32_t vmask = ((1 << ubits) - 1) << vbits;
-	const uint32_t umask = (1 << vbits) - 1;
-	const int32_t vshift = FRACBITS - vbits;
-	const int32_t ushift = FRACBITS;
+    const uint32_t vmask  = ((1 << ubits) - 1) << vbits;
+    const uint32_t umask  = (1 << vbits) - 1;
+    const int32_t  vshift = FRACBITS - vbits;
+    const int32_t  ushift = FRACBITS;
 
     shaderef_t colormap;
     COLORFUNC  colorfunc(drawspan);
@@ -715,7 +718,7 @@ class DirectTranslucentColormapFunc
     }
 
     const shaderef_t &colormap;
-    int32_t               fga, bga;
+    int32_t           fga, bga;
 };
 
 class DirectSlopeColormapFunc
@@ -1043,14 +1046,14 @@ void R_InitColumnDrawers()
     if (!I_VideoInitialized())
         return;
 
-    R_DrawColumn             = R_DrawColumnD;
-    R_DrawFuzzColumn         = R_DrawFuzzColumnD;
-    R_DrawTranslucentColumn  = R_DrawTranslucentColumnD;
-    R_DrawSlopeSpan          = R_DrawSlopeSpanD;
-    R_DrawSpan               = R_DrawSpanD;
-    R_FillColumn             = R_FillColumnD;
-    R_FillSpan               = R_FillSpanD;
-    R_FillTranslucentSpan    = R_FillTranslucentSpanD;
+    R_DrawColumn            = R_DrawColumnD;
+    R_DrawFuzzColumn        = R_DrawFuzzColumnD;
+    R_DrawTranslucentColumn = R_DrawTranslucentColumnD;
+    R_DrawSlopeSpan         = R_DrawSlopeSpanD;
+    R_DrawSpan              = R_DrawSpanD;
+    R_FillColumn            = R_FillColumnD;
+    R_FillSpan              = R_FillSpanD;
+    R_FillTranslucentSpan   = R_FillTranslucentSpanD;
 }
 
 VERSION_CONTROL(r_draw_cpp, "$Id: f878e66e7201c97021a528e052d53ef9a0811b5e $")

@@ -34,6 +34,7 @@
 #include "r_draw.h"
 #include "r_main.h"
 #include "r_plane.h"
+#include "r_segs.h"
 #include "r_state.h"
 #include "r_things.h"
 #include "v_palette.h"

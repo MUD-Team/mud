@@ -52,7 +52,6 @@
 #include "p_unlag.h"
 #include "p_zdoomhexspec.h"
 #include "r_local.h"
-#include "r_sky.h"
 #include "r_state.h"
 #include "s_sound.h"
 #include "w_wad.h"

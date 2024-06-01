@@ -28,12 +28,7 @@
 #include "r_defs.h"
 #include "r_state.h"
 
-// Retrieve column data for span blitting.
-tallpost_t *R_GetPatchColumn(patch_t *patch, int32_t colnum);
-tallpost_t *R_GetTextureColumn(texhandle_t texnum, int32_t colnum);
-
 // I/O, setting up the stuff.
 void R_InitData(void);
-void R_PrecacheLevel(void);
 
 uint32_t SlopeDiv(uint32_t num, uint32_t den);

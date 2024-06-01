@@ -38,7 +38,6 @@
 #include "p_saveg.h"
 #include "p_unlag.h"
 #include "r_data.h"
-#include "r_sky.h"
 #include "v_video.h"
 #include "w_ident.h"
 #include "w_wad.h"

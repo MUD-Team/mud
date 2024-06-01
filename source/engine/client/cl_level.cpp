@@ -46,6 +46,7 @@
 #include "p_setup.h"
 #include "r_data.h"
 #include "r_sky.h"
+#include "r_client.h"
 #include "res_texture.h"
 #include "s_sndseq.h"
 #include "s_sound.h"
@@ -548,6 +549,10 @@ void G_DoLoadLevel(int32_t position)
 
     SN_StopAllSequences(); // denis - todo - equivalent?
     P_SetupLevel(level.mapname.c_str(), position);
+
+    // preload graphics
+    if (precache)
+        R_PrecacheLevel();
 
     // [AM] Prevent holding onto stale snapshots.
     CL_ClearSectorSnapshots();
