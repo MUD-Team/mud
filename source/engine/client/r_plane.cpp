@@ -37,14 +37,17 @@
 #include "i_video.h"
 #include "m_alloc.h"
 #include "m_vectors.h"
-#include "mud_profiling.h"
 #include "mud_includes.h"
+#include "mud_profiling.h"
 #include "p_local.h"
+#include "r_draw.h"
+#include "r_plane.h"
 #include "r_local.h"
 #include "r_sky.h"
 #include "v_video.h"
 #include "w_wad.h"
 #include "z_zone.h"
+
 
 planefunction_t floorfunc;
 planefunction_t ceilingfunc;
@@ -92,8 +95,8 @@ extern fixed_t FocalLengthX, FocalLengthY;
 extern float   xfoc, yfoc;
 extern float   focratio, ifocratio;
 
-int32_t  *planezlight;
-float plight, shade;
+int32_t *planezlight;
+float    plight, shade;
 
 fixed_t       *yslope;
 static fixed_t planeheight;
@@ -281,8 +284,8 @@ static visplane_t *new_visplane(uint32_t hash)
 //
 // killough 2/28/98: Add offsets
 //
-visplane_t *R_FindPlane(plane_t secplane, texhandle_t picnum, int32_t lightlevel, fixed_t xoffs, fixed_t yoffs, fixed_t xscale,
-                        fixed_t yscale, angle_t angle)
+visplane_t *R_FindPlane(plane_t secplane, texhandle_t picnum, int32_t lightlevel, fixed_t xoffs, fixed_t yoffs,
+                        fixed_t xscale, fixed_t yscale, angle_t angle)
 {
     visplane_t *check;
     uint32_t    hash;                                // killough
@@ -418,7 +421,7 @@ void R_MakeSpans(visplane_t *pl, void (*spanfunc)(int32_t, int32_t, int32_t))
 void R_DrawSlopedPlane(visplane_t *pl)
 {
     MUD_ZoneScoped;
-    
+
     const float xoffsf           = FIXED2FLOAT(pl->xoffs);
     const float yoffsf           = FIXED2FLOAT(pl->yoffs);
     const float scaledflatwidth  = flatwidth * FIXED2FLOAT(pl->xscale);
@@ -519,7 +522,7 @@ void R_DrawSlopedPlane(visplane_t *pl)
 void R_DrawLevelPlane(visplane_t *pl)
 {
     MUD_ZoneScoped;
-    
+
     // viewx/viewy rotated by the texture rotation angle
     fixed_t pl_viewx, pl_viewy;
 
@@ -562,8 +565,8 @@ void R_DrawLevelPlane(visplane_t *pl)
     // so just use (0, 0) when calculating the plane's z height
     planeheight = abs(P_PlaneZ(0, 0, &pl->secplane) - viewz);
 
-    int32_t light   = clamp((pl->lightlevel >> LIGHTSEGSHIFT) + (foggy ? 0 : extralight), 0, LIGHTLEVELS - 1);
-    planezlight = zlight[light];
+    int32_t light = clamp((pl->lightlevel >> LIGHTSEGSHIFT) + (foggy ? 0 : extralight), 0, LIGHTLEVELS - 1);
+    planezlight   = zlight[light];
 
     R_MakeSpans(pl, R_MapLevelPlane);
 }
@@ -575,10 +578,10 @@ void R_DrawLevelPlane(visplane_t *pl)
 //
 void R_DrawPlanes(void)
 {
-    MUD_ZoneScoped;    
+    MUD_ZoneScoped;
 
     visplane_t *pl;
-    int32_t         i;
+    int32_t     i;
 
     R_ResetDrawFuncs();
 
@@ -599,12 +602,12 @@ void R_DrawPlanes(void)
             else
             {
                 dspan.color += 4; // [RH] color if r_drawflat is 1
-                const Texture *tex = texturemanager.getTexture(pl->picnum);
-                dspan.source = tex->getData();
-                dspan.texture_width_bits = tex->getWidthBits();
+                const Texture *tex        = texturemanager.getTexture(pl->picnum);
+                dspan.source              = tex->getData();
+                dspan.texture_width_bits  = tex->getWidthBits();
                 dspan.texture_height_bits = tex->getHeightBits();
-                flatheight = (float)tex->getHeight();
-                flatwidth = (float)tex->getWidth();
+                flatheight                = (float)tex->getHeight();
+                flatwidth                 = (float)tex->getWidth();
 
                 pl->top[pl->maxx + 1] = viewheight;
                 pl->top[pl->minx - 1] = viewheight;

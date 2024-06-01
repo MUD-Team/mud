@@ -55,7 +55,6 @@
 #include "mud_includes.h"
 #include "p_setup.h"
 #include "r_local.h"
-#include "r_sky.h"
 #include "s_sound.h"
 #include "sv_main.h"
 #include "v_video.h"

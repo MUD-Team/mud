@@ -1916,12 +1916,6 @@ void P_SetupLevel(const char *lumpname, int32_t position)
     // build subsector connect matrix
     //	UNUSED P_ConnectSubsectors ();
 
-#ifdef CLIENT_APP
-    // preload graphics
-    if (precache)
-        R_PrecacheLevel();
-#endif
-
     // [AM] Level is now safely loaded.
     g_ValidLevel = true;
 }

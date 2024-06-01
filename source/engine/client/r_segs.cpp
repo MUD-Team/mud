@@ -23,6 +23,7 @@
 //-----------------------------------------------------------------------------
 
 #include <math.h>
+
 #include <cstring>
 
 #include "i_system.h"
@@ -33,25 +34,29 @@
 #include "p_lnspec.h"
 #include "p_local.h"
 #include "p_mapformat.h"
+#include "r_draw.h"
+#include "r_client.h"
+#include "r_plane.h"
 #include "r_local.h"
 #include "v_video.h"
 
+
 // a pool of bytes allocated for sprite clipping arrays
 Pool<tallpost_t *> masked_midposts_pool(4096);
-Pool<int32_t>          sprclip_pool(4096);
+Pool<int32_t>      sprclip_pool(4096);
 
 // OPTIMIZE: closed two sided lines as single sided
 
 // killough 1/6/98: replaced globals with statics where appropriate
 
-static bool segtextured; // True if any of the segs textures might be visible.
-static bool markfloor;   // False if the back side is the same plane.
-static bool markceiling;
-static bool didsolidcol;
+static bool        segtextured; // True if any of the segs textures might be visible.
+static bool        markfloor;   // False if the back side is the same plane.
+static bool        markceiling;
+static bool        didsolidcol;
 static texhandle_t maskedtexture;
-static texhandle_t  toptexture;
-static texhandle_t  bottomtexture;
-static texhandle_t  midtexture;
+static texhandle_t toptexture;
+static texhandle_t bottomtexture;
+static texhandle_t midtexture;
 
 int32_t *walllights;
 
@@ -83,7 +88,7 @@ static tallpost_t *midposts[MAXWIDTH];
 static tallpost_t *bottomposts[MAXWIDTH];
 
 static fixed_t wallscalex[MAXWIDTH];
-static int32_t     texoffs[MAXWIDTH];
+static int32_t texoffs[MAXWIDTH];
 
 extern fixed_t FocalLengthY;
 extern float   yfoc;
@@ -258,7 +263,7 @@ inline void R_ColumnSetup(int32_t x, int32_t *top, int32_t *bottom, tallpost_t *
 {
     if (calc_light)
     {
-        int32_t index     = clamp(rw_light >> LIGHTSCALESHIFT, 0, MAXLIGHTSCALE - 1);
+        int32_t index = clamp(rw_light >> LIGHTSCALESHIFT, 0, MAXLIGHTSCALE - 1);
         dcol.colormap = basecolormap.with(walllights[index]);
     }
 
@@ -304,14 +309,14 @@ static inline int32_t R_ColumnRangeMaximumHeight(int32_t start, int32_t stop, in
 //		C is about twice as fast as using R_RenderSegLoop1() with an
 //		assembly rendering function.
 //
-void R_RenderColumnRange(int32_t start, int32_t stop, int32_t *top, int32_t *bottom, tallpost_t **posts, void (*colblast)(),
-                         bool calc_light, int32_t columnmethod)
-{    
+void R_RenderColumnRange(int32_t start, int32_t stop, int32_t *top, int32_t *bottom, tallpost_t **posts,
+                         void (*colblast)(), bool calc_light, int32_t columnmethod)
+{
     if (start > stop)
         return;
 
     MUD_ZoneScoped;
-    
+
     if (calc_light)
     {
         if (fixedlightlev)
@@ -352,7 +357,7 @@ void R_RenderColumnRange(int32_t start, int32_t stop, int32_t *top, int32_t *bot
         {
             for (int32_t x = start; x <= stop; x++)
             {
-                int32_t index       = clamp(rw_light >> LIGHTSCALESHIFT, 0, MAXLIGHTSCALE - 1);
+                int32_t index   = clamp(rw_light >> LIGHTSCALESHIFT, 0, MAXLIGHTSCALE - 1);
                 light_lookup[x] = walllights[index];
                 rw_light += rw_lightstep;
             }
@@ -402,7 +407,7 @@ void R_RenderColumnRange(int32_t start, int32_t stop, int32_t *top, int32_t *bot
 void R_RenderSolidSegRange(int32_t start, int32_t stop)
 {
 
-    MUD_ZoneScoped;    
+    MUD_ZoneScoped;
 
     static int32_t lower[MAXWIDTH];
     int32_t        count         = stop - start + 1;
@@ -524,7 +529,7 @@ void R_RenderSolidSegRange(int32_t start, int32_t stop)
             // save texturecol for backdrawing of masked mid texture
             for (int32_t x = start; x <= stop; x++)
             {
-                int32_t colnum         = R_TexScaleX(texoffs[x], maskedtexture) >> FRACBITS;
+                int32_t colnum     = R_TexScaleX(texoffs[x], maskedtexture) >> FRACBITS;
                 masked_midposts[x] = R_GetTextureColumn(maskedtexture, colnum);
             }
         }
@@ -549,9 +554,9 @@ void R_RenderSolidSegRange(int32_t start, int32_t stop)
 //
 void R_RenderMaskedSegRange(drawseg_t *ds, int32_t x1, int32_t x2)
 {
-    MUD_ZoneScoped;    
+    MUD_ZoneScoped;
 
-    int32_t      lightnum;
+    int32_t  lightnum;
     sector_t tempsec;                     // killough 4/13/98
 
     dcol.color = (dcol.color + 4) & 0xFF; // color if using r_drawflat
@@ -578,8 +583,8 @@ void R_RenderMaskedSegRange(drawseg_t *ds, int32_t x1, int32_t x2)
     frontsector = curline->frontsector;
     backsector  = curline->backsector;
 
-    texhandle_t     texnum    = curline->sidedef->midtexture;
-    fixed_t texheight = R_TexScaleY(texturemanager.getTexture(texnum)->getFracHeight(), texnum);
+    texhandle_t texnum    = curline->sidedef->midtexture;
+    fixed_t     texheight = R_TexScaleY(texturemanager.getTexture(texnum)->getFracHeight(), texnum);
 
     // find texture positioning
     if (curline->linedef->flags & ML_DONTPEGBOTTOM)
@@ -651,7 +656,8 @@ static fixed_t R_LineLength(fixed_t px1, fixed_t py1, fixed_t px2, fixed_t py2)
 // scaling for each column and the horizontal texture offset for each column
 // respectively.
 //
-void R_PrepWall(fixed_t px1, fixed_t py1, fixed_t px2, fixed_t py2, fixed_t dist1, fixed_t dist2, int32_t start, int32_t stop)
+void R_PrepWall(fixed_t px1, fixed_t py1, fixed_t px2, fixed_t py2, fixed_t dist1, fixed_t dist2, int32_t start,
+                int32_t stop)
 {
     MUD_ZoneScoped;
 
@@ -708,17 +714,17 @@ void R_PrepWall(fixed_t px1, fixed_t py1, fixed_t px2, fixed_t py2, fixed_t dist
 
         if (toptexture)
         {
-            int32_t colnum  = R_TexScaleX(colfrac, toptexture) >> FRACBITS;
-            topposts[i] = R_GetTextureColumn(toptexture, colnum);
+            int32_t colnum = R_TexScaleX(colfrac, toptexture) >> FRACBITS;
+            topposts[i]    = R_GetTextureColumn(toptexture, colnum);
         }
         if (midtexture)
         {
-            int32_t colnum  = R_TexScaleX(colfrac, midtexture) >> FRACBITS;
-            midposts[i] = R_GetTextureColumn(midtexture, colnum);
+            int32_t colnum = R_TexScaleX(colfrac, midtexture) >> FRACBITS;
+            midposts[i]    = R_GetTextureColumn(midtexture, colnum);
         }
         if (bottomtexture)
         {
-            int32_t colnum     = R_TexScaleX(colfrac, bottomtexture) >> FRACBITS;
+            int32_t colnum = R_TexScaleX(colfrac, bottomtexture) >> FRACBITS;
             bottomposts[i] = R_GetTextureColumn(bottomtexture, colnum);
         }
 
@@ -779,7 +785,7 @@ void R_PrepWall(fixed_t px1, fixed_t py1, fixed_t px2, fixed_t py2, fixed_t dist
 //
 void R_StoreWallRange(int32_t start, int32_t stop)
 {
-    MUD_ZoneScoped;    
+    MUD_ZoneScoped;
 
 #ifdef RANGECHECK
     if (start >= viewwidth || start > stop)

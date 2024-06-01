@@ -2504,24 +2504,7 @@ void P_SpawnMapThing(mapthing2_t *mthing, int32_t position)
             }
         }
     }
-
-    // [RH] Record polyobject-related things
-    if (HexenHack)
-    {
-        switch (mthing->type)
-        {
-        case PO_HEX_ANCHOR_TYPE:
-            mthing->type = PO_ANCHOR_TYPE;
-            break;
-        case PO_HEX_SPAWN_TYPE:
-            mthing->type = PO_SPAWN_TYPE;
-            break;
-        case PO_HEX_SPAWNCRUSH_TYPE:
-            mthing->type = PO_SPAWNCRUSH_TYPE;
-            break;
-        }
-    }
-
+    
     if (mthing->type == PO_ANCHOR_TYPE || mthing->type == PO_SPAWN_TYPE || mthing->type == PO_SPAWNCRUSH_TYPE)
     {
         polyspawns_t *polyspawn = new polyspawns_t;

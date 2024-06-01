@@ -47,7 +47,6 @@
 #include "p_setup.h"
 #include "p_unlag.h"
 #include "r_data.h"
-#include "r_sky.h"
 #include "res_texture.h"
 #include "s_sound.h"
 #include "sv_main.h"
@@ -90,6 +89,10 @@ bool savegamerestore;
 extern bool sendpause;
 
 bool isFast = false;
+
+extern char SKYFLATNAME[8];
+extern texhandle_t sky1texture; 
+extern texhandle_t sky2texture; 
 
 //
 // G_InitNew
