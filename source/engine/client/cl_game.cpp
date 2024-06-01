@@ -941,11 +941,14 @@ void G_Ticker(void)
         if (!multiplayer && P_Ticker_Paused() && players.begin()->viewz != 1)
             break;
 
-        P_ThinkParticles(); // [RH] make the particles think
+        if (!paused)
+        {
+            P_ThinkParticles(); // [RH] make the particles think
 
-        P_Ticker();
+            P_Ticker();
 
-        P_RunEffects(); // [RH] Run particle effects
+            P_RunEffects(); // [RH] Run particle effects
+        }
 
         break;
 
