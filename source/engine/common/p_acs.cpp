@@ -36,8 +36,10 @@
 #include "p_local.h"
 #include "p_saveg.h"
 #include "p_spec.h"
+#include "r_common.h"
 #include "s_sndseq.h"
 #include "s_sound.h"
+
 #if defined(SERVER_APP)
 #include "sv_main.h"
 #endif
@@ -48,16 +50,16 @@
 
 struct CallReturn
 {
-    int32_t             ReturnAddress;
+    int32_t         ReturnAddress;
     ScriptFunction *ReturnFunction;
-    uint8_t            bDiscardResult;
-    uint8_t            Pad[3];
+    uint8_t         bDiscardResult;
+    uint8_t         Pad[3];
 };
 
 static int32_t Stack[STACK_SIZE];
 
-static bool P_GetScriptGoing(AActor *who, line_t *where, int32_t num, int32_t *code, int32_t lineSide, int32_t arg0, int32_t arg1, int32_t arg2,
-                             int32_t always, bool delay);
+static bool P_GetScriptGoing(AActor *who, line_t *where, int32_t num, int32_t *code, int32_t lineSide, int32_t arg0,
+                             int32_t arg1, int32_t arg2, int32_t always, bool delay);
 AActor     *P_FindThingById(uint32_t id);
 
 template <size_t N> static std::vector<int32_t> ArgvToArgs(const int32_t (&a)[N])
@@ -67,7 +69,7 @@ template <size_t N> static std::vector<int32_t> ArgvToArgs(const int32_t (&a)[N]
 
 struct FBehavior::ArrayInfo
 {
-    int32_t     ArraySize;
+    int32_t  ArraySize;
     int32_t *Elements;
 };
 
@@ -594,7 +596,7 @@ FBehavior::FBehavior(uint8_t *object, int32_t len)
         NumScripts = ((uint32_t *)Scripts)[0];
         // Check for redesigned ACSE/ACSe
         if (((uint32_t *)object)[1] >= 6 * 4 && (((uint32_t *)Scripts)[-1] == MAKE_ID('A', 'C', 'S', 'e') ||
-                                              ((uint32_t *)Scripts)[-1] == MAKE_ID('A', 'C', 'S', 'E')))
+                                                 ((uint32_t *)Scripts)[-1] == MAKE_ID('A', 'C', 'S', 'E')))
         {
             Format = (((uint8_t *)Scripts)[-1] == 'e') ? ACS_LittleEnhanced : ACS_Enhanced;
             Chunks = object + ((uint32_t *)Scripts)[-2];
@@ -703,7 +705,7 @@ FBehavior::FBehavior(uint8_t *object, int32_t len)
             int32_t arraynum = level.vars[LELONG(chunk[2])];
             if ((uint32_t)arraynum < (uint32_t)NumArrays)
             {
-                int32_t     initsize = MIN<int32_t>(Arrays[arraynum].ArraySize, (LELONG(chunk[1]) - 4) / 4);
+                int32_t  initsize = MIN<int32_t>(Arrays[arraynum].ArraySize, (LELONG(chunk[1]) - 4) / 4);
                 int32_t *elems    = Arrays[arraynum].Elements;
                 for (i = 0; i < initsize; ++i)
                 {
@@ -848,7 +850,7 @@ const char *FBehavior::LocalizeString(uint32_t index) const
 {
     if (Format != ACS_Old)
     {
-        uint32_t       ofs = Localized;
+        uint32_t    ofs = Localized;
         const char *str = NULL;
 
         while (ofs != 0 && (str = LookupString(index, ofs)) == NULL)
@@ -977,21 +979,22 @@ uint32_t FBehavior::FindLanguage(uint32_t langid, bool ignoreregion) const
     return 0;
 }
 
-void FBehavior::StartTypedScripts(uint16_t type, AActor *activator, int32_t arg0, int32_t arg1, int32_t arg2, bool always) const
+void FBehavior::StartTypedScripts(uint16_t type, AActor *activator, int32_t arg0, int32_t arg1, int32_t arg2,
+                                  bool always) const
 {
     if (!serverside)
         return;
 
     ScriptPtr *ptr;
-    int32_t        i;
+    int32_t    i;
 
     for (i = 0; i < NumScripts; ++i)
     {
         ptr = (ScriptPtr *)(Scripts + 8 * i);
         if (ptr->Type == type)
         {
-            P_GetScriptGoing(activator, NULL, ptr->Number, (int32_t *)(ptr->Address + Data), 0, arg0, arg1, arg2, always,
-                             true);
+            P_GetScriptGoing(activator, NULL, ptr->Number, (int32_t *)(ptr->Address + Data), 0, arg0, arg1, arg2,
+                             always, true);
         }
     }
 }
@@ -1054,7 +1057,7 @@ void DACSThinker::Serialize(FArchive &arc)
     {
         arc >> Scripts >> LastScript;
 
-        uint16_t          scriptnum;
+        uint16_t      scriptnum;
         DLevelScript *script;
         arc >> script;
         while (script)
@@ -1096,8 +1099,8 @@ class DFlashFader : public DThinker
 
   protected:
     float   Blends[2][4];
-    int32_t     TotalTics;
-    int32_t     StartTic;
+    int32_t TotalTics;
+    int32_t StartTic;
     AActor *ForWho;
 
     void SetBlend(float time);
@@ -1198,18 +1201,18 @@ class DPlaneWatcher : public DThinker
 {
     DECLARE_SERIAL(DPlaneWatcher, DThinker)
   public:
-    DPlaneWatcher(AActor *it, line_t *line, int32_t lineSide, bool ceiling, int32_t tag, int32_t height, int32_t special, int32_t arg0,
-                  int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4);
+    DPlaneWatcher(AActor *it, line_t *line, int32_t lineSide, bool ceiling, int32_t tag, int32_t height,
+                  int32_t special, int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4);
     virtual void RunThink();
     virtual void DestroyedPointer(DObject *obj);
 
   private:
     sector_t *Sector;
     fixed_t   WatchD, LastD;
-    int32_t       Special, Arg0, Arg1, Arg2, Arg3, Arg4;
+    int32_t   Special, Arg0, Arg1, Arg2, Arg3, Arg4;
     AActor   *Activator;
     line_t   *Line;
-    int32_t       LineSide;
+    int32_t   LineSide;
     bool      bCeiling;
 
     DPlaneWatcher()
@@ -1225,8 +1228,8 @@ void DPlaneWatcher::DestroyedPointer(DObject *obj)
         Activator = NULL;
 }
 
-DPlaneWatcher::DPlaneWatcher(AActor *it, line_t *line, int32_t lineSide, bool ceiling, int32_t tag, int32_t height, int32_t special,
-                             int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4)
+DPlaneWatcher::DPlaneWatcher(AActor *it, line_t *line, int32_t lineSide, bool ceiling, int32_t tag, int32_t height,
+                             int32_t special, int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4)
     : Special(special), Arg0(arg0), Arg1(arg1), Arg2(arg2), Arg3(arg3), Arg4(arg4), Activator(it), Line(line),
       LineSide(lineSide), bCeiling(ceiling)
 {
@@ -1438,7 +1441,7 @@ void DLevelScript::PutFirst()
 
 int32_t DLevelScript::Random(int32_t min, int32_t max)
 {
-    int32_t          num1, num2, num3, num4;
+    int32_t  num1, num2, num3, num4;
     uint32_t num;
 
     num1 = P_Random();
@@ -1455,7 +1458,7 @@ int32_t DLevelScript::Random(int32_t min, int32_t max)
 int32_t DLevelScript::ThingCount(int32_t type, int32_t tid)
 {
     AActor *mobj  = NULL;
-    int32_t     count = 0;
+    int32_t count = 0;
 
     if (type >= NumSpawnableThings)
     {
@@ -1500,7 +1503,7 @@ int32_t DLevelScript::ThingCount(int32_t type, int32_t tid)
 
 void DLevelScript::ChangeFlat(int32_t tag, int32_t name, bool floorOrCeiling)
 {
-    int32_t         secnum = -1;
+    int32_t     secnum   = -1;
     const char *flatname = level.behavior->LookupString(name);
 
     if (flatname == NULL)
@@ -1562,7 +1565,7 @@ void DLevelScript::ACS_Print(uint8_t pcd, AActor *activator, const char *print)
     if (clientside &&
         (!local || (activator != NULL && activator->player && activator->player->mo == consoleplayer().camera)))
     {
-        //C_MidPrint(print);
+        // C_MidPrint(print);
     }
 }
 
@@ -1667,8 +1670,8 @@ void DLevelScript::ACS_SoundSequence(int32_t *args, uint8_t argCount)
 
 void DLevelScript::SetLineTexture(int32_t lineid, int32_t side, int32_t position, int32_t name)
 {
-    texhandle_t texture; 
-    int32_t linenum = -1;
+    texhandle_t texture;
+    int32_t     linenum = -1;
     const char *texname = level.behavior->LookupString(name);
 
     if (texname == NULL)
@@ -1772,7 +1775,8 @@ void DLevelScript::SetLineMonsterBlocking(int32_t lineid, int32_t toggle)
     }
 }
 
-void DLevelScript::SetLineSpecial(int32_t lineid, int32_t special, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4, int32_t arg5)
+void DLevelScript::SetLineSpecial(int32_t lineid, int32_t special, int32_t arg1, int32_t arg2, int32_t arg3,
+                                  int32_t arg4, int32_t arg5)
 {
     int32_t linenum = -1;
 
@@ -1796,8 +1800,8 @@ void DLevelScript::SetLineSpecial(int32_t lineid, int32_t special, int32_t arg1,
     }
 }
 
-void DLevelScript::ActivateLineSpecial(uint8_t special, line_t *line, AActor *activator, int32_t arg0, int32_t arg1, int32_t arg2,
-                                       int32_t arg3, int32_t arg4)
+void DLevelScript::ActivateLineSpecial(uint8_t special, line_t *line, AActor *activator, int32_t arg0, int32_t arg1,
+                                       int32_t arg2, int32_t arg3, int32_t arg4)
 {
     if (serverside)
     {
@@ -1828,7 +1832,8 @@ void DLevelScript::ChangeMusic(uint8_t pcd, AActor *activator, int32_t index, in
     }
 }
 
-void DLevelScript::StartSound(uint8_t pcd, AActor *activator, int32_t channel, int32_t index, int32_t volume, int32_t attenuation)
+void DLevelScript::StartSound(uint8_t pcd, AActor *activator, int32_t channel, int32_t index, int32_t volume,
+                              int32_t attenuation)
 {
     bool local = pcd == PCD_LOCALAMBIENTSOUND;
 
@@ -1850,7 +1855,8 @@ void DLevelScript::StartSound(uint8_t pcd, AActor *activator, int32_t channel, i
     }
 }
 
-void DLevelScript::StartSectorSound(uint8_t pcd, sector_t *sector, int32_t channel, int32_t index, int32_t volume, int32_t attenuation)
+void DLevelScript::StartSectorSound(uint8_t pcd, sector_t *sector, int32_t channel, int32_t index, int32_t volume,
+                                    int32_t attenuation)
 {
     if (clientside)
     {
@@ -1868,7 +1874,8 @@ void DLevelScript::StartSectorSound(uint8_t pcd, sector_t *sector, int32_t chann
     }
 }
 
-void DLevelScript::StartThingSound(uint8_t pcd, AActor *actor, int32_t channel, int32_t index, int32_t volume, int32_t attenuation)
+void DLevelScript::StartThingSound(uint8_t pcd, AActor *actor, int32_t channel, int32_t index, int32_t volume,
+                                   int32_t attenuation)
 {
     if (clientside)
     {
@@ -1885,7 +1892,8 @@ void DLevelScript::StartThingSound(uint8_t pcd, AActor *actor, int32_t channel, 
     }
 }
 
-void DLevelScript::SetThingSpecial(AActor *actor, int32_t special, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4, int32_t arg5)
+void DLevelScript::SetThingSpecial(AActor *actor, int32_t special, int32_t arg1, int32_t arg2, int32_t arg3,
+                                   int32_t arg4, int32_t arg5)
 {
     actor->special = special;
     actor->args[0] = arg1;
@@ -1997,7 +2005,7 @@ int32_t DLevelScript::DoSpawnSpot(int32_t type, int32_t spot, int32_t tid, int32
 {
     FActorIterator iterator(tid);
     AActor        *aspot;
-    int32_t            spawned = 0;
+    int32_t        spawned = 0;
 
     while ((aspot = iterator.Next()))
     {
@@ -2042,8 +2050,8 @@ static void DoActualFadeRange(player_s *viewer, float ftime, bool fadingFrom, fl
     }
 }
 
-void DLevelScript::DoFadeRange(AActor *who, int32_t r1, int32_t g1, int32_t b1, int32_t a1, int32_t r2, int32_t g2, int32_t b2, int32_t a2,
-                               fixed_t time)
+void DLevelScript::DoFadeRange(AActor *who, int32_t r1, int32_t g1, int32_t b1, int32_t a1, int32_t r2, int32_t g2,
+                               int32_t b2, int32_t a2, fixed_t time)
 {
     if (clientside && who->player != NULL)
     {
@@ -2079,7 +2087,7 @@ void DLevelScript::DoFadeRange(AActor *who, int32_t r1, int32_t g1, int32_t b1, 
 inline int32_t getbyte(int32_t *&pc)
 {
     int32_t res = *(uint8_t *)pc;
-    pc      = (int32_t *)((uint8_t *)pc + 1);
+    pc          = (int32_t *)((uint8_t *)pc + 1);
     return res;
 }
 
@@ -2090,7 +2098,7 @@ void DLevelScript::RunScript()
         return;
 
     TeleportSide                   = lineSide;
-    int32_t            *locals         = localvars;
+    int32_t        *locals         = localvars;
     ScriptFunction *activeFunction = NULL;
 
     switch (state)
@@ -2144,11 +2152,11 @@ void DLevelScript::RunScript()
         break;
     }
 
-    int32_t            *pc      = this->pc;
-    int32_t             sp      = this->sp;
+    int32_t        *pc      = this->pc;
+    int32_t         sp      = this->sp;
     const ACSFormat fmt     = level.behavior->GetFormat();
-    int32_t             runaway = 0; // used to prevent infinite loops
-    int32_t             pcd;
+    int32_t         runaway = 0; // used to prevent infinite loops
+    int32_t         pcd;
     char            work[4096], *workwhere = work;
     const char     *lookup;
     //	int32_t optstart = -1;
@@ -2303,7 +2311,8 @@ void DLevelScript::RunScript()
             break;
 
         case PCD_LSPEC2DIRECTB:
-            ActivateLineSpecial(((uint8_t *)pc)[0], activationline, activator, ((uint8_t *)pc)[1], ((uint8_t *)pc)[2], 0, 0, 0);
+            ActivateLineSpecial(((uint8_t *)pc)[0], activationline, activator, ((uint8_t *)pc)[1], ((uint8_t *)pc)[2],
+                                0, 0, 0);
             pc = (int32_t *)((uint8_t *)pc + 3);
             break;
 
@@ -2327,8 +2336,8 @@ void DLevelScript::RunScript()
 
         case PCD_CALL:
         case PCD_CALLDISCARD: {
-            int32_t             funcnum;
-            int32_t             i;
+            int32_t         funcnum;
+            int32_t         i;
             ScriptFunction *func;
 
             funcnum = NEXTBYTE;
@@ -2364,7 +2373,7 @@ void DLevelScript::RunScript()
 
         case PCD_RETURNVOID:
         case PCD_RETURNVAL: {
-            int32_t         value;
+            int32_t     value;
             CallReturn *retState;
 
             if (pcd == PCD_RETURNVAL)
@@ -3544,8 +3553,8 @@ void DLevelScript::RunScript()
     }
 }
 
-static bool P_GetScriptGoing(AActor *who, line_t *where, int32_t num, int32_t *code, int32_t lineSide, int32_t arg0, int32_t arg1, int32_t arg2,
-                             int32_t always, bool delay)
+static bool P_GetScriptGoing(AActor *who, line_t *where, int32_t num, int32_t *code, int32_t lineSide, int32_t arg0,
+                             int32_t arg1, int32_t arg2, int32_t always, bool delay)
 {
     DACSThinker *controller = DACSThinker::ActiveThinker;
 
@@ -3564,8 +3573,8 @@ static bool P_GetScriptGoing(AActor *who, line_t *where, int32_t num, int32_t *c
     return true;
 }
 
-DLevelScript::DLevelScript(AActor *who, line_t *where, int32_t num, int32_t *code, int32_t lineside, int32_t arg0, int32_t arg1, int32_t arg2,
-                           int32_t always, bool delay)
+DLevelScript::DLevelScript(AActor *who, line_t *where, int32_t num, int32_t *code, int32_t lineside, int32_t arg0,
+                           int32_t arg1, int32_t arg2, int32_t always, bool delay)
 {
     if (DACSThinker::ActiveThinker == NULL)
         new DACSThinker;
@@ -3614,7 +3623,7 @@ static void SetScriptState(int32_t script, DLevelScript::EScriptState state)
 void P_DoDeferedScripts(void)
 {
     acsdefered_t *def;
-    int32_t          *scriptdata;
+    int32_t      *scriptdata;
     AActor       *gomo = NULL;
 
     // Handle defered scripts in this step, too
@@ -3655,8 +3664,8 @@ void P_DoDeferedScripts(void)
     level.info->defered = NULL;
 }
 
-static void addDefered(level_pwad_info_t &i, acsdefered_t::EType type, int32_t script, int32_t arg0, int32_t arg1, int32_t arg2,
-                       AActor *who)
+static void addDefered(level_pwad_info_t &i, acsdefered_t::EType type, int32_t script, int32_t arg0, int32_t arg1,
+                       int32_t arg2, AActor *who)
 {
     if (i.levelnum != 0)
     {
@@ -3681,8 +3690,8 @@ static void addDefered(level_pwad_info_t &i, acsdefered_t::EType type, int32_t s
     }
 }
 
-bool P_StartScript(AActor *who, line_t *where, int32_t script, const char *map, int32_t lineSide, int32_t arg0, int32_t arg1, int32_t arg2,
-                   int32_t always)
+bool P_StartScript(AActor *who, line_t *where, int32_t script, const char *map, int32_t lineSide, int32_t arg0,
+                   int32_t arg1, int32_t arg2, int32_t always)
 {
     if (level.mapname == map)
     {
@@ -3734,8 +3743,8 @@ void P_TerminateScript(int32_t script, const char *map)
 
 void strbin(char *str)
 {
-    char *p = str, c;
-    int32_t   i;
+    char   *p = str, c;
+    int32_t i;
 
     while ((c = *p++))
     {
@@ -3825,7 +3834,7 @@ FArchive &operator<<(FArchive &arc, acsdefered_s *defer)
 FArchive &operator>>(FArchive &arc, acsdefered_s *&defertop)
 {
     acsdefered_s **defer = &defertop;
-    uint8_t           inbyte;
+    uint8_t        inbyte;
 
     arc >> inbyte;
     while (inbyte)

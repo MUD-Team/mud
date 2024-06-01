@@ -22,14 +22,15 @@
 //-----------------------------------------------------------------------------
 
 #include "c_console.h"
-#include "c_effect.h"
 #include "info.h"
 #include "m_random.h"
 #include "mud_includes.h"
 #include "p_local.h"
 #include "p_mobj.h"
+#include "r_common.h"
 #include "s_sound.h"
 #include "tables.h"
+
 
 EXTERN_CVAR(sv_nomonsters)
 
@@ -194,8 +195,8 @@ const int32_t NumSpawnableThings = sizeof(SpawnableThings) / sizeof(*SpawnableTh
 bool P_Thing_Spawn(int32_t tid, int32_t type, angle_t angle, bool fog)
 {
     fixed_t z;
-    int32_t     rtn = 0;
-    int32_t     kind;
+    int32_t rtn = 0;
+    int32_t kind;
     AActor *spot = NULL, *mobj;
 
     if (type >= NumSpawnableThings)
@@ -243,8 +244,8 @@ bool P_Thing_Spawn(int32_t tid, int32_t type, angle_t angle, bool fog)
 
 bool P_Thing_Projectile(int32_t tid, int32_t type, angle_t angle, fixed_t speed, fixed_t vspeed, bool gravity)
 {
-    int32_t     rtn = 0;
-    int32_t     kind;
+    int32_t rtn = 0;
+    int32_t kind;
     AActor *spot = NULL, *mobj;
 
     if (type >= NumSpawnableThings)
@@ -303,13 +304,15 @@ bool P_ActivateMobj(AActor *mobj, AActor *activator)
         switch (mobj->type)
         {
         case MT_SPARK: {
-            int32_t  count = mobj->args[0];
-            char sound[16];
+            int32_t count = mobj->args[0];
+            char    sound[16];
 
             if (count == 0)
                 count = 32;
-
+#ifdef CLIENT_APP
+            void P_DrawSplash(int32_t count, fixed_t x, fixed_t y, fixed_t z, angle_t angle, int32_t kind);
             P_DrawSplash(count, mobj->x, mobj->y, mobj->z, mobj->angle, 1);
+#endif            
             sprintf(sound, "world/spark%d", 1 + (M_Random() % 3));
             S_Sound(mobj, CHAN_AUTO, sound, 1, ATTN_STATIC);
             break;
@@ -325,7 +328,7 @@ bool P_ActivateMobj(AActor *mobj, AActor *activator)
             {
                 if (mobj->args[0] <= 1)
                 {
-                    //C_MidPrint("A secret is revealed!");
+                    // C_MidPrint("A secret is revealed!");
                 }
                 if (mobj->args[0] == 0 || mobj->args[0] == 2)
                 {

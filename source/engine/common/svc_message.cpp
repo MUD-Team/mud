@@ -39,6 +39,7 @@
 #include "p_local.h"
 #include "p_mobj.h"
 #include "p_unlag.h"
+#include "v_palette.h"
 
 /**
  * @brief Pack an array of booleans into a bitfield.
@@ -398,8 +399,7 @@ odaproto::svc::DisconnectClient SVC_DisconnectClient(player_t &player)
  * @brief Sends a message to a player telling them to change to the specified
  *        WAD and DEH patch files and load a map.
  */
-odaproto::svc::LoadMap SVC_LoadMap(const OResFiles &wadnames, const std::string &mapname,
-                                   int32_t time)
+odaproto::svc::LoadMap SVC_LoadMap(const OResFiles &wadnames, const std::string &mapname, int32_t time)
 {
     odaproto::svc::LoadMap msg;
 
@@ -969,7 +969,7 @@ odaproto::svc::PlayerState SVC_PlayerState(player_t &player)
     for (int32_t i = 0; i < NUMPSPRITES; i++)
     {
         pspdef_t             *psp   = &player.psprites[i];
-        uint32_t          state = psp->state - states;
+        uint32_t              state = psp->state - states;
         odaproto::Player_Psp *plpsp = pl->add_psprites();
         plpsp->set_statenum(state);
     }
@@ -1271,7 +1271,8 @@ odaproto::svc::DamageMobj SVC_DamageMobj(AActor *target, const int32_t pain)
     return msg;
 }
 
-odaproto::svc::ExecuteLineSpecial SVC_ExecuteLineSpecial(uint8_t special, line_t *line, AActor *mo, const int32_t (&args)[5])
+odaproto::svc::ExecuteLineSpecial SVC_ExecuteLineSpecial(uint8_t special, line_t *line, AActor *mo,
+                                                         const int32_t (&args)[5])
 {
     odaproto::svc::ExecuteLineSpecial msg;
 
@@ -1295,8 +1296,8 @@ odaproto::svc::ExecuteLineSpecial SVC_ExecuteLineSpecial(uint8_t special, line_t
  * @param print String to send to client, NULL if no string.
  * @param args Arguments to pass to the client.
  */
-odaproto::svc::ExecuteACSSpecial SVC_ExecuteACSSpecial(const uint8_t special, const AActor *activator, const char *print,
-                                                       const std::vector<int32_t> &args)
+odaproto::svc::ExecuteACSSpecial SVC_ExecuteACSSpecial(const uint8_t special, const AActor *activator,
+                                                       const char *print, const std::vector<int32_t> &args)
 {
     odaproto::svc::ExecuteACSSpecial msg;
 

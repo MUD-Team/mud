@@ -58,26 +58,27 @@
 #include "m_misc.h"
 #include "m_random.h"
 #include "minilzo.h"
-#include "mud_profiling.h"
 #include "mud_includes.h"
+#include "mud_profiling.h"
 #include "p_setup.h"
-#include "r_local.h"
+#include "r_common.h"
 #include "r_sky.h"
+#include "r_state.h"
 #include "res_texture.h"
 #include "s_sound.h"
+#include "script/lua_client_public.h"
 #include "stats.h"
 #include "v_video.h"
 #include "w_ident.h"
 #include "w_wad.h"
 #include "z_zone.h"
-#include "script/lua_client_public.h"
 
 extern size_t got_heapsize;
 
 void D_CheckNetGame(void);
 void D_DoomLoop(void);
 
-extern int32_t           testingmode;
+extern int32_t       testingmode;
 extern bool          gameisdead;
 extern bool          M_DemoNoPlay; // [RH] if true, then skip any demos in the loop
 extern DThinker      ThinkerCap;
@@ -89,8 +90,8 @@ const char *D_DrawIcon; // [RH] Patch name of icon to draw on next refresh
 char    startmap[8];
 bool    autostart;
 event_t events[MAXEVENTS];
-int32_t     eventhead;
-int32_t     eventtail;
+int32_t eventhead;
+int32_t eventtail;
 bool    demotest = false;
 
 static int32_t pagetic;
@@ -243,7 +244,7 @@ void D_PageDrawer()
     {
         return;
     }
-    int32_t             surface_width = primary_surface->getWidth(), surface_height = primary_surface->getHeight();
+    int32_t surface_width = primary_surface->getWidth(), surface_height = primary_surface->getHeight();
     primary_surface->clear(); // ensure black background in matted modes
 }
 
@@ -261,7 +262,7 @@ void D_Close()
 void D_StartTitle(void)
 {
     // CL_QuitNetGame(NQ_SILENT);
-    gameaction   = ga_nothing;        
+    gameaction = ga_nothing;
 }
 
 bool HashOk(std::string &required, std::string &available)
@@ -295,10 +296,10 @@ void D_Init()
         Printf("Z_Init: Using native allocator with OZone bookkeeping.\n");
 
     // Load palette and set up colormaps
-    V_Init();    
+    V_Init();
 
     if (first_time)
-    	Printf(PRINT_HIGH, "Res_InitTextureManager: Init image resource management.\n");
+        Printf(PRINT_HIGH, "Res_InitTextureManager: Init image resource management.\n");
     Res_InitTextureManager();
 
     // init the renderer
@@ -332,7 +333,7 @@ void D_Init()
 
     // init the status bar
     if (first_time)
-        Printf(PRINT_HIGH, "ST_Init: Init status bar.\n");    
+        Printf(PRINT_HIGH, "ST_Init: Init status bar.\n");
 
     first_time = false;
 }
@@ -344,7 +345,7 @@ void D_Init()
 // Should be called prior to D_Init when loading a new set of WADs.
 //
 void D_Shutdown()
-{    
+{
     if (gamestate == GS_LEVEL)
         G_ExitLevel(0, 0);
 
@@ -389,7 +390,7 @@ void D_DoomMainShutdown()
     D_Close();
     D_Shutdown();
     I_ShutdownHardware();
-    LUA_CloseClientState();    
+    LUA_CloseClientState();
     CL_DownloadShutdown();
 }
 
@@ -453,20 +454,20 @@ void D_DoomMain()
 
     D_AddWadCommandLineFiles(newwadfiles);
 
-    D_LoadResourceFiles(newwadfiles);    
+    D_LoadResourceFiles(newwadfiles);
 
-    Printf(PRINT_HIGH, "I_Init: Init hardware.\n");    
+    Printf(PRINT_HIGH, "I_Init: Init hardware.\n");
     I_Init();
     I_InitInput();
 
-    // [SL] Call init routines that need to be reinitialized every time WAD changes    
+    // [SL] Call init routines that need to be reinitialized every time WAD changes
     D_Init();
 
     // Base systems have been inited; enable cvar callbacks
     cvar_t::EnableCallbacks();
 
     LUA_OpenClientState();
-\
+
     // [RH] User-configurable startup strings. Because BOOM does.
     if (GStrings(STARTUP1)[0])
         Printf(PRINT_HIGH, "%s\n", GStrings(STARTUP1));
@@ -573,13 +574,13 @@ void D_DoomMain()
     }
     else if (gamestate != GS_CONNECTING)
     {
-        D_StartTitle();                 // start up intro loop
+        D_StartTitle(); // start up intro loop
     }
 
-    //void LUA_MainLoop();
-    //LUA_MainLoop();
-    
-    //D_DoomLoop(); // never returns
+    // void LUA_MainLoop();
+    // LUA_MainLoop();
+
+    // D_DoomLoop(); // never returns
 }
 
 VERSION_CONTROL(d_main_cpp, "$Id: 309553abfd782610a6419696f1c7ac781bb65246 $")

@@ -37,7 +37,7 @@
 #include "mud_includes.h"
 #include "mud_profiling.h"
 #include "r_intrin.h"
-#include "r_local.h"
+#include "r_main.h"
 #include "v_textcolors.h"
 #include "v_video.h"
 #include "w_wad.h"
@@ -67,11 +67,8 @@ extern "C"
 
 uint8_t *viewimage;
 
-extern "C"
-{
-    int32_t viewwidth;
-    int32_t viewheight;
-}
+int32_t viewwidth;
+int32_t viewheight;
 
 int32_t scaledviewwidth;
 int32_t viewwindowx;

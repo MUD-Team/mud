@@ -37,10 +37,11 @@
 #include "m_bbox.h"
 #include "mud_includes.h"
 #include "r_draw.h"
-#include "r_local.h"
+#include "r_main.h"
 #include "r_state.h"
 #include "w_wad.h"
 #include "z_zone.h"
+
 
 argb_t     Col2RGB8[65][256];
 palindex_t RGB32k[32][32][32];
@@ -106,7 +107,7 @@ static int32_t vid_widescreen_old = -1;
 
 static IVideoMode V_GetRequestedVideoMode()
 {
-    int32_t               surface_bpp = 32;
+    int32_t           surface_bpp = 32;
     EWindowMode       window_mode = (EWindowMode)vid_fullscreen.asInt();
     bool              vsync       = (vid_vsync != 0.0f);
     const std::string stretch_mode(vid_filter);
@@ -264,10 +265,10 @@ BEGIN_COMMAND(vid_currentmode)
 {
     std::string pixel_string;
 
-    const PixelFormat *format = IRenderSurface::getCurrentRenderSurface()->getPixelFormat();
-    char    temp_str[9] = {0};
-    argb_t *d1          = (argb_t *)temp_str;
-    argb_t *d2          = (argb_t *)temp_str + 1;
+    const PixelFormat *format      = IRenderSurface::getCurrentRenderSurface()->getPixelFormat();
+    char               temp_str[9] = {0};
+    argb_t            *d1          = (argb_t *)temp_str;
+    argb_t            *d2          = (argb_t *)temp_str + 1;
 
     d1->seta('A');
     d1->setr('R');
@@ -374,7 +375,6 @@ static bool V_DoSetResolution()
 //
 void STACK_ARGS V_Close()
 {
-
 }
 
 //
@@ -442,10 +442,10 @@ void V_MarkRect(int32_t x, int32_t y, int32_t width, int32_t height)
     dirtybox.AddToBox(x + width - 1, y + height - 1);
 }
 
-const int32_t    GRAPH_WIDTH           = 140;
-const int32_t    GRAPH_HEIGHT          = 80;
-const double GRAPH_BASELINE        = 1000 / 60.0;
-const double GRAPH_CAPPED_BASELINE = 1000 / 35.0;
+const int32_t GRAPH_WIDTH           = 140;
+const int32_t GRAPH_HEIGHT          = 80;
+const double  GRAPH_BASELINE        = 1000 / 60.0;
+const double  GRAPH_CAPPED_BASELINE = 1000 / 35.0;
 
 struct frametimeGraph_t
 {

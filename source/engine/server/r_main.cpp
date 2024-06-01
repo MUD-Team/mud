@@ -25,19 +25,23 @@
 //-----------------------------------------------------------------------------
 
 #include <math.h>
+
 #include <climits>
 
 #include "m_bbox.h"
 #include "m_random.h"
+#include "p_local.h"
 #include "mud_includes.h"
-#include "r_local.h"
+#include "r_common.h"
+#include "tables.h"
 #include "v_video.h"
+
 
 #define DISTMAP 2
 
 void R_SpanInitData();
 
-extern int32_t          *walllights;
+extern int32_t      *walllights;
 extern dyncolormap_t NormalLight;
 
 // [Russell] - Server expects these to exist
@@ -47,7 +51,7 @@ uint8_t  bosstable[256];
 
 fixed_t FocalLengthX;
 fixed_t FocalLengthY;
-int32_t     viewangleoffset;
+int32_t viewangleoffset;
 
 // increment every time a check is made
 int32_t validcount = 1;
@@ -242,7 +246,7 @@ void R_RotatePoint(fixed_t x, fixed_t y, angle_t ang, fixed_t &tx, fixed_t &ty)
 
 void R_Init(void)
 {
-    R_InitData();
+    Table_InitTanToAngle();
 
     framecount = 0;
 }

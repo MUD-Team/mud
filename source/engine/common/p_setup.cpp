@@ -45,10 +45,13 @@
 #include "p_local.h"
 #include "p_mapformat.h"
 #include "p_mobj.h"
+#include "r_common.h"
+#include "r_sprites.h"
 #include "s_sound.h"
 #include "v_palette.h"
 #include "w_wad.h"
 #include "z_zone.h"
+
 
 void SV_PreservePlayer(player_t &player);
 void P_SpawnMapThing(mapthing2_t *mthing, int32_t position);
@@ -57,14 +60,14 @@ void P_TranslateTeleportThings();
 
 const uint32_t P_TranslateCompatibleLineFlags(const uint32_t flags, const bool reserved);
 const uint32_t P_TranslateZDoomLineFlags(const uint32_t flags);
-void               P_SpawnCompatibleSectorSpecial(sector_t *sector);
+void           P_SpawnCompatibleSectorSpecial(sector_t *sector);
 
 static void P_SetupLevelFloorPlane(sector_t *sector);
 static void P_SetupLevelCeilingPlane(sector_t *sector);
 static void P_SetupSlopes();
 void        P_InvertPlane(plane_t *plane);
 void        P_SetupWorldState();
-int32_t         P_TranslateSectorSpecial(int32_t special);
+int32_t     P_TranslateSectorSpecial(int32_t special);
 
 extern dyncolormap_t NormalLight;
 extern AActor       *shootthing;
@@ -77,25 +80,25 @@ bool g_ValidLevel = false;
 // MAP related Lookup tables.
 // Store VERTEXES, LINEDEFS, SIDEDEFS, etc.
 //
-int32_t       numvertexes;
+int32_t   numvertexes;
 vertex_t *vertexes;
 
-int32_t    numsegs;
-seg_t *segs;
+int32_t numsegs;
+seg_t  *segs;
 
-int32_t       numsectors;
+int32_t   numsectors;
 sector_t *sectors;
 
-int32_t          numsubsectors;
+int32_t      numsubsectors;
 subsector_t *subsectors;
 
-int32_t     numnodes;
+int32_t numnodes;
 node_t *nodes;
 
-int32_t     numlines;
+int32_t numlines;
 line_t *lines;
 
-int32_t     numsides;
+int32_t numsides;
 side_t *sides;
 
 std::vector<int32_t> originalLightLevels; // Needed for map resets
@@ -112,15 +115,15 @@ bool HasBehavior = false;
 //
 // Blockmap size.
 int32_t bmapwidth;
-int32_t bmapheight;      // size in mapblocks
+int32_t bmapheight;    // size in mapblocks
 
-int32_t *blockmap;       // int32_t for larger maps ([RH] Made int32_t because BOOM does)
-int32_t *blockmaplump;   // offsets in blockmap are from here
+int32_t *blockmap;     // int32_t for larger maps ([RH] Made int32_t because BOOM does)
+int32_t *blockmaplump; // offsets in blockmap are from here
 
-fixed_t bmaporgx;    // origin of block map
+fixed_t bmaporgx;      // origin of block map
 fixed_t bmaporgy;
 
-AActor **blocklinks; // for thing chains
+AActor **blocklinks;   // for thing chains
 
 // REJECT
 // For fast sight rejection.
@@ -130,7 +133,7 @@ AActor **blocklinks; // for thing chains
 //	used as a PVS lookup as well.
 //
 uint8_t *rejectmatrix;
-bool  rejectempty;
+bool     rejectempty;
 
 // Maintain single and multi player starting spots.
 std::vector<mapthing2_t> DeathMatchStarts;
@@ -143,7 +146,7 @@ std::vector<mapthing2_t> voodoostarts;
 void P_LoadVertexes(int32_t lump)
 {
     uint8_t *data;
-    int32_t   i;
+    int32_t  i;
 
     // Determine number of vertices:
     //	total lump length / vertex record length.
@@ -179,7 +182,7 @@ void P_LoadSegs(int32_t lump)
         I_Error("P_LoadSegs: SEGS lump is empty - levels without nodes are not supported.");
     }
 
-    int32_t   i;
+    int32_t  i;
     uint8_t *data;
 
     numsegs = W_LumpLength(lump) / sizeof(mapseg_t);
@@ -192,7 +195,7 @@ void P_LoadSegs(int32_t lump)
         seg_t    *li = segs + i;
         mapseg_t *ml = (mapseg_t *)data + i;
 
-        int32_t     side, linedef;
+        int32_t side, linedef;
         line_t *ldef;
 
         uint16_t v = LESHORT(ml->v1);
@@ -265,7 +268,7 @@ void P_LoadSubsectors(int32_t lump)
     }
 
     uint8_t *data;
-    int32_t   i;
+    int32_t  i;
 
     numsubsectors = W_LumpLength(lump) / sizeof(mapsubsector_t);
     subsectors    = (subsector_t *)Z_Malloc(numsubsectors * sizeof(subsector_t), PU_LEVEL, 0);
@@ -287,11 +290,11 @@ void P_LoadSubsectors(int32_t lump)
 //
 void P_LoadSectors(int32_t lump)
 {
-    uint8_t        *data;
-    int32_t          i;
+    uint8_t     *data;
+    int32_t      i;
     mapsector_t *ms;
     sector_t    *ss;
-    int32_t          defSeqType;
+    int32_t      defSeqType;
 
     // denis - properly destroy sectors so that smart pointers they contain don't get screwed
     delete[] sectors;
@@ -397,10 +400,10 @@ void P_LoadNodes(int32_t lump)
         I_Error("P_LoadNodes: NODES lump is empty - levels without nodes are not supported.");
     }
 
-    uint8_t      *data;
-    int32_t        i;
-    int32_t        j;
-    int32_t        k;
+    uint8_t   *data;
+    int32_t    i;
+    int32_t    j;
+    int32_t    k;
     mapnode_t *mn;
     node_t    *no;
 
@@ -443,8 +446,8 @@ void P_LoadNodes(int32_t lump)
 //
 bool P_LoadXNOD(int32_t lump)
 {
-    size_t len  = W_LumpLength(lump);
-    uint8_t  *data = (uint8_t *)W_CacheLumpNum(lump, PU_STATIC);
+    size_t   len  = W_LumpLength(lump);
+    uint8_t *data = (uint8_t *)W_CacheLumpNum(lump, PU_STATIC);
 
     if (len < 4 || memcmp(data, "XNOD", 4) != 0)
     {
@@ -597,7 +600,7 @@ bool P_LoadXNOD(int32_t lump)
 void P_LoadThings(int32_t lump)
 {
     mapthing2_t mt2; // [RH] for translation
-    uint8_t       *data   = (uint8_t *)W_CacheLumpNum(lump, PU_STATIC);
+    uint8_t    *data   = (uint8_t *)W_CacheLumpNum(lump, PU_STATIC);
     mapthing_t *mt     = (mapthing_t *)data;
     mapthing_t *lastmt = (mapthing_t *)(data + W_LumpLength(lump));
 
@@ -625,7 +628,7 @@ void P_LoadThings(int32_t lump)
 
         // [RH] Need to translate the spawn flags to Hexen format.
         int16_t flags = LESHORT(mt->options);
-        mt2.flags   = (int16_t)((flags & 0xf) | 0x7e0);
+        mt2.flags     = (int16_t)((flags & 0xf) | 0x7e0);
         if (flags & BTF_NOTSINGLE)
         {
 #ifdef SERVER_APP
@@ -668,7 +671,7 @@ void P_LoadThings(int32_t lump)
 //
 void P_LoadThings2(int32_t lump, int32_t position)
 {
-    uint8_t        *data   = (uint8_t *)W_CacheLumpNum(lump, PU_STATIC);
+    uint8_t     *data   = (uint8_t *)W_CacheLumpNum(lump, PU_STATIC);
     mapthing2_t *mt     = (mapthing2_t *)data;
     mapthing2_t *lastmt = (mapthing2_t *)(data + W_LumpLength(lump));
 
@@ -849,7 +852,7 @@ void P_AdjustLine(line_t *ld)
 // killough 4/4/98: delay using sidedefs until they are loaded
 void P_FinishLoadingLineDefs(void)
 {
-    int32_t     i, linenum;
+    int32_t i, linenum;
     line_t *ld = lines;
 
     for (i = numlines, linenum = 0; i--; ld++, linenum++)
@@ -867,9 +870,9 @@ void P_FinishLoadingLineDefs(void)
 
 void P_LoadLineDefs(const int32_t lump)
 {
-    uint8_t   *data;
-    int32_t     i;
-    line_t *ld;
+    uint8_t *data;
+    int32_t  i;
+    line_t  *ld;
 
     numlines = W_LumpLength(lump) / sizeof(maplinedef_t);
     lines    = (line_t *)Z_Malloc(numlines * sizeof(line_t), PU_LEVEL, 0);
@@ -948,8 +951,8 @@ void P_LoadLineDefs(const int32_t lump)
 // [RH] Same as P_LoadLineDefs() except it uses Hexen-style LineDefs.
 void P_LoadLineDefs2(int32_t lump)
 {
-    uint8_t          *data;
-    int32_t            i;
+    uint8_t       *data;
+    int32_t        i;
     maplinedef2_t *mld;
     line_t        *ld;
 
@@ -1052,9 +1055,9 @@ void P_SetTransferHeightBlends(side_t *sd, const mapsidedef_t *msd)
     // for each of the texture tiers (bottom, middle, and top)
     for (int32_t i = 0; i < 3; i++)
     {
-        texhandle_t      *texture_num;
-        argb_t     *blend_color;
-        const char *texture_name;
+        texhandle_t *texture_num;
+        argb_t      *blend_color;
+        const char  *texture_name;
 
         if (i == 0) // bottom textures
         {
@@ -1145,7 +1148,7 @@ void P_LoadSideDefs2(int32_t lump)
 
 typedef struct linelist_t               // type used to list lines in each block
 {
-    int32_t                num;
+    int32_t            num;
     struct linelist_t *next;
 } linelist_t;
 
@@ -1179,18 +1182,18 @@ static void AddBlockLine(linelist_t **lists, int32_t *count, int32_t *done, int3
 
 void P_CreateBlockMap()
 {
-    int32_t          xorg, yorg;         // blockmap origin (lower left)
-    int32_t          nrows, ncols;       // blockmap dimensions
-    linelist_t **blocklists = NULL;  // array of pointers to lists of lines
-    int32_t         *blockcount = NULL;  // array of counters of line lists
-    int32_t         *blockdone  = NULL;  // array keeping track of blocks/line
-    int32_t          NBlocks;            // number of cells = nrows*ncols
-    uint32_t        linetotal = 0;      // total length of all blocklists
-    int32_t          i, j;
-    int32_t          map_minx = INT32_MAX; // init for map limits search
-    int32_t          map_miny = INT32_MAX;
-    int32_t          map_maxx = INT32_MIN;
-    int32_t          map_maxy = INT32_MIN;
+    int32_t      xorg, yorg;           // blockmap origin (lower left)
+    int32_t      nrows, ncols;         // blockmap dimensions
+    linelist_t **blocklists = NULL;    // array of pointers to lists of lines
+    int32_t     *blockcount = NULL;    // array of counters of line lists
+    int32_t     *blockdone  = NULL;    // array keeping track of blocks/line
+    int32_t      NBlocks;              // number of cells = nrows*ncols
+    uint32_t     linetotal = 0;        // total length of all blocklists
+    int32_t      i, j;
+    int32_t      map_minx = INT32_MAX; // init for map limits search
+    int32_t      map_miny = INT32_MAX;
+    int32_t      map_maxx = INT32_MIN;
+    int32_t      map_maxy = INT32_MIN;
 
     // scan for map limits, which the blockmap must enclose
 
@@ -1292,10 +1295,10 @@ void P_CreateBlockMap()
                 int32_t yb = (y - yorg) >> blkshift; // block row number
                 int32_t yp = (y - yorg) & blkmask;   // y position within block
 
-                if (yb < 0 || yb > nrows - 1)    // outside blockmap, continue
+                if (yb < 0 || yb > nrows - 1)        // outside blockmap, continue
                     continue;
 
-                if (x < minx || x > maxx)        // line doesn't touch column
+                if (x < minx || x > maxx)            // line doesn't touch column
                     continue;
 
                 // The cell that contains the intersection point is always added
@@ -1348,10 +1351,10 @@ void P_CreateBlockMap()
                 int32_t xb = (x - xorg) >> blkshift; // block column number
                 int32_t xp = (x - xorg) & blkmask;   // x position within block
 
-                if (xb < 0 || xb > ncols - 1)    // outside blockmap, continue
+                if (xb < 0 || xb > ncols - 1)        // outside blockmap, continue
                     continue;
 
-                if (y < miny || y > maxy)        // line doesn't touch row
+                if (y < miny || y > maxy)            // line doesn't touch row
                     continue;
 
                 // The cell that contains the intersection point is always added
@@ -1422,7 +1425,7 @@ void P_CreateBlockMap()
     for (i = 0; i < NBlocks; i++)
     {
         linelist_t *bl   = blocklists[i];
-        uint32_t       offs = blockmaplump[4 + i] = // set offset to block's list
+        uint32_t    offs = blockmaplump[4 + i] = // set offset to block's list
             (i ? blockmaplump[4 + i - 1] : 4 + NBlocks) + (i ? blockcount[i - 1] : 0);
 
         // add the lines in each block's list to the blockmaplump
@@ -1460,7 +1463,7 @@ void P_LoadBlockMap(int32_t lump)
     else
     {
         int16_t *wadblockmaplump = (int16_t *)W_CacheLumpNum(lump, PU_LEVEL);
-        int32_t    i;
+        int32_t  i;
         blockmaplump = (int32_t *)Z_Malloc(sizeof(*blockmaplump) * count, PU_LEVEL, 0);
 
         // killough 3/1/98: Expand wad blockmap into larger internal one,
@@ -1475,7 +1478,7 @@ void P_LoadBlockMap(int32_t lump)
 
         for (i = 4; i < count; i++)
         {
-            int16_t t         = LESHORT(wadblockmaplump[i]); // killough 3/1/98
+            int16_t t       = LESHORT(wadblockmaplump[i]); // killough 3/1/98
             blockmaplump[i] = t == -1 ? (uint32_t)0xffffffff : (uint32_t)t & 0xffff;
         }
 
@@ -1510,16 +1513,18 @@ void P_GenerateUniqueMapFingerPrint(int32_t maplumpnum)
     uint32_t length = 0;
 
     typedef std::vector<uint8_t> LevelLumps;
-    LevelLumps                levellumps;
+    LevelLumps                   levellumps;
 
-    const uint8_t *thingbytes = const_cast<const uint8_t *>((const uint8_t *)W_CacheLumpNum(maplumpnum + ML_THINGS, PU_STATIC));
+    const uint8_t *thingbytes =
+        const_cast<const uint8_t *>((const uint8_t *)W_CacheLumpNum(maplumpnum + ML_THINGS, PU_STATIC));
     const uint8_t *lindefbytes =
         const_cast<const uint8_t *>((const uint8_t *)W_CacheLumpNum(maplumpnum + ML_LINEDEFS, PU_STATIC));
     const uint8_t *sidedefbytes =
         const_cast<const uint8_t *>((const uint8_t *)W_CacheLumpNum(maplumpnum + ML_SIDEDEFS, PU_STATIC));
     const uint8_t *vertexbytes =
         const_cast<const uint8_t *>((const uint8_t *)W_CacheLumpNum(maplumpnum + ML_VERTEXES, PU_STATIC));
-    const uint8_t *segsbytes = const_cast<const uint8_t *>((const uint8_t *)W_CacheLumpNum(maplumpnum + ML_SEGS, PU_STATIC));
+    const uint8_t *segsbytes =
+        const_cast<const uint8_t *>((const uint8_t *)W_CacheLumpNum(maplumpnum + ML_SEGS, PU_STATIC));
     const uint8_t *ssectorsbytes =
         const_cast<const uint8_t *>((const uint8_t *)W_CacheLumpNum(maplumpnum + ML_SSECTORS, PU_STATIC));
     const uint8_t *sectorsbytes =
@@ -1550,13 +1555,13 @@ void P_GenerateUniqueMapFingerPrint(int32_t maplumpnum)
 void P_GroupLines(void)
 {
     line_t     **linebuffer;
-    int32_t          i;
-    int32_t          j;
-    int32_t          total;
+    int32_t      i;
+    int32_t      j;
+    int32_t      total;
     line_t      *li;
     sector_t    *sector;
     DBoundingBox bbox;
-    int32_t          block;
+    int32_t      block;
 
     // look up sector number for each subsector
     for (i = 0; i < numsubsectors; i++)
@@ -1746,7 +1751,7 @@ static void P_InitTagLists(void)
         sectors[i].firsttag = -1;
     for (i = numsectors; --i >= 0;)                                            // Proceed from last to first sector
     {                                                                          // so that lower sectors appear first
-        int32_t j               = (uint32_t)sectors[i].tag % (uint32_t)numsectors; // Hash func
+        int32_t j           = (uint32_t)sectors[i].tag % (uint32_t)numsectors; // Hash func
         sectors[i].nexttag  = sectors[j].firsttag;                             // Prepend sector to chain
         sectors[j].firsttag = i;
     }
@@ -1757,7 +1762,7 @@ static void P_InitTagLists(void)
         lines[i].firstid = -1;
     for (i = numlines; --i >= 0;)                                      // Proceed from last to first linedef
     {                                                                  // so that lower linedefs appear first
-        int32_t j            = (uint32_t)lines[i].id % (uint32_t)numlines; // Hash func
+        int32_t j        = (uint32_t)lines[i].id % (uint32_t)numlines; // Hash func
         lines[i].nextid  = lines[j].firstid;                           // Prepend linedef to chain
         lines[j].firstid = i;
     }
@@ -1799,7 +1804,7 @@ void P_SetupLevel(const char *lumpname, int32_t position)
 
     DThinker::DestroyAllThinkers();
     Z_FreeTags(PU_LEVEL, PU_LEVELMAX);
-    g_ValidLevel     = false; // [AM] False until the level is loaded.
+    g_ValidLevel = false; // [AM] False until the level is loaded.
     // [RH] Z_FreeTags frees all the custom colormaps
     NormalLight.next = nullptr;
 
@@ -1984,13 +1989,13 @@ void P_SetupPlane(sector_t *sec, line_t *line, bool floor)
     // Find the vertex comprising the sector that is farthest from the
     // slope's reference line
 
-    int32_t       bestdist = 0;
+    int32_t   bestdist = 0;
     line_t  **probe    = sec->lines;
     vertex_t *refvert  = (*sec->lines)->v1;
 
     for (int32_t i = sec->linecount * 2; i > 0; i--)
     {
-        int32_t       dist;
+        int32_t   dist;
         vertex_t *vert;
 
         // Do calculations with only the upper bits, because the lower ones

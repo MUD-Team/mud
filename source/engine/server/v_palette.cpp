@@ -24,7 +24,7 @@
 
 #include "m_alloc.h"
 #include "mud_includes.h"
-#include "r_main.h" // For lighting constants
+#include "r_common.h"
 #include "v_video.h"
 #include "z_zone.h"
 

@@ -35,7 +35,6 @@
 #include "p_local.h"
 #include "p_tick.h"
 #include "physfs.h"
-#include "r_data.h"
 #include "s_sound.h"
 #include "sv_main.h"
 #include "z_zone.h"

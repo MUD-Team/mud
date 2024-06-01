@@ -22,6 +22,8 @@
 //
 //-----------------------------------------------------------------------------
 
+#include "r_bsp.h"
+
 #include <math.h>
 
 #include "i_system.h"
@@ -38,6 +40,7 @@
 #include "r_state.h"
 #include "r_things.h"
 #include "v_palette.h"
+
 
 EXTERN_CVAR(r_particles)
 
@@ -222,9 +225,9 @@ sector_t *R_FakeFlat(sector_t *sec, sector_t *tempsec, int32_t *floorlightlevel,
     const sector_t *s         = sec->heightsec;
     sector_t       *heightsec = camera->subsector->sector->heightsec;
 
-    bool underwater     = r_fakingunderwater || (heightsec && viewz <= P_FloorHeight(viewx, viewy, heightsec));
-    bool doorunderwater = false;
-    int32_t  diffTex        = (s->MoreFlags & SECF_CLIPFAKEPLANES);
+    bool    underwater     = r_fakingunderwater || (heightsec && viewz <= P_FloorHeight(viewx, viewy, heightsec));
+    bool    doorunderwater = false;
+    int32_t diffTex        = (s->MoreFlags & SECF_CLIPFAKEPLANES);
 
     // Replace sector being drawn with a copy to be hacked
     *tempsec = *sec;
@@ -431,7 +434,7 @@ sector_t *R_FakeFlat(sector_t *sec, sector_t *tempsec, int32_t *floorlightlevel,
 //
 void R_AddLine(seg_t *line)
 {
-    MUD_ZoneScoped;    
+    MUD_ZoneScoped;
 
     curline = line;
 
@@ -566,11 +569,11 @@ static bool R_CheckBBox(const fixed_t *bspcoord)
 
     // Find the corners of the box that define the edges from current viewpoint
     int32_t boxpos = (viewx <= bspcoord[BOXLEFT]   ? 0
-                  : viewx < bspcoord[BOXRIGHT] ? 1
-                                               : 2) +
-                 (viewy >= bspcoord[BOXTOP]     ? 0
-                  : viewy > bspcoord[BOXBOTTOM] ? 4
-                                                : 8);
+                      : viewx < bspcoord[BOXRIGHT] ? 1
+                                                   : 2) +
+                     (viewy >= bspcoord[BOXTOP]     ? 0
+                      : viewy > bspcoord[BOXBOTTOM] ? 4
+                                                    : 8);
 
     if (boxpos == 5)
         return true;
@@ -643,12 +646,12 @@ static bool R_CheckBBox(const fixed_t *bspcoord)
 //
 void R_Subsector(int32_t num)
 {
-    int32_t          count;
+    int32_t      count;
     seg_t       *line;
     subsector_t *sub;
     sector_t     tempsec;           // killough 3/7/98: deep water hack
-    int32_t          floorlightlevel;   // killough 3/16/98: set floor lightlevel
-    int32_t          ceilinglightlevel; // killough 4/11/98
+    int32_t      floorlightlevel;   // killough 3/16/98: set floor lightlevel
+    int32_t      ceilinglightlevel; // killough 4/11/98
 
 #ifdef RANGECHECK
     if (num >= numsubsectors)
@@ -716,7 +719,7 @@ void R_Subsector(int32_t num)
 
     if (sub->poly)
     { // Render the polyobj in the subsector first
-        int32_t     polyCount = sub->poly->numsegs;
+        int32_t polyCount = sub->poly->numsegs;
         seg_t **polySeg   = sub->poly->segs;
         while (polyCount--)
             R_AddLine(*polySeg++);

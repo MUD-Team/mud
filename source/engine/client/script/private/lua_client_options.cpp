@@ -23,7 +23,7 @@
 #include <LuaBridge.h>
 #include <c_dispatch.h>
 #include <cmdlib.h>
-
+#include "c_cvars.h"
 #include "i_video.h"
 #include "lua_client_private.h"
 #include "v_video.h"

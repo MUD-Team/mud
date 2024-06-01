@@ -45,7 +45,6 @@
 #include "md5.h"
 #include "mud_includes.h"
 #include "physfs.h"
-#include "r_data.h"
 #include "w_wad.h"
 #include "z_zone.h"
 

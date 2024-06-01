@@ -30,14 +30,16 @@
 #include "mud_includes.h"
 #include "p_local.h"
 #include "p_mapformat.h"
+#include "r_common.h"
 #include "tables.h"
 #include "v_palette.h"
 
-#define FUNC(a) static bool a(line_t *ln, AActor *it, int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4)
+#define FUNC(a)                                                                                                        \
+    static bool a(line_t *ln, AActor *it, int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4)
 
 // Used by the teleporters to know if they were
 // activated by walking across the backside of a line.
-int32_t         TeleportSide;
+int32_t     TeleportSide;
 extern bool s_SpecialFromServer;
 
 // Set true if this special was activated from inside a script.
@@ -47,10 +49,11 @@ bool InScript;
 // Why are these needed here?  Linux won't compile without these definitions??
 //
 bool EV_MovePoly(line_t *line, int32_t polyNum, int32_t speed, angle_t angle, fixed_t dist, bool overRide);
-bool EV_OpenPolyDoor(line_t *line, int32_t polyNum, int32_t speed, angle_t angle, int32_t delay, int32_t distance, podoortype_t type);
+bool EV_OpenPolyDoor(line_t *line, int32_t polyNum, int32_t speed, angle_t angle, int32_t delay, int32_t distance,
+                     podoortype_t type);
 bool EV_RotatePoly(line_t *line, int32_t polyNum, int32_t speed, int32_t byteAngle, int32_t direction, bool overRide);
-bool EV_DoZDoomCeiling(DCeiling::ECeiling type, line_t *line, uint8_t tag, fixed_t speed, fixed_t speed2, fixed_t height,
-                       int32_t crush, uint8_t silent, int32_t change, crushmode_e crushmode);
+bool EV_DoZDoomCeiling(DCeiling::ECeiling type, line_t *line, uint8_t tag, fixed_t speed, fixed_t speed2,
+                       fixed_t height, int32_t crush, uint8_t silent, int32_t change, crushmode_e crushmode);
 
 //
 // P_LineSpecialMovesSector
@@ -541,7 +544,7 @@ FUNC(LS_Door_WaitClose)
 FUNC(LS_Generic_Door)
 // Generic_Door (tag, speed, kind, delay, lock)
 {
-    uint8_t           tag, lightTag;
+    uint8_t        tag, lightTag;
     DDoor::EVlDoor type;
     bool           boomgen = false;
 
@@ -690,8 +693,8 @@ FUNC(LS_Floor_RaiseAndCrushDoom)
 FUNC(LS_Floor_RaiseByValueTimes8)
 // FLoor_RaiseByValueTimes8 (tag, speed, height)
 {
-    return EV_DoZDoomFloor(DFloor::floorRaiseByValue, ln, arg0, P_ArgToSpeed(arg1), (int32_t)arg2 * 8, P_ArgToCrush(arg4),
-                           P_ArgToChange(arg3), true, false);
+    return EV_DoZDoomFloor(DFloor::floorRaiseByValue, ln, arg0, P_ArgToSpeed(arg1), (int32_t)arg2 * 8,
+                           P_ArgToCrush(arg4), P_ArgToChange(arg3), true, false);
 }
 
 FUNC(LS_Floor_LowerByValueTimes8)
@@ -711,8 +714,8 @@ FUNC(LS_Floor_CrushStop)
 FUNC(LS_Floor_LowerInstant)
 // Floor_LowerInstant (tag, unused, height)
 {
-    return EV_DoZDoomFloor(DFloor::floorLowerInstant, ln, arg0, 0, (int32_t)arg2 * 8, NO_CRUSH, P_ArgToChange(arg3), false,
-                           false);
+    return EV_DoZDoomFloor(DFloor::floorLowerInstant, ln, arg0, 0, (int32_t)arg2 * 8, NO_CRUSH, P_ArgToChange(arg3),
+                           false, false);
 }
 
 FUNC(LS_Floor_RaiseInstant)
@@ -988,15 +991,15 @@ FUNC(LS_Ceiling_RaiseByValue)
 FUNC(LS_Ceiling_LowerByValueTimes8)
 // Ceiling_LowerByValueTimes8 (tag, speed, height)
 {
-    return EV_DoZDoomCeiling(DCeiling::ceilLowerByValue, ln, arg0, P_ArgToSpeed(arg1), 0, (int32_t)arg2 * 8, NO_CRUSH, 0, 0,
-                             crushDoom);
+    return EV_DoZDoomCeiling(DCeiling::ceilLowerByValue, ln, arg0, P_ArgToSpeed(arg1), 0, (int32_t)arg2 * 8, NO_CRUSH,
+                             0, 0, crushDoom);
 }
 
 FUNC(LS_Ceiling_RaiseByValueTimes8)
 // Ceiling_RaiseByValueTimes8 (tag, speed, height)
 {
-    return EV_DoZDoomCeiling(DCeiling::ceilRaiseByValue, ln, arg0, P_ArgToSpeed(arg1), 0, (int32_t)arg2 * 8, NO_CRUSH, 0, 0,
-                             crushDoom);
+    return EV_DoZDoomCeiling(DCeiling::ceilRaiseByValue, ln, arg0, P_ArgToSpeed(arg1), 0, (int32_t)arg2 * 8, NO_CRUSH,
+                             0, 0, crushDoom);
 }
 
 FUNC(LS_Ceiling_CrushAndRaise)
@@ -1050,8 +1053,8 @@ FUNC(LS_Ceiling_MoveToValueTimes8)
 FUNC(LS_Ceiling_MoveToValue)
 // Ceiling_MoveToValue (tag, speed, height, negative)
 {
-    return EV_DoZDoomCeiling(DCeiling::ceilMoveToValue, ln, arg0, P_ArgToSpeed(arg1), 0, (int32_t)arg2 * (arg3 ? -1 : 1),
-                             NO_CRUSH, 0, 0, crushDoom);
+    return EV_DoZDoomCeiling(DCeiling::ceilMoveToValue, ln, arg0, P_ArgToSpeed(arg1), 0,
+                             (int32_t)arg2 * (arg3 ? -1 : 1), NO_CRUSH, 0, 0, crushDoom);
 }
 
 FUNC(LS_Ceiling_LowerToHighestFloor)
@@ -1384,17 +1387,17 @@ FUNC(LS_Line_SetBlocking)
     {
         int32_t              i, s;
         static const int32_t flags[] = {ML_BLOCKING,
-                                    ML_BLOCKMONSTERS,
-                                    ML_BLOCKPLAYERS,
-                                    0, // block floaters (not supported)
-                                    0, // block projectiles (not supported)
-                                    ML_BLOCKEVERYTHING,
-                                    0, // railing (not supported)
-                                    0, // block use (not supported)
-                                    0, // block sight (not supported)
-                                    0, // block hitscan (not supported)
-                                    ML_SOUNDBLOCK,
-                                    -1};
+                                        ML_BLOCKMONSTERS,
+                                        ML_BLOCKPLAYERS,
+                                        0, // block floaters (not supported)
+                                        0, // block projectiles (not supported)
+                                        ML_BLOCKEVERYTHING,
+                                        0, // railing (not supported)
+                                        0, // block use (not supported)
+                                        0, // block sight (not supported)
+                                        0, // block hitscan (not supported)
+                                        ML_SOUNDBLOCK,
+                                        -1};
 
         int32_t setflags   = 0;
         int32_t clearflags = 0;
@@ -1501,8 +1504,8 @@ FUNC(LS_Noise_Alert)
 FUNC(LS_Sector_SetDamage)
 // Sector_SetDamage (tag, amount, mod, interval, leaky)
 {
-    int32_t  s           = -1;
-    bool unblockable = false;
+    int32_t s           = -1;
+    bool    unblockable = false;
 
     if (arg3 == 0)
     {
@@ -1735,12 +1738,12 @@ FUNC(LS_ForceField)
 FUNC(LS_Clear_ForceField)
 // ForceField (damage)
 {
-    int32_t  s     = -1;
-    bool clear = false;
+    int32_t s     = -1;
+    bool    clear = false;
 
     while ((s = P_FindSectorFromTag(arg0, s)) >= 0)
     {
-        int32_t     i;
+        int32_t i;
         line_t *line;
 
         for (i = 0; i < sectors[s].linecount; i++)
@@ -2119,7 +2122,7 @@ FUNC(LS_Sector_ChangeSound)
 
 struct FThinkerCollection
 {
-    int32_t       RefNum;
+    int32_t   RefNum;
     DThinker *Obj;
 };
 
@@ -2199,7 +2202,7 @@ FUNC(LS_Scroll_Texture_Both)
 
     fixed_t dx = (arg1 - arg2) * (FRACUNIT / 64);
     fixed_t dy = (arg4 - arg3) * (FRACUNIT / 64);
-    int32_t     sidechoice;
+    int32_t sidechoice;
 
     if (arg0 < 0)
     {
@@ -2275,7 +2278,7 @@ static void SetScroller(int32_t tag, DScroller::EScrollType type, fixed_t dx, fi
 {
     TThinkerIterator<DScroller> iterator;
     DScroller                  *scroller;
-    int32_t                         i;
+    int32_t                     i;
 
     // Check if there is already a scroller for this tag
     // If at least one sector with this tag is scrolling, then they all are.
@@ -2348,8 +2351,8 @@ FUNC(LS_PointPush_SetForce)
 FUNC(LS_Sector_SetGravity)
 // Sector_SetGravity (tag, intpart, fracpart)
 {
-    int32_t   secnum = -1;
-    float gravity;
+    int32_t secnum = -1;
+    float   gravity;
 
     if (arg2 > 99)
         arg2 = 99;
@@ -2398,7 +2401,7 @@ FUNC(LS_Sector_SetFade)
 FUNC(LS_Sector_SetCeilingPanning)
 // Sector_SetCeilingPanning (tag, x-int32_t, x-frac, y-int32_t, y-frac)
 {
-    int32_t     secnum = -1;
+    int32_t secnum = -1;
     fixed_t xofs   = arg1 * FRACUNIT + arg2 * (FRACUNIT / 100);
     fixed_t yofs   = arg3 * FRACUNIT + arg4 * (FRACUNIT / 100);
 
@@ -2414,7 +2417,7 @@ FUNC(LS_Sector_SetCeilingPanning)
 FUNC(LS_Sector_SetFloorPanning)
 // Sector_SetCeilingPanning (tag, x-int32_t, x-frac, y-int32_t, y-frac)
 {
-    int32_t     secnum = -1;
+    int32_t secnum = -1;
     fixed_t xofs   = arg1 * FRACUNIT + arg2 * (FRACUNIT / 100);
     fixed_t yofs   = arg3 * FRACUNIT + arg4 * (FRACUNIT / 100);
 
@@ -2430,7 +2433,7 @@ FUNC(LS_Sector_SetFloorPanning)
 FUNC(LS_Sector_SetCeilingScale)
 // Sector_SetCeilingScale (tag, x-int32_t, x-frac, y-int32_t, y-frac)
 {
-    int32_t     secnum = -1;
+    int32_t secnum = -1;
     fixed_t xscale = arg1 * FRACUNIT + arg2 * (FRACUNIT / 100);
     fixed_t yscale = arg3 * FRACUNIT + arg4 * (FRACUNIT / 100);
 
@@ -2453,7 +2456,7 @@ FUNC(LS_Sector_SetCeilingScale)
 FUNC(LS_Sector_SetFloorScale)
 // Sector_SetFloorScale (tag, x-int32_t, x-frac, y-int32_t, y-frac)
 {
-    int32_t     secnum = -1;
+    int32_t secnum = -1;
     fixed_t xscale = arg1 * FRACUNIT + arg2 * (FRACUNIT / 100);
     fixed_t yscale = arg3 * FRACUNIT + arg4 * (FRACUNIT / 100);
 
@@ -2476,7 +2479,7 @@ FUNC(LS_Sector_SetFloorScale)
 FUNC(LS_Sector_SetRotation)
 // Sector_SetRotation (tag, floor-angle, ceiling-angle)
 {
-    int32_t     secnum  = -1;
+    int32_t secnum  = -1;
     angle_t ceiling = ANG(arg2);
     angle_t floor   = ANG(arg1);
 
@@ -2492,8 +2495,8 @@ FUNC(LS_Sector_SetRotation)
 FUNC(LS_Line_AlignCeiling)
 // Line_AlignCeiling (lineid, side)
 {
-    int32_t  line = P_FindLineFromID(arg0, -1);
-    bool ret  = 0;
+    int32_t line = P_FindLineFromID(arg0, -1);
+    bool    ret  = 0;
 
     if (line < 0)
         I_Error("Sector_AlignCeiling: Lineid %d is undefined", arg0);
@@ -2507,8 +2510,8 @@ FUNC(LS_Line_AlignCeiling)
 FUNC(LS_Line_AlignFloor)
 // Line_AlignFloor (lineid, side)
 {
-    int32_t  line = P_FindLineFromID(arg0, -1);
-    bool ret  = 0;
+    int32_t line = P_FindLineFromID(arg0, -1);
+    bool    ret  = 0;
 
     if (line < 0)
         I_Error("Sector_AlignFloor: Lineid %d is undefined", arg0);

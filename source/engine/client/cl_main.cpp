@@ -62,10 +62,12 @@
 #include "p_pspr.h"
 #include "p_snapshot.h"
 #include "p_tick.h"
+#include "r_main.h"
 #include "r_sky.h"
 #include "s_sound.h"
 #include "server.pb.h"
 #include "w_ident.h"
+
 
 // denis - fancy gfx, but no game manipulation
 bool      clientside = true, serverside = false;
@@ -75,19 +77,19 @@ extern bool step_mode;
 
 // denis - client version (VERSION or other supported)
 int16_t version           = 0;
-int32_t   gameversion       = 0; // GhostlyDeath -- Bigger Game Version
-int32_t   gameversiontosend = 0; // If the server is 0.4, let's fake our client info
+int32_t gameversion       = 0; // GhostlyDeath -- Bigger Game Version
+int32_t gameversiontosend = 0; // If the server is 0.4, let's fake our client info
 
 buf_t net_buffer(MAX_UDP_PACKET);
 
-bool noservermsgs;
-int32_t  last_received;
+bool    noservermsgs;
+int32_t last_received;
 
 // [SL] 2012-03-17 - world_index is the gametic on the server that the client
 // is currently simulating.  world_index_accum is a continuous accumulator that
 // is used to advance world_index if appropriate.
-int32_t   world_index       = 0;
-float world_index_accum = 0.0f;
+int32_t world_index       = 0;
+float   world_index_accum = 0.0f;
 
 int32_t last_svgametic     = 0;
 int32_t last_player_update = 0;
@@ -101,7 +103,7 @@ netadr_t serveraddr; // address of a server
 netadr_t lastconaddr;
 
 const static size_t PACKET_SEQ_MASK = 0xFF;
-static int32_t          packetseq[256];
+static int32_t      packetseq[256];
 
 // denis - unique session key provided by the server
 std::string digest;
@@ -116,7 +118,7 @@ bool simulated_connection = false;
 
 NetCommand localcmds[MAXSAVETICS];
 
-//extern NetGraph netgraph;
+// extern NetGraph netgraph;
 
 // [SL] 2012-03-07 - Players that were teleported during the current gametic
 std::set<uint8_t> teleported_players;
@@ -526,8 +528,8 @@ template <class Iterator> void CL_SpyCycle(Iterator begin, Iterator end)
     } while (it != sentinal);
 }
 
-uint64_t       nextstep   = 0;
-int32_t         canceltics = 0;
+uint64_t nextstep   = 0;
+int32_t  canceltics = 0;
 
 void CL_StepTics(uint32_t count)
 {
@@ -562,11 +564,10 @@ void CL_StepTics(uint32_t count)
 //
 void CL_DisplayTics()
 {
-    //I_GetEvents(true);
-    //D_Display();
+    // I_GetEvents(true);
+    // D_Display();
     void LUA_Display();
     LUA_Display();
-    
 }
 
 //
@@ -651,7 +652,7 @@ BEGIN_COMMAND(connect)
     }
 
     simulated_connection = false; // Ch0wW : don't block people connect to a server after playing a demo
-    
+
     gamestate = GS_CONNECTING;
 
     CL_QuitNetGame(NQ_SILENT);
@@ -868,7 +869,7 @@ END_COMMAND(playerteam)
 BEGIN_COMMAND(changeteams)
 {
     int32_t iTeam = (int32_t)consoleplayer().userinfo.team;
-    iTeam     = ++iTeam % sv_teamsinplay.asInt();
+    iTeam         = ++iTeam % sv_teamsinplay.asInt();
     cl_team.Set(GetTeamInfo((team_t)iTeam)->ColorStringUpper.c_str());
 }
 END_COMMAND(changeteams)
@@ -993,7 +994,6 @@ BEGIN_COMMAND(spy)
     CL_CheckDisplayPlayer();
 }
 END_COMMAND(spy)
-
 
 static bool quit_requested = false;
 
@@ -1150,7 +1150,6 @@ void CL_SpectatePlayer(player_t &player, bool spectate)
         }
 
         ClientReplay::getInstance().reset();
-
     }
 
     P_ClearPlayerPowerups(player); // Remove all current powerups
@@ -1259,16 +1258,16 @@ bool CL_PrepareConnect()
     cvar_t::C_BackupCVars(CVAR_SERVERINFO);
 
     uint32_t server_token = MSG_ReadLong();
-    server_host        = MSG_ReadString();
+    server_host           = MSG_ReadString();
 
     bool recv_teamplay_stats = 0;
     gameversiontosend        = 0;
 
     uint8_t playercount = MSG_ReadByte(); // players
-    MSG_ReadByte();                    // max_players
+    MSG_ReadByte();                       // max_players
 
     std::string server_map  = MSG_ReadString();
-    uint8_t        server_wads = MSG_ReadByte();
+    uint8_t     server_wads = MSG_ReadByte();
 
     Printf("Found server at %s.\n\n", NET_AdrToString(::serveraddr));
     Printf("> Hostname: %s\n", server_host.c_str());
@@ -1282,7 +1281,7 @@ bool CL_PrepareConnect()
 
     MSG_ReadBool();                        // deathmatch
     MSG_ReadByte();                        // skill
-    recv_teamplay_stats |= MSG_ReadBool(); // teamplay    
+    recv_teamplay_stats |= MSG_ReadBool(); // teamplay
 
     for (uint8_t i = 0; i < playercount; i++)
     {
@@ -1650,7 +1649,7 @@ bool CL_ReadPacketHeader()
         CL_Decompress();
     }
 
-    //netgraph.addPacketIn();
+    // netgraph.addPacketIn();
     return true;
 }
 
@@ -1792,7 +1791,7 @@ void CL_SendCmd(void)
     }
 
     int32_t bytesWritten = NET_SendPacket(net_buffer, serveraddr);
-    //netgraph.addTrafficOut(bytesWritten);
+    // netgraph.addTrafficOut(bytesWritten);
 
     outrate += net_buffer.size();
     SZ_Clear(&net_buffer);
@@ -1834,7 +1833,7 @@ void PickupMessage(AActor *toucher, const char *message)
 {
     // Some maps have multiple items stacked on top of each other.
     // It looks odd to display pickup messages for all of them.
-    static int32_t         lastmessagetic;
+    static int32_t     lastmessagetic;
     static const char *lastmessage = NULL;
 
     if (toucher == consoleplayer().camera && (lastmessagetic != gametic || lastmessage != message))
@@ -1902,7 +1901,7 @@ void CL_RemoveCompletedMovingSectors()
     while (itr != sector_snaps.end())
     {
         SectorSnapshotManager *mgr  = &(itr->second);
-        int32_t                    time = mgr->getMostRecentTime();
+        int32_t                time = mgr->getMostRecentTime();
 
         // are all the snapshots in the container invalid or too old?
         if (world_index - time > NUM_SNAPSHOTS || mgr->empty())
@@ -1916,7 +1915,7 @@ CVAR_FUNC_IMPL(cl_interp)
 {
     // Resync the world index since the sync offset has changed
     CL_ResyncWorldIndex();
-    //netgraph.setInterpolation(var);
+    // netgraph.setInterpolation(var);
 }
 
 //
@@ -2095,7 +2094,7 @@ void CL_SimulateWorld()
 #endif // _WORLD_INDEX_DEBUG_
 
     // [SL] 2012-03-29 - Add sync information to the netgraph
-    //netgraph.setWorldIndexSync(world_index - (last_svgametic - cl_interp));
+    // netgraph.setWorldIndexSync(world_index - (last_svgametic - cl_interp));
 
     CL_SimulateSectors();
     CL_SimulatePlayers();

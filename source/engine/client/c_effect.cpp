@@ -28,20 +28,21 @@
 #include "m_random.h"
 #include "mud_includes.h"
 #include "p_local.h"
+#include "r_common.h"
 #include "r_things.h"
 #include "s_sound.h"
 #include "v_video.h"
 
 // [RH] particle globals
-int32_t         NumParticles;
-int32_t         ActiveParticles;
-int32_t         InactiveParticles;
+int32_t     NumParticles;
+int32_t     ActiveParticles;
+int32_t     InactiveParticles;
 particle_t *Particles;
 
 #define FADEFROMTTL(a) (255 / (a))
 
-static int32_t grey1, grey2, grey3, grey4, red, green, blue, yellow, black, red1, green1, blue1, yellow1, purple, purple1,
-    white, rblue1, rblue2, rblue3, rblue4, orange, yorange, dred, grey5, maroon1, maroon2;
+static int32_t grey1, grey2, grey3, grey4, red, green, blue, yellow, black, red1, green1, blue1, yellow1, purple,
+    purple1, white, rblue1, rblue2, rblue3, rblue4, orange, yorange, dred, grey5, maroon1, maroon2;
 
 static const struct ColorList
 {
@@ -185,7 +186,7 @@ particle_t *JitterParticle(int32_t ttl)
     if (particle)
     {
         fixed_t *val = &particle->velx;
-        int32_t      i;
+        int32_t  i;
 
         // Set initial velocities
         for (i = 3; i; i--, val++)
@@ -230,8 +231,9 @@ void P_RunEffect(AActor *actor, int32_t effects)
     {
         // Particle fountain
 
-        static const int32_t *fountainColors[16] = {&black,  &black,   &red,    &red1,    &green, &green1, &blue,  &blue1,
-                                                &yellow, &yellow1, &purple, &purple1, &black, &grey3,  &grey4, &white};
+        static const int32_t *fountainColors[16] = {&black, &black, &red,    &red1,    &green,  &green1,
+                                                    &blue,  &blue1, &yellow, &yellow1, &purple, &purple1,
+                                                    &black, &grey3, &grey4,  &white};
         int32_t               color              = (effects & FX_FOUNTAINMASK) >> 15;
         MakeFountain(actor, *fountainColors[color], *fountainColors[color + 1]);
     }
@@ -242,7 +244,7 @@ void P_ThinkParticles(void)
     if (!clientside)
         return;
 
-    int32_t         i;
+    int32_t     i;
     particle_t *particle, *prev;
 
     i    = ActiveParticles;
@@ -285,8 +287,8 @@ void P_DrawRailTrail(v3double_t &start, v3double_t &end)
 
     M_SubVec3(&dir, &end, &start);
 
-    double length = M_LengthVec3(&dir);
-    int32_t    steps  = (int32_t)(length * 0.3333);
+    double  length = M_LengthVec3(&dir);
+    int32_t steps  = (int32_t)(length * 0.3333);
 
     if (!length) // line is 0 length, so nothing to do
         return;

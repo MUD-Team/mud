@@ -28,7 +28,7 @@
 #include "m_bbox.h"
 #include "mud_includes.h"
 #include "p_local.h"
-#include "r_local.h"
+#include "r_common.h"
 #include "s_sndseq.h"
 #include "tables.h"
 #include "w_wad.h"

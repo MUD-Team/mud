@@ -26,9 +26,7 @@
 
 #include <set>
 
-#ifndef __R_LOCAL__
-#include "r_local.h"
-#endif
+#include "d_player.h"
 
 #define FLOATSPEED (FRACUNIT * 4)
 
@@ -489,6 +487,20 @@ bool PO_Busy(int32_t polyobj);
 bool P_CheckFov(AActor *t1, AActor *t2, angle_t fov);
 bool P_IsFriendlyThing(AActor *actor, AActor *friendshiptest);
 bool P_IsTeamMate(AActor *actor, AActor *player);
+
+// Utility function,
+//	called by R_PointToAngle.
+uint32_t inline SlopeDiv(uint32_t num, uint32_t den)
+{
+    uint32_t ans;
+
+    if (den < 512)
+        return SLOPERANGE;
+
+    ans = (num << 3) / (den >> 8);
+
+    return ans <= SLOPERANGE ? ans : SLOPERANGE;
+}
 
 //
 // P_SPEC

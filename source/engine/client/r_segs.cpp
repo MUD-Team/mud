@@ -34,12 +34,14 @@
 #include "p_lnspec.h"
 #include "p_local.h"
 #include "p_mapformat.h"
-#include "r_draw.h"
+#include "r_bsp.h"
 #include "r_client.h"
+#include "r_common.h"
+#include "r_draw.h"
+#include "r_main.h"
 #include "r_plane.h"
-#include "r_local.h"
+#include "r_things.h"
 #include "v_video.h"
-
 
 // a pool of bytes allocated for sprite clipping arrays
 Pool<tallpost_t *> masked_midposts_pool(4096);

@@ -28,14 +28,9 @@
 #include "doomtype.h"
 #include "g_level.h"
 #include "m_vectors.h"
-#include "r_data.h"
+#include "r_common.h"
 #include "v_palette.h"
 #include "v_video.h"
-
-// killough 10/98: special mask indicates sky flat comes from sidedef
-#define PL_SKYFLAT (0x80000000)
-
-bool R_AlignFlat(int32_t linenum, int32_t side, int32_t fc);
 
 extern int32_t negonearray[MAXWIDTH];
 extern int32_t viewheightarray[MAXWIDTH];
@@ -63,12 +58,8 @@ extern fixed_t yaspectmul;
 
 extern shaderef_t basecolormap; // [RH] Colormap for sector currently being drawn
 
-extern int32_t validcount;
-
 extern int32_t linecount;
 extern int32_t loopcount;
-
-extern fixed_t render_lerp_amount;
 
 // [SL] Current color blending values (including palette effects)
 extern fargb_t blend_color;
@@ -77,40 +68,18 @@ void   R_SetSectorBlend(const argb_t color);
 void   R_ClearSectorBlend();
 argb_t R_GetSectorBlend();
 
-//
-// Lighting LUT.
-// Used for z-depth cuing per column/row,
-//	and other lighting effects (sector ambient, flash).
-//
-
-// Lighting constants.
-// Now why not 32 levels here?
-#define LIGHTLEVELS   16
-#define LIGHTSEGSHIFT 4
-
-#define MAXLIGHTSCALE     48
-#define LIGHTSCALEMULBITS 8 // [RH] for hires lighting fix
-#define LIGHTSCALESHIFT   (12 + LIGHTSCALEMULBITS)
-#define MAXLIGHTZ         128
-#define LIGHTZSHIFT       20
-
 // [RH] Changed from shaderef_t* to int32_t.
 extern int32_t scalelight[LIGHTLEVELS][MAXLIGHTSCALE];
 extern int32_t scalelightfixed[MAXLIGHTSCALE];
 extern int32_t zlight[LIGHTLEVELS][MAXLIGHTZ];
 
-extern int32_t        extralight;
+extern int32_t    extralight;
 extern bool       foggy;
-extern int32_t        fixedlightlev;
+extern int32_t    fixedlightlev;
 extern shaderef_t fixedcolormap;
 
 extern int32_t lightscalexmul; // [RH] for hires lighting fix
 extern int32_t lightscaleymul;
-
-// Number of diminishing brightness levels.
-// There a 0-31, i.e. 32 LUT in the COLORMAP lump.
-#define NUMCOLORMAPS 32
-
 //
 // Function pointers to switch refresh/drawing functions.
 //
@@ -121,24 +90,20 @@ extern void (*spanslopefunc)(void);
 //
 // Utility functions.
 
-int32_t  R_PointOnSide(fixed_t x, fixed_t y, const node_t *node);
-int32_t  R_PointOnSide(fixed_t x, fixed_t y, fixed_t xl, fixed_t yl, fixed_t xh, fixed_t yh);
-int32_t  R_PointOnSegSide(fixed_t x, fixed_t y, const seg_t *line);
-bool R_PointOnLine(fixed_t x, fixed_t y, fixed_t xl, fixed_t yl, fixed_t xh, fixed_t yh);
+int32_t R_PointOnSide(fixed_t x, fixed_t y, const node_t *node);
+int32_t R_PointOnSide(fixed_t x, fixed_t y, fixed_t xl, fixed_t yl, fixed_t xh, fixed_t yh);
+int32_t R_PointOnSegSide(fixed_t x, fixed_t y, const seg_t *line);
+bool    R_PointOnLine(fixed_t x, fixed_t y, fixed_t xl, fixed_t yl, fixed_t xh, fixed_t yh);
 
 angle_t R_PointToAngle(fixed_t x, fixed_t y);
 
-// 2/1/10: Updated (from EE) to restore vanilla style, with tweak for overflow tolerance
-angle_t R_PointToAngle2(fixed_t viewx, fixed_t viewy, fixed_t x, fixed_t y);
-
 fixed_t R_PointToDist(fixed_t x, fixed_t y);
 
-int32_t  R_ProjectPointX(fixed_t x, fixed_t y);
-int32_t  R_ProjectPointY(fixed_t z, fixed_t y);
-bool R_CheckProjectionX(int32_t &x1, int32_t &x2);
-bool R_CheckProjectionY(int32_t &y1, int32_t &y2);
+int32_t R_ProjectPointX(fixed_t x, fixed_t y);
+int32_t R_ProjectPointY(fixed_t z, fixed_t y);
+bool    R_CheckProjectionX(int32_t &x1, int32_t &x2);
+bool    R_CheckProjectionY(int32_t &y1, int32_t &y2);
 
-void R_RotatePoint(fixed_t x, fixed_t y, angle_t ang, fixed_t &tx, fixed_t &ty);
 bool R_ClipLineToFrustum(const v2fixed_t *v1, const v2fixed_t *v2, fixed_t clipdist, int32_t &lclip, int32_t &rclip);
 
 void R_ClipLine(const v2fixed_t *in1, const v2fixed_t *in2, int32_t lclip, int32_t rclip, v2fixed_t *out1,
@@ -166,14 +131,6 @@ int32_t R_GetWidescreen(void);
 
 // Called by G_Drawer.
 void R_RenderPlayerView(player_t *player);
-
-// Called by startup code.
-void R_Init();
-
-// Called by exit code.
-void STACK_ARGS R_Shutdown();
-
-void R_ExitLevel();
 
 // Called by M_Responder.
 void R_SetViewSize(int32_t blocks);

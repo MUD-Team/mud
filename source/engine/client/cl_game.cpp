@@ -28,6 +28,7 @@
 #include "c_bind.h"
 #include "c_console.h"
 #include "c_dispatch.h"
+#include "c_effect.h"
 #include "cl_main.h"
 #include "cl_replay.h"
 #include "d_main.h"
@@ -50,13 +51,13 @@
 #include "p_tick.h"
 #include "r_draw.h"
 #include "r_sky.h"
+#include "r_things.h"
 #include "s_sndseq.h"
 #include "s_sound.h"
 #include "script/lua_client_public.h"
 #include "v_video.h"
 #include "w_wad.h"
 #include "z_zone.h"
-
 
 #define SAVESTRINGSIZE 24
 
@@ -107,7 +108,7 @@ Players players;
 
 uint8_t consoleplayer_id; // player taking events and displaying
 uint8_t displayplayer_id; // view being displayed
-int32_t  gametic;
+int32_t gametic;
 
 EXTERN_CVAR(sv_nomonsters)
 EXTERN_CVAR(sv_fastmonsters)
@@ -162,7 +163,7 @@ fixed_t sidemove[2]    = {0x18, 0x28};
 
 fixed_t angleturn[3] = {640, 1280, 320}; // + slow turn
 fixed_t flyspeed[2]  = {1 * 256, 3 * 256};
-int32_t     lookspeed[2] = {450, 512};
+int32_t lookspeed[2] = {450, 512};
 
 #define SLOWTURNTICS 6
 
@@ -192,8 +193,8 @@ EXTERN_CVAR(joy_fastsensitivity)
 EXTERN_CVAR(joy_invert)
 EXTERN_CVAR(joy_freelook)
 
-int32_t  savegameslot;
-char savedescription[32];
+int32_t savegameslot;
+char    savedescription[32];
 
 player_t &consoleplayer()
 {
@@ -461,7 +462,8 @@ void G_BuildTiccmd(ticcmd_t *cmd)
         else
         {
             if (Actions[ACTION_FASTTURN])
-                cmd->yaw -= (int16_t)((((float)joyturn / (float)INT16_MAX) * angleturn[1]) * (joy_fastsensitivity / 10));
+                cmd->yaw -=
+                    (int16_t)((((float)joyturn / (float)INT16_MAX) * angleturn[1]) * (joy_fastsensitivity / 10));
             else
                 cmd->yaw -= (int16_t)((((float)joyturn / (float)INT16_MAX) * angleturn[1]) * (joy_sensitivity / 10));
         }
@@ -650,9 +652,9 @@ bool G_Responder(event_t *ev)
         {
 
             if (!cmd || (strnicmp(cmd, "menu_", 5) && stricmp(cmd, "toggleconsole") && stricmp(cmd, "sizeup") &&
-                         stricmp(cmd, "sizedown") && stricmp(cmd, "spynext") &&
-                         stricmp(cmd, "chase") && stricmp(cmd, "+showscores") && stricmp(cmd, "bumpgamma") &&
-                         stricmp(cmd, "screenshot") && stricmp(cmd, "stepmode") && stricmp(cmd, "step")))
+                         stricmp(cmd, "sizedown") && stricmp(cmd, "spynext") && stricmp(cmd, "chase") &&
+                         stricmp(cmd, "+showscores") && stricmp(cmd, "bumpgamma") && stricmp(cmd, "screenshot") &&
+                         stricmp(cmd, "stepmode") && stricmp(cmd, "step")))
             {
                 S_Sound(CHAN_INTERFACE, "switches/normbutn", 1, ATTN_NONE);
                 return true;
@@ -737,7 +739,7 @@ void CL_SimulateWorld();
 // Make ticcmd_ts for the players.
 //
 extern DCanvas *page;
-extern int32_t      connecttimeout;
+extern int32_t  connecttimeout;
 
 void G_Ticker(void)
 {
@@ -802,7 +804,7 @@ void G_Ticker(void)
             break;
         case ga_nothing:
             break;
-        }        
+        }
     }
 
     buf = gametic % BACKUPTICS;
@@ -830,8 +832,8 @@ void G_Ticker(void)
 
             CL_ParseCommands();
 
-//            if (gameaction == ga_fullconsole) 
-//                return;
+            //            if (gameaction == ga_fullconsole)
+            //                return;
         }
 
         if (!(gametic % TICRATE))
@@ -934,7 +936,17 @@ void G_Ticker(void)
             // Replay item pickups if the items arrived now.
             ClientReplay::getInstance().itemReplay();
         }
+
+        // Game pauses when in the menu and not online/demo
+        if (!multiplayer && P_Ticker_Paused() && players.begin()->viewz != 1)
+            break;
+
+        P_ThinkParticles(); // [RH] make the particles think
+
         P_Ticker();
+
+        P_RunEffects(); // [RH] Run particle effects
+
         break;
 
     default:
@@ -1147,7 +1159,7 @@ static mapthing2_t *SelectRandomDeathmatchSpot(player_t &player, int32_t selecti
 
 void G_DeathMatchSpawnPlayer(player_t &player)
 {
-    int32_t          selections;
+    int32_t      selections;
     mapthing2_t *spot;
 
     if (!serverside || G_UsesCoopSpawns())
@@ -1255,7 +1267,7 @@ void G_LoadGame(char *name)
 void G_DoLoadGame(void)
 {
     uint32_t i;
-    char         text[16];
+    char     text[16];
 
     gameaction = ga_nothing;
 
@@ -1305,7 +1317,7 @@ void G_DoLoadGame(void)
     FArchive arc(savefile);
 
     {
-        uint8_t         vars[4096], *vars_p;
+        uint8_t  vars[4096], *vars_p;
         uint32_t len;
         vars_p = vars;
         len    = arc.ReadCount();
@@ -1370,7 +1382,7 @@ void G_DoSaveGame()
 {
     std::string name;
     char       *description;
-    int32_t         i;
+    int32_t     i;
 
     G_SnapshotLevel();
 

@@ -32,3 +32,5 @@ void P_Ticker(void);
 bool P_AtInterval(int32_t interval);
 
 void P_Ticker_Pause(bool paused);
+
+bool P_Ticker_Paused();
