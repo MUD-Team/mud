@@ -2,27 +2,11 @@
 
 #pragma once
 
-#include <cstdint>
+#include "m_fixed.h"
+#include "tables.h"
 
 // killough 10/98: special mask indicates sky flat comes from sidedef
 #define PL_SKYFLAT (0x80000000)
-
-//
-// Lighting LUT.
-// Used for z-depth cuing per column/row,
-//	and other lighting effects (sector ambient, flash).
-//
-
-// Lighting constants.
-// Now why not 32 levels here?
-#define LIGHTLEVELS   16
-#define LIGHTSEGSHIFT 4
-
-#define MAXLIGHTSCALE     48
-#define LIGHTSCALEMULBITS 8 // [RH] for hires lighting fix
-#define LIGHTSCALESHIFT   (12 + LIGHTSCALEMULBITS)
-#define MAXLIGHTZ         128
-#define LIGHTZSHIFT       20
 
 // Number of diminishing brightness levels.
 // There a 0-31, i.e. 32 LUT in the COLORMAP lump.
@@ -52,10 +36,21 @@ angle_t R_PointToAngle2(fixed_t viewx, fixed_t viewy, fixed_t x, fixed_t y);
 
 bool R_AlignFlat(int32_t linenum, int32_t side, int32_t fc);
 
-// Called by startup code.
-void R_Init();
-
 // Called by exit code.
 void STACK_ARGS R_Shutdown();
 
 void R_ExitLevel();
+
+// Utility function,
+//	called by R_PointToAngle.
+uint32_t inline SlopeDiv(uint32_t num, uint32_t den)
+{
+    uint32_t ans;
+
+    if (den < 512)
+        return SLOPERANGE;
+
+    ans = (num << 3) / (den >> 8);
+
+    return ans <= SLOPERANGE ? ans : SLOPERANGE;
+}

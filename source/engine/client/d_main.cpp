@@ -62,6 +62,7 @@
 #include "mud_profiling.h"
 #include "p_setup.h"
 #include "r_common.h"
+#include "r_client.h"
 #include "r_sky.h"
 #include "r_state.h"
 #include "res_texture.h"
@@ -319,6 +320,7 @@ void D_Init()
         Printf(PRINT_HIGH, "P_Init: Init Playloop state.\n");
     P_InitEffects();
     P_Init();
+    R_InitSprites();
 
     // init sound and music
     if (first_time)

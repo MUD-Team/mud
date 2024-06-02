@@ -27,7 +27,7 @@
 #include "g_level.h"
 #include "m_resfile.h"
 #include "physfs.h"
-#include "r_defs.h"
+#include "map_defs.h"
 #include "z_zone.h"
 
 // [RH] Compare wad header as ints instead of chars

@@ -24,6 +24,7 @@
 
 #pragma once
 
+#include "r_defs.h"
 #include "r_sprites.h"
 
 // [RH] Particle details

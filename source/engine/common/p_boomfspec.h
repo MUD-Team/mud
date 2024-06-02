@@ -27,7 +27,7 @@
 #pragma once
 
 #include "d_player.h"
-#include "r_defs.h"
+#include "map_defs.h"
 
 void OnChangedSwitchTexture(line_t *line, int32_t useAgain);
 void G_SecretExitLevel(int32_t position, int32_t drawscores);
