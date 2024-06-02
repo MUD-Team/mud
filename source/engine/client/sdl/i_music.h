@@ -27,14 +27,12 @@
 
 #include "c_cvars.h"
 #include "doomtype.h"
-#include "m_memio.h"
 
 struct MusicHandler_t
 {
     Mix_Music *Track;
     SDL_RWops *Data;
-    MEMFILE   *Mem;
-    MusicHandler_t() : Track(NULL), Data(NULL), Mem(NULL)
+    MusicHandler_t() : Track(NULL), Data(NULL)
     {
     }
 };

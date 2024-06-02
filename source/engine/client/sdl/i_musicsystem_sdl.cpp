@@ -154,11 +154,6 @@ void SdlMixerMusicSystem::_UnregisterSong()
 
     m_registeredSong.Track = NULL;
     m_registeredSong.Data  = NULL;
-    if (m_registeredSong.Mem != NULL)
-    {
-        mem_fclose(m_registeredSong.Mem);
-        m_registeredSong.Mem = NULL;
-    }
 }
 
 //

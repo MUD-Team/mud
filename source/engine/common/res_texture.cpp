@@ -31,10 +31,10 @@
 #include <unordered_map>
 
 #include "Poco/Buffer.h"
+#include "Poco/MemoryStream.h"
 #include "cmdlib.h"
 #include "i_system.h"
 #include "m_fileio.h"
-#include "m_memio.h"
 #include "m_random.h"
 #include "mud_includes.h"
 #include "oscanner.h"
@@ -1059,6 +1059,8 @@ void TextureManager::generateColumns(Texture *texture, uint8_t *argbData)
     // Convert image to column/tallpost structure
     std::vector<texcolumn_t> columns;
     int32_t                  pixel_step = bpp * width;
+    uint32_t patch_size = 8; // header
+    std::vector<uint32_t> col_offsets;
 
     // Go through columns
     for (int32_t c = 0; c < width; c++)
@@ -1068,6 +1070,8 @@ void TextureManager::generateColumns(Texture *texture, uint8_t *argbData)
         post.row_off    = 0;
         bool     ispost = false;
         uint8_t *pixel  = argbData + c * bpp;
+
+        col_offsets.push_back(patch_size);
 
         uint8_t row_off = 0;
         for (int32_t r = 0; r < height; r++)
@@ -1085,10 +1089,13 @@ void TextureManager::generateColumns(Texture *texture, uint8_t *argbData)
 
                     // Start post
                     ispost = true;
+
+                    patch_size += 4; // post header
                 }
 
                 // Add the pixel to the post
                 post.pixels.push_back(V_BestColor(current_palette, {alpha, *pixel, *(pixel + 1), *(pixel + 2)}));
+                patch_size++;
             }
             else if (ispost)
             {
@@ -1110,56 +1117,47 @@ void TextureManager::generateColumns(Texture *texture, uint8_t *argbData)
 
         // Add the column data
         columns.push_back(col);
+        patch_size += 2; // 0xFFFF column end marker
     }
 
-    // Write doom gfx data to output
-    MEMFILE *newpatch = mem_fopen_write();
+    uint32_t offsets_size = columns.size() * 4;
 
-    // Setup header
-    mem_fwrite(&width, 2, 1, newpatch);
-    mem_fwrite(&height, 2, 1, newpatch);
-    mem_fwrite(&texture->mOffsetX, 2, 1, newpatch);
-    mem_fwrite(&texture->mOffsetY, 2, 1, newpatch);
+    patch_size += offsets_size;
 
-    // Write dummy column offsets for now
-    std::vector<uint32_t> col_offsets(columns.size());
-    mem_fwrite(col_offsets.data(), columns.size() * 4, 1, newpatch);
+    // write the tallpost patch
+    texture->mData = (uint8_t *)Z_Malloc(patch_size, PU_STATIC, 0);
+    Poco::MemoryOutputStream newpatch((char *)texture->mData, patch_size);
 
-    // Write columns
+    newpatch.write((char *)&width, 2);
+    newpatch.write((char *)&height, 2);
+    newpatch.write((char *)&texture->mOffsetX, 2);
+    newpatch.write((char *)&texture->mOffsetY, 2);
+    newpatch.write((char *)col_offsets.data(), offsets_size);
+
     for (size_t c = 0; c < columns.size(); c++)
     {
-        // Record column offset
-        col_offsets[c] = mem_ftell(newpatch);
+        col_offsets[c] += offsets_size;
 
-        // Determine column size (in bytes)
-        uint32_t col_size = 0;
-        for (auto &post : columns[c].posts)
-            col_size += post.pixels.size() + 4;
-
-        // Write column posts
-        for (auto &post : columns[c].posts)
+        // Write row offset
+        for (texpost_t &post : columns[c].posts)
         {
-            // Write row offset
-            mem_fwrite(&post.row_off, 2, 1, newpatch);
+            newpatch.write((char *)&post.row_off, 2);
 
             // Write no. of pixels
-            uint16_t npix = post.pixels.size();
-            mem_fwrite(&npix, 2, 1, newpatch);
+            uint16_t size = post.pixels.size();
+            newpatch.write((char *)&size, 2);
 
             // Write pixels
-            for (auto &pixel : post.pixels)
-                mem_fwrite(&pixel, 1, 1, newpatch);
+            newpatch.write((char *)post.pixels.data(), post.pixels.size());
         }
 
-        // Write 0xFFFF row to signal end of column
-        mem_fwrite(&column_end, 2, 1, newpatch);
+        // 0xFFFF row to signal end of column
+        newpatch.write((char *)&column_end, 2);
     }
 
-    // Now we write column offsets
-    mem_fseek(newpatch, 8, MEM_SEEK_SET);
-    mem_fwrite(col_offsets.data(), columns.size() * 4, 1, newpatch);
-
-    texture->mData = mem_get_buf_and_close(newpatch);
+    // go back and fill col_offsets data with correct values
+    newpatch.seekp(8);
+    newpatch.write((char *)col_offsets.data(), offsets_size);
 }
 
 //
