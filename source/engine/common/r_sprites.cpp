@@ -156,25 +156,4 @@ void R_InstallSprite(const char *name, int32_t num)
     memcpy(sprites[num].spriteframes, sprtemp, maxframe * sizeof(spriteframe_t));
 }
 
-//
-// GAME FUNCTIONS
-//
-int32_t      MaxVisSprites;
-vissprite_t *vissprites;
-vissprite_t *lastvissprite;
-
-//
-// R_InitSprites
-// Called at program start.
-//
-void R_InitSprites()
-{
-    MaxVisSprites = 128; // [RH] This is the initial default value. It grows as needed.
-
-    M_Free(vissprites);
-
-    vissprites    = (vissprite_t *)Malloc(MaxVisSprites * sizeof(vissprite_t));
-    lastvissprite = &vissprites[MaxVisSprites];
-}
-
 VERSION_CONTROL(r_sprites_cpp, "$Id: 875d809dc604f6d3d7e5cfe89d80c1206cb918c2 $")

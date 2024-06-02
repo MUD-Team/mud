@@ -25,7 +25,7 @@
 #pragma once
 
 #include "actor.h"
-#include "r_defs.h"
+#include "map_defs.h"
 #include "s_sound.h"
 
 typedef enum

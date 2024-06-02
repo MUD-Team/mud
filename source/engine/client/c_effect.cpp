@@ -30,6 +30,7 @@
 #include "p_local.h"
 #include "r_common.h"
 #include "r_things.h"
+#include "r_defs.h"
 #include "s_sound.h"
 #include "v_video.h"
 

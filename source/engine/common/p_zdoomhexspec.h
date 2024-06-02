@@ -29,7 +29,7 @@
 #include "doomtype.h"
 #include "m_fixed.h"
 #include "p_spec.h"
-#include "r_defs.h"
+#include "map_defs.h"
 
 void OnChangedSwitchTexture(line_t *line, int32_t useAgain);
 void SV_OnActivatedLine(line_t *line, AActor *mo, const int32_t side, const LineActivationType activationType,

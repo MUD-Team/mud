@@ -36,6 +36,7 @@
 #include "mud_profiling.h"
 #include "p_local.h"
 #include "r_bsp.h"
+#include "r_client.h"
 #include "r_draw.h"
 #include "r_plane.h"
 #include "r_segs.h"
@@ -78,9 +79,6 @@ fixed_t fovtan;
 float   focratio;
 float   ifocratio;
 
-// increment every time a check is made
-int32_t validcount = 1;
-
 // [RH] colormap currently drawing with
 shaderef_t basecolormap;
 int32_t    fixedlightlev;
@@ -114,8 +112,6 @@ AActor *camera; // [RH] camera to draw from. doesn't have to be a player
 // precalculated math tables
 //
 
-const fixed_t *finecosine = &finesine[FINEANGLES / 4];
-
 int32_t scalelight[LIGHTLEVELS][MAXLIGHTSCALE];
 int32_t scalelightfixed[MAXLIGHTSCALE];
 int32_t zlight[LIGHTLEVELS][MAXLIGHTZ];
@@ -148,8 +144,6 @@ void (*spanslopefunc)(void);
 // [AM] Number of fineangles in a default 90 degree FOV at a 4:3 resolution.
 int32_t FieldOfView        = 2048;
 int32_t CorrectFieldOfView = 2048;
-
-fixed_t render_lerp_amount;
 
 static void R_InitViewWindow();
 
@@ -227,36 +221,6 @@ bool R_PointOnLine(fixed_t x, fixed_t y, fixed_t xl, fixed_t yl, fixed_t xh, fix
 }
 
 //
-// R_PointToAngle
-//
-// To get a global angle from cartesian coordinates, the coordinates are
-// flipped until they are in the first octant of the coordinate system,
-// then the y (<=x) is scaled and divided by x to get a tangent (slope)
-// value which is looked up in the tantoangle[] table.
-//
-// This version is from prboom-plus
-//
-angle_t R_PointToAngle2(fixed_t viewx, fixed_t viewy, fixed_t x, fixed_t y)
-{
-    return (y -= viewy, (x -= viewx) || y) ? x >= 0 ? y >= 0 ? (x > y) ? tantoangle[SlopeDiv(y, x)] : // octant 0
-                                                                   ANG90 - 1 - tantoangle[SlopeDiv(x, y)]
-                                                             :                                        // octant 1
-                                                          x > (y = -y) ? 0 - tantoangle[SlopeDiv(y, x)]
-                                                                       :                              // octant 8
-                                                          ANG270 + tantoangle[SlopeDiv(x, y)]
-                                                    :                                                 // octant 7
-                                                 y >= 0 ? (x = -x) > y ? ANG180 - 1 - tantoangle[SlopeDiv(y, x)]
-                                                                       :                              // octant 3
-                                                              ANG90 + tantoangle[SlopeDiv(x, y)]
-                                                        :                                             // octant 2
-                                                 (x = -x) > (y = -y) ? ANG180 + tantoangle[SlopeDiv(y, x)]
-                                                                     :                                // octant 4
-                                                 ANG270 - 1 - tantoangle[SlopeDiv(x, y)]
-                                           :                                                          // octant 5
-               0;
-}
-
-//
 // R_PointToAngle - wrapper around R_PointToAngle2
 //
 angle_t R_PointToAngle(fixed_t x, fixed_t y)
@@ -307,14 +271,6 @@ fixed_t R_PointToDist2(fixed_t dx, fixed_t dy)
     }
 
     return FixedDiv(dx, finecosine[tantoangle[FixedDiv(dy, dx) >> DBITS] >> ANGLETOFINESHIFT]);
-}
-
-void R_RotatePoint(fixed_t x, fixed_t y, angle_t ang, fixed_t &tx, fixed_t &ty)
-{
-    int32_t index = ang >> ANGLETOFINESHIFT;
-
-    tx = FixedMul(x, finecosine[index]) - FixedMul(y, finesine[index]);
-    ty = FixedMul(x, finesine[index]) + FixedMul(y, finecosine[index]);
 }
 
 //

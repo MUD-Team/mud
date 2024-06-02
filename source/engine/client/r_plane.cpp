@@ -43,6 +43,7 @@
 #include "r_draw.h"
 #include "r_plane.h"
 
+#include "r_client.h"
 #include "r_sky.h"
 #include "v_video.h"
 #include "w_wad.h"

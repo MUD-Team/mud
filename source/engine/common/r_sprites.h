@@ -24,11 +24,7 @@
 
 #pragma once
 
-#include "r_defs.h"
-
-extern int32_t MaxVisSprites;
-
-extern vissprite_t *vissprites;
+#include "map_defs.h"
 
 extern spritedef_t *sprites;
 extern int32_t      numsprites;
@@ -40,9 +36,6 @@ extern int32_t      numsprites;
 extern spriteframe_t sprtemp[MAX_SPRITE_FRAMES];
 extern int32_t       maxframe;
 
-extern vissprite_t *lastvissprite;
-
 void R_CacheSprite(spritedef_t *sprite);
-void R_InitSprites();
 void R_InstallSpriteTex(const texhandle_t tex_id, uint32_t frame, uint32_t rot, bool flipped);
 void R_InstallSprite(const char *name, int32_t num);

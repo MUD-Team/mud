@@ -49,6 +49,7 @@
 #include "p_local.h"
 #include "p_saveg.h"
 #include "p_tick.h"
+#include "r_client.h"
 #include "r_draw.h"
 #include "r_sky.h"
 #include "r_things.h"

@@ -26,7 +26,7 @@
 
 #include "dobject.h"
 #include "dthinker.h"
-#include "r_defs.h"
+#include "map_defs.h"
 
 typedef enum
 {

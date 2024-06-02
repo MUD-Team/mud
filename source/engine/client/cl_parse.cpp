@@ -52,6 +52,7 @@
 #include "p_lnspec.h"
 #include "p_mapformat.h"
 #include "p_mobj.h"
+#include "r_client.h"
 #include "r_common.h"
 #include "r_sky.h"
 #include "r_state.h"

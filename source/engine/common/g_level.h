@@ -31,7 +31,7 @@
 #include "m_fixed.h"
 #include "m_resfile.h"
 #include "olumpname.h"
-#include "r_defs.h" // line_t
+#include "map_defs.h" // line_t
 
 #define NUM_MAPVARS    128
 #define NUM_WORLDVARS  256

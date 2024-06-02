@@ -133,10 +133,7 @@ void D_Init()
     // [RH] Initialize localizable strings.
     ::GStrings.loadStrings(false);
 
-    // init the renderer
-    if (first_time)
-        Printf(PRINT_HIGH, "R_Init: Init DOOM refresh daemon.\n");
-    R_Init();
+    Table_InitTanToAngle();
 
     G_ParseMapInfo();
     G_ParseMusInfo();
@@ -144,6 +141,7 @@ void D_Init()
 
     if (first_time)
         Printf(PRINT_HIGH, "P_Init: Init Playloop state.\n");
+
     P_Init();
 
     first_time = false;

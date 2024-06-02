@@ -1931,7 +1931,6 @@ void P_SetupLevel(const char *lumpname, int32_t position)
 void P_Init(void)
 {
     P_InitSwitchList();
-    R_InitSprites();
     InitTeamInfo();
 }
 

@@ -26,6 +26,7 @@
 #include "m_fixed.h"
 #include "mud_includes.h"
 #include "p_local.h"
+#include "r_client.h"
 #include "r_state.h"
 
 typedef std::pair<fixed_t, uint32_t> fixed_uint_pair;

@@ -72,3 +72,24 @@ void R_PrecacheLevel(void)
     while ((actor = iterator.Next()))
         R_CacheSprite(sprites + actor->sprite);
 }
+
+//
+// GAME FUNCTIONS
+//
+int32_t      MaxVisSprites;
+vissprite_t *vissprites;
+vissprite_t *lastvissprite;
+
+//
+// R_InitSprites
+// Called at program start.
+//
+void R_InitSprites()
+{
+    MaxVisSprites = 128; // [RH] This is the initial default value. It grows as needed.
+
+    M_Free(vissprites);
+
+    vissprites    = (vissprite_t *)Malloc(MaxVisSprites * sizeof(vissprite_t));
+    lastvissprite = &vissprites[MaxVisSprites];
+}

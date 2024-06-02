@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "r_defs.h"
+#include "map_defs.h"
 
 // NOT called by W_Ticker. Fixme.
 //

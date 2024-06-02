@@ -38,7 +38,7 @@
 #include "m_fileio.h"
 #include "m_ostring.h"
 #include "mud_includes.h"
-#include "r_defs.h"
+#include "map_defs.h"
 
 IMPLEMENT_CLASS(DConsoleCommand, DObject)
 IMPLEMENT_CLASS(DConsoleAlias, DConsoleCommand)

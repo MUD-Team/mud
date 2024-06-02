@@ -32,6 +32,23 @@
 #include "v_palette.h"
 #include "v_video.h"
 
+//
+// Lighting LUT.
+// Used for z-depth cuing per column/row,
+//	and other lighting effects (sector ambient, flash).
+//
+
+// Lighting constants.
+// Now why not 32 levels here?
+#define LIGHTLEVELS   16
+#define LIGHTSEGSHIFT 4
+
+#define MAXLIGHTSCALE     48
+#define LIGHTSCALEMULBITS 8 // [RH] for hires lighting fix
+#define LIGHTSCALESHIFT   (12 + LIGHTSCALEMULBITS)
+#define MAXLIGHTZ         128
+#define LIGHTZSHIFT       20
+
 extern int32_t negonearray[MAXWIDTH];
 extern int32_t viewheightarray[MAXWIDTH];
 
