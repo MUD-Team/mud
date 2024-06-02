@@ -29,3 +29,5 @@ IncludeCategories:
 IncludeIsMainRegex: '([-_](test|unittest))?$'
 IncludeIsMainSourceRegex: ''
 SortIncludes: CaseSensitive
+
+# to format MUD source files on windows run this in the source/engine directory: for /r %t in (*.cpp *.h *.cc *.hpp) do clang-format -i -style=file "%t"

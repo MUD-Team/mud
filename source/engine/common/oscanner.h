@@ -40,7 +40,7 @@ class OScanner
     const char    *m_scriptStart;
     const char    *m_scriptEnd;
     const char    *m_position;
-    int32_t            m_lineNumber;
+    int32_t        m_lineNumber;
     std::string    m_token;
     bool           m_unScan;
     bool           m_removeEscapeCharacter;
@@ -73,7 +73,7 @@ class OScanner
     void unScan();
 
     std::string getToken() const;
-    int32_t         getTokenInt() const;
+    int32_t     getTokenInt() const;
     float       getTokenFloat() const;
     bool        getTokenBool() const;
 

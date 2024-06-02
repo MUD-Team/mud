@@ -40,15 +40,15 @@ class Maplist
     bool                         shuffled;
     size_t                       s_index;
     std::vector<size_t>          s_maplist;
-    std::map<int32_t, uint64_t>         timeout;
-    uint8_t                         version;
+    std::map<int32_t, uint64_t>  timeout;
+    uint8_t                      version;
     void                         shuffle(void);
     void                         update_shuffle_index(void);
 
     maplist_entry_t lobbymap;
 
   public:
-    Maplist() : entered_once(false), error(""), index(0), in_maplist(false), shuffled(false), s_index(0), version(0){};
+    Maplist() : entered_once(false), error(""), index(0), in_maplist(false), shuffled(false), s_index(0), version(0) {};
     static Maplist &instance(void);
     // Modifiers
     bool add(maplist_entry_t &maplist_entry);
@@ -62,7 +62,7 @@ class Maplist
     bool        get_map_by_index(const size_t &index, maplist_entry_t &maplist_entry);
     bool        get_next_index(size_t &index);
     bool        get_this_index(size_t &index);
-    uint8_t        get_version(void);
+    uint8_t     get_version(void);
     bool        query(std::vector<std::pair<size_t, maplist_entry_t *>> &result);
     bool        query(const std::vector<std::string> &query, std::vector<std::pair<size_t, maplist_entry_t *>> &result);
     // Settings

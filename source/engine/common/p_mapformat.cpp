@@ -53,7 +53,7 @@ enum triggertype
 // Migrate some non-hexen data to hexen format, and other misc flags.
 void P_MigrateActorInfo(void)
 {
-    int32_t         i;
+    int32_t     i;
     static bool migrated = false;
 
     // Set MF2_PASSMOBJ on dehacked monsters
@@ -419,8 +419,8 @@ bool P_IsCompatibleBlueDoorLine(const int16_t special)
     if (map_format.getZDoom())
         return false;
 
-    int32_t  lock        = (special & LockedKey) >> LockedKeyShift;
-    bool genericlock = false;
+    int32_t lock        = (special & LockedKey) >> LockedKeyShift;
+    bool    genericlock = false;
 
     if (lock == BCard || lock == BSkull)
         genericlock = true;
@@ -433,8 +433,8 @@ bool P_IsCompatibleRedDoorLine(const int16_t special)
     if (map_format.getZDoom())
         return false;
 
-    int32_t  lock        = (special & LockedKey) >> LockedKeyShift;
-    bool genericlock = false;
+    int32_t lock        = (special & LockedKey) >> LockedKeyShift;
+    bool    genericlock = false;
 
     if (lock == RCard || lock == RSkull)
         genericlock = true;
@@ -447,8 +447,8 @@ bool P_IsCompatibleYellowDoorLine(const int16_t special)
     if (map_format.getZDoom())
         return false;
 
-    int32_t  lock        = (special & LockedKey) >> LockedKeyShift;
-    bool genericlock = false;
+    int32_t lock        = (special & LockedKey) >> LockedKeyShift;
+    bool    genericlock = false;
 
     if (lock == YCard || lock == YSkull)
         genericlock = true;

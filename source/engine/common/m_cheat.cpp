@@ -49,7 +49,7 @@ void C_DoCommand(const char *cmd, uint32_t key = 0);
 // CHEAT SEQUENCE PACKAGE
 //
 
-static int32_t           firsttime = 1;
+static int32_t firsttime = 1;
 static uint8_t cheat_xlate_table[256];
 
 #ifdef CLIENT_APP
@@ -336,7 +336,7 @@ void CHEAT_DoCheat(player_t *player, int32_t cheat, bool silentmsg)
         // killough 2/7/98: cleaned up code and changed to use dprintf;
         // fixed lost soul bug (LSs left behind when PEs are killed)
 
-        int32_t                      killcount = 0;
+        int32_t                  killcount = 0;
         AActor                  *actor;
         TThinkerIterator<AActor> iterator;
 
@@ -413,7 +413,7 @@ void CHEAT_DoCheat(player_t *player, int32_t cheat, bool silentmsg)
 void CHEAT_GiveTo(player_t *player, const char *name)
 {
     bool     giveall;
-    int32_t      i;
+    int32_t  i;
     gitem_t *it;
 
     if (player != &consoleplayer())

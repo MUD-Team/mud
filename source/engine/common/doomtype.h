@@ -484,7 +484,7 @@ typedef struct
 {
     palindex_t *colormap;  // Colormap for 8-bit
     argb_t     *shademap;  // ARGB8888 values for 32-bit
-    uint8_t        ramp[256]; // Light fall-off as a function of distance
+    uint8_t     ramp[256]; // Light fall-off as a function of distance
                            // Light levels: 0 = black, 255 = full bright.
                            // Distance:     0 = near,  255 = far.
 } shademap_t;
@@ -497,7 +497,7 @@ struct shaderef_t
 {
   private:
     const shademap_t *m_colors;                 // The color/shade map to use
-    int32_t               m_mapnum;                 // Which index into the color/shade map to use
+    int32_t           m_mapnum;                 // Which index into the color/shade map to use
 
   public:
     mutable const palindex_t    *m_colormap;    // Computed colormap pointer
@@ -517,8 +517,8 @@ struct shaderef_t
     palindex_t        index(const uint8_t c) const;
     argb_t            shade(const uint8_t c) const;
     const shademap_t *map() const;
-    int32_t               mapnum() const;
-    uint8_t              ramp() const;
+    int32_t           mapnum() const;
+    uint8_t           ramp() const;
 
     bool operator==(const shaderef_t &other) const;
 };

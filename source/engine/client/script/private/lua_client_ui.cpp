@@ -25,9 +25,9 @@
 #include <RmlUi/Core/RenderInterface.h>
 #include <RmlUi/Lua.h>
 
+#include "../../sdl/i_input.h"
 #include "../../ui/private/ui_render.h"
 #include "lua_client_private.h"
-#include "../../sdl/i_input.h"
 
 class LuaUI
 {

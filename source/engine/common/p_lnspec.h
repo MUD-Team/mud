@@ -501,8 +501,8 @@ typedef enum
 typedef struct
 {
     uint32_t flags;
-    int16_t        newspecial;
-    int16_t        args[5];
+    int16_t  newspecial;
+    int16_t  args[5];
 } xlat_t;
 
 #define TAG 123 // Special value that gets replaced with the line tag
@@ -517,8 +517,8 @@ typedef struct
 struct line_s;
 class AActor;
 
-typedef bool (*lnSpecFunc)(struct line_s *line, class AActor *activator, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4,
-                           int32_t arg5);
+typedef bool (*lnSpecFunc)(struct line_s *line, class AActor *activator, int32_t arg1, int32_t arg2, int32_t arg3,
+                           int32_t arg4, int32_t arg5);
 
 extern lnSpecFunc LineSpecials[283];
 
@@ -534,10 +534,10 @@ bool P_ActorInSpecialSector(AActor *actor);
 void P_DestroyScrollerThinkers();
 void P_DestroyLightThinkers();
 
-int32_t         P_FindLineFromLineTag(const line_t *line, int32_t start);
-int32_t         P_IsUnderDamage(const AActor *actor);
+int32_t     P_FindLineFromLineTag(const line_t *line, int32_t start);
+int32_t     P_IsUnderDamage(const AActor *actor);
 bool        P_IsOnLift(const AActor *actor);
-int32_t         P_IsUnderDamage(AActor *actor);
+int32_t     P_IsUnderDamage(AActor *actor);
 static bool P_CheckRange(AActor *actor, fixed_t range);
 void        EV_LightSetMinNeighbor(int32_t tag);
 void        EV_LightSetMaxNeighbor(int32_t tag);

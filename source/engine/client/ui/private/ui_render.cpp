@@ -31,8 +31,7 @@
 #include "../sdl/i_video_sdl20.h"
 #include "i_system.h"
 #include "r_main.h"
-
-#include"ui_main.h"
+#include "ui_main.h"
 
 UIRenderInterface::UIRenderInterface()
 {
@@ -78,7 +77,6 @@ void UIRenderInterface::EndFrame()
 
     void UI_IMGUI_EndFrame();
     UI_IMGUI_EndFrame();
-
 
     SDL_RenderPresent(mRenderer);
 }
@@ -126,7 +124,6 @@ void UIRenderInterface::setMode(uint16_t width, uint16_t height, const PixelForm
     {
         mRenderer = SDL_CreateRenderer(mWindow->mSDLWindow, -1, renderer_flags);
     }
-    
 
     if (mRenderer == NULL)
         I_Error("I_InitVideo: unable to create SDL2 renderer: %s\n", SDL_GetError());
@@ -152,7 +149,7 @@ void UIRenderInterface::setMode(uint16_t width, uint16_t height, const PixelForm
 }
 
 Rml::CompiledGeometryHandle UIRenderInterface::CompileGeometry(Rml::Span<const Rml::Vertex> vertices,
-                                                               Rml::Span<const int32_t>         indices)
+                                                               Rml::Span<const int32_t>     indices)
 {
     GeometryView *data = new GeometryView{vertices, indices};
     return reinterpret_cast<Rml::CompiledGeometryHandle>(data);
@@ -169,7 +166,7 @@ void UIRenderInterface::RenderGeometry(Rml::CompiledGeometryHandle handle, Rml::
     const GeometryView *geometry     = reinterpret_cast<GeometryView *>(handle);
     const Rml::Vertex  *vertices     = geometry->vertices.data();
     const size_t        num_vertices = geometry->vertices.size();
-    const int32_t          *indices      = geometry->indices.data();
+    const int32_t      *indices      = geometry->indices.data();
     const size_t        num_indices  = geometry->indices.size();
 
     SDL_FPoint *positions = new SDL_FPoint[num_vertices];
@@ -224,8 +221,8 @@ Rml::TextureHandle UIRenderInterface::LoadTexture(Rml::Vector2i &texture_dimensi
         texture_dimensions.x = mWidth;
         texture_dimensions.y = mHeight;
 
-        mPlayerViewTexture = SDL_CreateTexture(mRenderer, mSDLDisplayFormat, texture_flags,
-                                                                          texture_dimensions.x, texture_dimensions.y);
+        mPlayerViewTexture =
+            SDL_CreateTexture(mRenderer, mSDLDisplayFormat, texture_flags, texture_dimensions.x, texture_dimensions.y);
 
         return (Rml::TextureHandle)mPlayerViewTexture;
     }
@@ -247,7 +244,7 @@ Rml::TextureHandle UIRenderInterface::LoadTexture(Rml::Vector2i &texture_dimensi
     const size_t i_ext     = source.rfind('.');
     Rml::String  extension = (i_ext == Rml::String::npos ? Rml::String() : source.substr(i_ext + 1));
 
-    int32_t      width, height, channels;
+    int32_t  width, height, channels;
     stbi_uc *image_data = stbi_load_from_memory(buffer.get(), int32_t(buffer_size), &width, &height, &channels, 0);
 
     Uint32 format = (channels == 3) ? SDL_PIXELFORMAT_RGB24 : SDL_PIXELFORMAT_RGBA32;

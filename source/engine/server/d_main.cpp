@@ -54,15 +54,14 @@
 #include "minilzo.h"
 #include "mud_includes.h"
 #include "p_setup.h"
-#include "r_state.h"
 #include "r_common.h"
+#include "r_state.h"
 #include "s_sound.h"
 #include "sv_main.h"
 #include "v_video.h"
 #include "w_ident.h"
 #include "w_wad.h"
 #include "z_zone.h"
-
 
 EXTERN_CVAR(sv_timelimit)
 EXTERN_CVAR(sv_nomonsters)

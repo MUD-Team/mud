@@ -31,9 +31,9 @@
 #include "p_acs.h"
 #include "p_local.h"
 #include "p_mobj.h"
+#include "r_common.h"
 #include "s_sound.h"
 #include "v_video.h"
-#include "r_common.h"
 
 EXTERN_CVAR(sv_nomonsters)
 EXTERN_CVAR(cl_showspawns)

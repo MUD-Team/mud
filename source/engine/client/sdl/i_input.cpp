@@ -846,7 +846,7 @@ static bool TranslateSDLMouseEvent(const SDL_Event &sdl, event_t &event)
     {
         if (sdl.type == SDL_MOUSEWHEEL)
         {
-            event.type    = ev_keydown;
+            event.type        = ev_keydown;
             int32_t direction = 1;
 #if (SDL_VERSION >= SDL_VERSIONNUM(2, 0, 4))
             if (sdl.wheel.direction == SDL_MOUSEWHEEL_FLIPPED)
@@ -955,6 +955,6 @@ void I_SetRelativeMouseMode(bool relative)
     {
         return;
     }
-    
+
     SDL_SetRelativeMouseMode(relative ? SDL_TRUE : SDL_FALSE);
 }

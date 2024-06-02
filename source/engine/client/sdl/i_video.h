@@ -52,9 +52,9 @@ class IVideoCapabilities;
 class IWindow;
 class IRenderSurface;
 
-void            I_InitHardware();
-void            I_ShutdownHardware();
-bool            I_VideoInitialized();
+void I_InitHardware();
+void I_ShutdownHardware();
+bool I_VideoInitialized();
 
 void I_SetVideoMode(const IVideoMode &video_mode);
 

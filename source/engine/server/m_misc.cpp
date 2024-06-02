@@ -39,8 +39,8 @@
 // put into newer configfiles.
 static CVAR(configver, CONFIGVERSIONSTR, "", CVARTYPE_STRING, CVAR_ARCHIVE | CVAR_NOENABLEDISABLE)
 
-// [RH] Don't write a config file if M_LoadDefaults hasn't been called.
-bool DefaultsLoaded;
+    // [RH] Don't write a config file if M_LoadDefaults hasn't been called.
+    bool DefaultsLoaded;
 
 /**
  * Save a configuration file.

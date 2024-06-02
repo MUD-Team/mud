@@ -71,8 +71,8 @@ EXTERN_CVAR(sv_natport)
 //
 struct token_t
 {
-    uint32_t    id;
-    uint64_t    issued;
+    uint32_t id;
+    uint64_t issued;
     netadr_t from;
 };
 

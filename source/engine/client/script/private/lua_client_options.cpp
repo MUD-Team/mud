@@ -23,11 +23,11 @@
 #include <LuaBridge.h>
 #include <c_dispatch.h>
 #include <cmdlib.h>
+
 #include "c_cvars.h"
 #include "i_video.h"
 #include "lua_client_private.h"
 #include "v_video.h"
-
 
 EXTERN_CVAR(cl_mouselook)
 EXTERN_CVAR(snd_musicvolume)
@@ -56,8 +56,8 @@ class LuaOptions
 
                              // display modes
                              luabridge::LuaRef modes = luabridge::newTable(L);
-                             options["current_mode"]  = buildDisplayModes(L, modes);
-                             options["modes"]         = modes;
+                             options["current_mode"] = buildDisplayModes(L, modes);
+                             options["modes"]        = modes;
 
                              return options;
                          })
@@ -73,7 +73,7 @@ class LuaOptions
             .addFunction("set_sound_options",
                          [L](luabridge::LuaRef options) {
                              float musicvolume = options["music_volume"];
-                             float sfxvolume = options["sfx_volume"];
+                             float sfxvolume   = options["sfx_volume"];
 
                              snd_musicvolume.Set(musicvolume);
                              snd_sfxvolume.Set(sfxvolume);
@@ -87,8 +87,8 @@ class LuaOptions
         std::string       current_mode = options["current_mode"];
         luabridge::LuaRef modes        = options["modes"];
         luabridge::LuaRef mode         = modes[std::stoi(current_mode)];
-        int32_t               width        = mode["width"];
-        int32_t               height       = mode["height"];
+        int32_t           width        = mode["width"];
+        int32_t           height       = mode["height"];
 
         int32_t hiwidth  = I_GetVideoWidth();
         int32_t hiheight = I_GetVideoHeight();

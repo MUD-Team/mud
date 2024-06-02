@@ -244,7 +244,7 @@ static void IntQryBuildInformation(const uint32_t &EqProtocolVersion, const uint
 // Sends information regarding the type of information we received (ie: it will
 // send data that is wanted by the enquirer program)
 static uint32_t IntQrySendResponse(const uint16_t &TagId, const uint8_t &TagApplication, const uint8_t &TagQRId,
-                                const uint16_t &TagPacketType)
+                                   const uint16_t &TagPacketType)
 {
     // It isn't a query, throw it away
     if (TagQRId != 1)
@@ -284,10 +284,10 @@ static uint32_t IntQrySendResponse(const uint16_t &TagId, const uint8_t &TagAppl
     }
 
     uint32_t ReTag         = 0;
-    uint16_t  ReId          = TAG_ID;
+    uint16_t ReId          = TAG_ID;
     uint8_t  ReApplication = 3;
     uint8_t  ReQRId        = 2;
-    uint16_t  RePacketType  = 0;
+    uint16_t RePacketType  = 0;
 
     switch (TagPacketType)
     {
@@ -376,8 +376,8 @@ uint32_t SV_QryParseEnquiry(const uint32_t &Tag)
     // Decode the tag into its fields
     // TODO: this may not be 100% correct
     uint16_t TagId          = ((Tag >> 20) & 0x0FFF);
-    uint8_t TagApplication = ((Tag >> 16) & 0x0F);
-    uint8_t TagQRId        = ((Tag >> 12) & 0x0F);
+    uint8_t  TagApplication = ((Tag >> 16) & 0x0F);
+    uint8_t  TagQRId        = ((Tag >> 12) & 0x0F);
     uint16_t TagPacketType  = (Tag & 0xFFFF0FFF);
 
     // It is not ours

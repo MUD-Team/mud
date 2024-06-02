@@ -52,7 +52,6 @@
 #include "w_wad.h"
 #include "z_zone.h"
 
-
 void SV_PreservePlayer(player_t &player);
 void P_SpawnMapThing(mapthing2_t *mthing, int32_t position);
 void P_SpawnAvatars();

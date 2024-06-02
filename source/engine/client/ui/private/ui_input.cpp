@@ -21,17 +21,15 @@
 //-----------------------------------------------------------------------------
 
 #include "ui_input.h"
-#include "ui_playerview.h"
 
 #include <RmlUi/Core/Core.h>
 
 #include "../sdl/i_input.h"
+#include "ui_playerview.h"
 
 static Rml::Input::KeyIdentifier ConvertKey(int32_t sdlkey);
-static int32_t                       ConvertMouseButton(int32_t button);
-static int32_t                       GetKeyModifierState();
-
-
+static int32_t                   ConvertMouseButton(int32_t button);
+static int32_t                   GetKeyModifierState();
 
 UIInput::UIInput()
 {
@@ -46,12 +44,12 @@ void UIInput::postEvent(SDL_Event &ev)
 void UIInput::processEvents()
 {
 
-	bool UI_IMGUI_HandleInput(const std::vector<SDL_Event> &events);
-	if (UI_IMGUI_HandleInput(mSDLEvents))
-	{
-		mSDLEvents.clear();
-		return;
-	}
+    bool UI_IMGUI_HandleInput(const std::vector<SDL_Event> &events);
+    if (UI_IMGUI_HandleInput(mSDLEvents))
+    {
+        mSDLEvents.clear();
+        return;
+    }
 
     Rml::Context *context = Rml::GetContext("play");
     if (!context)
@@ -61,34 +59,34 @@ void UIInput::processEvents()
     }
 
     Rml::Element *focus = context->GetFocusElement();
-	
+
     if (focus && rmlui_dynamic_cast<ElementPlayerView *>(focus))
     {
-		event_t mouse_move_event(ev_mouse);
+        event_t mouse_move_event(ev_mouse);
         for (auto ev : mSDLEvents)
         {
             event_t event;
             if (I_TranslateSDLEvent(ev, event))
-            {	
-				// consolidate mouse move events to a single event		
-				if (event.type == ev_mouse && (event.data2 || event.data3))
-				{
-					mouse_move_event.data2 += event.data2;
-					mouse_move_event.data3 += event.data3;
-				}
-				else
-				{
-					I_PostInputEvent(event);
-				}				
+            {
+                // consolidate mouse move events to a single event
+                if (event.type == ev_mouse && (event.data2 || event.data3))
+                {
+                    mouse_move_event.data2 += event.data2;
+                    mouse_move_event.data3 += event.data3;
+                }
+                else
+                {
+                    I_PostInputEvent(event);
+                }
             }
-        }		
+        }
 
-		if (mouse_move_event.data2 || mouse_move_event.data3)
-		{
-			I_PostInputEvent(mouse_move_event);
-		}
+        if (mouse_move_event.data2 || mouse_move_event.data3)
+        {
+            I_PostInputEvent(mouse_move_event);
+        }
 
-		I_HandleInputEvents();		
+        I_HandleInputEvents();
     }
 
     for (auto ev : mSDLEvents)

@@ -28,10 +28,11 @@
 #ifndef CURL_STATICLIB
 #define CURL_STATICLIB
 #endif
+#include <cstddef>
+
 #include "curl/curl.h"
 #include "ohash.h"
 #include "physfs.h"
-#include <cstddef>
 
 struct OTransferProgress
 {
@@ -45,7 +46,7 @@ struct OTransferProgress
 
 struct OTransferInfo
 {
-    int32_t         code;
+    int32_t     code;
     curl_off_t  speed;
     std::string url;
     std::string contentType;
@@ -109,7 +110,7 @@ class OTransfer
 
     OTransfer(const OTransfer &);
     static int32_t curlProgress(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow);
-    static size_t curlWrite(void *data, size_t size, size_t nmemb, void *userp);
+    static size_t  curlWrite(void *data, size_t size, size_t nmemb, void *userp);
 
   public:
     OTransfer(OTransferDoneProc done, OTransferErrorProc err)
@@ -132,7 +133,7 @@ class OTransfer
     }
 
     void              setURL(const std::string &src);
-    int32_t               setOutputFile(const std::string &dest);
+    int32_t           setOutputFile(const std::string &dest);
     void              setMD5(const OMD5Hash &hash);
     bool              start();
     void              stop();

@@ -56,6 +56,6 @@ class ClientReplay
     // <int32_t, uint32_t> = <gametic, itemid>
     ClientReplay()
     {
-    }                                      // private contsructor (part of Singleton)
+    } // private contsructor (part of Singleton)
     ClientReplay(const ClientReplay &rhs); // private copy constructor
 };

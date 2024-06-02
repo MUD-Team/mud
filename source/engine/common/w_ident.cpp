@@ -121,8 +121,8 @@ class FileIdentificationManager
     //
     // Adds identification information for a known file.
     //
-    void addFile(const OString &idname, const OString &filename, const OString &md5,
-                 const OString &group, bool commercial, const bool iwad, const bool deprecated, const int32_t weight)
+    void addFile(const OString &idname, const OString &filename, const OString &md5, const OString &group,
+                 bool commercial, const bool iwad, const bool deprecated, const int32_t weight)
     {
         OMD5Hash md5Hash;
         OMD5Hash::makeFromHexStr(md5Hash, md5);
@@ -160,9 +160,9 @@ class FileIdentificationManager
         // This function for now is severely crippled and will work under the
         // assumption that we are only loading Freedoom 2 - Dasho
 
-        static const int32_t  NUM_CHECKLUMPS                = 1;
-        static const char checklumps[NUM_CHECKLUMPS][8] = {
-            {'M', 'A', 'P', '0', '1'},                // 0
+        static const int32_t NUM_CHECKLUMPS                = 1;
+        static const char    checklumps[NUM_CHECKLUMPS][8] = {
+            {'M', 'A', 'P', '0', '1'}, // 0
         };
 
         bool lumpsfound[NUM_CHECKLUMPS] = {0};
@@ -250,7 +250,7 @@ bool W_IsKnownIWAD(const OWantFile &file)
 // Returns true if the given file is an IWAD file.
 //
 // Right now we only want to test with a singular IWAD
-// while we migrate from the WAD format altogether. 
+// while we migrate from the WAD format altogether.
 // Assume anything ending in .wad is the IWAD - Dasho
 bool W_IsIWAD(const OResFile &file)
 {

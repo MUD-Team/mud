@@ -229,8 +229,8 @@ FArchive &operator<<(FArchive &arc, UserInfo &info)
     // [SL] use place-holders for deprecated client options
     // so old save games and netdemos continue to function
     uint32_t skin        = 0;
-    bool         unlag       = true;
-    uint8_t         update_rate = 0;
+    bool     unlag       = true;
+    uint8_t  update_rate = 0;
     arc << skin;
     arc << unlag;
     arc << update_rate;
@@ -259,8 +259,8 @@ FArchive &operator>>(FArchive &arc, UserInfo &info)
     // [SL] use place-holders for deprecated client options
     // so old save games and netdemos continue to function.
     uint32_t skin;
-    bool         unlag;
-    uint8_t         update_rate;
+    bool     unlag;
+    uint8_t  update_rate;
     arc >> skin;
     arc >> unlag;
     arc >> update_rate;

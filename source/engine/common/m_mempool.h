@@ -110,8 +110,8 @@ template <typename T> class Pool
         free_block = NULL;
     }
 
-    size_t  num_blocks;
-    size_t *block_size;
-    uint8_t  **data_block;
-    uint8_t   *free_block;
+    size_t    num_blocks;
+    size_t   *block_size;
+    uint8_t **data_block;
+    uint8_t  *free_block;
 };

@@ -36,17 +36,17 @@
 #define MOUSE_DOOM     0
 #define MOUSE_ZDOOM_DI 1
 
-bool            I_InitInput(void);
-void            I_ShutdownInput(void);
-void            I_ForceUpdateGrab();
-void            I_FlushInput();
+bool I_InitInput(void);
+void I_ShutdownInput(void);
+void I_ForceUpdateGrab();
+void I_FlushInput();
 
-int32_t         I_GetJoystickCount();
+int32_t     I_GetJoystickCount();
 std::string I_GetJoystickNameFromIndex(int32_t index);
 bool        I_OpenJoystick();
 void        I_CloseJoystick();
 std::string I_GetKeyName(int32_t key);
-int32_t         I_GetKeyFromName(const std::string &name);
+int32_t     I_GetKeyFromName(const std::string &name);
 
 void I_GetEvents();
 
@@ -84,7 +84,7 @@ class IInputDevice
 struct IInputDeviceInfo
 {
     std::string mDeviceName;
-    int32_t         mId;
+    int32_t     mId;
 };
 
 // ============================================================================
@@ -129,7 +129,7 @@ class IInputSubsystem
     virtual void enableTextEntry();
     virtual void disableTextEntry();
 
-    void postEvent(event_t& event)
+    void postEvent(event_t &event)
     {
         if (mRepeating)
             addToEventRepeaters(event);
@@ -153,17 +153,17 @@ class IInputSubsystem
     virtual void gatherMouseEvents();
     virtual void getEvent(event_t *ev);
 
-    virtual std::vector<IInputDeviceInfo> getKeyboardDevices() const = 0;
-    virtual void                          initKeyboard(int32_t id)       = 0;
-    virtual void                          shutdownKeyboard(int32_t id)   = 0;
+    virtual std::vector<IInputDeviceInfo> getKeyboardDevices() const   = 0;
+    virtual void                          initKeyboard(int32_t id)     = 0;
+    virtual void                          shutdownKeyboard(int32_t id) = 0;
 
-    virtual std::vector<IInputDeviceInfo> getMouseDevices() const = 0;
-    virtual void                          initMouse(int32_t id)       = 0;
-    virtual void                          shutdownMouse(int32_t id)   = 0;
+    virtual std::vector<IInputDeviceInfo> getMouseDevices() const   = 0;
+    virtual void                          initMouse(int32_t id)     = 0;
+    virtual void                          shutdownMouse(int32_t id) = 0;
 
-    virtual std::vector<IInputDeviceInfo> getJoystickDevices() const = 0;
-    virtual void                          initJoystick(int32_t id)       = 0;
-    virtual void                          shutdownJoystick(int32_t id)   = 0;
+    virtual std::vector<IInputDeviceInfo> getJoystickDevices() const   = 0;
+    virtual void                          initJoystick(int32_t id)     = 0;
+    virtual void                          shutdownJoystick(int32_t id) = 0;
 
   protected:
     void registerInputDevice(IInputDevice *device);
@@ -218,7 +218,7 @@ class IInputSubsystem
     // event_t::data1 as its key as there should only be
     // a single instance with that value in the table.
     typedef OHashTable<int32_t, EventRepeater> EventRepeaterTable;
-    EventRepeaterTable                     mEventRepeaters;
+    EventRepeaterTable                         mEventRepeaters;
 
     bool mRepeating;
 
@@ -235,10 +235,9 @@ class IInputSubsystem
 };
 
 typedef OHashTable<int32_t, std::string> KeyNameTable;
-extern KeyNameTable                  key_names;
+extern KeyNameTable                      key_names;
 
 void I_SetRelativeMouseMode(bool relative);
-void I_PostInputEvent(event_t& event);
+void I_PostInputEvent(event_t &event);
 void I_HandleInputEvents();
-bool I_TranslateSDLEvent(const SDL_Event& sdl, event_t& event);
-
+bool I_TranslateSDLEvent(const SDL_Event &sdl, event_t &event);

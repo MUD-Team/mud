@@ -178,7 +178,7 @@ extern int32_t msg_badread;
 // network message info
 struct msg_info_t
 {
-    int32_t         id;
+    int32_t     id;
     const char *msgName;
     const char *msgFormat; // 'b'=byte, 'n'=short, 'N'=long, 's'=string
 
@@ -250,10 +250,10 @@ enum svc_t
     svc_executelinespecial,
     svc_executeacsspecial,
     svc_thinkerupdate,
-    svc_vote_update,           // [AM] - Send the latest voting state to the client.
-    svc_maplist,               // [AM] - Return a maplist status.
-    svc_maplist_update,        // [AM] - Send the entire maplist to the client in chunks.
-    svc_maplist_index,         // [AM] - Send the current and next map index to the client.
+    svc_vote_update,    // [AM] - Send the latest voting state to the client.
+    svc_maplist,        // [AM] - Return a maplist status.
+    svc_maplist_update, // [AM] - Send the entire maplist to the client in chunks.
+    svc_maplist_index,  // [AM] - Send the current and next map index to the client.
     svc_toast
 };
 
@@ -316,7 +316,7 @@ class Message;
 
 typedef struct
 {
-    uint8_t           ip[4];
+    uint8_t  ip[4];
     uint16_t port;
     uint16_t pad;
 } netadr_t;
@@ -326,9 +326,9 @@ extern netadr_t net_from; // address of who sent the packet
 class buf_t
 {
   public:
-    uint8_t  *data;
-    size_t allocsize, cursize, readpos;
-    bool   overflowed; // set to true if the buffer size failed
+    uint8_t *data;
+    size_t   allocsize, cursize, readpos;
+    bool     overflowed; // set to true if the buffer size failed
 
     // Buffer seeking flags
     typedef enum
@@ -418,8 +418,8 @@ class buf_t
     {
         if (c && *c)
         {
-            size_t l   = strlen(c);
-            uint8_t  *buf = SZ_GetSpace(l + 1);
+            size_t   l   = strlen(c);
+            uint8_t *buf = SZ_GetSpace(l + 1);
 
             if (!overflowed)
             {
@@ -506,9 +506,9 @@ class buf_t
     //
     uint32_t ReadUnVarint()
     {
-        uint8_t b;
-        uint32_t  out    = 0;
-        uint32_t  offset = 0;
+        uint8_t  b;
+        uint32_t out    = 0;
+        uint32_t offset = 0;
 
         for (;;)
         {
@@ -642,8 +642,8 @@ class buf_t
     void resize(size_t len, bool clearbuf = true)
     {
         uint8_t *olddata = data;
-        data          = new uint8_t[len];
-        allocsize     = len;
+        data             = new uint8_t[len];
+        allocsize        = len;
 
         if (!clearbuf)
         {
@@ -711,8 +711,8 @@ class buf_t
     {
     }
     buf_t(const buf_t &other)
-        : data(new uint8_t[other.allocsize]), allocsize(other.allocsize), cursize(other.cursize), readpos(other.readpos),
-          overflowed(other.overflowed)
+        : data(new uint8_t[other.allocsize]), allocsize(other.allocsize), cursize(other.cursize),
+          readpos(other.readpos), overflowed(other.overflowed)
 
     {
         if (!overflowed)
@@ -736,8 +736,8 @@ bool NetWaitOrTimeout(size_t ms);
 char       *NET_AdrToString(netadr_t a);
 bool        NET_StringToAdr(const char *s, netadr_t *a);
 bool        NET_CompareAdr(netadr_t a, netadr_t b);
-int32_t         NET_GetPacket(void);
-int32_t         NET_SendPacket(buf_t &buf, netadr_t &to);
+int32_t     NET_GetPacket(void);
+int32_t     NET_SendPacket(buf_t &buf, netadr_t &to);
 std::string NET_GetLocalAddress(void);
 
 void SZ_Clear(buf_t *buf);
@@ -762,15 +762,15 @@ void MSG_BroadcastSVC(const clientBuf_e buf, const google::protobuf::Message &ms
 int32_t MSG_BytesLeft(void);
 int32_t MSG_NextByte(void);
 
-int32_t          MSG_ReadByte(void);
-void        *MSG_ReadChunk(const size_t &size);
-int32_t          MSG_ReadShort(void);
-int32_t          MSG_ReadLong(void);
-uint32_t MSG_ReadUnVarint();
-int32_t          MSG_ReadVarint();
-bool         MSG_ReadBool(void);
-float        MSG_ReadFloat(void);
-const char  *MSG_ReadString(void);
+int32_t     MSG_ReadByte(void);
+void       *MSG_ReadChunk(const size_t &size);
+int32_t     MSG_ReadShort(void);
+int32_t     MSG_ReadLong(void);
+uint32_t    MSG_ReadUnVarint();
+int32_t     MSG_ReadVarint();
+bool        MSG_ReadBool(void);
+float       MSG_ReadFloat(void);
+const char *MSG_ReadString(void);
 
 template <typename MSG> bool MSG_ReadProto(MSG &msg)
 {

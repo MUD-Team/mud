@@ -28,7 +28,6 @@
 #include "ui_render.h"
 #include "ui_system.h"
 
-
 class UI
 {
   public:

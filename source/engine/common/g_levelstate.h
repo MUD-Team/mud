@@ -40,7 +40,7 @@ struct WinInfo
     };
 
     WinType type;
-    int32_t     id;
+    int32_t id;
 
     WinInfo() : type(WIN_UNKNOWN), id(0)
     {
@@ -72,11 +72,11 @@ class LevelState
           m_setStateCB(NULL)
     {
     }
-    int32_t                  getCountdown() const;
+    int32_t              getCountdown() const;
     team_t               getDefendingTeam() const;
-    int32_t                  getIngameStartTime() const;
-    int32_t                  getJoinTimeLeft() const;
-    int32_t                  getRound() const;
+    int32_t              getIngameStartTime() const;
+    int32_t              getJoinTimeLeft() const;
+    int32_t              getRound() const;
     LevelState::States   getState() const;
     const char          *getStateString() const;
     WinInfo              getWinInfo() const;
@@ -94,9 +94,9 @@ class LevelState
 
   private:
     LevelState::States     m_state;
-    int32_t                    m_countdownDoneTime;
-    int32_t                    m_ingameStartTime;
-    int32_t                    m_roundNumber;
+    int32_t                m_countdownDoneTime;
+    int32_t                m_ingameStartTime;
+    int32_t                m_roundNumber;
     WinInfo                m_lastWininfo;
     LevelState::SetStateCB m_setStateCB;
 
@@ -108,11 +108,11 @@ class LevelState
 struct SerializedLevelState
 {
     LevelState::States state;
-    int32_t                countdown_done_time;
-    int32_t                ingame_start_time;
-    int32_t                round_number;
+    int32_t            countdown_done_time;
+    int32_t            ingame_start_time;
+    int32_t            round_number;
     WinInfo::WinType   last_wininfo_type;
-    int32_t                last_wininfo_id;
+    int32_t            last_wininfo_id;
 };
 
 extern LevelState levelstate;

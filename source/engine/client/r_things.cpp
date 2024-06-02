@@ -22,6 +22,8 @@
 //
 //-----------------------------------------------------------------------------
 
+#include "r_things.h"
+
 #include "c_console.h"
 #include "cmdlib.h"
 #include "i_system.h"
@@ -36,11 +38,9 @@
 #include "r_draw.h"
 #include "r_main.h"
 #include "r_segs.h"
-#include "r_things.h"
 #include "s_sound.h"
 #include "v_video.h"
 #include "w_wad.h"
-
 
 extern fixed_t FocalLengthX, FocalLengthY;
 

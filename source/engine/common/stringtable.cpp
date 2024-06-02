@@ -223,7 +223,7 @@ void StringTable::loadStringsFile(const bool engOnly)
     if (rawlang == NULL)
         I_Error("Error opening %s language file", filepath.c_str());
 
-    size_t len          = PHYSFS_fileLength(rawlang);
+    size_t             len = PHYSFS_fileLength(rawlang);
     Poco::Buffer<char> languageLump(len + 1);
 
     if (PHYSFS_readBytes(rawlang, languageLump.begin(), len) != len)

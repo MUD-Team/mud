@@ -244,8 +244,8 @@ int32_t ValidateMapName(const OLumpName &mapname, int32_t *pEpi = NULL, int32_t 
 {
     // Check if the given map name can be expressed as a gameepisode/gamemap pair and be
     // reconstructed from it.
-    char lumpname[9];
-    int32_t  epi = -1, map = -1;
+    char    lumpname[9];
+    int32_t epi = -1, map = -1;
 
     if (gamemode != commercial)
     {
@@ -506,7 +506,7 @@ void ParseUMapInfoFile(const char *filename)
     if (rawinfo == NULL)
         I_Error("Error opening %s umapinfo file", filepath.c_str());
 
-    uint32_t filelen = PHYSFS_fileLength(rawinfo);
+    uint32_t           filelen = PHYSFS_fileLength(rawinfo);
     Poco::Buffer<char> buffer(filelen);
 
     if (PHYSFS_readBytes(rawinfo, buffer.begin(), filelen) != filelen)
@@ -564,8 +564,8 @@ void ParseUMapInfoFile(const char *filename)
             }
             else
             {
-                char arr[9] = "";
-                int32_t  ep, map;
+                char    arr[9] = "";
+                int32_t ep, map;
                 ValidateMapName(info.mapname.c_str(), &ep, &map);
                 map++;
                 sprintf(arr, "MAP%02d", map);
@@ -970,7 +970,6 @@ void MIType_SCFlags(OScanner &os, bool doEquals, void *data, uint32_t flags, uin
 // Sets a cluster
 void MIType_Cluster(OScanner &os, bool doEquals, void *data, uint32_t flags, uint32_t flags2)
 {
-
 }
 
 // Sets a cluster string
@@ -1244,8 +1243,8 @@ struct MapInfoData
     const char       *name;
     MITypeFunctionPtr fn;
     void             *data;
-    uint32_t      flags;
-    uint32_t      flags2;
+    uint32_t          flags;
+    uint32_t          flags2;
 
     MapInfoData(const char *_name, MITypeFunctionPtr _fn = NULL, void *_data = NULL, uint32_t _flags = 0,
                 uint32_t _flags2 = 0)
@@ -1450,7 +1449,7 @@ template <typename T> void ParseMapInfoLower(OScanner &os, MapInfoDataSetter<T> 
 // todo: parse episode info like the others? (but how?)
 void ParseEpisodeInfo(OScanner &os)
 {
-    int32_t         new_mapinfo = false; // is int32_t instead of bool for template purposes
+    int32_t     new_mapinfo = false; // is int32_t instead of bool for template purposes
     OLumpName   map;
     std::string pic;
     bool        picisgfx    = false;
@@ -1666,7 +1665,7 @@ static void ParseMapInfoFile(const char *filename)
     if (rawinfo == NULL)
         I_Error("Error opening %s mapinfo file", filepath.c_str());
 
-    uint32_t filelen = PHYSFS_fileLength(rawinfo);
+    uint32_t           filelen = PHYSFS_fileLength(rawinfo);
     Poco::Buffer<char> buffer(filelen);
 
     if (PHYSFS_readBytes(rawinfo, buffer.begin(), filelen) != filelen)
@@ -1820,7 +1819,7 @@ static void ParseMapInfoFile(const char *filename)
 void G_ParseMapInfo()
 {
     const char *baseinfoname = NULL;
-    int32_t         lump;
+    int32_t     lump;
 
     // Reset skill definitions
     skillnum = 0;
@@ -1858,14 +1857,14 @@ void G_ParseMapInfo()
 
     if (episodenum == 0)
         I_Error("%s: You cannot use clearepisodes in a MAPINFO if you do not define any "
-                     "new episodes after it.",
-                     __FUNCTION__);
+                "new episodes after it.",
+                __FUNCTION__);
 
     if (defaultskillmenu > skillnum - 1)
         defaultskillmenu = skillnum - 1;
 
     if (skillnum == 0)
         I_Error("%s: You cannot use clearskills in a MAPINFO if you do not define any "
-                     "new skills after it.",
-                     __FUNCTION__);
+                "new skills after it.",
+                __FUNCTION__);
 }

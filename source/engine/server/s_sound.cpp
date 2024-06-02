@@ -210,14 +210,14 @@ void S_StopMusic()
 //
 // =============================== [RH]
 
-std::vector<sfxinfo_t>          S_sfx; // [RH] This is no longer defined in sounds.c
+std::vector<sfxinfo_t>                  S_sfx; // [RH] This is no longer defined in sounds.c
 std::map<int32_t, std::vector<int32_t>> S_rnd;
 
 static struct AmbientSound
 {
     uint32_t type;                   // type of ambient sound
-    int32_t      periodmin;              // # of tics between repeats
-    int32_t      periodmax;              // max # of tics for random ambients
+    int32_t  periodmin;              // # of tics between repeats
+    int32_t  periodmax;              // max # of tics for random ambients
     float    volume;                 // relative volume of sound
     float    attenuation;
     char     sound[MAX_SNDNAME + 1]; // Logical name of sound to play
@@ -304,7 +304,7 @@ int32_t S_AddSound(const char *logicalname, const char *filename)
 
         if (filename != NULL)
             strcpy(sfx.filename, filename);
-        sfx.link    = sfxinfo_t::NO_LINK;
+        sfx.link = sfxinfo_t::NO_LINK;
         if (sfx.israndom)
         {
             S_rnd.erase(sfxid);
@@ -318,8 +318,8 @@ int32_t S_AddSound(const char *logicalname, const char *filename)
 
         // logicalname MUST be < MAX_SNDNAME chars long
         strcpy(new_sfx.name, logicalname);
-        new_sfx.data    = NULL;
-        new_sfx.link    = sfxinfo_t::NO_LINK;
+        new_sfx.data = NULL;
+        new_sfx.link = sfxinfo_t::NO_LINK;
         if (filename != NULL)
             strcpy(new_sfx.filename, filename);
         sfxid = S_sfx.size() - 1;
@@ -347,7 +347,7 @@ void S_ParseSndInfo()
         if (rawinfo == NULL)
             I_Error("Error opening lumps/SNDINFO.txt file");
 
-        uint32_t filelen = PHYSFS_fileLength(rawinfo);
+        uint32_t           filelen = PHYSFS_fileLength(rawinfo);
         Poco::Buffer<char> buffer(filelen);
 
         if (PHYSFS_readBytes(rawinfo, (void *)buffer.begin(), filelen) != filelen)

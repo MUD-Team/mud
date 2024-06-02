@@ -128,7 +128,7 @@ std::string V_GetTeamColor(UserInfo userinfo);
 CVAR_FUNC_IMPL(sv_maxclients)
 {
     // Describes the max number of clients that are allowed to connect.
-    int32_t               count = var.asInt();
+    int32_t           count = var.asInt();
     Players::iterator it    = players.begin();
     while (it != players.end())
     {
@@ -150,8 +150,8 @@ CVAR_FUNC_IMPL(sv_maxclients)
 
 CVAR_FUNC_IMPL(sv_maxplayers)
 {
-    int32_t  normalcount = 0;
-    bool queueExists = false;
+    int32_t normalcount = 0;
+    bool    queueExists = false;
 
     for (Players::iterator it = players.begin(); it != players.end(); ++it)
     {
@@ -527,7 +527,7 @@ Players::iterator SV_GetFreeClient(void)
 
     // generate player id
     std::set<uint8_t>::iterator id = free_player_ids.begin();
-    players.back().id           = *id;
+    players.back().id              = *id;
     free_player_ids.erase(id);
 
     // update tracking cvar
@@ -656,9 +656,9 @@ void SV_MidPrint(const char *msg, player_t *p, int32_t msgtime)
 //
 void SV_Sound(AActor *mo, uint8_t channel, const char *name, uint8_t attenuation)
 {
-    int32_t       sfx_id;
+    int32_t   sfx_id;
     client_t *cl;
-    int32_t       x = 0, y = 0;
+    int32_t   x = 0, y = 0;
 
     sfx_id = S_FindSound(name);
 
@@ -712,7 +712,7 @@ void SV_Sound(player_t &pl, AActor *mo, const uint8_t channel, const char *name,
 //
 void UV_SoundAvoidPlayer(AActor *mo, uint8_t channel, const char *name, uint8_t attenuation)
 {
-    int32_t       sfx_id;
+    int32_t   sfx_id;
     client_t *cl;
 
     if (!mo || !mo->player)
@@ -770,7 +770,7 @@ void SV_SoundTeam(uint8_t channel, const char *name, uint8_t attenuation, int32_
 
 void SV_Sound(fixed_t x, fixed_t y, uint8_t channel, const char *name, uint8_t attenuation)
 {
-    int32_t       sfx_id;
+    int32_t   sfx_id;
     client_t *cl;
 
     sfx_id = S_FindSound(name);
@@ -1589,14 +1589,14 @@ void SV_ServerSettingChange()
 // SV_CheckClientVersion
 bool SV_CheckClientVersion(client_t *cl, Players::iterator it)
 {
-    int32_t         GameVer = 0;
+    int32_t     GameVer = 0;
     std::string VersionStr;
     std::string OurVersionStr(DOTVERSIONSTR);
     bool        AllowConnect = true;
-    int32_t         cl_major     = 0;
-    int32_t         cl_minor     = 0;
-    int32_t         cl_patch     = 0;
-    int32_t         sv_major, sv_minor, sv_patch;
+    int32_t     cl_major     = 0;
+    int32_t     cl_minor     = 0;
+    int32_t     cl_patch     = 0;
+    int32_t     sv_major, sv_minor, sv_patch;
     BREAKVER(GAMEVER, sv_major, sv_minor, sv_patch);
 
     switch (cl->version)
@@ -1668,8 +1668,8 @@ bool SV_CheckClientVersion(client_t *cl, Players::iterator it)
  */
 static void SV_DisconnectOldClient()
 {
-    int32_t         cl_version      = MSG_ReadShort();
-    uint8_t        connection_type = MSG_ReadByte();
+    int32_t     cl_version      = MSG_ReadShort();
+    uint8_t     connection_type = MSG_ReadByte();
     std::string VersionStr;
 
     int32_t GameVer = 0;
@@ -1699,7 +1699,7 @@ static void SV_DisconnectOldClient()
     // Send using the old protocol mechanism without relying on any defines
     const uint8_t old_svc_disconnect = 2;
     const uint8_t old_svc_print      = 28;
-    const int32_t  old_PRINT_HIGH     = 2;
+    const int32_t old_PRINT_HIGH     = 2;
 
     static buf_t smallbuf(1024);
 
@@ -1805,7 +1805,7 @@ void SV_ConnectClient()
     // Set player time
     player->JoinTime = time(NULL);
 
-    cl->version          = MSG_ReadShort();
+    cl->version             = MSG_ReadShort();
     uint8_t connection_type = MSG_ReadByte();
 
     // [SL] 2011-05-11 - Register the player with the reconciliation system
@@ -2760,7 +2760,6 @@ void SV_UpdateMonsters(player_t &pl)
 
 void SV_UpdateGametype(player_t &pl)
 {
-
 }
 
 //
@@ -2808,7 +2807,7 @@ void SV_ActorTracer(AActor *actor)
 void SV_RemoveCorpses(void)
 {
     AActor *mo;
-    int32_t     corpses = 0;
+    int32_t corpses = 0;
 
     // joek - Number of corpses infinite
     if (sv_maxcorpses <= 0)
@@ -3401,7 +3400,7 @@ void SV_JoinPlayer(player_t &player, bool silent)
     if (!silent)
     {
         SV_BroadcastPrintf("%s joined the game on the %s team.\n", player.userinfo.netname.c_str(),
-                            V_GetTeamColor(player.userinfo.team).c_str());
+                           V_GetTeamColor(player.userinfo.team).c_str());
     }
 
     M_LogWDLEvent(WDL_EVENT_JOINGAME, &player, NULL, player.userinfo.team, M_GetPlayerId(&player, player.userinfo.team),
@@ -3968,7 +3967,7 @@ void SV_GameTics(void)
         TimeCheck();
         Vote_Runtic();
         break;
-        
+
     default:
         break;
     }
@@ -4205,10 +4204,10 @@ END_COMMAND(playerinfo)
 
 BEGIN_COMMAND(playerlist)
 {
-    bool anybody = false;
-    int32_t  frags   = 0;
-    int32_t  deaths  = 0;
-    int32_t  points  = 0;
+    bool    anybody = false;
+    int32_t frags   = 0;
+    int32_t deaths  = 0;
+    int32_t points  = 0;
 
     for (Players::reverse_iterator it = players.rbegin(); it != players.rend(); ++it)
     {
@@ -4290,7 +4289,7 @@ END_COMMAND(players)
 
 void OnChangedSwitchTexture(line_t *line, int32_t useAgain)
 {
-    int32_t      l     = line - lines;
+    int32_t  l     = line - lines;
     uint32_t state = 0, time = 0;
     P_GetButtonInfo(line, state, time);
 
@@ -4439,7 +4438,7 @@ void SV_UpdatePlayerQueueLevelChange(const WinInfo &win)
 {
     if (::g_winnerstays)
     {
-        int32_t                     queuedPlayerCount = 0;
+        int32_t                 queuedPlayerCount = 0;
         std::vector<player_t *> loserPlayers;
 
         PlayerResults pr = PlayerQuery().execute();
@@ -4503,8 +4502,8 @@ void SV_UpdatePlayerQueueLevelChange(const WinInfo &win)
 
 void SV_UpdatePlayerQueuePositions(JoinTest joinTest, player_t *disconnectPlayer)
 {
-    int32_t         playerCount = 0;
-    int32_t         queuePos    = 1;
+    int32_t     playerCount = 0;
+    int32_t     queuePos    = 1;
     PlayersView queued;
     PlayersView queueUpdates;
 
@@ -4585,8 +4584,8 @@ void SV_ClearPlayerQueue()
         SV_SendPlayerQueuePositions(&(*it), false);
 }
 
-void SV_SendExecuteLineSpecial(uint8_t special, line_t *line, AActor *activator, int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3,
-                               int32_t arg4)
+void SV_SendExecuteLineSpecial(uint8_t special, line_t *line, AActor *activator, int32_t arg0, int32_t arg1,
+                               int32_t arg2, int32_t arg3, int32_t arg4)
 {
     if (P_LineSpecialMovesSector(special))
         return;

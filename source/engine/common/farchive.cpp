@@ -52,14 +52,14 @@
 // Swap any kind of data based on size - x = pointer to data, y = number of bytes
 #define SWAP_SIZE(x, y)                                                                                                \
     {                                                                                                                  \
-        std::reverse((uint8_t *)x, (uint8_t *)x + (size_t)y);                                              \
+        std::reverse((uint8_t *)x, (uint8_t *)x + (size_t)y);                                                          \
     }
 #define SWAP_QWORD(x)                                                                                                  \
     {                                                                                                                  \
-        uint32_t *y = (uint32_t *)&x;                                                                                        \
-        uint32_t  t = y[0];                                                                                               \
-        y[0]     = y[1];                                                                                               \
-        y[1]     = t;                                                                                                  \
+        uint32_t *y = (uint32_t *)&x;                                                                                  \
+        uint32_t  t = y[0];                                                                                            \
+        y[0]        = y[1];                                                                                            \
+        y[1]        = t;                                                                                               \
         SWAP_DWORD(y[0]);                                                                                              \
         SWAP_DWORD(y[1]);                                                                                              \
     }
@@ -155,7 +155,7 @@ void FLZOFile::PostOpen()
             SWAP_DWORD(sizes[1]);
 
             uint32_t len = sizes[0] == 0 ? sizes[1] : sizes[0];
-            m_Buffer         = (uint8_t *)Malloc(len + 8);
+            m_Buffer     = (uint8_t *)Malloc(len + 8);
 
             readlen = PHYSFS_readBytes(m_File, m_Buffer + 8, len);
             if (readlen < len)
@@ -285,8 +285,8 @@ FFile &FLZOFile::Seek(int32_t pos, ESeekPos ofs)
 void FLZOFile::Implode()
 {
     uint32_t input_len      = m_BufferSize;
-    lzo_uint     compressed_len = 0;
-    uint8_t        *compressed     = NULL;
+    lzo_uint compressed_len = 0;
+    uint8_t *compressed     = NULL;
 
     uint8_t *oldbuf = m_Buffer;
 
@@ -295,7 +295,7 @@ void FLZOFile::Implode()
         compressed = new lzo_byte[MaxLZOCompressedLength(input_len)];
 
         lzo_byte *wrkmem = new lzo_byte[LZO1X_1_MEM_COMPRESS];
-        int32_t       res    = lzo1x_1_compress(m_Buffer, input_len, compressed, &compressed_len, wrkmem);
+        int32_t   res    = lzo1x_1_compress(m_Buffer, input_len, compressed, &compressed_len, wrkmem);
         delete[] wrkmem;
 
         // If the data could not be compressed, store it as-is.
@@ -471,7 +471,7 @@ void FLZOMemFile::Serialize(FArchive &arc)
         Close();
         m_Mode = EReading;
 
-        char  sig[4];
+        char     sig[4];
         uint32_t sizes[2];
 
         arc.Read(sig, 4);
@@ -607,7 +607,7 @@ uint32_t FArchive::ReadCount()
 {
     uint8_t  in;
     uint32_t count = 0;
-    int32_t   ofs   = 0;
+    int32_t  ofs   = 0;
 
     do
     {
@@ -835,10 +835,10 @@ FArchive &FArchive::operator<<(DObject *obj)
 
 FArchive &FArchive::ReadObject(DObject *&obj, TypeInfo *wanttype)
 {
-    uint8_t            objHead;
+    uint8_t         objHead;
     const TypeInfo *type;
-    uint8_t            playerNum;
-    uint32_t           index;
+    uint8_t         playerNum;
+    uint32_t        index;
 
     operator>>(objHead);
 
@@ -929,7 +929,7 @@ uint32_t FArchive::WriteClass(const TypeInfo *info)
 const TypeInfo *FArchive::ReadClass()
 {
     std::string typeName;
-    int32_t         i;
+    int32_t     i;
 
     if (m_ClassCount >= TypeInfo::m_NumTypes)
     {

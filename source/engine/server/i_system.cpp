@@ -136,8 +136,8 @@ void *I_ZoneBase(size_t *size)
     // Die if the system has insufficient memory
     if (got_heapsize < min_heapsize)
         I_Error("I_ZoneBase: Insufficient memory available! Minimum size "
-                     "is %lu MB but got %lu MB instead",
-                     min_heapsize, got_heapsize);
+                "is %lu MB but got %lu MB instead",
+                min_heapsize, got_heapsize);
 
     return zone;
 }
@@ -388,9 +388,9 @@ int32_t ShutdownNow();
 std::string I_ConsoleInput(void)
 {
     // denis - todo - implement this properly!!!
-    static char  text[1024]   = {0};
-    static char  buffer[1024] = {0};
-    uint32_t len          = strlen(buffer);
+    static char text[1024]   = {0};
+    static char buffer[1024] = {0};
+    uint32_t    len          = strlen(buffer);
 
     if (ShutdownNow())
         return "quit";
@@ -468,7 +468,7 @@ std::string I_ConsoleInput(void)
 {
     std::string ret;
     static char text[1024] = {0};
-    int32_t         len;
+    int32_t     len;
 
     fd_set fdr;
     FD_ZERO(&fdr);

@@ -37,7 +37,7 @@
 struct OFileLine
 {
     const char *file;
-    int32_t         line;
+    int32_t     line;
 
     static OFileLine create(const char *file, const int32_t line)
     {
@@ -161,8 +161,7 @@ class OZone
         if (ptr == NULL)
         {
             // Don't format these bytes, the byte formatter allocates.
-            I_Error("%s: Could not allocate %zu bytes at %s:%i.", __FUNCTION__, size,
-                    info.shortFile(), info.line);
+            I_Error("%s: Could not allocate %zu bytes at %s:%i.", __FUNCTION__, size, info.shortFile(), info.line);
         }
 
         // Construct the memory block.
@@ -255,8 +254,8 @@ class OZone
         for (MemoryBlockTable::iterator it = m_heap.begin(); it != m_heap.end(); ++it)
         {
             total += it->second.size;
-            Printf("0x%p | size:%zu tag:%s user:0x%p %s:%d\n", it->first, it->second.size,
-                   TagStr(it->second.tag), it->second.user, it->second.fileLine.shortFile(), it->second.fileLine.line);
+            Printf("0x%p | size:%zu tag:%s user:0x%p %s:%d\n", it->first, it->second.size, TagStr(it->second.tag),
+                   it->second.user, it->second.fileLine.shortFile(), it->second.fileLine.line);
         }
 
         std::string buf;

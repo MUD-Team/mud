@@ -458,7 +458,7 @@ void TextureManager::readAnimDefLump()
     if (rawinfo == NULL)
         return;
 
-    uint32_t filelen = PHYSFS_fileLength(rawinfo);
+    uint32_t           filelen = PHYSFS_fileLength(rawinfo);
     Poco::Buffer<char> buffer(filelen);
 
     if (PHYSFS_readBytes(rawinfo, buffer.begin(), filelen) != filelen)
@@ -616,7 +616,7 @@ void TextureManager::readAnimatedLump()
     if (rawinfo == NULL)
         return;
 
-    uint32_t filelen = PHYSFS_fileLength(rawinfo);
+    uint32_t              filelen = PHYSFS_fileLength(rawinfo);
     Poco::Buffer<uint8_t> filedata(filelen);
 
     if (PHYSFS_readBytes(rawinfo, filedata.begin(), filelen) != filelen)
@@ -831,8 +831,8 @@ void TextureManager::cacheSprite(texhandle_t handle)
     uint32_t filenum = (handle & ~SPRITE_HANDLE_MASK);
 
     if (filenum - 1 >= mSpriteFilenames.size())
-        I_Error("TextureManager::cacheSprite: Invalid handle %d requested (%d is highest valid handle)\n",
-                     filenum - 1, mSpriteFilenames.size() - 1);
+        I_Error("TextureManager::cacheSprite: Invalid handle %d requested (%d is highest valid handle)\n", filenum - 1,
+                mSpriteFilenames.size() - 1);
 
     PHYSFS_File *rawsprite = PHYSFS_openRead(mSpriteFilenames[filenum - 1].c_str());
 
@@ -928,8 +928,8 @@ void TextureManager::cacheFlat(texhandle_t handle)
     uint32_t filenum = (handle & ~FLAT_HANDLE_MASK);
 
     if (filenum - 1 >= mFlatFilenames.size())
-        I_Error("TextureManager::cacheFlat: Invalid handle %d requested (%d is highest valid handle)\n",
-                     filenum - 1, mFlatFilenames.size() - 1);
+        I_Error("TextureManager::cacheFlat: Invalid handle %d requested (%d is highest valid handle)\n", filenum - 1,
+                mFlatFilenames.size() - 1);
 
     PHYSFS_File *rawflat = PHYSFS_openRead(mFlatFilenames[filenum - 1].c_str());
 
@@ -1059,8 +1059,8 @@ void TextureManager::generateColumns(Texture *texture, uint8_t *argbData)
     // Convert image to column/tallpost structure
     std::vector<texcolumn_t> columns;
     int32_t                  pixel_step = bpp * width;
-    uint32_t patch_size = 8; // header
-    std::vector<uint32_t> col_offsets;
+    uint32_t                 patch_size = 8; // header
+    std::vector<uint32_t>    col_offsets;
 
     // Go through columns
     for (int32_t c = 0; c < width; c++)
@@ -1170,8 +1170,8 @@ void TextureManager::cacheTexture(texhandle_t handle)
     uint32_t filenum = (handle & ~TEXTURE_HANDLE_MASK);
 
     if (filenum - 1 >= mTextureFilenames.size())
-        I_Error("TextureManager::cacheTexture: Invalid handle %d requested (%d is highest valid handle)\n",
-                     filenum - 1, mTextureFilenames.size() - 1);
+        I_Error("TextureManager::cacheTexture: Invalid handle %d requested (%d is highest valid handle)\n", filenum - 1,
+                mTextureFilenames.size() - 1);
 
     PHYSFS_File *rawtex = PHYSFS_openRead(mTextureFilenames[filenum - 1].c_str());
 

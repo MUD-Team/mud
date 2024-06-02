@@ -89,9 +89,9 @@ extern bool sendpause;
 
 bool isFast = false;
 
-extern char SKYFLATNAME[8];
-extern texhandle_t sky1texture; 
-extern texhandle_t sky2texture; 
+extern char        SKYFLATNAME[8];
+extern texhandle_t sky1texture;
+extern texhandle_t sky2texture;
 
 //
 // G_InitNew
@@ -434,7 +434,7 @@ void G_InitNew(const char *mapname)
             {
                 if (mobjinfo[i].altspeed != NO_ALTSPEED)
                 {
-                    int32_t swap             = mobjinfo[i].speed;
+                    int32_t swap         = mobjinfo[i].speed;
                     mobjinfo[i].speed    = mobjinfo[i].altspeed;
                     mobjinfo[i].altspeed = swap;
                 }
@@ -452,7 +452,7 @@ void G_InitNew(const char *mapname)
             {
                 if (mobjinfo[i].altspeed != NO_ALTSPEED)
                 {
-                    int32_t swap             = mobjinfo[i].altspeed;
+                    int32_t swap         = mobjinfo[i].altspeed;
                     mobjinfo[i].altspeed = mobjinfo[i].speed;
                     mobjinfo[i].speed    = swap;
                 }
@@ -497,8 +497,8 @@ void G_InitNew(const char *mapname)
     // [SL] 2012-12-08 - Multiplayer is always true for servers
     multiplayer = true;
 
-    paused       = false;
-    viewactive   = true;
+    paused     = false;
+    viewactive = true;
 
     // Make a copy of our previous winner so we can service the queue properly
     // after loading the level.
@@ -719,7 +719,7 @@ void G_DoResetLevel(bool full_reset)
 //
 // G_DoLoadLevel
 //
-extern float       BaseBlendA;
+extern float BaseBlendA;
 
 void G_DoLoadLevel(int32_t position)
 {
@@ -848,7 +848,6 @@ void G_DoLoadLevel(int32_t position)
 //
 void G_WorldDone(void)
 {
-
 }
 
 VERSION_CONTROL(g_level_cpp, "$Id: b56e5c37ed54d0d475c9b7bab21e138deaf883b2 $")

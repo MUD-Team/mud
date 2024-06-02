@@ -73,10 +73,10 @@ struct UserInfo
     team_t         team; // [Toke - Teams]
     fixed_t        aimdist;
     bool           predict_weapons;
-    uint8_t           color[4];
+    uint8_t        color[4];
     gender_t       gender;
     weaponswitch_t switchweapon;
-    uint8_t           weapon_prefs[NUMWEAPONS];
+    uint8_t        weapon_prefs[NUMWEAPONS];
 
     static const uint8_t weapon_prefs_default[NUMWEAPONS];
 

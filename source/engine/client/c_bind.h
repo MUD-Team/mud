@@ -56,7 +56,7 @@ class OKeyBindings
 
     const std::string &GetBind(int32_t key);             // Returns string bound to given key (NULL if none)
     std::string        GetNameKeys(int32_t first, int32_t second);
-    int32_t                GetKeysForCommand(const char *cmd, int32_t *first, int32_t *second);
+    int32_t            GetKeysForCommand(const char *cmd, int32_t *first, int32_t *second);
     std::string        GetKeynameFromCommand(const char *cmd, bool bTwoEntries = false);
 
     void ArchiveBindings(PHYSFS_File *f);

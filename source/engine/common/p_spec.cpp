@@ -62,11 +62,12 @@ EXTERN_CVAR(sv_fragexitswitch)
 std::list<movingsector_t> movingsectors;
 bool                      s_SpecialFromServer;
 
-int32_t  P_FindSectorFromLineTag(int32_t tag, int32_t start);
-bool EV_DoDoor(DDoor::EVlDoor type, line_t *line, AActor *thing, int32_t tag, int32_t speed, int32_t delay, card_t lock);
-bool P_ShootCompatibleSpecialLine(AActor *thing, line_t *line);
-bool P_ActivateZDoomLine(line_t *line, AActor *mo, int32_t side, uint32_t activationType);
-bool P_UseCompatibleSpecialLine(AActor *thing, line_t *line, int32_t side, bool bossaction);
+int32_t P_FindSectorFromLineTag(int32_t tag, int32_t start);
+bool    EV_DoDoor(DDoor::EVlDoor type, line_t *line, AActor *thing, int32_t tag, int32_t speed, int32_t delay,
+                  card_t lock);
+bool    P_ShootCompatibleSpecialLine(AActor *thing, line_t *line);
+bool    P_ActivateZDoomLine(line_t *line, AActor *mo, int32_t side, uint32_t activationType);
+bool    P_UseCompatibleSpecialLine(AActor *thing, line_t *line, int32_t side, bool bossaction);
 
 //
 // P_FindMovingSector
@@ -183,7 +184,7 @@ int32_t P_IsUnderDamage(AActor *actor)
 {
     const struct msecnode_s *seclist;
     const DCeiling          *cr; // Crushing ceiling
-    int32_t                      dir = 0;
+    int32_t                  dir = 0;
     for (seclist = actor->touching_sectorlist; seclist; seclist = seclist->m_tnext)
     {
         if ((cr = (DCeiling *)seclist->m_sector->ceilingdata) && cr->m_Status == 2) // Down
@@ -446,12 +447,12 @@ typedef struct
 {
     int16_t basepic;
     int16_t numframes;
-    uint8_t  istexture;
-    uint8_t  uniqueframes;
-    uint8_t  countdown;
-    uint8_t  curframe;
-    uint8_t  speedmin[MAX_ANIM_FRAMES];
-    uint8_t  speedmax[MAX_ANIM_FRAMES];
+    uint8_t istexture;
+    uint8_t uniqueframes;
+    uint8_t countdown;
+    uint8_t curframe;
+    uint8_t speedmin[MAX_ANIM_FRAMES];
+    uint8_t speedmax[MAX_ANIM_FRAMES];
     int16_t framepic[MAX_ANIM_FRAMES];
 } anim_t;
 
@@ -576,7 +577,7 @@ bool P_CheckTag(line_t *line)
 sector_t *P_NextSpecialSector(sector_t *sec, int32_t type, sector_t *nogood)
 {
     sector_t *tsec;
-    int32_t       i;
+    int32_t   i;
 
     for (i = 0; i < sec->linecount; i++)
     {
@@ -609,7 +610,7 @@ sector_t *P_NextSpecialSector(sector_t *sec, int32_t type, sector_t *nogood)
 //
 fixed_t P_FindLowestFloorSurrounding(sector_t *sec)
 {
-    int32_t       i;
+    int32_t   i;
     line_t   *check;
     sector_t *other;
     fixed_t   height = P_FloorHeight(sec);
@@ -639,7 +640,7 @@ fixed_t P_FindLowestFloorSurrounding(sector_t *sec)
 //
 fixed_t P_FindHighestFloorSurrounding(sector_t *sec)
 {
-    int32_t       i;
+    int32_t   i;
     line_t   *check;
     sector_t *other;
     fixed_t   height = INT32_MIN;
@@ -835,7 +836,7 @@ fixed_t P_FindNextHighestCeiling(sector_t *sec)
 //
 fixed_t P_FindLowestCeilingSurrounding(sector_t *sec)
 {
-    int32_t       i;
+    int32_t   i;
     line_t   *check;
     sector_t *other;
     fixed_t   height = INT32_MAX;
@@ -864,7 +865,7 @@ fixed_t P_FindLowestCeilingSurrounding(sector_t *sec)
 //
 fixed_t P_FindHighestCeilingSurrounding(sector_t *sec)
 {
-    int32_t       i;
+    int32_t   i;
     line_t   *check;
     sector_t *other;
     fixed_t   height = INT32_MIN;
@@ -898,9 +899,9 @@ fixed_t P_FindHighestCeilingSurrounding(sector_t *sec)
 //
 fixed_t P_FindShortestTextureAround(sector_t *sec)
 {
-    int32_t     minsize = INT32_MAX;
+    int32_t minsize = INT32_MAX;
     side_t *side;
-    int32_t     i;
+    int32_t i;
 
     for (i = 0; i < sec->linecount; i++)
     {
@@ -931,9 +932,9 @@ fixed_t P_FindShortestTextureAround(sector_t *sec)
 //
 fixed_t P_FindShortestUpperAround(sector_t *sec)
 {
-    int32_t     minsize = INT32_MAX;
+    int32_t minsize = INT32_MAX;
     side_t *side;
-    int32_t     i;
+    int32_t i;
 
     for (i = 0; i < sec->linecount; i++)
     {
@@ -1050,8 +1051,8 @@ int32_t P_FindLineFromID(int32_t id, int32_t start)
 //
 int32_t P_FindMinSurroundingLight(sector_t *sector, int32_t max)
 {
-    int32_t       i;
-    int32_t       min;
+    int32_t   i;
+    int32_t   min;
     line_t   *line;
     sector_t *check;
 
@@ -1267,7 +1268,7 @@ bool P_CanUnlockZDoomDoor(player_t *player, zdoom_lock_t lock, bool remote)
 
         if (msg != NULL)
         {
-            //C_MidPrint(GStrings(*msg), player);
+            // C_MidPrint(GStrings(*msg), player);
         }
     }
 
@@ -1419,7 +1420,7 @@ bool P_CanUnlockGenDoor(line_t *line, player_t *player)
 
         if (msg != NULL)
         {
-            //C_MidPrint(GStrings(*msg), player);
+            // C_MidPrint(GStrings(*msg), player);
         }
     }
 
@@ -1523,8 +1524,8 @@ bool P_CheckKeys(player_t *p, card_t lock, bool remote)
         else
             UV_SoundAvoidPlayer(p->mo, CHAN_VOICE, "player/male/grunt1", ATTN_NORM);
 
-        //if (msg != NULL)
-        //    C_MidPrint(GStrings(*msg), p);
+        // if (msg != NULL)
+        //     C_MidPrint(GStrings(*msg), p);
     }
 
     return false;
@@ -1856,7 +1857,7 @@ CVAR_FUNC_IMPL(sv_forcewater)
 {
     if (gamestate == GS_LEVEL)
     {
-        int32_t  i;
+        int32_t i;
         uint8_t set = var ? 2 : 0;
 
         for (i = 0; i < numsectors; i++)
@@ -1877,7 +1878,7 @@ CVAR_FUNC_IMPL(sv_forcewater)
 void P_SetupWorldState(void)
 {
     sector_t *sector;
-    int32_t       i;
+    int32_t   i;
 
     //	Init special SECTORs.
     sector = sectors;
@@ -2218,7 +2219,7 @@ DScroller::DScroller(fixed_t dx, fixed_t dy, const line_t *l, int32_t control, i
 // Initialize the scrollers
 static void P_SpawnScrollers(void)
 {
-    int32_t     i;
+    int32_t i;
     line_t *l = lines;
 
     for (i = 0; i < numlines; i++, l++)
@@ -2292,7 +2293,7 @@ bool P_ArgToCrushType(uint8_t arg)
 
 static void P_SpawnFriction(void)
 {
-    int32_t     i;
+    int32_t i;
     line_t *l = lines;
 
     for (i = 0; i < numlines; i++, l++)
@@ -2470,10 +2471,10 @@ void DPusher::RunThink()
     sector_t   *sec;
     AActor     *thing;
     msecnode_t *node;
-    int32_t         xspeed, yspeed;
-    int32_t         xl, xh, yl, yh, bx, by;
-    int32_t         radius;
-    int32_t         ht = 0;
+    int32_t     xspeed, yspeed;
+    int32_t     xl, xh, yl, yh, bx, by;
+    int32_t     radius;
+    int32_t     ht = 0;
 
     sec = sectors + m_Affectee;
 
@@ -2626,7 +2627,7 @@ AActor *P_GetPushThing(int32_t s)
 
 static void P_SpawnPushers(void)
 {
-    int32_t     i;
+    int32_t i;
     line_t *l = lines;
 
     for (i = 0; i < numlines; i++, l++)
@@ -2647,10 +2648,10 @@ bool A_CheckTrigger(AActor *mo, AActor *triggerer)
                         ((mo->flags2 & MF2_DORMANT) && (triggerer->flags2 & MF2_PCROSS))))
     {
         int32_t savedSide = TeleportSide;
-        TeleportSide  = 0;
-        bool res      = (LineSpecials[mo->special](NULL, triggerer, mo->args[0], mo->args[1], mo->args[2], mo->args[3],
+        TeleportSide      = 0;
+        bool res     = (LineSpecials[mo->special](NULL, triggerer, mo->args[0], mo->args[1], mo->args[2], mo->args[3],
                                               mo->args[4]) != 0);
-        TeleportSide  = savedSide;
+        TeleportSide = savedSide;
         return res;
     }
     return false;

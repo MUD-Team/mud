@@ -61,21 +61,21 @@ struct event_t
         mod   = other.mod;
         return *this;
     }
-    
+
     void clear()
     {
-        type = ev_keydown;
+        type  = ev_keydown;
         data1 = 0;
         data2 = 0;
         data3 = 0;
-        mod = 0;
+        mod   = 0;
     }
 
     evtype_t type;
-    int32_t      data1; // keys / mouse/joystick buttons
-    int32_t      data2; // mouse/joystick x move
-    int32_t      data3; // mouse/joystick y move
-    int32_t      mod;   // input mods
+    int32_t  data1; // keys / mouse/joystick buttons
+    int32_t  data2; // mouse/joystick x move
+    int32_t  data3; // mouse/joystick y move
+    int32_t  mod;   // input mods
 };
 
 typedef enum
@@ -133,7 +133,7 @@ typedef enum
 #define MAXEVENTS 128
 
 extern event_t events[MAXEVENTS];
-extern int32_t     eventhead;
-extern int32_t     eventtail;
+extern int32_t eventhead;
+extern int32_t eventtail;
 
 extern gameaction_t gameaction;

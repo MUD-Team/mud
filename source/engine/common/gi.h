@@ -27,27 +27,27 @@
 #include "olumpname.h"
 #include "s_sound.h"
 
-#define GI_NOCRAZYDEATH        0x00000080
+#define GI_NOCRAZYDEATH 0x00000080
 
 typedef struct
 {
     uint8_t offset;
     uint8_t size;
-    char tl[8];
-    char t[8];
-    char tr[8];
-    char l[8];
-    char r[8];
-    char bl[8];
-    char b[8];
-    char br[8];
+    char    tl[8];
+    char    t[8];
+    char    tr[8];
+    char    l[8];
+    char    r[8];
+    char    bl[8];
+    char    b[8];
+    char    br[8];
 } gameborder_t;
 
 typedef struct
 {
     int32_t       flags;
-    OLumpName titleMusic;
-    char      chatSound[MAX_SNDNAME + 1];
+    OLumpName     titleMusic;
+    char          chatSound[MAX_SNDNAME + 1];
     char          quitSound[MAX_SNDNAME + 1];
     int32_t       maxSwitch;
     char          borderFlat[8];

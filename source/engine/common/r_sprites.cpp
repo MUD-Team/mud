@@ -39,10 +39,10 @@
 // INITIALIZATION FUNCTIONS
 //
 spritedef_t *sprites;
-int32_t          numsprites;
+int32_t      numsprites;
 
 spriteframe_t sprtemp[MAX_SPRITE_FRAMES];
-int32_t           maxframe;
+int32_t       maxframe;
 
 void R_CacheSprite(spritedef_t *sprite)
 {
@@ -55,7 +55,7 @@ void R_CacheSprite(spritedef_t *sprite)
             {
                 if (sprite->spriteframes[i].texes[r] == TextureManager::NO_TEXTURE_HANDLE)
                     I_Error("Sprite %d, rotation %d has no lump", i, r);
-                patch_t *patch                       = (patch_t *)texturemanager.getTexture(sprite->spriteframes[i].texes[r])->getData();
+                patch_t *patch = (patch_t *)texturemanager.getTexture(sprite->spriteframes[i].texes[r])->getData();
                 sprite->spriteframes[i].width[r]     = patch->width() << FRACBITS;
                 sprite->spriteframes[i].offset[r]    = patch->leftoffset() << FRACBITS;
                 sprite->spriteframes[i].topoffset[r] = patch->topoffset() << FRACBITS;
@@ -73,97 +73,93 @@ void R_CacheSprite(spritedef_t *sprite)
 //
 void R_InstallSpriteTex(const texhandle_t tex_id, uint32_t frame, uint32_t rot, bool flipped)
 {
-	if (frame >= MAX_SPRITE_FRAMES || rot > 8)
-		I_Error ("R_InstallSpriteTex: Bad frame characters in resource ID %i", (int32_t)tex_id);
+    if (frame >= MAX_SPRITE_FRAMES || rot > 8)
+        I_Error("R_InstallSpriteTex: Bad frame characters in resource ID %i", (int32_t)tex_id);
 
-	if (static_cast<int32_t>(frame) > maxframe)
-		maxframe = frame;
+    if (static_cast<int32_t>(frame) > maxframe)
+        maxframe = frame;
 
-	if (rot == 0)
-	{
-		// the resource should be used for all rotations
+    if (rot == 0)
+    {
+        // the resource should be used for all rotations
         // false=0, true=1, but array initialised to -1
         // allows doom to have a "no value set yet" boolean value!
-		for (int32_t r = 7; r >= 0; r--)
-		{
-			if (sprtemp[frame].texes[r] == TextureManager::NO_TEXTURE_HANDLE)
-			{
-				sprtemp[frame].texes[r] = tex_id;
-				sprtemp[frame].flip[r] = (uint8_t)flipped;
-				sprtemp[frame].rotate = false;
-				sprtemp[frame].width[r] = SPRITE_NEEDS_INFO;
-			}
-		}
-		
-		return;
-	}
-	else if (sprtemp[frame].texes[--rot] == TextureManager::NO_TEXTURE_HANDLE)
-	{
-		// the lump is only used for one rotation
-		sprtemp[frame].texes[rot] = tex_id;
-		sprtemp[frame].flip[rot] = (uint8_t)flipped;
-		sprtemp[frame].rotate = true;
-		sprtemp[frame].width[rot] = SPRITE_NEEDS_INFO;
-	}
+        for (int32_t r = 7; r >= 0; r--)
+        {
+            if (sprtemp[frame].texes[r] == TextureManager::NO_TEXTURE_HANDLE)
+            {
+                sprtemp[frame].texes[r] = tex_id;
+                sprtemp[frame].flip[r]  = (uint8_t)flipped;
+                sprtemp[frame].rotate   = false;
+                sprtemp[frame].width[r] = SPRITE_NEEDS_INFO;
+            }
+        }
+
+        return;
+    }
+    else if (sprtemp[frame].texes[--rot] == TextureManager::NO_TEXTURE_HANDLE)
+    {
+        // the lump is only used for one rotation
+        sprtemp[frame].texes[rot] = tex_id;
+        sprtemp[frame].flip[rot]  = (uint8_t)flipped;
+        sprtemp[frame].rotate     = true;
+        sprtemp[frame].width[rot] = SPRITE_NEEDS_INFO;
+    }
 }
 
 // [RH] Seperated out of R_InitSpriteDefs()
-void R_InstallSprite(const char* name, int32_t num)
+void R_InstallSprite(const char *name, int32_t num)
 {
-	char sprname[5];
-	int32_t frame;
+    char    sprname[5];
+    int32_t frame;
 
-	if (maxframe == -1)
-	{
-		sprites[num].numframes = 0;
-		return;
-	}
+    if (maxframe == -1)
+    {
+        sprites[num].numframes = 0;
+        return;
+    }
 
-	strncpy(sprname, name, 4);
-	sprname[4] = 0;
+    strncpy(sprname, name, 4);
+    sprname[4] = 0;
 
-	maxframe++;
+    maxframe++;
 
-	for (frame = 0; frame < maxframe; frame++)
-	{
-		switch ((int32_t)sprtemp[frame].rotate)
-		{
-		case -1:
-			// no rotations were found for that frame at all
-			I_Error("R_InstallSprite: No patches found for %s frame %c", sprname,
-			             frame + 'A');
-			break;
+    for (frame = 0; frame < maxframe; frame++)
+    {
+        switch ((int32_t)sprtemp[frame].rotate)
+        {
+        case -1:
+            // no rotations were found for that frame at all
+            I_Error("R_InstallSprite: No patches found for %s frame %c", sprname, frame + 'A');
+            break;
 
-		case 0:
-			// only the first rotation is needed
-			break;
+        case 0:
+            // only the first rotation is needed
+            break;
 
-		case 1:
-			// must have all 8 frames
-			{
-				for (int32_t rotation = 0; rotation < 8; rotation++)
-				{
-					if (sprtemp[frame].texes[rotation] == TextureManager::NO_TEXTURE_HANDLE)
-						I_Error(
-						    "R_InstallSprite: Sprite %s frame %c is missing rotations",
-						    sprname, frame + 'A');
-				}
-			}
-			break;
-		}
-	}
+        case 1:
+            // must have all 8 frames
+            {
+                for (int32_t rotation = 0; rotation < 8; rotation++)
+                {
+                    if (sprtemp[frame].texes[rotation] == TextureManager::NO_TEXTURE_HANDLE)
+                        I_Error("R_InstallSprite: Sprite %s frame %c is missing rotations", sprname, frame + 'A');
+                }
+            }
+            break;
+        }
+    }
 
-	// allocate space for the frames present and copy sprtemp to it
-	sprites[num].numframes = maxframe;
-	sprites[num].spriteframes =
-	    (spriteframe_t*)Z_Malloc(maxframe * sizeof(spriteframe_t), PU_STATIC, NULL);
-	memcpy(sprites[num].spriteframes, sprtemp, maxframe * sizeof(spriteframe_t));
+    // allocate space for the frames present and copy sprtemp to it
+    sprites[num].numframes    = maxframe;
+    sprites[num].spriteframes = (spriteframe_t *)Z_Malloc(maxframe * sizeof(spriteframe_t), PU_STATIC, NULL);
+    memcpy(sprites[num].spriteframes, sprtemp, maxframe * sizeof(spriteframe_t));
 }
 
 //
 // GAME FUNCTIONS
 //
-int32_t          MaxVisSprites;
+int32_t      MaxVisSprites;
 vissprite_t *vissprites;
 vissprite_t *lastvissprite;
 

@@ -27,8 +27,8 @@
 #include "Poco/Buffer.h"
 #include "gi.h"
 #include "i_system.h"
-#include "mud_includes.h"
 #include "m_fileio.h"
+#include "mud_includes.h"
 #include "p_lnspec.h"
 #include "p_local.h"
 #include "p_mapformat.h"
@@ -65,7 +65,7 @@ class DActiveButton : public DThinker
     line_t     *m_Line;
     EWhere      m_Where;
     texhandle_t m_Texture;
-    int32_t      m_Timer;
+    int32_t     m_Timer;
     fixed_t     m_X, m_Y; // Location of timer sound
 
     friend FArchive &operator<<(FArchive &arc, EWhere where)
@@ -93,28 +93,29 @@ static int32_t  numswitches;
 void P_InitSwitchList(void)
 {
     if (!M_FileExists("lumps/SWITCHES.lmp"))
-        I_Error("Missing lumps/SWITCHES.lmp");    
+        I_Error("Missing lumps/SWITCHES.lmp");
 
     PHYSFS_File *rawswitches = PHYSFS_openRead("lumps/SWITCHES.lmp");
 
     if (rawswitches == NULL)
     {
-        I_Error("Error opening lumps/SWITCHES.lmp"); 
+        I_Error("Error opening lumps/SWITCHES.lmp");
     }
 
-    uint32_t filelen = PHYSFS_fileLength(rawswitches);
+    uint32_t              filelen = PHYSFS_fileLength(rawswitches);
     Poco::Buffer<uint8_t> alphSwitchList(filelen);
 
-    if (PHYSFS_readBytes(rawswitches, alphSwitchList.begin(), PHYSFS_fileLength(rawswitches)) != PHYSFS_fileLength(rawswitches))
+    if (PHYSFS_readBytes(rawswitches, alphSwitchList.begin(), PHYSFS_fileLength(rawswitches)) !=
+        PHYSFS_fileLength(rawswitches))
     {
         PHYSFS_close(rawswitches);
-        I_Error("Error reading lumps/SWITCHES.lmp"); 
+        I_Error("Error reading lumps/SWITCHES.lmp");
     }
-    
+
     PHYSFS_close(rawswitches);
 
     uint8_t *list_p;
-    int32_t   i;
+    int32_t  i;
 
     for (i = 0, list_p = alphSwitchList.begin(); list_p[18] || list_p[19]; list_p += 20, i++)
         ;
@@ -139,7 +140,7 @@ void P_InitSwitchList(void)
                     continue;
 
                 switchlist[i++] = switchtex;
-                switchlist[i++] = texturemanager.getHandle((const char *)(list_p+9), Texture::TEX_TEXTURE);
+                switchlist[i++] = texturemanager.getHandle((const char *)(list_p + 9), Texture::TEX_TEXTURE);
             }
         }
         numswitches   = i / 2;
@@ -183,8 +184,8 @@ texhandle_t *P_GetButtonTexturePtr(line_t *line, texhandle_t *&altTexture, DActi
     texhandle_t texTop = sides[line->sidenum[0]].toptexture;
     texhandle_t texMid = sides[line->sidenum[0]].midtexture;
     texhandle_t texBot = sides[line->sidenum[0]].bottomtexture;
-    where      = (DActiveButton::EWhere)0;
-    altTexture = NULL;
+    where              = (DActiveButton::EWhere)0;
+    altTexture         = NULL;
 
     for (int32_t i = 0; i < numswitches * 2; i++)
     {
@@ -214,8 +215,8 @@ texhandle_t *P_GetButtonTexturePtr(line_t *line, texhandle_t *&altTexture, DActi
 texhandle_t P_GetButtonTexture(line_t *line)
 {
     DActiveButton::EWhere twhere;
-    texhandle_t                *alt;
-    texhandle_t                *texture = P_GetButtonTexturePtr(line, alt, twhere);
+    texhandle_t          *alt;
+    texhandle_t          *texture = P_GetButtonTexturePtr(line, alt, twhere);
 
     if (texture)
         return *texture;
@@ -228,8 +229,8 @@ void P_SetButtonTexture(line_t *line, texhandle_t texture)
     if (texture != TextureManager::NO_TEXTURE_HANDLE)
     {
         DActiveButton::EWhere twhere;
-        texhandle_t                *alt;
-        texhandle_t                *findTexture = P_GetButtonTexturePtr(line, alt, twhere);
+        texhandle_t          *alt;
+        texhandle_t          *findTexture = P_GetButtonTexturePtr(line, alt, twhere);
 
         if (findTexture)
             *findTexture = texture;
@@ -331,8 +332,8 @@ void P_ChangeSwitchTexture(line_t *line, int32_t useAgain, bool playsound)
         line->special = 0;
 
     DActiveButton::EWhere twhere;
-    texhandle_t                *altTexture;
-    texhandle_t                *texture = P_GetButtonTexturePtr(line, altTexture, twhere);
+    texhandle_t          *altTexture;
+    texhandle_t          *texture = P_GetButtonTexturePtr(line, altTexture, twhere);
 
     if (texture)
     {
@@ -420,7 +421,7 @@ void DActiveButton::RunThink()
         fixed_t x = m_Line->v1->x + (m_Line->dx >> 1);
         fixed_t y = m_Line->v1->y + (m_Line->dy >> 1);
         S_Sound(x, y, CHAN_BODY, "switches/normbutn", 1, ATTN_NORM);
-        
+
         Destroy();
         m_Line->switchactive = false;
     }

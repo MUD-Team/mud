@@ -155,8 +155,8 @@ void     P_SetMobjBaseline(AActor &mo);
 uint32_t P_GetMobjBaselineFlags(AActor &mo);
 
 // [ML] From EE
-int32_t  P_ThingInfoHeight(mobjinfo_t *mi);
-bool P_HealCorpse(AActor *actor, int32_t radius, int32_t healstate, int32_t healsound);
+int32_t P_ThingInfoHeight(mobjinfo_t *mi);
+bool    P_HealCorpse(AActor *actor, int32_t radius, int32_t healstate, int32_t healsound);
 
 // From MBF
 bool P_SeekerMissile(AActor *actor, AActor *seekTarget, angle_t thresh, angle_t turnMax, bool seekcenter);

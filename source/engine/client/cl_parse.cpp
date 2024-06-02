@@ -62,7 +62,6 @@
 #include "v_palette.h"
 #include "v_textcolors.h"
 
-
 // Extern data from other files.
 
 EXTERN_CVAR(cl_autorecord)

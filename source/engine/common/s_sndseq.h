@@ -53,7 +53,7 @@ void      SN_StopSequence(fixed_t spot[3]);
 void      SN_UpdateActiveSequences(void);
 void      SN_StopAllSequences(void);
 ptrdiff_t SN_GetSequenceOffset(int32_t sequence, uint32_t *sequencePtr);
-void      SN_ChangeNodeData(int32_t nodeNum, int32_t seqOffset, int32_t delayTics, float volume, int32_t currentSoundID);
+void SN_ChangeNodeData(int32_t nodeNum, int32_t seqOffset, int32_t delayTics, float volume, int32_t currentSoundID);
 
 class DSeqNode : public DObject
 {
@@ -92,13 +92,13 @@ class DSeqNode : public DObject
     DSeqNode(int32_t sequence);
 
     uint32_t *m_SequencePtr;
-    int32_t           m_Sequence;
+    int32_t   m_Sequence;
 
-    int32_t   m_CurrentSoundID;
-    int32_t   m_DelayTics;
-    float m_Volume;
-    int32_t   m_StopSound;
-    int32_t   m_Atten;
+    int32_t m_CurrentSoundID;
+    int32_t m_DelayTics;
+    float   m_Volume;
+    int32_t m_StopSound;
+    int32_t m_Atten;
 
   private:
     static DSeqNode *SequenceListHead;
@@ -111,8 +111,8 @@ class DSeqNode : public DObject
 
 typedef struct
 {
-    char         name[MAX_SNDNAME + 1];
-    int32_t          stopsound;
+    char     name[MAX_SNDNAME + 1];
+    int32_t  stopsound;
     uint32_t script[1]; // + more until end of sequence script
 } sndseq_t;
 
@@ -128,8 +128,8 @@ void      SN_StopSequence(polyobj_t *poly);
 void      SN_UpdateActiveSequences(void);
 ptrdiff_t SN_GetSequenceOffset(int32_t sequence, uint32_t *sequencePtr);
 void      SN_DoStop(void *);
-void      SN_ChangeNodeData(int32_t nodeNum, int32_t seqOffset, int32_t delayTics, float volume, int32_t currentSoundID);
+void SN_ChangeNodeData(int32_t nodeNum, int32_t seqOffset, int32_t delayTics, float volume, int32_t currentSoundID);
 
 extern sndseq_t **Sequences;
-extern int32_t        ActiveSequences;
-extern int32_t        NumSequences;
+extern int32_t    ActiveSequences;
+extern int32_t    NumSequences;

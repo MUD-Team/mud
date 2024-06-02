@@ -43,28 +43,28 @@ extern int32_t viewheight;
 //
 extern bool g_ValidLevel;
 
-extern int32_t          numsprites;
+extern int32_t      numsprites;
 extern spritedef_t *sprites;
 
-extern int32_t       numvertexes;
+extern int32_t   numvertexes;
 extern vertex_t *vertexes;
 
-extern int32_t    numsegs;
-extern seg_t *segs;
+extern int32_t numsegs;
+extern seg_t  *segs;
 
-extern int32_t       numsectors;
+extern int32_t   numsectors;
 extern sector_t *sectors;
 
-extern int32_t          numsubsectors;
+extern int32_t      numsubsectors;
 extern subsector_t *subsectors;
 
-extern int32_t     numnodes;
+extern int32_t numnodes;
 extern node_t *nodes;
 
-extern int32_t     numlines;
+extern int32_t numlines;
 extern line_t *lines;
 
-extern int32_t     numsides;
+extern int32_t numsides;
 extern side_t *sides;
 
 extern std::vector<int32_t> originalLightLevels;
@@ -110,7 +110,7 @@ struct LocalView
     angle_t angle;
     bool    setangle;
     bool    skipangle;
-    int32_t     pitch;
+    int32_t pitch;
     bool    setpitch;
     bool    skippitch;
 };

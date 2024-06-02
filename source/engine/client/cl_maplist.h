@@ -50,8 +50,8 @@ class MaplistCache
     size_t                            next_index;
     size_t                            size;
     maplist_status_t                  status;
-    uint64_t                             timeout;
-    uint8_t                              valid_indexes;
+    uint64_t                          timeout;
+    uint8_t                           valid_indexes;
     void                              check_complete(void);
     void                              invalidate(void);
     bool                              query(maplist_qrows_t &result);
@@ -59,7 +59,7 @@ class MaplistCache
 
   public:
     MaplistCache(void)
-        : error(""), index(0), next_index(0), size(0), status(MAPLIST_EMPTY), timeout(0), valid_indexes(0){};
+        : error(""), index(0), next_index(0), size(0), status(MAPLIST_EMPTY), timeout(0), valid_indexes(0) {};
     static MaplistCache &instance(void);
     // Events
     void ev_tic(void);

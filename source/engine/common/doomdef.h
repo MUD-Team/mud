@@ -99,8 +99,8 @@ extern baseapp_t baseapp;
 //	to handle IWAD dependend animations etc.
 enum GameMode_t
 {
-    commercial,     // DOOM 2 retail, E1 M34
-    undetermined    // Well, no IWAD found.
+    commercial,  // DOOM 2 retail, E1 M34
+    undetermined // Well, no IWAD found.
 };
 
 // Mission packs - might be useful for TC stuff?
@@ -544,7 +544,7 @@ inline const ClassType *BinarySearch(const ClassType *first, int32_t max, const 
 
     while (min <= max)
     {
-        int32_t              mid    = (min + max) / 2;
+        int32_t          mid    = (min + max) / 2;
         const ClassType *probe  = &first[mid];
         const KeyType   &seekey = probe->*keyptr;
         if (seekey == key)
@@ -597,7 +597,7 @@ inline IndexType BinarySearchFlexible(IndexType max, const KeyType key, IndexTyp
     while (min <= max)
     {
         IndexType mid  = (min + max) / 2;
-        int32_t       lexx = CompType::DoCompare(mid, key);
+        int32_t   lexx = CompType::DoCompare(mid, key);
         if (lexx == 0)
         {
             return mid;

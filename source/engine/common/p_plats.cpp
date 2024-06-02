@@ -365,7 +365,8 @@ DPlat::DPlat(sector_t *sec, DPlat::EPlatType type, fixed_t height, int32_t speed
     }
 }
 
-DPlat::DPlat(sector_t *sec, int32_t target, int32_t delay, int32_t speed, int32_t trigger) : DMovingFloor(sec), m_Status(init)
+DPlat::DPlat(sector_t *sec, int32_t target, int32_t delay, int32_t speed, int32_t trigger)
+    : DMovingFloor(sec), m_Status(init)
 {
     m_Crush  = false;
     m_Type   = genLift;
@@ -460,13 +461,13 @@ DPlat *DPlat::Clone(sector_t *sec) const
 //	[RH] Changed amount to height and added delay,
 //		 lip, change, tag, and speed parameters.
 //
-bool EV_DoPlat(int32_t tag, line_t *line, DPlat::EPlatType type, fixed_t height, int32_t speed, int32_t delay, fixed_t lip,
-               int32_t change)
+bool EV_DoPlat(int32_t tag, line_t *line, DPlat::EPlatType type, fixed_t height, int32_t speed, int32_t delay,
+               fixed_t lip, int32_t change)
 {
     DPlat    *plat;
-    int32_t       secnum;
+    int32_t   secnum;
     sector_t *sec;
-    int32_t       rtn    = false;
+    int32_t   rtn    = false;
     bool      manual = false;
 
     // [RH] If tag is zero, use the sector on the back side
@@ -533,7 +534,7 @@ bool EV_DoPlat(int32_t tag, line_t *line, DPlat::EPlatType type, fixed_t height,
 bool EV_DoGenLift(line_t *line)
 {
     DPlat    *plat;
-    int32_t       secnum;
+    int32_t   secnum;
     sector_t *sec;
     bool      rtn    = false;
     bool      manual = false;

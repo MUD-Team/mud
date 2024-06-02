@@ -32,7 +32,7 @@
 
 extern bool predicting;
 
-void               P_ResetTransferSpecial(newspecial_s *newspecial);
+void           P_ResetTransferSpecial(newspecial_s *newspecial);
 const uint32_t P_ResetSectorTransferFlags(const uint32_t flags);
 
 //
@@ -308,7 +308,8 @@ DCeiling::DCeiling(sector_t *sec, line_t *line, int32_t silent, int32_t speed) :
     m_Speed2 = m_Speed;
 }
 
-DCeiling::DCeiling(sector_t *sec, line_t *line, int32_t speed, int32_t target, int32_t crush, int32_t change, int32_t direction, int32_t model)
+DCeiling::DCeiling(sector_t *sec, line_t *line, int32_t speed, int32_t target, int32_t crush, int32_t change,
+                   int32_t direction, int32_t model)
     : DMovingCeiling(sec), m_Status(init)
 {
     fixed_t targheight;
@@ -530,10 +531,11 @@ bool EV_ZDoomCeilingCrushStop(int32_t tag, bool remove)
     return rtn;
 }
 
-bool P_SpawnZDoomCeiling(DCeiling::ECeiling, line_t *, int32_t, fixed_t, fixed_t, fixed_t, int32_t, int32_t, int32_t, crushmode_e);
+bool P_SpawnZDoomCeiling(DCeiling::ECeiling, line_t *, int32_t, fixed_t, fixed_t, fixed_t, int32_t, int32_t, int32_t,
+                         crushmode_e);
 
-bool EV_DoZDoomCeiling(DCeiling::ECeiling type, line_t *line, uint8_t tag, fixed_t speed, fixed_t speed2, fixed_t height,
-                       int32_t crush, uint8_t silent, int32_t change, crushmode_e crushmode)
+bool EV_DoZDoomCeiling(DCeiling::ECeiling type, line_t *line, uint8_t tag, fixed_t speed, fixed_t speed2,
+                       fixed_t height, int32_t crush, uint8_t silent, int32_t change, crushmode_e crushmode)
 {
     return P_SpawnZDoomCeiling(type, line, tag, speed, speed2, height, crush, silent, change, crushmode);
 }
@@ -542,10 +544,10 @@ bool EV_DoZDoomCeiling(DCeiling::ECeiling type, line_t *line, uint8_t tag, fixed
 // P_SpawnZDoomCeiling
 // Move a ceiling up/down and all around!
 //
-bool P_SpawnZDoomCeiling(DCeiling::ECeiling type, line_t *line, int32_t tag, fixed_t speed, fixed_t speed2, fixed_t height,
-                         int32_t crush, int32_t silent, int32_t change, crushmode_e crushmode)
+bool P_SpawnZDoomCeiling(DCeiling::ECeiling type, line_t *line, int32_t tag, fixed_t speed, fixed_t speed2,
+                         fixed_t height, int32_t crush, int32_t silent, int32_t change, crushmode_e crushmode)
 {
-    int32_t       secnum;
+    int32_t   secnum;
     bool      rtn;
     sector_t *sec;
     DCeiling *ceiling;
@@ -803,7 +805,7 @@ bool P_SpawnZDoomCeiling(DCeiling::ECeiling type, line_t *line, int32_t tag, fix
 bool EV_DoCeiling(DCeiling::ECeiling type, line_t *line, int32_t tag, fixed_t speed, fixed_t speed2, fixed_t height,
                   bool crush, int32_t silent, int32_t change)
 {
-    int32_t       secnum;
+    int32_t   secnum;
     bool      rtn;
     sector_t *sec;
     DCeiling *ceiling;
@@ -1053,7 +1055,7 @@ bool EV_DoCeiling(DCeiling::ECeiling type, line_t *line, int32_t tag, fixed_t sp
 //
 bool EV_DoGenCeiling(line_t *line)
 {
-    int32_t       secnum;
+    int32_t   secnum;
     bool      rtn;
     bool      manual;
     fixed_t   targheight;
@@ -1123,7 +1125,7 @@ bool EV_DoGenCeiling(line_t *line)
 //
 bool EV_DoGenCrusher(line_t *line)
 {
-    int32_t       secnum;
+    int32_t   secnum;
     bool      rtn;
     bool      manual;
     fixed_t   targheight;

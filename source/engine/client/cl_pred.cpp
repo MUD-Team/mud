@@ -103,8 +103,8 @@ static void CL_ResetSectors()
     // Iterate through all predicted sectors
     while (itr != movingsectors.end())
     {
-        sector_t      *sector    = itr->sector;
-        uint16_t sectornum = sector - sectors;
+        sector_t *sector    = itr->sector;
+        uint16_t  sectornum = sector - sectors;
         if (sectornum >= numsectors)
             continue;
 
@@ -115,7 +115,7 @@ static void CL_ResetSectors()
 
         if (mgr && !mgr->empty())
         {
-            int32_t            mostrecent = mgr->getMostRecentTime();
+            int32_t        mostrecent = mgr->getMostRecentTime();
             SectorSnapshot snap       = mgr->getSnapshot(mostrecent);
 
             bool ceilingdone = P_CeilingSnapshotDone(&snap);
@@ -249,7 +249,7 @@ void CL_PredictWorld(void)
         return;
 
     // tenatively tell the netgraph that our prediction was successful
-    //netgraph.setMisprediction(false);
+    // netgraph.setMisprediction(false);
 
     if (consoleplayer_id != displayplayer_id)
         CL_PredictSpying();
@@ -283,7 +283,7 @@ void CL_PredictWorld(void)
         CL_ResetSectors();
 
     // Move the client to the last position received from the sever
-    int32_t            snaptime = p->snapshots.getMostRecentTime();
+    int32_t        snaptime = p->snapshots.getMostRecentTime();
     PlayerSnapshot snap     = p->snapshots.getSnapshot(snaptime);
     snap.toPlayer(p);
 
@@ -308,7 +308,7 @@ void CL_PredictWorld(void)
         if (!correct)
         {
             // Update the netgraph concerning our prediction's error
-            //netgraph.setMisprediction(true);
+            // netgraph.setMisprediction(true);
 
             // Lerp from the our previous position to the correct position
             PlayerSnapshot lerpedsnap = P_LerpPlayerPosition(prevsnap, correctedprevsnap, cl_prednudge);

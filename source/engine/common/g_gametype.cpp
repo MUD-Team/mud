@@ -447,7 +447,7 @@ void G_AssertValidPlayerCount()
     else if (G_IsTeamGame())
     {
         // End the game if there's only one team with players in it.
-        int32_t           hasplayers = TEAM_NONE;
+        int32_t       hasplayers = TEAM_NONE;
         PlayerResults pr         = PlayerQuery().execute();
         for (int32_t i = 0; i < NUMTEAMS; i++)
         {
@@ -781,7 +781,7 @@ void G_LivesCheckEndGame()
     {
         // One person alive on a single team is success, nobody alive is a draw.
         PlayerResults pr         = PlayerQuery().hasLives().execute();
-        int32_t           aliveteams = 0;
+        int32_t       aliveteams = 0;
         for (int32_t i = 0; i < sv_teamsinplay.asInt(); i++)
         {
             if (pr.teamCount[i] > 0)

@@ -32,30 +32,28 @@
 #include "lua.hpp"
 #include "physfs.h"
 
-
 static int32_t luaopen_debugger(lua_State *lua)
 {
 
-	std::string debugger_file = "common/scripts/debugger.lua";
-    PHYSFS_File *fp = PHYSFS_openRead(debugger_file.c_str());
+    std::string  debugger_file = "common/scripts/debugger.lua";
+    PHYSFS_File *fp            = PHYSFS_openRead(debugger_file.c_str());
     if (!fp)
     {
         I_Error("LuaVM: Failed to open file %s, error code: %u", debugger_file.c_str(), PHYSFS_getLastErrorCode());
     }
-    
-	PHYSFS_sint64 length = PHYSFS_fileLength(fp);
-	assert(length > 0);
 
-    Poco::Buffer<char> buffer(length+1);
-	buffer[length] = 0;
+    PHYSFS_sint64 length = PHYSFS_fileLength(fp);
+    assert(length > 0);
 
-	PHYSFS_sint64 read = PHYSFS_readBytes(fp, buffer.begin(), length);
+    Poco::Buffer<char> buffer(length + 1);
+    buffer[length] = 0;
+
+    PHYSFS_sint64 read = PHYSFS_readBytes(fp, buffer.begin(), length);
     assert(read == length);
 
-	PHYSFS_close(fp);
+    PHYSFS_close(fp);
 
-    if (luaL_loadbufferx(lua, buffer.begin(), length, "<debugger.lua>", nullptr) ||
-        lua_pcall(lua, 0, LUA_MULTRET, 0))
+    if (luaL_loadbufferx(lua, buffer.begin(), length, "<debugger.lua>", nullptr) || lua_pcall(lua, 0, LUA_MULTRET, 0))
         lua_error(lua);
 
     // Or you could load it from disk:

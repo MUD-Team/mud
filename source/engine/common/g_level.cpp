@@ -30,7 +30,6 @@
 #include "d_event.h"
 #include "d_main.h"
 #include "g_game.h"
-#include "r_common.h"
 #include "gi.h"
 #include "i_system.h"
 #include "mud_includes.h"
@@ -38,6 +37,7 @@
 #include "p_local.h"
 #include "p_saveg.h"
 #include "p_unlag.h"
+#include "r_common.h"
 #include "v_video.h"
 #include "w_ident.h"
 #include "w_wad.h"
@@ -827,7 +827,7 @@ BEGIN_COMMAND(mapinfo)
     else if (stricmp(argv[1], "levelnum") == 0)
     {
         int32_t levelnum = atoi(argv[2]);
-        infoptr      = &levels.findByNum(levelnum);
+        infoptr          = &levels.findByNum(levelnum);
         if (!infoptr->exists())
         {
             Printf(PRINT_HIGH, "Map number %d not found\n", levelnum);

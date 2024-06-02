@@ -60,17 +60,17 @@ bool sendpause; // send a pause event next tic
 
 bool viewactive;
 
-bool network_game;      // Describes if a network game is being played
-bool multiplayer;       // Describes if this is a multiplayer game or not
+bool network_game;        // Describes if a network game is being played
+bool multiplayer;         // Describes if this is a multiplayer game or not
 
-Players  players;       // The player vector, contains all player information
-player_t nullplayer;    // The null player
+Players  players;         // The player vector, contains all player information
+player_t nullplayer;      // The null player
 
-uint8_t consoleplayer_id;  // player taking events and displaying
-uint8_t displayplayer_id;  // view being displayed
-int32_t  gametic;
+uint8_t consoleplayer_id; // player taking events and displaying
+uint8_t displayplayer_id; // view being displayed
+int32_t gametic;
 
-wbstartstruct_t wminfo; // parms for world map / intermission
+wbstartstruct_t wminfo;   // parms for world map / intermission
 
 player_t &consoleplayer()
 {
@@ -143,7 +143,7 @@ void G_Ticker(void)
     {
     case GS_LEVEL:
         P_Ticker();
-        break;        
+        break;
 
     default:
         break;
@@ -330,7 +330,7 @@ static mapthing2_t *SelectFarthestDeathmatchSpot(int32_t selections)
 {
     fixed_t      bestdistance = 0;
     mapthing2_t *bestspot     = NULL;
-    int32_t          i;
+    int32_t      i;
 
     for (i = 0; i < selections; i++)
     {
@@ -387,7 +387,7 @@ static mapthing2_t *SelectRandomTeamSpot(player_t &player, int32_t selections)
 
 void G_TeamSpawnPlayer(player_t &player) // [Toke - CTF - starts] Modified this function to accept teamplay starts
 {
-    int32_t          selections;
+    int32_t      selections;
     mapthing2_t *spot = NULL;
 
     selections = 0;
@@ -431,7 +431,7 @@ EXTERN_CVAR(sv_dmfarspawn)
 
 void G_DeathMatchSpawnPlayer(player_t &player)
 {
-    int32_t          selections;
+    int32_t      selections;
     mapthing2_t *spot;
 
     if (G_UsesCoopSpawns())

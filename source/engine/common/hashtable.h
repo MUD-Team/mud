@@ -27,9 +27,9 @@
 #include <stdint.h>
 
 #include <cassert>
+#include <cstddef>
 #include <string>
 #include <utility>
-#include <cstddef>
 
 // ============================================================================
 //
@@ -247,13 +247,13 @@ template <typename KT, typename VT, typename HF = hashfunc<KT>> class OHashTable
     typedef std::pair<KT, VT>      HashPairType;
     typedef OHashTable<KT, VT, HF> HashTableType;
 
-    typedef uint32_t      IndexType;
-    static const uint32_t MAX_CAPACITY = 65536;
-    static const IndexType    NOT_FOUND    = HashTableType::MAX_CAPACITY;
+    typedef uint32_t       IndexType;
+    static const uint32_t  MAX_CAPACITY = 65536;
+    static const IndexType NOT_FOUND    = HashTableType::MAX_CAPACITY;
 
     struct Bucket
     {
-        uint32_t order;
+        uint32_t     order;
         HashPairType pair;
     };
 
@@ -271,8 +271,7 @@ template <typename KT, typename VT, typename HF = hashfunc<KT>> class OHashTable
     typedef generic_iterator<HashPairType, HashTableType>             iterator;
     typedef generic_iterator<const HashPairType, const HashTableType> const_iterator;
 
-    template <typename IVT, typename IHTT>
-    class generic_iterator
+    template <typename IVT, typename IHTT> class generic_iterator
     {
       private:
         // typedef for easier-to-read code
@@ -281,10 +280,10 @@ template <typename KT, typename VT, typename HF = hashfunc<KT>> class OHashTable
 
       public:
         using iterator_category = std::forward_iterator_tag;
-        using value_type = OHashTable;
-        using difference_type = std::ptrdiff_t;
-        using pointer = OHashTable*;
-        using reference = OHashTable&;
+        using value_type        = OHashTable;
+        using difference_type   = std::ptrdiff_t;
+        using pointer           = OHashTable *;
+        using reference         = OHashTable &;
 
         generic_iterator() : mBucketNum(IHTT::NOT_FOUND), mHashTable(NULL)
         {
@@ -450,8 +449,8 @@ template <typename KT, typename VT, typename HF = hashfunc<KT>> class OHashTable
 
     std::pair<iterator, bool> insert(const HashPairType &hp)
     {
-        uint32_t oldused   = mUsed;
-        IndexType    bucketnum = insertElement(hp.first, hp.second);
+        uint32_t  oldused   = mUsed;
+        IndexType bucketnum = insertElement(hp.first, hp.second);
         return std::pair<iterator, bool>(iterator(bucketnum, this), mUsed > oldused);
     }
 
@@ -505,7 +504,7 @@ template <typename KT, typename VT, typename HF = hashfunc<KT>> class OHashTable
 
         // ensure newsize is a power of two
         // determine number of bits needed for newsize
-        newsize  = newsize * 2 - 1;
+        newsize      = newsize * 2 - 1;
         int32_t bits = 0;
         while (newsize >>= 1)
             bits++;
@@ -592,8 +591,8 @@ template <typename KT, typename VT, typename HF = hashfunc<KT>> class OHashTable
         bucketnum = (bucketnum + 1) & mSizeMask;
         while (!emptyBucket(bucketnum))
         {
-            const KT    &key           = mElements[bucketnum].pair.first;
-            uint32_t order         = mElements[bucketnum].order;
+            const KT &key              = mElements[bucketnum].pair.first;
+            uint32_t  order            = mElements[bucketnum].order;
             mElements[bucketnum].order = 0;
 
             IndexType new_bucketnum        = findBucket(key);
@@ -613,7 +612,7 @@ template <typename KT, typename VT, typename HF = hashfunc<KT>> class OHashTable
     uint32_t mSizeMask;
     uint32_t mUsed;
 
-    Bucket      *mElements;
+    Bucket  *mElements;
     uint32_t mNextOrder;
 
     HF mHashFunc; // hash key generation functor

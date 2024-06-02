@@ -56,7 +56,7 @@ class Snapshot
 {
   public:
     Snapshot(int32_t time = -1);
-    virtual ~Snapshot(){};
+    virtual ~Snapshot() {};
 
     bool operator==(const Snapshot &other) const;
 
@@ -108,8 +108,8 @@ class Snapshot
     }
 
   private:
-    int32_t  mTime;
-    bool mValid;
+    int32_t mTime;
+    bool    mValid;
 
     bool mAuthoritative;
     bool mContinuous;
@@ -129,7 +129,7 @@ class ActorSnapshot : public Snapshot
   public:
     ActorSnapshot(int32_t time = -1);
     ActorSnapshot(int32_t time, const AActor *mo);
-    virtual ~ActorSnapshot(){};
+    virtual ~ActorSnapshot() {};
 
     bool operator==(const ActorSnapshot &other) const;
 
@@ -365,7 +365,7 @@ class PlayerSnapshot : public Snapshot
   public:
     PlayerSnapshot(int32_t time = -1);
     PlayerSnapshot(int32_t time, player_t *player);
-    virtual ~PlayerSnapshot(){};
+    virtual ~PlayerSnapshot() {};
 
     bool operator==(const PlayerSnapshot &other) const;
 
@@ -627,12 +627,12 @@ class PlayerSnapshot : public Snapshot
         PLY_JUMPTIME        = 0x00080000
     };
 
-    uint32_t  mFields; // bitfield of data present in snapshot
+    uint32_t      mFields; // bitfield of data present in snapshot
     ActorSnapshot mActorSnap;
 
     fixed_t mViewHeight;
     fixed_t mDeltaViewHeight;
-    int32_t     mJumpTime;
+    int32_t mJumpTime;
 };
 
 // ============================================================================
@@ -658,12 +658,12 @@ class PlayerSnapshotManager
 
   private:
     bool           mValidSnapshot(int32_t time) const;
-    int32_t            mFindValidSnapshot(int32_t starttime, int32_t endtime) const;
+    int32_t        mFindValidSnapshot(int32_t starttime, int32_t endtime) const;
     PlayerSnapshot mInterpolateSnapshots(int32_t from, int32_t to, int32_t time) const;
     PlayerSnapshot mExtrapolateSnapshot(int32_t from, int32_t time) const;
 
     PlayerSnapshot mSnaps[NUM_SNAPSHOTS];
-    int32_t            mMostRecent;
+    int32_t        mMostRecent;
 };
 
 // ============================================================================
@@ -677,7 +677,7 @@ class SectorSnapshot : public Snapshot
   public:
     SectorSnapshot(int32_t time = -1);
     SectorSnapshot(int32_t time, sector_t *sector);
-    virtual ~SectorSnapshot(){};
+    virtual ~SectorSnapshot() {};
 
     void clear();
     void toSector(sector_t *sector) const;
@@ -1082,10 +1082,10 @@ class SectorSnapshot : public Snapshot
 
     sector_t *mSector;
 
-    int32_t     mCeilingType;
-    int32_t     mFloorType;
-    int32_t     mCeilingTag;
-    int32_t     mFloorTag;
+    int32_t mCeilingType;
+    int32_t mFloorType;
+    int32_t mCeilingTag;
+    int32_t mFloorTag;
     line_t *mCeilingLine;
     line_t *mFloorLine;
 
@@ -1116,17 +1116,17 @@ class SectorSnapshot : public Snapshot
     fixed_t mFloorLow;
     fixed_t mFloorHigh;
 
-    bool mCeilingCrush;
-    bool mFloorCrush;
-    bool mSilent;
-    int32_t  mCeilingWait;
-    int32_t  mFloorWait;
-    int32_t  mCeilingCounter;
-    int32_t  mFloorCounter;
-    int32_t  mResetCounter;
-    int32_t  mCeilingStatus;
-    int32_t  mFloorStatus;
-    int32_t  mOldFloorStatus;
+    bool    mCeilingCrush;
+    bool    mFloorCrush;
+    bool    mSilent;
+    int32_t mCeilingWait;
+    int32_t mFloorWait;
+    int32_t mCeilingCounter;
+    int32_t mFloorCounter;
+    int32_t mResetCounter;
+    int32_t mCeilingStatus;
+    int32_t mFloorStatus;
+    int32_t mOldFloorStatus;
 
     fixed_t mCrusherSpeed1;
     fixed_t mCrusherSpeed2;
@@ -1170,7 +1170,7 @@ class SectorSnapshotManager
     bool mValidSnapshot(int32_t time) const;
 
     SectorSnapshot mSnaps[NUM_SNAPSHOTS];
-    int32_t            mMostRecent;
+    int32_t        mMostRecent;
 };
 
 // ============================================================================

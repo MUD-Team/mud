@@ -30,10 +30,11 @@
 //
 //-----------------------------------------------------------------------------
 
+#include "m_fileio.h"
+
 #include "cmdlib.h"
 #include "i_system.h"
 #include "m_argv.h"
-#include "m_fileio.h"
 #include "mud_includes.h"
 #include "physfs.h"
 #include "z_zone.h"
@@ -83,7 +84,7 @@ std::string M_GetUserFileName(const std::string &file)
     if (M_IsAbsolutePath(path))
     {
         I_Error("Attempting to write to %s, which is outside of the write directory at %s\n", file.c_str(),
-                     M_GetWriteDir().c_str());
+                M_GetWriteDir().c_str());
     }
 
     // If we get here, it should just be writing somewhere in

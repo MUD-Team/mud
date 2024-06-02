@@ -65,7 +65,6 @@ class OResFile
         return m_type;
     }
 
-
     bool operator==(const OResFile &other) const
     {
         return m_md5 == other.m_md5;
@@ -167,5 +166,5 @@ struct scannedPWAD_t
     std::string filename;
 };
 
-std::string                     M_ResFilesToString(const OResFiles &files);
-bool                            M_ResolveWantedFile(OResFile &out, const OWantFile &wanted);
+std::string M_ResFilesToString(const OResFiles &files);
+bool        M_ResolveWantedFile(OResFile &out, const OWantFile &wanted);

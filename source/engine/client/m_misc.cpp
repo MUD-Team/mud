@@ -73,7 +73,7 @@ void STACK_ARGS M_SaveDefaults()
         cvar_t::C_ArchiveCVars(f);
 
         // Archive all active key bindings
-        str ="// --- Key Bindings ---\n\n";
+        str = "// --- Key Bindings ---\n\n";
         str.append("unbindall\n");
         PHYSFS_writeBytes(f, str.data(), str.size());
         Bindings.ArchiveBindings(f);

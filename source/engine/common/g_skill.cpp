@@ -27,8 +27,8 @@
 #include "mud_includes.h"
 
 SkillInfo SkillInfos[MAX_SKILLS];
-uint8_t      skillnum         = 0;
-uint8_t      defaultskillmenu = 2;
+uint8_t   skillnum         = 0;
+uint8_t   defaultskillmenu = 2;
 
 const SkillInfo &G_GetCurrentSkill()
 {

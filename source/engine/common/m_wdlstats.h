@@ -113,18 +113,20 @@ enum WDLPowerups
     WDL_PICKUP_UNKNOWN,
 };
 
-void M_StartWDLLog(bool newmap);
-void M_LogWDLEvent(WDLEvents event, player_t *activator, player_t *target, int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3);
-void M_LogActorWDLEvent(WDLEvents event, AActor *activator, AActor *target, int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3);
-int32_t  M_GetPlayerId(player_t *player, team_t team);
-void M_LogWDLPlayerSpawn(mapthing2_t *mthing);
-void M_RemoveWDLPlayerSpawn(mapthing2_t *mthing);
-void M_LogWDLItemRespawnEvent(AActor *activator);
-void M_LogWDLFlagLocation(mapthing2_t *activator, team_t team);
-void M_LogWDLPickupEvent(player_t *activator, AActor *target, WDLPowerups pickuptype, bool dropped);
-void M_LogWDLItemSpawn(AActor *target, WDLPowerups type);
-int32_t  M_GetPlayerSpawn(int32_t x, int32_t y);
-void M_HandleWDLNameChange(team_t team, std::string oldname, std::string newname, int32_t netid);
-int32_t  GetMaxShotsForMod(int32_t mod);
-void M_CommitWDLLog();
+void    M_StartWDLLog(bool newmap);
+void    M_LogWDLEvent(WDLEvents event, player_t *activator, player_t *target, int32_t arg0, int32_t arg1, int32_t arg2,
+                      int32_t arg3);
+void    M_LogActorWDLEvent(WDLEvents event, AActor *activator, AActor *target, int32_t arg0, int32_t arg1, int32_t arg2,
+                           int32_t arg3);
+int32_t M_GetPlayerId(player_t *player, team_t team);
+void    M_LogWDLPlayerSpawn(mapthing2_t *mthing);
+void    M_RemoveWDLPlayerSpawn(mapthing2_t *mthing);
+void    M_LogWDLItemRespawnEvent(AActor *activator);
+void    M_LogWDLFlagLocation(mapthing2_t *activator, team_t team);
+void    M_LogWDLPickupEvent(player_t *activator, AActor *target, WDLPowerups pickuptype, bool dropped);
+void    M_LogWDLItemSpawn(AActor *target, WDLPowerups type);
+int32_t M_GetPlayerSpawn(int32_t x, int32_t y);
+void    M_HandleWDLNameChange(team_t team, std::string oldname, std::string newname, int32_t netid);
+int32_t GetMaxShotsForMod(int32_t mod);
+void    M_CommitWDLLog();
 WDLPowerups M_GetWDLItemByMobjType(const mobjtype_t type);

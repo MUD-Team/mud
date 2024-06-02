@@ -38,7 +38,6 @@
 #include "s_sound.h"
 #include "svc_message.h"
 
-
 #define LOWERSPEED   FRACUNIT * 6
 #define RAISESPEED   FRACUNIT * 6
 #define WEAPONBOTTOM 128 * FRACUNIT

@@ -30,8 +30,8 @@
 #include "mud_includes.h"
 #include "p_local.h"
 #include "p_mapformat.h"
-#include "r_state.h"
 #include "r_common.h"
+#include "r_state.h"
 
 //
 // P_CheckSight
@@ -108,15 +108,15 @@ bool PTR_SightTraverse(intercept_t *in)
 
 bool P_SightBlockLinesIterator(int32_t x, int32_t y)
 {
-    int32_t       offset;
-    int32_t      *list;
+    int32_t   offset;
+    int32_t  *list;
     line_t   *ld;
-    int32_t       s1, s2;
+    int32_t   s1, s2;
     divline_t dl;
 
     polyblock_t         *polyLink;
     seg_t              **segList;
-    int32_t                  i;
+    int32_t              i;
     extern polyblock_t **PolyBlockMap;
 
     offset = y * bmapwidth + x;
@@ -262,8 +262,8 @@ bool P_SightPathTraverse(fixed_t x1, fixed_t y1, fixed_t x2, fixed_t y2)
     fixed_t xstep, ystep;
     fixed_t partial;
     fixed_t xintercept, yintercept;
-    int32_t     mapx, mapy, mapxstep, mapystep;
-    int32_t     count;
+    int32_t mapx, mapy, mapxstep, mapystep;
+    int32_t count;
 
     validcount++;
     intercepts.Clear();
@@ -392,7 +392,7 @@ bool P_CheckSightZDoom(const AActor *t1, const AActor *t2)
 
     const sector_t *s1   = t1->subsector->sector;
     const sector_t *s2   = t2->subsector->sector;
-    int32_t             pnum = (s1 - sectors) * numsectors + (s2 - sectors);
+    int32_t         pnum = (s1 - sectors) * numsectors + (s2 - sectors);
 
     //
     // check for trivial rejection
@@ -448,7 +448,7 @@ bool P_CheckSightEdgesZDoom(const AActor *t1, const AActor *t2, float radius_boo
 {
     const sector_t *s1   = t1->subsector->sector;
     const sector_t *s2   = t2->subsector->sector;
-    int32_t             pnum = (s1 - sectors) * numsectors + (s2 - sectors);
+    int32_t         pnum = (s1 - sectors) * numsectors + (s2 - sectors);
 
     //
     // check for trivial rejection
@@ -585,9 +585,9 @@ bool P_CrossSubsector(int32_t num)
 {
     seg_t       *seg;
     line_t      *line;
-    int32_t          s1;
-    int32_t          s2;
-    int32_t          count;
+    int32_t      s1;
+    int32_t      s2;
+    int32_t      count;
     subsector_t *sub;
     sector_t    *front;
     sector_t    *back;
@@ -709,7 +709,7 @@ bool P_CrossSubsector(int32_t num)
 bool P_CrossBSPNode(int32_t bspnum)
 {
     node_t *bsp;
-    int32_t     side;
+    int32_t side;
 
     if (bspnum & NF_SUBSECTOR)
     {

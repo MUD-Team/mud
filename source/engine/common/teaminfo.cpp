@@ -39,56 +39,56 @@ TeamInfo s_NoTeam;
 
 void InitTeamInfo()
 {
-    TeamInfo *teamInfo           = &s_Teams[TEAM_BLUE];
-    teamInfo->Team               = TEAM_BLUE;
-    teamInfo->Color              = argb_t(255, 0, 0, 255);
-    teamInfo->ColorStringUpper   = "BLUE";
-    teamInfo->ColorString        = "Blue";
-    teamInfo->TextColor          = TEXTCOLOR_BLUE;
-    teamInfo->ToastColor         = TEXTCOLOR_LIGHTBLUE;
-    teamInfo->TransColor         = CR_BLUE;
-    teamInfo->FountainColorArg   = 3;
-    teamInfo->TeamSpawnThingNum  = 5080;
-    teamInfo->Points             = 0;
-    teamInfo->RoundWins          = 0;
+    TeamInfo *teamInfo          = &s_Teams[TEAM_BLUE];
+    teamInfo->Team              = TEAM_BLUE;
+    teamInfo->Color             = argb_t(255, 0, 0, 255);
+    teamInfo->ColorStringUpper  = "BLUE";
+    teamInfo->ColorString       = "Blue";
+    teamInfo->TextColor         = TEXTCOLOR_BLUE;
+    teamInfo->ToastColor        = TEXTCOLOR_LIGHTBLUE;
+    teamInfo->TransColor        = CR_BLUE;
+    teamInfo->FountainColorArg  = 3;
+    teamInfo->TeamSpawnThingNum = 5080;
+    teamInfo->Points            = 0;
+    teamInfo->RoundWins         = 0;
 
-    teamInfo                     = &s_Teams[TEAM_RED];
-    teamInfo->Team               = TEAM_RED;
-    teamInfo->Color              = argb_t(255, 255, 0, 0);
-    teamInfo->ColorStringUpper   = "RED";
-    teamInfo->ColorString        = "Red";
-    teamInfo->TextColor          = TEXTCOLOR_RED;
-    teamInfo->ToastColor         = TEXTCOLOR_BRICK;
-    teamInfo->TransColor         = CR_RED;
-    teamInfo->FountainColorArg   = 1;
-    teamInfo->TeamSpawnThingNum  = 5081;
-    teamInfo->Points             = 0;
-    teamInfo->RoundWins          = 0;
+    teamInfo                    = &s_Teams[TEAM_RED];
+    teamInfo->Team              = TEAM_RED;
+    teamInfo->Color             = argb_t(255, 255, 0, 0);
+    teamInfo->ColorStringUpper  = "RED";
+    teamInfo->ColorString       = "Red";
+    teamInfo->TextColor         = TEXTCOLOR_RED;
+    teamInfo->ToastColor        = TEXTCOLOR_BRICK;
+    teamInfo->TransColor        = CR_RED;
+    teamInfo->FountainColorArg  = 1;
+    teamInfo->TeamSpawnThingNum = 5081;
+    teamInfo->Points            = 0;
+    teamInfo->RoundWins         = 0;
 
-    teamInfo                     = &s_Teams[TEAM_GREEN];
-    teamInfo->Team               = TEAM_GREEN;
-    teamInfo->Color              = argb_t(255, 0, 255, 0);
-    teamInfo->ColorStringUpper   = "GREEN";
-    teamInfo->ColorString        = "Green";
-    teamInfo->TextColor          = TEXTCOLOR_GREEN;
-    teamInfo->ToastColor         = TEXTCOLOR_GREEN;
-    teamInfo->TransColor         = CR_GREEN;
-    teamInfo->FountainColorArg   = 2;
-    teamInfo->TeamSpawnThingNum  = 5083;
-    teamInfo->Points             = 0;
-    teamInfo->RoundWins          = 0;
+    teamInfo                    = &s_Teams[TEAM_GREEN];
+    teamInfo->Team              = TEAM_GREEN;
+    teamInfo->Color             = argb_t(255, 0, 255, 0);
+    teamInfo->ColorStringUpper  = "GREEN";
+    teamInfo->ColorString       = "Green";
+    teamInfo->TextColor         = TEXTCOLOR_GREEN;
+    teamInfo->ToastColor        = TEXTCOLOR_GREEN;
+    teamInfo->TransColor        = CR_GREEN;
+    teamInfo->FountainColorArg  = 2;
+    teamInfo->TeamSpawnThingNum = 5083;
+    teamInfo->Points            = 0;
+    teamInfo->RoundWins         = 0;
 
-    s_NoTeam.Team               = NUMTEAMS;
-    s_NoTeam.Color              = argb_t(255, 0, 255, 0);
-    s_NoTeam.ColorStringUpper   = "";
-    s_NoTeam.ColorString        = "";
-    s_NoTeam.TextColor          = TEXTCOLOR_GRAY;
-    s_NoTeam.ToastColor         = TEXTCOLOR_GRAY;
-    s_NoTeam.TransColor         = CR_GRAY;
-    s_NoTeam.FountainColorArg   = 0;
-    s_NoTeam.TeamSpawnThingNum  = 0;
-    s_NoTeam.Points             = 0;
-    s_NoTeam.RoundWins          = 0;
+    s_NoTeam.Team              = NUMTEAMS;
+    s_NoTeam.Color             = argb_t(255, 0, 255, 0);
+    s_NoTeam.ColorStringUpper  = "";
+    s_NoTeam.ColorString       = "";
+    s_NoTeam.TextColor         = TEXTCOLOR_GRAY;
+    s_NoTeam.ToastColor        = TEXTCOLOR_GRAY;
+    s_NoTeam.TransColor        = CR_GRAY;
+    s_NoTeam.FountainColorArg  = 0;
+    s_NoTeam.TeamSpawnThingNum = 0;
+    s_NoTeam.Points            = 0;
+    s_NoTeam.RoundWins         = 0;
 }
 
 void TeamInfo_ResetScores(bool fullreset)
@@ -100,8 +100,8 @@ void TeamInfo_ResetScores(bool fullreset)
         for (it = players.begin(); it != players.end(); ++it)
             it->flags[i] = false;
 
-        TeamInfo *teamInfo           = GetTeamInfo((team_t)i);
-        teamInfo->Points             = 0;
+        TeamInfo *teamInfo = GetTeamInfo((team_t)i);
+        teamInfo->Points   = 0;
 
         if (fullreset)
             teamInfo->RoundWins = 0;
@@ -242,7 +242,7 @@ const std::string TeamInfo::ColorizedTeamName()
 
 int32_t TeamInfo::LivesPool()
 {
-    int32_t           pool = 0;
+    int32_t       pool = 0;
     PlayerResults pr   = PlayerQuery().hasLives().execute();
 
     for (PlayersView::const_iterator it = pr.players.begin(); it != pr.players.end(); ++it)

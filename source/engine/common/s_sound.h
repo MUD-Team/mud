@@ -140,12 +140,12 @@ struct sfxinfo_struct
     };
 
     // fix this to use arbitrary length filenames - Dasho
-    char        filename[MAX_SNDNAME + 1]; // filename of sfx
-    uint32_t ms;          // [RH] length of sfx in milliseconds
-    uint32_t next, index; // [RH] For hashing
-    uint32_t frequency;   // [RH] Preferred playback rate
-    uint32_t length;      // [RH] Length of the sound in bytes
-    bool         israndom;    // [DE] Whether or not this is an alias for a set of random sounds
+    char     filename[MAX_SNDNAME + 1]; // filename of sfx
+    uint32_t ms;                        // [RH] length of sfx in milliseconds
+    uint32_t next, index;               // [RH] For hashing
+    uint32_t frequency;                 // [RH] Preferred playback rate
+    uint32_t length;                    // [RH] Length of the sound in bytes
+    bool     israndom;                  // [DE] Whether or not this is an alias for a set of random sounds
 };
 
 // the complete set of sound effects
@@ -251,12 +251,12 @@ void S_ActivateAmbient(AActor *mobj, int32_t ambient);
 // [RH] S_sfx "maintenance" routines
 void S_ParseSndInfo();
 
-void S_HashSounds();
-int32_t  S_FindSound(const char *logicalname);
-int32_t  S_FindSoundByFilename(const char *filename);
-int32_t  S_AddSound(const char *logicalname, const char *filename);
-void S_AddRandomSound(int32_t owner, std::vector<int32_t> &list);
-void S_ClearSoundLumps();
+void    S_HashSounds();
+int32_t S_FindSound(const char *logicalname);
+int32_t S_FindSoundByFilename(const char *filename);
+int32_t S_AddSound(const char *logicalname, const char *filename);
+void    S_AddRandomSound(int32_t owner, std::vector<int32_t> &list);
+void    S_ClearSoundLumps();
 
 void UV_SoundAvoidPlayer(AActor *mo, uint8_t channel, const char *name, uint8_t attenuation);
 

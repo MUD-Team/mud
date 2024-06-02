@@ -44,17 +44,17 @@
 #include "p_local.h"
 #include "p_saveg.h"
 #include "p_setup.h"
-#include "r_sky.h"
 #include "r_client.h"
 #include "r_common.h"
+#include "r_sky.h"
 #include "r_things.h"
 #include "res_texture.h"
 #include "s_sndseq.h"
 #include "s_sound.h"
+#include "script/lua_client_public.h"
 #include "v_video.h"
 #include "w_wad.h"
 #include "z_zone.h"
-#include "script/lua_client_public.h"
 
 #define lioffset(x) offsetof(level_pwad_info_t, x)
 #define cioffset(x) offsetof(cluster_info_t, x)
@@ -85,8 +85,8 @@ FLZOMemFile *reset_snapshot = NULL;
 extern bool r_underwater;
 bool        savegamerestore;
 
-extern int32_t  mousex, mousey, joyforward, joystrafe, joyturn, joylook, Impulse;
-extern bool sendpause, sendsave, sendcenterview;
+extern int32_t mousex, mousey, joyforward, joystrafe, joyturn, joylook, Impulse;
+extern bool    sendpause, sendsave, sendcenterview;
 
 bool isFast = false;
 
@@ -231,7 +231,7 @@ void G_InitNew(const char *mapname)
             {
                 if (mobjinfo[i].altspeed != NO_ALTSPEED)
                 {
-                    int32_t swap             = mobjinfo[i].speed;
+                    int32_t swap         = mobjinfo[i].speed;
                     mobjinfo[i].speed    = mobjinfo[i].altspeed;
                     mobjinfo[i].altspeed = swap;
                 }
@@ -249,7 +249,7 @@ void G_InitNew(const char *mapname)
             {
                 if (mobjinfo[i].altspeed != NO_ALTSPEED)
                 {
-                    int32_t swap             = mobjinfo[i].altspeed;
+                    int32_t swap         = mobjinfo[i].altspeed;
                     mobjinfo[i].altspeed = mobjinfo[i].speed;
                     mobjinfo[i].speed    = swap;
                 }
@@ -284,8 +284,8 @@ void G_InitNew(const char *mapname)
 //
 // G_DoCompleted
 //
-bool        secretexit;
-static int32_t  startpos; // [RH] Support for multiple starts per level
+bool           secretexit;
+static int32_t startpos; // [RH] Support for multiple starts per level
 
 // [RH] The position parameter to these next three functions should
 //		match the first parameter of the single player start spots
@@ -473,7 +473,7 @@ void G_DoCompleted(void)
 void G_DoLoadLevel(int32_t position)
 {
     static int32_t lastposition = 0;
-    size_t     i;
+    size_t         i;
 
     if (position == -1)
         position = lastposition;
@@ -588,7 +588,7 @@ void G_DoLoadLevel(int32_t position)
     }
 
     displayplayer_id = consoleplayer_id; // view the guy you are playing
-    
+
     gameaction = ga_nothing;
 
     // clear cmd building stuff // denis - todo - could we get rid of this?

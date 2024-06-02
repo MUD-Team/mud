@@ -344,7 +344,7 @@ void EV_TurnTagLightsOff(int32_t tag)
     for (secnum = -1; (secnum = P_FindSectorFromTag(tag, secnum)) >= 0;)
     {
         sector_t *sector = sectors + secnum;
-        int32_t       min    = sector->lightlevel;
+        int32_t   min    = sector->lightlevel;
 
         for (i = 0; i < sector->linecount; i++)
         {
@@ -427,9 +427,9 @@ int32_t EV_LightTurnOnPartway(int32_t tag, int32_t level)
     for (i = -1; (i = P_FindSectorFromTag(tag, i)) >= 0;)
     {
         sector_t *temp, *sector = sectors + i;
-        int32_t       j;
-        int32_t       bright = 0;
-        int32_t       min    = sector->lightlevel;
+        int32_t   j;
+        int32_t   bright = 0;
+        int32_t   min    = sector->lightlevel;
         for (j = 0; j < sector->linecount; j++)
         {
             if ((temp = getNextSector(sector->lines[j], sector)))
@@ -462,7 +462,7 @@ void EV_LightChange(int32_t tag, int32_t value)
 
     while ((secnum = P_FindSectorFromTag(tag, secnum)) >= 0)
     {
-        int32_t newlight               = sectors[secnum].lightlevel + value;
+        int32_t newlight           = sectors[secnum].lightlevel + value;
         sectors[secnum].lightlevel = CLIPLIGHT(newlight);
         sectors[secnum].SectorChanges |= SPC_LightLevel;
     }
@@ -474,8 +474,8 @@ void EV_LightSetMinNeighbor(int32_t tag)
 
     while ((s = P_FindSectorFromTag(tag, s)) >= 0)
     {
-        int32_t       i;
-        int16_t     level;
+        int32_t   i;
+        int16_t   level;
         sector_t *temp, *sector;
 
         sector = &sectors[s];
@@ -495,8 +495,8 @@ void EV_LightSetMaxNeighbor(int32_t tag)
 
     while ((s = P_FindSectorFromTag(tag, s)) >= 0)
     {
-        int32_t       i;
-        int16_t     level;
+        int32_t   i;
+        int16_t   level;
         sector_t *temp, *sector;
 
         sector = &sectors[s];
@@ -593,8 +593,8 @@ void DGlow2::RunThink()
         else
         {
             int32_t temp = m_Start;
-            m_Start  = m_End;
-            m_End    = temp;
+            m_Start      = m_End;
+            m_End        = temp;
             m_Tics -= m_MaxTics;
         }
     }
@@ -621,8 +621,8 @@ void EV_StartLightGlowing(int32_t tag, int32_t upper, int32_t lower, int32_t tic
     if (upper < lower)
     {
         int32_t temp = upper;
-        upper    = lower;
-        lower    = temp;
+        upper        = lower;
+        lower        = temp;
     }
 
     secnum = -1;
@@ -700,7 +700,7 @@ int32_t DPhased::PhaseHelper(sector_t *sector, int32_t index, int32_t light, sec
     else
     {
         DPhased *l;
-        int32_t      baselevel = sector->lightlevel ? sector->lightlevel : light;
+        int32_t  baselevel = sector->lightlevel ? sector->lightlevel : light;
 
         if (index == 0)
         {

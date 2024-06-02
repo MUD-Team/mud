@@ -38,7 +38,7 @@ enum parseError_e
 
 struct Proto
 {
-    uint8_t        header;
+    uint8_t     header;
     std::string name;
     size_t      size;
     std::string data;

@@ -335,8 +335,8 @@ void cvar_t::FilterCompactCVars(TArray<cvar_t *> &cvars, uint32_t filter)
 
 void cvar_t::C_WriteCVars(uint8_t **demo_p, uint32_t filter, bool compact)
 {
-    cvar_t *cvar = ad.GetCVars();
-    uint8_t   *ptr  = *demo_p;
+    cvar_t  *cvar = ad.GetCVars();
+    uint8_t *ptr  = *demo_p;
 
     if (compact)
     {
@@ -376,7 +376,7 @@ void cvar_t::C_ReadCVars(uint8_t **demo_p)
     { // compact mode
         TArray<cvar_t *> cvars;
         cvar_t          *cvar;
-        uint32_t            filter;
+        uint32_t         filter;
 
         ptr++;
         breakpt  = strchr(ptr, '\\');
@@ -470,7 +470,7 @@ void cvar_t::C_BackupCVars(uint32_t bitflag)
 void cvar_t::C_RestoreCVars(void)
 {
     struct backup_s *backup = CVarBackups;
-    int32_t              i;
+    int32_t          i;
 
     for (i = numbackedup; i; i--, backup++)
     {
@@ -548,7 +548,7 @@ void cvar_t::C_SetCVarsToDefaults(uint32_t bitflag)
 
 void cvar_t::C_ArchiveCVars(void *f)
 {
-    cvar_t *cvar = ad.GetCVars();
+    cvar_t     *cvar = ad.GetCVars();
     std::string str;
     while (cvar)
     {
@@ -556,7 +556,7 @@ void cvar_t::C_ArchiveCVars(void *f)
             (baseapp == server && (cvar->m_Flags & CVAR_SERVERARCHIVE)))
         {
             str.append(StrFormat("// %s\nset %s %s\n\n", cvar->helptext(), C_QuoteString(cvar->name()).c_str(),
-                    C_QuoteString(cvar->cstring()).c_str()));
+                                 C_QuoteString(cvar->cstring()).c_str()));
         }
         cvar = cvar->m_Next;
     }
@@ -567,7 +567,7 @@ void cvar_t::C_ArchiveCVars(void *f)
 void cvar_t::cvarlist()
 {
     cvar_t *var   = ad.GetCVars();
-    int32_t     count = 0;
+    int32_t count = 0;
 
     while (var)
     {

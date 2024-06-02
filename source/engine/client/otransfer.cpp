@@ -174,7 +174,7 @@ bool OTransferCheck::start()
     if (running < 1)
     {
         // Transfer isn't running right after we enabled it, error out.
-        int32_t      queuelen;
+        int32_t  queuelen;
         CURLMsg *msg = curl_multi_info_read(m_curlm, &queuelen);
         if (msg == NULL)
         {
@@ -218,7 +218,7 @@ bool OTransferCheck::tick()
         return true;
 
     // We're done.  Was the transfer successful, or an error?
-    int32_t      queuelen;
+    int32_t  queuelen;
     CURLMsg *msg = curl_multi_info_read(m_curlm, &queuelen);
     if (msg == NULL)
     {
@@ -341,7 +341,7 @@ bool OTransfer::start()
     if (running < 1)
     {
         // Transfer isn't running right after we enabled it, error out.
-        int32_t      queuelen;
+        int32_t  queuelen;
         CURLMsg *msg = curl_multi_info_read(m_curlm, &queuelen);
         if (msg == NULL)
         {
@@ -385,7 +385,7 @@ bool OTransfer::tick()
         return true;
 
     // We're done.  Was the transfer successful, or an error?
-    int32_t      queuelen;
+    int32_t  queuelen;
     CURLMsg *msg = curl_multi_info_read(m_curlm, &queuelen);
     if (msg == NULL)
     {

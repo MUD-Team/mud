@@ -89,7 +89,7 @@ bool Vote::setup_check_cvar()
 class CoinflipVote : public Vote
 {
   public:
-    CoinflipVote() : Vote("coinflip", &sv_callvote_coinflip){};
+    CoinflipVote() : Vote("coinflip", &sv_callvote_coinflip) {};
     bool setup(const std::vector<std::string> &args, const player_t &player)
     {
         if (!Vote::setup_check_cvar())
@@ -110,11 +110,11 @@ class CoinflipVote : public Vote
 class ForcespecVote : public Vote
 {
   private:
-    uint8_t        id;
+    uint8_t     id;
     std::string netname;
 
   public:
-    ForcespecVote() : Vote("forcespec", &sv_callvote_forcespec){};
+    ForcespecVote() : Vote("forcespec", &sv_callvote_forcespec) {};
     bool setup(const std::vector<std::string> &args, const player_t &player)
     {
         if (!Vote::setup_check_cvar())
@@ -173,7 +173,7 @@ class ForcespecVote : public Vote
 class ForcestartVote : public Vote
 {
   public:
-    ForcestartVote() : Vote("forcestart", &sv_callvote_forcestart){};
+    ForcestartVote() : Vote("forcestart", &sv_callvote_forcestart) {};
     bool setup(const std::vector<std::string> &args, const player_t &player)
     {
         if (!Vote::setup_check_cvar())
@@ -211,7 +211,7 @@ class FraglimitVote : public Vote
     uint32_t fraglimit;
 
   public:
-    FraglimitVote() : Vote("fraglimit", &sv_callvote_fraglimit){};
+    FraglimitVote() : Vote("fraglimit", &sv_callvote_fraglimit) {};
     bool setup(const std::vector<std::string> &args, const player_t &player)
     {
         uint32_t fraglimit;
@@ -260,12 +260,12 @@ class KickVote : public Vote
 {
   private:
     std::string caller;
-    uint8_t        id;
+    uint8_t     id;
     std::string netname;
     std::string reason;
 
   public:
-    KickVote() : Vote("kick", &sv_callvote_kick){};
+    KickVote() : Vote("kick", &sv_callvote_kick) {};
     bool setup(const std::vector<std::string> &args, const player_t &player)
     {
         if (!Vote::setup_check_cvar())
@@ -331,11 +331,11 @@ class KickVote : public Vote
 class MapVote : public Vote
 {
   private:
-    size_t index;
-    uint8_t   version;
+    size_t  index;
+    uint8_t version;
 
   public:
-    MapVote() : Vote("map", &sv_callvote_map){};
+    MapVote() : Vote("map", &sv_callvote_map) {};
     bool setup(const std::vector<std::string> &args, const player_t &player)
     {
         size_t index;
@@ -402,7 +402,7 @@ class MapVote : public Vote
 class NextmapVote : public Vote
 {
   public:
-    NextmapVote() : Vote("nextmap", &sv_callvote_nextmap){};
+    NextmapVote() : Vote("nextmap", &sv_callvote_nextmap) {};
     bool setup(const std::vector<std::string> &args, const player_t &player)
     {
         if (!Vote::setup_check_cvar())
@@ -423,7 +423,7 @@ class NextmapVote : public Vote
 class RandcapsVote : public Vote
 {
   public:
-    RandcapsVote() : Vote("randcaps", &sv_callvote_randcaps){};
+    RandcapsVote() : Vote("randcaps", &sv_callvote_randcaps) {};
     bool setup(const std::vector<std::string> &args, const player_t &player)
     {
         if (!Vote::setup_check_cvar())
@@ -442,7 +442,7 @@ class RandcapsVote : public Vote
 class RandmapVote : public Vote
 {
   public:
-    RandmapVote() : Vote("randmap", &sv_callvote_randmap){};
+    RandmapVote() : Vote("randmap", &sv_callvote_randmap) {};
     bool setup(const std::vector<std::string> &args, const player_t &player)
     {
         if (!Vote::setup_check_cvar())
@@ -481,7 +481,7 @@ class RandpickupVote : public Vote
     size_t num_players;
 
   public:
-    RandpickupVote() : Vote("randpickup", &sv_callvote_randpickup){};
+    RandpickupVote() : Vote("randpickup", &sv_callvote_randpickup) {};
     bool setup(const std::vector<std::string> &args, const player_t &player)
     {
         if (!Vote::setup_check_cvar())
@@ -521,7 +521,7 @@ class RandpickupVote : public Vote
 class RestartVote : public Vote
 {
   public:
-    RestartVote() : Vote("restart", &sv_callvote_restart){};
+    RestartVote() : Vote("restart", &sv_callvote_restart) {};
     bool setup(const std::vector<std::string> &args, const player_t &player)
     {
         if (!Vote::setup_check_cvar())
@@ -550,7 +550,7 @@ class ScorelimitVote : public Vote
     uint32_t scorelimit;
 
   public:
-    ScorelimitVote() : Vote("scorelimit", &sv_callvote_scorelimit){};
+    ScorelimitVote() : Vote("scorelimit", &sv_callvote_scorelimit) {};
     bool setup(const std::vector<std::string> &args, const player_t &player)
     {
         uint32_t scorelimit;
@@ -601,7 +601,7 @@ class TimelimitVote : public Vote
     float timelimit;
 
   public:
-    TimelimitVote() : Vote("timelimit", &sv_callvote_timelimit){};
+    TimelimitVote() : Vote("timelimit", &sv_callvote_timelimit) {};
     bool setup(const std::vector<std::string> &args, const player_t &player)
     {
         float timelimit;
@@ -1047,7 +1047,7 @@ static void SV_GlobalVoteUpdate()
 void SV_Callvote(player_t &player)
 {
     vote_type_t votecmd = (vote_type_t)MSG_ReadByte();
-    uint8_t        argc    = (uint8_t)MSG_ReadByte();
+    uint8_t     argc    = (uint8_t)MSG_ReadByte();
 
     DPrintf("SV_Callvote: Got votecmd %s from player %d, %d additional arguments.\n", vote_type_cmd[votecmd], player.id,
             argc);

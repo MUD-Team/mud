@@ -104,7 +104,7 @@ void W_HashLumps(void)
 
     for (uint32_t i = 0; i < numlumps; i++)
     {
-        uint32_t j    = W_LumpNameHash(lumpinfo[i].name) % (uint32_t)numlumps;
+        uint32_t j        = W_LumpNameHash(lumpinfo[i].name) % (uint32_t)numlumps;
         lumpinfo[i].next  = lumpinfo[j].index; // Prepend to list
         lumpinfo[j].index = i;
     }
@@ -130,12 +130,12 @@ OMD5Hash W_MD5(const std::string &filename)
 {
     OMD5Hash rvo;
 
-    PHYSFS_File     *fp       = PHYSFS_openRead(filename.c_str());
+    PHYSFS_File *fp = PHYSFS_openRead(filename.c_str());
 
     if (!fp)
         return rvo;
 
-    size_t len = PHYSFS_fileLength(fp);
+    size_t                len = PHYSFS_fileLength(fp);
     Poco::Buffer<uint8_t> buf(len);
 
     if (PHYSFS_readBytes(fp, buf.begin(), len) != len)
@@ -204,8 +204,8 @@ void AddFile(const OResFile &file)
     }
 
     const std::string filename = file.getBasename();
-    PHYSFS_File       *handle = NULL;
-    filelump_t *fileinfo = NULL;
+    PHYSFS_File      *handle   = NULL;
+    filelump_t       *fileinfo = NULL;
 
     if ((handle = PHYSFS_openRead(filename.c_str())) == NULL)
     {
@@ -445,7 +445,7 @@ uint32_t W_LumpLength(uint32_t lump)
 //
 void W_ReadLump(uint32_t lump, void *dest)
 {
-    int32_t         c;
+    int32_t     c;
     lumpinfo_t *l;
 
     if (lump >= numlumps)
@@ -471,8 +471,8 @@ void W_ReadLump(uint32_t lump, void *dest)
 //
 uint32_t W_ReadChunk(const char *file, uint32_t offs, uint32_t len, void *dest, uint32_t &filelen)
 {
-    PHYSFS_File    *fp   = PHYSFS_openRead(file);
-    uint32_t read = 0;
+    PHYSFS_File *fp   = PHYSFS_openRead(file);
+    uint32_t     read = 0;
 
     if (fp)
     {
@@ -532,7 +532,7 @@ void *W_CacheLumpNum(uint32_t lump, const zoneTag_e tag)
 
         // DPrintf("cache miss on lump %i\n",lump);
         uint32_t lump_length = W_LumpLength(lump);
-        lumpcache[lump]          = (uint8_t *)Z_Malloc(lump_length + 1, tag, &lumpcache[lump]);
+        lumpcache[lump]      = (uint8_t *)Z_Malloc(lump_length + 1, tag, &lumpcache[lump]);
         W_ReadLump(lump, lumpcache[lump]);
         *((uint8_t *)lumpcache[lump] + lump_length) = 0;
     }

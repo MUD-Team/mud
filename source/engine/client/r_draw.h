@@ -70,8 +70,8 @@ typedef struct
     int32_t x1;
     int32_t x2;
 
-    uint32_t texture_width_bits;
-	uint32_t texture_height_bits;
+    uint32_t  texture_width_bits;
+    uint32_t  texture_height_bits;
     dsfixed_t xfrac;
     dsfixed_t yfrac;
     dsfixed_t xstep;
@@ -95,8 +95,8 @@ extern "C" drawspan_t dspan;
 
 // [RH] Temporary buffer for column drawing
 
-void R_RenderColumnRange(int32_t start, int32_t stop, int32_t *top, int32_t *bottom, tallpost_t **posts, void (*colblast)(),
-                         bool calc_light, int32_t columnmethod);
+void R_RenderColumnRange(int32_t start, int32_t stop, int32_t *top, int32_t *bottom, tallpost_t **posts,
+                         void (*colblast)(), bool calc_light, int32_t columnmethod);
 
 // [RH] Pointers to the different column and span drawers...
 
@@ -165,4 +165,5 @@ void r_dimpatchD_ALTIVEC(IRenderSurface *, argb_t color, int32_t alpha, int32_t 
 // Vectorizable function pointers:
 extern void (*R_DrawSpanD)(void);
 extern void (*R_DrawSlopeSpanD)(void);
-extern void (*r_dimpatchD)(IRenderSurface *surface, argb_t color, int32_t alpha, int32_t x1, int32_t y1, int32_t w, int32_t h);
+extern void (*r_dimpatchD)(IRenderSurface *surface, argb_t color, int32_t alpha, int32_t x1, int32_t y1, int32_t w,
+                           int32_t h);

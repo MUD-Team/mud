@@ -50,27 +50,27 @@ struct SkillInfo
     bool        easy_boss_brain;
     bool        easy_key;       // not implemented
     bool        no_menu;        // not implemented
-    int32_t         respawn_counter;
-    int32_t         respawn_limit;  // not implemented
+    int32_t     respawn_counter;
+    int32_t     respawn_limit;  // not implemented
     float       aggressiveness; // not implemented
-    int32_t         spawn_filter;
+    int32_t     spawn_filter;
     bool        spawn_multi;    // not implemented
     bool        instant_reaction;
-    int32_t         ACS_return;     // not implemented
+    int32_t     ACS_return;     // not implemented
     std::string menu_name;
     std::string pic_name;
     // SkillMenuNames menu_names_for_player_class;	// not implemented
     bool        must_confirm;
     std::string must_confirm_text;
     char        shortcut;
-    uint8_t        text_color[4]; // not implemented
+    uint8_t     text_color[4]; // not implemented
     // SkillActorReplacement replace;	// not implemented
     // SkillActorReplacement replaced;	// not implemented
-    float monster_health;  // not implemented
-    float friendly_health; // not implemented
-    bool  no_pain;         // not implemented
-    int32_t   infighting;      // not implemented
-    bool  player_respawn;  // not implemented
+    float   monster_health;  // not implemented
+    float   friendly_health; // not implemented
+    bool    no_pain;         // not implemented
+    int32_t infighting;      // not implemented
+    bool    player_respawn;  // not implemented
 
     SkillInfo()
         : ammo_factor(1.f), double_ammo_factor(2.f), drop_ammo_factor(-1.f), damage_factor(1.f), armor_factor(1.f),
@@ -94,7 +94,7 @@ struct SkillInfo
 };
 
 extern SkillInfo SkillInfos[MAX_SKILLS];
-extern uint8_t      skillnum;
-extern uint8_t      defaultskillmenu;
+extern uint8_t   skillnum;
+extern uint8_t   defaultskillmenu;
 
 const SkillInfo &G_GetCurrentSkill();

@@ -85,17 +85,17 @@ void I_CallAssert(const char *file, int line, const char *message, ...);
 #if !defined MUD_DEBUG
 
 #define I_ASSERT(x, m, ...)
-#define I_VERIFY(x, m, ...)                                                                                                 \
+#define I_VERIFY(x, m, ...)                                                                                            \
     if (!(x))                                                                                                          \
     {                                                                                                                  \
-        I_CallAssert(__FILE__, __LINE__, m, __VA_ARGS__);                                                                          \
+        I_CallAssert(__FILE__, __LINE__, m, __VA_ARGS__);                                                              \
     }
 #else
 
-#define I_ASSERT(x, m, ...)                                                                                                 \
+#define I_ASSERT(x, m, ...)                                                                                            \
     if (!(x))                                                                                                          \
     {                                                                                                                  \
-        I_CallAssert(__FILE__, __LINE__, m, __VA_ARGS__);                                                                          \
+        I_CallAssert(__FILE__, __LINE__, m, __VA_ARGS__);                                                              \
     }
 
 #define I_VERIFY(x, m, ...) I_ASSERT(x, m, __VA_ARGS__)

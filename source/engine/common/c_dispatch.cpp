@@ -168,7 +168,7 @@ int32_t GetActionBit(uint32_t key)
 
     while (min <= max)
     {
-        int32_t          mid    = (min + max) / 2;
+        int32_t  mid    = (min + max) / 2;
         uint32_t seekey = actionbits[mid].key;
 
         if (seekey == key)
@@ -190,7 +190,7 @@ void C_DoCommand(const char *cmd, uint32_t key)
     char            *arg;
     const char      *data;
     DConsoleCommand *com;
-    int32_t              check = -1;
+    int32_t          check = -1;
 
     data = ParseString(cmd);
     if (!data)
@@ -230,7 +230,7 @@ void C_DoCommand(const char *cmd, uint32_t key)
         argsize = strlen(com_token) + 1;
 
         Poco::Buffer<char> realargs(strlen(data) + 1);
-        
+
         strcpy(realargs.begin(), data);
 
         while ((data = ParseString(data)))
@@ -239,7 +239,7 @@ void C_DoCommand(const char *cmd, uint32_t key)
             argsize += strlen(com_token) + 1;
         }
 
-        Poco::Buffer<char> args(argsize);
+        Poco::Buffer<char>   args(argsize);
         Poco::Buffer<char *> argv(argc);
 
         arg     = args.begin();
@@ -670,8 +670,8 @@ DConsoleCommand::DConsoleCommand(const char *name)
 
     if (firstTime)
     {
-        char tname[16];
-        int32_t  i;
+        char    tname[16];
+        int32_t i;
 
         firstTime = false;
 
@@ -904,8 +904,8 @@ END_COMMAND(cmdlist)
 // If onlylogfile is true... well, you get the point.
 void C_ExecCmdLineParams(bool onlyset, bool onlylogfile)
 {
-    size_t cmdlen, argstart;
-    int32_t    didlogfile = 0;
+    size_t  cmdlen, argstart;
+    int32_t didlogfile = 0;
 
     for (size_t currArg = 1; currArg < Args.NumArgs();)
     {
@@ -952,16 +952,16 @@ BEGIN_COMMAND(dumpactors)
     Printf(PRINT_HIGH, "Actors at level.time == %d:\n", level.time);
     while ((mo = iterator.Next()))
     {
-        Printf(PRINT_HIGH, "%s (%x, %x, %x | %x) state: %zd tics: %d\n", mobjinfo[mo->type].name, mo->x,
-               mo->y, mo->z, mo->angle, mo->state - states, mo->tics);
+        Printf(PRINT_HIGH, "%s (%x, %x, %x | %x) state: %zd tics: %d\n", mobjinfo[mo->type].name, mo->x, mo->y, mo->z,
+               mo->angle, mo->state - states, mo->tics);
     }
 }
 END_COMMAND(dumpactors)
 
 BEGIN_COMMAND(logfile)
 {
-    time_t            rawtime;
-    struct tm        *timeinfo;
+    time_t      rawtime;
+    struct tm  *timeinfo;
     std::string default_logname = M_GetWriteDir();
     default_logname.append(::serverside ? "mud-server.log" : "mud-client.log");
 
@@ -1012,8 +1012,8 @@ BEGIN_COMMAND(stoplog)
 }
 END_COMMAND(stoplog)
 
-bool P_StartScript(AActor *who, line_t *where, int32_t script, const char *map, int32_t lineSide, int32_t arg0, int32_t arg1, int32_t arg2,
-                   int32_t always);
+bool P_StartScript(AActor *who, line_t *where, int32_t script, const char *map, int32_t lineSide, int32_t arg0,
+                   int32_t arg1, int32_t arg2, int32_t always);
 
 BEGIN_COMMAND(puke)
 {

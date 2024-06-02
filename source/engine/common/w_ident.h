@@ -35,7 +35,7 @@ struct fileIdentifier_t
     bool        mIsIWAD;
 };
 
-void                    W_ConfigureGameInfo(const OResFile &iwad);
-bool                    W_IsKnownIWAD(const OWantFile &file);
-bool                    W_IsIWAD(const OResFile &file);
-std::vector<OString>    W_GetIWADFilenames();
+void                 W_ConfigureGameInfo(const OResFile &iwad);
+bool                 W_IsKnownIWAD(const OWantFile &file);
+bool                 W_IsIWAD(const OResFile &file);
+std::vector<OString> W_GetIWADFilenames();

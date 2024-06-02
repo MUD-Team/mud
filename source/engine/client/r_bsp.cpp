@@ -41,7 +41,6 @@
 #include "r_things.h"
 #include "v_palette.h"
 
-
 EXTERN_CVAR(r_particles)
 
 seg_t    *curline;

@@ -74,7 +74,7 @@ EXTERN_CVAR(sv_maxplayers)
 #define GM_COOP   0.0f
 #define GM_DM     1.0f
 #define GM_TEAMDM 2.0f
-//#define GM_CTF    3.0f
+// #define GM_CTF    3.0f
 
 #define FPS_NONE    0
 #define FPS_FULL    1
@@ -101,15 +101,15 @@ EXTERN_CVAR(sv_maxplayers)
 //	status bar explicitely.
 extern bool statusbaractive;
 
-extern bool paused;     // Game Pause?
+extern bool paused; // Game Pause?
 
 extern bool viewactive;
 
 extern bool nodrawers;
 extern bool noblit;
 
-extern int32_t     viewwindowx;
-extern int32_t     viewwindowy;
+extern int32_t viewwindowx;
+extern int32_t viewwindowy;
 extern int32_t viewheight;
 extern int32_t viewwidth;
 

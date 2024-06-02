@@ -30,12 +30,11 @@
 
 #include "m_bbox.h"
 #include "m_random.h"
-#include "p_local.h"
 #include "mud_includes.h"
+#include "p_local.h"
 #include "r_common.h"
 #include "tables.h"
 #include "v_video.h"
-
 
 #define DISTMAP 2
 

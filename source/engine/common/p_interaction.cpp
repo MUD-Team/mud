@@ -540,7 +540,7 @@ static void P_GiveCarePack(player_t *player)
         return;
 
     // We get "blocks" of inventory to give out.
-    int32_t         blocks = 4;
+    int32_t     blocks = 4;
     std::string message, midmessage;
 
     // Players who are extremely low on health always get an initial health
@@ -577,8 +577,8 @@ static void P_GiveCarePack(player_t *player)
         // Players who are extremely low on ammo for a weapon they are holding
         // always get ammo for that weapon.
         // Missle clip is a bit stingy, so we double our handouts.
-        const int32_t   lowLimit   = ammomulti[ammo] * 2;
-        const float giveAmount = static_cast<float>(ammomulti[ammo] * 5);
+        const int32_t lowLimit   = ammomulti[ammo] * 2;
+        const float   giveAmount = static_cast<float>(ammomulti[ammo] * 5);
         if (player->ammo[ammo] < ::clipammo[ammo] * lowLimit)
         {
             P_GiveAmmo(player, ammo, giveAmount);
@@ -594,7 +594,7 @@ static void P_GiveCarePack(player_t *player)
     }
 
     // Hand out some ammo for all held weapons - that's always appreciated.
-     for (size_t i = 0; i < NUMWEAPONS; i++)
+    for (size_t i = 0; i < NUMWEAPONS; i++)
     {
         if (blocks < 1)
         {
@@ -650,8 +650,8 @@ static void P_GiveCarePack(player_t *player)
         Printf(PRINT_PICKUP, "%s\n", message.c_str());
         if (!midmessage.empty())
         {
-            //std::string buf = std::string(TEXTCOLOR_GREEN) + midmessage;
-            //C_MidPrint(buf.c_str(), NULL, 0);
+            // std::string buf = std::string(TEXTCOLOR_GREEN) + midmessage;
+            // C_MidPrint(buf.c_str(), NULL, 0);
         }
     }
 }
@@ -679,7 +679,7 @@ void P_GiveSpecial(player_t *player, AActor *special)
         return;
 
     AActor        *toucher = player->mo;
-    int32_t            sound   = 0;
+    int32_t        sound   = 0;
     const OString *msg     = NULL;
     ItemEquipVal   val     = IEV_EquipRemove;
     bool           dropped = false;
@@ -746,7 +746,8 @@ void P_GiveSpecial(player_t *player, AActor *special)
         break;
 
     case SPR_MEGA:
-        player->health = static_cast<int32_t>(static_cast<float>(deh.MegasphereHealth) * G_GetCurrentSkill().health_factor);
+        player->health =
+            static_cast<int32_t>(static_cast<float>(deh.MegasphereHealth) * G_GetCurrentSkill().health_factor);
         player->mo->health = player->health;
         P_GiveArmor(player, deh.BlueAC);
         msg   = &GOTMSPHERE;
@@ -1180,9 +1181,9 @@ void P_TouchSpecialThing(AActor *special, AActor *toucher)
 //
 void SexMessage(const char *from, char *to, int32_t gender, const char *victim, const char *killer)
 {
-    static const char *genderstuff[3][3] = {{"he", "him", "his"}, {"she", "her", "her"}, {"it", "it", "its"}};
-    static const int32_t   gendershift[3][3] = {{2, 3, 3}, {3, 3, 3}, {2, 2, 3}};
-    const char        *subst             = NULL;
+    static const char   *genderstuff[3][3] = {{"he", "him", "his"}, {"she", "her", "her"}, {"it", "it", "its"}};
+    static const int32_t gendershift[3][3] = {{2, 3, 3}, {3, 3, 3}, {2, 2, 3}};
+    const char          *subst             = NULL;
 
     do
     {
@@ -1263,7 +1264,7 @@ static void ClientObituary(AActor *self, AActor *inflictor, AActor *attacker)
         MeansOfDeath |= MOD_FRIENDLY_FIRE;
 
     bool        friendly = MeansOfDeath & MOD_FRIENDLY_FIRE;
-    int32_t         mod      = MeansOfDeath & ~MOD_FRIENDLY_FIRE;
+    int32_t     mod      = MeansOfDeath & ~MOD_FRIENDLY_FIRE;
     const char *message  = NULL;
     OString     messagename;
 
@@ -1826,7 +1827,7 @@ static bool P_InfightingImmune(AActor *target, AActor *source)
 void P_DamageMobj(AActor *target, AActor *inflictor, AActor *source, int32_t damage, int32_t mod, int32_t flags)
 {
     uint32_t ang;
-    int32_t      saved = 0;
+    int32_t  saved = 0;
 
     if (!serverside)
     {

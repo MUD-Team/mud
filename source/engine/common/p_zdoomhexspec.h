@@ -57,12 +57,12 @@ bool P_TestActivateZDoomLine(line_t *line, AActor *mo, int32_t side, uint32_t ac
 bool P_ExecuteZDoomLineSpecial(int32_t special, int16_t *args, line_t *line, int32_t side, AActor *mo);
 bool EV_DoZDoomFloor(DFloor::EFloor floortype, line_t *line, int32_t tag, fixed_t speed, fixed_t height, int32_t crush,
                      int32_t change, bool hexencrush, bool hereticlower);
-bool EV_DoZDoomCeiling(DCeiling::ECeiling type, line_t *line, uint8_t tag, fixed_t speed, fixed_t speed2, fixed_t height,
-                       int32_t crush, uint8_t silent, int32_t change, crushmode_e crushmode);
+bool EV_DoZDoomCeiling(DCeiling::ECeiling type, line_t *line, uint8_t tag, fixed_t speed, fixed_t speed2,
+                       fixed_t height, int32_t crush, uint8_t silent, int32_t change, crushmode_e crushmode);
 void P_SetTransferHeightBlends(side_t *sd, const mapsidedef_t *msd);
 void SetTextureNoErr(texhandle_t *texture, uint32_t *color, char *name);
 
-int32_t                      P_Random(AActor *actor);
+int32_t                  P_Random(AActor *actor);
 const LineActivationType P_LineActivationTypeForSPACFlag(const uint32_t activationType);
 void                     P_SpawnPhasedLight(sector_t *sector, int32_t base, int32_t index);
 void                     P_SpawnLightSequence(sector_t *sector);

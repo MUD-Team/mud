@@ -188,8 +188,8 @@ DPillar *DPillar::Clone(sector_t *sec) const
 
 bool EV_DoPillar(DPillar::EPillar type, int32_t tag, fixed_t speed, fixed_t height, fixed_t height2, bool crush)
 {
-    bool rtn    = false;
-    int32_t  secnum = -1;
+    bool    rtn    = false;
+    int32_t secnum = -1;
 
     while ((secnum = P_FindSectorFromTag(tag, secnum)) >= 0)
     {
@@ -218,7 +218,7 @@ bool EV_DoZDoomPillar(DPillar::EPillar type, line_t *line, int32_t tag, fixed_t 
 {
     bool      rtn = false;
     sector_t *sec;
-    int32_t       secnum = -1;
+    int32_t   secnum = -1;
 
     floordist *= FRACUNIT;
     ceilingdist *= FRACUNIT;

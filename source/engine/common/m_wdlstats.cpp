@@ -76,8 +76,8 @@ static struct WDLState
 // A single tracked player
 struct WDLPlayer
 {
-    int32_t         id;
-    int32_t         pid;
+    int32_t     id;
+    int32_t     pid;
     std::string netname;
     team_t      team;
 };
@@ -89,11 +89,11 @@ static WDLPlayers              wdlplayers;
 // A single tracked spawn
 struct WDLPlayerSpawn
 {
-    int32_t    id;
-    int32_t    x;
-    int32_t    y;
-    int32_t    z;
-    team_t team;
+    int32_t id;
+    int32_t x;
+    int32_t y;
+    int32_t z;
+    team_t  team;
 };
 
 bool operator==(const WDLPlayerSpawn &lhs, const WDLPlayerSpawn &rhs)
@@ -108,10 +108,10 @@ static WDLPlayerSpawns              wdlplayerspawns;
 // A single tracked item spawn
 struct WDLItemSpawn
 {
-    int32_t         id;
-    int32_t         x;
-    int32_t         y;
-    int32_t         z;
+    int32_t     id;
+    int32_t     x;
+    int32_t     y;
+    int32_t     z;
     WDLPowerups item;
 };
 
@@ -122,10 +122,10 @@ static WDLItemSpawns              wdlitemspawns;
 // A single tracked flag socket
 struct WDLFlagLocation
 {
-    team_t team;
-    int32_t    x;
-    int32_t    y;
-    int32_t    z;
+    team_t  team;
+    int32_t x;
+    int32_t y;
+    int32_t z;
 };
 
 // Flags that we're keeping track of.
@@ -136,15 +136,15 @@ static WDLFlagLocations              wdlflaglocations;
 struct WDLEvent
 {
     WDLEvents ev;
-    int32_t       activator;
-    int32_t       target;
-    int32_t       gametic;
+    int32_t   activator;
+    int32_t   target;
+    int32_t   gametic;
     fixed_t   apos[3];
     fixed_t   tpos[3];
-    int32_t       arg0;
-    int32_t       arg1;
-    int32_t       arg2;
-    int32_t       arg3;
+    int32_t   arg0;
+    int32_t   arg1;
+    int32_t   arg2;
+    int32_t   arg3;
 };
 
 // Events that we're keeping track of.
@@ -493,7 +493,8 @@ void M_StartWDLLog(bool newmap)
  * Returns true if the function successfully appended to an existing event,
  * otherwise false if we need to generate a new event.
  */
-static bool LogDamageEvent(WDLEvents event, player_t *activator, player_t *target, int32_t arg0, int32_t arg1, int32_t arg2)
+static bool LogDamageEvent(WDLEvents event, player_t *activator, player_t *target, int32_t arg0, int32_t arg1,
+                           int32_t arg2)
 {
     WDLEventLog::reverse_iterator it = ::wdlevents.rbegin();
     for (; it != ::wdlevents.rend(); ++it)
@@ -719,9 +720,9 @@ void M_LogWDLPickupEvent(player_t *activator, AActor *target, WDLPowerups pickup
 
     // Activator
     fixed_t aid = 0;
-    int32_t     ax  = 0;
-    int32_t     ay  = 0;
-    int32_t     az  = 0;
+    int32_t ax  = 0;
+    int32_t ay  = 0;
+    int32_t az  = 0;
     if (activator != NULL)
     {
         // Add the activator.
@@ -740,9 +741,9 @@ void M_LogWDLPickupEvent(player_t *activator, AActor *target, WDLPowerups pickup
     // Target
     fixed_t tid         = 0;
     fixed_t itemspawnid = 0;
-    int32_t     tx          = 0;
-    int32_t     ty          = 0;
-    int32_t     tz          = 0;
+    int32_t tx          = 0;
+    int32_t ty          = 0;
+    int32_t tz          = 0;
     if (target != NULL)
     {
         tx = target->x;
@@ -765,7 +766,8 @@ void M_LogWDLPickupEvent(player_t *activator, AActor *target, WDLPowerups pickup
  *
  * The particulars of what you pass to this needs to be checked against the document.
  */
-void M_LogWDLEvent(WDLEvents event, player_t *activator, player_t *target, int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3)
+void M_LogWDLEvent(WDLEvents event, player_t *activator, player_t *target, int32_t arg0, int32_t arg1, int32_t arg2,
+                   int32_t arg3)
 {
     if (!::wdlstate.recording)
         return;
@@ -775,9 +777,9 @@ void M_LogWDLEvent(WDLEvents event, player_t *activator, player_t *target, int32
 
     // Activator
     fixed_t aid = 0;
-    int32_t     ax  = 0;
-    int32_t     ay  = 0;
-    int32_t     az  = 0;
+    int32_t ax  = 0;
+    int32_t ay  = 0;
+    int32_t az  = 0;
     if (activator != NULL)
     {
         // Add the activator.
@@ -795,9 +797,9 @@ void M_LogWDLEvent(WDLEvents event, player_t *activator, player_t *target, int32
 
     // Target
     fixed_t tid = 0;
-    int32_t     tx  = 0;
-    int32_t     ty  = 0;
-    int32_t     tz  = 0;
+    int32_t tx  = 0;
+    int32_t ty  = 0;
+    int32_t tz  = 0;
     if (target != NULL)
     {
         // Add the target.
@@ -846,7 +848,8 @@ void M_LogWDLEvent(WDLEvents event, player_t *activator, player_t *target, int32
 /**
  * Log a WDL event when you have actor pointers.
  */
-void M_LogActorWDLEvent(WDLEvents event, AActor *activator, AActor *target, int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3)
+void M_LogActorWDLEvent(WDLEvents event, AActor *activator, AActor *target, int32_t arg0, int32_t arg1, int32_t arg2,
+                        int32_t arg3)
 {
     if (!::wdlstate.recording)
         return;
@@ -1003,9 +1006,9 @@ void M_CommitWDLLog()
     for (; eit != ::wdlevents.end(); ++eit)
     {
         //          "ev,ac,tg,gt,ax,ay,az,tx,ty,tz,a0,a1,a2,a3"
-        str.append(StrFormat("%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n", eit->ev, eit->activator, eit->target, eit->gametic,
-                eit->apos[0], eit->apos[1], eit->apos[2], eit->tpos[0], eit->tpos[1], eit->tpos[2], eit->arg0,
-                eit->arg1, eit->arg2, eit->arg3));
+        str.append(StrFormat("%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n", eit->ev, eit->activator, eit->target,
+                             eit->gametic, eit->apos[0], eit->apos[1], eit->apos[2], eit->tpos[0], eit->tpos[1],
+                             eit->tpos[2], eit->arg0, eit->arg1, eit->arg2, eit->arg3));
     }
 
     PHYSFS_writeBytes(fh, str.data(), str.size());

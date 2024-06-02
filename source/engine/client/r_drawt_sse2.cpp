@@ -72,7 +72,7 @@ void R_DrawSpanD_SSE2(void)
     dsfixed_t vstep = dspan.xstep;
 
     const uint8_t *source = dspan.source;
-    argb_t     *dest   = (argb_t *)dspan.destination + dspan.y * dspan.pitch_in_pixels + dspan.x1;
+    argb_t        *dest   = (argb_t *)dspan.destination + dspan.y * dspan.pitch_in_pixels + dspan.x1;
 
     shaderef_t colormap = dspan.colormap;
 
@@ -125,9 +125,9 @@ void R_DrawSpanD_SSE2(void)
         //		const int32_t spot2 = (((ufrac + ustep*2) >> ushift) & umask) | (((vfrac + vstep*2) >> vshift) & vmask);
         //		const int32_t spot3 = (((ufrac + ustep*3) >> ushift) & umask) | (((vfrac + vstep*3) >> vshift) & vmask);
 
-        __m128i       u      = _mm_and_si128(_mm_srli_epi32(mufrac, ushift), mumask);
-        __m128i       v      = _mm_and_si128(_mm_srli_epi32(mvfrac, vshift), mvmask);
-        __m128i       mspots = _mm_or_si128(u, v);
+        __m128i   u      = _mm_and_si128(_mm_srli_epi32(mufrac, ushift), mumask);
+        __m128i   v      = _mm_and_si128(_mm_srli_epi32(mvfrac, vshift), mvmask);
+        __m128i   mspots = _mm_or_si128(u, v);
         uint32_t *spots  = (uint32_t *)&mspots;
 
         // get the color of the pixels at each of the spots
@@ -195,12 +195,12 @@ void R_DrawSlopeSpanD_SSE2(void)
     int32_t ltindex = 0; // index into the lighting table
 
     const uint32_t ubits = dspan.texture_height_bits;
-	const uint32_t vbits = dspan.texture_width_bits;
+    const uint32_t vbits = dspan.texture_width_bits;
 
-	const uint32_t vmask = ((1 << ubits) - 1) << vbits;
-	const uint32_t umask = (1 << vbits) - 1;
-	const int32_t vshift = FRACBITS - vbits;
-	const int32_t ushift = FRACBITS;
+    const uint32_t vmask  = ((1 << ubits) - 1) << vbits;
+    const uint32_t umask  = (1 << vbits) - 1;
+    const int32_t  vshift = FRACBITS - vbits;
+    const int32_t  ushift = FRACBITS;
 
     // Blit the bulk in batches of SPANJUMP columns:
     while (count >= SPANJUMP)
@@ -244,10 +244,14 @@ void R_DrawSlopeSpanD_SSE2(void)
             {
                 for (int32_t i = 0; i < rounds; ++i, incount -= 4)
                 {
-                    const int32_t spot0 = (((ufrac + ustep * 0) >> ushift) & umask) | (((vfrac + vstep * 0) >> vshift) & vmask);
-                    const int32_t spot1 = (((ufrac + ustep * 1) >> ushift) & umask) | (((vfrac + vstep * 0) >> vshift) & vmask);
-                    const int32_t spot2 = (((ufrac + ustep * 2) >> ushift) & umask) | (((vfrac + vstep * 0) >> vshift) & vmask);
-                    const int32_t spot3 = (((ufrac + ustep * 3) >> ushift) & umask) | (((vfrac + vstep * 0) >> vshift) & vmask);
+                    const int32_t spot0 =
+                        (((ufrac + ustep * 0) >> ushift) & umask) | (((vfrac + vstep * 0) >> vshift) & vmask);
+                    const int32_t spot1 =
+                        (((ufrac + ustep * 1) >> ushift) & umask) | (((vfrac + vstep * 0) >> vshift) & vmask);
+                    const int32_t spot2 =
+                        (((ufrac + ustep * 2) >> ushift) & umask) | (((vfrac + vstep * 0) >> vshift) & vmask);
+                    const int32_t spot3 =
+                        (((ufrac + ustep * 3) >> ushift) & umask) | (((vfrac + vstep * 0) >> vshift) & vmask);
 
                     const __m128i finalColors = _mm_setr_epi32(dspan.slopelighting[ltindex + 0].shade(src[spot0]),
                                                                dspan.slopelighting[ltindex + 1].shade(src[spot1]),
@@ -269,7 +273,7 @@ void R_DrawSlopeSpanD_SSE2(void)
             while (incount--)
             {
                 const shaderef_t &colormap = dspan.slopelighting[ltindex++];
-                const int32_t         spot     = ((ufrac >> ushift) & umask) | ((vfrac >> vshift) & vmask);
+                const int32_t     spot     = ((ufrac >> ushift) & umask) | ((vfrac >> vshift) & vmask);
                 *dest                      = colormap.shade(src[spot]);
                 dest++;
 
@@ -316,7 +320,8 @@ void R_DrawSlopeSpanD_SSE2(void)
     }
 }
 
-void r_dimpatchD_SSE2(IRenderSurface *surface, argb_t color, int32_t alpha, int32_t x1, int32_t y1, int32_t w, int32_t h)
+void r_dimpatchD_SSE2(IRenderSurface *surface, argb_t color, int32_t alpha, int32_t x1, int32_t y1, int32_t w,
+                      int32_t h)
 {
     int32_t surface_pitch_pixels = surface->getPitchInPixels();
     int32_t line_inc             = surface_pitch_pixels - w;

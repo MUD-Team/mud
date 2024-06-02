@@ -82,17 +82,17 @@ struct bossaction_t;
 struct level_info_t
 {
     OLumpName     mapname;
-    int32_t           levelnum;
+    int32_t       levelnum;
     std::string   level_name;
-    uint8_t          level_fingerprint[16];
+    uint8_t       level_fingerprint[16];
     OLumpName     pname;
     OLumpName     nextmap;
     OLumpName     secretmap;
-    int32_t           partime;
+    int32_t       partime;
     OLumpName     skypic;
     OLumpName     music;
     uint32_t      flags;
-    int32_t           cluster;
+    int32_t       cluster;
     FLZOMemFile  *snapshot;
     acsdefered_s *defered;
 
@@ -113,17 +113,17 @@ struct level_pwad_info_t
 {
     // level_info_t
     OLumpName     mapname;
-    int32_t           levelnum;
+    int32_t       levelnum;
     std::string   level_name;
-    uint8_t          level_fingerprint[16];
+    uint8_t       level_fingerprint[16];
     OLumpName     pname;
     OLumpName     nextmap;
     OLumpName     secretmap;
-    int32_t           partime;
+    int32_t       partime;
     OLumpName     skypic;
     OLumpName     music;
     uint32_t      flags;
-    int32_t           cluster;
+    int32_t       cluster;
     FLZOMemFile  *snapshot;
     acsdefered_s *defered;
 
@@ -225,21 +225,21 @@ struct level_pwad_info_t
 
 struct level_locals_t
 {
-    int32_t          time;
-    int32_t          starttime;
-    int32_t          partime;
+    int32_t  time;
+    int32_t  starttime;
+    int32_t  partime;
     uint32_t inttimeleft;
 
     level_info_t *info;
-    int32_t           cluster;
-    int32_t           levelnum;
-    char          level_name[64]; // the descriptive name (Outer Base, etc)
-    uint8_t level_fingerprint[16]; // [Blair] 128-bit FarmHash fingerprint generated for the level to describe it uniquely
-                                // so it can besingled out if it's out of its host wad, like in a compilation wad.
-                                // Contains a 16-byte array.
-    OLumpName mapname;          // the server name (base1, etc)
-    OLumpName nextmap;          // go here when sv_fraglimit is hit
-    OLumpName secretmap;        // map to go to when used secret exit
+    int32_t       cluster;
+    int32_t       levelnum;
+    char          level_name[64];        // the descriptive name (Outer Base, etc)
+    uint8_t       level_fingerprint[16]; // [Blair] 128-bit FarmHash fingerprint generated for the level to describe it
+                                         // uniquely so it can besingled out if it's out of its host wad, like in a
+                                         // compilation wad. Contains a 16-byte array.
+    OLumpName mapname;                   // the server name (base1, etc)
+    OLumpName nextmap;                   // go here when sv_fraglimit is hit
+    OLumpName secretmap;                 // map to go to when used secret exit
 
     uint32_t flags;
 
@@ -271,7 +271,7 @@ struct level_locals_t
 
     // The following are all used for ACS scripting
     FBehavior *behavior;
-    int32_t     vars[NUM_MAPVARS];
+    int32_t    vars[NUM_MAPVARS];
 
     // The following are used for UMAPINFO
     OLumpName exitpic;
@@ -291,11 +291,11 @@ struct level_locals_t
 
 typedef uint32_t clusterFlags_t;
 
-const static clusterFlags_t CLUSTER_HUB            = BIT(0);
+const static clusterFlags_t CLUSTER_HUB = BIT(0);
 
 struct bossaction_t
 {
-    int32_t   type;
+    int32_t type;
     int16_t special;
     int16_t tag;
 
@@ -306,8 +306,8 @@ struct bossaction_t
 
 struct cluster_info_t
 {
-    int32_t       cluster;
-    int32_t       flags;
+    int32_t cluster;
+    int32_t flags;
 
     cluster_info_t() : cluster(0), flags(0)
     {

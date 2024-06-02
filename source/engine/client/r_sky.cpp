@@ -38,7 +38,6 @@
 #include "res_texture.h"
 #include "w_wad.h"
 
-
 extern int32_t *texturewidthmask;
 extern fixed_t  FocalLengthX;
 extern fixed_t  freelookviewheight;

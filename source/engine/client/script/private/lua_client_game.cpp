@@ -21,6 +21,7 @@
 //-----------------------------------------------------------------------------
 
 #include <LuaBridge.h>
+
 #include "lua_client_private.h"
 
 class LuaClientGame

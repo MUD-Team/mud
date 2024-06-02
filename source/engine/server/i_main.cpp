@@ -155,8 +155,12 @@ int32_t __cdecl main(int32_t argc, char *argv[])
         PHYSFS_mount(M_GetBinaryDir().c_str(), NULL, 0);
         PHYSFS_mount(M_GetWriteDir().c_str(), NULL, 0);
 
-        PHYSFS_mount(M_GetBinaryDir().append("assets").append(PATHSEP).append("core").append(PATHSEP).append("common").c_str(), NULL, 0);
-        PHYSFS_mount(M_GetBinaryDir().append("assets").append(PATHSEP).append("core").append(PATHSEP).append("server").c_str(), NULL, 0);
+        PHYSFS_mount(
+            M_GetBinaryDir().append("assets").append(PATHSEP).append("core").append(PATHSEP).append("common").c_str(),
+            NULL, 0);
+        PHYSFS_mount(
+            M_GetBinaryDir().append("assets").append(PATHSEP).append("core").append(PATHSEP).append("server").c_str(),
+            NULL, 0);
         PHYSFS_mount(M_GetWriteDir().append("assets").append(PATHSEP).append("downloads").c_str(), NULL, 0);
 
         if (::Args.CheckParm("--version"))
@@ -216,9 +220,9 @@ int32_t __cdecl main(int32_t argc, char *argv[])
 //
 void daemon_init(void)
 {
-    int32_t         pid;
+    int32_t      pid;
     PHYSFS_File *fpid;
-    std::string pidfile;
+    std::string  pidfile;
 
     Printf(PRINT_HIGH, "Launched into the background\n");
 
@@ -278,8 +282,12 @@ int32_t main(int32_t argc, char **argv)
         PHYSFS_mount(M_GetBinaryDir().c_str(), NULL, 0);
         PHYSFS_mount(M_GetWriteDir().c_str(), NULL, 0);
 
-        PHYSFS_mount(M_GetBinaryDir().append("assets").append(PATHSEP).append("core").append(PATHSEP).append("common").c_str(), NULL, 0);
-        PHYSFS_mount(M_GetBinaryDir().append("assets").append(PATHSEP).append("core").append(PATHSEP).append("server").c_str(), NULL, 0);
+        PHYSFS_mount(
+            M_GetBinaryDir().append("assets").append(PATHSEP).append("core").append(PATHSEP).append("common").c_str(),
+            NULL, 0);
+        PHYSFS_mount(
+            M_GetBinaryDir().append("assets").append(PATHSEP).append("core").append(PATHSEP).append("server").c_str(),
+            NULL, 0);
         PHYSFS_mount(M_GetWriteDir().append("assets").append(PATHSEP).append("downloads").c_str(), NULL, 0);
 
         if (::Args.CheckParm("--version"))

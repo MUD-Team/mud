@@ -2531,7 +2531,7 @@ void P_RailAttack(AActor *source, int32_t damage, int32_t offset)
     }
 
 #ifdef CLIENT_APP
-    void P_DrawRailTrail(v3double_t &start, v3double_t &end);
+    void P_DrawRailTrail(v3double_t & start, v3double_t & end);
     P_DrawRailTrail(start, end);
 #else
     for (Players::iterator it = players.begin(); it != players.end(); ++it)

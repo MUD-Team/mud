@@ -36,8 +36,8 @@ extern std::ifstream CON;
 std::string M_FindUserFileName(const std::string &file, const char *ext);
 void        M_FixPathSep(std::string &path);
 
-bool   M_FileExists(const std::string &filename);
-bool   M_FileExistsExt(const std::string &filename, const char *ext);
+bool M_FileExists(const std::string &filename);
+bool M_FileExistsExt(const std::string &filename, const char *ext);
 
 bool        M_AppendExtension(std::string &filename, std::string extension, bool if_needed = true);
 void        M_ExtractFilePath(const std::string &filename, std::string &dest);

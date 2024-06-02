@@ -24,6 +24,7 @@
 //
 //-----------------------------------------------------------------------------
 #include <climits>
+
 #include "c_dispatch.h"
 #include "cmdlib.h"
 #include "d_event.h"
@@ -178,7 +179,7 @@ static bool cmpWins(player_t *a, const player_t *b)
 PlayerResults PlayerQuery::execute()
 {
     PlayerResults results;
-    int32_t           maxscore = 0;
+    int32_t       maxscore = 0;
 
     // Construct a base result set from all ingame players, possibly filtered.
     for (Players::iterator it = ::players.begin(); it != players.end(); ++it)
@@ -382,7 +383,7 @@ void P_ForwardThrust(player_t *player, angle_t angle, fixed_t move)
 //
 void P_CalcHeight(player_t *player)
 {
-    int32_t     angle;
+    int32_t angle;
     fixed_t bob;
 
     // Regular movement bobbing
@@ -569,8 +570,8 @@ void P_MovePlayer(player_t *player)
     if (player->cmd.forwardmove | player->cmd.sidemove)
     {
         fixed_t forwardmove, sidemove;
-        int32_t     bobfactor;
-        int32_t     friction, movefactor;
+        int32_t bobfactor;
+        int32_t friction, movefactor;
 
         movefactor = P_GetMoveFactor(mo, &friction);
         bobfactor  = friction < ORIG_FRICTION ? movefactor : ORIG_FRICTION_FACTOR;
@@ -638,8 +639,8 @@ void P_MovePlayer(player_t *player)
 //
 void P_FallingDamage(AActor *ent)
 {
-    float delta;
-    int32_t   damage;
+    float   delta;
+    int32_t damage;
 
     if (!ent->player)
         return; // not a player
@@ -739,8 +740,8 @@ void P_DeathThink(player_t *player)
             (!clientside && sv_forcerespawn && level.time >= player->death_time + sv_forcerespawntime * TICRATE);
 
         // [SL] Can we respawn yet?
-        int32_t  respawn_time  = player->death_time + sv_spawndelaytime * TICRATE;
-        bool delay_respawn = (!clientside && level.time < respawn_time);
+        int32_t respawn_time  = player->death_time + sv_spawndelaytime * TICRATE;
+        bool    delay_respawn = (!clientside && level.time < respawn_time);
 
         // [Toke - dmflags] Old location of DF_FORCE_RESPAWN
         if (player->ingame() && ((player->cmd.buttons & BT_USE && !delay_respawn) || force_respawn) &&

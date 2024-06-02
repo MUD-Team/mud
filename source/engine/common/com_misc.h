@@ -45,10 +45,10 @@ struct toast_t
 
     uint32_t    flags;
     std::string left;
-    int32_t         left_pid;
+    int32_t     left_pid;
     std::string right;
-    int32_t         right_pid;
-    int32_t         icon;
+    int32_t     right_pid;
+    int32_t     icon;
 
     toast_t() : flags(0), left(""), left_pid(-1), right(""), right_pid(-1), icon(-1)
     {

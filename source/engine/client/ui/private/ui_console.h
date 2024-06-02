@@ -43,15 +43,14 @@ class ElementConsole : public Rml::Element, public Rml::EventListener
     ElementConsole(const Rml::String &tag);
     ~ElementConsole();
 
-    static void AddMessage(ConsoleLevel level, const std::string& message);
+    static void AddMessage(ConsoleLevel level, const std::string &message);
 
-protected:
-	void OnUpdate() override;
-  void OnChildAdd(Rml::Element* child) override;
-  void OnChildRemove(Rml::Element* child) override;
-	void ProcessEvent(Rml::Event& event) override;
-	void OnLayout() override;
-
+  protected:
+    void OnUpdate() override;
+    void OnChildAdd(Rml::Element *child) override;
+    void OnChildRemove(Rml::Element *child) override;
+    void ProcessEvent(Rml::Event &event) override;
+    void OnLayout() override;
 
   private:
     struct ConsoleLine
@@ -66,14 +65,13 @@ protected:
         std::string  mClassName;
         std::string  mAlertContents;
         std::string  mButtonName;
-    };    
+    };
 
     Rml::Element *mConsoleContent = nullptr;
-    Rml::Element *mConsoleInput = nullptr;
+    Rml::Element *mConsoleInput   = nullptr;
 
     ConsoleType mConsoleTypes[CONSOLE_MAX];
 
-    static bool mDirty;
+    static bool                     mDirty;
     static std::vector<ConsoleLine> mConsoleLines;
-
 };
