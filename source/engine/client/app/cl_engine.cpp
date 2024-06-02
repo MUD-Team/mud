@@ -22,7 +22,6 @@
 #include "m_fileio.h"
 #include "mud_includes.h"
 
-
 using Poco::Activity;
 using Poco::Util::Application;
 using Poco::Util::Subsystem;

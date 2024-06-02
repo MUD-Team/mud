@@ -61,8 +61,8 @@ typedef struct memblock_s
 {
     size_t             size; // including the header and possibly tiny fragments
     void             **user; // NULL if a free block
-    int32_t                tag;  // PU_FREE if this is free  [ML] 12/4/06: Readded from Chocodoom
-    int32_t                id;   // should be ZONEID
+    int32_t            tag;  // PU_FREE if this is free  [ML] 12/4/06: Readded from Chocodoom
+    int32_t            id;   // should be ZONEID
     struct memblock_s *next;
     struct memblock_s *prev;
 } memblock_t;
@@ -82,6 +82,6 @@ inline void Z_ChangeTag2(const void *ptr, const zoneTag_e tag, const char *file,
             Z_ChangeTag(p, t);                                                                                         \
     }
 
-#define Z_Malloc(s, t, p)   Z_Malloc2(s, t, p, __FILE__, __LINE__)
-#define Z_Free(p)           Z_Free2(p, __FILE__, __LINE__)
-#define Z_ChangeTag(p, t)   Z_ChangeTag2(p, t, __FILE__, __LINE__)
+#define Z_Malloc(s, t, p) Z_Malloc2(s, t, p, __FILE__, __LINE__)
+#define Z_Free(p)         Z_Free2(p, __FILE__, __LINE__)
+#define Z_ChangeTag(p, t) Z_ChangeTag2(p, t, __FILE__, __LINE__)

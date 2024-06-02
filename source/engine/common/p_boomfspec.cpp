@@ -34,7 +34,6 @@
 #include "r_common.h"
 #include "v_palette.h"
 
-
 EXTERN_CVAR(sv_allowexit)
 
 //

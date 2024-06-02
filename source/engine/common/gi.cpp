@@ -31,13 +31,7 @@ gameinfo_t gameinfo;
 static gameborder_t DoomBorder = {8,        8,        "brdr_tl", "brdr_t", "brdr_tr",
                                   "brdr_l", "brdr_r", "brdr_bl", "brdr_b", "brdr_br"};
 
-gameinfo_t CommercialGameInfo = {0,
-                                 "D_DM2TTL",
-                                 "misc/chat",
-                                 "menu/quit2",
-                                 3,
-                                 "GRNROCK",
-                                 &DoomBorder,
-                                 "DOOM 2: Hell on Earth"};
+gameinfo_t CommercialGameInfo = {0, "D_DM2TTL", "misc/chat", "menu/quit2",
+                                 3, "GRNROCK",  &DoomBorder, "DOOM 2: Hell on Earth"};
 
 VERSION_CONTROL(gi_cpp, "$Id: bb8881dbc0490c572c584cc210225fa323737593 $")

@@ -130,7 +130,7 @@ int32_t VPrintf(int32_t printlevel, const char *format, va_list parms)
 FORMAT_PRINTF(1, 2) int32_t STACK_ARGS Printf(const char *format, ...)
 {
     va_list argptr;
-    int32_t     count;
+    int32_t count;
 
     va_start(argptr, format);
     count = VPrintf(PRINT_HIGH, format, argptr);
@@ -142,7 +142,7 @@ FORMAT_PRINTF(1, 2) int32_t STACK_ARGS Printf(const char *format, ...)
 FORMAT_PRINTF(2, 3) int32_t STACK_ARGS Printf(int32_t printlevel, const char *format, ...)
 {
     va_list argptr;
-    int32_t     count;
+    int32_t count;
 
     va_start(argptr, format);
     count = VPrintf(printlevel, format, argptr);
@@ -154,7 +154,7 @@ FORMAT_PRINTF(2, 3) int32_t STACK_ARGS Printf(int32_t printlevel, const char *fo
 FORMAT_PRINTF(1, 2) int32_t STACK_ARGS Printf_Bold(const char *format, ...)
 {
     va_list argptr;
-    int32_t     count;
+    int32_t count;
 
     printxormask = 0x80;
     va_start(argptr, format);
@@ -167,7 +167,7 @@ FORMAT_PRINTF(1, 2) int32_t STACK_ARGS Printf_Bold(const char *format, ...)
 FORMAT_PRINTF(1, 2) int32_t STACK_ARGS DPrintf(const char *format, ...)
 {
     va_list argptr;
-    int32_t     count;
+    int32_t count;
 
     if (developer || devparm)
     {

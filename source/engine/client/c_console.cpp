@@ -60,7 +60,6 @@ static bool   ShouldTabCycle = false;
 static size_t NextCycleIndex = 0;
 static size_t PrevCycleIndex = 0;
 
-
 EXTERN_CVAR(con_coloredmessages)
 EXTERN_CVAR(con_buffersize)
 EXTERN_CVAR(show_messages)
@@ -382,8 +381,8 @@ static int32_t VPrintf(int32_t printlevel, const char *color_code, const char *f
 
     std::string sanitized_str(outline);
 
-    //if (!con_coloredmessages)
-    StripColorCodes(sanitized_str);    
+    // if (!con_coloredmessages)
+    StripColorCodes(sanitized_str);
 
     void UI_PrintString(printlevel_t print_level, const std::string &);
     UI_PrintString((printlevel_t)printlevel, sanitized_str);
@@ -411,7 +410,7 @@ static int32_t VPrintf(int32_t printlevel, const char *color_code, const char *f
 FORMAT_PRINTF(1, 2) int32_t STACK_ARGS Printf(const char *format, ...)
 {
     va_list argptr;
-    int32_t     count;
+    int32_t count;
 
     va_start(argptr, format);
     count = VPrintf(PRINT_HIGH, TEXTCOLOR_NORMAL, format, argptr);

@@ -314,7 +314,8 @@ DDoor::DDoor(sector_t *sector) : DMovingCeiling(sector), m_Status(init), m_Line(
 //		and made them more general to support the new specials.
 
 // [RH] SpawnDoor: Helper function for EV_DoDoor
-DDoor::DDoor(sector_t *sec, line_t *ln, EVlDoor type, fixed_t speed, int32_t delay) : DMovingCeiling(sec), m_Status(init)
+DDoor::DDoor(sector_t *sec, line_t *ln, EVlDoor type, fixed_t speed, int32_t delay)
+    : DMovingCeiling(sec), m_Status(init)
 {
     m_Type         = type;
     m_TopWait      = delay;
@@ -363,7 +364,8 @@ DDoor::DDoor(sector_t *sec, line_t *ln, EVlDoor type, fixed_t speed, int32_t del
 }
 
 // [Blair] Boom Generic locked Door Type
-DDoor::DDoor(sector_t *sec, line_t *ln, int32_t kind, int32_t trigger, int32_t speed) : DMovingCeiling(sec), m_Status(init)
+DDoor::DDoor(sector_t *sec, line_t *ln, int32_t kind, int32_t trigger, int32_t speed)
+    : DMovingCeiling(sec), m_Status(init)
 {
     m_Line         = ln;
     m_TopWait      = VDOORWAIT;
@@ -483,7 +485,8 @@ DDoor::DDoor(sector_t *sec, line_t *ln, int32_t delay, int32_t kind, int32_t tri
 }
 
 // [Blair] ZDoom-compatible door type
-DDoor::DDoor(sector_t *sec, line_t *ln, EVlDoor type, fixed_t speed, int32_t topwait, uint8_t lighttag, int32_t topcountdown)
+DDoor::DDoor(sector_t *sec, line_t *ln, EVlDoor type, fixed_t speed, int32_t topwait, uint8_t lighttag,
+             int32_t topcountdown)
     : DMovingCeiling(sec), m_Status(init)
 {
     m_Type         = type;
@@ -547,7 +550,7 @@ DDoor *DDoor::Clone(sector_t *sec) const
 bool EV_DoDoor(DDoor::EVlDoor type, line_t *line, AActor *thing, int32_t tag, int32_t speed, int32_t delay, card_t lock)
 {
     bool      rtn = false;
-    int32_t       secnum;
+    int32_t   secnum;
     sector_t *sec;
     DDoor    *door;
 
@@ -769,8 +772,8 @@ bool EV_DoZDoomDoor(DDoor::EVlDoor type, line_t *line, AActor *mo, uint8_t tag, 
     }
     else
     {
-        int32_t  secnum  = -1;
-        bool retcode = false;
+        int32_t secnum  = -1;
+        bool    retcode = false;
 
         while ((secnum = P_FindSectorFromTag(tag, secnum)) >= 0)
         {
@@ -798,7 +801,7 @@ bool EV_DoZDoomDoor(DDoor::EVlDoor type, line_t *line, AActor *mo, uint8_t tag, 
 //
 bool EV_DoGenDoor(line_t *line)
 {
-    int32_t       secnum;
+    int32_t   secnum;
     bool      rtn;
     sector_t *sec;
     bool      manual;
@@ -870,7 +873,7 @@ bool EV_DoGenDoor(line_t *line)
 //
 bool EV_DoGenLockedDoor(line_t *line)
 {
-    int32_t       secnum;
+    int32_t   secnum;
     bool      rtn;
     sector_t *sec;
     bool      manual;

@@ -145,7 +145,7 @@ enum
 
     // Joystick actions
     ACTION_FASTTURN,
-    
+
     // NUM
     NUM_ACTIONS
 };
@@ -155,8 +155,8 @@ extern uint8_t Actions[NUM_ACTIONS];
 struct ActionBits
 {
     uint32_t key;
-    int32_t          index;
-    char         name[12];
+    int32_t  index;
+    char     name[12];
 };
 
 extern uint32_t MakeKey(const char *s);

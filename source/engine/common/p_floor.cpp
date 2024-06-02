@@ -29,7 +29,7 @@
 #include "s_sound.h"
 #include "tables.h"
 
-void               P_ResetTransferSpecial(newspecial_s *newspecial);
+void           P_ResetTransferSpecial(newspecial_s *newspecial);
 const uint32_t P_ResetSectorTransferFlags(const uint32_t flags);
 
 extern bool predicting;
@@ -467,7 +467,8 @@ DFloor::DFloor(sector_t *sec, DFloor::EFloor floortype, line_t *line, fixed_t sp
 }
 
 // Generalized floor init
-DFloor::DFloor(sector_t *sec, line_t *line, int32_t speed, int32_t target, int32_t crush, int32_t change, int32_t direction, int32_t model)
+DFloor::DFloor(sector_t *sec, line_t *line, int32_t speed, int32_t target, int32_t crush, int32_t change,
+               int32_t direction, int32_t model)
     : DMovingFloor(sec), m_Status(init)
 {
     fixed_t floorheight   = P_FloorHeight(sec);
@@ -889,9 +890,10 @@ DFloor *DFloor::Clone(sector_t *sec) const
 // HANDLE FLOOR TYPES
 // [RH] Added tag, speed, height, crush, change params.
 //
-bool EV_DoFloor(DFloor::EFloor floortype, line_t *line, int32_t tag, fixed_t speed, fixed_t height, bool crush, int32_t change)
+bool EV_DoFloor(DFloor::EFloor floortype, line_t *line, int32_t tag, fixed_t speed, fixed_t height, bool crush,
+                int32_t change)
 {
-    int32_t       secnum;
+    int32_t   secnum;
     bool      rtn = false;
     sector_t *sec;
     bool      manual = false;
@@ -945,7 +947,7 @@ bool EV_DoFloor(DFloor::EFloor floortype, line_t *line, int32_t tag, fixed_t spe
 //
 bool EV_DoGenFloor(line_t *line)
 {
-    int32_t       secnum;
+    int32_t   secnum;
     bool      rtn;
     bool      manual;
     sector_t *sec;
@@ -1003,7 +1005,7 @@ bool EV_DoGenFloor(line_t *line)
 bool EV_DoZDoomFloor(DFloor::EFloor floortype, line_t *line, int32_t tag, fixed_t speed, fixed_t height, int32_t crush,
                      int32_t change, bool hexencrush, bool hereticlower)
 {
-    int32_t       secnum;
+    int32_t   secnum;
     bool      rtn = false;
     sector_t *sec;
     bool      manual = false;
@@ -1060,7 +1062,7 @@ bool EV_DoZDoomFloor(DFloor::EFloor floortype, line_t *line, int32_t tag, fixed_
 //
 bool EV_DoChange(line_t *line, EChange changetype, int32_t tag)
 {
-    int32_t       secnum;
+    int32_t   secnum;
     bool      rtn;
     sector_t *sec;
     sector_t *secm;
@@ -1104,14 +1106,14 @@ bool EV_DoChange(line_t *line, EChange changetype, int32_t tag)
 //
 bool EV_DoGenStairs(line_t *line)
 {
-    int32_t  secnum;
-    int32_t  osecnum; // jff 3/4/98 save old loop index
-    int32_t  height;
-    int32_t  i;
-    int32_t  newsecnum = 0;
-    int32_t  texture;
-    int32_t  ok;
-    bool rtn = false;
+    int32_t secnum;
+    int32_t osecnum; // jff 3/4/98 save old loop index
+    int32_t height;
+    int32_t i;
+    int32_t newsecnum = 0;
+    int32_t texture;
+    int32_t ok;
+    bool    rtn = false;
 
     sector_t *sec  = NULL;
     sector_t *tsec = NULL;
@@ -1315,18 +1317,18 @@ bool EV_DoGenStairs(line_t *line)
 //		by its special. If usespecials is 2, each sector stays in "sync" with
 //		the others.
 //
-bool EV_BuildStairs(int32_t tag, DFloor::EStair type, line_t *line, fixed_t stairsize, fixed_t speed, int32_t delay, int32_t reset,
-                    int32_t igntxt, int32_t usespecials)
+bool EV_BuildStairs(int32_t tag, DFloor::EStair type, line_t *line, fixed_t stairsize, fixed_t speed, int32_t delay,
+                    int32_t reset, int32_t igntxt, int32_t usespecials)
 {
-    int32_t  secnum;
-    int32_t  osecnum; // jff 3/4/98 save old loop index
-    int32_t  height;
-    int32_t  i;
-    int32_t  newsecnum = 0;
-    int32_t  texture;
-    int32_t  ok;
-    int32_t  persteptime;
-    bool rtn = false;
+    int32_t secnum;
+    int32_t osecnum; // jff 3/4/98 save old loop index
+    int32_t height;
+    int32_t i;
+    int32_t newsecnum = 0;
+    int32_t texture;
+    int32_t ok;
+    int32_t persteptime;
+    bool    rtn = false;
 
     sector_t *sec  = NULL;
     sector_t *tsec = NULL;
@@ -1532,9 +1534,9 @@ int32_t P_SpawnDonut(int32_t tag, line_t *line, fixed_t pillarspeed, fixed_t sli
     sector_t *s1;
     sector_t *s2;
     sector_t *s3;
-    int32_t       secnum;
-    int32_t       rtn;
-    int32_t       i;
+    int32_t   secnum;
+    int32_t   rtn;
+    int32_t   i;
     DFloor   *floor;
 
     secnum = -1;
@@ -1734,7 +1736,7 @@ bool EV_DoElevator(line_t *line, DElevator::EElevator elevtype, fixed_t speed, f
 
 bool SpawnCommonElevator(line_t *line, DElevator::EElevator type, fixed_t speed, fixed_t height, int32_t tag)
 {
-    int32_t        secnum;
+    int32_t    secnum;
     bool       rtn;
     sector_t  *sec;
     DElevator *elevator;

@@ -31,7 +31,7 @@
 #include "r_main.h"
 #include "ui_render.h"
 
-int32_t                  ElementPlayerView::mResolution = 1;
+int32_t              ElementPlayerView::mResolution = 1;
 Rml::DataModelHandle ElementPlayerView::mPlayerViewHandle;
 
 ElementPlayerView::ElementPlayerView(const Rml::String &tag) : Rml::Element(tag)
@@ -120,7 +120,7 @@ void ElementPlayerView::OnRender()
 
 void ElementPlayerView::ProcessEvent(Rml::Event &event)
 {
-    if (event == Rml::EventId::Click)    
+    if (event == Rml::EventId::Click)
     {
         if (event.GetPhase() == Rml::EventPhase::Target)
         {

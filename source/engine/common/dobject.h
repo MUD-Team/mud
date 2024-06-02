@@ -80,7 +80,7 @@ struct TypeInfo
 
     const char     *Name;
     const TypeInfo *ParentType;
-    uint32_t    SizeOf;
+    uint32_t        SizeOf;
     DObject *(*CreateNew)();
     uint16_t TypeIndex;
 
@@ -104,8 +104,8 @@ struct TypeInfo
 
     static const TypeInfo *FindType(const char *name);
 
-    static uint16_t m_NumTypes, m_MaxTypes;
-    static TypeInfo     **m_Types;
+    static uint16_t   m_NumTypes, m_MaxTypes;
+    static TypeInfo **m_Types;
 };
 
 struct ClassInit

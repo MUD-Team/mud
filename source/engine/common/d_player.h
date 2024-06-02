@@ -144,9 +144,9 @@ class player_s
     int32_t armortype;
 
     // Power ups. invinc and invis are tic counters.
-    int32_t  powers[NUMPOWERS];
-    bool cards[NUMCARDS];
-    bool backpack;
+    int32_t powers[NUMPOWERS];
+    bool    cards[NUMCARDS];
+    bool    backpack;
 
     // [AM] Lives left.
     int32_t lives;
@@ -172,9 +172,9 @@ class player_s
     weapontype_t pendingweapon;
     weapontype_t readyweapon;
 
-    bool weaponowned[NUMWEAPONS + 1];
-    int32_t  ammo[NUMAMMO];
-    int32_t  maxammo[NUMAMMO];
+    bool    weaponowned[NUMWEAPONS + 1];
+    int32_t ammo[NUMAMMO];
+    int32_t maxammo[NUMAMMO];
 
     // True if button down last tic.
     int32_t attackdown, usedown;
@@ -195,51 +195,51 @@ class player_s
     // So gun flashes light up areas.
     int32_t extralight;
     // Current PLAYPAL, ???
-    int32_t fixedcolormap;               //  can be set to REDCOLORMAP for pain, etc.
+    int32_t fixedcolormap;           //  can be set to REDCOLORMAP for pain, etc.
 
-    int32_t xviewshift;                  // [RH] view shift (for earthquakes)
+    int32_t xviewshift;              // [RH] view shift (for earthquakes)
 
-    int32_t      psprnum;
+    int32_t  psprnum;
     pspdef_t psprites[NUMPSPRITES];  // Overlay view sprites (gun, etc).
 
-    int32_t jumpTics;                    // delay the next jump for a moment
+    int32_t jumpTics;                // delay the next jump for a moment
 
-    int32_t     death_time;              // [SL] Record time of death to enforce respawn delay if needed
-    int32_t     suicidedelay;            // Ch0wW - Time between 2 suicides.
+    int32_t death_time;              // [SL] Record time of death to enforce respawn delay if needed
+    int32_t suicidedelay;            // Ch0wW - Time between 2 suicides.
     fixed_t oldvelocity[3];          // [RH] Used for falling damage
 
     AActor::AActorPtr camera;        // [RH] Whose eyes this player sees through
 
-    int32_t air_finished;                // [RH] Time when you start drowning
+    int32_t air_finished;            // [RH] Time when you start drowning
 
-    int32_t    GameTime;                 // [Dash|RD] Length of time that this client has been in the game.
-    time_t JoinTime;                 // [Dash|RD] Time this client joined.
-    int32_t    ping;                     // [Fly] guess what :)
-    int32_t    last_received;
+    int32_t GameTime;                // [Dash|RD] Length of time that this client has been in the game.
+    time_t  JoinTime;                // [Dash|RD] Time this client joined.
+    int32_t ping;                    // [Fly] guess what :)
+    int32_t last_received;
 
-    int32_t tic;                         // gametic last update for player was received
+    int32_t tic;                     // gametic last update for player was received
 
     PlayerSnapshotManager snapshots; // Previous player positions
 
-    uint8_t spying;                     // [SL] id of player being spynext'd by this player
-    bool spectator;                  // [GhostlyDeath] spectating?
+    uint8_t spying;                  // [SL] id of player being spynext'd by this player
+    bool    spectator;               // [GhostlyDeath] spectating?
                                      //	bool		deadspectator;			// [tm512] spectating as a dead player?
-    int32_t joindelay;                   // Number of tics to delay player from rejoining
-    int32_t timeout_callvote;            // [AM] Tic when a vote last finished.
-    int32_t timeout_vote;                // [AM] Tic when a player last voted.
+    int32_t joindelay;               // Number of tics to delay player from rejoining
+    int32_t timeout_callvote;        // [AM] Tic when a vote last finished.
+    int32_t timeout_vote;            // [AM] Tic when a player last voted.
 
-    bool ready;                      // [AM] Player is ready.
-    int32_t  timeout_ready;              // [AM] Tic when a player last toggled his ready state.
+    bool    ready;                   // [AM] Player is ready.
+    int32_t timeout_ready;           // [AM] Tic when a player last toggled his ready state.
 
-    uint8_t prefcolor[4];               // Nes - Preferred color. Server only.
+    uint8_t prefcolor[4];            // Nes - Preferred color. Server only.
 
     argb_t blend_color;              // blend color for the sector the player is in
     bool   doreborn;
 
-    uint8_t QueuePosition;              // Queue position to join game. 0 means not in queue
+    uint8_t QueuePosition;           // Queue position to join game. 0 means not in queue
 
     // zdoom
-    int32_t  hazardcount;
+    int32_t hazardcount;
     uint8_t hazardinterval;
 
     // For flood protection
@@ -257,8 +257,8 @@ class player_s
     {
         struct oldPacket_t
         {
-            int32_t   sequence;
-            buf_t data;
+            int32_t sequence;
+            buf_t   data;
 
             oldPacket_t() : sequence(-1)
             {
@@ -279,13 +279,13 @@ class player_s
 
         // protocol version supported by the client
         int16_t version;
-        int32_t   packedversion;
+        int32_t packedversion;
 
         // for reliable protocol
         oldPacket_t oldpackets[256];
 
-        int32_t  sequence;
-        int32_t  last_sequence;
+        int32_t sequence;
+        int32_t last_sequence;
         uint8_t packetnum;
 
         int32_t rate;
@@ -305,9 +305,9 @@ class player_s
         class download_t
         {
           public:
-            std::string  name;
-            std::string  md5;
-            uint32_t next_offset;
+            std::string name;
+            std::string md5;
+            uint32_t    next_offset;
 
             download_t() : name(""), md5(""), next_offset(0)
             {
@@ -644,7 +644,7 @@ typedef struct wbplayerstruct_s
 
 typedef struct wbstartstruct_s
 {
-    int32_t epsd;        // episode # (0-2)
+    int32_t epsd;    // episode # (0-2)
 
     char current[9]; // [RH] Name of map just finished
     char next[9];    // next level, [RH] actual map name

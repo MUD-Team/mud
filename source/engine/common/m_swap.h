@@ -67,8 +67,8 @@ inline static uint32_t LELONG(uint32_t x)
 
 inline static int32_t LELONG(int32_t x)
 {
-    return (int32_t)((((uint32_t)x) >> 24) | ((((uint32_t)x) >> 8) & 0xff00) |
-                 ((((uint32_t)x) << 8) & 0xff0000) | (((uint32_t)x) << 24));
+    return (int32_t)((((uint32_t)x) >> 24) | ((((uint32_t)x) >> 8) & 0xff00) | ((((uint32_t)x) << 8) & 0xff0000) |
+                     (((uint32_t)x) << 24));
 }
 
 inline static uint16_t BESHORT(uint16_t x)
@@ -130,8 +130,8 @@ inline static uint32_t BELONG(uint32_t x)
 
 inline static int32_t BELONG(int32_t x)
 {
-    return (int32_t)((((uint32_t)x) >> 24) | ((((uint32_t)x) >> 8) & 0xff00) |
-                 ((((uint32_t)x) << 8) & 0xff0000) | (((uint32_t)x) << 24));
+    return (int32_t)((((uint32_t)x) >> 24) | ((((uint32_t)x) >> 8) & 0xff00) | ((((uint32_t)x) << 8) & 0xff0000) |
+                     (((uint32_t)x) << 24));
 }
 
 #endif

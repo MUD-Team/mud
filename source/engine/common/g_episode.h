@@ -43,5 +43,5 @@ struct EpisodeInfo
 
 extern OLumpName   EpisodeMaps[MAX_EPISODES];
 extern EpisodeInfo EpisodeInfos[MAX_EPISODES];
-extern uint8_t        episodenum;
+extern uint8_t     episodenum;
 extern bool        episodes_modified; // Used by UMAPINFO only

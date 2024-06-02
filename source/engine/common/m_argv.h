@@ -67,7 +67,7 @@ class DArgs : public DObject
 
 extern DArgs Args;
 
-void M_FindResponseFile(void);
-int32_t  M_GetParmValue(const char *name);
+void    M_FindResponseFile(void);
+int32_t M_GetParmValue(const char *name);
 
 extern bool DefaultsLoaded;

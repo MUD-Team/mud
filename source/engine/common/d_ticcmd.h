@@ -99,15 +99,15 @@ struct ticcmd_t
         readByte(in.begin() + 11, impulse);
     }
 
-    int32_t tic;     // the client's tic when this cmd was sent
+    int32_t tic;   // the client's tic when this cmd was sent
 
-    uint8_t  buttons;
+    uint8_t buttons;
     int16_t pitch; // up/down. currently just a y-sheering amount
     int16_t yaw;   // left/right
     int16_t forwardmove;
     int16_t sidemove;
     int16_t upmove;
-    uint8_t  impulse;
+    uint8_t impulse;
 };
 
 #define UCMDF_BUTTONS     0x01

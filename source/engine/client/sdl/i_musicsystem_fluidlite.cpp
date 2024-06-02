@@ -60,10 +60,10 @@ static int32_t fluidFileClose(void *handle)
     if (res == 0)
         return -1; // FLUID_FAILED
     else
-        return 0; // FLUID_OK
+        return 0;  // FLUID_OK
 }
 
-static int32_t fluidFileSeek(void* handle, long offset, int32_t origin)
+static int32_t fluidFileSeek(void *handle, long offset, int32_t origin)
 {
     long real_offset = offset;
     if (origin == SEEK_CUR)
@@ -78,10 +78,10 @@ static int32_t fluidFileSeek(void* handle, long offset, int32_t origin)
     if (res == 0)
         return -1; // FLUID_FAILED
     else
-        return 0; // FLUID_OK
+        return 0;  // FLUID_OK
 }
 
-static long fluidFileTell(void* handle)
+static long fluidFileTell(void *handle)
 {
     long res = PHYSFS_tell((PHYSFS_File *)handle);
     if (res == -1)
@@ -90,11 +90,11 @@ static long fluidFileTell(void* handle)
         return res;
 }
 
-static int32_t fluidFileRead(void *buf, int32_t count, void* handle)
+static int32_t fluidFileRead(void *buf, int32_t count, void *handle)
 {
     int32_t res = PHYSFS_readBytes((PHYSFS_File *)handle, buf, (PHYSFS_uint64)count);
     if (res == count)
-        return 0; // FLUID_OK
+        return 0;  // FLUID_OK
     else
         return -1; // FLUID_FAILED
 }
@@ -197,15 +197,14 @@ FluidLiteMusicSystem::FluidLiteMusicSystem()
     m_soundfontLoader          = new_fluid_defsfloader();
     m_soundfontLoader->fileapi = (fluid_fileapi_t *)calloc(1, sizeof(fluid_fileapi_t));
     fluid_init_default_fileapi(m_soundfontLoader->fileapi);
-    m_soundfontLoader->fileapi->fopen = fluidFileOpen;
+    m_soundfontLoader->fileapi->fopen  = fluidFileOpen;
     m_soundfontLoader->fileapi->fclose = fluidFileClose;
-    m_soundfontLoader->fileapi->fseek = fluidFileSeek;
-    m_soundfontLoader->fileapi->fread = fluidFileRead;
-    m_soundfontLoader->fileapi->ftell = fluidFileTell;
+    m_soundfontLoader->fileapi->fseek  = fluidFileSeek;
+    m_soundfontLoader->fileapi->fread  = fluidFileRead;
+    m_soundfontLoader->fileapi->ftell  = fluidFileTell;
     fluid_synth_add_sfloader(m_synth, m_soundfontLoader);
 
-    if (fluid_synth_sfload(m_synth, std::string("soundfonts/").append(snd_soundfont.cstring()).c_str(),
-                           1) == -1)
+    if (fluid_synth_sfload(m_synth, std::string("soundfonts/").append(snd_soundfont.cstring()).c_str(), 1) == -1)
     {
         Printf(PRINT_WARNING, "I_InitMusic: FluidLite Initialization failure.\n");
         delete_fluid_synth(m_synth);

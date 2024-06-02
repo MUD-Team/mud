@@ -38,9 +38,9 @@
 #include "p_mapformat.h"
 #include "p_mobj.h"
 #include "p_setup.h"
+#include "r_common.h"
 #include "r_state.h"
 #include "s_sound.h"
-#include "r_common.h"
 
 EXTERN_CVAR(sv_allowexit)
 EXTERN_CVAR(sv_fastmonsters)
@@ -105,7 +105,7 @@ extern bool isFast;
 
 void P_RecursiveSound(sector_t *sec, int32_t soundblocks, AActor *soundtarget)
 {
-    int32_t       i;
+    int32_t   i;
     line_t   *check;
     sector_t *other;
 
@@ -278,10 +278,10 @@ bool P_Move(AActor *actor)
 {
     fixed_t tryx, tryy, deltax, deltay, origx, origy;
     bool    try_ok;
-    int32_t     good;
-    int32_t     speed;
-    int32_t     movefactor = ORIG_FRICTION_FACTOR;
-    int32_t     friction   = ORIG_FRICTION;
+    int32_t good;
+    int32_t speed;
+    int32_t movefactor = ORIG_FRICTION_FACTOR;
+    int32_t friction   = ORIG_FRICTION;
 
     if (!actor->subsector)
         return false;
@@ -420,7 +420,7 @@ bool P_IsOnLift(const AActor *actor)
 {
     const sector_t *sec = actor->subsector->sector;
     line_t          line;
-    int32_t             l;
+    int32_t         l;
 
     // Short-circuit: it's on a lift which is active.
     if (sec->floordata && ((DFloor *)sec->floordata)->m_Status == DFloor::up)
@@ -478,7 +478,7 @@ void P_NewChaseDir(AActor *actor)
 
     dirtype_t d[3];
 
-    int32_t       tdir;
+    int32_t   tdir;
     dirtype_t olddir;
 
     dirtype_t turnaround;
@@ -865,7 +865,7 @@ seeyou:
 //
 void A_Chase(AActor *actor)
 {
-    int32_t     delta;
+    int32_t delta;
     AActor *ngoal;
 
     // GhostlyDeath -- Don't chase spectators at all
@@ -1358,12 +1358,12 @@ AActor *corpsehit;
 AActor *vileobj;
 fixed_t viletryx;
 fixed_t viletryy;
-int32_t     viletryradius;
+int32_t viletryradius;
 
 bool PIT_VileCheck(AActor *thing)
 {
-    int32_t  maxdist;
-    bool check;
+    int32_t maxdist;
+    bool    check;
 
     if (thing->oflags & MFO_NORAISE)
         return true; // [AM] Can't raise
@@ -1551,7 +1551,7 @@ void A_VileTarget(AActor *actor)
 void A_VileAttack(AActor *actor)
 {
     AActor *fire;
-    int32_t     an;
+    int32_t an;
 
     if (!actor->target)
         return;
@@ -1607,9 +1607,9 @@ void A_FatAttack1(AActor *actor)
         AActor *mo = P_SpawnMissile(actor, actor->target, MT_FATSHOT);
 
         mo->angle += FATSPREAD;
-        int32_t an   = mo->angle >> ANGLETOFINESHIFT;
-        mo->momx = FixedMul(mo->info->speed, finecosine[an]);
-        mo->momy = FixedMul(mo->info->speed, finesine[an]);
+        int32_t an = mo->angle >> ANGLETOFINESHIFT;
+        mo->momx   = FixedMul(mo->info->speed, finecosine[an]);
+        mo->momy   = FixedMul(mo->info->speed, finesine[an]);
     }
 }
 
@@ -1630,9 +1630,9 @@ void A_FatAttack2(AActor *actor)
         AActor *mo = P_SpawnMissile(actor, actor->target, MT_FATSHOT);
 
         mo->angle -= FATSPREAD * 2;
-        int32_t an   = mo->angle >> ANGLETOFINESHIFT;
-        mo->momx = FixedMul(mo->info->speed, finecosine[an]);
-        mo->momy = FixedMul(mo->info->speed, finesine[an]);
+        int32_t an = mo->angle >> ANGLETOFINESHIFT;
+        mo->momx   = FixedMul(mo->info->speed, finecosine[an]);
+        mo->momy   = FixedMul(mo->info->speed, finesine[an]);
     }
 }
 
@@ -1677,7 +1677,7 @@ void A_Mushroom(AActor *actor)
     fixed_t misc1 = actor->state->misc1 ? actor->state->misc1 : FRACUNIT * 4;
     fixed_t misc2 = actor->state->misc2 ? actor->state->misc2 : FRACUNIT / 2;
 
-    A_Explode(actor);                // make normal explosion
+    A_Explode(actor);                    // make normal explosion
 
     for (int32_t i = -n; i <= n; i += 8) // launch mushroom cloud
     {
@@ -1710,7 +1710,7 @@ void A_SkullAttack(AActor *actor)
 {
     AActor *dest;
     angle_t an;
-    int32_t     dist;
+    int32_t dist;
 
     if (!actor->target)
         return;
@@ -1765,7 +1765,7 @@ void A_BetaSkullAttack(AActor *actor)
 //
 void A_SpawnObject(AActor *actor)
 {
-    int32_t     type, angle, ofs_x, ofs_y, ofs_z, vel_x, vel_y, vel_z;
+    int32_t type, angle, ofs_x, ofs_y, ofs_z, vel_x, vel_y, vel_z;
     angle_t an;
     fixed_t fan, dx, dy;
     AActor *mo;
@@ -1832,9 +1832,9 @@ void A_SpawnObject(AActor *actor)
 //
 void A_MonsterProjectile(AActor *actor)
 {
-    int32_t     type, angle, pitch, spawnofs_xy, spawnofs_z;
+    int32_t type, angle, pitch, spawnofs_xy, spawnofs_z;
     AActor *mo;
-    int32_t     an;
+    int32_t an;
 
     if (!actor->target || !actor->state->args[0] || !serverside)
         return;
@@ -2106,7 +2106,7 @@ void A_SeekTracer(AActor *actor)
 void A_FindTracer(AActor *actor)
 {
     angle_t fov;
-    int32_t     dist;
+    int32_t dist;
 
     if (!actor || (actor->tracer != AActor::AActorPtr() && actor->tracer->health > 0) || !serverside)
         return;
@@ -2173,7 +2173,7 @@ void A_JumpIfHealthBelow(AActor *actor)
 //
 void A_JumpIfTargetInSight(AActor *actor)
 {
-    int32_t     state;
+    int32_t state;
     angle_t fov;
 
     if (!actor || !actor->target)
@@ -2220,7 +2220,7 @@ void A_JumpIfTargetCloser(AActor *actor)
 void A_JumpIfTracerInSight(AActor *actor)
 {
     angle_t fov;
-    int32_t     state;
+    int32_t state;
 
     if (!actor || !actor->tracer || !serverside)
         return;
@@ -2343,8 +2343,8 @@ void A_PainShootSkull(AActor *actor, angle_t angle)
 
     AActor *other;
     angle_t an;
-    int32_t     prestep;
-    int32_t     count;
+    int32_t prestep;
+    int32_t count;
 
     if (!serverside)
         return;
@@ -2516,10 +2516,10 @@ void A_Detonate(AActor *mo)
 void A_Explode(AActor *thing)
 {
     // [RH] figure out means of death;
-    int32_t  mod;
-    int32_t  damage     = 128;
-    int32_t  distance   = 128;
-    bool hurtSource = true;
+    int32_t mod;
+    int32_t damage     = 128;
+    int32_t distance   = 128;
+    bool    hurtSource = true;
 
     switch (thing->type)
     {
@@ -2631,8 +2631,8 @@ void A_BabyMetal(AActor *mo)
 
 // killough 2/7/98: Remove limit on icon landings:
 AActor **braintargets;
-int32_t      numbraintargets_alloc;
-int32_t      numbraintargets;
+int32_t  numbraintargets_alloc;
+int32_t  numbraintargets;
 
 struct brain_s brain; // killough 3/26/98: global state of boss brain
 
@@ -2680,9 +2680,9 @@ void A_BrainScream(AActor *mo)
     if (!clientside)
         return;
 
-    int32_t     x;
-    int32_t     y;
-    int32_t     z;
+    int32_t x;
+    int32_t y;
+    int32_t z;
     AActor *th;
 
     for (x = mo->x - 196 * FRACUNIT; x < mo->x + 320 * FRACUNIT; x += FRACUNIT * 8)
@@ -2707,9 +2707,9 @@ void A_BrainExplode(AActor *mo)
     if (!clientside)
         return;
 
-    int32_t     x  = mo->x + P_RandomDiff(mo) * 2048;
-    int32_t     y  = mo->y;
-    int32_t     z  = 128 + P_Random(mo) * 2 * FRACUNIT;
+    int32_t x  = mo->x + P_RandomDiff(mo) * 2048;
+    int32_t y  = mo->y;
+    int32_t z  = 128 + P_Random(mo) * 2 * FRACUNIT;
     AActor *th = new AActor(x, y, z, MT_ROCKET);
     th->momz   = P_Random(mo) << 9;
 
@@ -2772,7 +2772,7 @@ void A_SpawnFly(AActor *mo)
     AActor    *newmobj;
     AActor    *fog;
     AActor    *targ;
-    int32_t        r;
+    int32_t    r;
     mobjtype_t type;
 
     if (--mo->reactiontime)

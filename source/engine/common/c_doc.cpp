@@ -112,7 +112,7 @@ static void HTMLCvarRow(std::string &out, const cvar_t &cvar)
     case CVARTYPE_WORD:
     case CVARTYPE_INT: {
         std::string buffer;
-        int32_t         val = atoi(cvar.getDefault().c_str());
+        int32_t     val = atoi(cvar.getDefault().c_str());
         StrFormat(buffer, "Default: %d", val);
         info.push_back(buffer);
 

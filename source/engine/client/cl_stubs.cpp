@@ -141,8 +141,8 @@ bool SV_AwarenessUpdate(player_t &pl, AActor *mo)
 void SV_SendPackets(void)
 {
 }
-void SV_SendExecuteLineSpecial(uint8_t special, line_t *line, AActor *activator, int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3,
-                               int32_t arg4)
+void SV_SendExecuteLineSpecial(uint8_t special, line_t *line, AActor *activator, int32_t arg0, int32_t arg1,
+                               int32_t arg2, int32_t arg3, int32_t arg4)
 {
 }
 

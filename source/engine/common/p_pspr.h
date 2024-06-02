@@ -66,7 +66,7 @@ inline FArchive &operator>>(FArchive &arc, psprnum_t &out)
 typedef struct pspdef_s
 {
     state_t *state; // a NULL state means not active
-    int32_t      tics;
+    int32_t  tics;
 
     fixed_t sx;
     fixed_t sy;

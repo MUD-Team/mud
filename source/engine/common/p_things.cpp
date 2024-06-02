@@ -31,7 +31,6 @@
 #include "s_sound.h"
 #include "tables.h"
 
-
 EXTERN_CVAR(sv_nomonsters)
 
 // List of spawnable things for the Thing_Spawn and Thing_Projectile specials.
@@ -312,7 +311,7 @@ bool P_ActivateMobj(AActor *mobj, AActor *activator)
 #ifdef CLIENT_APP
             void P_DrawSplash(int32_t count, fixed_t x, fixed_t y, fixed_t z, angle_t angle, int32_t kind);
             P_DrawSplash(count, mobj->x, mobj->y, mobj->z, mobj->angle, 1);
-#endif            
+#endif
             sprintf(sound, "world/spark%d", 1 + (M_Random() % 3));
             S_Sound(mobj, CHAN_AUTO, sound, 1, ATTN_STATIC);
             break;

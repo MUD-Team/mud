@@ -74,7 +74,8 @@ class DMover : public DSectorEffect
     };
 
   private:
-    EResult MovePlane(fixed_t speed, fixed_t dest, int32_t crush, int32_t floorOrCeiling, int32_t direction, bool hexencrush);
+    EResult MovePlane(fixed_t speed, fixed_t dest, int32_t crush, int32_t floorOrCeiling, int32_t direction,
+                      bool hexencrush);
 
   protected:
     DMover();

@@ -42,7 +42,6 @@
 #include "w_wad.h"
 #include "z_zone.h"
 
-
 argb_t     Col2RGB8[65][256];
 palindex_t RGB32k[32][32][32];
 

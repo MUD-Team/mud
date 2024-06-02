@@ -255,7 +255,7 @@ static IVideoMode I_ValidateVideoMode(const IVideoMode &mode)
             return invalid_mode;
     }
 
-    uint32_t      closest_dist = UINT_MAX;
+    uint32_t          closest_dist = UINT_MAX;
     const IVideoMode *closest_mode = NULL;
 
     const IVideoModeList *modelist = I_GetVideoCapabilities()->getSupportedVideoModes();
@@ -272,7 +272,7 @@ static IVideoMode I_ValidateVideoMode(const IVideoMode &mode)
                     continue;
 
                 uint32_t dist = (it->width - desired_mode.width) * (it->width - desired_mode.width) +
-                                    (it->height - desired_mode.height) * (it->height - desired_mode.height);
+                                (it->height - desired_mode.height) * (it->height - desired_mode.height);
 
                 if (dist < closest_dist)
                 {
@@ -339,7 +339,7 @@ bool I_VideoInitialized()
 //
 void I_ShutdownHardware()
 {
-    UI_Shutdown();       
+    UI_Shutdown();
 
     delete video_subsystem;
     video_subsystem = NULL;
@@ -509,7 +509,7 @@ void I_BeginUpdate()
 {
     if (I_VideoInitialized())
     {
-        I_GetWindow()->startRefresh();              
+        I_GetWindow()->startRefresh();
     }
 }
 
@@ -522,7 +522,7 @@ void I_BeginUpdate()
 void I_FinishUpdate()
 {
     if (I_VideoInitialized())
-    {        
+    {
         I_GetWindow()->finishRefresh();
     }
 }

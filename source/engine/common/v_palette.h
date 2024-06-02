@@ -57,9 +57,9 @@ typedef struct dyncolormap_s dyncolormap_t;
 extern fargb_t baseblend;
 
 extern uint8_t gammatable[256];
-float       V_GetMinimumGammaLevel();
-float       V_GetMaximumGammaLevel();
-void        V_IncrementGammaLevel();
+float          V_GetMinimumGammaLevel();
+float          V_GetMaximumGammaLevel();
+void           V_IncrementGammaLevel();
 
 static inline argb_t V_GammaCorrect(const argb_t value)
 {

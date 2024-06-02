@@ -210,18 +210,18 @@ class NetCommand
     static const int32_t CMD_DELTAYAW   = 0x0080;
     static const int32_t CMD_DELTAPITCH = 0x0100;
 
-    int32_t     mTic;
-    int32_t     mWorldIndex;
-    int32_t     mFields;
-    uint8_t    mButtons;
+    int32_t mTic;
+    int32_t mWorldIndex;
+    int32_t mFields;
+    uint8_t mButtons;
     fixed_t mAngle;
     fixed_t mPitch;
-    int16_t   mForwardMove;
-    int16_t   mSideMove;
-    int16_t   mUpMove;
-    uint8_t    mImpulse;
-    int16_t   mDeltaYaw;
-    int16_t   mDeltaPitch;
+    int16_t mForwardMove;
+    int16_t mSideMove;
+    int16_t mUpMove;
+    uint8_t mImpulse;
+    int16_t mDeltaYaw;
+    int16_t mDeltaPitch;
 
     int32_t getSerializedFields();
 

@@ -91,7 +91,7 @@ FindItemByClassname
 */
 gitem_t *FindItemByClassname(const char *classname)
 {
-    int32_t      i;
+    int32_t  i;
     gitem_t *it;
 
     it = itemlist;
@@ -110,7 +110,7 @@ FindItem
 */
 gitem_t *FindItem(const char *pickup_name)
 {
-    int32_t      i;
+    int32_t  i;
     gitem_t *it;
 
     it = itemlist;
@@ -123,7 +123,7 @@ gitem_t *FindItem(const char *pickup_name)
 
 gitem_t *FindCardItem(card_t card)
 {
-    int32_t      i;
+    int32_t  i;
     gitem_t *it;
 
     it = itemlist;

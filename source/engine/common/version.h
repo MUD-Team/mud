@@ -98,7 +98,7 @@
 
 #define NETDEMOVER 3
 
-int32_t         VersionCompat(const int32_t server, const int32_t client);
+int32_t     VersionCompat(const int32_t server, const int32_t client);
 std::string VersionMessage(const int32_t server, const int32_t client, const char *email);
 
 // denis - per-file svn version stamps

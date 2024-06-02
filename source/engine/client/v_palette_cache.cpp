@@ -72,7 +72,7 @@ class PaletteCache
 
         liq_attr      *histogram_attr = liq_attr_create();
         liq_histogram *histogram      = liq_histogram_create(histogram_attr);
-        
+
         // Todo: see how this affects quality vs speed, though should be preprocessing palettes for distribution anyway
         // liq_set_speed(histogram_attr, 10);
 

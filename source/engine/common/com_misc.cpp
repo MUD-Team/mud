@@ -41,7 +41,7 @@ void COM_PushToast(const toast_t &toast)
         MSG_WriteSVC(&it->client.reliablebuf, SVC_Toast(toast));
     }
 #else
-    //hud::PushToast(toast);
+    // hud::PushToast(toast);
 #endif
 }
 

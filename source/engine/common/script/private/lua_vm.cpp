@@ -31,11 +31,11 @@
 
 void LUA_OpenCommonState(lua_State *L);
 
-static void LUA_Sandbox(lua_State *L);
-static int32_t  LUA_DbgNOP(lua_State *L);
-static int32_t  LUA_MsgHandler(lua_State *L);
-static int32_t  LUA_LuaRequire(lua_State *L);
-static int32_t  LUA_DoFile(lua_State *L, const std::string &filepath, const char *source, size_t source_length);
+static void    LUA_Sandbox(lua_State *L);
+static int32_t LUA_DbgNOP(lua_State *L);
+static int32_t LUA_MsgHandler(lua_State *L);
+static int32_t LUA_LuaRequire(lua_State *L);
+static int32_t LUA_DoFile(lua_State *L, const std::string &filepath, const char *source, size_t source_length);
 
 // TODO: Fixme
 static std::vector<std::string> requirePaths;
@@ -125,7 +125,7 @@ int32_t LUA_DoFile(lua_State *L, const std::string &filepath)
         I_Error("LuaVM: Zero length file %s", filepath.c_str());
     }
 
-    Poco::Buffer<char> buffer(length+1);
+    Poco::Buffer<char> buffer(length + 1);
 
     if (length != PHYSFS_readBytes(fp, buffer.begin(), length))
     {
@@ -135,7 +135,7 @@ int32_t LUA_DoFile(lua_State *L, const std::string &filepath)
     PHYSFS_close(fp);
 
     buffer[length] = 0;
-    int32_t result     = LUA_DoFile(L, filepath, buffer.begin(), length);
+    int32_t result = LUA_DoFile(L, filepath, buffer.begin(), length);
 
     requirePaths.pop_back();
     return result;
@@ -163,7 +163,9 @@ int32_t LUA_DoFile(lua_State *L, const std::string &filepath, const char *source
 
     if (status != LUA_OK)
     {
-        I_Error(StrFormat("LUA: Error compiling %s : %s\n", filepath.c_str() ? filepath.c_str() : "???", lua_tostring(L, -1)).c_str());
+        I_Error(StrFormat("LUA: Error compiling %s : %s\n", filepath.c_str() ? filepath.c_str() : "???",
+                          lua_tostring(L, -1))
+                    .c_str());
     }
 
     if (true) // lua_debug.d_)
@@ -172,7 +174,7 @@ int32_t LUA_DoFile(lua_State *L, const std::string &filepath, const char *source
     }
     else
     {
-        int32_t base = lua_gettop(L);             // function index
+        int32_t base = lua_gettop(L);         // function index
         lua_pushcfunction(L, LUA_MsgHandler); // push message handler */
         lua_insert(L, base);                  // put it under function and args */
         status = lua_pcall(L, 0, LUA_MULTRET, base);
@@ -320,19 +322,19 @@ void LUA_Sandbox(lua_State *L)
 
 // NOP dbg() for when debugger is disabled and someone has left some breakpoints in code
 static bool dbg_nop_warn = false;
-int32_t         LUA_DbgNOP(lua_State *L)
+int32_t     LUA_DbgNOP(lua_State *L)
 {
     if (!dbg_nop_warn)
     {
         dbg_nop_warn = true;
-#ifdef CLIENT_APP        
+#ifdef CLIENT_APP
         I_Warning("LUA: dbg() called without lua_debug being set.  Please check that "
                   "a stray dbg call didn't get left "
                   "in source.");
 #else
         Printf("WARNING: LUA: dbg() called without lua_debug being set.  Please check that "
-                  "a stray dbg call didn't get left "
-                  "in source.");
+               "a stray dbg call didn't get left "
+               "in source.");
 #endif
     }
     return 0;
@@ -357,7 +359,7 @@ void LUA_CallGlobalFunction(lua_State *L, const char *function_name)
     }
     else
     {
-        int32_t base = lua_gettop(L);             // function index
+        int32_t base = lua_gettop(L);         // function index
         lua_pushcfunction(L, LUA_MsgHandler); // push message handler */
         lua_insert(L, base);                  // put it under function and args */
 

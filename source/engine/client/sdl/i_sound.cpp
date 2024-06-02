@@ -42,13 +42,13 @@
 
 #define NUM_CHANNELS 32
 
-static int32_t    mixer_freq;
-static Uint16 mixer_format;
-static int32_t    mixer_channels;
+static int32_t mixer_freq;
+static Uint16  mixer_format;
+static int32_t mixer_channels;
 
-static bool sound_initialized = false;
-static bool channel_in_use[NUM_CHANNELS];
-static int32_t  nextchannel = 0;
+static bool    sound_initialized = false;
+static bool    channel_in_use[NUM_CHANNELS];
+static int32_t nextchannel = 0;
 
 EXTERN_CVAR(snd_sfxvolume)
 EXTERN_CVAR(snd_musicvolume)
@@ -110,8 +110,8 @@ static void ExpandSoundData(uint8_t *data, int32_t samplerate, int32_t bits, int
 
     for (size_t i = 0; i < expanded_length; ++i)
     {
-        Sint16 sample;
-        int32_t    src;
+        Sint16  sample;
+        int32_t src;
 
         src = (i * expand_ratio) >> 8;
 
@@ -206,8 +206,8 @@ static void getsfx(sfxinfo_struct *sfx)
 
     // Just deal with uppercase exported lump names with .lmp extension while testing - Dasho
     std::string sfxfile = StdStringToUpper(sfx->filename);
-    sfxfile = StrFormat("sounds/%s.lmp", sfxfile.c_str());
-    
+    sfxfile             = StrFormat("sounds/%s.lmp", sfxfile.c_str());
+
     if (!M_FileExists(sfxfile))
         return;
 

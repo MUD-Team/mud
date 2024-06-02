@@ -32,7 +32,7 @@
 
 struct ScriptPtr
 {
-    uint16_t  Number;
+    uint16_t Number;
     uint8_t  Type;
     uint8_t  ArgCount;
     uint32_t Address;
@@ -40,8 +40,8 @@ struct ScriptPtr
 
 struct ScriptPtr1
 {
-    uint16_t  Number;
-    uint16_t  Type;
+    uint16_t Number;
+    uint16_t Type;
     uint32_t Address;
     uint32_t ArgCount;
 };
@@ -91,15 +91,15 @@ class FBehavior
     ~FBehavior();
 
     bool        IsGood();
-    uint8_t       *FindChunk(uint32_t id) const;
-    uint8_t       *NextChunk(uint8_t *chunk) const;
-    int32_t        *FindScript(int32_t number) const;
+    uint8_t    *FindChunk(uint32_t id) const;
+    uint8_t    *NextChunk(uint8_t *chunk) const;
+    int32_t    *FindScript(int32_t number) const;
     void        PrepLocale(uint32_t userpref, uint32_t userdef, uint32_t syspref, uint32_t sysdef);
     const char *LookupString(uint32_t index, uint32_t ofs = 0) const;
     const char *LocalizeString(uint32_t index) const;
-    void        StartTypedScripts(uint16_t type, AActor *activator, int32_t arg0 = 0, int32_t arg1 = 0, int32_t arg2 = 0,
-                                  bool always = true) const;
-    uint32_t       PC2Ofs(int32_t *pc) const
+    void     StartTypedScripts(uint16_t type, AActor *activator, int32_t arg0 = 0, int32_t arg1 = 0, int32_t arg2 = 0,
+                               bool always = true) const;
+    uint32_t PC2Ofs(int32_t *pc) const
     {
         return (uint8_t *)pc - Data;
     }
@@ -112,7 +112,7 @@ class FBehavior
         return Format;
     }
     ScriptFunction *GetFunction(int32_t funcnum) const;
-    int32_t             GetArrayVal(int32_t arraynum, int32_t index) const;
+    int32_t         GetArrayVal(int32_t arraynum, int32_t index) const;
     void            SetArrayVal(int32_t arraynum, int32_t index, int32_t value);
 
   private:
@@ -120,22 +120,22 @@ class FBehavior
 
     ACSFormat Format;
 
-    uint8_t      *Data;
-    int32_t        DataSize;
-    uint8_t      *Chunks;
-    uint8_t      *Scripts;
-    int32_t        NumScripts;
-    uint8_t      *Functions;
-    int32_t        NumFunctions;
+    uint8_t   *Data;
+    int32_t    DataSize;
+    uint8_t   *Chunks;
+    uint8_t   *Scripts;
+    int32_t    NumScripts;
+    uint8_t   *Functions;
+    int32_t    NumFunctions;
     ArrayInfo *Arrays;
-    int32_t        NumArrays;
-    uint32_t      LanguageNeutral;
-    uint32_t      Localized;
+    int32_t    NumArrays;
+    uint32_t   LanguageNeutral;
+    uint32_t   Localized;
 
     static int32_t STACK_ARGS SortScripts(const void *a, const void *b);
-    void                  AddLanguage(uint32_t lang);
-    uint32_t                 FindLanguage(uint32_t lang, bool ignoreregion) const;
-    uint32_t                *CheckIfInList(uint32_t lang);
+    void                      AddLanguage(uint32_t lang);
+    uint32_t                  FindLanguage(uint32_t lang, bool ignoreregion) const;
+    uint32_t                 *CheckIfInList(uint32_t lang);
 };
 
 class DLevelScript : public DObject
@@ -493,8 +493,8 @@ class DLevelScript : public DObject
         SCRIPT_ModulusBy0,
     };
 
-    DLevelScript(AActor *who, line_t *where, int32_t num, int32_t *code, int32_t lineSide, int32_t arg0, int32_t arg1, int32_t arg2, int32_t always,
-                 bool delay);
+    DLevelScript(AActor *who, line_t *where, int32_t num, int32_t *code, int32_t lineSide, int32_t arg0, int32_t arg1,
+                 int32_t arg2, int32_t always, bool delay);
 
     void RunScript();
 
@@ -512,47 +512,53 @@ class DLevelScript : public DObject
 
   protected:
     DLevelScript *next, *prev;
-    int32_t           script;
-    int32_t           sp;
-    int32_t           localvars[LOCAL_SIZE];
-    int32_t          *pc;
+    int32_t       script;
+    int32_t       sp;
+    int32_t       localvars[LOCAL_SIZE];
+    int32_t      *pc;
     EScriptState  state;
-    int32_t           statedata;
+    int32_t       statedata;
     AActor       *activator;
     line_t       *activationline;
-    int32_t           lineSide;
-    int32_t           stringstart;
+    int32_t       lineSide;
+    int32_t       stringstart;
 
     inline void PushToStack(int32_t val);
 
-    void        Link();
-    void        Unlink();
-    void        PutLast();
-    void        PutFirst();
-    static int32_t  Random(int32_t min, int32_t max);
-    static int32_t  ThingCount(int32_t type, int32_t tid);
-    static void ChangeFlat(int32_t tag, int32_t name, bool floorOrCeiling);
-    static int32_t  CountPlayers();
-    static void SetLineTexture(int32_t lineid, int32_t side, int32_t position, int32_t name);
+    void           Link();
+    void           Unlink();
+    void           PutLast();
+    void           PutFirst();
+    static int32_t Random(int32_t min, int32_t max);
+    static int32_t ThingCount(int32_t type, int32_t tid);
+    static void    ChangeFlat(int32_t tag, int32_t name, bool floorOrCeiling);
+    static int32_t CountPlayers();
+    static void    SetLineTexture(int32_t lineid, int32_t side, int32_t position, int32_t name);
 
     static int32_t DoSpawn(int32_t type, fixed_t x, fixed_t y, fixed_t z, int32_t tid, int32_t angle);
     static int32_t DoSpawnSpot(int32_t type, int32_t spot, int32_t tid, int32_t angle);
 
     static void SetLineBlocking(int32_t lineid, int32_t flags);
     static void SetLineMonsterBlocking(int32_t lineid, int32_t toggle);
-    static void SetLineSpecial(int32_t lineid, int32_t special, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4, int32_t arg5);
-    static void ActivateLineSpecial(uint8_t special, line_t *line, AActor *activator, int32_t arg0, int32_t arg1, int32_t arg2,
-                                    int32_t arg3, int32_t arg4);
+    static void SetLineSpecial(int32_t lineid, int32_t special, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4,
+                               int32_t arg5);
+    static void ActivateLineSpecial(uint8_t special, line_t *line, AActor *activator, int32_t arg0, int32_t arg1,
+                                    int32_t arg2, int32_t arg3, int32_t arg4);
     static void ChangeMusic(uint8_t pcd, AActor *activator, int32_t index, int32_t loop);
-    static void StartSound(uint8_t pcd, AActor *activator, int32_t channel, int32_t index, int32_t volume, int32_t attenuation);
-    static void StartSectorSound(uint8_t pcd, sector_t *sector, int32_t channel, int32_t index, int32_t volume, int32_t attenuation);
-    static void StartThingSound(uint8_t pcd, AActor *actor, int32_t channel, int32_t index, int32_t volume, int32_t attenuation);
-    static void SetThingSpecial(AActor *actor, int32_t special, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4, int32_t arg5);
+    static void StartSound(uint8_t pcd, AActor *activator, int32_t channel, int32_t index, int32_t volume,
+                           int32_t attenuation);
+    static void StartSectorSound(uint8_t pcd, sector_t *sector, int32_t channel, int32_t index, int32_t volume,
+                                 int32_t attenuation);
+    static void StartThingSound(uint8_t pcd, AActor *actor, int32_t channel, int32_t index, int32_t volume,
+                                int32_t attenuation);
+    static void SetThingSpecial(AActor *actor, int32_t special, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4,
+                                int32_t arg5);
     static void CancelFade(AActor *actor);
     static void StartSoundSequence(sector_t *sec, int32_t index);
 
     static void DoFadeTo(AActor *who, int32_t r, int32_t g, int32_t b, int32_t a, fixed_t time);
-    static void DoFadeRange(AActor *who, int32_t r1, int32_t g1, int32_t b1, int32_t a1, int32_t r2, int32_t g2, int32_t b2, int32_t a2, fixed_t time);
+    static void DoFadeRange(AActor *who, int32_t r1, int32_t g1, int32_t b1, int32_t a1, int32_t r2, int32_t g2,
+                            int32_t b2, int32_t a2, fixed_t time);
 
   private:
     DLevelScript();

@@ -37,4 +37,3 @@ int32_t STACK_ARGS Printf_Bold(const char *format, ...);
 
 void C_AddTabCommand(const char *name);
 void C_RemoveTabCommand(const char *name);
-

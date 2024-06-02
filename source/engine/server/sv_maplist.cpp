@@ -589,8 +589,8 @@ void SV_MaplistIndex(player_t &player)
     // count = 0: No indexes.
     // count = 1: Next map index.
     // count = 2: Next map & this map indexes.
-    uint8_t   count      = 0;
-    size_t this_index = 0, next_index = 0;
+    uint8_t count      = 0;
+    size_t  this_index = 0, next_index = 0;
     if (Maplist::instance().get_next_index(next_index))
     {
         count += 1;

@@ -34,9 +34,9 @@ ClassInit::ClassInit(TypeInfo *type)
     type->RegisterType();
 }
 
-TypeInfo     **TypeInfo::m_Types;
-uint16_t TypeInfo::m_NumTypes;
-uint16_t TypeInfo::m_MaxTypes;
+TypeInfo **TypeInfo::m_Types;
+uint16_t   TypeInfo::m_NumTypes;
+uint16_t   TypeInfo::m_MaxTypes;
 
 void TypeInfo::RegisterType()
 {

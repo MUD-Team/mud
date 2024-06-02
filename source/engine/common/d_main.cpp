@@ -54,7 +54,6 @@
 #include "w_wad.h"
 #include "z_zone.h"
 
-
 OResFiles  wadfiles;
 OWantFiles missingfiles;
 

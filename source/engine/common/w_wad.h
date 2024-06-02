@@ -45,16 +45,16 @@ typedef struct
 {
     // Should be "IWAD" or "PWAD".
     uint32_t identification;
-    int32_t      numlumps;
-    int32_t      infotableofs;
+    int32_t  numlumps;
+    int32_t  infotableofs;
 
 } wadinfo_t;
 
 typedef struct
 {
-    int32_t  filepos;
-    int32_t  size;
-    char name[8]; // denis - todo - string
+    int32_t filepos;
+    int32_t size;
+    char    name[8]; // denis - todo - string
 
 } filelump_t;
 
@@ -63,10 +63,10 @@ typedef struct
 //
 typedef struct lumpinfo_s
 {
-    char  name[8]; // denis - todo - string
+    char         name[8]; // denis - todo - string
     PHYSFS_File *handle;
-    int32_t   position;
-    int32_t   size;
+    int32_t      position;
+    int32_t      size;
 
     // [RH] Hashing stuff
     int32_t next;
@@ -100,7 +100,7 @@ extern size_t      numlumps;
 OMD5Hash     W_MD5(const std::string &filename);
 void         W_InitMultipleFiles(const OResFiles &filenames);
 lumpHandle_t W_LumpToHandle(const uint32_t lump);
-int32_t          W_HandleToLump(const lumpHandle_t handle);
+int32_t      W_HandleToLump(const lumpHandle_t handle);
 
 int32_t W_CheckNumForName(const char *name);
 int32_t W_GetNumForName(const char *name);
@@ -110,14 +110,14 @@ uint32_t    W_LumpLength(uint32_t lump);
 void        W_ReadLump(uint32_t lump, void *dest);
 uint32_t    W_ReadChunk(const char *file, uint32_t offs, uint32_t len, void *dest, uint32_t &filelen);
 
-void        *W_CacheLumpNum(uint32_t lump, const zoneTag_e tag);
-void        *W_CacheLumpName(const char *name, const zoneTag_e tag);
+void *W_CacheLumpNum(uint32_t lump, const zoneTag_e tag);
+void *W_CacheLumpName(const char *name, const zoneTag_e tag);
 
 void W_Close();
 
-int32_t  W_FindLump(const char *name, int32_t lastlump); // [RH]	Find lumps with duplication
-bool W_CheckLumpName(uint32_t    lump,
-                     const char *name); // [RH] True if lump's name == name // denis - todo - replace with map<>
+int32_t W_FindLump(const char *name, int32_t lastlump); // [RH]	Find lumps with duplication
+bool    W_CheckLumpName(uint32_t    lump,
+                        const char *name); // [RH] True if lump's name == name // denis - todo - replace with map<>
 
 // [RH] Copy an 8-char string and uppercase it.
 void uppercopy(char *to, const char *from);

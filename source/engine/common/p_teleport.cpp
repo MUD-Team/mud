@@ -49,7 +49,7 @@ static AActor *SelectTeleDest(int32_t tid, int32_t tag)
     if (tid != 0)
     {
         TThinkerIterator<AActor> iterator;
-        int32_t                      count = 0;
+        int32_t                  count = 0;
         while ((searcher = iterator.Next()))
         {
             if (!(searcher->type == MT_TELEPORTMAN || searcher->type == MT_TELEPORTMAN2))
@@ -222,8 +222,8 @@ bool EV_LineTeleport(line_t *line, int32_t side, AActor *thing)
 {
     AActor                  *m;
     uint32_t                 an;
-    int32_t                      i;
-    int32_t                      tag;
+    int32_t                  i;
+    int32_t                  tag;
     fixed_t                  oldx;
     fixed_t                  oldy;
     fixed_t                  oldz;
@@ -308,7 +308,8 @@ bool EV_LineTeleport(line_t *line, int32_t side, AActor *thing)
 // [RH] Changed to find destination by tid rather than sector
 //
 
-bool EV_SilentTeleport(int32_t tid, int32_t useangle, int32_t tag, int32_t keepheight, line_t *line, int32_t side, AActor *thing)
+bool EV_SilentTeleport(int32_t tid, int32_t useangle, int32_t tag, int32_t keepheight, line_t *line, int32_t side,
+                       AActor *thing)
 {
     AActor *m;
 
@@ -388,7 +389,7 @@ bool EV_SilentTeleport(int32_t tid, int32_t useangle, int32_t tag, int32_t keeph
 // [RH] Modified to support different source and destination ids.
 bool EV_SilentLineTeleport(line_t *line, int32_t side, AActor *thing, int32_t id, bool reverse)
 {
-    int32_t     i;
+    int32_t i;
     line_t *l;
 
     if (thing->flags & MF_MISSILE || !line)

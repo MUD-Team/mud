@@ -49,18 +49,18 @@ struct TeamInfo
     argb_t      Color;
     std::string TextColor;
     std::string ToastColor;
-    int32_t         TransColor;
+    int32_t     TransColor;
 
     int32_t FountainColorArg;
 
-    int32_t                      TeamSpawnThingNum;
+    int32_t                  TeamSpawnThingNum;
     std::vector<mapthing2_t> Starts;
 
     int32_t Points;
     int32_t RoundWins;
 
     const std::string ColorizedTeamName();
-    int32_t               LivesPool();
+    int32_t           LivesPool();
 };
 
 /**

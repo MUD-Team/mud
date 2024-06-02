@@ -119,8 +119,8 @@ void SV_ClearPlayerQueue();
 
 void SV_UpdateSecretCount(player_t &player);
 void SV_UpdateMonsterRespawnCount();
-void SV_SendExecuteLineSpecial(uint8_t special, line_t *line, AActor *activator, int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3,
-                               int32_t arg4);
+void SV_SendExecuteLineSpecial(uint8_t special, line_t *line, AActor *activator, int32_t arg0, int32_t arg1,
+                               int32_t arg2, int32_t arg3, int32_t arg4);
 void SV_ACSExecuteSpecial(uint8_t special, AActor *activator, const char *print, bool playerOnly,
                           const std::vector<int32_t> &args = std::vector<int32_t>());
 

@@ -88,7 +88,7 @@ typedef enum
 typedef struct
 {
     const char *name;
-    uint8_t        seqs[4];
+    uint8_t     seqs[4];
 } hexenseq_t;
 
 class DSeqActorNode : public DSeqNode
@@ -212,14 +212,14 @@ static const hexenseq_t HexenSequences[] = {
         NULL,
     }};
 
-static int32_t           SeqTrans[64 * 3];
+static int32_t   SeqTrans[64 * 3];
 static uint32_t *ScriptTemp;
-static int32_t           ScriptTempSize;
+static int32_t   ScriptTempSize;
 
 sndseq_t **Sequences;
-int32_t        NumSequences;
-int32_t        MaxSequences;
-int32_t        ActiveSequences;
+int32_t    NumSequences;
+int32_t    MaxSequences;
+int32_t    ActiveSequences;
 DSeqNode  *DSeqNode::SequenceListHead;
 
 // CODE --------------------------------------------------------------------
@@ -255,9 +255,9 @@ void DSeqNode::Serialize(FArchive &arc)
     else
     {
         std::string seqName, soundName;
-        int32_t         seqOffset = 0, delayTics = 0;
+        int32_t     seqOffset = 0, delayTics = 0;
         float       volume;
-        int32_t         atten = ATTN_NORM;
+        int32_t     atten = ATTN_NORM;
 
         arc >> seqOffset >> delayTics >> volume >> atten >> soundName >> seqName >> m_Next >> m_Prev;
 
@@ -382,10 +382,10 @@ static int32_t MustMatchString(OScanner &os, const char **strings)
 
 void S_ParseSndSeq()
 {
-    char name[MAX_SNDNAME + 1];
-    int32_t  stopsound;
-    int32_t  cursize;
-    int32_t  curseq = -1;
+    char    name[MAX_SNDNAME + 1];
+    int32_t stopsound;
+    int32_t cursize;
+    int32_t curseq = -1;
 
     // denis - reboot safe
     if (Sequences)
@@ -409,7 +409,7 @@ void S_ParseSndSeq()
     if (rawinfo == NULL)
         return;
 
-    uint32_t filelen = PHYSFS_fileLength(rawinfo);
+    uint32_t           filelen = PHYSFS_fileLength(rawinfo);
     Poco::Buffer<char> buffer(filelen);
 
     if (PHYSFS_readBytes(rawinfo, buffer.begin(), filelen) != filelen)
@@ -920,7 +920,7 @@ ptrdiff_t SN_GetSequenceOffset(int32_t sequence, uint32_t *sequencePtr)
 
 void SN_ChangeNodeData(int32_t nodeNum, int32_t seqOffset, int32_t delayTics, float volume, int32_t currentSoundID)
 {
-    int32_t       i;
+    int32_t   i;
     DSeqNode *node;
 
     i    = 0;

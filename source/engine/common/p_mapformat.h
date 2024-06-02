@@ -33,8 +33,8 @@ class MapFormat
     void P_ApplyZDoomMapFormat(void);
     void P_ApplyDefaultMapFormat(void);
 
-    bool  getZDoom(void);
-    bool  getHexen(void);
+    bool    getZDoom(void);
+    bool    getHexen(void);
     int16_t getGeneralizedMask(void);
 
     void init_sector_special(sector_t *);
@@ -49,8 +49,8 @@ class MapFormat
     void post_process_linedef_special(line_t *line);
 
   protected:
-    bool  zdoom;
-    bool  hexen;
+    bool    zdoom;
+    bool    hexen;
     int16_t generalized_mask;
 };
 

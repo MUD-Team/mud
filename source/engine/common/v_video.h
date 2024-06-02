@@ -52,7 +52,8 @@ void V_MarkRect(int32_t x, int32_t y, int32_t width, int32_t height);
 // as defined in the X11R6RGB lump.
 argb_t V_GetColorFromString(const std::string &str);
 
-template <> forceinline palindex_t rt_blend2(const palindex_t bg, const int32_t bga, const palindex_t fg, const int32_t fga)
+template <>
+forceinline palindex_t rt_blend2(const palindex_t bg, const int32_t bga, const palindex_t fg, const int32_t fga)
 {
     // Crazy 8bpp alpha-blending using lookup tables and bit twiddling magic
     argb_t bgARGB = Col2RGB8[bga >> 2][bg];

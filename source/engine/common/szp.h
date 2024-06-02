@@ -48,7 +48,7 @@ template <typename T> class szp
 
     // this should never be used
     // spawn from other pointers, or use init()
-    szp &operator=(T *other){};
+    szp &operator=(T *other) {};
 
     // utility function to remove oneself from the linked list
     void inline unlink()

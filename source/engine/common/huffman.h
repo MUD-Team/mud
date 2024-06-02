@@ -34,8 +34,8 @@
 #pragma once
 
 #include <stdint.h>
-#include <cstring>
 
+#include <cstring>
 #include <iostream>
 
 class huffman
@@ -44,12 +44,12 @@ class huffman
     struct huff_bitstream_t
     {
         uint8_t *BytePtr;
-        uint32_t   BitPos;
+        uint32_t BitPos;
     };
 
     struct huff_sym_t
     {
-        int32_t          Symbol;
+        int32_t  Symbol;
         uint32_t Count;
         uint32_t Code;
         uint32_t Bits;
@@ -58,13 +58,13 @@ class huffman
     struct huff_encodenode_t
     {
         huff_encodenode_t *ChildA, *ChildB;
-        int32_t                Count;
-        int32_t                Symbol;
+        int32_t            Count;
+        int32_t            Symbol;
     };
 
     // Histogram of character frequency
-    huff_sym_t   sym[256];
-    uint32_t total_count;
+    huff_sym_t sym[256];
+    uint32_t   total_count;
 
     // Flag to indicate that tree needs rebuilding
     bool fresh_histogram;
@@ -75,15 +75,14 @@ class huffman
     huff_encodenode_t *root;
 
     void               _Huffman_InitBitstream(huff_bitstream_t *stream, uint8_t *buf);
-    uint32_t       _Huffman_ReadBit(huff_bitstream_t *stream);
-    uint32_t       _Huffman_Read8Bits(huff_bitstream_t *stream);
+    uint32_t           _Huffman_ReadBit(huff_bitstream_t *stream);
+    uint32_t           _Huffman_Read8Bits(huff_bitstream_t *stream);
     void               _Huffman_WriteBits(huff_bitstream_t *stream, uint32_t x, uint32_t bits);
     void               _Huffman_Hist(uint8_t *in, huff_sym_t *sym, uint32_t size);
     huff_encodenode_t *_Huffman_MakeTree(huff_sym_t *sym, huff_encodenode_t *nodes);
-    void _Huffman_StoreTree(huff_encodenode_t *node, huff_sym_t *sym, uint32_t code, uint32_t bits);
+    void               _Huffman_StoreTree(huff_encodenode_t *node, huff_sym_t *sym, uint32_t code, uint32_t bits);
 
-    bool Huffman_Compress_Using_Histogram(uint8_t *in, size_t insize, uint8_t *out, size_t &outsize,
-                                          huff_sym_t *sym);
+    bool Huffman_Compress_Using_Histogram(uint8_t *in, size_t insize, uint8_t *out, size_t &outsize, huff_sym_t *sym);
     bool Huffman_Uncompress_Using_Tree(uint8_t *in, size_t insize, uint8_t *out, size_t &outsize,
                                        huff_encodenode_t *tree_root);
 

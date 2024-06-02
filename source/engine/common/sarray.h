@@ -77,7 +77,7 @@ template <typename VT, int32_t N = 16> class SArray
 {
   private:
     typedef SArray<VT, N> SArrayType;
-    typedef uint32_t  SlotNumber;
+    typedef uint32_t      SlotNumber;
 
     struct ItemRecord
     {
@@ -94,8 +94,7 @@ template <typename VT, int32_t N = 16> class SArray
     typedef generic_iterator<VT, SArrayType>             iterator;
     typedef generic_iterator<const VT, const SArrayType> const_iterator;
 
-    template <typename IVT, typename ISAT>
-    class generic_iterator
+    template <typename IVT, typename ISAT> class generic_iterator
     {
       private:
         // typedef for easier-to-read code
@@ -104,10 +103,10 @@ template <typename VT, int32_t N = 16> class SArray
 
       public:
         using iterator_category = std::forward_iterator_tag;
-        using value_type = SArray;
-        using difference_type = std::ptrdiff_t;
-        using pointer = SArray*;
-        using reference = SArray&;
+        using value_type        = SArray;
+        using difference_type   = std::ptrdiff_t;
+        using pointer           = SArray *;
+        using reference         = SArray &;
 
         generic_iterator(ISAT &sarray) : mSArray(sarray), mSlot(NOT_FOUND)
         {
@@ -722,10 +721,10 @@ template <typename VT, int32_t N = 16> class SArray
 
     static const uint32_t NOT_FOUND = (1 << SLOT_BITS) | MAX_SLOT;
 
-    ItemRecord  *mItemRecords;
-    uint32_t mSize;
-    uint32_t mUsed;
-    SlotNumber   mNextUnused;
-    SlotNumber   mFreeHead;
-    uint32_t mIdKey;
+    ItemRecord *mItemRecords;
+    uint32_t    mSize;
+    uint32_t    mUsed;
+    SlotNumber  mNextUnused;
+    SlotNumber  mFreeHead;
+    uint32_t    mIdKey;
 };

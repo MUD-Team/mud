@@ -1013,7 +1013,7 @@ static inline uint64_t readVariableLengthValue(const uint8_t **ptr, const uint8_
         if (*ptr >= end)
             return 2;
         uint8_t byte = *((*ptr)++);
-        result             = (result << 7) + (byte & 0x7F);
+        result       = (result << 7) + (byte & 0x7F);
         if (!(byte & 0x80))
             break;
     }
@@ -1211,7 +1211,7 @@ void MidiSequencer::setInterface(const MidiRealTimeInterface *intrf)
 
 int32_t MidiSequencer::playStream(uint8_t *stream, size_t length)
 {
-    int32_t      count      = 0;
+    int32_t  count      = 0;
     size_t   samples    = (size_t)(length / (size_t)(m_midi_time.m_frame_size));
     size_t   left       = samples;
     size_t   periodSize = 0;
@@ -1430,7 +1430,7 @@ bool MidiSequencer::buildSMFTrackData(const std::vector<std::vector<uint8_t>> &t
     for (size_t tk = 0; tk < track_count; ++tk)
     {
         uint64_t       abs_position = 0;
-        int32_t            status       = 0;
+        int32_t        status       = 0;
         MidiEvent      event;
         bool           ok       = false;
         const uint8_t *end      = track_data[tk].data() + track_data[tk].size();
@@ -1444,9 +1444,9 @@ bool MidiSequencer::buildSMFTrackData(const std::vector<std::vector<uint8_t>> &t
             if (!ok)
             {
                 int32_t len = snprintf(error, 150,
-                                   "buildTrackData: Can't read variable-length "
-                                   "value at begin of track %d.\n",
-                                   (int32_t)tk);
+                                       "buildTrackData: Can't read variable-length "
+                                       "value at begin of track %d.\n",
+                                       (int32_t)tk);
                 if ((len > 0) && (len < 150))
                     m_midi_parsing_errors_string += std::string(error, (size_t)len);
                 return false;
@@ -1473,7 +1473,8 @@ bool MidiSequencer::buildSMFTrackData(const std::vector<std::vector<uint8_t>> &t
             event = parseEvent(&trackPtr, end, status);
             if (!event.is_valid)
             {
-                int32_t len = snprintf(error, 150, "buildTrackData: Fail to parse event in the track %d.\n", (int32_t)tk);
+                int32_t len =
+                    snprintf(error, 150, "buildTrackData: Fail to parse event in the track %d.\n", (int32_t)tk);
                 if ((len > 0) && (len < 150))
                     m_midi_parsing_errors_string += std::string(error, (size_t)len);
                 return false;
@@ -2083,7 +2084,7 @@ MidiSequencer::MidiEvent MidiSequencer::parseEvent(const uint8_t **pptr, const u
     }
 
     uint8_t byte = *(ptr++);
-    bool          ok   = false;
+    bool    ok   = false;
 
     if (byte == MidiEvent::EVENT_SYSEX || byte == MidiEvent::EVENT_SYSEX2) // Ignore SysEx
     {
@@ -2669,8 +2670,8 @@ double MidiSequencer::Seek(double seconds, const double granularity)
     {
         m_midi_current_position.wait -= s;
         m_midi_current_position.absolute_time_position += s;
-        int32_t    antiFreezeCounter = 10000; // Limit 10000 loops to avoid freezing
-        double dstWait           = m_midi_current_position.wait + granualityHalf;
+        int32_t antiFreezeCounter = 10000; // Limit 10000 loops to avoid freezing
+        double  dstWait           = m_midi_current_position.wait + granualityHalf;
         while ((m_midi_current_position.wait <= granualityHalf) /*&& (antiFreezeCounter > 0)*/)
         {
             // std::fprintf(stderr, "wait = %g...\n", CurrentPosition.wait);
@@ -2914,7 +2915,7 @@ bool MidiSequencer::parseMUS(Poco::MemoryInputStream &mfr)
     }
 
     mfr.seekg(0);
-    size_t mus_len = mfr.rdbuf()->in_avail();
+    size_t                mus_len = mfr.rdbuf()->in_avail();
     Poco::Buffer<uint8_t> mus(mus_len);
 
     mfr.read((char *)mus.begin(), mus_len);
@@ -2926,7 +2927,7 @@ bool MidiSequencer::parseMUS(Poco::MemoryInputStream &mfr)
 
     uint8_t *mid     = nullptr;
     uint32_t mid_len = 0;
-    int32_t      m2mret  = ConvertMusToMidi(mus.begin(), (uint32_t)(mus_len), &mid, &mid_len, 0);
+    int32_t  m2mret  = ConvertMusToMidi(mus.begin(), (uint32_t)(mus_len), &mid, &mid_len, 0);
 
     if (m2mret < 0)
     {

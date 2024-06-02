@@ -43,7 +43,6 @@
 #include "w_wad.h"
 #include "z_zone.h"
 
-
 #undef RANGECHECK
 
 // status bar height at bottom of screen

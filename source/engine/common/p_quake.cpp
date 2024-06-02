@@ -41,8 +41,8 @@ class DEarthquake : public DThinker
     AActor *m_Spot;
     fixed_t m_TremorBox[4];
     fixed_t m_DamageBox[4];
-    int32_t     m_Intensity;
-    int32_t     m_Countdown;
+    int32_t m_Intensity;
+    int32_t m_Countdown;
 
   private:
     DEarthquake()

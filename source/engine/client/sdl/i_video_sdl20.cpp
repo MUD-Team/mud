@@ -43,12 +43,11 @@
 #include "i_sdl.h"
 #include "i_system.h"
 #include "i_video.h"
-#include "mud_profiling.h"
 #include "mud_includes.h"
+#include "mud_profiling.h"
+#include "ui_public.h"
 #include "v_palette.h"
 #include "v_video.h"
-
-#include "ui_public.h"
 
 EXTERN_CVAR(vid_fullscreen)
 EXTERN_CVAR(vid_widescreen)
@@ -69,7 +68,7 @@ EXTERN_CVAR(vid_widescreen)
 //
 static void I_AddSDL20VideoModes(IVideoModeList *modelist, int32_t bpp)
 {
-    int32_t             display_index = 0;
+    int32_t         display_index = 0;
     SDL_DisplayMode mode          = {SDL_PIXELFORMAT_UNKNOWN, 0, 0, 0, 0};
 
     int32_t display_mode_count = SDL_GetNumDisplayModes(display_index);
@@ -112,7 +111,7 @@ ISDL20VideoCapabilities::ISDL20VideoCapabilities() : IVideoCapabilities(), mNati
 {
     const int32_t display_index = 0;
     int32_t       bpp;
-    Uint32    Rmask, Gmask, Bmask, Amask;
+    Uint32        Rmask, Gmask, Bmask, Amask;
 
     SDL_DisplayMode sdl_display_mode;
     if (SDL_GetDesktopDisplayMode(display_index, &sdl_display_mode) != 0)
@@ -203,7 +202,7 @@ ISDL20Window::ISDL20Window(uint16_t width, uint16_t height, uint8_t bpp, EWindow
 ISDL20Window::~ISDL20Window()
 {
     if (mSDLWindow)
-        SDL_DestroyWindow(mSDLWindow);\
+        SDL_DestroyWindow(mSDLWindow);
 }
 
 //
@@ -231,7 +230,7 @@ void ISDL20Window::setRendererDriver()
 bool ISDL20Window::isRendererDriverAvailable(const char *driver) const
 {
     SDL_RendererInfo info;
-    int32_t              num_drivers = SDL_GetNumRenderDrivers();
+    int32_t          num_drivers = SDL_GetNumRenderDrivers();
 
     for (int32_t i = 0; i < num_drivers; i++)
     {
@@ -270,7 +269,7 @@ void ISDL20Window::getEvents()
     // Retrieve chunks of up to 1024 events from SDL
     int32_t       num_events = 0;
     const int32_t max_events = 1024;
-    SDL_Event sdl_events[max_events];
+    SDL_Event     sdl_events[max_events];
 
     while ((num_events = SDL_PeepEvents(sdl_events, max_events, SDL_GETEVENT, SDL_QUIT, SDL_SYSWMEVENT)))
     {
@@ -476,7 +475,7 @@ std::string ISDL20Window::getVideoDriverName() const
 static void I_BuildPixelFormatFromSDLPixelFormatEnum(uint32_t sdl_fmt, PixelFormat *format)
 {
     uint32_t amask, rmask, gmask, bmask;
-    int32_t      bpp;
+    int32_t  bpp;
     SDL_PixelFormatEnumToMasks(sdl_fmt, &bpp, &rmask, &gmask, &bmask, &amask);
 
     uint32_t rshift = 0, rloss = 8;
@@ -674,8 +673,8 @@ ISDL20VideoSubsystem::ISDL20VideoSubsystem() : IVideoSubsystem()
 
     if (linked.major != compiled.major || linked.minor != compiled.minor)
     {
-        I_Error("SDL version conflict (%d.%d.%d vs %d.%d.%d dll)\n", compiled.major, compiled.minor,
-                     compiled.patch, linked.major, linked.minor, linked.patch);
+        I_Error("SDL version conflict (%d.%d.%d vs %d.%d.%d dll)\n", compiled.major, compiled.minor, compiled.patch,
+                linked.major, linked.minor, linked.patch);
         return;
     }
 

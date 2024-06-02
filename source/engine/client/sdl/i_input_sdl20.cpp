@@ -399,7 +399,7 @@ void ISDL20MouseInputDevice::pause()
     SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE);
     SDL_EventState(SDL_MOUSEBUTTONDOWN, SDL_IGNORE);
     SDL_EventState(SDL_MOUSEBUTTONUP, SDL_IGNORE);
-    //SDL_SetRelativeMouseMode(SDL_FALSE);
+    // SDL_SetRelativeMouseMode(SDL_FALSE);
 }
 
 //
@@ -414,7 +414,7 @@ void ISDL20MouseInputDevice::resume()
 {
     mActive = true;
     reset();
-    //SDL_SetRelativeMouseMode(SDL_TRUE);
+    // SDL_SetRelativeMouseMode(SDL_TRUE);
     SDL_EventState(SDL_MOUSEMOTION, SDL_ENABLE);
     SDL_EventState(SDL_MOUSEBUTTONDOWN, SDL_ENABLE);
     SDL_EventState(SDL_MOUSEBUTTONUP, SDL_ENABLE);
@@ -434,7 +434,7 @@ void ISDL20MouseInputDevice::gatherEvents()
     // Force SDL to gather events from input devices. This is called
     // implicitly from SDL_PollEvent but since we're using SDL_PeepEvents to
     // process only mouse events, SDL_PumpEvents is necessary.
-    int32_t       num_events;
+    int32_t   num_events;
     SDL_Event sdl_events[MAX_SDL_EVENTS_PER_TIC];
     SDL_PumpEvents();
 
@@ -446,18 +446,17 @@ void ISDL20MouseInputDevice::gatherEvents()
 
     while ((num_events =
                 SDL_PeepEvents(sdl_events, MAX_SDL_EVENTS_PER_TIC, SDL_GETEVENT, SDL_MOUSEMOTION, SDL_MOUSEMOTION)))
-    {        
+    {
         for (int32_t i = 0; i < num_events; i++)
-        {                    
+        {
             UI_PostEvent(sdl_events[i]);
 
-            //const SDL_Event &sdl_ev = sdl_events[i];
+            // const SDL_Event &sdl_ev = sdl_events[i];
             /*
             movement_event.data2 += sdl_ev.motion.xrel;
             movement_event.data3 -= sdl_ev.motion.yrel;
             */
         }
-        
     }
 
     /*
@@ -473,7 +472,7 @@ void ISDL20MouseInputDevice::gatherEvents()
         for (int32_t i = 0; i < num_events; i++)
         {
             UI_PostEvent(sdl_events[i]);
-            
+
             /*
             event_t ev;
 
@@ -644,7 +643,7 @@ void ISDL20JoystickInputDevice::gatherEvents()
     SDL_PumpEvents();
 
     // Retrieve events from SDL
-    int32_t       num_events = 0;
+    int32_t   num_events = 0;
     SDL_Event sdl_events[MAX_SDL_EVENTS_PER_TIC];
 
     while ((num_events = SDL_PeepEvents(sdl_events, MAX_SDL_EVENTS_PER_TIC, SDL_GETEVENT, SDL_CONTROLLERAXISMOTION,

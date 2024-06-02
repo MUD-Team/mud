@@ -44,7 +44,6 @@
 #include "v_video.h"
 #include "z_zone.h"
 
-
 void SV_UpdateMobj(AActor *mo);
 void SV_UpdateMobjState(AActor *mo);
 

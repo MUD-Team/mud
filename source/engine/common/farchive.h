@@ -66,9 +66,9 @@ class FFile
     virtual FFile &Write(const void *, uint32_t) = 0;
     virtual FFile &Read(void *, uint32_t)        = 0;
 
-    virtual uint32_t Tell() const        = 0;
-    virtual FFile       &Seek(int32_t, ESeekPos) = 0;
-    inline FFile        &Seek(uint32_t i, ESeekPos p)
+    virtual uint32_t Tell() const            = 0;
+    virtual FFile   &Seek(int32_t, ESeekPos) = 0;
+    inline FFile    &Seek(uint32_t i, ESeekPos p)
     {
         return Seek((int32_t)i, p);
     }
@@ -92,19 +92,19 @@ class FLZOFile : public FFile
     }
     virtual bool IsOpen() const;
 
-    virtual FFile       &Write(const void *, uint32_t);
-    virtual FFile       &Read(void *, uint32_t);
+    virtual FFile   &Write(const void *, uint32_t);
+    virtual FFile   &Read(void *, uint32_t);
     virtual uint32_t Tell() const;
-    virtual FFile       &Seek(int32_t, ESeekPos);
+    virtual FFile   &Seek(int32_t, ESeekPos);
 
   protected:
-    uint32_t   m_Pos;
-    uint32_t   m_BufferSize;
-    uint32_t   m_MaxBufferSize;
-    uint8_t *m_Buffer;
-    bool           m_NoCompress;
-    EOpenMode      m_Mode;
-    PHYSFS_File   *m_File;
+    uint32_t     m_Pos;
+    uint32_t     m_BufferSize;
+    uint32_t     m_MaxBufferSize;
+    uint8_t     *m_Buffer;
+    bool         m_NoCompress;
+    EOpenMode    m_Mode;
+    PHYSFS_File *m_File;
 
     virtual void Implode();
     virtual void Explode();
@@ -144,7 +144,7 @@ class FLZOMemFile : public FLZOFile
     }
 
   private:
-    bool           m_SourceFromMem;
+    bool     m_SourceFromMem;
     uint8_t *m_ImplodedBuffer;
 };
 
@@ -181,7 +181,7 @@ class FArchive
     virtual void Write(const void *mem, uint32_t len);
     virtual void Read(void *mem, uint32_t len);
 
-    void  WriteCount(uint32_t count);
+    void     WriteCount(uint32_t count);
     uint32_t ReadCount();
 
     FArchive &operator<<(uint8_t c);
@@ -290,28 +290,28 @@ class FArchive
         EObjectHashSize = 137
     };
 
-    uint32_t           FindObjectIndex(const DObject *obj) const;
-    uint32_t           MapObject(const DObject *obj);
-    uint32_t           WriteClass(const TypeInfo *info);
+    uint32_t        FindObjectIndex(const DObject *obj) const;
+    uint32_t        MapObject(const DObject *obj);
+    uint32_t        WriteClass(const TypeInfo *info);
     const TypeInfo *ReadClass();
     const TypeInfo *ReadClass(const TypeInfo *wanttype);
     const TypeInfo *ReadStoredClass(const TypeInfo *wanttype);
-    uint32_t           HashObject(const DObject *obj) const;
+    uint32_t        HashObject(const DObject *obj) const;
 
-    bool   m_Persistent;  // meant for persistent storage (disk)?
-    bool   m_Loading;     // extracting objects?
-    bool   m_Storing;     // inserting objects?
-    bool   m_HubTravel;   // travelling inside a hub?
-    bool   m_Reset;       // reset state?
-    FFile *m_File;        // unerlying file object
-    uint32_t  m_ObjectCount; // # of objects currently serialized
-    uint32_t  m_MaxObjectCount;
-    uint32_t  m_ClassCount;  // # of unique classes currently serialized
+    bool     m_Persistent;  // meant for persistent storage (disk)?
+    bool     m_Loading;     // extracting objects?
+    bool     m_Storing;     // inserting objects?
+    bool     m_HubTravel;   // travelling inside a hub?
+    bool     m_Reset;       // reset state?
+    FFile   *m_File;        // unerlying file object
+    uint32_t m_ObjectCount; // # of objects currently serialized
+    uint32_t m_MaxObjectCount;
+    uint32_t m_ClassCount;  // # of unique classes currently serialized
 
     struct TypeMap
     {
         const TypeInfo *toCurrent; // maps archive type index to execution type index
-        uint32_t           toArchive; // maps execution type index to archive type index
+        uint32_t        toArchive; // maps execution type index to archive type index
 
         enum
         {

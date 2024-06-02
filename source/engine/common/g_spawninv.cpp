@@ -40,15 +40,15 @@ extern const char *weaponnames[];
 struct spawnInventory_t
 {
     bool         isdefault;
-    int32_t          health;
-    int32_t          armorpoints;
-    int32_t          armortype;
+    int32_t      health;
+    int32_t      armorpoints;
+    int32_t      armortype;
     weapontype_t readyweapon;
     bool         weaponowned[NUMWEAPONS];
-    int32_t          ammo[NUMAMMO];
+    int32_t      ammo[NUMAMMO];
     bool         berserk;
     bool         backpack;
-    int32_t          invul;
+    int32_t      invul;
 
     spawnInventory_t()
         : isdefault(false), health(100), armorpoints(0), armortype(0), readyweapon(NUMWEAPONS), berserk(false),

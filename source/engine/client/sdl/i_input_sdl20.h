@@ -153,7 +153,7 @@ class ISDL20JoystickInputDevice : public IInputDevice
     typedef std::queue<event_t> EventQueue;
     EventQueue                  mEvents;
 
-    int32_t                 mJoystickId;
+    int32_t             mJoystickId;
     SDL_GameController *mJoystick;
 };
 

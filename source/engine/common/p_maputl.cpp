@@ -69,8 +69,8 @@ static int32_t P_PointOnSide(fixed_t x, fixed_t y, node_t *node)
 subsector_t *P_PointInSubsector(fixed_t x, fixed_t y)
 {
     node_t *node;
-    int32_t     side;
-    int32_t     nodenum;
+    int32_t side;
+    int32_t nodenum;
 
     // single subsector is a special case
     if (!numnodes)
@@ -562,7 +562,7 @@ bool P_BlockLinesIterator(int32_t x, int32_t y, bool (*func)(line_t *))
         {
             if (polyLink->polyobj && polyLink->polyobj->validcount != validcount)
             {
-                int32_t     i;
+                int32_t i;
                 seg_t **tempSeg               = polyLink->polyobj->segs;
                 polyLink->polyobj->validcount = validcount;
 
@@ -635,7 +635,7 @@ TArray<intercept_t> intercepts;
 
 divline_t trace;
 bool      earlyout;
-int32_t       ptflags;
+int32_t   ptflags;
 
 //
 // PIT_AddLineIntercepts.
@@ -649,8 +649,8 @@ int32_t       ptflags;
 //
 bool PIT_AddLineIntercepts(line_t *ld)
 {
-    int32_t       s1;
-    int32_t       s2;
+    int32_t   s1;
+    int32_t   s2;
     fixed_t   frac;
     divline_t dl;
 
@@ -1150,15 +1150,15 @@ static AActor *RoughBlockCheck(AActor *mo, int32_t index, angle_t fov)
 
 AActor *P_RoughTargetSearch(AActor *mo, angle_t fov, int32_t distance)
 {
-    int32_t     blockX;
-    int32_t     blockY;
-    int32_t     startX, startY;
-    int32_t     blockIndex;
-    int32_t     firstStop;
-    int32_t     secondStop;
-    int32_t     thirdStop;
-    int32_t     finalStop;
-    int32_t     count;
+    int32_t blockX;
+    int32_t blockY;
+    int32_t startX, startY;
+    int32_t blockIndex;
+    int32_t firstStop;
+    int32_t secondStop;
+    int32_t thirdStop;
+    int32_t finalStop;
+    int32_t count;
     AActor *target;
 
     startX = (mo->x - bmaporgx) >> MAPBLOCKSHIFT;

@@ -565,7 +565,7 @@ ActorSnapshot P_LerpActorPosition(const ActorSnapshot &from, const ActorSnapshot
 #endif // _SNAPSHOT_DEBUG_
 
     // lerp the angle
-    int32_t     anglediff = int32_t(to.getAngle()) - int32_t(from.getAngle());
+    int32_t anglediff = int32_t(to.getAngle()) - int32_t(from.getAngle());
     angle_t angle     = from.getAngle() + FixedMul(anglediff, amount_fixed);
 
 #ifdef _SNAPSHOT_DEBUG_

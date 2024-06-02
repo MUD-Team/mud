@@ -63,7 +63,7 @@ static struct DownloadState
     Websites        checkurls;
     size_t          checkurlidx;
     std::string     checkfilename;
-    int32_t             checkfails;
+    int32_t         checkfails;
     DownloadState()
         : state(STATE_SHUTDOWN), check(NULL), transfer(NULL), url(""), filename(""), hash(), flags(0), checkurls(),
           checkurlidx(0), checkfilename(""), checkfails(0)
@@ -308,7 +308,7 @@ static void TickDownload()
         ::dlstate.transfer->setURL(::dlstate.url.c_str());
 
         // This should resolve within PHYSFS to the pref path/downloads folder
-        std::string  dest = "downloads/" + ::dlstate.filename;
+        std::string dest = "downloads/" + ::dlstate.filename;
 
         // Set our expected hash of the file.
         ::dlstate.transfer->setMD5(::dlstate.hash);

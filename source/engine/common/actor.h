@@ -270,17 +270,17 @@ enum mobjflag_t
 
     // --- mobj.oflags ---
     // Odamex-specific flags
-    MFO_NOSNAPZ      = BIT(0),  // ignore snapshot z this tic
-    //MFO_HEALTHPOOL   = BIT(1),  // global health pool that tracks killed HP
-    MFO_INFIGHTINVUL = BIT(2),  // invulnerable to infighting
-    MFO_UNFLINCHING  = BIT(3),  // monster flinching reduced to 1 in 256
-    MFO_ARMOR        = BIT(4),  // damage taken by monster is reduced
-    MFO_QUICK        = BIT(5),  // speed of monster is increased
-    MFO_NORAISE      = BIT(6),  // vile can't raise corpse
-    //MFO_BOSSPOOL     = BIT(7),  // boss health pool that tracks damage
-    MFO_FULLBRIGHT   = BIT(8),  // monster is fullbright
-    MFO_SPECTATOR    = BIT(9),  // GhostlyDeath -- thing is/was a spectator and can't be seen!
-    MFO_FALLING      = BIT(10), // [INTERNAL] for falling
+    MFO_NOSNAPZ = BIT(0), // ignore snapshot z this tic
+    // MFO_HEALTHPOOL   = BIT(1),  // global health pool that tracks killed HP
+    MFO_INFIGHTINVUL = BIT(2), // invulnerable to infighting
+    MFO_UNFLINCHING  = BIT(3), // monster flinching reduced to 1 in 256
+    MFO_ARMOR        = BIT(4), // damage taken by monster is reduced
+    MFO_QUICK        = BIT(5), // speed of monster is increased
+    MFO_NORAISE      = BIT(6), // vile can't raise corpse
+    // MFO_BOSSPOOL     = BIT(7),  // boss health pool that tracks damage
+    MFO_FULLBRIGHT = BIT(8),  // monster is fullbright
+    MFO_SPECTATOR  = BIT(9),  // GhostlyDeath -- thing is/was a spectator and can't be seen!
+    MFO_FALLING    = BIT(10), // [INTERNAL] for falling
 };
 
 #define MF_TRANSSHIFT 0x1A
@@ -302,9 +302,9 @@ struct baseline_t
     angle_t   angle;
     uint32_t  targetid;
     uint32_t  tracerid;
-    int32_t       movecount;
-    uint8_t      movedir;
-    uint8_t      rndindex;
+    int32_t   movecount;
+    uint8_t   movedir;
+    uint8_t   rndindex;
 
     // Flags are a varint, so order from most to least likely.
     static const uint32_t POSX      = BIT(0);
@@ -431,13 +431,13 @@ class AActor : public DThinker
     angle_t     angle;  // orientation
     angle_t     prevangle;
     spritenum_t sprite; // used to find patch_t and flip value
-    int32_t         frame;  // might be ORed with FF_FULLBRIGHT
+    int32_t     frame;  // might be ORed with FF_FULLBRIGHT
     fixed_t     pitch;
     angle_t     prevpitch;
 
     uint32_t effects; // [RH] see p_effect.h
 
-                   // Interaction info, by BLOCKMAP.
+                      // Interaction info, by BLOCKMAP.
     // Links in blocks (if needed).
     struct subsector_s *subsector;
 
@@ -461,23 +461,23 @@ class AActor : public DThinker
 
     mobjtype_t  type;
     mobjinfo_t *info;     // &mobjinfo[mobj->type]
-    int32_t         tics;     // state tic counter
+    int32_t     tics;     // state tic counter
     state_t    *state;
-    int32_t         damage;   // For missiles
-    int32_t         flags;
-    int32_t         flags2;   // Heretic flags
-    int32_t         flags3;   // MBF21 flags
-    int32_t         oflags;   // Odamex flags
-    int32_t         special1; // Special info
-    int32_t         special2; // Special info
-    int32_t         health;
+    int32_t     damage;   // For missiles
+    int32_t     flags;
+    int32_t     flags2;   // Heretic flags
+    int32_t     flags3;   // MBF21 flags
+    int32_t     oflags;   // Odamex flags
+    int32_t     special1; // Special info
+    int32_t     special2; // Special info
+    int32_t     health;
 
     // Movement direction, movement generation (zig-zagging).
     uint8_t movedir;   // 0-7
-    int32_t  movecount; // when 0, select a new dir
-    char visdir;
+    int32_t movecount; // when 0, select a new dir
+    char    visdir;
 
-                    // Thing being chased/attacked (or NULL),
+                       // Thing being chased/attacked (or NULL),
     // also the originator for missiles.
     AActorPtr target;
     AActorPtr lastenemy; // Last known enemy -- killogh 2/15/98
@@ -502,8 +502,8 @@ class AActor : public DThinker
 
     // Thing being chased/attacked for tracers.
     AActorPtr tracer;
-    uint8_t      special;     // special
-    uint8_t      args[5];     // special arguments
+    uint8_t   special;     // special
+    uint8_t   args[5];     // special arguments
 
     AActor *inext, *iprev; // Links to other mobjs in same bucket
 
@@ -511,19 +511,19 @@ class AActor : public DThinker
     // [SL] changed to use a bitfield instead of a vector for O(1) lookups
     PlayerBitField players_aware;
 
-    AActorPtr        goal;         // Monster's goal if not chasing anything
-    fixed_t          translucency; // 65536=fully opaque, 0=fully invisible
-    uint8_t             waterlevel;   // 0=none, 1=feet, 2=waist, 3=eyes
-    int16_t            gear;         // killough 11/98: used in torque simulation
+    AActorPtr goal;         // Monster's goal if not chasing anything
+    fixed_t   translucency; // 65536=fully opaque, 0=fully invisible
+    uint8_t   waterlevel;   // 0=none, 1=feet, 2=waist, 3=eyes
+    int16_t   gear;         // killough 11/98: used in torque simulation
 
-    bool onground;                 // NES - Fixes infinite jumping bug like a charm.
-    bool on_conveyor;              // Blair - Update items on conveyors more often
+    bool onground;          // NES - Fixes infinite jumping bug like a charm.
+    bool on_conveyor;       // Blair - Update items on conveyors more often
 
     // a linked list of sectors where this object appears
     struct msecnode_s *touching_sectorlist; // phares 3/14/98
 
-    int16_t deadtic;                          // tics after player's death
-    int32_t   oldframe;
+    int16_t deadtic;                        // tics after player's death
+    int32_t oldframe;
 
     uint8_t rndindex; // denis - because everything should have a random number generator, for prediction
 
@@ -537,15 +537,15 @@ class AActor : public DThinker
     static AActor *FindGoal(const AActor *first, int32_t tid, int32_t kind);
 
     uint32_t   netid;        // every object has its own netid
-    int16_t      tid;          // thing identifier
+    int16_t    tid;          // thing identifier
     baseline_t baseline;     // Baseline data for mobj sent to clients
     bool       baseline_set; // Have we set our baseline yet?
 
   private:
-    static const size_t TIDHashSize = 256;
-    static const size_t TIDHashMask = TIDHashSize - 1;
-    static AActor      *TIDHash[TIDHashSize];
-    static inline int32_t   TIDHASH(int32_t key)
+    static const size_t   TIDHashSize = 256;
+    static const size_t   TIDHashMask = TIDHashSize - 1;
+    static AActor        *TIDHash[TIDHashSize];
+    static inline int32_t TIDHASH(int32_t key)
     {
         return key & TIDHashMask;
     }
@@ -629,7 +629,7 @@ class FActorIterator
 
   private:
     AActor *base;
-    int32_t     id;
+    int32_t id;
 };
 
 template <class T> class TActorIterator : public FActorIterator

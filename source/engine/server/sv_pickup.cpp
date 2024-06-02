@@ -84,9 +84,9 @@ bool Pickup_DistributePlayers(size_t num_players, std::string &error)
 
     // Rip through our eligible vector, forcing players in the vector
     // onto alternating teams.
-    team_t dest_team = TEAM_BLUE;
-    size_t i         = 0;
-    int32_t    teamCount = sv_teamsinplay.asInt();
+    team_t  dest_team = TEAM_BLUE;
+    size_t  i         = 0;
+    int32_t teamCount = sv_teamsinplay.asInt();
     for (std::vector<player_t *>::iterator it = eligible.begin(); it != eligible.end(); ++it, ++i)
     {
         player_t &player = **it;
@@ -115,8 +115,8 @@ bool Pickup_DistributePlayers(size_t num_players, std::string &error)
         }
 
         int32_t iTeam = dest_team;
-        iTeam     = ++iTeam % teamCount;
-        dest_team = (team_t)iTeam;
+        iTeam         = ++iTeam % teamCount;
+        dest_team     = (team_t)iTeam;
     }
 
     // Force-spectate everyone who is not eligible.

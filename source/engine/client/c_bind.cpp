@@ -58,24 +58,23 @@ OBinding DefaultBindings[] = {
     {"mouse3", "+forward"},     {"mouse4", "+jump"}, // <- So is this <- change to jump
     {"mouse5", "+speed"},                            // <- new for +speed
     {"joy1", "+jump"},          {"joy2", "+use"},
-    {"joy5", "+showscores"},
-    {"joy9", "ready"},          {"joy10", "weapprev"},
-    {"joy11", "weapnext"},      {"joy20", "+use"},
-    {"joy21", "+attack"},       {"mwheelup", "weapprev"},
-    {"mwheeldown", "weapnext"}, {"f1", "menu_help"},
-    {"f2", "menu_save"},        {"f3", "menu_load"},
-    {"f4", "menu_options"}, // <- Since we don't have a separate sound menu anymore
-    {"f5", "menu_display"}, // <- More useful than just changing the detail level
+    {"joy5", "+showscores"},    {"joy9", "ready"},
+    {"joy10", "weapprev"},      {"joy11", "weapnext"},
+    {"joy20", "+use"},          {"joy21", "+attack"},
+    {"mwheelup", "weapprev"},   {"mwheeldown", "weapnext"},
+    {"f1", "menu_help"},        {"f2", "menu_save"},
+    {"f3", "menu_load"},        {"f4", "menu_options"}, // <- Since we don't have a separate sound menu anymore
+    {"f5", "menu_display"},                             // <- More useful than just changing the detail level
     {"f6", "quicksave"},        {"f7", "menu_endgame"},
     {"f8", "togglemessages"},   {"f9", "quickload"},
-    {"f10", "menu_quit"},
-    {"pause", "pause"},         {"sysrq", "screenshot"}, // <- Also known as the Print Screen key
-    {"print", "screenshot"},                             // <- AZERTY equivalent
+    {"f10", "menu_quit"},       {"pause", "pause"},
+    {"sysrq", "screenshot"},                           // <- Also known as the Print Screen key
+    {"print", "screenshot"},                           // <- AZERTY equivalent
     {"t", "messagemode"},       {"enter", "messagemode"},
-    {"y", "messagemode2"},      {"\\", "+showscores"},   // <- Another new command
+    {"y", "messagemode2"},      {"\\", "+showscores"}, // <- Another new command
     {"f11", "bumpgamma"},       {"f12", "spynext"},
-    {"pgup", "vote_yes"},                                // <- New for voting
-    {"pgdn", "vote_no"},                                 // <- New for voting
+    {"pgup", "vote_yes"},                              // <- New for voting
+    {"pgdn", "vote_no"},                               // <- New for voting
     {"home", "ready"},          {"end", "spectate"},
     {"m", "changeteams"},       {NULL, NULL}};
 
@@ -87,13 +86,13 @@ struct KeyState
     {
     }
 
-    int32_t  double_click_time;
-    bool double_clicked;
-    bool key_down;
+    int32_t double_click_time;
+    bool    double_clicked;
+    bool    key_down;
 };
 
 typedef OHashTable<int32_t, KeyState> KeyStateTable;
-static KeyStateTable              KeyStates;
+static KeyStateTable                  KeyStates;
 
 void OKeyBindings::SetBindingType(std::string cmd)
 {
@@ -103,7 +102,7 @@ void OKeyBindings::SetBindingType(std::string cmd)
 void OKeyBindings::UnbindKey(const char *key)
 {
     std::string keyname = StdStringToLower(key);
-    int32_t         keycode = I_GetKeyFromName(keyname);
+    int32_t     keycode = I_GetKeyFromName(keyname);
 
     if (keycode)
         Binds.erase(keycode);
@@ -121,7 +120,7 @@ void OKeyBindings::BindAKey(size_t argc, char **argv, const char *msg)
     if (argc > 1)
     {
         std::string key_name = StdStringToLower(argv[1]);
-        int32_t         key      = I_GetKeyFromName(key_name);
+        int32_t     key      = I_GetKeyFromName(key_name);
         if (!key)
         {
             Printf(PRINT_HIGH, "Unknown key %s\n", C_QuoteString(argv[1]).c_str());
@@ -139,7 +138,7 @@ void OKeyBindings::BindAKey(size_t argc, char **argv, const char *msg)
         Printf(PRINT_HIGH, "%s\n", msg);
         for (BindingTable::const_iterator it = Binds.begin(); it != Binds.end(); ++it)
         {
-            int32_t                key     = it->first;
+            int32_t            key     = it->first;
             const std::string &binding = it->second;
             if (!binding.empty())
                 Printf(PRINT_HIGH, "%s = %s\n", I_GetKeyName(key).c_str(), C_QuoteString(binding).c_str());
@@ -205,7 +204,7 @@ bool C_DoKey(event_t *ev, OKeyBindings *binds, OKeyBindings *doublebinds)
         return false;
 
     const std::string *binding = NULL;
-    int32_t                key     = ev->data1;
+    int32_t            key     = ev->data1;
 
     KeyState &key_state = KeyStates[key];
     if (doublebinds != NULL && ev->type == ev_keydown && key_state.double_click_time > level.time)
@@ -278,7 +277,7 @@ void C_ReleaseKeys()
 {
     for (KeyStateTable::iterator it = KeyStates.begin(); it != KeyStates.end(); ++it)
     {
-        int32_t       key       = it->first;
+        int32_t   key       = it->first;
         KeyState &key_state = it->second;
         if (key_state.key_down)
         {
@@ -295,7 +294,7 @@ void C_ReleaseKeys()
                 }
             }
         }
-    }    
+    }
 }
 
 void OKeyBindings::ArchiveBindings(PHYSFS_File *f)
@@ -303,12 +302,12 @@ void OKeyBindings::ArchiveBindings(PHYSFS_File *f)
     std::string str;
     for (BindingTable::const_iterator it = Binds.begin(); it != Binds.end(); ++it)
     {
-        const int32_t          key     = it->first;
+        const int32_t      key     = it->first;
         const std::string &binding = it->second;
         if (!binding.empty())
         {
             str.append(StrFormat("%s %s %s\n", command.c_str(), C_QuoteString(I_GetKeyName(key)).c_str(),
-                    C_QuoteString(binding).c_str()));
+                                 C_QuoteString(binding).c_str()));
         }
     }
     if (!str.empty())
@@ -317,12 +316,12 @@ void OKeyBindings::ArchiveBindings(PHYSFS_File *f)
 
 int32_t OKeyBindings::GetKeysForCommand(const char *cmd, int32_t *first, int32_t *second)
 {
-    int32_t c  = 0;
+    int32_t c = 0;
     *first = *second = 0;
 
     for (BindingTable::const_iterator it = Binds.begin(); it != Binds.end(); ++it)
     {
-        int32_t                key     = it->first;
+        int32_t            key     = it->first;
         const std::string &binding = it->second;
         if (!binding.empty() && stricmp(cmd, binding.c_str()) == 0)
         {

@@ -104,7 +104,7 @@ void huffman::_Huffman_InitBitstream(huff_bitstream_t *stream, uint8_t *buf)
 
 uint32_t huffman::_Huffman_ReadBit(huff_bitstream_t *stream)
 {
-    uint32_t   x, bit;
+    uint32_t x, bit;
     uint8_t *buf;
 
     /* Get current stream state */
@@ -132,7 +132,7 @@ uint32_t huffman::_Huffman_ReadBit(huff_bitstream_t *stream)
 
 uint32_t huffman::_Huffman_Read8Bits(huff_bitstream_t *stream)
 {
-    uint32_t   x, bit;
+    uint32_t x, bit;
     uint8_t *buf;
 
     /* Get current stream state */
@@ -155,9 +155,9 @@ uint32_t huffman::_Huffman_Read8Bits(huff_bitstream_t *stream)
 
 void huffman::_Huffman_WriteBits(huff_bitstream_t *stream, uint32_t x, uint32_t bits)
 {
-    uint32_t   bit, count;
+    uint32_t bit, count;
     uint8_t *buf;
-    uint32_t   mask;
+    uint32_t mask;
 
     /* Get current stream state */
     buf = stream->BytePtr;
@@ -248,7 +248,7 @@ void huffman::_Huffman_StoreTree(huff_encodenode_t *node, huff_sym_t *sym, uint3
 huffman::huff_encodenode_t *huffman::_Huffman_MakeTree(huff_sym_t *sym, huff_encodenode_t *nodes)
 {
     huff_encodenode_t *node_1, *node_2, *new_root;
-    uint32_t       k, num_symbols, nodes_left, next_idx;
+    uint32_t           k, num_symbols, nodes_left, next_idx;
 
     /* Initialize all leaf nodes */
     num_symbols = 0;
@@ -332,7 +332,7 @@ bool huffman::Huffman_Compress_Using_Histogram(uint8_t *in, size_t insize, uint8
 {
     huff_sym_t       tmp;
     huff_bitstream_t stream;
-    uint32_t     k, swaps, symbol;
+    uint32_t         k, swaps, symbol;
 
     /* Do we have anything to compress? */
     if (insize < 1)

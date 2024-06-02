@@ -101,8 +101,8 @@ void                  SV_DelayLoop()
     {
         while (m_delayQueue.size())
         {
-            int32_t  sendgametic = gametic;
-            auto item        = &m_delayQueue.front();
+            int32_t sendgametic = gametic;
+            auto    item        = &m_delayQueue.front();
 
             while (std::chrono::steady_clock::now() < item->m_tp)
                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -274,8 +274,8 @@ void SV_AcknowledgePacket(player_t &player)
         // resend
         for (int32_t seq = cl->last_sequence + 1; seq < sequence; seq++)
         {
-            int32_t  n;
-            bool needfullupdate = true;
+            int32_t n;
+            bool    needfullupdate = true;
 
             if (cl->oldpackets[seq & PACKET_OLD_MASK].sequence != seq)
             {

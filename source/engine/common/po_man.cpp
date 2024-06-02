@@ -49,7 +49,7 @@ void PO_Init(void);
 // PRIVATE FUNCTION PROTOTYPES ---------------------------------------------
 
 static polyobj_t *GetPolyobj(int32_t polyNum);
-static int32_t        GetPolyobjMirror(int32_t poly);
+static int32_t    GetPolyobjMirror(int32_t poly);
 static void       UpdateSegBBox(seg_t *seg);
 static void       RotatePt(int32_t an, fixed_t *x, fixed_t *y, fixed_t startSpotX, fixed_t startSpotY);
 static void       UnLinkPolyobj(polyobj_t *po);
@@ -69,12 +69,12 @@ extern seg_t *segs;
 
 polyblock_t **PolyBlockMap;
 polyobj_t    *polyobjs;   // list of all poly-objects on the level
-int32_t           po_NumPolyobjs;
+int32_t       po_NumPolyobjs;
 polyspawns_t *polyspawns; // [RH] Let P_SpawnMapThings() find our thingies for us
 
 // PRIVATE DATA DEFINITIONS ------------------------------------------------
 
-static int32_t     PolySegCount;
+static int32_t PolySegCount;
 static fixed_t PolyStartX;
 static fixed_t PolyStartY;
 
@@ -199,7 +199,7 @@ void DRotatePoly::RunThink()
 //
 bool EV_RotatePoly(line_t *line, int32_t polyNum, int32_t speed, int32_t byteAngle, int32_t direction, bool overRide)
 {
-    int32_t          mirror;
+    int32_t      mirror;
     DRotatePoly *pe;
     polyobj_t   *poly;
 
@@ -309,7 +309,7 @@ void DMovePoly::RunThink()
 //
 bool EV_MovePoly(line_t *line, int32_t polyNum, int32_t speed, angle_t angle, fixed_t dist, bool overRide)
 {
-    int32_t        mirror;
+    int32_t    mirror;
     DMovePoly *pe;
     polyobj_t *poly;
     angle_t    an;
@@ -363,7 +363,7 @@ bool EV_MovePoly(line_t *line, int32_t polyNum, int32_t speed, angle_t angle, fi
 //
 void DPolyDoor::RunThink()
 {
-    int32_t        absSpeed;
+    int32_t    absSpeed;
     polyobj_t *poly;
 
     if (m_Tics)
@@ -477,9 +477,10 @@ void DPolyDoor::RunThink()
 //
 // EV_OpenPolyDoor
 //
-bool EV_OpenPolyDoor(line_t *line, int32_t polyNum, int32_t speed, angle_t angle, int32_t delay, int32_t distance, podoortype_t type)
+bool EV_OpenPolyDoor(line_t *line, int32_t polyNum, int32_t speed, angle_t angle, int32_t delay, int32_t distance,
+                     podoortype_t type)
 {
-    int32_t        mirror;
+    int32_t    mirror;
     DPolyDoor *pd;
     polyobj_t *poly;
 
@@ -589,9 +590,9 @@ static int32_t GetPolyobjMirror(int32_t poly)
 //
 void ThrustMobj(AActor *actor, seg_t *seg, polyobj_t *po)
 {
-    int32_t          thrustAngle;
-    int32_t          thrustX;
-    int32_t          thrustY;
+    int32_t      thrustAngle;
+    int32_t      thrustX;
+    int32_t      thrustY;
     DPolyAction *pe;
 
     int32_t force;
@@ -699,7 +700,7 @@ static void UpdateSegBBox(seg_t *seg)
 //
 bool PO_MovePolyobj(int32_t num, int32_t x, int32_t y)
 {
-    int32_t        count;
+    int32_t    count;
     seg_t    **segList;
     polyobj_t *po;
     bool       blocked;
@@ -739,7 +740,7 @@ bool PO_MovePolyobj(int32_t num, int32_t x, int32_t y)
 //
 void DoMovePolyobj(polyobj_t *po, int32_t x, int32_t y)
 {
-    int32_t       count;
+    int32_t   count;
     seg_t   **segList;
     seg_t   **veryTempSeg;
     vertex_t *prevPts;
@@ -805,11 +806,11 @@ static void RotatePt(int32_t an, fixed_t *x, fixed_t *y, fixed_t startSpotX, fix
 //
 bool PO_RotatePolyobj(int32_t num, angle_t angle)
 {
-    int32_t        count;
+    int32_t    count;
     seg_t    **segList;
     vertex_t  *originalPts;
     vertex_t  *prevPts;
-    int32_t        an;
+    int32_t    an;
     polyobj_t *po;
     bool       blocked;
 
@@ -893,8 +894,8 @@ bool PO_RotatePolyobj(int32_t num, angle_t angle)
 static void UnLinkPolyobj(polyobj_t *po)
 {
     polyblock_t *link;
-    int32_t          i, j;
-    int32_t          index;
+    int32_t      i, j;
+    int32_t      index;
 
     // remove the polyobj from each blockmap section
     for (j = po->bbox[BOXBOTTOM]; j <= po->bbox[BOXTOP]; j++)
@@ -924,12 +925,12 @@ static void UnLinkPolyobj(polyobj_t *po)
 //
 static void LinkPolyobj(polyobj_t *po)
 {
-    int32_t           leftX, rightX;
-    int32_t           topY, bottomY;
+    int32_t       leftX, rightX;
+    int32_t       topY, bottomY;
     seg_t       **tempSeg;
     polyblock_t **link;
     polyblock_t  *tempLink;
-    int32_t           i, j;
+    int32_t       i, j;
 
     // calculate the polyobj bbox
     tempSeg = po->segs;
@@ -1007,8 +1008,8 @@ static void LinkPolyobj(polyobj_t *po)
 static bool CheckMobjBlocking(seg_t *seg, polyobj_t *po)
 {
     AActor *mobj;
-    int32_t     i, j;
-    int32_t     left, right, top, bottom;
+    int32_t i, j;
+    int32_t left, right, top, bottom;
     fixed_t tmbbox[4];
     line_t *ld;
     bool    blocked;
@@ -1115,11 +1116,11 @@ static void IterFindPolySegs(int32_t x, int32_t y, seg_t **segList)
 //
 static void SpawnPolyobj(int32_t index, int32_t tag, bool crush)
 {
-    int32_t    i;
-    int32_t    j;
-    int32_t    psIndex;
-    int32_t    psIndexOld;
-    seg_t *polySegList[PO_MAXPOLYSEGS];
+    int32_t i;
+    int32_t j;
+    int32_t psIndex;
+    int32_t psIndexOld;
+    seg_t  *polySegList[PO_MAXPOLYSEGS];
 
     for (i = 0; i < numsegs; i++)
     {
@@ -1233,10 +1234,10 @@ static void TranslateToStartSpot(int32_t tag, int32_t originX, int32_t originY)
     vertex_t    *tempPt;
     subsector_t *sub;
     polyobj_t   *po;
-    int32_t          deltaX;
-    int32_t          deltaY;
+    int32_t      deltaX;
+    int32_t      deltaY;
     vertex_t     avg; // used to find a polyobj's center, and hence subsector
-    int32_t          i;
+    int32_t      i;
 
     po = NULL;
     for (i = 0; i < po_NumPolyobjs; i++)
@@ -1315,7 +1316,7 @@ void PO_Init(void)
     //		record those things instead, so that in here, we simply need to
     //		look at the polyspawns list.
     polyspawns_t *polyspawn, **prev;
-    int32_t           polyIndex;
+    int32_t       polyIndex;
 
     polyobjs = (polyobj_t *)Z_Malloc(po_NumPolyobjs * sizeof(polyobj_t), PU_LEVEL, 0);
     memset(polyobjs, 0, po_NumPolyobjs * sizeof(polyobj_t));

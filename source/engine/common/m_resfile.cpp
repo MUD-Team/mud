@@ -35,7 +35,7 @@
 #include "w_ident.h"
 #include "w_wad.h"
 
-static constexpr uint8_t ZipMagic[4] = { 0x50, 0x4b, 0x03, 0x04 };
+static constexpr uint8_t ZipMagic[4] = {0x50, 0x4b, 0x03, 0x04};
 
 /**
  * @brief Populate an OResFile.
@@ -66,7 +66,7 @@ bool OResFile::make(OResFile &out, const std::string &file)
 
     // Stat and assign OFILE type (if valid)
     PHYSFS_Stat stat_check;
-    ofile_t type;
+    ofile_t     type;
     if (PHYSFS_stat(basename.c_str(), &stat_check) == 0)
         return false;
     else if (stat_check.filetype == PHYSFS_FILETYPE_REGULAR)
@@ -80,7 +80,7 @@ bool OResFile::make(OResFile &out, const std::string &file)
         else
         {
             uint8_t magic[4] = {0, 0, 0, 0};
-            if (PHYSFS_readBytes(zipcheck, magic, 4) != 4)  // something's wrong
+            if (PHYSFS_readBytes(zipcheck, magic, 4) != 4) // something's wrong
             {
                 PHYSFS_close(zipcheck);
                 return false;
@@ -154,7 +154,7 @@ bool OResFile::makeWithHash(OResFile &out, const std::string &file, const OMD5Ha
 
     // Stat and assign OFILE type (if valid)
     PHYSFS_Stat stat_check;
-    ofile_t type;
+    ofile_t     type;
     if (PHYSFS_stat(basename.c_str(), &stat_check) == 0)
         return false;
     else if (stat_check.filetype == PHYSFS_FILETYPE_REGULAR)
@@ -168,7 +168,7 @@ bool OResFile::makeWithHash(OResFile &out, const std::string &file, const OMD5Ha
         else
         {
             uint8_t magic[4] = {0, 0, 0, 0};
-            if (PHYSFS_readBytes(zipcheck, magic, 4) != 4)  // something's wrong
+            if (PHYSFS_readBytes(zipcheck, magic, 4) != 4) // something's wrong
             {
                 PHYSFS_close(zipcheck);
                 return false;
@@ -326,7 +326,8 @@ BEGIN_COMMAND(whereis)
     OResFile res;
     if (M_ResolveWantedFile(res, want))
     {
-        Printf("basename: %s\nfullpath: %s\nMD5: %s\n", res.getBasename().c_str(), res.getFullpath().c_str(), res.getMD5().getHexCStr());
+        Printf("basename: %s\nfullpath: %s\nMD5: %s\n", res.getBasename().c_str(), res.getFullpath().c_str(),
+               res.getMD5().getHexCStr());
         return;
     }
 

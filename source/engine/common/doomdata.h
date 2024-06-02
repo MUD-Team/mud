@@ -67,9 +67,9 @@ typedef struct
 {
     int16_t textureoffset;
     int16_t rowoffset;
-    char  toptexture[8];
-    char  bottomtexture[8];
-    char  midtexture[8];
+    char    toptexture[8];
+    char    bottomtexture[8];
+    char    midtexture[8];
     int16_t sector; // Front sector, towards viewer.
 } mapsidedef_t;
 
@@ -78,9 +78,9 @@ typedef struct
 {
     uint16_t v1;
     uint16_t v2;
-    int16_t          flags;
-    int16_t          special;
-    int16_t          tag;
+    int16_t  flags;
+    int16_t  special;
+    int16_t  tag;
     // sidenum[1] will be -1 if one sided
     int16_t sidenum[2];
 } maplinedef_t;
@@ -90,9 +90,9 @@ typedef struct
 {
     uint16_t v1;
     uint16_t v2;
-    int16_t          flags;
-    uint8_t           special;
-    uint8_t           args[5];
+    int16_t  flags;
+    uint8_t  special;
+    uint8_t  args[5];
     // sidenum[1] will be -1 if one sided
     int16_t sidenum[2];
 } maplinedef2_t;
@@ -180,8 +180,8 @@ typedef struct
 {
     int16_t floorheight;
     int16_t ceilingheight;
-    char  floorpic[8];
-    char  ceilingpic[8];
+    char    floorpic[8];
+    char    ceilingpic[8];
     int16_t lightlevel;
     int16_t special;
     int16_t tag;
@@ -242,19 +242,19 @@ typedef struct
 typedef struct MapThing
 {
     uint16_t thingid;
-    int16_t          x;
-    int16_t          y;
-    int16_t          z;
-    int16_t          angle;
-    int16_t          type;
-    int16_t          flags;
-    uint8_t           special;
-    uint8_t           args[5];
+    int16_t  x;
+    int16_t  y;
+    int16_t  z;
+    int16_t  angle;
+    int16_t  type;
+    int16_t  flags;
+    uint8_t  special;
+    uint8_t  args[5];
 
     void Serialize(FArchive &);
 } mapthing2_t;
 
-#define NO_INDEX ((uint16_t)-1)
+#define NO_INDEX ((uint16_t) - 1)
 
 // [RH] MapThing flags.
 
@@ -307,12 +307,12 @@ typedef struct
 typedef struct
 {
     char       name[8];
-    uint16_t       masked;             // [RH] Unused
-    uint8_t       scalex;             // [RH] Scaling (8 is normal)
-    uint8_t       scaley;             // [RH] Same as above
-    int16_t      width;
-    int16_t      height;
-    uint8_t       columndirectory[4]; // OBSOLETE
-    int16_t      patchcount;
+    uint16_t   masked;             // [RH] Unused
+    uint8_t    scalex;             // [RH] Scaling (8 is normal)
+    uint8_t    scaley;             // [RH] Same as above
+    int16_t    width;
+    int16_t    height;
+    uint8_t    columndirectory[4]; // OBSOLETE
+    int16_t    patchcount;
     mappatch_t patches[1];
 } maptexture_t;

@@ -41,8 +41,8 @@ struct weaponinfo_s
     statenum_t atkstate;
     statenum_t flashstate;
     mobjtype_t droptype;
-    int32_t        ammouse;
-    int32_t        minammo;
+    int32_t    ammouse;
+    int32_t    minammo;
 
     // MBF21 Specifications
     int32_t flags;
@@ -96,4 +96,4 @@ gitem_t *FindItem(const char *pickup_name);
 
 gitem_t *FindCardItem(card_t card);
 
-#define ITEM_INDEX(i) ((i)-itemlist)
+#define ITEM_INDEX(i) ((i) - itemlist)

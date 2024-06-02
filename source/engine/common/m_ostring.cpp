@@ -736,7 +736,7 @@ struct LowerFunctor
 template <typename FUNC> static OString OStringConverter(const char *s, size_t length)
 {
     Poco::Buffer<char> conv_buf(1024);
-    char *out;
+    char              *out;
 
     const char *in = s;
     FUNC        func; // instance of the conversion functor

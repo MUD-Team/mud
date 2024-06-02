@@ -97,8 +97,8 @@ void R_BeginInterpolation(fixed_t amount)
         for (std::vector<fixed_uint_pair>::const_iterator ceiling_it = prev_ceilingheight.begin();
              ceiling_it != prev_ceilingheight.end(); ++ceiling_it)
         {
-            uint32_t secnum = ceiling_it->second;
-            sector_t    *sector = &sectors[secnum];
+            uint32_t  secnum = ceiling_it->second;
+            sector_t *sector = &sectors[secnum];
 
             fixed_t old_value = ceiling_it->first;
             fixed_t cur_value = P_CeilingHeight(sector);
@@ -112,8 +112,8 @@ void R_BeginInterpolation(fixed_t amount)
         for (std::vector<fixed_uint_pair>::const_iterator floor_it = prev_floorheight.begin();
              floor_it != prev_floorheight.end(); ++floor_it)
         {
-            uint32_t secnum = floor_it->second;
-            sector_t    *sector = &sectors[secnum];
+            uint32_t  secnum = floor_it->second;
+            sector_t *sector = &sectors[secnum];
 
             fixed_t old_value = floor_it->first;
             fixed_t cur_value = P_FloorHeight(sector);

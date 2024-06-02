@@ -36,6 +36,7 @@
 // Need for wide string arg stuff - Dasho
 // Must go after win32inc.h...should we just throw it in there?
 #include <shellapi.h>
+
 #include "Poco/UnicodeConverter.h"
 #endif
 
@@ -84,8 +85,8 @@ void DArgs::CopyArgs(uint32_t argc, char **argv)
     if (!argv || !argc)
         return;
 
-    int32_t       win_argc = 0;
-    uint32_t    i;
+    int32_t   win_argc = 0;
+    uint32_t  i;
     wchar_t **win_argv = CommandLineToArgvW(GetCommandLineW(), &win_argc);
 
     if (!win_argv)
@@ -264,13 +265,13 @@ void M_FindResponseFile(void)
     {
         if (Args.GetArg(i)[0] == '@')
         {
-            char **argv;
-            int32_t    argc;
-            int32_t    argcinresp;
-            PHYSFS_File  *handle;
-            int32_t    size;
-            long   argsize;
-            size_t index;
+            char       **argv;
+            int32_t      argc;
+            int32_t      argcinresp;
+            PHYSFS_File *handle;
+            int32_t      size;
+            long         argsize;
+            size_t       index;
 
             std::string responsepath = Args.GetArg(i) + 1;
             std::string mountpath;
@@ -291,7 +292,7 @@ void M_FindResponseFile(void)
             Printf(PRINT_HIGH, "Found response file %s!\n", Args.GetArg(i) + 1);
             size = PHYSFS_fileLength(handle);
             Poco::Buffer<char> file(size + 1);
-            size_t readlen = PHYSFS_readBytes(handle, file.begin(), size);
+            size_t             readlen = PHYSFS_readBytes(handle, file.begin(), size);
             if (readlen < size)
             {
                 Printf(PRINT_HIGH, "Failed to read response file %s.\n", Args.GetArg(i) + 1);
@@ -335,8 +336,8 @@ void M_FindResponseFile(void)
 
 static long ParseCommandLine(const char *args, int32_t *argc, char **argv)
 {
-    int32_t   count;
-    char *buffplace;
+    int32_t count;
+    char   *buffplace;
 
     count     = 0;
     buffplace = NULL;

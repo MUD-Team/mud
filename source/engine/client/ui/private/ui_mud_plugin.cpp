@@ -22,13 +22,12 @@
 
 #include "ui_mud_plugin.h"
 
-#include <RmlUi/Debugger.h>
 #include <RmlUi/Core/Context.h>
+#include <RmlUi/Debugger.h>
 #include <assert.h>
 
 #include "i_system.h"
 #include "ui_console.h"
-
 
 MUDPlugin::MUDPlugin()
 {

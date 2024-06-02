@@ -37,13 +37,14 @@
 
 #include <exception>
 
+#include "Poco/UnicodeConverter.h"
 #include "cmdlib.h"
 #include "i_crash.h"
 #include "i_system.h"
 #include "m_fileio.h"
-#include "Poco/UnicodeConverter.h"
 #include "mud_includes.h"
 #include "version.h"
+
 
 // Fucntion pointer for MiniDumpWriteDump.
 typedef BOOL(WINAPI *MINIDUMPWRITEDUMP)(HANDLE hProcess, DWORD dwPid, HANDLE hFile, MINIDUMP_TYPE DumpType,
@@ -73,11 +74,13 @@ void writeMinidump(EXCEPTION_POINTERS *exceptionPtrs)
     // Open a file to write our dump into.
     SYSTEMTIME dt;
     GetSystemTime(&dt);
-    const std::string filename = StrFormat("%s\\%s_g%s_%lu_%4d%02d%02dT%02d%02d%02d.dmp", M_GetWriteDir().c_str(), GAMEEXE,
-              GitShortHash(), GetCurrentProcessId(), dt.wYear, dt.wMonth, dt.wDay, dt.wHour, dt.wMinute, dt.wSecond);
+    const std::string filename =
+        StrFormat("%s\\%s_g%s_%lu_%4d%02d%02dT%02d%02d%02d.dmp", M_GetWriteDir().c_str(), GAMEEXE, GitShortHash(),
+                  GetCurrentProcessId(), dt.wYear, dt.wMonth, dt.wDay, dt.wHour, dt.wMinute, dt.wSecond);
     std::wstring wide_filename;
     Poco::UnicodeConverter::convert(filename, wide_filename);
-    HANDLE hFile = CreateFileW(wide_filename.c_str(), GENERIC_WRITE, FILE_SHARE_READ, 0, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, 0);
+    HANDLE hFile =
+        CreateFileW(wide_filename.c_str(), GENERIC_WRITE, FILE_SHARE_READ, 0, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, 0);
     if (hFile == INVALID_HANDLE_VALUE)
     {
         // We couldn't create a dump file - oh well.
@@ -128,8 +131,8 @@ void purecallCallback()
     abort();
 }
 
-void invalidparamCallback(const wchar_t *expression, const wchar_t *function, const wchar_t *filename,
-                          uint32_t line, uintptr_t x)
+void invalidparamCallback(const wchar_t *expression, const wchar_t *function, const wchar_t *filename, uint32_t line,
+                          uintptr_t x)
 {
     // Exception pointer is located at _pxcptinfoptrs.
     writeMinidump(static_cast<PEXCEPTION_POINTERS>(_pxcptinfoptrs));

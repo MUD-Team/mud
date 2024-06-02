@@ -29,20 +29,20 @@
 class Vote
 {
   protected:
-    uint8_t                         caller_id;
-    uint32_t                 countdown;
-    std::string                  error;
-    vote_result_t                result;
+    uint8_t                          caller_id;
+    uint32_t                         countdown;
+    std::string                      error;
+    vote_result_t                    result;
     std::map<int32_t, vote_result_t> tally;
-    std::string                  votestring;
+    std::string                      votestring;
 
   public:
     Vote(const char *cname, const cvar_t *ccvar)
-        : countdown(0), error(""), result(VOTE_UNDEC), votestring(""), name(cname), cvar(ccvar){};
-    virtual ~Vote(){};
+        : countdown(0), error(""), result(VOTE_UNDEC), votestring(""), name(cname), cvar(ccvar) {};
+    virtual ~Vote() {};
     const char   *name;
     const cvar_t *cvar;
-    uint32_t  get_countdown() const
+    uint32_t      get_countdown() const
     {
         return this->countdown;
     }

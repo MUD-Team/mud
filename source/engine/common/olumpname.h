@@ -63,9 +63,9 @@ class OLumpName
     const char *c_str() const;
     const char *data() const;
     // Note: comparison operations are done without regard to case sensitivity.
-    int32_t         compare(const OLumpName &other) const;
-    int32_t         compare(const char *other) const;
-    int32_t         compare(const std::string &other) const;
+    int32_t     compare(const OLumpName &other) const;
+    int32_t     compare(const char *other) const;
+    int32_t     compare(const std::string &other) const;
     friend bool operator==(const OLumpName &lhs, const OLumpName &rhs);
     friend bool operator==(const OLumpName &lhs, const char *rhs);
     friend bool operator==(const OLumpName &lhs, const std::string &rhs);

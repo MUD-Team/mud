@@ -29,7 +29,7 @@
 #include "server.pb.h"
 
 typedef OHashTable<int32_t, const google::protobuf::Descriptor *> SVCHeaderMap;
-typedef OHashTable<const void *, svc_t>                       SVCDescMap;
+typedef OHashTable<const void *, svc_t>                           SVCDescMap;
 
 SVCHeaderMap g_SVCHeaderMap;
 SVCDescMap   g_SVCDescMap;

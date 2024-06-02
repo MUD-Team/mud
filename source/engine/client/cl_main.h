@@ -32,10 +32,10 @@
 
 extern netadr_t serveraddr;
 extern bool     connected;
-extern int32_t      connecttimeout;
+extern int32_t  connecttimeout;
 
-extern bool noservermsgs;
-extern int32_t  last_received;
+extern bool    noservermsgs;
+extern int32_t last_received;
 
 extern buf_t net_buffer;
 

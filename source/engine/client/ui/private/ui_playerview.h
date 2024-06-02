@@ -56,10 +56,9 @@ class ElementPlayerView : public Rml::Element, public Rml::EventListener
 
     bool GetIntrinsicDimensions(Rml::Vector2f &dimensions, float &ratio) override;
 
-    void ProcessEvent(Rml::Event& event) override;
+    void ProcessEvent(Rml::Event &event) override;
 
   private:
-
     friend class UIContextPlay;
 
     static void InitializeContext(Rml::Context *context);
@@ -87,10 +86,10 @@ class ElementPlayerView : public Rml::Element, public Rml::EventListener
     // The geometry used to render this element.
     Rml::Geometry geometry;
 
-    IRenderSurface* mRenderSurface = nullptr;
+    IRenderSurface *mRenderSurface = nullptr;
 
     // Data Model
 
-    static int32_t mResolution;
+    static int32_t              mResolution;
     static Rml::DataModelHandle mPlayerViewHandle;
 };

@@ -31,18 +31,18 @@ extern int32_t MaxVisSprites;
 extern vissprite_t *vissprites;
 
 extern spritedef_t *sprites;
-extern int32_t          numsprites;
+extern int32_t      numsprites;
 
 #define MAX_SPRITE_FRAMES 29 // [RH] Macro-ized as in BOOM.
 
 // variables used to look up
 //	and range check thing_t sprites patches
 extern spriteframe_t sprtemp[MAX_SPRITE_FRAMES];
-extern int32_t           maxframe;
+extern int32_t       maxframe;
 
 extern vissprite_t *lastvissprite;
 
 void R_CacheSprite(spritedef_t *sprite);
 void R_InitSprites();
 void R_InstallSpriteTex(const texhandle_t tex_id, uint32_t frame, uint32_t rot, bool flipped);
-void R_InstallSprite(const char* name, int32_t num);
+void R_InstallSprite(const char *name, int32_t num);

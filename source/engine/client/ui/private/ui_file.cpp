@@ -33,7 +33,7 @@ UIFileInterface::UIFileInterface()
 }
 
 UIFileInterface::~UIFileInterface()
-{    
+{
 }
 
 Rml::FileHandle UIFileInterface::Open(const Rml::String &path)

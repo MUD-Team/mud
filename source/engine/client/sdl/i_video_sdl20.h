@@ -150,8 +150,10 @@ class ISDL20Window : public IWindow
 
     virtual std::string getVideoDriverName() const;
 
-    SDL_Window* getSDLWindow() const { return mSDLWindow; }
-
+    SDL_Window *getSDLWindow() const
+    {
+        return mSDLWindow;
+    }
 
   private:
     // disable copy constructor and assignment operator

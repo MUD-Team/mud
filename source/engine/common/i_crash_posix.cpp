@@ -50,8 +50,9 @@ static void WriteBacktrace(int32_t sig, siginfo_t *si)
     strftime(timebuf, ARRAY_LENGTH(timebuf), "%Y%m%dT%H%M%S", local);
 
     // Find the spot to write our backtrace.
-    const char  *filename = StrFormat("%s/%s_g%s_%d_%s_dump.txt", M_GetWriteDir().c_str(), GAMEEXE, GitShortHash(),
-                   getpid(), timebuf).c_str();
+    const char *filename =
+        StrFormat("%s/%s_g%s_%d_%s_dump.txt", M_GetWriteDir().c_str(), GAMEEXE, GitShortHash(), getpid(), timebuf)
+            .c_str();
 
     // Create a file.
     int32_t fd = creat(filename, 0644);

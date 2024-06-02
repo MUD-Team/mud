@@ -79,8 +79,8 @@ class Unlag
         fixed_t offset_z;
 
         // did we change player's MF_SHOOTABLE flag during reconciliation?
-        bool changed_flags;
-        int32_t  backup_flags;
+        bool    changed_flags;
+        int32_t backup_flags;
 
         size_t current_lag;
     } PlayerHistoryRecord;
@@ -110,7 +110,7 @@ class Unlag
 
     Unlag() : reconciled(false)
     {
-    }                                   // private contsructor (part of Singleton)
+    } // private contsructor (part of Singleton)
     Unlag(const Unlag &rhs);            // private copy constructor
     Unlag &operator=(const Unlag &rhs); // private assignment operator
 

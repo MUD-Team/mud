@@ -65,8 +65,8 @@ typedef int32_t SOCKET;
 #endif
 
 uint32_t inet_socket;
-int32_t          localport;
-netadr_t     net_from; // address of who sent the packet
+int32_t  localport;
+netadr_t net_from; // address of who sent the packet
 
 buf_t       net_message(MAX_UDP_PACKET);
 extern bool simulated_connection;
@@ -102,7 +102,7 @@ SOCKET UDPsocket(void)
 //
 void BindToLocalPort(SOCKET s, u_short wanted)
 {
-    int32_t                v;
+    int32_t            v;
     struct sockaddr_in address;
 
     memset(&address, 0, sizeof(address));
@@ -212,7 +212,7 @@ typedef int32_t socklen_t;
 
 int32_t NET_GetPacket(void)
 {
-    int32_t                ret;
+    int32_t            ret;
     struct sockaddr_in from;
     socklen_t          fromlen;
 
@@ -258,7 +258,7 @@ int32_t NET_GetPacket(void)
 
 int32_t NET_SendPacket(buf_t &buf, netadr_t &to)
 {
-    int32_t                ret;
+    int32_t            ret;
     struct sockaddr_in addr;
 
     // [SL] 2011-07-06 - Don't try to send a packet if we're not really connected
@@ -660,7 +660,7 @@ bool MSG_CompressMinilzo(buf_t &buf, size_t start_offset, size_t write_gap)
         compressed.resize(total_len);
 
     int32_t r = lzo1x_1_compress(buf.ptr() + start_offset, buf.size() - start_offset,
-                             compressed.ptr() + start_offset + write_gap, &outlen, wrkmem);
+                                 compressed.ptr() + start_offset + write_gap, &outlen, wrkmem);
 
     // worth the effort?
     if (r != LZO_E_OK || outlen >= (buf.size() - start_offset - write_gap))
