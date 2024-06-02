@@ -26,7 +26,6 @@
 #include "p_lnspec.h"
 #include "p_local.h"
 #include "p_mapformat.h"
-#include "r_state.h"
 #include "s_sndseq.h"
 #include "s_sound.h"
 

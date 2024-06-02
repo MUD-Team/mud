@@ -31,7 +31,6 @@
 
 #include "d_player.h"
 #include "dsectoreffect.h"
-#include "r_state.h"
 #include "res_texture.h"
 
 typedef struct movingsector_s

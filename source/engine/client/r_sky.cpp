@@ -34,7 +34,6 @@
 #include "r_client.h"
 #include "r_draw.h"
 #include "r_main.h"
-#include "r_state.h"
 #include "res_texture.h"
 #include "w_wad.h"
 

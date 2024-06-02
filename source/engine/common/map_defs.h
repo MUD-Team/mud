@@ -632,3 +632,68 @@ struct spritedef_s
     spriteframe_t *spriteframes;
 };
 typedef spritedef_s spritedef_t;
+
+//
+// Lookup tables for map data.
+//
+extern bool g_ValidLevel;
+
+extern int32_t      numsprites;
+extern spritedef_t *sprites;
+
+extern int32_t   numvertexes;
+extern vertex_t *vertexes;
+
+extern int32_t numsegs;
+extern seg_t  *segs;
+
+extern int32_t   numsectors;
+extern sector_t *sectors;
+
+extern int32_t      numsubsectors;
+extern subsector_t *subsectors;
+
+extern int32_t numnodes;
+extern node_t *nodes;
+
+extern int32_t numlines;
+extern line_t *lines;
+
+extern int32_t numsides;
+extern side_t *sides;
+
+inline FArchive &operator<<(FArchive &arc, sector_t *sec)
+{
+    if (sec)
+        return arc << (uint16_t)(sec - sectors);
+    else
+        return arc << (uint16_t)0xffff;
+}
+inline FArchive &operator>>(FArchive &arc, sector_t *&sec)
+{
+    uint16_t ofs;
+    arc >> ofs;
+    if (ofs == 0xffff)
+        sec = NULL;
+    else
+        sec = sectors + ofs;
+    return arc;
+}
+
+inline FArchive &operator<<(FArchive &arc, line_t *line)
+{
+    if (line)
+        return arc << (uint16_t)(line - lines);
+    else
+        return arc << (uint16_t)0xffff;
+}
+inline FArchive &operator>>(FArchive &arc, line_t *&line)
+{
+    uint16_t ofs;
+    arc >> ofs;
+    if (ofs == 0xffff)
+        line = NULL;
+    else
+        line = lines + ofs;
+    return arc;
+}

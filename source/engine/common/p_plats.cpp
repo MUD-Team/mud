@@ -26,7 +26,6 @@
 #include "mud_includes.h"
 #include "p_lnspec.h"
 #include "p_local.h"
-#include "r_state.h"
 #include "s_sound.h"
 
 // From sv_main.cpp

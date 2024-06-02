@@ -26,7 +26,6 @@
 #include "mud_includes.h"
 #include "p_lnspec.h"
 #include "p_local.h"
-#include "r_state.h"
 
 // [RH] Make sure the light level is in bounds.
 #define CLIPLIGHT(l) (((l) < 0) ? 0 : (((l) > 255) ? 255 : (l)))
