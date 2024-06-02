@@ -30,6 +30,7 @@
 
 #if defined _WIN32 && defined _MSC_VER && !defined _DEBUG
 
+#include "win32inc.h"
 #include <DbgHelp.h>
 #include <new.h>
 #include <signal.h>
@@ -43,7 +44,7 @@
 #include "m_fileio.h"
 #include "mud_includes.h"
 #include "version.h"
-#include "win32inc.h"
+
 
 // Fucntion pointer for MiniDumpWriteDump.
 typedef BOOL(WINAPI *MINIDUMPWRITEDUMP)(HANDLE hProcess, DWORD dwPid, HANDLE hFile, MINIDUMP_TYPE DumpType,
