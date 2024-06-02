@@ -31,7 +31,6 @@
 #include "p_local.h"
 #include "p_mapformat.h"
 #include "r_common.h"
-#include "r_state.h"
 
 //
 // P_CheckSight

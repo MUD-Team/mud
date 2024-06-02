@@ -108,11 +108,6 @@ extern bool viewactive;
 extern bool nodrawers;
 extern bool noblit;
 
-extern int32_t viewwindowx;
-extern int32_t viewwindowy;
-extern int32_t viewheight;
-extern int32_t viewwidth;
-
 extern level_locals_t level;
 
 // --------------------------------------

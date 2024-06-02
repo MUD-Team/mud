@@ -29,7 +29,6 @@
 #include "mud_includes.h"
 #include "p_local.h"
 #include "r_common.h"
-#include "r_state.h"
 
 //
 //

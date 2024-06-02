@@ -51,7 +51,6 @@
 #include "p_mapformat.h"
 #include "p_unlag.h"
 #include "p_zdoomhexspec.h"
-#include "r_state.h"
 #include "s_sound.h"
 #include "w_wad.h"
 #include "z_zone.h"

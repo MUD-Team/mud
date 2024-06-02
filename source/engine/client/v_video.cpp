@@ -38,7 +38,6 @@
 #include "mud_includes.h"
 #include "r_draw.h"
 #include "r_main.h"
-#include "r_state.h"
 #include "w_wad.h"
 #include "z_zone.h"
 

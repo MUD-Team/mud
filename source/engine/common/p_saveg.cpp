@@ -28,7 +28,6 @@
 #include "m_random.h"
 #include "mud_includes.h"
 #include "p_local.h"
-#include "r_state.h"
 #include "v_palette.h"
 
 //

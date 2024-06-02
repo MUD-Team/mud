@@ -41,7 +41,6 @@
 #include "p_mobj.h"
 #include "p_unlag.h"
 #include "r_common.h"
-#include "r_state.h"
 #include "s_sound.h"
 #include "svc_message.h"
 #include "z_zone.h"

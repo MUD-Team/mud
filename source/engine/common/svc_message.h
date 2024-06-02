@@ -37,7 +37,6 @@
 #include "i_net.h"
 #include "m_resfile.h"
 #include "p_spec.h"
-#include "r_state.h"
 #include "server.pb.h"
 
 /**

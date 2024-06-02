@@ -5,7 +5,6 @@
 #include "Poco/ByteOrder.h"
 #include "r_sky.h"
 #include "r_sprites.h"
-#include "r_state.h"
 
 //
 // R_GetPatchColumn

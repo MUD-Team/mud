@@ -39,7 +39,6 @@
 #include "p_mobj.h"
 #include "p_setup.h"
 #include "r_common.h"
-#include "r_state.h"
 #include "s_sound.h"
 
 EXTERN_CVAR(sv_allowexit)
