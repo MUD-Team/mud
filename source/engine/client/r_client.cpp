@@ -2,6 +2,7 @@
 
 #include "r_client.h"
 
+#include "Poco/ByteOrder.h"
 #include "r_sky.h"
 #include "r_sprites.h"
 #include "r_state.h"
@@ -11,7 +12,7 @@
 //
 tallpost_t *R_GetPatchColumn(patch_t *patch, int32_t colnum)
 {
-    return (tallpost_t *)((uint8_t *)patch + LELONG(patch->columnofs[colnum]));
+    return (tallpost_t *)((uint8_t *)patch + Poco::ByteOrder::fromLittleEndian(patch->columnofs[colnum]));
 }
 
 //
@@ -23,7 +24,7 @@ tallpost_t *R_GetTextureColumn(texhandle_t texnum, int32_t colnum)
     colnum &= tex->getWidthMask();
     patch_t *texpatch = (patch_t *)tex->getData();
 
-    return (tallpost_t *)((uint8_t *)texpatch + LELONG(texpatch->columnofs[colnum]));
+    return (tallpost_t *)((uint8_t *)texpatch + Poco::ByteOrder::fromLittleEndian(texpatch->columnofs[colnum]));
 }
 
 //

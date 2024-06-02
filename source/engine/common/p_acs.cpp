@@ -36,6 +36,7 @@
 #include "p_local.h"
 #include "p_saveg.h"
 #include "p_spec.h"
+#include "Poco/ByteOrder.h"
 #include "r_common.h"
 #include "s_sndseq.h"
 #include "s_sound.h"
@@ -669,31 +670,31 @@ FBehavior::FBehavior(uint8_t *object, int32_t len)
         Functions = FindChunk(MAKE_ID('F', 'U', 'N', 'C'));
         if (Functions != NULL)
         {
-            NumFunctions = LELONG(((uint32_t *)Functions)[1]);
+            NumFunctions = Poco::ByteOrder::fromLittleEndian(((uint32_t *)Functions)[1]);
             Functions += 8;
         }
 
         chunk = (uint32_t *)FindChunk(MAKE_ID('M', 'I', 'N', 'I'));
         if (chunk != NULL)
         {
-            int32_t numvars  = LELONG(chunk[1]) / 4;
-            int32_t firstvar = LELONG(chunk[2]);
+            int32_t numvars  = Poco::ByteOrder::fromLittleEndian(chunk[1]) / 4;
+            int32_t firstvar = Poco::ByteOrder::fromLittleEndian(chunk[2]);
             for (i = 0; i < numvars; ++i)
             {
-                level.vars[i + firstvar] = LELONG(chunk[3 + i]);
+                level.vars[i + firstvar] = Poco::ByteOrder::fromLittleEndian(chunk[3 + i]);
             }
         }
 
         chunk = (uint32_t *)FindChunk(MAKE_ID('A', 'R', 'A', 'Y'));
         if (chunk != NULL)
         {
-            NumArrays = LELONG(chunk[1]) / 8;
+            NumArrays = Poco::ByteOrder::fromLittleEndian(chunk[1]) / 8;
             Arrays    = new ArrayInfo[NumArrays];
             memset(Arrays, 0, sizeof(*Arrays) * NumArrays);
             for (i = 0; i < NumArrays; ++i)
             {
-                level.vars[LELONG(chunk[2 + i * 2])] = i;
-                Arrays[i].ArraySize                  = LELONG(chunk[3 + i * 2]);
+                level.vars[Poco::ByteOrder::fromLittleEndian(chunk[2 + i * 2])] = i;
+                Arrays[i].ArraySize                  = Poco::ByteOrder::fromLittleEndian(chunk[3 + i * 2]);
                 Arrays[i].Elements                   = new int32_t[Arrays[i].ArraySize];
                 memset(Arrays[i].Elements, 0, Arrays[i].ArraySize * sizeof(uint32_t));
             }
@@ -702,14 +703,14 @@ FBehavior::FBehavior(uint8_t *object, int32_t len)
         chunk = (uint32_t *)FindChunk(MAKE_ID('A', 'I', 'N', 'I'));
         while (chunk != NULL)
         {
-            int32_t arraynum = level.vars[LELONG(chunk[2])];
+            int32_t arraynum = level.vars[Poco::ByteOrder::fromLittleEndian(chunk[2])];
             if ((uint32_t)arraynum < (uint32_t)NumArrays)
             {
-                int32_t  initsize = MIN<int32_t>(Arrays[arraynum].ArraySize, (LELONG(chunk[1]) - 4) / 4);
+                int32_t  initsize = MIN<int32_t>(Arrays[arraynum].ArraySize, (Poco::ByteOrder::fromLittleEndian(chunk[1]) - 4) / 4);
                 int32_t *elems    = Arrays[arraynum].Elements;
                 for (i = 0; i < initsize; ++i)
                 {
-                    elems[i] = LELONG(chunk[3 + i]);
+                    elems[i] = Poco::ByteOrder::fromLittleEndian(chunk[3 + i]);
                 }
             }
             chunk = (uint32_t *)NextChunk((uint8_t *)chunk);
@@ -1001,7 +1002,7 @@ void FBehavior::StartTypedScripts(uint16_t type, AActor *activator, int32_t arg0
 
 //---- The ACS Interpreter ----//
 
-#define NEXTWORD       (LELONG(*pc++))
+#define NEXTWORD       (Poco::ByteOrder::fromLittleEndian(*pc++))
 #define NEXTBYTE       (fmt == ACS_LittleEnhanced ? getbyte(pc) : NEXTWORD)
 #define STACK(a)       (Stack[sp - (a)])
 #define PushToStack(a) (Stack[sp++] = (a))

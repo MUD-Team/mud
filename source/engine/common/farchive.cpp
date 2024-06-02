@@ -27,6 +27,7 @@
 #include <algorithm>
 
 #include "Poco/Buffer.h"
+#include "Poco/ByteOrder.h"
 #include "d_player.h"
 #include "dobject.h"
 #include "i_system.h"
@@ -319,8 +320,8 @@ void FLZOFile::Implode()
     m_Buffer = (uint8_t *)Malloc(m_BufferSize + 8);
     m_Pos    = 0;
 
-    ((uint32_t *)m_Buffer)[0] = BELONG((uint32_t)compressed_len);
-    ((uint32_t *)m_Buffer)[1] = BELONG((uint32_t)input_len);
+    ((uint32_t *)m_Buffer)[0] = Poco::ByteOrder::fromBigEndian((uint32_t)compressed_len);
+    ((uint32_t *)m_Buffer)[1] = Poco::ByteOrder::fromBigEndian((uint32_t)input_len);
 
     if (compressed_len == 0 || !compressed)
         memcpy(m_Buffer + 8, oldbuf, input_len);
@@ -337,8 +338,8 @@ void FLZOFile::Explode()
 {
     if (m_Buffer)
     {
-        uint32_t compressed_len = BELONG(((uint32_t *)m_Buffer)[0]);
-        uint32_t expanded_len   = BELONG(((uint32_t *)m_Buffer)[1]);
+        uint32_t compressed_len = Poco::ByteOrder::fromBigEndian(((uint32_t *)m_Buffer)[0]);
+        uint32_t expanded_len   = Poco::ByteOrder::fromBigEndian(((uint32_t *)m_Buffer)[1]);
 
         uint8_t *expanded_buffer = (uint8_t *)Malloc(expanded_len);
 

@@ -45,6 +45,7 @@
 #include "p_local.h"
 #include "p_mapformat.h"
 #include "p_mobj.h"
+#include "Poco/ByteOrder.h"
 #include "r_common.h"
 #include "r_sprites.h"
 #include "s_sound.h"
@@ -161,8 +162,8 @@ void P_LoadVertexes(int32_t lump)
     // internal representation as fixed.
     for (i = 0; i < numvertexes; i++)
     {
-        vertexes[i].x = LESHORT(((mapvertex_t *)data)[i].x) << FRACBITS;
-        vertexes[i].y = LESHORT(((mapvertex_t *)data)[i].y) << FRACBITS;
+        vertexes[i].x = Poco::ByteOrder::fromLittleEndian(((mapvertex_t *)data)[i].x) << FRACBITS;
+        vertexes[i].y = Poco::ByteOrder::fromLittleEndian(((mapvertex_t *)data)[i].y) << FRACBITS;
     }
 
     // Free buffer memory.
@@ -197,24 +198,24 @@ void P_LoadSegs(int32_t lump)
         int32_t side, linedef;
         line_t *ldef;
 
-        uint16_t v = LESHORT(ml->v1);
+        uint16_t v = Poco::ByteOrder::fromLittleEndian(ml->v1);
 
         if (v >= numvertexes)
             I_Error("P_LoadSegs: invalid vertex %d", v);
         else
             li->v1 = &vertexes[v];
 
-        v = LESHORT(ml->v2);
+        v = Poco::ByteOrder::fromLittleEndian(ml->v2);
 
         if (v >= numvertexes)
             I_Error("P_LoadSegs: invalid vertex %d", v);
         else
             li->v2 = &vertexes[v];
 
-        li->angle = (LESHORT(ml->angle)) << 16;
+        li->angle = (Poco::ByteOrder::fromLittleEndian(ml->angle)) << 16;
 
-        li->offset = (LESHORT(ml->offset)) << 16;
-        linedef    = LESHORT(ml->linedef);
+        li->offset = (Poco::ByteOrder::fromLittleEndian(ml->offset)) << 16;
+        linedef    = Poco::ByteOrder::fromLittleEndian(ml->linedef);
 
         if (linedef < 0 || linedef >= numlines)
             I_Error("P_LoadSegs: invalid linedef %d", linedef);
@@ -222,7 +223,7 @@ void P_LoadSegs(int32_t lump)
         ldef        = &lines[linedef];
         li->linedef = ldef;
 
-        side = LESHORT(ml->side);
+        side = Poco::ByteOrder::fromLittleEndian(ml->side);
 
         if (side != 0 && side != 1)
             side = 1; // assume invalid value means back
@@ -277,8 +278,8 @@ void P_LoadSubsectors(int32_t lump)
 
     for (i = 0; i < numsubsectors; i++)
     {
-        subsectors[i].numlines  = (uint16_t)LESHORT(((mapsubsector_t *)data)[i].numsegs);
-        subsectors[i].firstline = (uint16_t)LESHORT(((mapsubsector_t *)data)[i].firstseg);
+        subsectors[i].numlines  = (uint16_t)Poco::ByteOrder::fromLittleEndian(((mapsubsector_t *)data)[i].numsegs);
+        subsectors[i].firstline = (uint16_t)Poco::ByteOrder::fromLittleEndian(((mapsubsector_t *)data)[i].firstseg);
     }
 
     Z_Free(data);
@@ -316,15 +317,15 @@ void P_LoadSectors(int32_t lump)
     ss = sectors;
     for (i = 0; i < numsectors; i++, ss++, ms++)
     {
-        ss->floorheight   = LESHORT(ms->floorheight) << FRACBITS;
-        ss->ceilingheight = LESHORT(ms->ceilingheight) << FRACBITS;
+        ss->floorheight   = Poco::ByteOrder::fromLittleEndian(ms->floorheight) << FRACBITS;
+        ss->ceilingheight = Poco::ByteOrder::fromLittleEndian(ms->ceilingheight) << FRACBITS;
         ss->floorpic      = texturemanager.getHandle(ms->floorpic, Texture::TEX_FLAT);
         ss->ceilingpic    = texturemanager.getHandle(ms->ceilingpic, Texture::TEX_FLAT);
-        ss->lightlevel    = LESHORT(ms->lightlevel);
-        originalLightLevels.push_back(LESHORT(ms->lightlevel));
-        ss->special            = LESHORT(ms->special);
+        ss->lightlevel    = Poco::ByteOrder::fromLittleEndian(ms->lightlevel);
+        originalLightLevels.push_back(Poco::ByteOrder::fromLittleEndian(ms->lightlevel));
+        ss->special            = Poco::ByteOrder::fromLittleEndian(ms->special);
         ss->secretsector       = !!(ss->special & SECRET_MASK);
-        ss->tag                = LESHORT(ms->tag);
+        ss->tag                = Poco::ByteOrder::fromLittleEndian(ms->tag);
         ss->thinglist          = NULL;
         ss->touching_thinglist = NULL; // phares 3/14/98
         ss->seqType            = defSeqType;
@@ -415,14 +416,14 @@ void P_LoadNodes(int32_t lump)
 
     for (i = 0; i < numnodes; i++, no++, mn++)
     {
-        no->x  = LESHORT(mn->x) << FRACBITS;
-        no->y  = LESHORT(mn->y) << FRACBITS;
-        no->dx = LESHORT(mn->dx) << FRACBITS;
-        no->dy = LESHORT(mn->dy) << FRACBITS;
+        no->x  = Poco::ByteOrder::fromLittleEndian(mn->x) << FRACBITS;
+        no->y  = Poco::ByteOrder::fromLittleEndian(mn->y) << FRACBITS;
+        no->dx = Poco::ByteOrder::fromLittleEndian(mn->dx) << FRACBITS;
+        no->dy = Poco::ByteOrder::fromLittleEndian(mn->dy) << FRACBITS;
         for (j = 0; j < 2; j++)
         {
             // account for children's promotion to 32 bits
-            uint32_t child = (uint16_t)LESHORT(mn->children[j]);
+            uint32_t child = (uint16_t)Poco::ByteOrder::fromLittleEndian(mn->children[j]);
 
             if (child == 0xffff)
                 child = 0xffffffff;
@@ -432,7 +433,7 @@ void P_LoadNodes(int32_t lump)
             no->children[j] = child;
 
             for (k = 0; k < 4; k++)
-                no->bbox[j][k] = LESHORT(mn->bbox[j][k]) << FRACBITS;
+                no->bbox[j][k] = Poco::ByteOrder::fromLittleEndian(mn->bbox[j][k]) << FRACBITS;
         }
     }
 
@@ -457,9 +458,9 @@ bool P_LoadXNOD(int32_t lump)
     uint8_t *p = data + 4; // skip the magic number
 
     // Load vertices
-    uint32_t numorgvert = LELONG(*(uint32_t *)p);
+    uint32_t numorgvert = Poco::ByteOrder::fromLittleEndian(*(uint32_t *)p);
     p += 4;
-    uint32_t numnewvert = LELONG(*(uint32_t *)p);
+    uint32_t numnewvert = Poco::ByteOrder::fromLittleEndian(*(uint32_t *)p);
     p += 4;
 
     vertex_t *newvert = (vertex_t *)Z_Malloc((numorgvert + numnewvert) * sizeof(*newvert), PU_LEVEL, 0);
@@ -470,9 +471,9 @@ bool P_LoadXNOD(int32_t lump)
     for (uint32_t i = 0; i < numnewvert; i++)
     {
         vertex_t *v = &newvert[numorgvert + i];
-        v->x        = LELONG(*(int32_t *)p);
+        v->x        = Poco::ByteOrder::fromLittleEndian(*(int32_t *)p);
         p += 4;
-        v->y = LELONG(*(int32_t *)p);
+        v->y = Poco::ByteOrder::fromLittleEndian(*(int32_t *)p);
         p += 4;
     }
 
@@ -492,7 +493,7 @@ bool P_LoadXNOD(int32_t lump)
 
     // Load subsectors
 
-    numsubsectors = LELONG(*(uint32_t *)p);
+    numsubsectors = Poco::ByteOrder::fromLittleEndian(*(uint32_t *)p);
     p += 4;
     subsectors = (subsector_t *)Z_Malloc(numsubsectors * sizeof(*subsectors), PU_LEVEL, 0);
     memset(subsectors, 0, numsubsectors * sizeof(*subsectors));
@@ -502,25 +503,25 @@ bool P_LoadXNOD(int32_t lump)
     for (int32_t i = 0; i < numsubsectors; i++)
     {
         subsectors[i].firstline = first_seg;
-        subsectors[i].numlines  = LELONG(*(uint32_t *)p);
+        subsectors[i].numlines  = Poco::ByteOrder::fromLittleEndian(*(uint32_t *)p);
         p += 4;
         first_seg += subsectors[i].numlines;
     }
 
     // Load segs
 
-    numsegs = LELONG(*(uint32_t *)p);
+    numsegs = Poco::ByteOrder::fromLittleEndian(*(uint32_t *)p);
     p += 4;
     segs = (seg_t *)Z_Malloc(numsegs * sizeof(*segs), PU_LEVEL, 0);
     memset(segs, 0, numsegs * sizeof(*segs));
 
     for (int32_t i = 0; i < numsegs; i++)
     {
-        uint32_t v1 = LELONG(*(uint32_t *)p);
+        uint32_t v1 = Poco::ByteOrder::fromLittleEndian(*(uint32_t *)p);
         p += 4;
-        uint32_t v2 = LELONG(*(uint32_t *)p);
+        uint32_t v2 = Poco::ByteOrder::fromLittleEndian(*(uint32_t *)p);
         p += 4;
-        uint16_t ld = LESHORT(*(uint16_t *)p);
+        uint16_t ld = Poco::ByteOrder::fromLittleEndian(*(uint16_t *)p);
         p += 2;
         uint8_t side = *(uint8_t *)p;
         p += 1;
@@ -554,7 +555,7 @@ bool P_LoadXNOD(int32_t lump)
 
     // Load nodes
 
-    numnodes = LELONG(*(uint32_t *)p);
+    numnodes = Poco::ByteOrder::fromLittleEndian(*(uint32_t *)p);
     p += 4;
     nodes = (node_t *)Z_Malloc(numnodes * sizeof(*nodes), PU_LEVEL, 0);
     memset(nodes, 0, numnodes * sizeof(*nodes));
@@ -563,27 +564,27 @@ bool P_LoadXNOD(int32_t lump)
     {
         node_t *node = &nodes[i];
 
-        node->x = LESHORT(*(int16_t *)p) << FRACBITS;
+        node->x = Poco::ByteOrder::fromLittleEndian(*(int16_t *)p) << FRACBITS;
         p += 2;
-        node->y = LESHORT(*(int16_t *)p) << FRACBITS;
+        node->y = Poco::ByteOrder::fromLittleEndian(*(int16_t *)p) << FRACBITS;
         p += 2;
-        node->dx = LESHORT(*(int16_t *)p) << FRACBITS;
+        node->dx = Poco::ByteOrder::fromLittleEndian(*(int16_t *)p) << FRACBITS;
         p += 2;
-        node->dy = LESHORT(*(int16_t *)p) << FRACBITS;
+        node->dy = Poco::ByteOrder::fromLittleEndian(*(int16_t *)p) << FRACBITS;
         p += 2;
 
         for (int32_t j = 0; j < 2; j++)
         {
             for (int32_t k = 0; k < 4; k++)
             {
-                node->bbox[j][k] = LESHORT(*(int16_t *)p) << FRACBITS;
+                node->bbox[j][k] = Poco::ByteOrder::fromLittleEndian(*(int16_t *)p) << FRACBITS;
                 p += 2;
             }
         }
 
         for (int32_t j = 0; j < 2; j++)
         {
-            node->children[j] = LELONG(*(uint32_t *)p);
+            node->children[j] = Poco::ByteOrder::fromLittleEndian(*(uint32_t *)p);
             p += 4;
         }
     }
@@ -626,7 +627,7 @@ void P_LoadThings(int32_t lump)
         //		everything and let it decide what to do with them.
 
         // [RH] Need to translate the spawn flags to Hexen format.
-        int16_t flags = LESHORT(mt->options);
+        int16_t flags = Poco::ByteOrder::fromLittleEndian(mt->options);
         mt2.flags     = (int16_t)((flags & 0xf) | 0x7e0);
         if (flags & BTF_NOTSINGLE)
         {
@@ -647,10 +648,10 @@ void P_LoadThings(int32_t lump)
         if (flags & BTF_NOTCOOPERATIVE)
             mt2.flags &= ~MTF_COOPERATIVE;
 
-        mt2.x     = LESHORT(mt->x);
-        mt2.y     = LESHORT(mt->y);
-        mt2.angle = LESHORT(mt->angle);
-        mt2.type  = LESHORT(mt->type);
+        mt2.x     = Poco::ByteOrder::fromLittleEndian(mt->x);
+        mt2.y     = Poco::ByteOrder::fromLittleEndian(mt->y);
+        mt2.angle = Poco::ByteOrder::fromLittleEndian(mt->angle);
+        mt2.type  = Poco::ByteOrder::fromLittleEndian(mt->type);
 
         P_SpawnMapThing(&mt2, 0);
     }
@@ -687,13 +688,13 @@ void P_LoadThings2(int32_t lump, int32_t position)
         //		handle these and more cases better, so we just pass it
         //		everything and let it decide what to do with them.
 
-        mt->thingid = LESHORT(mt->thingid);
-        mt->x       = LESHORT(mt->x);
-        mt->y       = LESHORT(mt->y);
-        mt->z       = LESHORT(mt->z);
-        mt->angle   = LESHORT(mt->angle);
-        mt->type    = LESHORT(mt->type);
-        mt->flags   = LESHORT(mt->flags);
+        mt->thingid = Poco::ByteOrder::fromLittleEndian(mt->thingid);
+        mt->x       = Poco::ByteOrder::fromLittleEndian(mt->x);
+        mt->y       = Poco::ByteOrder::fromLittleEndian(mt->y);
+        mt->z       = Poco::ByteOrder::fromLittleEndian(mt->z);
+        mt->angle   = Poco::ByteOrder::fromLittleEndian(mt->angle);
+        mt->type    = Poco::ByteOrder::fromLittleEndian(mt->type);
+        mt->flags   = Poco::ByteOrder::fromLittleEndian(mt->flags);
 
         P_SpawnMapThing(mt, position);
     }
@@ -919,22 +920,22 @@ void P_LoadLineDefs(const int32_t lump)
 
         ld->flags = P_TranslateCompatibleLineFlags(ld->flags, isE2M7);
 
-        uint16_t v = LESHORT(mld->v1);
+        uint16_t v = Poco::ByteOrder::fromLittleEndian(mld->v1);
 
         if (v >= numvertexes)
             I_Error("P_LoadLineDefs: invalid vertex %d", v);
         else
             ld->v1 = &vertexes[v];
 
-        v = LESHORT(mld->v2);
+        v = Poco::ByteOrder::fromLittleEndian(mld->v2);
 
         if (v >= numvertexes)
             I_Error("P_LoadLineDefs: invalid vertex %d", v);
         else
             ld->v2 = &vertexes[v];
 
-        ld->sidenum[0] = LESHORT(mld->sidenum[0]);
-        ld->sidenum[1] = LESHORT(mld->sidenum[1]);
+        ld->sidenum[0] = Poco::ByteOrder::fromLittleEndian(mld->sidenum[0]);
+        ld->sidenum[1] = Poco::ByteOrder::fromLittleEndian(mld->sidenum[1]);
 
         if (ld->sidenum[0] >= numsides)
             ld->sidenum[0] = R_NOSIDE;
@@ -969,27 +970,27 @@ void P_LoadLineDefs2(int32_t lump)
         for (j = 0; j < 5; j++)
             ld->args[j] = mld->args[j];
 
-        ld->flags   = LESHORT(mld->flags);
+        ld->flags   = Poco::ByteOrder::fromLittleEndian(mld->flags);
         ld->special = mld->special;
 
         ld->flags = P_TranslateZDoomLineFlags(ld->flags);
 
-        uint16_t v = LESHORT(mld->v1);
+        uint16_t v = Poco::ByteOrder::fromLittleEndian(mld->v1);
 
         if (v >= numvertexes)
             I_Error("P_LoadLineDefs2: invalid vertex %d", v);
         else
             ld->v1 = &vertexes[v];
 
-        v = LESHORT(mld->v2);
+        v = Poco::ByteOrder::fromLittleEndian(mld->v2);
 
         if (v >= numvertexes)
             I_Error("P_LoadLineDefs2: invalid vertex %d", v);
         else
             ld->v2 = &vertexes[v];
 
-        ld->sidenum[0] = LESHORT(mld->sidenum[0]);
-        ld->sidenum[1] = LESHORT(mld->sidenum[1]);
+        ld->sidenum[0] = Poco::ByteOrder::fromLittleEndian(mld->sidenum[0]);
+        ld->sidenum[1] = Poco::ByteOrder::fromLittleEndian(mld->sidenum[1]);
 
         if (ld->sidenum[0] >= numsides)
             ld->sidenum[0] = R_NOSIDE;
@@ -1049,7 +1050,7 @@ static argb_t P_GetColorFromTextureName(const char *name)
 //
 void P_SetTransferHeightBlends(side_t *sd, const mapsidedef_t *msd)
 {
-    sector_t *sec = &sectors[LESHORT(msd->sector)];
+    sector_t *sec = &sectors[Poco::ByteOrder::fromLittleEndian(msd->sector)];
 
     // for each of the texture tiers (bottom, middle, and top)
     for (int32_t i = 0; i < 3; i++)
@@ -1119,10 +1120,10 @@ void P_LoadSideDefs2(int32_t lump)
         side_t       *sd  = sides + i;
         sector_t     *sec;
 
-        sd->textureoffset = LESHORT(msd->textureoffset) << FRACBITS;
-        sd->rowoffset     = LESHORT(msd->rowoffset) << FRACBITS;
+        sd->textureoffset = Poco::ByteOrder::fromLittleEndian(msd->textureoffset) << FRACBITS;
+        sd->rowoffset     = Poco::ByteOrder::fromLittleEndian(msd->rowoffset) << FRACBITS;
         sd->linenum       = -1;
-        sd->sector = sec = &sectors[LESHORT(msd->sector)];
+        sd->sector = sec = &sectors[Poco::ByteOrder::fromLittleEndian(msd->sector)];
 
         // killough 4/4/98: allow sidedef texture names to be overloaded
         // killough 4/11/98: refined to allow colormaps to work as wall
@@ -1470,14 +1471,14 @@ void P_LoadBlockMap(int32_t lump)
         // them. This potentially doubles the size of blockmaps allowed,
         // because Doom originally considered the offsets as always signed.
 
-        blockmaplump[0] = LESHORT(wadblockmaplump[0]);
-        blockmaplump[1] = LESHORT(wadblockmaplump[1]);
-        blockmaplump[2] = (uint32_t)(LESHORT(wadblockmaplump[2])) & 0xffff;
-        blockmaplump[3] = (uint32_t)(LESHORT(wadblockmaplump[3])) & 0xffff;
+        blockmaplump[0] = Poco::ByteOrder::fromLittleEndian(wadblockmaplump[0]);
+        blockmaplump[1] = Poco::ByteOrder::fromLittleEndian(wadblockmaplump[1]);
+        blockmaplump[2] = (uint32_t)(Poco::ByteOrder::fromLittleEndian(wadblockmaplump[2])) & 0xffff;
+        blockmaplump[3] = (uint32_t)(Poco::ByteOrder::fromLittleEndian(wadblockmaplump[3])) & 0xffff;
 
         for (i = 4; i < count; i++)
         {
-            int16_t t       = LESHORT(wadblockmaplump[i]); // killough 3/1/98
+            int16_t t       = Poco::ByteOrder::fromLittleEndian(wadblockmaplump[i]); // killough 3/1/98
             blockmaplump[i] = t == -1 ? (uint32_t)0xffffffff : (uint32_t)t & 0xffff;
         }
 
