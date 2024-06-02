@@ -41,7 +41,7 @@
 #include <vector>
 
 #include "Poco/Buffer.h"
-#include "m_memio.h"
+#include "Poco/MemoryStream.h"
 #include "mus2midi.hpp"
 
 /*! Raw MIDI event hook */
@@ -880,14 +880,7 @@ class MidiSequencer
      * @param size Size of source memory block
      * @return true if file successfully opened, false on any error
      */
-    bool loadMidi(const uint8_t *data, size_t size);
-
-    /**
-     * @brief Load MIDI file by using FileAndMemReader interface
-     * @param mfr mem_file_c with opened source file
-     * @return true if file successfully opened, false on any error
-     */
-    bool loadMidi(MEMFILE *mfr);
+    bool loadMIDI(const uint8_t *data, size_t size);
 
     /**
      * @brief Periodic tick handler.
@@ -952,17 +945,17 @@ class MidiSequencer
   private:
     /**
      * @brief Load file as Standard MIDI file
-     * @param mfr mem_file_c with opened source file
+     * @param mfr MemoryInputStream with opened source file
      * @return true on successful load
      */
-    bool _ParseSmf(MEMFILE *mfr);
+    bool parseSMF(Poco::MemoryInputStream &mfr);
 
     /**
      * @brief Load file as DMX MUS file (Doom)
-     * @param mfr mem_file_c with opened source file
+     * @param mfr MemoryInputStream with opened source file
      * @return true on successful load
      */
-    bool _ParseMus(MEMFILE *mfr);
+    bool parseMUS(Poco::MemoryInputStream &mfr);
 };
 
 /**
@@ -2752,12 +2745,6 @@ void MidiSequencer::setTempo(double tempo)
     m_midi_tempo_multiplier = tempo;
 }
 
-bool MidiSequencer::loadMidi(const uint8_t *data, size_t size)
-{
-    MEMFILE *mfr = mem_fopen_read((void *)data, size);
-    return loadMidi(mfr);
-}
-
 template <class T> class BufferGuard
 {
     T *m_ptr;
@@ -2780,7 +2767,7 @@ template <class T> class BufferGuard
     }
 };
 
-bool MidiSequencer::loadMidi(MEMFILE *mfr)
+bool MidiSequencer::loadMIDI(const uint8_t *data, size_t size)
 {
     size_t fsize = 0;
     (void)(fsize);
@@ -2797,34 +2784,32 @@ bool MidiSequencer::loadMidi(MEMFILE *mfr)
     const size_t headerSize            = 4 + 4 + 2 + 2 + 2; // 14
     char         headerBuf[headerSize] = "";
 
-    fsize = mem_fread(headerBuf, headerSize, 1, mfr) * headerSize;
-    if (fsize < headerSize)
+    Poco::MemoryInputStream mfr((char *)data, size);
+
+    mfr.read(headerBuf, headerSize);
+    if (mfr.gcount() < headerSize)
     {
         m_midi_error_string = "Unexpected end of file at header!\n";
-        mem_fclose(mfr);
-        mfr = NULL;
         return false;
     }
 
     if (memcmp(headerBuf, "MThd\0\0\0\6", 8) == 0)
     {
-        mem_fseek(mfr, 0, MEM_SEEK_SET);
-        return _ParseSmf(mfr);
+        mfr.seekg(0);
+        return parseSMF(mfr);
     }
 
     if (memcmp(headerBuf, "MUS\x1A", 4) == 0)
     {
-        mem_fseek(mfr, 0, MEM_SEEK_SET);
-        return _ParseMus(mfr);
+        mfr.seekg(0);
+        return parseMUS(mfr);
     }
 
     m_midi_error_string = "Unknown or unsupported file format";
-    mem_fclose(mfr);
-    mfr = NULL;
     return false;
 }
 
-bool MidiSequencer::_ParseSmf(MEMFILE *mfr)
+bool MidiSequencer::parseSMF(Poco::MemoryInputStream &mfr)
 {
     const size_t                      headerSize            = 14; // 4 + 4 + 2 + 2 + 2
     char                              headerBuf[headerSize] = "";
@@ -2833,20 +2818,16 @@ bool MidiSequencer::_ParseSmf(MEMFILE *mfr)
     uint32_t                          smfFormat = 0;
     std::vector<std::vector<uint8_t>> rawTrackData;
 
-    fsize = mem_fread(headerBuf, headerSize, 1, mfr) * headerSize;
-    if (fsize < headerSize)
+    mfr.read(headerBuf, headerSize);
+    if (mfr.gcount() < headerSize)
     {
         m_midi_error_string = "Unexpected end of file at header!\n";
-        mem_fclose(mfr);
-        mfr = NULL;
         return false;
     }
 
     if (memcmp(headerBuf, "MThd\0\0\0\6", 8) != 0)
     {
         m_midi_error_string = "MIDI Loader: Invalid format, MThd signature is not found!\n";
-        mem_fclose(mfr);
-        mfr = NULL;
         return false;
     }
 
@@ -2869,25 +2850,21 @@ bool MidiSequencer::_ParseSmf(MEMFILE *mfr)
         // Read track header
         size_t trackLength;
 
-        fsize = mem_fread(headerBuf, 8, 1, mfr) * 8;
-        if ((fsize < 8) || (memcmp(headerBuf, "MTrk", 4) != 0))
+        mfr.read(headerBuf, 8);
+        if ((mfr.gcount() < 8) || (memcmp(headerBuf, "MTrk", 4) != 0))
         {
             m_midi_error_string = "MIDI Loader: Invalid format, MTrk signature is not found!\n";
-            mem_fclose(mfr);
-            mfr = NULL;
             return false;
         }
         trackLength = (size_t)readIntBigEndian(headerBuf + 4, 4);
 
         // read track data
         rawTrackData[tk].resize(trackLength);
-        fsize = mem_fread(&rawTrackData[tk][0], trackLength, 1, mfr) * trackLength;
-        if (fsize < trackLength)
+        mfr.read((char *)&rawTrackData[tk][0], trackLength);
+        if (mfr.gcount() < trackLength)
         {
             m_midi_error_string = "MIDI Loader: Unexpected file ending while getting raw track "
                                   "data!\n";
-            mem_fclose(mfr);
-            mfr = NULL;
             return false;
         }
 
@@ -2900,8 +2877,6 @@ bool MidiSequencer::_ParseSmf(MEMFILE *mfr)
     if (totalGotten == 0)
     {
         m_midi_error_string = "MIDI Loader: Empty track data";
-        mem_fclose(mfr);
-        mfr = NULL;
         return false;
     }
 
@@ -2909,62 +2884,45 @@ bool MidiSequencer::_ParseSmf(MEMFILE *mfr)
     if (!buildSMFTrackData(rawTrackData))
     {
         m_midi_error_string = "MIDI Loader: MIDI data parsing error has occouped!\n" + m_midi_parsing_errors_string;
-        mem_fclose(mfr);
-        mfr = NULL;
         return false;
     }
 
     m_midi_smf_format        = smfFormat;
     m_midi_loop.m_stacklevel = -1;
 
-    mem_fclose(mfr);
-    mfr = NULL;
-
     return true;
 }
 
-bool MidiSequencer::_ParseMus(MEMFILE *mfr)
+bool MidiSequencer::parseMUS(Poco::MemoryInputStream &mfr)
 {
     const size_t         headerSize            = 14;
     char                 headerBuf[headerSize] = "";
     size_t               fsize                 = 0;
     BufferGuard<uint8_t> cvt_buf;
 
-    fsize = mem_fread(headerBuf, headerSize, 1, mfr) * headerSize;
-    if (fsize < headerSize)
+    mfr.read(headerBuf, headerSize);
+    if (mfr.gcount() < headerSize)
     {
         m_midi_error_string = "Unexpected end of file at header!\n";
-        mem_fclose(mfr);
-        mfr = NULL;
         return false;
     }
 
     if (memcmp(headerBuf, "MUS\x1A", 4) != 0)
     {
         m_midi_error_string = "MIDI Loader: Invalid format, MUS\\x1A signature is not found!\n";
-        mem_fclose(mfr);
-        mfr = NULL;
         return false;
     }
 
-    size_t mus_len = mem_fsize(mfr);
-
-    mem_fseek(mfr, 0, MEM_SEEK_SET);
+    mfr.seekg(0);
+    size_t mus_len = mfr.rdbuf()->in_avail();
     Poco::Buffer<uint8_t> mus(mus_len);
 
-    fsize = mem_fread(mus.begin(), mus_len, 1, mfr) * mus_len;
-    if (fsize < mus_len)
+    mfr.read((char *)mus.begin(), mus_len);
+    if (mfr.gcount() < mus_len)
     {
         m_midi_error_string = "Failed to read MUS file data!\n";
-        mem_fclose(mfr);
-        mfr = NULL;
         return false;
     }
-
-    // Close source stream
-    mem_fclose(mfr);
-    mfr = NULL;
-    mfr = nullptr;
 
     uint8_t *mid     = nullptr;
     uint32_t mid_len = 0;
@@ -2980,7 +2938,8 @@ bool MidiSequencer::_ParseMus(MEMFILE *mfr)
     cvt_buf.set(mid);
 
     // Open converted MIDI file
-    mfr = mem_fopen_read(mid, (size_t)(mid_len));
+    mfr.rdbuf()->pubsetbuf((char *)mid, mid_len);
+    mfr.seekg(0);
 
-    return _ParseSmf(mfr);
+    return parseSMF(mfr);
 }

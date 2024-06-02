@@ -298,7 +298,7 @@ void FluidLiteMusicSystem::startSong(uint8_t *data, size_t length, bool loop)
     {
         stopSong();
     }
-    if (m_sequencer->loadMidi(data, length))
+    if (m_sequencer->loadMIDI(data, length))
     {
         MusicSystem::startSong(data, length, loop);
         m_loopSong = loop;

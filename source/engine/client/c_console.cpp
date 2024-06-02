@@ -39,7 +39,6 @@
 #include "i_video.h"
 #include "m_alloc.h"
 #include "m_fileio.h"
-#include "m_memio.h"
 #include "mud_includes.h"
 #include "r_main.h"
 #include "s_sound.h"
