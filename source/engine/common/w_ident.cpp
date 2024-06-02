@@ -31,6 +31,7 @@
 #include "m_fileio.h"
 #include "m_ostring.h"
 #include "mud_includes.h"
+#include "Poco/ByteOrder.h"
 #include "sarray.h"
 #include "w_wad.h"
 
@@ -62,14 +63,14 @@ class WadFileLumpFinder
             wadinfo_t header;
             if (PHYSFS_readBytes(fp, &header, sizeof(header)) == sizeof(header))
             {
-                header.identification = LELONG(header.identification);
-                header.infotableofs   = LELONG(header.infotableofs);
+                header.identification = Poco::ByteOrder::fromLittleEndian(header.identification);
+                header.infotableofs   = Poco::ByteOrder::fromLittleEndian(header.infotableofs);
 
                 if (header.identification == IWAD_ID || header.identification == PWAD_ID)
                 {
                     if (PHYSFS_seek(fp, header.infotableofs) != 0)
                     {
-                        mNumLumps = LELONG(header.numlumps);
+                        mNumLumps = Poco::ByteOrder::fromLittleEndian(header.numlumps);
                         mLumps    = new filelump_t[mNumLumps];
 
                         if (PHYSFS_readBytes(fp, mLumps, mNumLumps * sizeof(*mLumps)) != mNumLumps * sizeof(*mLumps))

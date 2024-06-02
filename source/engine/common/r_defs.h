@@ -30,6 +30,7 @@
 #include "doomtype.h"
 #include "dthinker.h"
 #include "m_fixed.h"
+#include "Poco/ByteOrder.h"
 #include "res_texture.h"
 
 // Silhouette, needed for clipping Segs (mainly)
@@ -556,19 +557,19 @@ struct patch_s
 
     int16_t width() const
     {
-        return LESHORT(_width);
+        return Poco::ByteOrder::fromLittleEndian(_width);
     }
     int16_t height() const
     {
-        return LESHORT(_height);
+        return Poco::ByteOrder::fromLittleEndian(_height);
     }
     int16_t leftoffset() const
     {
-        return LESHORT(_leftoffset);
+        return Poco::ByteOrder::fromLittleEndian(_leftoffset);
     }
     int16_t topoffset() const
     {
-        return LESHORT(_topoffset);
+        return Poco::ByteOrder::fromLittleEndian(_topoffset);
     }
     uint32_t *ofs() const
     {

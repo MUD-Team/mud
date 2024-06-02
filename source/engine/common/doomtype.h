@@ -39,9 +39,6 @@
 #define forceinline inline
 #endif
 
-// For __BIG_ENDIAN__ macro, requires forceinline
-#include "m_swap.h"
-
 #ifdef _MSC_VER
 #define FORMAT_PRINTF(index, first_arg)
 #else

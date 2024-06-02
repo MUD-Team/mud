@@ -31,6 +31,7 @@
 #include <unordered_map>
 
 #include "Poco/Buffer.h"
+#include "Poco/ByteOrder.h"
 #include "Poco/MemoryStream.h"
 #include "cmdlib.h"
 #include "i_system.h"
@@ -652,7 +653,7 @@ void TextureManager::readAnimatedLump()
             continue;
         anim.curframe = 0;
 
-        int32_t speed  = LELONG(*(int32_t *)(ptr + 19));
+        int32_t speed  = Poco::ByteOrder::fromLittleEndian(*(int32_t *)(ptr + 19));
         anim.countdown = speed - 1;
 
         for (int32_t i = 0; i < anim.numframes; i++)
@@ -892,8 +893,8 @@ void TextureManager::cacheSprite(texhandle_t handle)
             memcpy(&x, &filedata[i], 4);
             i += 4;
             memcpy(&y, &filedata[i], 4);
-            x = BELONG(x);
-            y = BELONG(y);
+            x = Poco::ByteOrder::fromBigEndian(x);
+            y = Poco::ByteOrder::fromBigEndian(y);
             texture->setOffsetX(x);
             texture->setOffsetY(y);
         }
@@ -1231,8 +1232,8 @@ void TextureManager::cacheTexture(texhandle_t handle)
             memcpy(&x, &filedata[i], 4);
             i += 4;
             memcpy(&y, &filedata[i], 4);
-            x = BELONG(x);
-            y = BELONG(y);
+            x = Poco::ByteOrder::fromBigEndian(x);
+            y = Poco::ByteOrder::fromBigEndian(y);
             texture->setOffsetX(x);
             texture->setOffsetY(y);
         }

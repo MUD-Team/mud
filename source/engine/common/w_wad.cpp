@@ -38,6 +38,7 @@
 #include <algorithm>
 
 #include "Poco/Buffer.h"
+#include "Poco/ByteOrder.h"
 #include "cmdlib.h"
 #include "i_system.h"
 #include "m_argv.h"
@@ -225,7 +226,7 @@ void AddFile(const OResFile &file)
         PHYSFS_close(handle);
         return;
     }
-    header.identification = LELONG(header.identification);
+    header.identification = Poco::ByteOrder::fromLittleEndian(header.identification);
 
     if (header.identification != IWAD_ID && header.identification != PWAD_ID)
     {
@@ -244,8 +245,8 @@ void AddFile(const OResFile &file)
     else
     {
         // WAD file
-        header.numlumps     = LELONG(header.numlumps);
-        header.infotableofs = LELONG(header.infotableofs);
+        header.numlumps     = Poco::ByteOrder::fromLittleEndian(header.numlumps);
+        header.infotableofs = Poco::ByteOrder::fromLittleEndian(header.infotableofs);
         size_t length       = header.numlumps * sizeof(filelump_t);
 
         if (length > (uint32_t)PHYSFS_fileLength(handle))
@@ -268,8 +269,8 @@ void AddFile(const OResFile &file)
         // convert from little-endian to target arch and capitalize lump name
         for (int32_t i = 0; i < header.numlumps; i++)
         {
-            fileinfo[i].filepos = LELONG(fileinfo[i].filepos);
-            fileinfo[i].size    = LELONG(fileinfo[i].size);
+            fileinfo[i].filepos = Poco::ByteOrder::fromLittleEndian(fileinfo[i].filepos);
+            fileinfo[i].size    = Poco::ByteOrder::fromLittleEndian(fileinfo[i].size);
             std::transform(fileinfo[i].name, fileinfo[i].name + 8, fileinfo[i].name, toupper);
         }
 
