@@ -380,8 +380,6 @@ static OptionMenuItem vidoptions[] = {
     {kOptionMenuItemTypeSwitch, "Framerate Target", "35 FPS/70 FPS", 2, &double_framerate.d_,
      OptionMenuUpdateConsoleVariableFromInt, nullptr, &double_framerate},
     {kOptionMenuItemTypeSwitch, "Smoothing", YesNo, 2, &image_smoothing, OptionMenuChangeMipMap, nullptr},
-    {kOptionMenuItemTypeSwitch, "Upscale Textures", "Off/UI Only/UI & Sprites/All", 4, &hq2x_scaling,
-     OptionMenuChangeMipMap, "Only affects paletted (Doom format) textures"},
     {kOptionMenuItemTypeSwitch, "Title/Intermission Scaling", "Normal/Border Fill", 2, &title_scaling.d_,
      OptionMenuUpdateConsoleVariableFromInt, nullptr, &title_scaling},
     {kOptionMenuItemTypeSwitch, "Sky Scaling", "Mirror/Repeat/Stretch/Vanilla", 4, &sky_stretch_mode.d_,

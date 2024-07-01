@@ -43,7 +43,6 @@
 #include "epi_filesystem.h"
 #include "i_defs_gl.h"
 #include "im_data.h"
-#include "im_filter.h"
 #include "im_funcs.h"
 #include "m_argv.h"
 #include "m_misc.h"

@@ -249,7 +249,6 @@ void         ImageMakeSaveString(const Image *image, char *type, char *namebuf);
 //
 
 extern int image_smoothing;
-extern int hq2x_scaling;
 
 enum LiquidSwirl
 {
