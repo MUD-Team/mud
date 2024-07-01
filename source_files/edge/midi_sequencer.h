@@ -65,9 +65,6 @@ typedef void (*MetaEventHook)(void *userdata, uint8_t type, const uint8_t *data,
 typedef void (*RtDeviceSwitch)(void *userdata, size_t track, const char *data, size_t length);
 /*! Get the channels offset for current MIDI device */
 typedef size_t (*RtCurrentDevice)(void *userdata, size_t track);
-/*! [Non-Standard] Pass raw OPL3 data to the chip (when playing IMF files)
- */
-typedef void (*RtRawOPL)(void *userdata, uint8_t reg, uint8_t value);
 
 /**
      \brief Real-Time MIDI interface between Sequencer and the Synthesizer
@@ -157,10 +154,4 @@ struct MidiRealTimeInterface
     /*! Get the channels offset for current MIDI device hook. Returms
      * multiple to 16 value. */
     RtCurrentDevice rt_currentDevice;
-
-    /******************************************
-     * NonStandard events. There are optional *
-     ******************************************/
-    /*! [Non-Standard] Pass raw OPL3 data to the chip hook */
-    RtRawOPL rt_rawOPL;
 };

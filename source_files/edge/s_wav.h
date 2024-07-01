@@ -20,7 +20,7 @@
 
 #include "snd_data.h"
 
-bool LoadWAVSound(SoundData *buf, uint8_t *data, int length, bool pc_speaker);
+bool LoadWAVSound(SoundData *buf, uint8_t *data, int length);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

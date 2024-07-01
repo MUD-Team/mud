@@ -51,9 +51,6 @@ class SoundEffectDefinition
     std::string file_name_;
     std::string pack_name_;
 
-    // PC Speaker equivalent sound
-    std::string pc_speaker_sound_;
-
     // sfxinfo ID number
     // -AJA- Changed to a SoundEffect.  It serves two purposes: (a) hold the
     //       sound ID, like before, (b) better memory usage, as we don't

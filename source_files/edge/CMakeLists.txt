@@ -85,10 +85,6 @@ set (EDGE_SOURCE_FILES
   s_music.cc
   s_ogg.cc
   s_fluid.cc
-  s_m4p.cc
-  s_opl.cc
-  s_rad.cc
-  s_sid.cc
   s_wav.cc
   s_flac.cc
   sv_chunk.cc
@@ -129,10 +125,7 @@ set (EDGE_LINK_LIBRARIES
   edge_ddf
   edge_epi
   ${SDL2_LIBRARIES}
-  crsid
   fluidlite
-  libRAD
-  m4p
   miniz
   lua
   utf8proc
@@ -169,14 +162,11 @@ endif()
 
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/almostequals)
 target_include_directories(edge-classic PRIVATE ../ajbsp)
-target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/crsid)
 target_include_directories(edge-classic PRIVATE ../ddf)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/dr_libs)
 target_include_directories(edge-classic PRIVATE ../epi)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/fluidlite/include)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/hmm)
-target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/libRAD)
-target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/m4p)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/minivorbis)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/miniz)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/pl_mpeg)

@@ -21,7 +21,6 @@
 #include "epi.h"
 #include "epi_filesystem.h"
 #include "epi_str_util.h"
-#include "m4p.h"
 
 SoundFormat DetectSoundFormat(uint8_t *data, int song_len)
 {
@@ -40,11 +39,6 @@ SoundFormat DetectSoundFormat(uint8_t *data, int song_len)
     if (data[0] == 'O' && data[1] == 'g' && data[2] == 'g' && data[3] == 'S')
     {
         return kSoundOGG;
-    }
-
-    if ((data[0] == 'P' || data[0] == 'R') && data[1] == 'S' && data[2] == 'I' && data[3] == 'D')
-    {
-        return kSoundSID;
     }
 
     if (data[0] == 'M' && data[1] == 'U' && data[2] == 'S')
@@ -79,29 +73,7 @@ SoundFormat DetectSoundFormat(uint8_t *data, int song_len)
             return kSoundMIDI;
     }
 
-    // Reality Adlib Tracker 2
-    if (song_len > 16)
-    {
-        bool        is_rad = true;
-        const char *hdrtxt = "RAD by REALiTY!!";
-        for (int i = 0; i < 16; i++)
-        {
-            if (data[i] != *hdrtxt++)
-            {
-                is_rad = false;
-                break;
-            }
-        }
-        if (is_rad)
-            return kSoundRAD;
-    }
-
     // Moving on to more specialized or less reliable detections
-
-    if (m4p_TestFromData(data, song_len))
-    {
-        return kSoundM4P;
-    }
 
     if ((data[0] == 'I' && data[1] == 'D' && data[2] == '3') || (data[0] == 0xFF && ((data[1] >> 4 & 0xF) == 0xF)))
     {
@@ -111,11 +83,6 @@ SoundFormat DetectSoundFormat(uint8_t *data, int song_len)
     if (data[0] == 0x3)
     {
         return kSoundDoom;
-    }
-
-    if (data[0] == 0x0)
-    {
-        return kSoundPCSpeaker;
     }
 
     return kSoundUnknown;
@@ -139,9 +106,6 @@ SoundFormat SoundFilenameToFormat(std::string_view filename)
     if (ext == ".mp3")
         return kSoundMP3;
 
-    if (ext == ".sid" || ext == ".psid")
-        return kSoundSID;
-
     // Test MUS vs EA-MIDI MUS ?
     if (ext == ".mus")
         return kSoundMUS;
@@ -149,22 +113,10 @@ SoundFormat SoundFilenameToFormat(std::string_view filename)
     if (ext == ".mid" || ext == ".midi" || ext == ".xmi" || ext == ".rmi" || ext == ".rmid")
         return kSoundMIDI;
 
-    if (ext == ".mod" || ext == ".s3m" || ext == ".xm" || ext == ".it")
-        return kSoundM4P;
-
-    if (ext == ".rad")
-        return kSoundRAD;
-
     // Not sure if these will ever be encountered in the wild, but according to
     // the VGMPF Wiki they are valid DMX file extensions
-    if (ext == ".dsp" || ext == ".pcs" || ext == ".gsp" || ext == ".gsw")
+    if (ext == ".lmp" || ext == ".dsp" || ext == ".pcs" || ext == ".gsp" || ext == ".gsw")
         return kSoundDoom;
-
-    // Will actually result in checking the first byte to further determine if
-    // it's Doom or PC Speaker format; the above kSoundDoom stuff is
-    // unconditional which is why I didn't throw it up there
-    if (ext == ".lmp")
-        return kSoundPCSpeaker;
 
     return kSoundUnknown;
 }
