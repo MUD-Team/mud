@@ -2007,7 +2007,6 @@ static void EdgeStartup(void)
 
     HUDInit();
     ConsoleStart();
-    ConsoleCreateQuitScreen();
     SpecialWadVerify();
     BuildXGLNodes();
     ShowNotice();

@@ -498,12 +498,6 @@ int ConsoleCommandMap(char **argv, int argc)
     return 0;
 }
 
-int ConsoleCommandEndoom(char **argv, int argc)
-{
-    ConsolePrintEndoom();
-    return 0;
-}
-
 int ConsoleCommandClear(char **argv, int argc)
 {
     ClearConsoleLines();
@@ -584,7 +578,6 @@ const ConsoleCommand builtin_commands[] = {{"cat", ConsoleCommandType},
                                            {"clear", ConsoleCommandClear},
                                            {"dir", ConsoleCommandDir},
                                            {"ls", ConsoleCommandDir},
-                                           {"endoom", ConsoleCommandEndoom},
                                            {"exec", ConsoleCommandExec},
                                            {"help", ConsoleCommandHelp},
                                            {"map", ConsoleCommandMap},
