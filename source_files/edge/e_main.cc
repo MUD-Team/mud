@@ -1998,7 +1998,6 @@ static void EdgeStartup(void)
 
     DDFCleanUp();
     SetLanguage();
-    ReadUMAPINFOLumps();
 
     InitializeFlats();
     InitializeTextures();

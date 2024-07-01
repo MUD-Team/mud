@@ -181,68 +181,12 @@ LanguageChoice *Language::AddChoice(const char *name)
     return choice;
 }
 
-void Language::AddOrReplace(const char *ref, const char *value)
-{
-    if (umapinfo_choice_ == nullptr)
-    {
-        umapinfo_choice_ = new LanguageChoice;
-    }
-    umapinfo_choice_->AddEntry(ref, value);
-}
-
-const char *Language::GetReferenceOrNull(const char *refname)
-{
-    if (!refname)
-        return nullptr;
-
-    if (current_choice_ < 0 || current_choice_ >= (int)choices_.size())
-        return nullptr;
-
-    // ensure ref name is uppercase, with no spaces
-    std::string ref = DDFSanitizeName(refname);
-
-    if (umapinfo_choice_ != nullptr)
-    {
-        if (umapinfo_choice_->HasEntry(ref))
-        {
-            const std::string &value = umapinfo_choice_->refs[ref];
-            return value.c_str();
-        }
-    }
-
-    if (choices_[current_choice_]->HasEntry(ref))
-    {
-        const std::string &value = choices_[current_choice_]->refs[ref];
-        return value.c_str();
-    }
-
-    // fallback, look through other language definitions...
-
-    for (size_t i = 0; i < choices_.size(); i++)
-    {
-        if (choices_[i]->HasEntry(ref))
-        {
-            const std::string &value = choices_[i]->refs[ref];
-            return value.c_str();
-        }
-    }
-
-    // not found!
-    return nullptr;
-}
-
 void Language::Clear()
 {
     for (size_t i = 0; i < choices_.size(); i++)
         delete choices_[i];
 
     choices_.clear();
-
-    if (umapinfo_choice_ != nullptr)
-    {
-        delete umapinfo_choice_;
-        umapinfo_choice_ = nullptr;
-    }
 
     current_choice_ = -1;
 }
@@ -298,10 +242,6 @@ bool Language::IsValidRef(const char *refname)
     // ensure ref name is uppercase, with no spaces
     std::string ref = DDFSanitizeName(refname);
 
-    if (umapinfo_choice_ != nullptr)
-        if (umapinfo_choice_->HasEntry(ref))
-            return true;
-
     return choices_[current_choice_]->HasEntry(ref);
 }
 
@@ -316,15 +256,6 @@ const char *Language::operator[](const char *refname)
 
     // ensure ref name is uppercase, with no spaces
     std::string ref = DDFSanitizeName(refname);
-
-    if (umapinfo_choice_ != nullptr)
-    {
-        if (umapinfo_choice_->HasEntry(ref))
-        {
-            const std::string &value = umapinfo_choice_->refs[ref];
-            return value.c_str();
-        }
-    }
 
     if (choices_[current_choice_]->HasEntry(ref))
     {

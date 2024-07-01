@@ -54,7 +54,6 @@ set (EDGE_SOURCE_FILES
   p_user.cc
   p_forces.cc
   p_telept.cc
-  p_umapinfo.cc
   p_weapon.cc
   rad_act.cc
   rad_pars.cc
