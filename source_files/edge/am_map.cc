@@ -61,7 +61,7 @@ extern unsigned int root_node;
 
 // Automap colors
 
-// NOTE: this order must match the one in the COAL API script
+// NOTE: this order must match the one in the Lua API script
 static RGBAColor am_colors[kTotalAutomapColors] = {
     epi::MakeRGBA(40, 40, 112),   // kAutomapColorGrid
     epi::MakeRGBA(112, 112, 112), // kAutomapColorAllmap

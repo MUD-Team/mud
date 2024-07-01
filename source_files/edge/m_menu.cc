@@ -1717,7 +1717,7 @@ void DrawMenuSlider(int x, int y, float slider_position, float increment, int di
     Style *opt_style = hud_styles.Lookup(styledefs.Lookup("OPTIONS"));
 
     // If using an IMAGE or TRUETYPE type font for the menu, use a
-    // COALHUDs-style bar for the slider instead
+    // LUAHUD-style bar for the slider instead
     if (opt_style->fonts_[StyleDefinition::kTextSectionAlternate]->definition_->type_ == kFontTypeImage ||
         opt_style->fonts_[StyleDefinition::kTextSectionAlternate]->definition_->type_ == kFontTypeTrueType)
     {

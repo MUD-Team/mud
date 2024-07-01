@@ -61,7 +61,7 @@ void AutomapStop(void);
 
 // color setting API
 
-// NOTE: these numbers here must match the COAL API script
+// NOTE: these numbers here must match the Lua API script
 enum AutomapColor
 {
     kAutomapColorGrid = 0,
@@ -82,7 +82,7 @@ enum AutomapColor
 
 void AutomapSetColor(int which, RGBAColor color);
 
-// NOTE: the bit numbers here must match the COAL API script
+// NOTE: the bit numbers here must match the Lua API script
 enum AutomapState
 {
     kAutomapStateGrid      = (1 << 0), // draw the grid

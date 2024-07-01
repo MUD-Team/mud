@@ -111,9 +111,6 @@ set (EDGE_SOURCE_FILES
   w_sprite.cc
   w_texture.cc
   w_wad.cc
-  vm_coal.cc
-  vm_hud.cc 
-  vm_player.cc
   script/lua_debugger.cc
   script/compat/lua_vm.cc
   script/compat/lua_compat.cc
@@ -139,7 +136,6 @@ set (EDGE_LINK_LIBRARIES
   libRAD
   m4p
   miniz
-  edge_coal
   lua
   utf8proc
 )
