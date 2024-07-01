@@ -27,7 +27,6 @@ set (EDGE_SOURCE_FILES
   im_filter.cc
   im_data.cc
   im_funcs.cc
-  l_deh.cc
   m_argv.cc
   m_bbox.cc
   m_cheat.cc
@@ -128,7 +127,6 @@ endif()
 set (EDGE_LINK_LIBRARIES
   edge_ajbsp  
   edge_ddf
-  edge_deh
   edge_epi
   ${SDL2_LIBRARIES}
   crsid
@@ -173,7 +171,6 @@ target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/almos
 target_include_directories(edge-classic PRIVATE ../ajbsp)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/crsid)
 target_include_directories(edge-classic PRIVATE ../ddf)
-target_include_directories(edge-classic PRIVATE ../dehacked)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/dr_libs)
 target_include_directories(edge-classic PRIVATE ../epi)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/fluidlite/include)

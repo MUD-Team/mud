@@ -29,7 +29,6 @@
 
 #include "ddf_game.h"
 #include "ddf_language.h"
-#include "deh_text.h"
 #include "epi_ename.h"
 #include "epi_lexer.h"
 #include "epi_str_compare.h"

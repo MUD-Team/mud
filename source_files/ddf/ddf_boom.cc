@@ -153,7 +153,7 @@ void DDFBoomMakeGeneralizedSector(SectorType *sec, int number)
     // ignoring bit 11: Suppress all floor/ceiling movement sounds in sector -
     // Same as above
 
-    // handle bit 12: Alternate damage mode (MBF21)
+    // handle bit 12: Alternate damage mode (from MBF21, but uses EC's DAMAGE_IF/DAMAGE_UNLESS DDF constructs)
     if ((number >> 12) & 1)
     {
         switch ((number >> 5) & 0x3)
@@ -195,6 +195,7 @@ void DDFBoomMakeGeneralizedSector(SectorType *sec, int number)
     }
 
     // handle bit 13: Kill grounded monsters (MBF21)
+    // See if worth removing or converting to a more generic/DDF construct - Dasho
     if ((number >> 13) & 1)
     {
         sec->damage_.delay_             = 0;

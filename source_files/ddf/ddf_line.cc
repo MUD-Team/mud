@@ -829,9 +829,9 @@ static DDFSpecialFlags line_effect_names[] = {{"TRANSLUCENT", kLineEffectTypeTra
                                               {"BLOCK_SHOTS", kLineEffectTypeBlockShots, 0},
                                               {"BLOCK_SIGHT", kLineEffectTypeBlockSight, 0},
                                               {"SKY_TRANSFER", kLineEffectTypeSkyTransfer, 0}, // Lobo 2022
-                                              {"TAGGED_OFFSET_SCROLL", kLineEffectTypeTaggedOffsetScroll, 0},   // MBF21
-                                              {"BLOCK_LAND_MONSTERS", kLineEffectTypeBlockGroundedMonsters, 0}, // MBF21
-                                              {"BLOCK_PLAYERS", kLineEffectTypeBlockPlayers, 0},                // MBF21
+                                              {"TAGGED_OFFSET_SCROLL", kLineEffectTypeTaggedOffsetScroll, 0},
+                                              {"BLOCK_LAND_MONSTERS", kLineEffectTypeBlockGroundedMonsters, 0},
+                                              {"BLOCK_PLAYERS", kLineEffectTypeBlockPlayers, 0},
                                               {"STRETCH_TEX_WIDTH", kLineEffectTypeStretchWidth, 0},   // Lobo 2023
                                               {"STRETCH_TEX_HEIGHT", kLineEffectTypeStretchHeight, 0}, // Lobo 2023
                                               {nullptr, 0, 0}};

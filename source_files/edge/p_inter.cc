@@ -1175,17 +1175,7 @@ void KillMapObject(MapObject *source, MapObject *target, const DamageClass *damt
         }
     }
 
-    if (target->hyper_flags_ & kHyperFlagDehackedCompatibility)
-    {
-        MapObjectSetState(target, state);
-        target->tics_ -= RandomByteDeterministic() & 3;
-        if (target->tics_ < 1)
-            target->tics_ = 1;
-    }
-    else
-    {
-        MapObjectSetStateDeferred(target, state, RandomByteDeterministic() & 3);
-    }
+    MapObjectSetStateDeferred(target, state, RandomByteDeterministic() & 3);
 
     // Drop stuff. This determines the kind of object spawned
     // during the death frame of a thing.

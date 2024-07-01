@@ -226,8 +226,8 @@ enum HyperFlag
     kHyperFlagShoveable = (1 << 19),
     // -Lobo- 2022/07/07: this thing doesn't cause splashes
     kHyperFlagNoSplash = (1 << 20),
-    // -AJA- 2022/10/04: used by DEH_EDGE to workaround issues
-    kHyperFlagDehackedCompatibility = (1 << 21),
+    // No longer used - Dasho
+    //kHyperFlagDehackedCompatibility = (1 << 21),
     // -Lobo- 2023/10/19: this thing will not be affected by thrust forces
     kHyperFlagImmovable = (1 << 22),
     // Dasho 2023/12/05: this thing is a MUSINFO Music Changer thing

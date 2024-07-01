@@ -60,7 +60,6 @@
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
 #include "i_system.h"
-#include "l_deh.h"
 #include "m_misc.h"
 #include "p_umapinfo.h" //Lobo 2022
 #include "r_image.h"
@@ -121,9 +120,6 @@ class WadFile
     // texture information
     WadTextureResource wadtex_;
 
-    // DeHackEd support
-    int dehacked_lump_;
-
     // LUA scripts
     int lua_huds_;
 
@@ -139,7 +135,7 @@ class WadFile
   public:
     WadFile()
         : sprite_lumps_(), flat_lumps_(), patch_lumps_(), colormap_lumps_(), tx_lumps_(), hires_lumps_(), xgl_lumps_(),
-          level_markers_(), skin_markers_(), wadtex_(), dehacked_lump_(-1), lua_huds_(-1),
+          level_markers_(), skin_markers_(), wadtex_(), lua_huds_(-1),
           umapinfo_lump_(-1), animated_(-1), switches_(-1), md5_string_()
     {
         for (int d = 0; d < kTotalDDFTypes; d++)
@@ -158,7 +154,7 @@ enum LumpKind
     kLumpNormal   = 0,  // fallback value
     kLumpMarker   = 3,  // X_START, X_END, S_SKIN, level name
     kLumpWadTex   = 6,  // palette, pnames, texture1/2
-    kLumpDDFRTS   = 10, // DDF, RTS, DEHACKED lump
+    kLumpDDFRTS   = 10, // DDF, RTS, Lua lump
     kLumpTx       = 14,
     kLumpColormap = 15,
     kLumpFlat     = 16,
@@ -548,13 +544,6 @@ static void AddLump(DataFile *df, const char *raw_name, int pos, int size, int f
         lump_p->kind = kLumpWadTex;
         if (wad != nullptr)
             wad->wadtex_.texture2 = lump;
-        return;
-    }
-    else if (strcmp(info.name, "DEHACKED") == 0)
-    {
-        lump_p->kind = kLumpDDFRTS;
-        if (wad != nullptr && info.size > 0)
-            wad->dehacked_lump_ = lump;
         return;
     }
     else if (strcmp(info.name, "LUAHUDS") == 0)
@@ -970,30 +959,6 @@ void ProcessFixersForWAD(DataFile *df)
     }
 }
 
-void ProcessDehackedInWad(DataFile *df)
-{
-    int deh_lump = df->wad_->dehacked_lump_;
-    if (deh_lump < 0)
-        return;
-
-    const char *lump_name = lump_info[deh_lump].name;
-
-    LogPrint("Converting [%s] lump in: %s\n", lump_name, df->name_.c_str());
-
-    int            length = -1;
-    const uint8_t *data   = (const uint8_t *)LoadLumpIntoMemory(deh_lump, &length);
-
-    std::string bare_name = epi::GetFilename(df->name_);
-
-    std::string source = lump_name;
-    source += " in ";
-    source += bare_name;
-
-    ConvertDehacked(data, length, source);
-
-    delete[] data;
-}
-
 static void ProcessDDFInWad(DataFile *df)
 {
     std::string bare_filename = epi::GetFilename(df->name_);
@@ -1160,7 +1125,6 @@ void ProcessWad(DataFile *df, size_t file_index)
 
     delete[] raw_info;
 
-    ProcessDehackedInWad(df);
     ProcessBoomStuffInWad(df);
     ProcessDDFInWad(df);
     ProcessLuaInWad(df);

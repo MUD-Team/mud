@@ -39,14 +39,12 @@
 #include "ddf_style.h"
 #include "ddf_switch.h"
 #include "ddf_wadfixes.h"
-#include "deh_edge.h"
 #include "dm_state.h"
 #include "dstrings.h"
 #include "epi.h"
 #include "epi_file.h"
 #include "epi_filesystem.h"
 #include "i_system.h"
-#include "l_deh.h"
 #include "rad_trig.h"
 #include "w_epk.h"
 #include "w_wad.h"
@@ -98,32 +96,6 @@ extern void ProcessFixersForWAD(DataFile *df);
 extern void ProcessWad(DataFile *df, size_t file_index);
 
 extern std::string BuildXGLNodesForWAD(DataFile *df);
-
-static void DEH_ConvertFile(std::string &filename)
-{
-    epi::File *F = epi::FileOpen(filename, epi::kFileAccessRead | epi::kFileAccessBinary);
-    if (F == nullptr)
-    {
-        LogPrint("FAILED to open file: %s\n", filename.c_str());
-        return;
-    }
-
-    int      length = F->GetLength();
-    uint8_t *data   = F->LoadIntoMemory();
-
-    if (data == nullptr)
-    {
-        LogPrint("FAILED to read file: %s\n", filename.c_str());
-        delete F;
-        return;
-    }
-
-    ConvertDehacked(data, length, filename);
-
-    // close file, free that data
-    delete F;
-    delete[] data;
-}
 
 static void W_ExternalDDF(DataFile *df)
 {
@@ -215,13 +187,6 @@ void ProcessFile(DataFile *df)
     {
         // handle external rts scripts (from `-file` or `-script` option)
         W_ExternalRTS(df);
-    }
-    else if (df->kind_ == kFileKindDehacked)
-    {
-        // handle stand-alone DeHackEd patches
-        LogPrint("Converting DEH file: %s\n", df->name_.c_str());
-
-        DEH_ConvertFile(df->name_);
     }
 
     // handle fixer-uppers   [ TODO support it for EPK files too ]
@@ -390,8 +355,6 @@ static const char *FileKindString(FileKind kind)
         return "ddf  ";
     case kFileKindRTS:
         return "rts  ";
-    case kFileKindDehacked:
-        return "deh  ";
 
     default:
         return "??? ";
