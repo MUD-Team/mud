@@ -2964,11 +2964,7 @@ void MenuDrawer(void)
                           (current_menu->draw_function == MenuDrawLoad || current_menu->draw_function == MenuDrawSave)))
     {
         if (title_scaling.d_) // Fill Border
-        {
-            if (!menu_backdrop->blurred_version_)
-                StoreBlurredImage(menu_backdrop);
-            HUDStretchImage(-320, -200, 960, 600, menu_backdrop->blurred_version_, 0, 0);
-        }
+            HUDStretchImage(-320, -200, 960, 600, menu_backdrop, 0, 0);
         else
             HUDSolidBox(-320, -200, 960, 600, 0);
         HUDDrawImageTitleWS(menu_backdrop);

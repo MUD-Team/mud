@@ -367,11 +367,7 @@ static void TextWrite(void)
         else
         {
             if (title_scaling.d_) // Fill Border
-            {
-                if (!finale_text_background->blurred_version_)
-                    StoreBlurredImage(finale_text_background);
-                HUDStretchImage(-320, -200, 960, 600, finale_text_background->blurred_version_, 0, 0);
-            }
+                HUDStretchImage(-320, -200, 960, 600, finale_text_background, 0, 0);
             HUDDrawImageTitleWS(finale_text_background);
         }
 
@@ -706,11 +702,7 @@ static void CastDrawer(void)
     {
         image = ImageLookup("BOSSBACK");
         if (title_scaling.d_) // Fill Border
-        {
-            if (!image->blurred_version_)
-                StoreBlurredImage(image);
-            HUDStretchImage(-320, -200, 960, 600, image->blurred_version_, 0, 0);
-        }
+            HUDStretchImage(-320, -200, 960, 600, image, 0, 0);
         HUDDrawImageTitleWS(image);
     }
 
@@ -890,11 +882,7 @@ void FinaleDrawer(void)
         const Image *image =
             ImageLookup(finale->pics_[HMM_MIN((size_t)picture_number, finale->pics_.size() - 1)].c_str());
         if (title_scaling.d_) // Fill Border
-        {
-            if (!image->blurred_version_)
-                StoreBlurredImage(image);
-            HUDStretchImage(-320, -200, 960, 600, image->blurred_version_, 0, 0);
-        }
+            HUDStretchImage(-320, -200, 960, 600, image, 0, 0);
         HUDDrawImageTitleWS(image);
         break;
     }

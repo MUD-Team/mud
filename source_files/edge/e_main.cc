@@ -234,11 +234,7 @@ class StartupProgress
         if (loading_image)
         {
             if (title_scaling.d_) // Fill Border
-            {
-                if (!loading_image->blurred_version_)
-                    StoreBlurredImage(loading_image);
-                HUDStretchImage(-320, -200, 960, 600, loading_image->blurred_version_, 0, 0);
-            }
+                HUDStretchImage(-320, -200, 960, 600, loading_image, 0, 0);
             HUDDrawImageTitleWS(loading_image);
             HUDSolidBox(25, 25, 295, 175, SG_BLACK_RGBA32);
         }
@@ -649,11 +645,7 @@ static void TitleDrawer(void)
     if (title_image)
     {
         if (title_scaling.d_) // Fill Border
-        {
-            if (!title_image->blurred_version_)
-                StoreBlurredImage(title_image);
-            HUDStretchImage(-320, -200, 960, 600, title_image->blurred_version_, 0, 0);
-        }
+            HUDStretchImage(-320, -200, 960, 600, title_image, 0, 0);
         HUDDrawImageTitleWS(title_image);
     }
     else

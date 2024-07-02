@@ -53,7 +53,6 @@
 #include "i_defs_gl.h"
 #include "i_system.h"
 #include "im_data.h"
-#include "im_filter.h"
 #include "im_funcs.h"
 #include "m_argv.h"
 #include "m_misc.h"
@@ -192,46 +191,6 @@ Image::Image()
 
 Image::~Image()
 { /* TODO: image_c destructor */
-}
-
-void StoreBlurredImage(const Image *image)
-{
-    // const override
-    Image *img = (Image *)image;
-    if (!img->blurred_version_)
-    {
-        img->blurred_version_                     = new Image;
-        img->blurred_version_->name_              = std::string(img->name_).append("_BLURRED");
-        img->blurred_version_->actual_height_     = img->actual_height_;
-        img->blurred_version_->actual_width_      = img->actual_width_;
-        img->blurred_version_->is_empty_          = img->is_empty_;
-        img->blurred_version_->is_font_           = img->is_font_;
-        img->blurred_version_->offset_x_          = img->offset_x_;
-        img->blurred_version_->offset_y_          = img->offset_y_;
-        img->blurred_version_->opacity_           = img->opacity_;
-        img->blurred_version_->height_ratio_      = img->height_ratio_;
-        img->blurred_version_->width_ratio_       = img->width_ratio_;
-        img->blurred_version_->scale_x_           = img->scale_x_;
-        img->blurred_version_->scale_y_           = img->scale_y_;
-        img->blurred_version_->source_            = img->source_;
-        img->blurred_version_->source_palette_    = img->source_palette_;
-        img->blurred_version_->source_type_       = img->source_type_;
-        img->blurred_version_->total_height_      = img->total_height_;
-        img->blurred_version_->total_width_       = img->total_width_;
-        img->blurred_version_->animation_.current = img->blurred_version_;
-        img->blurred_version_->animation_.next    = nullptr;
-        img->blurred_version_->animation_.count   = 0;
-        img->blurred_version_->animation_.speed   = 0;
-        img->blurred_version_->grayscale_         = img->grayscale_;
-        if (img->blur_sigma_ > 0.0f)
-        {
-            img->blurred_version_->blur_sigma_ = img->blur_sigma_;
-        }
-        else
-        {
-            img->blurred_version_->blur_sigma_ = -1.0f;
-        }
-    }
 }
 
 static Image *NewImage(int width, int height, int opacity = kOpacityUnknown)
@@ -671,7 +630,6 @@ static Image *AddImage_DOOM(ImageDefinition *def, bool user_defined = false)
     rim->hsv_rotation_   = def->hsv_rotation_;
     rim->hsv_saturation_ = def->hsv_saturation_;
     rim->hsv_value_      = def->hsv_value_;
-    rim->blur_sigma_     = def->blur_factor_;
 
     rim->source_.graphic.special = kImageSpecialNone;
 
@@ -801,7 +759,6 @@ static Image *AddImageUser(ImageDefinition *def)
     rim->hsv_rotation_   = def->hsv_rotation_;
     rim->hsv_saturation_ = def->hsv_saturation_;
     rim->hsv_value_      = def->hsv_value_;
-    rim->blur_sigma_     = def->blur_factor_;
 
     if (def->special_ & kImageSpecialCrosshair)
     {
@@ -1102,9 +1059,6 @@ static bool IM_ShouldMipmap(Image *rim)
 
 static bool IM_ShouldSmooth(Image *rim)
 {
-    if (!AlmostEquals(rim->blur_sigma_, 0.0f))
-        return true;
-
     return image_smoothing ? true : false;
 }
 
@@ -1192,13 +1146,6 @@ static GLuint LoadImageOGL(Image *rim, const Colormap *trans, bool do_whiten)
             rim->opacity_ = DetermineOpacity(tmp_img, &rim->is_empty_);
         }
 
-        if (rim->blur_sigma_ > 0.0f)
-        {
-            ImageData *blurred_img = ImageBlur(rgb_img, rim->blur_sigma_);
-            delete rgb_img;
-            rgb_img = blurred_img;
-        }
-
         delete tmp_img;
         tmp_img = rgb_img;
     }
@@ -1208,12 +1155,6 @@ static GLuint LoadImageOGL(Image *rim, const Colormap *trans, bool do_whiten)
         {
             tmp_img->RemoveBackground();
             rim->opacity_ = DetermineOpacity(tmp_img, &rim->is_empty_);
-        }
-        if (rim->blur_sigma_ > 0.0f)
-        {
-            ImageData *blurred_img = ImageBlur(tmp_img, rim->blur_sigma_);
-            delete tmp_img;
-            tmp_img = blurred_img;
         }
         if (trans != nullptr)
             PaletteRemapRGBA(tmp_img, what_palette, (const uint8_t *)&playpal_data[0]);

@@ -87,10 +87,6 @@ base64.lua - Copyright (c) 2018 Ilya Kolbin
 
 BW_Midi_Sequencer library - Copyright (c) 2015-2022 Vitaly Novichkov
 
-"C++ implementation of a fast Gaussian blur algorithm by Ivan Kutskir - Integer Version"
-	- Copyright (C) 2017 Basile Fraboni
-	- Copyright (C) 2014 Ivan Kutskir
-
 debugger.lua -Copyright (c) 2023 Scott Lembcke and Howling Moon Software
 
 gl4es library - Copyright (c) 2016-2018 Sebastien Chevalier

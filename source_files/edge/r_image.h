@@ -90,9 +90,6 @@ class Image
     int hsv_saturation_ = -1;
     int hsv_value_      = 0;
 
-    Image *blurred_version_ = nullptr;
-    float  blur_sigma_      = 0.0f;
-
     // --- information about where this image came from ---
     std::string name_;
 
