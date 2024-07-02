@@ -125,14 +125,5 @@ extern int screen_hud;
 
 extern int reduce_flash;
 
-enum InvulnerabilityEffectType
-{
-    kInvulnerabilitySimple = 0, // plain inverse blending
-    kInvulnerabilityTextured,   // upload new textures
-    kTotalInvulnerabilityEffects
-};
-
-extern int invulnerability_effect;
-
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

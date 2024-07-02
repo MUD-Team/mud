@@ -390,8 +390,6 @@ static OptionMenuItem vidoptions[] = {
     {kOptionMenuItemTypeSlider, "Crosshair Size", nullptr, 0, &crosshair_size.f_,
      OptionMenuUpdateConsoleVariableFromFloat, nullptr, &crosshair_size, 1.0f, 2.0f, 64.0f, "%g Pixels"},
     {kOptionMenuItemTypeBoolean, "Map Rotation", YesNo, 2, &rotate_map, nullptr, nullptr},
-    {kOptionMenuItemTypeSwitch, "Invulnerability", "Simple/Textured", kTotalInvulnerabilityEffects,
-     &invulnerability_effect, nullptr, nullptr},
     {kOptionMenuItemTypeBoolean, "Skip Startup Movies", YesNo, 2, &skip_intros.d_,
      OptionMenuUpdateConsoleVariableFromInt, nullptr, &skip_intros},
 };

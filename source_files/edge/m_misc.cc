@@ -89,7 +89,6 @@ static ConfigurationDefault defaults[] = {
 
     // -ES- 1998/11/28 Save fade settings
     {kConfigInteger, "reduce_flash", &reduce_flash, 0},
-    {kConfigInteger, "invuln_fx", &invulnerability_effect, EDGE_DEFAULT_INVUL_FX},
     {kConfigBoolean, "rotate_map", &rotate_map, EDGE_DEFAULT_ROTATEMAP},
     {kConfigBoolean, "respawnsetting", &global_flags.enemy_respawn_mode, EDGE_DEFAULT_RES_RESPAWN},
     {kConfigBoolean, "items_respawn", &global_flags.items_respawn, EDGE_DEFAULT_ITEMRESPAWN},

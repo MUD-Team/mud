@@ -73,20 +73,9 @@ void RendererRainbowEffect(Player *player)
 
     if (s > 0 && player->powers_[kPowerTypeInvulnerable] > 0 && (player->effect_left_ & 8) && !reduce_flash)
     {
-        if (invulnerability_effect == kInvulnerabilityTextured && !reduce_flash)
-        {
-            render_view_effect_colormap = player->effect_colourmap_;
-        }
-        else
-        {
-            render_view_red_multiplier = 0.90f;
-            ///???		render_view_red_multiplier += (1.0f -
-            /// render_view_red_multiplier) * (1.0f - s);
-
-            render_view_green_multiplier = render_view_red_multiplier;
-            render_view_blue_multiplier  = render_view_red_multiplier;
-        }
-
+        render_view_red_multiplier = 0.90f;
+        render_view_green_multiplier = render_view_red_multiplier;
+        render_view_blue_multiplier  = render_view_red_multiplier;
         render_view_extra_light = 255;
         return;
     }
@@ -159,9 +148,6 @@ void RendererColourmapEffect(Player *player)
     if (s > 0 && player->powers_[kPowerTypeInvulnerable] > 0 && player->effect_colourmap_ &&
         (player->effect_left_ & 8 || reduce_flash))
     {
-        if (invulnerability_effect == kInvulnerabilityTextured && !reduce_flash)
-            return;
-
         glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ZERO);
 
         if (!reduce_flash)
