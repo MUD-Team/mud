@@ -169,15 +169,6 @@ struct RawPatchDefinition
 };
 #pragma pack(pop)
 
-#pragma pack(push, 1)
-struct RawStrifePatchDefinition
-{
-    int16_t  x_origin;
-    int16_t  y_origin;
-    uint16_t pname; // index into PNAMES
-};
-#pragma pack(pop)
-
 // Texture definition.
 //
 // Each texture is composed of one or more patches,
@@ -197,22 +188,6 @@ struct RawTexture
     uint16_t patch_count;
 
     RawPatchDefinition patches[1];
-};
-#pragma pack(pop)
-
-#pragma pack(push, 1)
-struct RawStrifeTexture
-{
-    char name[8];
-
-    uint16_t masked; // NOT USED
-    uint8_t  scale_x;
-    uint8_t  scale_y;
-    uint16_t width;
-    uint16_t height;
-    uint16_t patch_count;
-
-    RawStrifePatchDefinition patches[1];
 };
 #pragma pack(pop)
 

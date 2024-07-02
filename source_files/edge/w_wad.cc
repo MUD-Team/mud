@@ -68,33 +68,12 @@
 #include "w_files.h"
 #include "w_texture.h"
 
-#define EDGE_ENABLE_STRIFE 0
-
 // Combination of unique lumps needed to best identify an IWAD
 const std::vector<GameCheck> game_checker = {{
     {"Custom", "custom", {"EDGEGAME", "EDGEGAME"}},
     {"Blasphemer", "blasphemer", {"BLASPHEM", "E1M1"}},
     {"Freedoom 1", "freedoom1", {"FREEDOOM", "E1M1"}},
-    {"Freedoom 2", "freedoom2", {"FREEDOOM", "MAP01"}},
-    {"REKKR", "rekkr", {"REKCREDS", "E1M1"}},
-    {"HacX", "hacx", {"HACX-R", "MAP01"}},
-    {"Harmony", "harmony", {"0HAWK01", "DBIGFONT"}}, // Original Harmony Release
-    {"Harmony Compat", "harmonyc", {"0HAWK01", "DMAPINFO"}}, // Harmony Compatible Release
-    {"Chex Quest 3M", "chex3vm", {"ENDOOM", "MAP01"}},  // Chex Quest 3: Vanilla Edition
-                                                        // Modder/Doom 2 Base
-    {"Chex Quest 3", "chex3v", {"ENDOOM", "BOSSBACK"}},  // Chex Quest 3: Vanilla Edition
-    {"Chex Quest 1", "chex1", {"ENDOOM", "E4M1"}},
-    {"Heretic", "heretic", {"MUS_E1M1", "E1M1"}},
-    {"Plutonia", "plutonia", {"CAMO1", "MAP01"}},
-    {"Evilution", "tnt", {"REDTNT2", "MAP01"}},
-    {"Doom", "doom", {"BFGGA0", "E2M1"}},
-    {"Doom BFG", "doom", {"DMENUPIC", "M_MULTI"}},
-    {"Doom Demo", "doom1", {"SHOTA0", "E1M1"}},
-    {"Doom II", "doom2", {"BFGGA0", "MAP01"}},
-    {"Doom II BFG", "doom2", {"DMENUPIC", "MAP33"}},
-#if EDGE_ENABLE_STRIFE
-    {"Strife", "strife", {"VELLOGO", "RGELOGO"}}     // Dev/internal use - Definitely nowhwere near playable
-#endif
+    {"Freedoom 2", "freedoom2", {"FREEDOOM", "MAP01"}}
 }};
 
 class WadFile
@@ -824,11 +803,8 @@ int CheckForUniqueGameLumps(epi::File *file)
         const char *lump0     = gamecheck.unique_lumps[0];
         const char *lump1     = gamecheck.unique_lumps[1];
 
-        // Do not require IWAD header if loading Harmony, REKKR, BFG Edition
-        // WADs, Chex Quest or a custom standalone IWAD
-        if (strncmp(header.magic, "IWAD", 4) != 0 && epi::StringCompare(lump0, "DMENUPIC") != 0 &&
-            epi::StringCompare(lump0, "REKCREDS") != 0 && epi::StringCompare(lump0, "0HAWK01") != 0 &&
-            epi::StringCompare(lump0, "EDGEGAME") != 0 && epi::StringCompare(lump0, "ENDOOM") != 0)
+        // Do not require IWAD header if loading a custom standalone IWAD
+        if (strncmp(header.magic, "IWAD", 4) != 0 && epi::StringCompare(lump0, "EDGEGAME") != 0)
         {
             continue;
         }
@@ -851,31 +827,6 @@ int CheckForUniqueGameLumps(epi::File *file)
                     delete[] raw_info;
                     file->Seek(0, epi::File::kSeekpointStart);
                     return check;
-                }
-                // Either really smart or really dumb Chex Quest detection
-                // method
-                else if (epi::StringCompare(lump0, "ENDOOM") == 0)
-                {
-                    EPI_ASSERT(entry.size == 4000);
-                    file->Seek(entry.position, epi::File::kSeekpointStart);
-                    uint8_t *endoom = new uint8_t[entry.size];
-                    file->Read(endoom, entry.size);
-                    // CQ3: Vanilla
-                    if (endoom[1174] == 'c' && endoom[1176] == 'h' && endoom[1178] == 'e' && endoom[1180] == 'x' &&
-                        endoom[1182] == 'q' && endoom[1184] == 'u' && endoom[1186] == 'e' && endoom[1188] == 's' &&
-                        endoom[1190] == 't' && endoom[1192] == '.' && endoom[1194] == 'o' && endoom[1196] == 'r' &&
-                        endoom[1198] == 'g')
-                    {
-                        lump1_found = true;
-                    }
-                    // CQ1
-                    else if (endoom[1026] == 'c' && endoom[1028] == 'h' && endoom[1030] == 'e' && endoom[1032] == 'x' &&
-                        endoom[1034] == 'q' && endoom[1036] == 'u' && endoom[1038] == 'e' && endoom[1040] == 's' &&
-                        endoom[1042] == 't')
-                    {
-                        lump1_found = true;
-                    }
-                    delete[] endoom;
                 }
                 else
                     lump1_found = true;
