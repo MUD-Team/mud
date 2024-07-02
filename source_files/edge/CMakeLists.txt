@@ -66,7 +66,6 @@ set (EDGE_SOURCE_FILES
   r_occlude.cc
   r_things.cc
   r_units.cc
-  r_wipe.cc
   r_misc.cc
   r_sky.cc
   r_state.cc

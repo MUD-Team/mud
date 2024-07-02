@@ -879,8 +879,6 @@ static void DrawTime(float x, float y, int t, bool drawText = false)
 
 static void IntermissionEnd(void)
 {
-    ForceWipe();
-
     background_camera_map_object = nullptr;
 
     FinaleStart(&current_map->f_end_, next_map ? kGameActionFinale : kGameActionNothing);

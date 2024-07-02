@@ -61,7 +61,6 @@
 #include "r_gldefs.h"
 #include "r_image.h"
 #include "r_modes.h"
-#include "r_wipe.h"
 #include "s_blit.h"
 #include "s_sound.h"
 #include "version.h"
@@ -92,7 +91,6 @@ static ConfigurationDefault defaults[] = {
     // -ES- 1998/11/28 Save fade settings
     {kConfigInteger, "reduce_flash", &reduce_flash, 0},
     {kConfigInteger, "invuln_fx", &invulnerability_effect, EDGE_DEFAULT_INVUL_FX},
-    {kConfigEnum, "wipe_method", &wipe_method, EDGE_DEFAULT_WIPE_METHOD},
     {kConfigBoolean, "rotate_map", &rotate_map, EDGE_DEFAULT_ROTATEMAP},
     {kConfigBoolean, "respawnsetting", &global_flags.enemy_respawn_mode, EDGE_DEFAULT_RES_RESPAWN},
     {kConfigBoolean, "items_respawn", &global_flags.items_respawn, EDGE_DEFAULT_ITEMRESPAWN},

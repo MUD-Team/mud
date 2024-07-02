@@ -189,9 +189,6 @@ static void DoBumpFinale(void)
 
     if (stage != kFinaleStageDone)
     {
-        if (game_state != kGameStateIntermission)
-            ForceWipe();
-
         finale_stage = stage;
 
         DoStartFinale();
@@ -200,10 +197,7 @@ static void DoBumpFinale(void)
 
     // capture the screen _before_ changing any global state
     if (new_game_action != kGameActionNothing)
-    {
-        ForceWipe();
         game_action = new_game_action;
-    }
 
     game_state = kGameStateNothing; // hack ???  (cannot leave as GS_FINALE)
 }
@@ -253,9 +247,6 @@ void FinaleStart(const FinaleDefinition *F, GameAction newaction)
 
         return /* false */;
     }
-
-    // capture the screen _before_ changing any global state
-    //--- E_ForceWipe();   // CRASH with IDCLEV
 
     finale       = F;
     finale_stage = stage;
@@ -352,11 +343,7 @@ void FinaleTicker(void)
         {
             game_action = new_game_action;
 
-            // don't come here again (for E_ForceWipe)
             new_game_action = kGameActionNothing;
-
-            if (game_state == kGameStateFinale)
-                ForceWipe();
         }
     }
 }

@@ -82,7 +82,6 @@
 #define EDGE_DEFAULT_MAP_OVERLAY   (0)
 #define EDGE_DEFAULT_ROTATEMAP     (0)
 #define EDGE_DEFAULT_INVUL_FX      (1) // TEXTURED
-#define EDGE_DEFAULT_WIPE_METHOD   (1)
 #define EDGE_DEFAULT_PNG_SCRSHOTS  (1)
 
 // Gameplay Options

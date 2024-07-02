@@ -281,7 +281,6 @@ void   ImagePrecache(const Image *image);
 // this only needed during initialisation -- r_things.cpp
 const Image **GetUserSprites(int *count);
 
-// internal routines -- only needed by rgl_wipe.c
 int MakeValidTextureSize(int value);
 
 // Store a duplicate version of the image_c with smoothing forced

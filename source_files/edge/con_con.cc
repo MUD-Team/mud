@@ -48,7 +48,6 @@
 #include "r_draw.h"
 #include "r_image.h"
 #include "r_modes.h"
-#include "r_wipe.h"
 #include "w_files.h"
 #include "w_wad.h"
 

@@ -41,7 +41,6 @@
 #include "r_image.h"
 #include "r_misc.h"
 #include "r_units.h"
-#include "r_wipe.h"
 
 // Globals
 int current_screen_width;
@@ -276,8 +275,6 @@ void SoftInitializeResolution(void)
 
 static bool DoExecuteChangeResolution(DisplayMode *mode)
 {
-    StopWipe(); // delete any wipe texture too
-
     DeleteAllImages();
 
     bool was_ok = SetScreenSize(mode);

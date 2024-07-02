@@ -37,7 +37,6 @@ void TitleTicker(void);
 void PickLoadingScreen(void);
 void AdvanceTitle(void);
 void StartTitle(void);
-void ForceWipe(void);
 
 void StartupProgressMessage(const char *message);
 

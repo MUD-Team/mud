@@ -392,7 +392,6 @@ static void CheckPlayersReborn(void)
         if (InSinglePlayerMatch())
         {
             // reload the level
-            ForceWipe();
             game_action = kGameActionLoadLevel;
 
             // -AJA- if we are on a HUB map, then we must go all the
@@ -647,8 +646,6 @@ static void GameDoCompleted(void)
 {
     EPI_ASSERT(current_map);
 
-    ForceWipe();
-
     exit_time = INT_MAX;
 
     for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
@@ -848,8 +845,6 @@ static bool GameLoadGameFromFile(std::string filename, bool is_hub)
 //
 static void GameDoLoadGame(void)
 {
-    ForceWipe();
-
     const char *dir_name = SaveSlotName(defer_load_slot);
     LogDebug("GameDoLoadGame : %s\n", dir_name);
 
@@ -1079,8 +1074,6 @@ static void GameDoNewGame(void)
 {
     EPI_ASSERT(defer_params);
 
-    ForceWipe();
-
     SaveClearSlot("current");
     quicksave_slot = -1;
 
@@ -1194,8 +1187,6 @@ void DeferredEndGame(void)
 //
 static void GameDoEndGame(void)
 {
-    ForceWipe();
-
     DestroyAllPlayers();
 
     SaveClearSlot("current");

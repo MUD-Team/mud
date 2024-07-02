@@ -104,7 +104,6 @@
 #include "r_image.h"
 #include "r_misc.h"
 #include "r_modes.h"
-#include "r_wipe.h"
 #include "s_blit.h"
 #include "s_cache.h"
 #include "s_fluid.h"
@@ -396,10 +395,6 @@ static OptionMenuItem vidoptions[] = {
     {kOptionMenuItemTypeBoolean, "Map Rotation", YesNo, 2, &rotate_map, nullptr, nullptr},
     {kOptionMenuItemTypeSwitch, "Invulnerability", "Simple/Textured", kTotalInvulnerabilityEffects,
      &invulnerability_effect, nullptr, nullptr},
-#ifndef EDGE_WEB
-    {kOptionMenuItemTypeSwitch, "Wipe method", "None/Melt/Crossfade/Pixelfade/Top/Bottom/Left/Right/Spooky/Doors",
-     kTotalScreenWipeTypes, &wipe_method, nullptr, nullptr},
-#endif
     {kOptionMenuItemTypeBoolean, "Screenshot Format", "JPEG/PNG", 2, &png_screenshots, nullptr, nullptr},
     {kOptionMenuItemTypeSwitch, "Animated Liquid Type", "Vanilla/SMMU/SMMU+Swirl/Parallax", 4, &swirling_flats, nullptr,
      nullptr},

@@ -77,7 +77,6 @@
 #include "r_image.h"
 #include "r_misc.h"
 #include "r_modes.h"
-#include "r_wipe.h"
 #include "rad_trig.h"
 #include "s_music.h"
 #include "s_sound.h"
@@ -553,37 +552,12 @@ static void DisplayPauseImage(void)
     HUDStretchImage(x, y, w, h, pause_image, 0.0, 0.0);
 }
 
-ScreenWipe wipe_method = kScreenWipeMelt;
-
-static bool need_wipe = false;
-
-void ForceWipe(void)
-{
-#ifdef EDGE_WEB
-    // Wiping blocks the main thread while rendering outside of the main loop
-    // tick Disabled on the platform until can be better integrated
-    return;
-#endif
-    if (game_state == kGameStateNothing)
-        return;
-
-    if (wipe_method == kScreenWipeNone)
-        return;
-
-    need_wipe = true;
-
-    // capture screen now (before new level is loaded etc..)
-    EdgeDisplay();
-}
-
 //
 // E_Display
 //
 // Draw current display, possibly wiping it from the previous
 //
 // -ACB- 1998/07/27 Removed doublebufferflag check (unneeded).
-
-static bool wipe_gl_active = false;
 
 void EdgeDisplay(void)
 {
@@ -625,27 +599,6 @@ void EdgeDisplay(void)
 
     case kGameStateNothing:
         break;
-    }
-
-    if (wipe_gl_active)
-    {
-        // -AJA- Wipe code for GL.  Sorry for all this ugliness, but it just
-        //       didn't fit into the existing wipe framework.
-        //
-        if (DoWipe())
-        {
-            StopWipe();
-            wipe_gl_active = false;
-        }
-    }
-
-    // save the current screen if about to wipe
-    if (need_wipe)
-    {
-        need_wipe      = false;
-        wipe_gl_active = true;
-
-        InitializeWipe(wipe_method);
     }
 
     if (paused)
