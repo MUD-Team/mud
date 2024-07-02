@@ -38,7 +38,6 @@
 #include "ddf_main.h"
 #include "ddf_style.h"
 #include "ddf_switch.h"
-#include "ddf_wadfixes.h"
 #include "dm_state.h"
 #include "dstrings.h"
 #include "epi.h"
@@ -91,8 +90,6 @@ size_t AddPendingFile(std::string file, FileKind kind)
     return index;
 }
 
-// TODO tidy this
-extern void ProcessFixersForWAD(DataFile *df);
 extern void ProcessWad(DataFile *df, size_t file_index);
 
 extern std::string BuildXGLNodesForWAD(DataFile *df);
@@ -188,10 +185,6 @@ void ProcessFile(DataFile *df)
         // handle external rts scripts (from `-file` or `-script` option)
         W_ExternalRTS(df);
     }
-
-    // handle fixer-uppers   [ TODO support it for EPK files too ]
-    if (df->wad_ != nullptr)
-        ProcessFixersForWAD(df);
 }
 
 void ProcessMultipleFiles()

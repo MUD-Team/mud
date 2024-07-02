@@ -24,7 +24,6 @@ add_library(
   ddf_style.cc
   ddf_switch.cc
   ddf_thing.cc
-  ddf_wadfixes.cc
   ddf_weapon.cc
 )
 

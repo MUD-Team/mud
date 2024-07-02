@@ -46,7 +46,6 @@
 #include "ddf_colormap.h"
 #include "ddf_main.h"
 #include "ddf_switch.h"
-#include "ddf_wadfixes.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "dstrings.h"
@@ -846,57 +845,6 @@ int CheckForUniqueGameLumps(epi::File *file)
     delete[] raw_info;
     file->Seek(0, epi::File::kSeekpointStart);
     return -1;
-}
-
-void ProcessFixersForWAD(DataFile *df)
-{
-    // Special handling for Doom 2 BFG Edition
-    if (df->kind_ == kFileKindIWAD || df->kind_ == kFileKindIPackWAD)
-    {
-        if (CheckLumpNumberForName("MAP33") > -1 && CheckLumpNumberForName("DMENUPIC") > -1)
-        {
-            std::string fix_path = epi::PathAppend(game_directory, "edge_fixes/doom2_bfg.epk");
-            if (epi::TestFileAccess(fix_path))
-            {
-                AddPendingFile(fix_path, kFileKindEPK);
-
-                LogPrint("WADFIXES: Applying fixes for Doom 2 BFG Edition\n");
-            }
-            else
-                LogWarning("WADFIXES: Doom 2 BFG Edition detected, but fix not found "
-                           "in edge_fixes directory!\n");
-            return;
-        }
-    }
-
-    std::string fix_checker;
-
-    fix_checker = df->wad_->md5_string_;
-
-    if (fix_checker.empty())
-        return;
-
-    for (size_t i = 0; i < fixdefs.size(); i++)
-    {
-        if (epi::StringCaseCompareASCII(fix_checker, fixdefs[i]->md5_string_) == 0)
-        {
-            std::string fix_path = epi::PathAppend(game_directory, "edge_fixes");
-            fix_path             = epi::PathAppend(fix_path, fix_checker.append(".epk"));
-            if (epi::TestFileAccess(fix_path))
-            {
-                AddPendingFile(fix_path, kFileKindEPK);
-
-                LogPrint("WADFIXES: Applying fixes for %s\n", fixdefs[i]->name_.c_str());
-            }
-            else
-            {
-                LogWarning("WADFIXES: %s defined, but no fix WAD located in "
-                           "edge_fixes!\n",
-                           fixdefs[i]->name_.c_str());
-                return;
-            }
-        }
-    }
 }
 
 static void ProcessDDFInWad(DataFile *df)

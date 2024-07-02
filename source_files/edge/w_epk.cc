@@ -22,7 +22,6 @@
 
 #include "ddf_colormap.h"
 #include "ddf_main.h"
-#include "ddf_wadfixes.h"
 #include "epi.h"
 #include "epi_file.h"
 #include "epi_filesystem.h"
@@ -1240,17 +1239,6 @@ void ProcessAllInPack(DataFile *df, size_t file_index)
         df->pack_ = ProcessZip(df);
 
     df->pack_->SortEntries();
-
-    // parse the WADFIXES file from edge_defs folder or `edge_defs.epk`
-    // immediately
-    if ((df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEEPK) && file_index == 0)
-    {
-        LogPrint("Loading WADFIXES\n");
-        epi::File *wadfixes = OpenPackFile(df->pack_, "wadfixes.ddf");
-        if (wadfixes)
-            DDFReadFixes(wadfixes->ReadText());
-        delete wadfixes;
-    }
 
     // Only load some things here; the rest are deferred until
     // after all files loaded so that pack substitutions can work properly

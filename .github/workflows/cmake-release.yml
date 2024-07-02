@@ -29,7 +29,6 @@ jobs:
             autoload
             docs
             edge_base/*.epk
-            edge_fixes
             soundfont
             edge-classic.exe
             *.dll
@@ -68,7 +67,6 @@ jobs:
             autoload
             docs
             edge_base/*.epk
-            edge_fixes
             soundfont
             edge-classic.exe
             *.dll

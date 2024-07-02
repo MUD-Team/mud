@@ -333,10 +333,6 @@ void DDFImageCleanUp(void);
 void DDFFlatInit(void);
 void DDFFlatCleanUp(void);
 
-// WADFIXES Code 2022
-void DDFFixInit(void);
-void DDFFixCleanUp(void);
-
 // MOVIES 2023
 void DDFMovieInit(void);
 void DDFMovieCleanUp(void);
