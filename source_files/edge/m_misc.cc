@@ -83,7 +83,6 @@ static ConfigurationDefault defaults[] = {
     {kConfigInteger, "displaymode", &current_window_mode, EDGE_DEFAULT_DISPLAYMODE},
 
     {kConfigInteger, "sound_stereo", &var_sound_stereo, EDGE_DEFAULT_SOUND_STEREO},
-    {kConfigBoolean, "dynamic_reverb", &dynamic_reverb, 0},
     {kConfigInteger, "mix_channels", &sound_mixing_channels, EDGE_DEFAULT_MIX_CHANNELS},
 
     {kConfigInteger, "show_messages", &show_messages, EDGE_DEFAULT_SHOWMESSAGES},

@@ -55,14 +55,6 @@ static constexpr uint16_t kMaximumSoundChannels = 256;
 SoundChannel *mix_channels[kMaximumSoundChannels];
 int           total_channels;
 
-bool  vacuum_sound_effects    = false;
-bool  submerged_sound_effects = false;
-bool  outdoor_reverb          = false;
-bool  dynamic_reverb          = false;
-bool  ddf_reverb              = false;
-int   ddf_reverb_type         = 0;
-int   ddf_reverb_ratio        = 0;
-int   ddf_reverb_delay        = 0;
 float music_player_gain       = 1.0f;
 
 static int *mix_buffer;
@@ -194,18 +186,7 @@ static void MixMono(SoundChannel *chan, int *dest, int pairs)
 {
     EPI_ASSERT(pairs > 0);
 
-    int16_t *src_L;
-
-    if (paused || menu_active)
-        src_L = chan->data_->data_left_;
-    else
-    {
-        if (!chan->data_->is_sound_effect_ || chan->category_ == kCategoryUi ||
-            chan->data_->current_filter_ == kFilterNone)
-            src_L = chan->data_->data_left_;
-        else
-            src_L = chan->data_->filter_data_left_;
-    }
+    int16_t *src_L = chan->data_->data_left_;
 
     int *d_pos = dest;
     int *d_end = d_pos + pairs;
@@ -228,28 +209,8 @@ static void MixStereo(SoundChannel *chan, int *dest, int pairs)
 {
     EPI_ASSERT(pairs > 0);
 
-    int16_t *src_L;
-    int16_t *src_R;
-
-    if (paused || menu_active)
-    {
-        src_L = chan->data_->data_left_;
-        src_R = chan->data_->data_right_;
-    }
-    else
-    {
-        if (!chan->data_->is_sound_effect_ || chan->category_ == kCategoryUi ||
-            chan->data_->current_filter_ == kFilterNone)
-        {
-            src_L = chan->data_->data_left_;
-            src_R = chan->data_->data_right_;
-        }
-        else
-        {
-            src_L = chan->data_->filter_data_left_;
-            src_R = chan->data_->filter_data_right_;
-        }
-    }
+    int16_t *src_L = chan->data_->data_left_;
+    int16_t *src_R = chan->data_->data_right_;
 
     int *d_pos = dest;
     int *d_end = d_pos + pairs * 2;
@@ -277,18 +238,7 @@ static void MixInterleaved(SoundChannel *chan, int *dest, int pairs)
 
     EPI_ASSERT(pairs > 0);
 
-    int16_t *src_L;
-
-    if (paused || menu_active)
-        src_L = chan->data_->data_left_;
-    else
-    {
-        if (!chan->data_->is_sound_effect_ || chan->category_ == kCategoryUi ||
-            chan->data_->current_filter_ == kFilterNone)
-            src_L = chan->data_->data_left_;
-        else
-            src_L = chan->data_->filter_data_left_;
-    }
+    int16_t *src_L = chan->data_->data_left_;
 
     int *d_pos = dest;
     int *d_end = d_pos + pairs * 2;

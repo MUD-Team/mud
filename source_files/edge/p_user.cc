@@ -794,25 +794,12 @@ bool PlayerThink(Player *player, bool extra_tic)
         }
     }
 
-    // Reset environmental FX in case player has left sector in which they apply
-    // - Dasho
-    vacuum_sound_effects    = false;
-    submerged_sound_effects = false;
-    outdoor_reverb          = false;
-    ddf_reverb              = false;
-    ddf_reverb_type         = 0;
-    ddf_reverb_delay        = 0;
-    ddf_reverb_ratio        = 0;
-
     if (player->map_object_->region_properties_->special ||
         player->map_object_->subsector_->sector->extrafloor_used > 0 || player->underwater_ || player->swimming_ ||
         player->airless_)
     {
         PlayerInSpecialSector(player, player->map_object_->subsector_->sector, should_think);
     }
-
-    if (EDGE_IMAGE_IS_SKY(player->map_object_->subsector_->sector->ceiling))
-        outdoor_reverb = true;
 
     // Check for weapon change.
     if (cmd->buttons & kButtonCodeChangeWeapon)
@@ -891,36 +878,6 @@ bool PlayerThink(Player *player, bool extra_tic)
         player->attack_sustained_count_ = 0;
 
     player->kick_offset_ /= 1.6f;
-
-    if (players[console_player] == player && dynamic_reverb)
-    {
-        // Approximate "room size" determination for reverb system - Dasho
-        HMM_Vec2 room_checker;
-        float    line_lengths = 0;
-        float    player_x     = player->map_object_->x;
-        float    player_y     = player->map_object_->y;
-        PathTraverse(player_x, player_y, player_x, 32768.0f, kPathAddLines, P_RoomPath, &room_checker);
-        line_lengths += abs(room_checker.Y - player_y);
-        PathTraverse(player_x, player_y, 32768.0f + player_x, 32768.0f + player_y, kPathAddLines, P_RoomPath,
-                     &room_checker);
-        line_lengths += PointToDistance(player_x, player_y, room_checker.X, room_checker.Y);
-        PathTraverse(player_x, player_y, -32768.0f + player_x, 32768.0f + player_y, kPathAddLines, P_RoomPath,
-                     &room_checker);
-        line_lengths += PointToDistance(player_x, player_y, room_checker.X, room_checker.Y);
-        PathTraverse(player_x, player_y, player_x, -32768.0f, kPathAddLines, P_RoomPath, &room_checker);
-        line_lengths += abs(player_y - room_checker.Y);
-        PathTraverse(player_x, player_y, -32768.0f + player_x, -32768.0f + player_y, kPathAddLines, P_RoomPath,
-                     &room_checker);
-        line_lengths += PointToDistance(player_x, player_y, room_checker.X, room_checker.Y);
-        PathTraverse(player_x, player_y, 32768.0f + player_x, -32768.0f + player_y, kPathAddLines, P_RoomPath,
-                     &room_checker);
-        line_lengths += PointToDistance(player_x, player_y, room_checker.X, room_checker.Y);
-        PathTraverse(player_x, player_y, -32768.0f, player_y, kPathAddLines, P_RoomPath, &room_checker);
-        line_lengths += abs(player_x - room_checker.X);
-        PathTraverse(player_x, player_y, 32768.0f, player_y, kPathAddLines, P_RoomPath, &room_checker);
-        line_lengths += abs(room_checker.X - player_x);
-        room_area = line_lengths / 8;
-    }
 
     return should_think;
 }
