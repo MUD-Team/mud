@@ -37,16 +37,12 @@
 static constexpr float kVerticalSpacing = 2.0f;
 
 extern int             console_cursor;
-extern ConsoleVariable video_overlay;
 extern ConsoleVariable double_framerate;
 
 static Font *default_font;
 
 extern int game_tic;
 int        hud_tic;
-
-int  hud_swirl_pass   = 0;
-bool hud_thick_liquid = false;
 
 float hud_x_left;
 float hud_x_right;
@@ -72,16 +68,6 @@ static float margin_x_multiplier;
 static float margin_y_multiplier;
 
 static constexpr float kDoomPixelAspectRatio = (5.0f / 6.0f);
-
-std::vector<std::string> hud_overlays = {
-    "",
-    "OVERLAY_LINES_1X",
-    "OVERLAY_LINES_2X",
-    "OVERLAY_VERTICAL_1X",
-    "OVERLAY_VERTICAL_2X",
-    "OVERLAY_GRILL_1X",
-    "OVERLAY_GRILL_2X",
-};
 
 static inline float HUDToRealCoordinatesX(float x)
 {
@@ -298,64 +284,6 @@ void HUDCalcScrollTexCoords(float x_scroll, float y_scroll, float *tx1, float *t
     *ty2 += adjustedScrollT;
 }
 
-// Adapted from Quake 3 GPL release
-void HUDCalcTurbulentTexCoords(float *tx, float *ty, float x, float y)
-{
-    float now;
-    float phase     = 0;
-    float frequency = hud_thick_liquid ? 0.5 : 1.0;
-    float amplitude = 0.05;
-
-    now = (phase + hud_tic / 100.0f * frequency);
-
-    if (swirling_flats == kLiquidSwirlParallax)
-    {
-        frequency *= 2;
-        if (hud_thick_liquid)
-        {
-            if (hud_swirl_pass == 1)
-            {
-                *tx = *tx +
-                      sine_table[(int)((x * 1.0 / 128 * 0.125 + now) * kSineTableSize) & (kSineTableMask)] * amplitude;
-                *ty = *ty +
-                      sine_table[(int)((y * 1.0 / 128 * 0.125 + now) * kSineTableSize) & (kSineTableMask)] * amplitude;
-            }
-            else
-            {
-                amplitude = 0;
-                *tx       = *tx -
-                      sine_table[(int)((x * 1.0 / 128 * 0.125 + now) * kSineTableSize) & (kSineTableMask)] * amplitude;
-                *ty = *ty -
-                      sine_table[(int)((y * 1.0 / 128 * 0.125 + now) * kSineTableSize) & (kSineTableMask)] * amplitude;
-            }
-        }
-        else
-        {
-            if (hud_swirl_pass == 1)
-            {
-                amplitude = 0.025;
-                *tx       = *tx +
-                      sine_table[(int)((x * 1.0 / 128 * 0.125 + now) * kSineTableSize) & (kSineTableMask)] * amplitude;
-                *ty = *ty +
-                      sine_table[(int)((y * 1.0 / 128 * 0.125 + now) * kSineTableSize) & (kSineTableMask)] * amplitude;
-            }
-            else
-            {
-                amplitude = 0.015;
-                *tx       = *tx -
-                      sine_table[(int)((x * 1.0 / 128 * 0.125 + now) * kSineTableSize) & (kSineTableMask)] * amplitude;
-                *ty = *ty -
-                      sine_table[(int)((y * 1.0 / 128 * 0.125 + now) * kSineTableSize) & (kSineTableMask)] * amplitude;
-            }
-        }
-    }
-    else
-    {
-        *tx = *tx + sine_table[(int)((x * 1.0 / 128 * 0.125 + now) * kSineTableSize) & (kSineTableMask)] * amplitude;
-        *ty = *ty + sine_table[(int)((y * 1.0 / 128 * 0.125 + now) * kSineTableSize) & (kSineTableMask)] * amplitude;
-    }
-}
-
 //----------------------------------------------------------------------------
 
 void HUDRawImage(float hx1, float hy1, float hx2, float hy2, const Image *image, float tx1, float ty1, float tx2,
@@ -472,32 +400,9 @@ void HUDRawImage(float hx1, float hy1, float hx2, float hy2, const Image *image,
         HUDCalcScrollTexCoords(sx, sy, &tx1, &ty1, &tx2, &ty2);
     }
 
-    if (epi::StringCaseCompareASCII(image->name_, hud_overlays.at(video_overlay.d_)) == 0)
-    {
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    }
-
-    bool hud_swirl = false;
-
-    if (image->liquid_type_ > kLiquidImageNone && swirling_flats > kLiquidSwirlSmmu)
-    {
-        hud_swirl_pass = 1;
-        hud_swirl      = true;
-    }
-
-    if (image->liquid_type_ == kLiquidImageThick)
-        hud_thick_liquid = true;
-
     glColor4f(sgcol.r, sgcol.g, sgcol.b, alpha);
 
     glBegin(GL_QUADS);
-
-    if (hud_swirl)
-    {
-        HUDCalcTurbulentTexCoords(&tx1, &ty1, x1, y1);
-        HUDCalcTurbulentTexCoords(&tx2, &ty2, x2, y2);
-    }
 
     glTexCoord2f(tx1, ty1);
     glVertex2i(x1, y1);
@@ -512,39 +417,6 @@ void HUDRawImage(float hx1, float hy1, float hx2, float hy2, const Image *image,
     glVertex2i(x1, y2);
 
     glEnd();
-
-    if (hud_swirl && swirling_flats == kLiquidSwirlParallax)
-    {
-        hud_swirl_pass = 2;
-        tx1 += 0.2;
-        tx2 += 0.2;
-        ty1 += 0.2;
-        ty2 += 0.2;
-        HUDCalcTurbulentTexCoords(&tx1, &ty1, x1, y1);
-        HUDCalcTurbulentTexCoords(&tx2, &ty2, x2, y2);
-        alpha /= 2;
-        glEnable(GL_ALPHA_TEST);
-
-        glColor4f(sgcol.r, sgcol.g, sgcol.b, alpha);
-
-        glEnable(GL_BLEND);
-        glBegin(GL_QUADS);
-        glTexCoord2f(tx1, ty1);
-        glVertex2i(x1, y1);
-
-        glTexCoord2f(tx2, ty1);
-        glVertex2i(x2, y1);
-
-        glTexCoord2f(tx2, ty2);
-        glVertex2i(x2, y2);
-
-        glTexCoord2f(tx1, ty2);
-        glVertex2i(x1, y2);
-        glEnd();
-    }
-
-    hud_swirl_pass   = 0;
-    hud_thick_liquid = false;
 
     if (old_s_clamp != kDummyClamp)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, old_s_clamp);

@@ -1965,9 +1965,6 @@ void RunMapObjectThinkers(bool extra_tic)
 //
 void SpawnDebris(float x, float y, float z, BAMAngle angle, const MapObjectDefinition *debris)
 {
-    // if (!level_flags.have_extra && (splash->extended_flags_ &
-    // kExtendedFlagExtra)) return; if (! (splash->extended_flags_ &
-    // kExtendedFlagExtra)) return; //Optional extra
     MapObject *th;
 
     th = CreateMapObject(x, y, z, debris);
@@ -2043,11 +2040,11 @@ void SpawnBlood(float x, float y, float z, float damage, BAMAngle angle, const M
 
 //---------------------------------------------------------------------------
 //
-// FUNC P_IsThingOnLiquidFloor
+// FUNC P_GetThingFlatDef
 //
 //---------------------------------------------------------------------------
 
-FlatDefinition *P_IsThingOnLiquidFloor(MapObject *thing)
+FlatDefinition *P_GetThingFlatDef(MapObject *thing)
 {
     FlatDefinition *current_flatdef = nullptr;
 
@@ -2073,10 +2070,6 @@ FlatDefinition *P_IsThingOnLiquidFloor(MapObject *thing)
             if (AlmostEquals(player_floor_height, ef->top_height))
                 current_flatdef = flatdefs.Find(ef->extrafloor_line->front_sector->floor.image->name_.c_str());
         }
-        // if (!current_flatdef)
-        //	current_flatdef =
-        // flatdefs.Find(thing->subsector_->sector->floor.image->name); //
-        // Fallback if nothing else satisfies these conditions
     }
 
     return current_flatdef;
@@ -2087,6 +2080,9 @@ FlatDefinition *P_IsThingOnLiquidFloor(MapObject *thing)
 // FUNC P_HitLiquidFloor
 //
 //---------------------------------------------------------------------------
+
+// For now, this will mean any floor with an "impact object" that exists when something
+// hits it; this is usually a splash but can be any debris - Dasho
 
 bool HitLiquidFloor(MapObject *thing)
 {
@@ -2103,7 +2099,7 @@ bool HitLiquidFloor(MapObject *thing)
     else if (!AlmostEquals(thing->floor_z_, thing->subsector_->sector->floor_height))
         return false;
 
-    FlatDefinition *current_flatdef = P_IsThingOnLiquidFloor(thing);
+    FlatDefinition *current_flatdef = P_GetThingFlatDef(thing);
 
     if (current_flatdef)
     {
@@ -2115,10 +2111,8 @@ bool HitLiquidFloor(MapObject *thing)
             SpawnDebris(thing->x, thing->y, thing->z, angle, current_flatdef->impactobject_);
 
             StartSoundEffect(current_flatdef->footstep_, GetSoundEffectCategory(thing), thing);
-        }
-        if (current_flatdef->liquid_.empty())
-        {
-            return false;
+
+            return true;
         }
         else
             return true;

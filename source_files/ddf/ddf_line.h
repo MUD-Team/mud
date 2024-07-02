@@ -778,16 +778,7 @@ enum SectorFlag
     kSectorFlagAirLess = 0x0020,
 
     // player can swim in this sector
-    kSectorFlagSwimming = 0x0040,
-
-    // sounds will apply underwater effects in this sector
-    kSectorFlagSubmergedSFX = 0x0080,
-
-    // sounds will be heavily muffled in this sector
-    kSectorFlagVacuumSFX = 0x0100,
-
-    // sounds will reverberate/echo in this sector
-    kSectorFlagReverbSFX = 0x0200
+    kSectorFlagSwimming = 0x0040
 };
 
 class SectorType
@@ -848,11 +839,6 @@ class SectorType
     float    push_speed_;
     float    push_zspeed_;
     BAMAngle push_angle_;
-
-    // Dasho 2022 - Params for user-defined reverb in sectors
-    std::string reverb_type_;
-    float       reverb_ratio_;
-    float       reverb_delay_;
 
     float floor_bob_;
     float ceiling_bob_;

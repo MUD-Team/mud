@@ -189,9 +189,6 @@ static void DoBumpFinale(void)
 
     if (stage != kFinaleStageDone)
     {
-        if (game_state != kGameStateIntermission)
-            ForceWipe();
-
         finale_stage = stage;
 
         DoStartFinale();
@@ -200,10 +197,7 @@ static void DoBumpFinale(void)
 
     // capture the screen _before_ changing any global state
     if (new_game_action != kGameActionNothing)
-    {
-        ForceWipe();
         game_action = new_game_action;
-    }
 
     game_state = kGameStateNothing; // hack ???  (cannot leave as GS_FINALE)
 }
@@ -253,9 +247,6 @@ void FinaleStart(const FinaleDefinition *F, GameAction newaction)
 
         return /* false */;
     }
-
-    // capture the screen _before_ changing any global state
-    //--- E_ForceWipe();   // CRASH with IDCLEV
 
     finale       = F;
     finale_stage = stage;
@@ -352,11 +343,7 @@ void FinaleTicker(void)
         {
             game_action = new_game_action;
 
-            // don't come here again (for E_ForceWipe)
             new_game_action = kGameActionNothing;
-
-            if (game_state == kGameStateFinale)
-                ForceWipe();
         }
     }
 }
@@ -380,11 +367,7 @@ static void TextWrite(void)
         else
         {
             if (title_scaling.d_) // Fill Border
-            {
-                if (!finale_text_background->blurred_version_)
-                    StoreBlurredImage(finale_text_background);
-                HUDStretchImage(-320, -200, 960, 600, finale_text_background->blurred_version_, 0, 0);
-            }
+                HUDStretchImage(-320, -200, 960, 600, finale_text_background, 0, 0);
             HUDDrawImageTitleWS(finale_text_background);
         }
 
@@ -719,11 +702,7 @@ static void CastDrawer(void)
     {
         image = ImageLookup("BOSSBACK");
         if (title_scaling.d_) // Fill Border
-        {
-            if (!image->blurred_version_)
-                StoreBlurredImage(image);
-            HUDStretchImage(-320, -200, 960, 600, image->blurred_version_, 0, 0);
-        }
+            HUDStretchImage(-320, -200, 960, 600, image, 0, 0);
         HUDDrawImageTitleWS(image);
     }
 
@@ -903,11 +882,7 @@ void FinaleDrawer(void)
         const Image *image =
             ImageLookup(finale->pics_[HMM_MIN((size_t)picture_number, finale->pics_.size() - 1)].c_str());
         if (title_scaling.d_) // Fill Border
-        {
-            if (!image->blurred_version_)
-                StoreBlurredImage(image);
-            HUDStretchImage(-320, -200, 960, 600, image->blurred_version_, 0, 0);
-        }
+            HUDStretchImage(-320, -200, 960, 600, image, 0, 0);
         HUDDrawImageTitleWS(image);
         break;
     }

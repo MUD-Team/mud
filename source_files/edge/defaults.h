@@ -43,7 +43,6 @@
 #define EDGE_DEFAULT_KEY_LOOKUP     (kPageUp)
 #define EDGE_DEFAULT_KEY_LOOKDOWN   (kPageDown)
 #define EDGE_DEFAULT_KEY_LOOKCENTER (kHome)
-#define EDGE_DEFAULT_KEY_MLOOK      ('m')
 #define EDGE_DEFAULT_KEY_ZOOM       ('z' + (kGamepadUp << 16))
 #define EDGE_DEFAULT_KEY_MAP        (kTab + (kGamepadBack << 16))
 #define EDGE_DEFAULT_KEY_180        (0)
@@ -82,20 +81,13 @@
 #define EDGE_DEFAULT_MAP_OVERLAY   (0)
 #define EDGE_DEFAULT_ROTATEMAP     (0)
 #define EDGE_DEFAULT_INVUL_FX      (1) // TEXTURED
-#define EDGE_DEFAULT_WIPE_METHOD   (1)
 #define EDGE_DEFAULT_PNG_SCRSHOTS  (1)
 
 // Gameplay Options
 #define EDGE_DEFAULT_AUTOAIM        (0)
-#define EDGE_DEFAULT_MLOOK          (1)
-#define EDGE_DEFAULT_JUMP           (1)
-#define EDGE_DEFAULT_CROUCH         (1)
 #define EDGE_DEFAULT_KICKING        (0)
 #define EDGE_DEFAULT_WEAPON_SWITCH  (1)
 #define EDGE_DEFAULT_MORE_BLOOD     (0)
-#define EDGE_DEFAULT_HAVE_EXTRA     (1)
-#define EDGE_DEFAULT_TRUE3DGAMEPLAY (1)
-#define EDGE_DEFAULT_PASS_MISSILE   (1)
 #define EDGE_DEFAULT_RES_RESPAWN    (1) // Resurrect Mode
 #define EDGE_DEFAULT_ITEMRESPAWN    (0)
 #define EDGE_DEFAULT_FASTPARM       (0)

@@ -65,25 +65,25 @@ class FinaleDefinition
 enum MapFlag
 {
     kMapFlagNone         = 0x0,
-    kMapFlagJumping      = (1 << 0),
-    kMapFlagMlook        = (1 << 1),
+    //kMapFlagJumping      = (1 << 0), // Unconditionally on - Dasho
+    //kMapFlagMlook        = (1 << 1), // Unconditionally on - Dasho
     kMapFlagCheats       = (1 << 2),
     kMapFlagItemRespawn  = (1 << 3),
     kMapFlagFastParm     = (1 << 4), // Fast Monsters
     kMapFlagResRespawn   = (1 << 5), // Resurrect Monsters (else Teleport)
-    kMapFlagTrue3D       = (1 << 6), // True 3D Gameplay
+    //kMapFlagTrue3D       = (1 << 6), // Unconditionally on - Dasho
     kMapFlagStomp        = (1 << 7), // Monsters can stomp players
     kMapFlagMoreBlood    = (1 << 8), // Make a bloody mess
     kMapFlagRespawn      = (1 << 9),
     kMapFlagAutoAim      = (1 << 10),
-    kMapFlagAutoAimMlook = (1 << 11),
+    //kMapFlagAutoAimMlook = (1 << 11), // Legacy, no longer used - Dasho
     kMapFlagResetPlayer  = (1 << 12), // Force player back to square #1
-    kMapFlagExtras       = (1 << 13),
+    //kMapFlagExtras       = (1 << 13), // Legacy, no longer used - Dasho
     kMapFlagLimitZoom    = (1 << 14), // Limit zoom to certain weapons
-    kMapFlagCrouching    = (1 << 15),
+    //kMapFlagCrouching    = (1 << 15), // Unconditionally on - Dasho
     kMapFlagKicking      = (1 << 16), // Weapon recoil
     kMapFlagWeaponSwitch = (1 << 17),
-    kMapFlagPassMissile  = (1 << 18),
+    //kMapFlagPassMissile  = (1 << 18), // Legacy, no longer used - Dasho
     kMapFlagTeamDamage   = (1 << 19),
 };
 

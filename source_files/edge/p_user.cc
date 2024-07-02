@@ -61,36 +61,6 @@ static SoundEffect *sfx_jprise;
 static SoundEffect *sfx_jpdown;
 static SoundEffect *sfx_jpflow;
 
-// Test for "measuring" size of room
-static bool P_RoomPath(PathIntercept *in, void *dataptr)
-{
-    HMM_Vec2 *blocker = (HMM_Vec2 *)dataptr;
-
-    if (in->line)
-    {
-        Line *ld = in->line;
-
-        if (ld->back_sector && ld->front_sector)
-        {
-            if ((EDGE_IMAGE_IS_SKY(ld->back_sector->ceiling) && !EDGE_IMAGE_IS_SKY(ld->front_sector->ceiling)) ||
-                (!EDGE_IMAGE_IS_SKY(ld->back_sector->ceiling) && EDGE_IMAGE_IS_SKY(ld->front_sector->ceiling)))
-            {
-                blocker->X = (ld->vertex_1->X + ld->vertex_2->X) / 2;
-                blocker->Y = (ld->vertex_1->Y + ld->vertex_2->Y) / 2;
-                return false;
-            }
-        }
-
-        if (ld->blocked)
-        {
-            blocker->X = (ld->vertex_1->X + ld->vertex_2->X) / 2;
-            blocker->Y = (ld->vertex_1->Y + ld->vertex_2->Y) / 2;
-            return false;
-        }
-    }
-    return true;
-}
-
 static void UpdatePowerups(Player *player);
 
 static void CalcHeight(Player *player, bool extra_tic)
@@ -286,24 +256,17 @@ static void MovePlayer(Player *player, bool extra_tic)
     // -ACB- 1998/07/02 New Code used, rerouted via Ticcmd
     // -ACB- 1998/07/27 Used defines for look limits.
     //
-    if (level_flags.mouselook)
-    {
-        if (player->zoom_field_of_view_ > 0)
-            cmd->mouselook_turn /= kZoomAngleDivisor;
+    if (player->zoom_field_of_view_ > 0)
+        cmd->mouselook_turn /= kZoomAngleDivisor;
 
-        BAMAngle V = player->map_object_->vertical_angle_ + (BAMAngle)(cmd->mouselook_turn << 16);
+    BAMAngle V = player->map_object_->vertical_angle_ + (BAMAngle)(cmd->mouselook_turn << 16);
 
-        if (V < kBAMAngle180 && V > kMouseLookLimit)
-            V = kMouseLookLimit;
-        else if (V >= kBAMAngle180 && V < (kBAMAngle360 - kMouseLookLimit))
-            V = (kBAMAngle360 - kMouseLookLimit);
+    if (V < kBAMAngle180 && V > kMouseLookLimit)
+        V = kMouseLookLimit;
+    else if (V >= kBAMAngle180 && V < (kBAMAngle360 - kMouseLookLimit))
+        V = (kBAMAngle360 - kMouseLookLimit);
 
-        player->map_object_->vertical_angle_ = V;
-    }
-    else
-    {
-        player->map_object_->vertical_angle_ = 0;
-    }
+    player->map_object_->vertical_angle_ = V;
 
     // EDGE Feature: Vertical Centering
     //
@@ -415,7 +378,7 @@ static void MovePlayer(Player *player, bool extra_tic)
 
     if (!extra_tic || !double_framerate.d_)
     {
-        if (level_flags.jump && mo->info_->jumpheight_ > 0 && (cmd->upward_move > 4))
+        if (mo->info_->jumpheight_ > 0 && (cmd->upward_move > 4))
         {
             if (!jumping && !crouching && !swimming && !flying && onground && !onladder)
             {
@@ -427,7 +390,7 @@ static void MovePlayer(Player *player, bool extra_tic)
 
     // EDGE Feature: Crouching
 
-    if (level_flags.crouch && mo->info_->crouchheight_ > 0 && (player->command_.upward_move < -4) &&
+    if (mo->info_->crouchheight_ > 0 && (player->command_.upward_move < -4) &&
         !player->wet_feet_ && !jumping && onground)
     // NB: no ladder check, onground is sufficient
     {
@@ -794,25 +757,12 @@ bool PlayerThink(Player *player, bool extra_tic)
         }
     }
 
-    // Reset environmental FX in case player has left sector in which they apply
-    // - Dasho
-    vacuum_sound_effects    = false;
-    submerged_sound_effects = false;
-    outdoor_reverb          = false;
-    ddf_reverb              = false;
-    ddf_reverb_type         = 0;
-    ddf_reverb_delay        = 0;
-    ddf_reverb_ratio        = 0;
-
     if (player->map_object_->region_properties_->special ||
         player->map_object_->subsector_->sector->extrafloor_used > 0 || player->underwater_ || player->swimming_ ||
         player->airless_)
     {
         PlayerInSpecialSector(player, player->map_object_->subsector_->sector, should_think);
     }
-
-    if (EDGE_IMAGE_IS_SKY(player->map_object_->subsector_->sector->ceiling))
-        outdoor_reverb = true;
 
     // Check for weapon change.
     if (cmd->buttons & kButtonCodeChangeWeapon)
@@ -891,36 +841,6 @@ bool PlayerThink(Player *player, bool extra_tic)
         player->attack_sustained_count_ = 0;
 
     player->kick_offset_ /= 1.6f;
-
-    if (players[console_player] == player && dynamic_reverb)
-    {
-        // Approximate "room size" determination for reverb system - Dasho
-        HMM_Vec2 room_checker;
-        float    line_lengths = 0;
-        float    player_x     = player->map_object_->x;
-        float    player_y     = player->map_object_->y;
-        PathTraverse(player_x, player_y, player_x, 32768.0f, kPathAddLines, P_RoomPath, &room_checker);
-        line_lengths += abs(room_checker.Y - player_y);
-        PathTraverse(player_x, player_y, 32768.0f + player_x, 32768.0f + player_y, kPathAddLines, P_RoomPath,
-                     &room_checker);
-        line_lengths += PointToDistance(player_x, player_y, room_checker.X, room_checker.Y);
-        PathTraverse(player_x, player_y, -32768.0f + player_x, 32768.0f + player_y, kPathAddLines, P_RoomPath,
-                     &room_checker);
-        line_lengths += PointToDistance(player_x, player_y, room_checker.X, room_checker.Y);
-        PathTraverse(player_x, player_y, player_x, -32768.0f, kPathAddLines, P_RoomPath, &room_checker);
-        line_lengths += abs(player_y - room_checker.Y);
-        PathTraverse(player_x, player_y, -32768.0f + player_x, -32768.0f + player_y, kPathAddLines, P_RoomPath,
-                     &room_checker);
-        line_lengths += PointToDistance(player_x, player_y, room_checker.X, room_checker.Y);
-        PathTraverse(player_x, player_y, 32768.0f + player_x, -32768.0f + player_y, kPathAddLines, P_RoomPath,
-                     &room_checker);
-        line_lengths += PointToDistance(player_x, player_y, room_checker.X, room_checker.Y);
-        PathTraverse(player_x, player_y, -32768.0f, player_y, kPathAddLines, P_RoomPath, &room_checker);
-        line_lengths += abs(player_x - room_checker.X);
-        PathTraverse(player_x, player_y, 32768.0f, player_y, kPathAddLines, P_RoomPath, &room_checker);
-        line_lengths += abs(room_checker.X - player_x);
-        room_area = line_lengths / 8;
-    }
 
     return should_think;
 }

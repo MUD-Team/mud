@@ -184,21 +184,18 @@ static bool StompThingCallback(MapObject *thing, void *data)
         return true; // no, we did not
 
     // -AJA- 1999/07/30: True 3d gameplay checks.
-    if (level_flags.true_3d_gameplay)
+    if (move_check.z >= thing->z + thing->height_)
     {
-        if (move_check.z >= thing->z + thing->height_)
-        {
-            // went over
-            move_check.floor_z = HMM_MAX(move_check.floor_z, thing->z + thing->height_);
-            return true;
-        }
+        // went over
+        move_check.floor_z = HMM_MAX(move_check.floor_z, thing->z + thing->height_);
+        return true;
+    }
 
-        if (move_check.z + move_check.mover->height_ <= thing->z)
-        {
-            // went under
-            move_check.ceiling_z = HMM_MIN(move_check.ceiling_z, thing->z);
-            return true;
-        }
+    if (move_check.z + move_check.mover->height_ <= thing->z)
+    {
+        // went under
+        move_check.ceiling_z = HMM_MIN(move_check.ceiling_z, thing->z);
+        return true;
     }
 
     if (!move_check.mover->player_ && (current_map->force_off_ & kMapFlagStomp))
@@ -342,16 +339,13 @@ static bool CheckAbsoluteThingCallback(MapObject *thing, void *data)
     if (!AlmostEquals(move_check.z, kOnFloorZ) && !AlmostEquals(move_check.z, kOnCeilingZ))
     {
         // -KM- 1998/9/19 True 3d gameplay checks.
-        if ((move_check.flags & kMapObjectFlagMissile) || level_flags.true_3d_gameplay)
-        {
-            // overhead ?
-            if (move_check.z >= thing->z + thing->height_)
-                return true;
+        // overhead ?
+        if (move_check.z >= thing->z + thing->height_)
+            return true;
 
-            // underneath ?
-            if (move_check.z + move_check.mover->height_ <= thing->z)
-                return true;
-        }
+        // underneath ?
+        if (move_check.z + move_check.mover->height_ <= thing->z)
+            return true;
     }
 
     solid = (thing->flags_ & kMapObjectFlagSolid) ? true : false;
@@ -366,9 +360,6 @@ static bool CheckAbsoluteThingCallback(MapObject *thing, void *data)
     {
         // ignore the missile's shooter
         if (move_check.mover->source_ && move_check.mover->source_ == thing)
-            return true;
-
-        if ((thing->hyper_flags_ & kHyperFlagMissilesPassThrough) && level_flags.pass_missile)
             return true;
 
         // thing isn't shootable, return depending on if the thing is solid.
@@ -844,7 +835,7 @@ static bool CheckRelativeThingCallback(MapObject *thing, void *data)
         return true; // no we missed this thing
 
     // -KM- 1998/9/19 True 3d gameplay checks.
-    if (level_flags.true_3d_gameplay && !(thing->flags_ & kMapObjectFlagSpecial))
+    if (!(thing->flags_ & kMapObjectFlagSpecial))
     {
         float top_z = thing->z + thing->height_;
 
@@ -910,9 +901,6 @@ static bool CheckRelativeThingCallback(MapObject *thing, void *data)
 
         // ignore the missile's shooter
         if (move_check.mover->source_ && move_check.mover->source_ == thing)
-            return true;
-
-        if ((thing->hyper_flags_ & kHyperFlagMissilesPassThrough) && level_flags.pass_missile)
             return true;
 
         // thing isn't shootable, return depending on if the thing is solid.
@@ -2481,18 +2469,6 @@ MapObject *DoMapTargetAutoAim(MapObject *source, BAMAngle angle, float distance,
     if (!aim_check.target)
         return nullptr;
 
-    // -KM- 1999/01/31 Look at the thing you aimed at.  Is sometimes
-    //   useful, sometimes annoying :-)
-    if (source->player_ && level_flags.autoaim == kAutoAimMouselook)
-    {
-        float slope = ApproximateSlope(source->x - aim_check.target->x, source->y - aim_check.target->y,
-                                       aim_check.target->z - source->z);
-
-        slope = HMM_Clamp(-1.0f, slope, 1.0f);
-
-        source->vertical_angle_ = epi::BAMFromATan(slope);
-    }
-
     return aim_check.target;
 }
 
@@ -2630,7 +2606,6 @@ struct RadiusAttackInfo
     float              damage;
     const DamageClass *damage_type;
     bool               thrust;
-    bool               use_3d;
 };
 
 static RadiusAttackInfo radius_attack_check;
@@ -2696,9 +2671,8 @@ static bool RadiusAttackCallback(MapObject *thing, void *data)
 
     // dist is the distance to the *edge* of the thing
     dist = HMM_MAX(dx, dy) - thing->radius_;
-
-    if (radius_attack_check.use_3d)
-        dist = HMM_MAX(dist, dz - thing->height_ / 2);
+    // Can we consolidate these? - Dasho
+    dist = HMM_MAX(dist, dz - thing->height_ / 2);
 
     if (dist < 0)
         dist = 0;
@@ -2737,7 +2711,6 @@ void RadiusAttack(MapObject *spot, MapObject *source, float radius, float damage
     radius_attack_check.damage      = damage;
     radius_attack_check.damage_type = damtype;
     radius_attack_check.thrust      = thrust_only;
-    radius_attack_check.use_3d      = level_flags.true_3d_gameplay;
 
     //
     // -ACB- 1998/07/15 This normally does damage to everything within

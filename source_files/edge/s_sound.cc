@@ -442,28 +442,13 @@ void StartSoundEffect(SoundEffect *sfx, int category, Position *pos, int flags)
         flags |= (def->precious_ ? kSoundEffectPrecious : 0);
     }
 
-    // LogPrint("StartFX: '%s' cat:%d flags:0x%04x\n", def->name.c_str(),
-    // category, flags);
-
     while (category_limits[category] == 0)
         category++;
 
     SoundData *buf = SoundCacheLoad(def);
+
     if (!buf)
         return;
-
-    if (vacuum_sound_effects)
-        buf->MixVacuum();
-    else if (submerged_sound_effects)
-        buf->MixSubmerged();
-    else
-    {
-        if (ddf_reverb)
-            buf->MixReverb(dynamic_reverb, room_area, outdoor_reverb, ddf_reverb_type, ddf_reverb_ratio,
-                           ddf_reverb_delay);
-        else
-            buf->MixReverb(dynamic_reverb, room_area, outdoor_reverb, 0, 0, 0);
-    }
 
     LockAudio();
     {

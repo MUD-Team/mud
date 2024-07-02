@@ -639,10 +639,6 @@ static MapObject *SpawnMapThing(const MapObjectDefinition *info, float x, float 
     if (level_flags.no_monsters && (info->extended_flags_ & kExtendedFlagMonster))
         return nullptr;
 
-    // -AJA- 1999/10/07: don't spawn extra things if -noextra.
-    if (!level_flags.have_extra && (info->extended_flags_ & kExtendedFlagExtra))
-        return nullptr;
-
     // spawn it now !
     // Use MobjCreateObject -ACB- 1998/08/06
     MapObject *mo = CreateMapObject(x, y, z, info);

@@ -148,24 +148,18 @@ static void SaveGlobalGetLevelFlags(const char *info, void *storage)
 
     EPI_CLEAR_MEMORY(dest, GameFlags, 1);
 
-    dest->jump               = (flags & kMapFlagJumping) ? true : false;
-    dest->crouch             = (flags & kMapFlagCrouching) ? true : false;
-    dest->mouselook          = (flags & kMapFlagMlook) ? true : false;
     dest->items_respawn      = (flags & kMapFlagItemRespawn) ? true : false;
     dest->fast_monsters      = (flags & kMapFlagFastParm) ? true : false;
-    dest->true_3d_gameplay   = (flags & kMapFlagTrue3D) ? true : false;
     dest->more_blood         = (flags & kMapFlagMoreBlood) ? true : false;
     dest->cheats             = (flags & kMapFlagCheats) ? true : false;
     dest->enemies_respawn    = (flags & kMapFlagRespawn) ? true : false;
     dest->enemy_respawn_mode = (flags & kMapFlagResRespawn) ? true : false;
-    dest->have_extra         = (flags & kMapFlagExtras) ? true : false;
     dest->limit_zoom         = (flags & kMapFlagLimitZoom) ? true : false;
     dest->kicking            = (flags & kMapFlagKicking) ? true : false;
     dest->weapon_switch      = (flags & kMapFlagWeaponSwitch) ? true : false;
-    dest->pass_missile       = (flags & kMapFlagPassMissile) ? true : false;
     dest->team_damage        = (flags & kMapFlagTeamDamage) ? true : false;
     dest->autoaim =
-        (flags & kMapFlagAutoAim) ? ((flags & kMapFlagAutoAimMlook) ? kAutoAimMouselook : kAutoAimOn) : kAutoAimOff;
+        (flags & kMapFlagAutoAim) ? kAutoAimOn : kAutoAimOff;
 }
 
 static void SaveGlobalGetImage(const char *info, void *storage)
@@ -238,18 +232,10 @@ static const char *SaveGlobalPutLevelFlags(void *storage)
 
     flags = 0;
 
-    if (src->jump)
-        flags |= kMapFlagJumping;
-    if (src->crouch)
-        flags |= kMapFlagCrouching;
-    if (src->mouselook)
-        flags |= kMapFlagMlook;
     if (src->items_respawn)
         flags |= kMapFlagItemRespawn;
     if (src->fast_monsters)
         flags |= kMapFlagFastParm;
-    if (src->true_3d_gameplay)
-        flags |= kMapFlagTrue3D;
     if (src->more_blood)
         flags |= kMapFlagMoreBlood;
     if (src->cheats)
@@ -258,22 +244,16 @@ static const char *SaveGlobalPutLevelFlags(void *storage)
         flags |= kMapFlagRespawn;
     if (src->enemy_respawn_mode)
         flags |= kMapFlagResRespawn;
-    if (src->have_extra)
-        flags |= kMapFlagExtras;
     if (src->limit_zoom)
         flags |= kMapFlagLimitZoom;
     if (src->kicking)
         flags |= kMapFlagKicking;
     if (src->weapon_switch)
         flags |= kMapFlagWeaponSwitch;
-    if (src->pass_missile)
-        flags |= kMapFlagPassMissile;
     if (src->team_damage)
         flags |= kMapFlagTeamDamage;
     if (src->autoaim != kAutoAimOff)
         flags |= kMapFlagAutoAim;
-    if (src->autoaim == kAutoAimMouselook)
-        flags |= kMapFlagAutoAimMlook;
 
     return SaveGlobalPutInteger(&flags);
 }

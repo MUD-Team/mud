@@ -94,8 +94,6 @@ MapObject *background_camera_map_object = nullptr;
 
 int reduce_flash = 0;
 
-int invulnerability_effect;
-
 float sine_table[kSineTableSize];
 
 void FreeBSP(void);

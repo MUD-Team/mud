@@ -392,11 +392,7 @@ static void DrawLevelFinished(void)
         else
         {
             if (title_scaling.d_) // Fill Border
-            {
-                if (!leaving_background_image->blurred_version_)
-                    StoreBlurredImage(leaving_background_image);
-                HUDStretchImage(-320, -200, 960, 600, leaving_background_image->blurred_version_, 0, 0);
-            }
+                HUDStretchImage(-320, -200, 960, 600, leaving_background_image, 0, 0);
             HUDDrawImageTitleWS(leaving_background_image);
         }
     }
@@ -561,11 +557,7 @@ static void DrawEnteringLevel(void)
         else
         {
             if (title_scaling.d_) // Fill Border
-            {
-                if (!entering_background_image->blurred_version_)
-                    StoreBlurredImage(entering_background_image);
-                HUDStretchImage(-320, -200, 960, 600, entering_background_image->blurred_version_, 0, 0);
-            }
+                HUDStretchImage(-320, -200, 960, 600, entering_background_image, 0, 0);
             HUDDrawImageTitleWS(entering_background_image);
         }
     }
@@ -879,8 +871,6 @@ static void DrawTime(float x, float y, int t, bool drawText = false)
 
 static void IntermissionEnd(void)
 {
-    ForceWipe();
-
     background_camera_map_object = nullptr;
 
     FinaleStart(&current_map->f_end_, next_map ? kGameActionFinale : kGameActionNothing);
@@ -1807,11 +1797,7 @@ void IntermissionDrawer(void)
             else
             {
                 if (title_scaling.d_) // Fill Border
-                {
-                    if (!background_image->blurred_version_)
-                        StoreBlurredImage(background_image);
-                    HUDStretchImage(-320, -200, 960, 600, background_image->blurred_version_, 0, 0);
-                }
+                    HUDStretchImage(-320, -200, 960, 600, background_image, 0, 0);
                 HUDDrawImageTitleWS(background_image);
             }
 

@@ -104,7 +104,6 @@
 #include "r_image.h"
 #include "r_misc.h"
 #include "r_modes.h"
-#include "r_wipe.h"
 #include "s_blit.h"
 #include "s_cache.h"
 #include "s_fluid.h"
@@ -120,7 +119,6 @@ extern ConsoleVariable crosshair_style;
 extern ConsoleVariable crosshair_color;
 extern ConsoleVariable crosshair_size;
 extern ConsoleVariable midi_soundfont;
-extern ConsoleVariable video_overlay;
 extern ConsoleVariable erraticism;
 extern ConsoleVariable double_framerate;
 extern ConsoleVariable draw_culling;
@@ -175,16 +173,10 @@ static void OptionMenuUpdateConsoleVariableFromInt(int key_pressed, ConsoleVaria
 // -ACB- 1998/08/09 "Does Map allow these changes?" procedures.
 static void OptionMenuChangeMonsterRespawn(int key_pressed, ConsoleVariable *console_variable = nullptr);
 static void OptionMenuChangeItemRespawn(int key_pressed, ConsoleVariable *console_variable = nullptr);
-static void OptionMenuChangeTrue3d(int key_pressed, ConsoleVariable *console_variable = nullptr);
 static void OptionMenuChangeAutoAim(int key_pressed, ConsoleVariable *console_variable = nullptr);
 static void OptionMenuChangeFastparm(int key_pressed, ConsoleVariable *console_variable = nullptr);
 static void OptionMenuChangeRespawn(int key_pressed, ConsoleVariable *console_variable = nullptr);
-static void OptionMenuChangePassMissile(int key_pressed, ConsoleVariable *console_variable = nullptr);
 static void OptionMenuChangeBobbing(int key_pressed, ConsoleVariable *console_variable = nullptr);
-static void OptionMenuChangeMLook(int key_pressed, ConsoleVariable *console_variable = nullptr);
-static void OptionMenuChangeJumping(int key_pressed, ConsoleVariable *console_variable = nullptr);
-static void OptionMenuChangeCrouching(int key_pressed, ConsoleVariable *console_variable = nullptr);
-static void OptionMenuChangeExtra(int key_pressed, ConsoleVariable *console_variable = nullptr);
 static void OptionMenuChangeMonitorSize(int key_pressed, ConsoleVariable *console_variable = nullptr);
 static void OptionMenuChangeKicking(int key_pressed, ConsoleVariable *console_variable = nullptr);
 static void OptionMenuChangeWeaponSwitch(int key_pressed, ConsoleVariable *console_variable = nullptr);
@@ -383,10 +375,8 @@ static OptionMenuItem vidoptions[] = {
     {kOptionMenuItemTypeSwitch, "Title/Intermission Scaling", "Normal/Border Fill", 2, &title_scaling.d_,
      OptionMenuUpdateConsoleVariableFromInt, nullptr, &title_scaling},
     {kOptionMenuItemTypeSwitch, "Sky Scaling", "Mirror/Repeat/Stretch/Vanilla", 4, &sky_stretch_mode.d_,
-     OptionMenuUpdateConsoleVariableFromInt, "Vanilla will be forced when Mouselook is Off", &sky_stretch_mode},
+     OptionMenuUpdateConsoleVariableFromInt, nullptr, &sky_stretch_mode},
     {kOptionMenuItemTypeSwitch, "Dynamic Lighting", YesNo, 2, &use_dynamic_lights, nullptr, nullptr},
-    {kOptionMenuItemTypeSwitch, "Overlay", "None/Lines 1x/Lines 2x/Vertical 1x/Vertical 2x/Grill 1x/Grill 2x", 7,
-     &video_overlay.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr, &video_overlay},
     {kOptionMenuItemTypeSwitch, "Crosshair", "None/Dot/Angle/Plus/Spiked/Thin/Cross/Carat/Circle/Double", 10,
      &crosshair_style.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr, &crosshair_style},
     {kOptionMenuItemTypeSwitch, "Crosshair Color", "White/Blue/Green/Cyan/Red/Pink/Yellow/Orange", 8,
@@ -394,15 +384,6 @@ static OptionMenuItem vidoptions[] = {
     {kOptionMenuItemTypeSlider, "Crosshair Size", nullptr, 0, &crosshair_size.f_,
      OptionMenuUpdateConsoleVariableFromFloat, nullptr, &crosshair_size, 1.0f, 2.0f, 64.0f, "%g Pixels"},
     {kOptionMenuItemTypeBoolean, "Map Rotation", YesNo, 2, &rotate_map, nullptr, nullptr},
-    {kOptionMenuItemTypeSwitch, "Invulnerability", "Simple/Textured", kTotalInvulnerabilityEffects,
-     &invulnerability_effect, nullptr, nullptr},
-#ifndef EDGE_WEB
-    {kOptionMenuItemTypeSwitch, "Wipe method", "None/Melt/Crossfade/Pixelfade/Top/Bottom/Left/Right/Spooky/Doors",
-     kTotalScreenWipeTypes, &wipe_method, nullptr, nullptr},
-#endif
-    {kOptionMenuItemTypeBoolean, "Screenshot Format", "JPEG/PNG", 2, &png_screenshots, nullptr, nullptr},
-    {kOptionMenuItemTypeSwitch, "Animated Liquid Type", "Vanilla/SMMU/SMMU+Swirl/Parallax", 4, &swirling_flats, nullptr,
-     nullptr},
     {kOptionMenuItemTypeBoolean, "Skip Startup Movies", YesNo, 2, &skip_intros.d_,
      OptionMenuUpdateConsoleVariableFromInt, nullptr, &skip_intros},
 };
@@ -499,7 +480,6 @@ static OptionMenuItem soundoptions[] = {
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
     {kOptionMenuItemTypeFunction, "MIDI Soundfont", nullptr, 0, nullptr, OptionMenuChangeSoundfont, nullptr},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {kOptionMenuItemTypeBoolean, "Dynamic Reverb", YesNo, 2, &dynamic_reverb, nullptr, nullptr},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
     {kOptionMenuItemTypeSwitch, "Mix Channels", "32/64/96/128/160/192/224/256", 8, &sound_mixing_channels,
      OptionMenuChangeMixChan, nullptr},
@@ -533,15 +513,7 @@ static OptionMenuDefinition f4sound_optmenu = {
 // -KM- 1998/07/21 Change blood to switch
 //
 static OptionMenuItem playoptions[] = {
-    {kOptionMenuItemTypeBoolean, "Pistol Starts", YesNo, 2, &pistol_starts, nullptr, nullptr},
-
-    {kOptionMenuItemTypeBoolean, "Mouse Look", YesNo, 2, &global_flags.mouselook, OptionMenuChangeMLook, nullptr},
-
-    {kOptionMenuItemTypeSwitch, "Autoaim", "Off/On/Mlook", 3, &global_flags.autoaim, OptionMenuChangeAutoAim, nullptr},
-
-    {kOptionMenuItemTypeBoolean, "Jumping", YesNo, 2, &global_flags.jump, OptionMenuChangeJumping, nullptr},
-
-    {kOptionMenuItemTypeBoolean, "Crouching", YesNo, 2, &global_flags.crouch, OptionMenuChangeCrouching, nullptr},
+    {kOptionMenuItemTypeSwitch, "Autoaim", "Off/On", 2, &global_flags.autoaim, OptionMenuChangeAutoAim, nullptr},
 
     {kOptionMenuItemTypeBoolean, "Weapon Kick", YesNo, 2, &global_flags.kicking, OptionMenuChangeKicking, nullptr},
 
@@ -552,14 +524,6 @@ static OptionMenuItem playoptions[] = {
 
     {kOptionMenuItemTypeSwitch, "Blood Level", "Normal/Extra/None", 3, &gore_level.d_,
      OptionMenuUpdateConsoleVariableFromInt, "Blood", &gore_level},
-
-    {kOptionMenuItemTypeBoolean, "Extras", YesNo, 2, &global_flags.have_extra, OptionMenuChangeExtra, nullptr},
-
-    {kOptionMenuItemTypeBoolean, "True 3D Gameplay", YesNo, 2, &global_flags.true_3d_gameplay, OptionMenuChangeTrue3d,
-     "True3d"},
-
-    {kOptionMenuItemTypeBoolean, "Shoot-thru Scenery", YesNo, 2, &global_flags.pass_missile,
-     OptionMenuChangePassMissile, nullptr},
 
     {kOptionMenuItemTypeBoolean, "Erraticism", YesNo, 2, &erraticism.d_, OptionMenuUpdateConsoleVariableFromInt,
      "Time only advances when you move or fire", &erraticism},
@@ -702,7 +666,6 @@ static OptionMenuItem look_keyconfig[] = {
     {kOptionMenuItemTypeKeyConfig, "Look Up", nullptr, 0, &key_look_up, nullptr, nullptr},
     {kOptionMenuItemTypeKeyConfig, "Look Down", nullptr, 0, &key_look_down, nullptr, nullptr},
     {kOptionMenuItemTypeKeyConfig, "Center View", nullptr, 0, &key_look_center, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Mouse Look", nullptr, 0, &key_mouselook, nullptr, nullptr},
 };
 
 static OptionMenuDefinition look_optmenu = {look_keyconfig,
@@ -1784,38 +1747,6 @@ static void OptionMenuChangeMonitorSize(int key, ConsoleVariable *console_variab
     monitor_aspect_ratio = ratios[monitor_size];
 }
 
-static void OptionMenuChangeMLook(int key_pressed, ConsoleVariable *console_variable)
-{
-    if (current_map && ((current_map->force_on_ | current_map->force_off_) & kMapFlagMlook))
-        return;
-
-    level_flags.mouselook = global_flags.mouselook;
-}
-
-static void OptionMenuChangeJumping(int key_pressed, ConsoleVariable *console_variable)
-{
-    if (current_map && ((current_map->force_on_ | current_map->force_off_) & kMapFlagJumping))
-        return;
-
-    level_flags.jump = global_flags.jump;
-}
-
-static void OptionMenuChangeCrouching(int key_pressed, ConsoleVariable *console_variable)
-{
-    if (current_map && ((current_map->force_on_ | current_map->force_off_) & kMapFlagCrouching))
-        return;
-
-    level_flags.crouch = global_flags.crouch;
-}
-
-static void OptionMenuChangeExtra(int key_pressed, ConsoleVariable *console_variable)
-{
-    if (current_map && ((current_map->force_on_ | current_map->force_off_) & kMapFlagExtras))
-        return;
-
-    level_flags.have_extra = global_flags.have_extra;
-}
-
 //
 // OptionMenuChangeMonsterRespawn
 //
@@ -1835,14 +1766,6 @@ static void OptionMenuChangeItemRespawn(int key_pressed, ConsoleVariable *consol
         return;
 
     level_flags.items_respawn = global_flags.items_respawn;
-}
-
-static void OptionMenuChangeTrue3d(int key_pressed, ConsoleVariable *console_variable)
-{
-    if (current_map && ((current_map->force_on_ | current_map->force_off_) & kMapFlagTrue3D))
-        return;
-
-    level_flags.true_3d_gameplay = global_flags.true_3d_gameplay;
 }
 
 static void OptionMenuChangeAutoAim(int key_pressed, ConsoleVariable *console_variable)
@@ -1873,11 +1796,6 @@ static void OptionMenuChangeFastparm(int key_pressed, ConsoleVariable *console_v
         return;
 
     level_flags.fast_monsters = global_flags.fast_monsters;
-}
-
-static void OptionMenuChangePassMissile(int key_pressed, ConsoleVariable *console_variable)
-{
-    level_flags.pass_missile = global_flags.pass_missile;
 }
 
 // this used by both MIPMIP, SMOOTHING and DETAIL options

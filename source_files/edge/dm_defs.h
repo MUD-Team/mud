@@ -62,8 +62,7 @@ enum SkillLevel
 enum AutoAimState
 {
     kAutoAimOff,
-    kAutoAimOn,
-    kAutoAimMouselook
+    kAutoAimOn
 };
 
 struct GameFlags
@@ -78,22 +77,16 @@ struct GameFlags
     bool enemy_respawn_mode;
     bool items_respawn;
 
-    bool true_3d_gameplay;
     int  menu_gravity_factor;
     bool more_blood;
 
-    bool         jump;
-    bool         crouch;
-    bool         mouselook;
     AutoAimState autoaim;
 
     bool cheats;
-    bool have_extra;
     bool limit_zoom;
 
     bool kicking;
     bool weapon_switch;
-    bool pass_missile;
     bool team_damage;
 };
 

@@ -61,7 +61,6 @@
 #include "r_gldefs.h"
 #include "r_image.h"
 #include "r_modes.h"
-#include "r_wipe.h"
 #include "s_blit.h"
 #include "s_sound.h"
 #include "version.h"
@@ -84,36 +83,25 @@ static ConfigurationDefault defaults[] = {
     {kConfigInteger, "displaymode", &current_window_mode, EDGE_DEFAULT_DISPLAYMODE},
 
     {kConfigInteger, "sound_stereo", &var_sound_stereo, EDGE_DEFAULT_SOUND_STEREO},
-    {kConfigBoolean, "dynamic_reverb", &dynamic_reverb, 0},
     {kConfigInteger, "mix_channels", &sound_mixing_channels, EDGE_DEFAULT_MIX_CHANNELS},
 
     {kConfigInteger, "show_messages", &show_messages, EDGE_DEFAULT_SHOWMESSAGES},
 
     // -ES- 1998/11/28 Save fade settings
     {kConfigInteger, "reduce_flash", &reduce_flash, 0},
-    {kConfigInteger, "invuln_fx", &invulnerability_effect, EDGE_DEFAULT_INVUL_FX},
-    {kConfigEnum, "wipe_method", &wipe_method, EDGE_DEFAULT_WIPE_METHOD},
     {kConfigBoolean, "rotate_map", &rotate_map, EDGE_DEFAULT_ROTATEMAP},
     {kConfigBoolean, "respawnsetting", &global_flags.enemy_respawn_mode, EDGE_DEFAULT_RES_RESPAWN},
     {kConfigBoolean, "items_respawn", &global_flags.items_respawn, EDGE_DEFAULT_ITEMRESPAWN},
     {kConfigBoolean, "respawn", &global_flags.enemies_respawn, EDGE_DEFAULT_RESPAWN},
     {kConfigBoolean, "fast_monsters", &global_flags.fast_monsters, EDGE_DEFAULT_FASTPARM},
-    {kConfigBoolean, "true_3d_gameplay", &global_flags.true_3d_gameplay, EDGE_DEFAULT_TRUE3DGAMEPLAY},
     {kConfigEnum, "autoaim", &global_flags.autoaim, EDGE_DEFAULT_AUTOAIM},
-    {kConfigBoolean, "shootthru_scenery", &global_flags.pass_missile, EDGE_DEFAULT_PASS_MISSILE},
-    {kConfigInteger, "swirling_flats", &swirling_flats, 0},
 
-    {kConfigBoolean, "pistol_starts", &pistol_starts, 0},
     {kConfigBoolean, "automap_keydoor_blink", &automap_keydoor_blink, EDGE_DEFAULT_AM_KEYDOORBLINK},
 
     // -KM- 1998/07/21 Save the blood setting
     {kConfigBoolean, "blood", &global_flags.more_blood, EDGE_DEFAULT_MORE_BLOOD},
-    {kConfigBoolean, "extra", &global_flags.have_extra, EDGE_DEFAULT_HAVE_EXTRA},
     {kConfigBoolean, "weaponkick", &global_flags.kicking, EDGE_DEFAULT_KICKING},
     {kConfigBoolean, "weaponswitch", &global_flags.weapon_switch, EDGE_DEFAULT_WEAPON_SWITCH},
-    {kConfigBoolean, "mlook", &global_flags.mouselook, EDGE_DEFAULT_MLOOK},
-    {kConfigBoolean, "jumping", &global_flags.jump, EDGE_DEFAULT_JUMP},
-    {kConfigBoolean, "crouching", &global_flags.crouch, EDGE_DEFAULT_CROUCH},
     {kConfigInteger, "smoothing", &image_smoothing, EDGE_DEFAULT_USE_SMOOTHING},
     {kConfigInteger, "dlights", &use_dynamic_lights, EDGE_DEFAULT_USE_DLIGHTS},
     {kConfigInteger, "detail_level", &detail_level, EDGE_DEFAULT_DETAIL_LEVEL},
@@ -130,7 +118,6 @@ static ConfigurationDefault defaults[] = {
 
     {kConfigInteger, "screen_hud", &screen_hud, EDGE_DEFAULT_SCREEN_HUD},
     {kConfigInteger, "save_page", &save_page, 0},
-    {kConfigBoolean, "png_screenshots", &png_screenshots, EDGE_DEFAULT_PNG_SCRSHOTS},
 
     // -------------------- VARS --------------------
 
@@ -170,7 +157,6 @@ static ConfigurationDefault defaults[] = {
     {kConfigKey, "key_console", &key_console, EDGE_DEFAULT_KEY_CONSOLE},               // -AJA- 2007/08/15.
     {kConfigKey, "key_pause", &key_pause, kPause},                                     // -AJA- 2010/06/13.
 
-    {kConfigKey, "key_mouselook", &key_mouselook, EDGE_DEFAULT_KEY_MLOOK},             // -AJA- 1999/07/27.
     {kConfigKey, "key_second_attack", &key_second_attack, EDGE_DEFAULT_KEY_SECONDATK}, // -AJA- 2000/02/08.
     {kConfigKey, "key_third_attack", &key_third_attack, 0},                            //
     {kConfigKey, "key_fourth_attack", &key_fourth_attack, 0},                          //
@@ -449,12 +435,7 @@ void LoadBranding(void)
 
 void TakeScreenshot(bool show_msg)
 {
-    const char *extension;
-
-    if (png_screenshots)
-        extension = "png";
-    else
-        extension = "jpg";
+    const char *extension = "png";
 
     std::string fn;
 
@@ -480,14 +461,7 @@ void TakeScreenshot(bool show_msg)
 
     bool result;
 
-    if (png_screenshots)
-    {
-        result = SavePNG(fn, img);
-    }
-    else
-    {
-        result = SaveJPEG(fn, img);
-    }
+    result = SavePNG(fn, img);
 
     if (show_msg)
     {
@@ -502,7 +476,7 @@ void TakeScreenshot(bool show_msg)
 
 void CreateSaveScreenshot(void)
 {
-    const char *extension = "jpg";
+    const char *extension = "png";
 
     std::string temp(epi::StringFormat("%s/%s.%s", "current", "head", extension));
     std::string filename = epi::PathAppend(save_directory, temp);
@@ -517,7 +491,7 @@ void CreateSaveScreenshot(void)
     img->Invert();
 
     bool result;
-    result = SaveJPEG(filename, img);
+    result = SavePNG(filename, img);
 
     if (result)
         LogPrint("Captured to file: %s\n", filename.c_str());

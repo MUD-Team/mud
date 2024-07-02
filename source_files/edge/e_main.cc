@@ -77,7 +77,6 @@
 #include "r_image.h"
 #include "r_misc.h"
 #include "r_modes.h"
-#include "r_wipe.h"
 #include "rad_trig.h"
 #include "s_music.h"
 #include "s_sound.h"
@@ -126,22 +125,16 @@ GameFlags default_game_flags = {
     false,      // enemy_respawn_mode
     false,      // item respawn
 
-    false,      // true 3d gameplay
     8,          // gravity
     false,      // more blood
 
-    true,       // jump
-    true,       // crouch
-    true,       // mlook
     kAutoAimOn, // autoaim
 
     true,       // cheats
-    true,       // have_extra
     false,      // limit_zoom
 
     true,       // kicking
     true,       // weapon_switch
-    true,       // pass_missile
     false,      // team_damage
 };
 
@@ -153,7 +146,6 @@ GameFlags default_game_flags = {
 GameFlags global_flags;
 
 bool mus_pause_stop  = false;
-bool png_screenshots = false;
 
 std::string branding_file;
 std::string configuration_file;
@@ -177,8 +169,6 @@ EDGE_DEFINE_CONSOLE_VARIABLE(edge_version, "1.38", kConsoleVariableFlagNoReset)
 EDGE_DEFINE_CONSOLE_VARIABLE(team_name, "EDGE Team", kConsoleVariableFlagNoReset)
 EDGE_DEFINE_CONSOLE_VARIABLE(application_name, "EDGE-Classic", kConsoleVariableFlagNoReset)
 EDGE_DEFINE_CONSOLE_VARIABLE(homepage, "https://edge-classic.github.io", kConsoleVariableFlagNoReset)
-
-EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(video_overlay, "0", kConsoleVariableFlagArchive, 0, 6)
 
 EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(title_scaling, "0", kConsoleVariableFlagArchive, 0, 1)
 
@@ -237,11 +227,7 @@ class StartupProgress
         if (loading_image)
         {
             if (title_scaling.d_) // Fill Border
-            {
-                if (!loading_image->blurred_version_)
-                    StoreBlurredImage(loading_image);
-                HUDStretchImage(-320, -200, 960, 600, loading_image->blurred_version_, 0, 0);
-            }
+                HUDStretchImage(-320, -200, 960, 600, loading_image, 0, 0);
             HUDDrawImageTitleWS(loading_image);
             HUDSolidBox(25, 25, 295, 175, SG_BLACK_RGBA32);
         }
@@ -253,16 +239,6 @@ class StartupProgress
             else
                 HUDDrawText(26, y, startup_messages_[i].c_str());
             y += 10;
-        }
-
-        if (!hud_overlays.at(video_overlay.d_).empty())
-        {
-            const Image *overlay =
-                ImageLookup(hud_overlays.at(video_overlay.d_).c_str(), kImageNamespaceGraphic, kImageLookupNull);
-            if (overlay)
-                HUDRawImage(0, 0, current_screen_width, current_screen_height, overlay, 0, 0,
-                            current_screen_width / overlay->ScaledWidthActual(),
-                            current_screen_height / overlay->ScaledHeightActual());
         }
 
         if (gamma_correction.f_ < 0)
@@ -395,17 +371,12 @@ static void SetGlobalVariables(void)
     CheckBooleanParameter("sound", &no_sound, true);
     CheckBooleanParameter("music", &no_music, true);
     CheckBooleanParameter("items_respawn", &global_flags.items_respawn, false);
-    CheckBooleanParameter("mlook", &global_flags.mouselook, false);
     CheckBooleanParameter("monsters", &global_flags.no_monsters, true);
     CheckBooleanParameter("fast", &global_flags.fast_monsters, false);
-    CheckBooleanParameter("extras", &global_flags.have_extra, false);
     CheckBooleanParameter("kick", &global_flags.kicking, false);
     CheckBooleanParameter("single_tics", &single_tics, false);
-    CheckBooleanParameter("true3d", &global_flags.true_3d_gameplay, false);
     CheckBooleanParameter("blood", &global_flags.more_blood, false);
     CheckBooleanParameter("cheats", &global_flags.cheats, false);
-    CheckBooleanParameter("jumping", &global_flags.jump, false);
-    CheckBooleanParameter("crouching", &global_flags.crouch, false);
     CheckBooleanParameter("weaponswitch", &global_flags.weapon_switch, false);
 
     CheckBooleanParameter("automap_keydoor_blink", &automap_keydoor_blink, false);
@@ -553,37 +524,12 @@ static void DisplayPauseImage(void)
     HUDStretchImage(x, y, w, h, pause_image, 0.0, 0.0);
 }
 
-ScreenWipe wipe_method = kScreenWipeMelt;
-
-static bool need_wipe = false;
-
-void ForceWipe(void)
-{
-#ifdef EDGE_WEB
-    // Wiping blocks the main thread while rendering outside of the main loop
-    // tick Disabled on the platform until can be better integrated
-    return;
-#endif
-    if (game_state == kGameStateNothing)
-        return;
-
-    if (wipe_method == kScreenWipeNone)
-        return;
-
-    need_wipe = true;
-
-    // capture screen now (before new level is loaded etc..)
-    EdgeDisplay();
-}
-
 //
 // E_Display
 //
 // Draw current display, possibly wiping it from the previous
 //
 // -ACB- 1998/07/27 Removed doublebufferflag check (unneeded).
-
-static bool wipe_gl_active = false;
 
 void EdgeDisplay(void)
 {
@@ -627,27 +573,6 @@ void EdgeDisplay(void)
         break;
     }
 
-    if (wipe_gl_active)
-    {
-        // -AJA- Wipe code for GL.  Sorry for all this ugliness, but it just
-        //       didn't fit into the existing wipe framework.
-        //
-        if (DoWipe())
-        {
-            StopWipe();
-            wipe_gl_active = false;
-        }
-    }
-
-    // save the current screen if about to wipe
-    if (need_wipe)
-    {
-        need_wipe      = false;
-        wipe_gl_active = true;
-
-        InitializeWipe(wipe_method);
-    }
-
     if (paused)
         DisplayPauseImage();
 
@@ -658,16 +583,6 @@ void EdgeDisplay(void)
     NetworkUpdate();
 
     ConsoleDrawer();
-
-    if (!hud_overlays.at(video_overlay.d_).empty())
-    {
-        const Image *overlay =
-            ImageLookup(hud_overlays.at(video_overlay.d_).c_str(), kImageNamespaceGraphic, kImageLookupNull);
-        if (overlay)
-            HUDRawImage(0, 0, current_screen_width, current_screen_height, overlay, 0, 0,
-                        current_screen_width / overlay->ScaledWidthActual(),
-                        current_screen_height / overlay->ScaledHeightActual());
-    }
 
     if (gamma_correction.f_ < 0)
     {
@@ -718,11 +633,7 @@ static void TitleDrawer(void)
     if (title_image)
     {
         if (title_scaling.d_) // Fill Border
-        {
-            if (!title_image->blurred_version_)
-                StoreBlurredImage(title_image);
-            HUDStretchImage(-320, -200, 960, 600, title_image->blurred_version_, 0, 0);
-        }
+            HUDStretchImage(-320, -200, 960, 600, title_image, 0, 0);
         HUDDrawImageTitleWS(title_image);
     }
     else
@@ -849,7 +760,6 @@ static void PickMenuBackdrop(void)
         new_backdrop->cache_             = menu_image->cache_;
         new_backdrop->is_empty_          = menu_image->is_empty_;
         new_backdrop->is_font_           = menu_image->is_font_;
-        new_backdrop->liquid_type_       = menu_image->liquid_type_;
         new_backdrop->offset_x_          = menu_image->offset_x_;
         new_backdrop->offset_y_          = menu_image->offset_y_;
         new_backdrop->opacity_           = menu_image->opacity_;
@@ -880,7 +790,6 @@ static void PickMenuBackdrop(void)
         new_backdrop->cache_             = loading_image->cache_;
         new_backdrop->is_empty_          = loading_image->is_empty_;
         new_backdrop->is_font_           = loading_image->is_font_;
-        new_backdrop->liquid_type_       = loading_image->liquid_type_;
         new_backdrop->offset_x_          = loading_image->offset_x_;
         new_backdrop->offset_y_          = loading_image->offset_y_;
         new_backdrop->opacity_           = loading_image->opacity_;

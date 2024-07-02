@@ -25,19 +25,1448 @@
 
 #pragma once
 
-#include <assert.h>
-#include <errno.h>
-#include <stdio.h>
-#include <string.h>
+#include <stddef.h>
+#include <stdint.h>
 
-#include <algorithm> // std::copy
-#include <iterator>  // std::back_inserter
-#include <memory>
+#include <algorithm>
+#include <iterator>
+#include <list>
 #include <set>
 
-#include "midi_convert_mus.hpp"
-#include "midi_convert_xmi.hpp"
-#include "midi_sequencer.hpp"
+/*! Raw MIDI event hook */
+typedef void (*RawEventHook)(void *userdata, uint8_t type, uint8_t subtype, uint8_t channel, const uint8_t *data,
+                             size_t len);
+/*! PCM render */
+typedef void (*PcmRender)(void *userdata, uint8_t *stream, size_t length);
+/*! Library internal debug messages */
+typedef void (*DebugMessageHook)(void *userdata, const char *fmt, ...);
+/*! Loop Start event hook */
+typedef void (*LoopStartHook)(void *userdata);
+/*! Loop Start event hook */
+typedef void (*LoopEndHook)(void *userdata);
+typedef void (*SongStartHook)(void *userdata);
+
+/*! Note-On MIDI event */
+typedef void (*RtNoteOn)(void *userdata, uint8_t channel, uint8_t note, uint8_t velocity);
+/*! Note-Off MIDI event */
+typedef void (*RtNoteOff)(void *userdata, uint8_t channel, uint8_t note);
+/*! Note-Off MIDI event with a velocity */
+typedef void (*RtNoteOffVel)(void *userdata, uint8_t channel, uint8_t note, uint8_t velocity);
+/*! Note aftertouch MIDI event */
+typedef void (*RtNoteAfterTouch)(void *userdata, uint8_t channel, uint8_t note, uint8_t atVal);
+/*! Channel aftertouch MIDI event */
+typedef void (*RtChannelAfterTouch)(void *userdata, uint8_t channel, uint8_t atVal);
+/*! Controller change MIDI event */
+typedef void (*RtControllerChange)(void *userdata, uint8_t channel, uint8_t type, uint8_t value);
+/*! Patch change MIDI event */
+typedef void (*RtPatchChange)(void *userdata, uint8_t channel, uint8_t patch);
+/*! Pitch bend MIDI event */
+typedef void (*RtPitchBend)(void *userdata, uint8_t channel, uint8_t msb, uint8_t lsb);
+/*! System Exclusive MIDI event */
+typedef void (*RtSysEx)(void *userdata, const uint8_t *msg, size_t size);
+/*! Meta event hook */
+typedef void (*MetaEventHook)(void *userdata, uint8_t type, const uint8_t *data, size_t len);
+/*! Device Switch MIDI event */
+typedef void (*RtDeviceSwitch)(void *userdata, size_t track, const char *data, size_t length);
+/*! Get the channels offset for current MIDI device */
+typedef size_t (*RtCurrentDevice)(void *userdata, size_t track);
+
+/* MUS-to-MIDI conversion */
+
+static constexpr uint8_t kMusFrequency = 140;
+static constexpr int     kMusTempo     = 0x00068A1B; /* MPQN: 60000000 / 140BPM (140Hz) = 428571 */
+                                                     /*  0x000D1436 -> MPQN: 60000000 /  70BPM  (70Hz) = 857142 */
+static constexpr uint16_t kMusDivision = 0x0101;     /* 257 for 140Hz files with a 140MPQN */
+                                                     /*  0x0088 -> 136 for  70Hz files with a 140MPQN */
+                                                     /*  0x010B -> 267 for  70hz files with a 70MPQN  */
+                                                     /*  0x01F9 -> 505 for 140hz files with a 70MPQN  */
+
+/* New
+ * QLS: MPQN/1000000 = 0.428571
+ * TDPS: QLS/PPQN = 0.428571/136 = 0.003151257
+ * PPQN: 136
+ *
+ * QLS: MPQN/1000000 = 0.428571
+ * TDPS: QLS/PPQN = 0.428571/257 = 0.001667591
+ * PPQN: 257
+ *
+ * QLS: MPQN/1000000 = 0.857142
+ * TDPS: QLS/PPQN = 0.857142/267 = 0.00321027
+ * PPQN: 267
+ *
+ * QLS: MPQN/1000000 = 0.857142
+ * TDPS: QLS/PPQN = 0.857142/505 = 0.001697311
+ * PPQN: 505
+ *
+ * Old
+ * QLS: MPQN/1000000 = 1.745673
+ * TDPS: QLS/PPQN = 1.745673 / 89 = 0.019614303 (seconds per tick)
+ * PPQN: (TDPS = QLS/PPQN) (0.019614303 = 1.745673/PPQN) (0.019614303*PPQN
+ * = 1.745673) (PPQN = 89.000001682)
+ *
+ */
+
+enum MusEvent
+{
+    kMusEventKeyOff           = 0,
+    kMusEventKeyOn            = 1,
+    kMusEventPitchWheel       = 2,
+    kMusEventChannelMode      = 3,
+    kMusEventControllerChange = 4,
+    kMusEventEnd              = 6,
+};
+
+static constexpr uint8_t kMusMidiMaxChannels = 16;
+
+static constexpr char kMusHeader[] = {'M', 'U', 'S', 0x1A};
+
+static constexpr uint8_t kMusToMidiMap[] = {
+    /* MIDI  Number  Description */
+    0,    /* 0    program change */
+    0,    /* 1    bank selection */
+    0x01, /* 2    Modulation pot (frequency vibrato depth) */
+    0x07, /* 3    Volume: 0-silent, ~100-normal, 127-loud */
+    0x0A, /* 4    Pan (balance) pot: 0-left, 64-center (default), 127-right */
+    0x0B, /* 5    Expression pot */
+    0x5B, /* 6    Reverb depth */
+    0x5D, /* 7    Chorus depth */
+    0x40, /* 8    Sustain pedal */
+    0x43, /* 9    Soft pedal */
+    0x78, /* 10   All sounds off */
+    0x7B, /* 11   All notes off */
+    0x7E, /* 12   Mono (use numchannels + 1) */
+    0x7F, /* 13   Poly */
+    0x79, /* 14   reset all controllers */
+};
+
+struct MusHeader
+{
+    char     ID[4];        /* identifier: "MUS" 0x1A */
+    uint16_t scoreLen;
+    uint16_t scoreStart;
+    uint16_t channels;     /* count of primary channels */
+    uint16_t sec_channels; /* count of secondary channels */
+    uint16_t instrCnt;
+};
+
+struct MidiHeaderChunk
+{
+    char    name[4];
+    int32_t length;
+    int16_t format;   /* make 0 */
+    int16_t ntracks;  /* make 1 */
+    int16_t division; /* 0xe250 ?? */
+};
+
+struct MidiTrackChunk
+{
+    char    name[4];
+    int32_t length;
+};
+
+struct MusConversionContext
+{
+    uint8_t *src, *src_ptr;
+    uint32_t srcsize;
+    uint32_t datastart;
+    uint8_t *dst, *dst_ptr;
+    uint32_t dstsize, dstrem;
+};
+
+static constexpr uint16_t kMusDestinationChunkSize = 8192;
+static void               MusToMidiResizeDestination(struct MusConversionContext *ctx)
+{
+    uint32_t pos = (uint32_t)(ctx->dst_ptr - ctx->dst);
+    ctx->dst     = (uint8_t *)realloc(ctx->dst, ctx->dstsize + kMusDestinationChunkSize);
+    ctx->dstsize += kMusDestinationChunkSize;
+    ctx->dstrem += kMusDestinationChunkSize;
+    ctx->dst_ptr = ctx->dst + pos;
+}
+
+static void MusToMidiWrite1(struct MusConversionContext *ctx, uint32_t val)
+{
+    if (ctx->dstrem < 1)
+        MusToMidiResizeDestination(ctx);
+    *ctx->dst_ptr++ = val & 0xff;
+    ctx->dstrem--;
+}
+
+static void MusToMidiWrite2(struct MusConversionContext *ctx, uint32_t val)
+{
+    if (ctx->dstrem < 2)
+        MusToMidiResizeDestination(ctx);
+    *ctx->dst_ptr++ = (val >> 8) & 0xff;
+    *ctx->dst_ptr++ = val & 0xff;
+    ctx->dstrem -= 2;
+}
+
+static void MusToMidiWrite4(struct MusConversionContext *ctx, uint32_t val)
+{
+    if (ctx->dstrem < 4)
+        MusToMidiResizeDestination(ctx);
+    *ctx->dst_ptr++ = (uint8_t)((val >> 24) & 0xff);
+    *ctx->dst_ptr++ = (uint8_t)((val >> 16) & 0xff);
+    *ctx->dst_ptr++ = (uint8_t)((val >> 8) & 0xff);
+    *ctx->dst_ptr++ = (uint8_t)((val & 0xff));
+    ctx->dstrem -= 4;
+}
+
+static void MusToMidiSeekDestination(struct MusConversionContext *ctx, uint32_t pos)
+{
+    ctx->dst_ptr = ctx->dst + pos;
+    while (ctx->dstsize < pos)
+        MusToMidiResizeDestination(ctx);
+    ctx->dstrem = ctx->dstsize - pos;
+}
+
+static void MusToMidiSkipDestination(struct MusConversionContext *ctx, int32_t pos)
+{
+    size_t newpos;
+    ctx->dst_ptr += pos;
+    newpos = ctx->dst_ptr - ctx->dst;
+    while (ctx->dstsize < newpos)
+        MusToMidiResizeDestination(ctx);
+    ctx->dstrem = (uint32_t)(ctx->dstsize - newpos);
+}
+
+static uint32_t MusToMidiGetDestinationPosition(struct MusConversionContext *ctx)
+{
+    return (uint32_t)(ctx->dst_ptr - ctx->dst);
+}
+
+/* writes a variable length integer to a buffer, and returns bytes written */
+static int32_t MusToMidiWriteVariableLength(int32_t value, uint8_t *out)
+{
+    int32_t buffer, count = 0;
+
+    buffer = value & 0x7f;
+    while ((value >>= 7) > 0)
+    {
+        buffer <<= 8;
+        buffer += 0x80;
+        buffer += (value & 0x7f);
+    }
+
+    while (1)
+    {
+        ++count;
+        *out = (uint8_t)buffer;
+        ++out;
+        if (buffer & 0x80)
+            buffer >>= 8;
+        else
+            break;
+    }
+    return (count);
+}
+
+#define EDGE_MUS_READ_SHORT(b) ((b)[0] | ((b)[1] << 8))
+#define EDGE_MUS_READ_INT(b)   ((b)[0] | ((b)[1] << 8) | ((b)[2] << 16) | ((b)[3] << 24))
+
+static int ConvertMusToMidi(uint8_t *in, uint32_t insize, uint8_t **out, uint32_t *outsize, uint16_t frequency)
+{
+    struct MusConversionContext ctx;
+    MusHeader                   header;
+    uint8_t                    *cur, *end;
+    uint32_t                    track_size_pos, begin_track_pos, current_pos;
+    int32_t                     delta_time; /* Delta time for midi event */
+    int                         temp, ret = -1;
+    int                         channel_volume[kMusMidiMaxChannels];
+    int                         channelMap[kMusMidiMaxChannels], currentChannel;
+
+    if (insize < sizeof(MusHeader))
+    {
+        /*_WM_GLOBAL_ERROR(__FUNCTION__, __LINE__, WM_ERR_CORUPT, "(too short)",
+         * 0);*/
+        return (-1);
+    }
+
+    if (!frequency)
+        frequency = kMusFrequency;
+
+    /* read the MUS header and set our location */
+    memcpy(header.ID, in, 4);
+    header.scoreLen     = EDGE_MUS_READ_SHORT(&in[4]);
+    header.scoreStart   = EDGE_MUS_READ_SHORT(&in[6]);
+    header.channels     = EDGE_MUS_READ_SHORT(&in[8]);
+    header.sec_channels = EDGE_MUS_READ_SHORT(&in[10]);
+    header.instrCnt     = EDGE_MUS_READ_SHORT(&in[12]);
+
+    if (memcmp(header.ID, kMusHeader, 4))
+    {
+        /*_WM_GLOBAL_ERROR(__FUNCTION__, __LINE__, WM_ERR_NOT_MUS, nullptr,
+         * 0);*/
+        return (-1);
+    }
+    if (insize < (uint32_t)header.scoreLen + (uint32_t)header.scoreStart)
+    {
+        /*_WM_GLOBAL_ERROR(__FUNCTION__, __LINE__, WM_ERR_CORUPT, "(too short)",
+         * 0);*/
+        return (-1);
+    }
+    /* channel #15 should be excluded in the numchannels field: */
+    if (header.channels > kMusMidiMaxChannels - 1)
+    {
+        /*_WM_GLOBAL_ERROR(__FUNCTION__, __LINE__, WM_ERR_INVALID, nullptr,
+         * 0);*/
+        return (-1);
+    }
+
+    memset(&ctx, 0, sizeof(struct MusConversionContext));
+    ctx.src = ctx.src_ptr = in;
+    ctx.srcsize           = insize;
+
+    ctx.dst     = (uint8_t *)calloc(kMusDestinationChunkSize, sizeof(uint8_t));
+    ctx.dst_ptr = ctx.dst;
+    ctx.dstsize = kMusDestinationChunkSize;
+    ctx.dstrem  = kMusDestinationChunkSize;
+
+    /* Map channel 15 to 9 (percussions) */
+    for (temp = 0; temp < kMusMidiMaxChannels; ++temp)
+    {
+        channelMap[temp]     = -1;
+        channel_volume[temp] = 0x40;
+    }
+    channelMap[15] = 9;
+
+    /* Header is 14 bytes long and add the rest as well */
+    MusToMidiWrite1(&ctx, 'M');
+    MusToMidiWrite1(&ctx, 'T');
+    MusToMidiWrite1(&ctx, 'h');
+    MusToMidiWrite1(&ctx, 'd');
+    MusToMidiWrite4(&ctx, 6);            /* length of header */
+    MusToMidiWrite2(&ctx, 0);            /* MIDI type (always 0) */
+    MusToMidiWrite2(&ctx, 1);            /* MUS files only have 1 track */
+    MusToMidiWrite2(&ctx, kMusDivision); /* division */
+
+    /* Write out track header and track length position for later */
+    begin_track_pos = MusToMidiGetDestinationPosition(&ctx);
+    MusToMidiWrite1(&ctx, 'M');
+    MusToMidiWrite1(&ctx, 'T');
+    MusToMidiWrite1(&ctx, 'r');
+    MusToMidiWrite1(&ctx, 'k');
+    track_size_pos = MusToMidiGetDestinationPosition(&ctx);
+    MusToMidiSkipDestination(&ctx, 4);
+
+    /* write tempo: microseconds per quarter note */
+    MusToMidiWrite1(&ctx, 0x00);   /* delta time */
+    MusToMidiWrite1(&ctx, 0xff);   /* sys command */
+    MusToMidiWrite2(&ctx, 0x5103); /* command - set tempo */
+    MusToMidiWrite1(&ctx, kMusTempo & 0x000000ff);
+    MusToMidiWrite1(&ctx, (kMusTempo & 0x0000ff00) >> 8);
+    MusToMidiWrite1(&ctx, (kMusTempo & 0x00ff0000) >> 16);
+
+    /* Percussions channel starts out at volume 100 */
+    MusToMidiWrite1(&ctx, 0x00);
+    MusToMidiWrite1(&ctx, 0xB9);
+    MusToMidiWrite1(&ctx, 0x07);
+    MusToMidiWrite1(&ctx, 100);
+
+    /* get current position in source, and end of position */
+    cur = in + header.scoreStart;
+    end = cur + header.scoreLen;
+
+    currentChannel = 0;
+    delta_time     = 0;
+
+    /* main loop */
+    while (cur < end)
+    {
+        /*printf("LOOP DEBUG: %d\r\n",iterator++);*/
+        uint8_t  channel;
+        uint8_t  event;
+        uint8_t  temp_buffer[32]; /* temp buffer for current iterator */
+        uint8_t *out_local = temp_buffer;
+        uint8_t  status, bit1, bit2, bitc = 2;
+
+        /* read in current bit */
+        event   = *cur++;
+        channel = (event & 15); /* current channel */
+
+        /* write variable length delta time */
+        out_local += MusToMidiWriteVariableLength(delta_time, out_local);
+
+        /* set all channels to 127 (max) volume */
+        if (channelMap[channel] < 0)
+        {
+            *out_local++        = 0xB0 + currentChannel;
+            *out_local++        = 0x07;
+            *out_local++        = 100;
+            *out_local++        = 0x00;
+            channelMap[channel] = currentChannel++;
+            if (currentChannel == 9)
+                ++currentChannel;
+        }
+        status = channelMap[channel];
+
+        /* handle events */
+        switch ((event & 122) >> 4)
+        {
+        case kMusEventKeyOff:
+            status |= 0x80;
+            bit1 = *cur++;
+            bit2 = 0x40;
+            break;
+        case kMusEventKeyOn:
+            status |= 0x90;
+            bit1 = *cur & 127;
+            if (*cur++ & 128) /* volume bit? */
+                channel_volume[channelMap[channel]] = *cur++;
+            bit2 = channel_volume[channelMap[channel]];
+            break;
+        case kMusEventPitchWheel:
+            status |= 0xE0;
+            bit1 = (*cur & 1) >> 6;
+            bit2 = (*cur++ >> 1) & 127;
+            break;
+        case kMusEventChannelMode:
+            status |= 0xB0;
+            if (*cur >= sizeof(kMusToMidiMap) / sizeof(kMusToMidiMap[0]))
+            {
+                /*_WM_ERROR_NEW("%s:%i: can't map %u to midi",
+                              __FUNCTION__, __LINE__, *cur);*/
+                goto _end;
+            }
+            bit1 = kMusToMidiMap[*cur++];
+            bit2 = (*cur++ == 12) ? header.channels + 1 : 0x00;
+            break;
+        case kMusEventControllerChange:
+            if (*cur == 0)
+            {
+                cur++;
+                status |= 0xC0;
+                bit1 = *cur++;
+                bit2 = 0; /* silence bogus warnings */
+                bitc = 1;
+            }
+            else
+            {
+                status |= 0xB0;
+                if (*cur >= sizeof(kMusToMidiMap) / sizeof(kMusToMidiMap[0]))
+                {
+                    /*_WM_ERROR_NEW("%s:%i: can't map %u to midi",
+                                  __FUNCTION__, __LINE__, *cur);*/
+                    goto _end;
+                }
+                bit1 = kMusToMidiMap[*cur++];
+                bit2 = *cur++;
+            }
+            break;
+        case kMusEventEnd: /* End */
+            status = 0xff;
+            bit1   = 0x2f;
+            bit2   = 0x00;
+            if (cur != end)
+            { /* should we error here or report-only? */
+                /*_WM_DEBUG_MSG("%s:%i: MUS buffer off by %ld bytes",
+                              __FUNCTION__, __LINE__, (long)(cur - end));*/
+            }
+            break;
+        case 5:  /* Unknown */
+        case 7:  /* Unknown */
+        default: /* shouldn't happen */
+            /*_WM_ERROR_NEW("%s:%i: unrecognized event (%u)",
+                          __FUNCTION__, __LINE__, event);*/
+            goto _end;
+        }
+
+        /* write it out */
+        *out_local++ = status;
+        *out_local++ = bit1;
+        if (bitc == 2)
+            *out_local++ = bit2;
+
+        /* write out our temp buffer */
+        if (out_local != temp_buffer)
+        {
+            if (ctx.dstrem < sizeof(temp_buffer))
+                MusToMidiResizeDestination(&ctx);
+
+            memcpy(ctx.dst_ptr, temp_buffer, out_local - temp_buffer);
+            ctx.dst_ptr += out_local - temp_buffer;
+            ctx.dstrem -= (uint32_t)(out_local - temp_buffer);
+        }
+
+        if (event & 128)
+        {
+            delta_time = 0;
+            do
+            {
+                delta_time = (int32_t)((delta_time * 128 + (*cur & 127)) * (140.0 / (double)frequency));
+            } while ((*cur++ & 128));
+        }
+        else
+        {
+            delta_time = 0;
+        }
+    }
+
+    /* write out track length */
+    current_pos = MusToMidiGetDestinationPosition(&ctx);
+    MusToMidiSeekDestination(&ctx, track_size_pos);
+    MusToMidiWrite4(&ctx, current_pos - begin_track_pos - sizeof(MidiTrackChunk));
+    MusToMidiSeekDestination(&ctx, current_pos); /* reseek to end position */
+
+    *out     = ctx.dst;
+    *outsize = ctx.dstsize - ctx.dstrem;
+    ret      = 0;
+
+_end: /* cleanup */
+    if (ret < 0)
+    {
+        free(ctx.dst);
+        *out     = nullptr;
+        *outsize = 0;
+    }
+
+    return (ret);
+}
+
+/**
+     \brief Real-Time MIDI interface between Sequencer and the Synthesizer
+    */
+struct MidiRealTimeInterface
+{
+    /*! MIDI event hook which catches all MIDI events */
+    RawEventHook onEvent;
+    /*! User data which will be passed through On-Event hook */
+    void *onEvent_userdata;
+
+    /*! PCM render hook which catches passing of loop start point */
+    PcmRender onPcmRender;
+    /*! User data which will be passed through On-PCM-render hook */
+    void *onPcmRender_userdata;
+
+    /*! Sample rate */
+    uint32_t pcmSampleRate;
+
+    /*! Size of one sample in bytes */
+    uint32_t pcmFrameSize;
+
+    /*! Debug message hook */
+    DebugMessageHook onDebugMessage;
+    /*! User data which will be passed through Debug Message hook */
+    void *onDebugMessage_userdata;
+
+    /*! Loop start hook which catches passing of loop start point */
+    LoopStartHook onloopStart;
+    /*! User data which will be passed through On-LoopStart hook */
+    void *onloopStart_userdata;
+
+    /*! Loop start hook which catches passing of loop start point */
+    LoopEndHook onloopEnd;
+    /*! User data which will be passed through On-LoopStart hook */
+    void *onloopEnd_userdata;
+
+    /*! Song start hook which is calling when starting playing song at begin
+     */
+    SongStartHook onSongStart;
+    /*! User data which will be passed through On-SongStart hook */
+    void *onSongStart_userdata;
+
+    /*! MIDI Run Time event calls user data */
+    void *rtUserData;
+
+    /***************************************************
+     * Standard MIDI events. All of them are required! *
+     ***************************************************/
+
+    /*! Note-On MIDI event hook */
+    RtNoteOn rt_noteOn;
+    /*! Note-Off MIDI event hook */
+    RtNoteOff rt_noteOff;
+
+    /*! Note-Off MIDI event hook with a velocity */
+    RtNoteOffVel rt_noteOffVel;
+
+    /*! Note aftertouch MIDI event hook */
+    RtNoteAfterTouch rt_noteAfterTouch;
+
+    /*! Channel aftertouch MIDI event hook */
+    RtChannelAfterTouch rt_channelAfterTouch;
+
+    /*! Controller change MIDI event hook */
+    RtControllerChange rt_controllerChange;
+
+    /*! Patch change MIDI event hook */
+    RtPatchChange rt_patchChange;
+
+    /*! Pitch bend MIDI event hook */
+    RtPitchBend rt_pitchBend;
+
+    /*! System Exclusive MIDI event hook */
+    RtSysEx rt_systemExclusive;
+
+    /*******************
+     * Optional events *
+     *******************/
+
+    /*! Meta event hook which catches all meta events */
+    MetaEventHook rt_metaEvent;
+
+    /*! Device Switch MIDI event hook */
+    RtDeviceSwitch rt_deviceSwitch;
+
+    /*! Get the channels offset for current MIDI device hook. Returms
+     * multiple to 16 value. */
+    RtCurrentDevice rt_currentDevice;
+};
+
+// MidiFraction is a stripped down version of
+// Bisqwit's Fraction class with the following
+// copyright:
+/*
+ * Fraction number handling.
+ * Copyright (C) 1992,2001 Bisqwit (http://iki.fi/bisqwit/)
+ *
+ * The license of this file is in Public Domain:
+ * https://bisqwit.iki.fi/src/index.html
+ *
+ * "... and orphan source code files are copyrighted public domain."
+ */
+
+class MidiFraction
+{
+    uint64_t num1_, num2_;
+    void     Optim();
+
+  public:
+    MidiFraction() : num1_(0), num2_(1)
+    {
+    }
+    MidiFraction(uint64_t value) : num1_(value), num2_(1)
+    {
+    }
+    MidiFraction(uint64_t n, uint64_t d) : num1_(n), num2_(d)
+    {
+    }
+    inline double Value() const
+    {
+        return Nom() / (double)Denom();
+    }
+    MidiFraction &operator*=(const MidiFraction &b)
+    {
+        num1_ *= b.Nom();
+        num2_ *= b.Denom();
+        Optim();
+        return *this;
+    }
+    MidiFraction operator*(const MidiFraction &b) const
+    {
+        MidiFraction tmp(*this);
+        tmp *= b;
+        return tmp;
+    }
+    const uint64_t &Nom() const
+    {
+        return num1_;
+    }
+    const uint64_t &Denom() const
+    {
+        return num2_;
+    }
+};
+
+void MidiFraction::Optim()
+{
+    /* Euclidean algorithm */
+    uint64_t n1, n2, nn1, nn2;
+
+    nn1 = num1_;
+    nn2 = num2_;
+
+    if (nn1 < nn2)
+        n1 = num1_, n2 = num2_;
+    else
+        n1 = num2_, n2 = num1_;
+
+    if (!num1_)
+    {
+        num2_ = 1;
+        return;
+    }
+    for (;;)
+    {
+        uint64_t tmp = n2 % n1;
+        if (!tmp)
+            break;
+        n2 = n1;
+        n1 = tmp;
+    }
+    num1_ /= n1;
+    num2_ /= n1;
+}
+
+MidiFraction operator*(const uint64_t bla, const MidiFraction &b)
+{
+    return MidiFraction(bla) * b;
+}
+
+class MidiSequencer
+{
+    /**
+     * @brief MIDI Event utility container
+     */
+    struct MidiEvent
+    {
+        /**
+         * @brief Main MIDI event types
+         */
+        enum Types
+        {
+            //! Unknown event
+            kUnknown = 0x00,
+            //! Note-Off event
+            kNoteOff = 0x08,           // size == 2
+                                       //! Note-On event
+            kNoteOn = 0x09,            // size == 2
+                                       //! Note After-Touch event
+            kNoteTouch = 0x0A,         // size == 2
+                                       //! Controller change event
+            kControlChange = 0x0B,     // size == 2
+                                       //! Patch change event
+            kPatchChange = 0x0C,       // size == 1
+                                       //! Channel After-Touch event
+            kChannelAftertouch = 0x0D, // size == 1
+                                       //! Pitch-bend change event
+            kPitchWheel = 0x0E,        // size == 2
+
+            //! System Exclusive message, type 1
+            kSysex = 0xF0,                     // size == len
+                                               //! Sys Com Song Position Pntr [LSB, MSB]
+            kSysComSongPositionPointer = 0xF2, // size == 2
+                                               //! Sys Com Song Select(Song #) [0-127]
+            kSysComSongSelect = 0xF3,          // size == 1
+                                               //! System Exclusive message, type 2
+            kSysex2 = 0xF7,                    // size == len
+                                               //! Special event
+            kSpecial = 0xFF
+        };
+        /**
+         * @brief Special MIDI event sub-types
+         */
+        enum SubTypes
+        {
+            //! Sequension number
+            kSequensionNumber = 0x00,   // size == 2
+                                        //! Text label
+            kText = 0x01,               // size == len
+                                        //! Copyright notice
+            kCopyright = 0x02,          // size == len
+                                        //! Sequence track title
+            kSequenceTrackTitle = 0x03, // size == len
+                                        //! Instrument title
+            kInstrumentTitle = 0x04,    // size == len
+                                        //! Lyrics text fragment
+            kLyrics = 0x05,             // size == len
+                                        //! MIDI Marker
+            kMarker = 0x06,             // size == len
+                                        //! Cue Point
+            kCuePoint = 0x07,           // size == len
+                                        //! [Non-Standard] Device Switch
+            kDeviceSwitch = 0x09,       // size == len <CUSTOM>
+                                        //! MIDI Channel prefix
+            kMidiChannelPrefix = 0x20,  // size == 1
+
+            //! End of Track event
+            kEndTrack = 0x2F,      // size == 0
+                                   //! Tempo change event
+            kTempoChange = 0x51,   // size == 3
+                                   //! SMPTE offset
+            kSmpteOffset = 0x54,   // size == 5
+                                   //! Time signature
+            kTimeSignature = 0x55, // size == 4
+                                   //! Key signature
+            kKeySignature = 0x59,  // size == 2
+                                   //! Sequencer specs
+            kSequencerSpec = 0x7F, // size == len
+
+            /* Non-standard, internal ADLMIDI usage only */
+            //! [Non-Standard] Loop Start point
+            kLoopStart = 0xE1, // size == 0 <CUSTOM>
+                               //! [Non-Standard] Loop End point
+            kLoopEnd = 0xE2,   // size == 0 <CUSTOM>
+                               //! [Non-Standard] Raw OPL data
+
+            //! [Non-Standard] Loop Start point with support of multi-loops
+            kLoopStackBegin = 0xE4,  // size == 1 <CUSTOM>
+                                     //! [Non-Standard] Loop End point with
+                                     //! support of multi-loops
+            kLoopStackEnd = 0xE5,    // size == 0 <CUSTOM>
+                                     //! [Non-Standard] Loop End point with
+                                     //! support of multi-loops
+            kLoopStackBreak = 0xE6,  // size == 0 <CUSTOM>
+                                     //! [Non-Standard] Callback Trigger
+            kCallbackTrigger = 0xE7, // size == 1 <CUSTOM>
+
+            // Built-in hooks
+            kSongBeginHook = 0x101
+        };
+        //! Main type of event
+        uint_fast16_t type = kUnknown;
+        //! Sub-type of the event
+        uint_fast16_t sub_type = kUnknown;
+        //! Targeted MIDI channel
+        uint_fast16_t channel = 0;
+        //! Is valid event
+        uint_fast16_t is_valid = 1;
+        //! Reserved 5 bytes padding
+        uint_fast16_t padding[4];
+        //! Absolute tick position (Used for the tempo calculation only)
+        uint64_t absolute_tick_position = 0;
+        //! Raw data of this event
+        std::vector<uint8_t> data;
+    };
+
+    /**
+     * @brief A track position event contains a chain of MIDI events until next
+     * delay value
+     *
+     * Created with purpose to sort events by type in the same position
+     * (for example, to keep controllers always first than note on events or
+     * lower than note-off events)
+     */
+    class MidiTrackRow
+    {
+      public:
+        MidiTrackRow();
+        //! Clear MIDI row data
+        void Clear();
+        //! Absolute time position in seconds
+        double time_;
+        //! Delay to next event in ticks
+        uint64_t delay_;
+        //! Absolute position in ticks
+        uint64_t absolute_position_;
+        //! Delay to next event in seconds
+        double time_delay_;
+        //! List of MIDI events in the current row
+        std::vector<MidiEvent> events_;
+        /**
+         * @brief Sort events in this position
+         * @param note_states Buffer of currently pressed/released note keys in
+         * the track
+         */
+        void SortEvents(bool *note_states = nullptr);
+    };
+
+    /**
+     * @brief Tempo change point entry. Used in the MIDI data building function
+     * only.
+     */
+    struct TempoChangePoint
+    {
+        uint64_t     absolute_position;
+        MidiFraction tempo;
+    };
+
+    /**
+     * @brief Song position context
+     */
+    struct Position
+    {
+        //! Was track began playing
+        bool began = false;
+        //! Reserved
+        char padding[7] = {0, 0, 0, 0, 0, 0, 0};
+        //! Waiting time before next event in seconds
+        double wait = 0.0;
+        //! Absolute time position on the track in seconds
+        double absolute_time_position = 0.0;
+        //! Track information
+        struct TrackInfo
+        {
+            //! Delay to next event in a track
+            uint64_t delay = 0;
+            //! Last handled event type
+            int32_t lastHandledEvent = 0;
+            //! Reserved
+            char padding2[4];
+            //! MIDI Events queue position iterator
+            std::list<MidiTrackRow>::iterator pos;
+        };
+        std::vector<TrackInfo> track;
+    };
+
+    //! MIDI Output interface context
+    const MidiRealTimeInterface *midi_output_interface_;
+
+    /**
+     * @brief Prepare internal events storage for track data building
+     * @param track_count Count of tracks
+     */
+    void BuildSMFSetupReset(size_t track_count);
+
+    /**
+     * @brief Build MIDI track data from the raw track data storage
+     * @return true if everything successfully processed, or false on any error
+     */
+    bool BuildSMFTrackData(const std::vector<std::vector<uint8_t>> &track_data);
+
+    /**
+     * @brief Build the time line from off loaded events
+     * @param tempos Pre-collected list of tempo events
+     * @param loop_start_ticks Global loop start tick (give zero if no global
+     * loop presented)
+     * @param loop_end_ticks Global loop end tick (give zero if no global loop
+     * presented)
+     */
+    void BuildTimeLine(const std::vector<MidiEvent> &tempos, uint64_t loop_start_ticks = 0,
+                       uint64_t loop_end_ticks = 0);
+
+    /**
+     * @brief Parse one event from raw MIDI track stream
+     * @param [_inout] ptr pointer to pointer to current position on the raw
+     * data track
+     * @param [_in] end address to end of raw track data, needed to validate
+     * position and size
+     * @param [_inout] status status of the track processing
+     * @return Parsed MIDI event entry
+     */
+    MidiEvent ParseEvent(const uint8_t **ptr, const uint8_t *end, int &status);
+
+    /**
+     * @brief Process MIDI events on the current tick moment
+     * @param is_seek is a seeking process
+     * @return returns false on reaching end of the song
+     */
+    bool ProcessEvents(bool is_seek = false);
+
+    /**
+     * @brief Handle one event from the chain
+     * @param tk MIDI track
+     * @param evt MIDI event entry
+     * @param status Recent event type, -1 returned when end of track event was
+     * handled.
+     */
+    void handleEvent(size_t tk, const MidiEvent &evt, int32_t &status);
+
+  public:
+    /**
+     * @brief MIDI marker entry
+     */
+    struct MidiMarkerEntry
+    {
+        //! Label
+        std::string label;
+        //! Position time in seconds
+        double position_time;
+        //! Position time in MIDI ticks
+        uint64_t position_ticks;
+    };
+
+    /**
+     * @brief The FileFormat enum
+     */
+    enum FileFormat
+    {
+        //! MIDI format
+        kFormatMidi,
+        //! EA-MUS format
+        kFormatRSXX
+    };
+
+    /**
+     * @brief Format of loop points implemented by CC events
+     */
+    enum LoopFormat
+    {
+        kLoopDefault,
+        kLoopRpgMaker = 1,
+        kLoopEMidi,
+        kLoopHmi
+    };
+
+  private:
+    //! Music file format type. MIDI is default.
+    FileFormat midi_format_;
+    //! SMF format identifier.
+    unsigned midi_smf_format_;
+    //! Loop points format
+    LoopFormat midi_loop_format_;
+
+    //! Current position
+    Position midi_current_position_;
+    //! Track begin position
+    Position midi_track_begin_position_;
+    //! Loop start point
+    Position midi_loop_begin_position_;
+
+    //! Is looping enabled or not
+    bool midi_loop_enabled_;
+    //! Don't process loop: trigger hooks only if they are set
+    bool midi_loop_hooks_only_;
+
+    //! Full song length in seconds
+    double midi_full_song_time_length_;
+    //! Delay after song playd before rejecting the output stream requests
+    double midi_post_song_wait_delay_;
+
+    //! Global loop start time
+    double midi_loop_start_time_;
+    //! Global loop end time
+    double midi_loop_end_time_;
+
+    //! Pre-processed track data storage
+    std::vector<std::list<MidiTrackRow>> midi_track_data_;
+
+    //! Title of music
+    std::string midi_music_title_;
+    //! Copyright notice of music
+    std::string midi_music_copyright_;
+    //! List of track titles
+    std::vector<std::string> midi_music_track_titles_;
+    //! List of MIDI markers
+    std::vector<MidiMarkerEntry> midi_music_markers_;
+
+    //! Time of one tick
+    MidiFraction midi_individual_tick_delta_;
+    //! Current tempo
+    MidiFraction midi_tempo_;
+
+    //! Tempo multiplier factor
+    double midi_tempo_multiplier_;
+    //! Is song at end
+    bool midi_at_end_;
+
+    //! Set the number of loops limit. Lesser than 0 - loop infinite
+    int midi_loop_count_;
+
+    //! The number of track of multi-track file (for exmaple, XMI) to load
+    int midi_load_track_number_;
+
+    //! The XMI-specific list of raw songs, converted into SMF format
+    std::vector<std::vector<uint8_t>> midi_raw_songs_data_;
+
+    /**
+     * @brief Loop stack entry
+     */
+    struct LoopStackEntry
+    {
+        //! is infinite loop
+        bool infinity = false;
+        //! Count of loops left to break. <0 - infinite loop
+        int loops = 0;
+        //! Start position snapshot to return back
+        Position start_position;
+        //! Loop start tick
+        uint64_t start = 0;
+        //! Loop end tick
+        uint64_t end = 0;
+    };
+
+    class LoopState
+    {
+      public:
+        //! Loop start has reached
+        bool caught_start_;
+        //! Loop end has reached, reset on handling
+        bool caught_end_;
+
+        //! Loop start has reached
+        bool caught_stack_start_;
+        //! Loop next has reached, reset on handling
+        bool caught_stack_end_;
+        //! Loop break has reached, reset on handling
+        bool caught_stack_break_;
+        //! Skip next stack loop start event handling
+        bool skip_stack_start_;
+
+        //! Are loop points invalid?
+        bool invalid_loop_; /*Loop points are invalid (loopStart after loopEnd
+                             or loopStart and loopEnd are on same place)*/
+
+        //! Is look got temporarily broken because of post-end seek?
+        bool temporary_broken_;
+
+        //! How much times the loop should start repeat? For example, if you
+        //! want to loop song twice, set value 1
+        int loops_count_;
+
+        //! how many loops left until finish the song
+        int loops_left_;
+
+        //! Stack of nested loops
+        std::vector<LoopStackEntry> stack_;
+        //! Current level on the loop stack (<0 - out of loop, 0++ - the index
+        //! in the loop stack)
+        int stack_level_;
+
+        /**
+         * @brief Reset loop state to initial
+         */
+        void Reset()
+        {
+            caught_start_       = false;
+            caught_end_         = false;
+            caught_stack_start_ = false;
+            caught_stack_end_   = false;
+            caught_stack_break_ = false;
+            skip_stack_start_   = false;
+            loops_left_         = loops_count_;
+        }
+
+        void FullReset()
+        {
+            loops_count_ = -1;
+            Reset();
+            invalid_loop_     = false;
+            temporary_broken_ = false;
+            stack_.clear();
+            stack_level_ = -1;
+        }
+
+        bool IsStackEnd()
+        {
+            if (caught_stack_end_ && (stack_level_ >= 0) && (stack_level_ < (int)(stack_.size())))
+            {
+                const LoopStackEntry &e = stack_[(size_t)(stack_level_)];
+                if (e.infinity || (!e.infinity && e.loops > 0))
+                    return true;
+            }
+            return false;
+        }
+
+        void StackUp(int count = 1)
+        {
+            stack_level_ += count;
+        }
+
+        void StackDown(int count = 1)
+        {
+            stack_level_ -= count;
+        }
+
+        LoopStackEntry &GetCurrentStack()
+        {
+            if ((stack_level_ >= 0) && (stack_level_ < (int)(stack_.size())))
+                return stack_[(size_t)(stack_level_)];
+            if (stack_.empty())
+            {
+                LoopStackEntry d;
+                d.loops    = 0;
+                d.infinity = 0;
+                d.start    = 0;
+                d.end      = 0;
+                stack_.push_back(d);
+            }
+            return stack_[0];
+        }
+    };
+
+    LoopState midi_loop_;
+
+    //! Whether the nth track has playback disabled
+    std::vector<bool> midi_track_disabled_;
+    //! Index of solo track, or max for disabled
+    size_t midi_track_solo_;
+    //! MIDI channel disable (exception for extra port-prefix-based channels)
+    bool m_channelDisable[16];
+
+    /**
+     * @brief Handler of callback trigger events
+     * @param userdata Pointer to user data (usually, context of something)
+     * @param trigger Value of the event which triggered this callback.
+     * @param track Identifier of the track which triggered this callback.
+     */
+    typedef void (*TriggerHandler)(void *userdata, unsigned trigger, size_t track);
+
+    //! Handler of callback trigger events
+    TriggerHandler midi_trigger_handler_;
+    //! User data of callback trigger events
+    void *midi_trigger_userdata_;
+
+    //! File parsing errors string (adding into midi_error_string_ on aborting
+    //! of the process)
+    std::string midi_parsing_errors_string_;
+    //! Common error string
+    std::string midi_error_string_;
+
+    class SequencerTime
+    {
+      public:
+        //! Time buffer
+        double time_rest_;
+        //! Sample rate
+        uint32_t sample_rate_;
+        //! Size of one frame in bytes
+        uint32_t frame_size_;
+        //! Minimum possible delay, granuality
+        double minimum_delay_;
+        //! Last delay
+        double delay_;
+
+        void Init()
+        {
+            sample_rate_ = 44100;
+            frame_size_  = 2;
+            Reset();
+        }
+
+        void Reset()
+        {
+            time_rest_     = 0.0;
+            minimum_delay_ = 1.0 / (double)(sample_rate_);
+            delay_         = 0.0;
+        }
+    };
+
+    SequencerTime midi_time_;
+
+  public:
+    MidiSequencer();
+    virtual ~MidiSequencer();
+
+    /**
+     * @brief Sets the RT interface
+     * @param intrf Pre-Initialized interface structure (pointer will be taken)
+     */
+    void SetInterface(const MidiRealTimeInterface *intrf);
+
+    /**
+     * @brief Runs ticking in a sync with audio streaming. Use this together
+     * with onPcmRender hook to easily play MIDI.
+     * @param stream pointer to the output PCM stream
+     * @param length length of the buffer in bytes
+     * @return Count of recorded data in bytes
+     */
+    int PlayStream(uint8_t *stream, size_t length);
+
+    /**
+     * @brief Returns file format type of currently loaded file
+     * @return File format type enumeration
+     */
+    FileFormat GetFormat();
+
+    /**
+     * @brief Returns the number of tracks
+     * @return Track count
+     */
+    size_t GetTrackCount() const;
+
+    /**
+     * @brief Sets whether a track is playing
+     * @param track Track identifier
+     * @param enable Whether to enable track playback
+     * @return true on success, false if there was no such track
+     */
+    bool SetTrackEnabled(size_t track, bool enable);
+
+    /**
+     * @brief Disable/enable a channel is sounding
+     * @param channel Channel number from 0 to 15
+     * @param enable Enable the channel playback
+     * @return true on success, false if there was no such channel
+     */
+    bool SetChannelEnabled(size_t channel, bool enable);
+
+    /**
+     * @brief Enables or disables solo on a track
+     * @param track Identifier of solo track, or max to disable
+     */
+    void SetSoloTrack(size_t track);
+
+    /**
+     * @brief Set the song number of a multi-song file (such as XMI)
+     * @param trackNumber Identifier of the song to load (or -1 to mix all songs
+     * as one song)
+     */
+    void SetSongNum(int track);
+
+    /**
+     * @brief Retrive the number of songs in a currently opened file
+     * @return Number of songs in the file. If 1 or less, means, the file has
+     * only one song inside.
+     */
+    int GetSongsCount();
+
+    /**
+     * @brief Defines a handler for callback trigger events
+     * @param handler Handler to invoke from the sequencer when triggered, or
+     * nullptr.
+     * @param userdata Instance of the library
+     */
+    void SetTriggerHandler(TriggerHandler handler, void *userdata);
+
+    /**
+     * @brief Get string that describes reason of error
+     * @return Error string
+     */
+    const std::string &GetErrorString();
+
+    /**
+     * @brief Check is loop enabled
+     * @return true if loop enabled
+     */
+    bool GetLoopEnabled();
+
+    /**
+     * @brief Switch loop on/off
+     * @param enabled Enable loop
+     */
+    void SetLoopEnabled(bool enabled);
+
+    /**
+     * @brief Get the number of loops set
+     * @return number of loops or -1 if loop infinite
+     */
+    int GetLoopsCount();
+
+    /**
+     * @brief How many times song should loop
+     * @param loops count or -1 to loop infinite
+     */
+    void SetLoopsCount(int loops);
+
+    /**
+     * @brief Switch loop hooks-only mode on/off
+     * @param enabled Don't loop: trigger hooks only without loop
+     */
+    void SetLoopHooksOnly(bool enabled);
+
+    /**
+     * @brief Get music title
+     * @return music title string
+     */
+    const std::string &GetMusicTitle();
+
+    /**
+     * @brief Get music copyright notice
+     * @return music copyright notice string
+     */
+    const std::string &GetMusicCopyright();
+
+    /**
+     * @brief Get list of track titles
+     * @return array of track title strings
+     */
+    const std::vector<std::string> &GetTrackTitles();
+
+    /**
+     * @brief Get list of MIDI markers
+     * @return Array of MIDI marker structures
+     */
+    const std::vector<MidiMarkerEntry> &GetMarkers();
+
+    /**
+     * @brief Is position of song at end
+     * @return true if end of song was reached
+     */
+    bool PositionAtEnd();
+
+    /**
+     * @brief Load MIDI file from a memory block
+     * @param data Pointer to memory block with MIDI data
+     * @param size Size of source memory block
+     * @param rate For IMF formats, the proper playback rate in Hz
+     * @return true if file successfully opened, false on any error
+     */
+    bool LoadMidi(const uint8_t *data, size_t size, uint16_t rate = 0);
+
+    /**
+     * @brief Load MIDI file by using FileAndMemReader interface
+     * @param mfr mem_file_c with opened source file
+     * @param rate For IMF formats, the proper playback rate in Hz
+     * @return true if file successfully opened, false on any error
+     */
+    bool LoadMidi(epi::MemFile *mfr, uint16_t rate);
+
+    /**
+     * @brief Periodic tick handler.
+     * @param s seconds since last call
+     * @param granularity don't expect intervals smaller than this, in seconds
+     * @return desired number of seconds until next call
+     */
+    double Tick(double s, double granularity);
+
+    /**
+     * @brief Change current position to specified time position in seconds
+     * @param granularity don't expect intervals smaller than this, in seconds
+     * @param seconds Absolute time position in seconds
+     * @return desired number of seconds until next call of Tick()
+     */
+    double Seek(double seconds, const double granularity);
+
+    /**
+     * @brief Gives current time position in seconds
+     * @return Current time position in seconds
+     */
+    double Tell();
+
+    /**
+     * @brief Gives time length of current song in seconds
+     * @return Time length of current song in seconds
+     */
+    double TimeLength();
+
+    /**
+     * @brief Gives loop start time position in seconds
+     * @return Loop start time position in seconds or -1 if song has no loop
+     * points
+     */
+    double GetLoopStart();
+
+    /**
+     * @brief Gives loop end time position in seconds
+     * @return Loop end time position in seconds or -1 if song has no loop
+     * points
+     */
+    double GetLoopEnd();
+
+    /**
+     * @brief Return to begin of current song
+     */
+    void Rewind();
+
+    /**
+     * @brief Get current tempor multiplier value
+     * @return
+     */
+    double GetTempoMultiplier();
+
+    /**
+     * @brief Set tempo multiplier
+     * @param tempo Tempo multiplier: 1.0 - original tempo. >1 - faster, <1 -
+     * slower
+     */
+    void SetTempo(double tempo);
+
+  private:
+    /**
+     * @brief Load file as EA MUS
+     * @param mfr mem_file_c with opened source file
+     * @return true on successful load
+     */
+    bool ParseRSXX(epi::MemFile *mfr);
+
+    /**
+     * @brief Load file as GMD/MUS files (ScummVM)
+     * @param mfr mem_file_c with opened source file
+     * @return true on successful load
+     */
+    bool ParseGMF(epi::MemFile *mfr);
+
+    /**
+     * @brief Load file as Standard MIDI file
+     * @param mfr mem_file_c with opened source file
+     * @return true on successful load
+     */
+    bool ParseSMF(epi::MemFile *mfr);
+
+    /**
+     * @brief Load file as RIFF MIDI
+     * @param mfr mem_file_c with opened source file
+     * @return true on successful load
+     */
+    bool ParseRMI(epi::MemFile *mfr);
+
+    /**
+     * @brief Load file as DMX MUS file (Doom)
+     * @param mfr mem_file_c with opened source file
+     * @return true on successful load
+     */
+    bool ParseMUS(epi::MemFile *mfr);
+};
 
 /**
  * @brief Utility function to read Big-Endian integer from raw binary data
@@ -257,24 +1686,24 @@ MidiSequencer::~MidiSequencer()
 void MidiSequencer::SetInterface(const MidiRealTimeInterface *intrf)
 {
     // Interface must NOT be nullptr
-    assert(intrf);
+    EPI_ASSERT(intrf);
 
     // Note ON hook is REQUIRED
-    assert(intrf->rt_noteOn);
+    EPI_ASSERT(intrf->rt_noteOn);
     // Note OFF hook is REQUIRED
-    assert(intrf->rt_noteOff || intrf->rt_noteOffVel);
+    EPI_ASSERT(intrf->rt_noteOff || intrf->rt_noteOffVel);
     // Note Aftertouch hook is REQUIRED
-    assert(intrf->rt_noteAfterTouch);
+    EPI_ASSERT(intrf->rt_noteAfterTouch);
     // Channel Aftertouch hook is REQUIRED
-    assert(intrf->rt_channelAfterTouch);
+    EPI_ASSERT(intrf->rt_channelAfterTouch);
     // Controller change hook is REQUIRED
-    assert(intrf->rt_controllerChange);
+    EPI_ASSERT(intrf->rt_controllerChange);
     // Patch change hook is REQUIRED
-    assert(intrf->rt_patchChange);
+    EPI_ASSERT(intrf->rt_patchChange);
     // Pitch bend hook is REQUIRED
-    assert(intrf->rt_pitchBend);
+    EPI_ASSERT(intrf->rt_pitchBend);
     // System Exclusive hook is REQUIRED
-    assert(intrf->rt_systemExclusive);
+    EPI_ASSERT(intrf->rt_systemExclusive);
 
     if (intrf->pcmSampleRate != 0 && intrf->pcmFrameSize != 0)
     {
@@ -294,7 +1723,7 @@ int MidiSequencer::PlayStream(uint8_t *stream, size_t length)
     size_t   periodSize = 0;
     uint8_t *stream_pos = stream;
 
-    assert(midi_output_interface_->onPcmRender);
+    EPI_ASSERT(midi_output_interface_->onPcmRender);
 
     while (left > 0)
     {
@@ -315,7 +1744,7 @@ int MidiSequencer::PlayStream(uint8_t *stream, size_t length)
             stream_pos += generateSize * midi_time_.frame_size_;
             count += generateSize;
             left -= generateSize;
-            assert(left <= samples);
+            EPI_ASSERT(left <= samples);
         }
 
         if (midi_time_.time_rest_ <= 0.0)
@@ -382,30 +1811,6 @@ void MidiSequencer::SetSoloTrack(size_t track)
 void MidiSequencer::SetSongNum(int track)
 {
     midi_load_track_number_ = track;
-
-    if (!midi_raw_songs_data_.empty() && midi_format_ == kFormatXMidi) // Reload the song
-    {
-        if (midi_load_track_number_ >= (int)midi_raw_songs_data_.size())
-            midi_load_track_number_ = midi_raw_songs_data_.size() - 1;
-
-        if (midi_output_interface_ && midi_output_interface_->rt_controllerChange)
-        {
-            for (int i = 0; i < 15; i++)
-                midi_output_interface_->rt_controllerChange(midi_output_interface_->rtUserData, i, 123, 0);
-        }
-
-        midi_at_end_ = false;
-        midi_loop_.FullReset();
-        midi_loop_.caught_start_ = true;
-
-        midi_smf_format_ = 0;
-
-        epi::MemFile *mfr = new epi::MemFile(midi_raw_songs_data_[midi_load_track_number_].data(),
-                                             midi_raw_songs_data_[midi_load_track_number_].size());
-        ParseSMF(mfr);
-
-        midi_format_ = kFormatXMidi;
-    }
 }
 
 int MidiSequencer::GetSongsCount()
@@ -1477,48 +2882,6 @@ MidiSequencer::MidiEvent MidiSequencer::ParseEvent(const uint8_t **pptr, const u
                     break;
                 }
             }
-
-            if (midi_format_ == kFormatXMidi)
-            {
-                switch (evt.data[0])
-                {
-                case 116: // For Loop Controller
-                    evt.type     = MidiEvent::kSpecial;
-                    evt.sub_type = MidiEvent::kLoopStackBegin;
-                    evt.data[0]  = evt.data[1];
-                    evt.data.pop_back();
-
-                    if (midi_output_interface_->onDebugMessage)
-                    {
-                        midi_output_interface_->onDebugMessage(midi_output_interface_->onDebugMessage_userdata,
-                                                               "Stack XMI Loop Start at %d to %d level "
-                                                               "with %d loops",
-                                                               midi_loop_.stack_level_, midi_loop_.stack_level_ + 1,
-                                                               evt.data[0]);
-                    }
-                    break;
-
-                case 117: // Next/Break Loop Controller
-                    evt.type     = MidiEvent::kSpecial;
-                    evt.sub_type = evt.data[1] < 64 ? MidiEvent::kLoopStackBreak : MidiEvent::kLoopStackEnd;
-                    evt.data.clear();
-
-                    if (midi_output_interface_->onDebugMessage)
-                    {
-                        midi_output_interface_->onDebugMessage(
-                            midi_output_interface_->onDebugMessage_userdata, "Stack XMI Loop %s at %d to %d level",
-                            (evt.sub_type == MidiEvent::kLoopStackEnd ? "End" : "Break"), midi_loop_.stack_level_,
-                            midi_loop_.stack_level_ - 1);
-                    }
-                    break;
-
-                case 119: // Callback Trigger
-                    evt.type     = MidiEvent::kSpecial;
-                    evt.sub_type = MidiEvent::kCallbackTrigger;
-                    evt.data.assign(1, evt.data[1]);
-                    break;
-                }
-            }
         }
 
         return evt;
@@ -1761,7 +3124,7 @@ void MidiSequencer::handleEvent(size_t track, const MidiSequencer::MidiEvent &ev
 
 double MidiSequencer::Tick(double s, double granularity)
 {
-    assert(midi_output_interface_); // MIDI output interface must be defined!
+    EPI_ASSERT(midi_output_interface_); // MIDI output interface must be defined!
 
     s *= midi_tempo_multiplier_;
     midi_current_position_.wait -= s;
@@ -1966,7 +3329,7 @@ bool MidiSequencer::LoadMidi(epi::MemFile *mfr, uint16_t rate)
     (void)(fsize);
     midi_parsing_errors_string_.clear();
 
-    assert(midi_output_interface_); // MIDI output interface must be defined!
+    EPI_ASSERT(midi_output_interface_); // MIDI output interface must be defined!
 
     midi_at_end_ = false;
     midi_loop_.FullReset();
@@ -2010,12 +3373,6 @@ bool MidiSequencer::LoadMidi(epi::MemFile *mfr, uint16_t rate)
     {
         mfr->Seek(0, epi::File::kSeekpointStart);
         return ParseMUS(mfr);
-    }
-
-    if ((memcmp(headerBuf, "FORM", 4) == 0) && (memcmp(headerBuf + 8, "XDIR", 4) == 0))
-    {
-        mfr->Seek(0, epi::File::kSeekpointStart);
-        return ParseXMI(mfr);
     }
 
     if (detectRSXX(headerBuf, mfr))
@@ -2392,90 +3749,4 @@ bool MidiSequencer::ParseMUS(epi::MemFile *mfr)
     mfr = new epi::MemFile(mid, (size_t)(mid_len));
 
     return ParseSMF(mfr);
-}
-
-bool MidiSequencer::ParseXMI(epi::MemFile *mfr)
-{
-    const size_t                      headerSize            = 14;
-    char                              headerBuf[headerSize] = "";
-    size_t                            fsize                 = 0;
-    std::vector<std::vector<uint8_t>> song_buf;
-    bool                              ret;
-
-    fsize = mfr->Read(headerBuf, headerSize);
-    if (fsize < headerSize)
-    {
-        midi_error_string_ = "Unexpected end of file at header!\n";
-        delete mfr;
-        return false;
-    }
-
-    if (memcmp(headerBuf, "FORM", 4) != 0)
-    {
-        midi_error_string_ = "MIDI Loader: Invalid format, FORM signature is not found!\n";
-        delete mfr;
-        return false;
-    }
-
-    if (memcmp(headerBuf + 8, "XDIR", 4) != 0)
-    {
-        midi_error_string_ = "MIDI Loader: Invalid format\n";
-        delete mfr;
-        return false;
-    }
-
-    size_t mus_len = mfr->GetLength();
-    mfr->Seek(0, epi::File::kSeekpointStart);
-
-    uint8_t *mus = (uint8_t *)std::malloc(mus_len + 20);
-    if (!mus)
-    {
-        midi_error_string_ = "Out of memory!";
-        delete mfr;
-        return false;
-    }
-
-    memset(mus, 0, mus_len + 20);
-
-    fsize = mfr->Read(mus, mus_len);
-    if (fsize < mus_len)
-    {
-        midi_error_string_ = "Failed to read XMI file data!\n";
-        delete mfr;
-        return false;
-    }
-
-    // Close source stream
-    delete mfr;
-    mfr = nullptr;
-
-    int m2mret = ConvertXMIToMidi(mus, (uint32_t)(mus_len + 20), song_buf, kXMINoConversion);
-    if (mus)
-        free(mus);
-    if (m2mret < 0)
-    {
-        song_buf.clear();
-        midi_error_string_ = "Invalid XMI data format!";
-        return false;
-    }
-
-    if (midi_load_track_number_ >= (int)song_buf.size())
-        midi_load_track_number_ = song_buf.size() - 1;
-
-    for (size_t i = 0; i < song_buf.size(); ++i)
-    {
-        midi_raw_songs_data_.push_back(song_buf[i]);
-    }
-
-    song_buf.clear();
-
-    // Open converted MIDI file
-    mfr = new epi::MemFile(midi_raw_songs_data_[midi_load_track_number_].data(),
-                           midi_raw_songs_data_[midi_load_track_number_].size());
-    // Set format as XMIDI
-    midi_format_ = kFormatXMidi;
-
-    ret = ParseSMF(mfr);
-
-    return ret;
 }

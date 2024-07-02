@@ -375,8 +375,6 @@ static void RenderSkyCylinder(void)
 
     if (current_map->forced_skystretch_ > kSkyStretchUnset)
         current_sky_stretch = current_map->forced_skystretch_;
-    else if (!level_flags.mouselook)
-        current_sky_stretch = kSkyStretchVanilla;
     else
         current_sky_stretch = (SkyStretch)sky_stretch_mode.d_;
 

@@ -121,20 +121,9 @@ extern const Image *sky_flat_image;
 #define EDGE_IMAGE_IS_SKY(plane) ((plane).image == sky_flat_image)
 
 // misc stuff
-extern bool png_screenshots;
-
 extern int screen_hud;
 
 extern int reduce_flash;
-
-enum InvulnerabilityEffectType
-{
-    kInvulnerabilitySimple = 0, // plain inverse blending
-    kInvulnerabilityTextured,   // upload new textures
-    kTotalInvulnerabilityEffects
-};
-
-extern int invulnerability_effect;
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
