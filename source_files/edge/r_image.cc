@@ -253,6 +253,7 @@ Image *AddPackImageSmart(const char *name, ImageSource type, const char *packfil
     int offset_x = 0, offset_y = 0;
 
     bool is_patch = false;
+    bool is_raw = false;
     bool solid    = false;
 
     int  header_len = HMM_MIN((int)sizeof(header), packfile_len);
@@ -278,6 +279,7 @@ Image *AddPackImageSmart(const char *name, ImageSource type, const char *packfil
             height = 200;
             solid  = true;
             type   = kImageSourceRawBlock;
+            is_raw = true;
         }
         // check for AUTOPAGE images, which are raw 320x158
         else if (packfile_len == 320 * 158 && type == kImageSourceGraphic)
@@ -286,6 +288,7 @@ Image *AddPackImageSmart(const char *name, ImageSource type, const char *packfil
             height = 158;
             solid  = true;
             type   = kImageSourceRawBlock;
+            is_raw = true;
         }
         // check for flats
         else if ((packfile_len == 64 * 64 || packfile_len == 64 * 65) && type == kImageSourceGraphic)
@@ -294,6 +297,7 @@ Image *AddPackImageSmart(const char *name, ImageSource type, const char *packfil
             height = 64;
             solid  = true;
             type   = kImageSourceFlat;
+            is_raw = true;
         }
         else
         {
@@ -342,6 +346,7 @@ Image *AddPackImageSmart(const char *name, ImageSource type, const char *packfil
     rim->source_.graphic.packfile_name = (char *)calloc(pn_len + 1, 1);
     epi::CStringCopyMax(rim->source_.graphic.packfile_name, packfile_name, pn_len);
     rim->source_.graphic.is_patch     = is_patch;
+    rim->source_.graphic.is_raw       = is_raw;
     rim->source_.graphic.user_defined = false; // This should only get set to true with DDFIMAGE specified DOOM
                                                // format images
     rim->source_palette_ = -1;
@@ -384,6 +389,7 @@ static Image *AddImage_Smart(const char *name, ImageSource type, int lump, std::
     int offset_x = 0, offset_y = 0;
 
     bool is_patch = false;
+    bool is_raw = false;
     bool solid    = false;
 
     int  header_len = HMM_MIN((int)sizeof(header), lump_len);
@@ -409,6 +415,7 @@ static Image *AddImage_Smart(const char *name, ImageSource type, int lump, std::
             height = 200;
             solid  = true;
             type   = kImageSourceRawBlock;
+            is_raw = true;
         }
         // check for AUTOPAGE images, which are raw 320x158
         else if (lump_len == 320 * 158 && type == kImageSourceGraphic)
@@ -417,6 +424,7 @@ static Image *AddImage_Smart(const char *name, ImageSource type, int lump, std::
             height = 158;
             solid  = true;
             type   = kImageSourceRawBlock;
+            is_raw = true;
         }
         // check for flats
         else if ((lump_len == 64 * 64 || lump_len == 64 * 65) && type == kImageSourceGraphic)
@@ -425,6 +433,7 @@ static Image *AddImage_Smart(const char *name, ImageSource type, int lump, std::
             height = 64;
             solid  = true;
             type   = kImageSourceFlat;
+            is_raw = true;
         }
         else
         {
@@ -471,6 +480,7 @@ static Image *AddImage_Smart(const char *name, ImageSource type, int lump, std::
     rim->source_type_                 = type;
     rim->source_.graphic.lump         = lump;
     rim->source_.graphic.is_patch     = is_patch;
+    rim->source_.graphic.is_raw       = is_raw;
     rim->source_.graphic.user_defined = false; // This should only get set to true with DDFIMAGE specified DOOM
                                                // format images
     rim->source_palette_ = GetPaletteForLump(lump);
@@ -556,6 +566,7 @@ static Image *AddImageFlat(const char *name, int lump)
 
     rim->source_type_      = kImageSourceFlat;
     rim->source_.flat.lump = lump;
+    rim->source_.graphic.is_raw = true;
     rim->source_palette_   = GetPaletteForLump(lump);
 
     real_flats.push_back(rim);

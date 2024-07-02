@@ -498,7 +498,8 @@ std::string GetFilename(std::string_view path)
 // path from the child path assuming the parent is actually in the child path
 std::string MakePathRelative(std::string_view parent, std::string_view child)
 {
-    EPI_ASSERT(!parent.empty() && !child.empty() && child.size() > parent.size());
+    EPI_ASSERT(!parent.empty() && !child.empty());
+    std::string relpath;
     size_t parent_check = child.find(parent);
     if (parent_check != std::string_view::npos)
     {
@@ -506,7 +507,7 @@ std::string MakePathRelative(std::string_view parent, std::string_view child)
         if (IsDirectorySeparator(child[0]))
             child.remove_prefix(1);
     }
-    std::string relpath(child);
+    relpath = child;
     return relpath;
 }
 
