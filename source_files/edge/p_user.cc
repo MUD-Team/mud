@@ -256,24 +256,17 @@ static void MovePlayer(Player *player, bool extra_tic)
     // -ACB- 1998/07/02 New Code used, rerouted via Ticcmd
     // -ACB- 1998/07/27 Used defines for look limits.
     //
-    if (level_flags.mouselook)
-    {
-        if (player->zoom_field_of_view_ > 0)
-            cmd->mouselook_turn /= kZoomAngleDivisor;
+    if (player->zoom_field_of_view_ > 0)
+        cmd->mouselook_turn /= kZoomAngleDivisor;
 
-        BAMAngle V = player->map_object_->vertical_angle_ + (BAMAngle)(cmd->mouselook_turn << 16);
+    BAMAngle V = player->map_object_->vertical_angle_ + (BAMAngle)(cmd->mouselook_turn << 16);
 
-        if (V < kBAMAngle180 && V > kMouseLookLimit)
-            V = kMouseLookLimit;
-        else if (V >= kBAMAngle180 && V < (kBAMAngle360 - kMouseLookLimit))
-            V = (kBAMAngle360 - kMouseLookLimit);
+    if (V < kBAMAngle180 && V > kMouseLookLimit)
+        V = kMouseLookLimit;
+    else if (V >= kBAMAngle180 && V < (kBAMAngle360 - kMouseLookLimit))
+        V = (kBAMAngle360 - kMouseLookLimit);
 
-        player->map_object_->vertical_angle_ = V;
-    }
-    else
-    {
-        player->map_object_->vertical_angle_ = 0;
-    }
+    player->map_object_->vertical_angle_ = V;
 
     // EDGE Feature: Vertical Centering
     //
@@ -385,7 +378,7 @@ static void MovePlayer(Player *player, bool extra_tic)
 
     if (!extra_tic || !double_framerate.d_)
     {
-        if (level_flags.jump && mo->info_->jumpheight_ > 0 && (cmd->upward_move > 4))
+        if (mo->info_->jumpheight_ > 0 && (cmd->upward_move > 4))
         {
             if (!jumping && !crouching && !swimming && !flying && onground && !onladder)
             {
@@ -397,7 +390,7 @@ static void MovePlayer(Player *player, bool extra_tic)
 
     // EDGE Feature: Crouching
 
-    if (level_flags.crouch && mo->info_->crouchheight_ > 0 && (player->command_.upward_move < -4) &&
+    if (mo->info_->crouchheight_ > 0 && (player->command_.upward_move < -4) &&
         !player->wet_feet_ && !jumping && onground)
     // NB: no ladder check, onground is sufficient
     {

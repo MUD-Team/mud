@@ -571,9 +571,6 @@ static void P_SpawnLineEffectDebris(Line *TheLine, const LineType *special)
     if (!info)
         return; // found nothing so exit
 
-    if (!level_flags.have_extra && (info->extended_flags_ & kExtendedFlagExtra))
-        return;
-
     // if it's shootable we've already handled this elsewhere
     if (special->type_ == kLineTriggerShootable)
         return;

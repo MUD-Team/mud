@@ -125,22 +125,16 @@ GameFlags default_game_flags = {
     false,      // enemy_respawn_mode
     false,      // item respawn
 
-    false,      // true 3d gameplay
     8,          // gravity
     false,      // more blood
 
-    true,       // jump
-    true,       // crouch
-    true,       // mlook
     kAutoAimOn, // autoaim
 
     true,       // cheats
-    true,       // have_extra
     false,      // limit_zoom
 
     true,       // kicking
     true,       // weapon_switch
-    true,       // pass_missile
     false,      // team_damage
 };
 
@@ -377,17 +371,12 @@ static void SetGlobalVariables(void)
     CheckBooleanParameter("sound", &no_sound, true);
     CheckBooleanParameter("music", &no_music, true);
     CheckBooleanParameter("items_respawn", &global_flags.items_respawn, false);
-    CheckBooleanParameter("mlook", &global_flags.mouselook, false);
     CheckBooleanParameter("monsters", &global_flags.no_monsters, true);
     CheckBooleanParameter("fast", &global_flags.fast_monsters, false);
-    CheckBooleanParameter("extras", &global_flags.have_extra, false);
     CheckBooleanParameter("kick", &global_flags.kicking, false);
     CheckBooleanParameter("single_tics", &single_tics, false);
-    CheckBooleanParameter("true3d", &global_flags.true_3d_gameplay, false);
     CheckBooleanParameter("blood", &global_flags.more_blood, false);
     CheckBooleanParameter("cheats", &global_flags.cheats, false);
-    CheckBooleanParameter("jumping", &global_flags.jump, false);
-    CheckBooleanParameter("crouching", &global_flags.crouch, false);
     CheckBooleanParameter("weaponswitch", &global_flags.weapon_switch, false);
 
     CheckBooleanParameter("automap_keydoor_blink", &automap_keydoor_blink, false);

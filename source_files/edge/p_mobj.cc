@@ -1965,9 +1965,6 @@ void RunMapObjectThinkers(bool extra_tic)
 //
 void SpawnDebris(float x, float y, float z, BAMAngle angle, const MapObjectDefinition *debris)
 {
-    // if (!level_flags.have_extra && (splash->extended_flags_ &
-    // kExtendedFlagExtra)) return; if (! (splash->extended_flags_ &
-    // kExtendedFlagExtra)) return; //Optional extra
     MapObject *th;
 
     th = CreateMapObject(x, y, z, debris);

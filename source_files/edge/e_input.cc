@@ -571,16 +571,8 @@ bool InputResponder(InputEvent *ev)
             LogPrint("Mouse %+04d %+04d --> %+7.2f %+7.2f\n", ev->value.mouse.dx, ev->value.mouse.dy, dx, dy);
 
         // -AJA- 1999/07/27: Mlook key like quake's.
-        if (IsKeyPressed(key_mouselook))
-        {
-            ball_deltas[kAxisTurn] += dx;
-            ball_deltas[kAxisMouselook] += dy;
-        }
-        else
-        {
-            ball_deltas[(mouse_x_axis + 1) >> 1] += dx;
-            ball_deltas[(mouse_y_axis + 1) >> 1] += dy;
-        }
+        ball_deltas[(mouse_x_axis + 1) >> 1] += dx;
+        ball_deltas[(mouse_y_axis + 1) >> 1] += dy;
 
         return true; // eat events
     }

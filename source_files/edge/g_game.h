@@ -29,7 +29,6 @@
 #include "e_event.h"
 #include "e_player.h"
 
-extern bool pistol_starts;
 extern int  random_seed;
 extern int  exit_time; // for savegame code
 extern int  key_show_players;

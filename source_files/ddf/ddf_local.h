@@ -251,7 +251,6 @@ constexpr int16_t     kEmptyColormapNumber = -777;
 // DDFMOBJ Code  (Moving Objects)
 void DDFMobjInit(void);
 void DDFMobjCleanUp(void);
-void DDFMobjGetExtra(const char *info, void *storage);
 void DDFMobjGetItemType(const char *info, void *storage);
 void DDFMobjGetBpAmmo(const char *info, void *storage);
 void DDFMobjGetBpAmmoLimit(const char *info, void *storage);

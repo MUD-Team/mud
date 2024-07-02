@@ -69,7 +69,6 @@ GameState game_state = kGameStateNothing;
 GameAction game_action = kGameActionNothing;
 
 bool paused        = false;
-bool pistol_starts = false;
 
 int key_pause;
 
@@ -169,7 +168,7 @@ void LoadLevel_Bits(void)
         if (!p)
             continue;
 
-        if (p->player_state_ == kPlayerDead || (current_map->force_on_ & kMapFlagResetPlayer) || pistol_starts)
+        if (p->player_state_ == kPlayerDead || (current_map->force_on_ & kMapFlagResetPlayer))
         {
             p->player_state_ = kPlayerAwaitingRespawn;
         }
@@ -179,30 +178,19 @@ void LoadLevel_Bits(void)
 
     // -KM- 1998/12/16 Make map flags actually do stuff.
     // -AJA- 2000/02/02: Made it more generic.
-    HandleLevelFlag(&level_flags.jump, kMapFlagJumping);
-    HandleLevelFlag(&level_flags.crouch, kMapFlagCrouching);
-    HandleLevelFlag(&level_flags.mouselook, kMapFlagMlook);
     HandleLevelFlag(&level_flags.items_respawn, kMapFlagItemRespawn);
     HandleLevelFlag(&level_flags.fast_monsters, kMapFlagFastParm);
-    HandleLevelFlag(&level_flags.true_3d_gameplay, kMapFlagTrue3D);
     HandleLevelFlag(&level_flags.more_blood, kMapFlagMoreBlood);
     HandleLevelFlag(&level_flags.cheats, kMapFlagCheats);
     HandleLevelFlag(&level_flags.enemies_respawn, kMapFlagRespawn);
     HandleLevelFlag(&level_flags.enemy_respawn_mode, kMapFlagResRespawn);
-    HandleLevelFlag(&level_flags.have_extra, kMapFlagExtras);
     HandleLevelFlag(&level_flags.limit_zoom, kMapFlagLimitZoom);
     HandleLevelFlag(&level_flags.kicking, kMapFlagKicking);
     HandleLevelFlag(&level_flags.weapon_switch, kMapFlagWeaponSwitch);
-    HandleLevelFlag(&level_flags.pass_missile, kMapFlagPassMissile);
     HandleLevelFlag(&level_flags.team_damage, kMapFlagTeamDamage);
 
     if (current_map->force_on_ & kMapFlagAutoAim)
-    {
-        if (current_map->force_on_ & kMapFlagAutoAimMlook)
-            level_flags.autoaim = kAutoAimMouselook;
-        else
-            level_flags.autoaim = kAutoAimOn;
-    }
+        level_flags.autoaim = kAutoAimOn;
     else if (current_map->force_off_ & kMapFlagAutoAim)
         level_flags.autoaim = kAutoAimOff;
 

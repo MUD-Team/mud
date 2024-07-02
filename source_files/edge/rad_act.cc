@@ -386,10 +386,6 @@ void ScriptSpawnThing(RADScriptTrigger *R, void *param)
     if (level_flags.no_monsters && (minfo->extended_flags_ & kExtendedFlagMonster))
         return;
 
-    // -AJA- 1999/10/07: -noextra check.
-    if (!level_flags.have_extra && (minfo->extended_flags_ & kExtendedFlagExtra))
-        return;
-
     // -AJA- 1999/09/11: Support for supplying Z value.
 
     if (t->spawn_effect)

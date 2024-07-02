@@ -99,7 +99,6 @@ extern int key_talk;
 extern int key_console;
 extern int key_pause;
 
-extern int key_mouselook; // -AJA- 1999/07/27.
 extern int key_second_attack;
 extern int key_third_attack;
 extern int key_fourth_attack;

@@ -94,21 +94,14 @@ static ConfigurationDefault defaults[] = {
     {kConfigBoolean, "items_respawn", &global_flags.items_respawn, EDGE_DEFAULT_ITEMRESPAWN},
     {kConfigBoolean, "respawn", &global_flags.enemies_respawn, EDGE_DEFAULT_RESPAWN},
     {kConfigBoolean, "fast_monsters", &global_flags.fast_monsters, EDGE_DEFAULT_FASTPARM},
-    {kConfigBoolean, "true_3d_gameplay", &global_flags.true_3d_gameplay, EDGE_DEFAULT_TRUE3DGAMEPLAY},
     {kConfigEnum, "autoaim", &global_flags.autoaim, EDGE_DEFAULT_AUTOAIM},
-    {kConfigBoolean, "shootthru_scenery", &global_flags.pass_missile, EDGE_DEFAULT_PASS_MISSILE},
 
-    {kConfigBoolean, "pistol_starts", &pistol_starts, 0},
     {kConfigBoolean, "automap_keydoor_blink", &automap_keydoor_blink, EDGE_DEFAULT_AM_KEYDOORBLINK},
 
     // -KM- 1998/07/21 Save the blood setting
     {kConfigBoolean, "blood", &global_flags.more_blood, EDGE_DEFAULT_MORE_BLOOD},
-    {kConfigBoolean, "extra", &global_flags.have_extra, EDGE_DEFAULT_HAVE_EXTRA},
     {kConfigBoolean, "weaponkick", &global_flags.kicking, EDGE_DEFAULT_KICKING},
     {kConfigBoolean, "weaponswitch", &global_flags.weapon_switch, EDGE_DEFAULT_WEAPON_SWITCH},
-    {kConfigBoolean, "mlook", &global_flags.mouselook, EDGE_DEFAULT_MLOOK},
-    {kConfigBoolean, "jumping", &global_flags.jump, EDGE_DEFAULT_JUMP},
-    {kConfigBoolean, "crouching", &global_flags.crouch, EDGE_DEFAULT_CROUCH},
     {kConfigInteger, "smoothing", &image_smoothing, EDGE_DEFAULT_USE_SMOOTHING},
     {kConfigInteger, "dlights", &use_dynamic_lights, EDGE_DEFAULT_USE_DLIGHTS},
     {kConfigInteger, "detail_level", &detail_level, EDGE_DEFAULT_DETAIL_LEVEL},
@@ -164,7 +157,6 @@ static ConfigurationDefault defaults[] = {
     {kConfigKey, "key_console", &key_console, EDGE_DEFAULT_KEY_CONSOLE},               // -AJA- 2007/08/15.
     {kConfigKey, "key_pause", &key_pause, kPause},                                     // -AJA- 2010/06/13.
 
-    {kConfigKey, "key_mouselook", &key_mouselook, EDGE_DEFAULT_KEY_MLOOK},             // -AJA- 1999/07/27.
     {kConfigKey, "key_second_attack", &key_second_attack, EDGE_DEFAULT_KEY_SECONDATK}, // -AJA- 2000/02/08.
     {kConfigKey, "key_third_attack", &key_third_attack, 0},                            //
     {kConfigKey, "key_fourth_attack", &key_fourth_attack, 0},                          //

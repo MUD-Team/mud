@@ -1242,13 +1242,10 @@ void ThrustMapObject(MapObject *target, MapObject *inflictor, float thrust)
     target->momentum_.X += push * epi::BAMCos(angle);
     target->momentum_.Y += push * epi::BAMSin(angle);
 
-    if (level_flags.true_3d_gameplay)
-    {
-        float dz    = MapObjectMidZ(target) - MapObjectMidZ(inflictor);
-        float slope = ApproximateSlope(dx, dy, dz);
+    float dz    = MapObjectMidZ(target) - MapObjectMidZ(inflictor);
+    float slope = ApproximateSlope(dx, dy, dz);
 
-        target->momentum_.Z += push * slope / 2;
-    }
+    target->momentum_.Z += push * slope / 2;
 }
 
 //
@@ -1296,13 +1293,10 @@ void PushMapObject(MapObject *target, MapObject *inflictor, float thrust)
     target->momentum_.X += push * epi::BAMCos(angle);
     target->momentum_.Y += push * epi::BAMSin(angle);
 
-    if (level_flags.true_3d_gameplay)
-    {
-        float dz    = MapObjectMidZ(target) - MapObjectMidZ(inflictor);
-        float slope = ApproximateSlope(dx, dy, dz);
+    float dz    = MapObjectMidZ(target) - MapObjectMidZ(inflictor);
+    float slope = ApproximateSlope(dx, dy, dz);
 
-        target->momentum_.Z += push * slope / 2;
-    }
+    target->momentum_.Z += push * slope / 2;
 }
 
 //

@@ -85,25 +85,18 @@ static const DDFCommandList level_commands[] = {
 
     {nullptr, nullptr, 0, nullptr}};
 
-static DDFSpecialFlags map_specials[] = {{"JUMPING", kMapFlagJumping, 0},
-                                         {"MLOOK", kMapFlagMlook, 0},
-                                         {"FREELOOK", kMapFlagMlook, 0}, // -AJA- backwards compat.
-                                         {"CHEATS", kMapFlagCheats, 0},
+static DDFSpecialFlags map_specials[] = {{"CHEATS", kMapFlagCheats, 0},
                                          {"ITEM_RESPAWN", kMapFlagItemRespawn, 0},
                                          {"FAST_MONSTERS", kMapFlagFastParm, 0},
                                          {"RESURRECT_RESPAWN", kMapFlagResRespawn, 0},
                                          {"TELEPORT_RESPAWN", kMapFlagResRespawn, 1},
-                                         {"TRUE3D", kMapFlagTrue3D, 0},
                                          {"ENEMY_STOMP", kMapFlagStomp, 0},
                                          {"MORE_BLOOD", kMapFlagMoreBlood, 0},
                                          {"NORMAL_BLOOD", kMapFlagMoreBlood, 1},
                                          {"RESPAWN", kMapFlagRespawn, 0},
                                          {"AUTOAIM", kMapFlagAutoAim, 0},
-                                         {"AA_MLOOK", kMapFlagAutoAimMlook, 0},
-                                         {"EXTRAS", kMapFlagExtras, 0},
                                          {"RESET_PLAYER", kMapFlagResetPlayer, 0},
                                          {"LIMIT_ZOOM", kMapFlagLimitZoom, 0},
-                                         {"CROUCHING", kMapFlagCrouching, 0},
                                          {"WEAPON_KICK", kMapFlagKicking, 0},
 
                                          {nullptr, 0, 0}};

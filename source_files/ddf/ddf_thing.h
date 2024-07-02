@@ -162,7 +162,7 @@ enum ExtendedFlag
     // Thing is never affected by friction
     kExtendedFlagNoFriction = (1 << 20),
     // Thing is optional, won't exist when -noextra is used.
-    kExtendedFlagExtra = (1 << 21),
+    // kExtendedFlagExtra = (1 << 21), // Legacy, no longer used - Dasho
     // Just bounced, won't enter bounce states until BOUNCE_REARM.
     kExtendedFlagJustBounced = (1 << 22),
     // Thing can be "used" (like linedefs) with the spacebar.  Thing
@@ -201,7 +201,7 @@ enum HyperFlag
     // -AJA- 2006/08/17: used by MT_PUSH and MT_PULL objects
     kHyperFlagPointForce = (1 << 7),
     // -AJA- 2006/10/19: scenery items don't block missiles
-    kHyperFlagMissilesPassThrough = (1 << 8),
+    //kHyperFlagMissilesPassThrough = (1 << 8), // Legacy, no longer used - Dasho
     // -AJA- 2007/11/03: invulnerable flag
     kHyperFlagInvulnerable = (1 << 9),
     // -AJA- 2007/11/06: gain health when causing damage
