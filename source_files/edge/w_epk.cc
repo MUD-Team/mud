@@ -1182,7 +1182,7 @@ static void ProcessWADsInPack(PackFile *pack)
                     entry.name_, (pack->parent_->kind_ == kFileKindIFolder || pack->parent_->kind_ == kFileKindIPK)
                                      ? kFileKindIPackWAD
                                      : kFileKindPackWAD);
-                pack_wad_df->name_ = entry.name_;
+                pack_wad_df->name_ = epi::MakePathRelative(pack->parent_->name_, entry.name_);
                 pack_wad_df->file_ = pack_wad_mem;
                 ProcessFile(pack_wad_df);
             }
