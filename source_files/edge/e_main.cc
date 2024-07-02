@@ -177,8 +177,6 @@ EDGE_DEFINE_CONSOLE_VARIABLE(team_name, "EDGE Team", kConsoleVariableFlagNoReset
 EDGE_DEFINE_CONSOLE_VARIABLE(application_name, "EDGE-Classic", kConsoleVariableFlagNoReset)
 EDGE_DEFINE_CONSOLE_VARIABLE(homepage, "https://edge-classic.github.io", kConsoleVariableFlagNoReset)
 
-EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(video_overlay, "0", kConsoleVariableFlagArchive, 0, 6)
-
 EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(title_scaling, "0", kConsoleVariableFlagArchive, 0, 1)
 
 EDGE_DEFINE_CONSOLE_VARIABLE(force_infighting, "0", kConsoleVariableFlagArchive)
@@ -252,16 +250,6 @@ class StartupProgress
             else
                 HUDDrawText(26, y, startup_messages_[i].c_str());
             y += 10;
-        }
-
-        if (!hud_overlays.at(video_overlay.d_).empty())
-        {
-            const Image *overlay =
-                ImageLookup(hud_overlays.at(video_overlay.d_).c_str(), kImageNamespaceGraphic, kImageLookupNull);
-            if (overlay)
-                HUDRawImage(0, 0, current_screen_width, current_screen_height, overlay, 0, 0,
-                            current_screen_width / overlay->ScaledWidthActual(),
-                            current_screen_height / overlay->ScaledHeightActual());
         }
 
         if (gamma_correction.f_ < 0)
@@ -611,16 +599,6 @@ void EdgeDisplay(void)
     NetworkUpdate();
 
     ConsoleDrawer();
-
-    if (!hud_overlays.at(video_overlay.d_).empty())
-    {
-        const Image *overlay =
-            ImageLookup(hud_overlays.at(video_overlay.d_).c_str(), kImageNamespaceGraphic, kImageLookupNull);
-        if (overlay)
-            HUDRawImage(0, 0, current_screen_width, current_screen_height, overlay, 0, 0,
-                        current_screen_width / overlay->ScaledWidthActual(),
-                        current_screen_height / overlay->ScaledHeightActual());
-    }
 
     if (gamma_correction.f_ < 0)
     {

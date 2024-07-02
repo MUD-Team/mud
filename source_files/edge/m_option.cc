@@ -119,7 +119,6 @@ extern ConsoleVariable crosshair_style;
 extern ConsoleVariable crosshair_color;
 extern ConsoleVariable crosshair_size;
 extern ConsoleVariable midi_soundfont;
-extern ConsoleVariable video_overlay;
 extern ConsoleVariable erraticism;
 extern ConsoleVariable double_framerate;
 extern ConsoleVariable draw_culling;
@@ -384,8 +383,6 @@ static OptionMenuItem vidoptions[] = {
     {kOptionMenuItemTypeSwitch, "Sky Scaling", "Mirror/Repeat/Stretch/Vanilla", 4, &sky_stretch_mode.d_,
      OptionMenuUpdateConsoleVariableFromInt, "Vanilla will be forced when Mouselook is Off", &sky_stretch_mode},
     {kOptionMenuItemTypeSwitch, "Dynamic Lighting", YesNo, 2, &use_dynamic_lights, nullptr, nullptr},
-    {kOptionMenuItemTypeSwitch, "Overlay", "None/Lines 1x/Lines 2x/Vertical 1x/Vertical 2x/Grill 1x/Grill 2x", 7,
-     &video_overlay.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr, &video_overlay},
     {kOptionMenuItemTypeSwitch, "Crosshair", "None/Dot/Angle/Plus/Spiked/Thin/Cross/Carat/Circle/Double", 10,
      &crosshair_style.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr, &crosshair_style},
     {kOptionMenuItemTypeSwitch, "Crosshair Color", "White/Blue/Green/Cyan/Red/Pink/Yellow/Orange", 8,

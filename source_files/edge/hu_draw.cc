@@ -37,7 +37,6 @@
 static constexpr float kVerticalSpacing = 2.0f;
 
 extern int             console_cursor;
-extern ConsoleVariable video_overlay;
 extern ConsoleVariable double_framerate;
 
 static Font *default_font;
@@ -72,16 +71,6 @@ static float margin_x_multiplier;
 static float margin_y_multiplier;
 
 static constexpr float kDoomPixelAspectRatio = (5.0f / 6.0f);
-
-std::vector<std::string> hud_overlays = {
-    "",
-    "OVERLAY_LINES_1X",
-    "OVERLAY_LINES_2X",
-    "OVERLAY_VERTICAL_1X",
-    "OVERLAY_VERTICAL_2X",
-    "OVERLAY_GRILL_1X",
-    "OVERLAY_GRILL_2X",
-};
 
 static inline float HUDToRealCoordinatesX(float x)
 {
@@ -470,12 +459,6 @@ void HUDRawImage(float hx1, float hy1, float hx2, float hy2, const Image *image,
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
         HUDCalcScrollTexCoords(sx, sy, &tx1, &ty1, &tx2, &ty2);
-    }
-
-    if (epi::StringCaseCompareASCII(image->name_, hud_overlays.at(video_overlay.d_)) == 0)
-    {
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     }
 
     bool hud_swirl = false;
