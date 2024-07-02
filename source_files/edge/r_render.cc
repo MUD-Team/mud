@@ -79,9 +79,6 @@ int use_dynamic_lights = 0;
 
 std::unordered_set<AbstractShader *> seen_dynamic_lights;
 
-static int  swirl_pass   = 0;
-static bool thick_liquid = false;
-
 float view_x_slope;
 float view_y_slope;
 
@@ -473,72 +470,6 @@ float Slope_GetHeight(SlopePlane *slope, float x, float y)
     return slope->delta_z1 + along * (slope->delta_z2 - slope->delta_z1);
 }
 
-// Adapted from Quake 3 GPL release - Dasho
-static void CalcTurbulentTexCoords(HMM_Vec2 *texc, HMM_Vec3 *pos)
-{
-    float amplitude = 0.05;
-    float now       = wave_now * (thick_liquid ? 0.5 : 1.0);
-
-    if (swirling_flats == kLiquidSwirlParallax)
-    {
-        if (thick_liquid)
-        {
-            if (swirl_pass == 1)
-            {
-                texc->X = texc->X + sine_table[(int)(((pos->X + pos->Z) * kWavetableIncrement + now) * kSineTableSize) &
-                                               (kSineTableMask)] *
-                                        amplitude;
-                texc->Y = texc->Y +
-                          sine_table[(int)((pos->Y * kWavetableIncrement + now) * kSineTableSize) & (kSineTableMask)] *
-                              amplitude;
-            }
-            else
-            {
-                amplitude = 0;
-                texc->X = texc->X - sine_table[(int)(((pos->X + pos->Z) * kWavetableIncrement + now) * kSineTableSize) &
-                                               (kSineTableMask)] *
-                                        amplitude;
-                texc->Y = texc->Y -
-                          sine_table[(int)((pos->Y * kWavetableIncrement + now) * kSineTableSize) & (kSineTableMask)] *
-                              amplitude;
-            }
-        }
-        else
-        {
-            if (swirl_pass == 1)
-            {
-                amplitude = 0.025;
-                texc->X = texc->X + sine_table[(int)(((pos->X + pos->Z) * kWavetableIncrement + now) * kSineTableSize) &
-                                               (kSineTableMask)] *
-                                        amplitude;
-                texc->Y = texc->Y +
-                          sine_table[(int)((pos->Y * kWavetableIncrement + now) * kSineTableSize) & (kSineTableMask)] *
-                              amplitude;
-            }
-            else
-            {
-                amplitude = 0.015;
-                texc->X = texc->X - sine_table[(int)(((pos->X + pos->Z) * kWavetableIncrement + now) * kSineTableSize) &
-                                               (kSineTableMask)] *
-                                        amplitude;
-                texc->Y = texc->Y -
-                          sine_table[(int)((pos->Y * kWavetableIncrement + now) * kSineTableSize) & (kSineTableMask)] *
-                              amplitude;
-            }
-        }
-    }
-    else
-    {
-        texc->X =
-            texc->X +
-            sine_table[(int)(((pos->X + pos->Z) * kWavetableIncrement + now) * kSineTableSize) & (kSineTableMask)] *
-                amplitude;
-        texc->Y =
-            texc->Y +
-            sine_table[(int)((pos->Y * kWavetableIncrement + now) * kSineTableSize) & (kSineTableMask)] * amplitude;
-    }
-}
-
 struct WallCoordinateData
 {
     int             v_count;
@@ -570,18 +501,9 @@ static void WallCoordFunc(void *d, int v_idx, HMM_Vec3 *pos, float *rgb, HMM_Vec
     *pos    = data->vertices[v_idx];
     *normal = data->normal;
 
-    if (swirl_pass > 1)
-    {
-        rgb[0] = 1.0 / data->R;
-        rgb[1] = 1.0 / data->G;
-        rgb[2] = 1.0 / data->B;
-    }
-    else
-    {
-        rgb[0] = data->R;
-        rgb[1] = data->G;
-        rgb[2] = data->B;
-    }
+    rgb[0] = data->R;
+    rgb[1] = data->G;
+    rgb[2] = data->B;
 
     float along;
 
@@ -596,9 +518,6 @@ static void WallCoordFunc(void *d, int v_idx, HMM_Vec3 *pos, float *rgb, HMM_Vec
 
     texc->X = data->tx0 + along * data->tx_mul;
     texc->Y = data->ty0 + pos->Z * data->ty_mul;
-
-    if (swirl_pass > 0)
-        CalcTurbulentTexCoords(texc, pos);
 
     *lit_pos = *pos;
 }
@@ -640,18 +559,9 @@ static void PlaneCoordFunc(void *d, int v_idx, HMM_Vec3 *pos, float *rgb, HMM_Ve
     *pos    = data->vertices[v_idx];
     *normal = data->normal;
 
-    if (swirl_pass > 1)
-    {
-        rgb[0] = 1.0 / data->R;
-        rgb[1] = 1.0 / data->G;
-        rgb[2] = 1.0 / data->B;
-    }
-    else
-    {
-        rgb[0] = data->R;
-        rgb[1] = data->G;
-        rgb[2] = data->B;
-    }
+    rgb[0] = data->R;
+    rgb[1] = data->G;
+    rgb[2] = data->B;
 
     HMM_Vec2 rxy = {{(data->tx0 + pos->X), (data->ty0 + pos->Y)}};
 
@@ -663,9 +573,6 @@ static void PlaneCoordFunc(void *d, int v_idx, HMM_Vec3 *pos, float *rgb, HMM_Ve
 
     texc->X = rxy.X * data->x_mat.X + rxy.Y * data->x_mat.Y;
     texc->Y = rxy.X * data->y_mat.X + rxy.Y * data->y_mat.Y;
-
-    if (swirl_pass > 0)
-        CalcTurbulentTexCoords(texc, pos);
 
     if (data->bob_amount > 0)
         pos->Z += (plane_z_bob * data->bob_amount);
@@ -985,34 +892,10 @@ static void DrawWallPart(DrawFloor *dfloor, float x1, float y1, float lz1, float
     data.trans      = trans;
     data.mid_masked = mid_masked;
 
-    if (surf->image && surf->image->liquid_type_ == kLiquidImageThick)
-        thick_liquid = true;
-    else
-        thick_liquid = false;
-
-    if (surf->image && surf->image->liquid_type_ > kLiquidImageNone && swirling_flats > kLiquidSwirlSmmu)
-        swirl_pass = 1;
-
     AbstractShader *cmap_shader = GetColormapShader(props, lit_adjust, current_subsector->sector);
 
     cmap_shader->WorldMix(GL_POLYGON, data.v_count, data.tex_id, trans, &data.pass, data.blending, data.mid_masked,
                           &data, WallCoordFunc);
-
-    if (surf->image && surf->image->liquid_type_ > kLiquidImageNone && swirling_flats == kLiquidSwirlParallax)
-    {
-        data.tx0        = surf->offset.X + 25;
-        data.ty0        = surf->offset.Y + 25;
-        swirl_pass      = 2;
-        int   old_blend = data.blending;
-        float old_dt    = data.trans;
-        data.blending   = kBlendingMasked | kBlendingAlpha;
-        data.trans      = 0.33f;
-        trans           = 0.33f;
-        cmap_shader->WorldMix(GL_POLYGON, data.v_count, data.tex_id, trans, &data.pass, data.blending, false, &data,
-                              WallCoordFunc);
-        data.blending = old_blend;
-        data.trans    = old_dt;
-    }
 
     if (use_dynamic_lights && render_view_extra_light < 250)
     {
@@ -1025,8 +908,6 @@ static void DrawWallPart(DrawFloor *dfloor, float x1, float y1, float lz1, float
         SectorGlowIterator(current_seg->front_sector, v_bbox[kBoundingBoxLeft], v_bbox[kBoundingBoxBottom], bottom,
                            v_bbox[kBoundingBoxRight], v_bbox[kBoundingBoxTop], top, GLOWLIT_Wall, &data);
     }
-
-    swirl_pass = 0;
 }
 
 static void DrawSlidingDoor(DrawFloor *dfloor, float c, float f, float tex_top_h, MapSurface *surf, bool opaque,
@@ -2496,35 +2377,10 @@ static void RenderPlane(DrawFloor *dfloor, float h, MapSurface *surf, int face_d
             data.bob_amount = current_subsector->sector->properties.special->ceiling_bob_;
     }
 
-    if (surf->image->liquid_type_ == kLiquidImageThick)
-        thick_liquid = true;
-    else
-        thick_liquid = false;
-
-    if (surf->image->liquid_type_ > kLiquidImageNone && swirling_flats > kLiquidSwirlSmmu)
-        swirl_pass = 1;
-
     AbstractShader *cmap_shader = GetColormapShader(props, 0, current_subsector->sector);
 
     cmap_shader->WorldMix(GL_POLYGON, data.v_count, data.tex_id, trans, &data.pass, data.blending, false /* masked */,
                           &data, PlaneCoordFunc);
-
-    if (surf->image->liquid_type_ > kLiquidImageNone &&
-        swirling_flats == kLiquidSwirlParallax) // Kept as an example for future effects
-    {
-        data.tx0        = surf->offset.X + 25;
-        data.ty0        = surf->offset.Y + 25;
-        swirl_pass      = 2;
-        int   old_blend = data.blending;
-        float old_dt    = data.trans;
-        data.blending   = kBlendingMasked | kBlendingAlpha;
-        data.trans      = 0.33f;
-        trans           = 0.33f;
-        cmap_shader->WorldMix(GL_POLYGON, data.v_count, data.tex_id, trans, &data.pass, data.blending, false, &data,
-                              PlaneCoordFunc);
-        data.blending = old_blend;
-        data.trans    = old_dt;
-    }
 
     if (use_dynamic_lights && render_view_extra_light < 250)
     {
@@ -2534,8 +2390,6 @@ static void RenderPlane(DrawFloor *dfloor, float h, MapSurface *surf, int face_d
         SectorGlowIterator(current_subsector->sector, v_bbox[kBoundingBoxLeft], v_bbox[kBoundingBoxBottom], h,
                            v_bbox[kBoundingBoxRight], v_bbox[kBoundingBoxTop], h, GLOWLIT_Plane, &data);
     }
-
-    swirl_pass = 0;
 }
 
 static inline void AddNewDrawFloor(DrawSubsector *dsub, Extrafloor *ef, float floor_height, float ceiling_height,

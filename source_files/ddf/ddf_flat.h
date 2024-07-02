@@ -33,9 +33,6 @@ class FlatDefinition
     // Member vars....
     std::string name_;
 
-    std::string liquid_; // Values are "THIN" and "THICK" - determines swirl
-                         // and shader params - Dasho
-
     struct SoundEffect *footstep_;
     std::string         splash_;
     // Lobo: item to spawn (or nullptr).  The mobjdef pointer is only valid

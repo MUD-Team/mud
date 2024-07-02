@@ -98,7 +98,6 @@ static ConfigurationDefault defaults[] = {
     {kConfigBoolean, "true_3d_gameplay", &global_flags.true_3d_gameplay, EDGE_DEFAULT_TRUE3DGAMEPLAY},
     {kConfigEnum, "autoaim", &global_flags.autoaim, EDGE_DEFAULT_AUTOAIM},
     {kConfigBoolean, "shootthru_scenery", &global_flags.pass_missile, EDGE_DEFAULT_PASS_MISSILE},
-    {kConfigInteger, "swirling_flats", &swirling_flats, 0},
 
     {kConfigBoolean, "pistol_starts", &pistol_starts, 0},
     {kConfigBoolean, "automap_keydoor_blink", &automap_keydoor_blink, EDGE_DEFAULT_AM_KEYDOORBLINK},

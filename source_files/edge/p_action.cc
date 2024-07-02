@@ -60,7 +60,7 @@
 #include "s_sound.h"
 #include "w_wad.h"
 
-extern FlatDefinition *P_IsThingOnLiquidFloor(MapObject *thing);
+extern FlatDefinition *P_GetThingFlatDef(MapObject *thing);
 
 static constexpr float kLongMeleeRange    = 128.0f; // For kMBF21FlagLongMeleeRange
 static constexpr float kShortMissileRange = 896.0f; // For kMBF21FlagShortMissileRange
@@ -3601,7 +3601,9 @@ void A_JumpLiquid(MapObject *mo)
     //
     // Note: nothing to do with monsters physically jumping.
 
-    if (!P_IsThingOnLiquidFloor(mo)) // Are we touching a liquid floor?
+    FlatDefinition *flat = P_GetThingFlatDef(mo);
+
+    if (!flat || !flat->impactobject_) // Are we touching a liquid floor?
     {
         return;
     }

@@ -30,7 +30,6 @@ FlatDefinitionContainer flatdefs;
 static FlatDefinition dummy_flatdef;
 
 static const DDFCommandList flat_commands[] = {
-    DDF_FIELD("LIQUID", dummy_flatdef, liquid_, DDFMainGetString),
     DDF_FIELD("FOOTSTEP", dummy_flatdef, footstep_, DDFMainLookupSound),
     DDF_FIELD("SPLASH", dummy_flatdef, splash_, DDFMainGetLumpName),
     DDF_FIELD("IMPACT_OBJECT", dummy_flatdef, impactobject_ref_, DDFMainGetString),
@@ -179,7 +178,6 @@ FlatDefinition::FlatDefinition() : name_()
 
 void FlatDefinition::CopyDetail(FlatDefinition &src)
 {
-    liquid_           = src.liquid_;
     footstep_         = src.footstep_;
     splash_           = src.splash_;
     impactobject_     = src.impactobject_;
@@ -192,7 +190,6 @@ void FlatDefinition::CopyDetail(FlatDefinition &src)
 
 void FlatDefinition::Default()
 {
-    liquid_   = "";
     footstep_ = nullptr;
     splash_.clear();
     impactobject_ = nullptr;

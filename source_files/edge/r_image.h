@@ -50,13 +50,6 @@ enum ImageOpacity
     kOpacityComplex = 3, // uses full range of alpha values
 };
 
-enum LiquidImageType
-{
-    kLiquidImageNone  = 0,
-    kLiquidImageThin  = 1,
-    kLiquidImageThick = 2
-};
-
 class Image
 {
   public:
@@ -85,10 +78,6 @@ class Image
 
     // one of the kOpacityXXX values
     int opacity_;
-
-    LiquidImageType liquid_type_;
-
-    int swirled_game_tic_;
 
     bool is_font_;
 
@@ -249,16 +238,6 @@ void         ImageMakeSaveString(const Image *image, char *type, char *namebuf);
 //
 
 extern int image_smoothing;
-
-enum LiquidSwirl
-{
-    kLiquidSwirlVanilla   = 0,
-    kLiquidSwirlSmmu      = 1,
-    kLiquidSwirlSmmuSlosh = 2,
-    kLiquidSwirlParallax  = 3
-};
-
-extern LiquidSwirl swirling_flats;
 
 bool InitializeImages(void);
 void AnimationTicker(void);

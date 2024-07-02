@@ -780,7 +780,6 @@ static void PickMenuBackdrop(void)
         new_backdrop->cache_             = menu_image->cache_;
         new_backdrop->is_empty_          = menu_image->is_empty_;
         new_backdrop->is_font_           = menu_image->is_font_;
-        new_backdrop->liquid_type_       = menu_image->liquid_type_;
         new_backdrop->offset_x_          = menu_image->offset_x_;
         new_backdrop->offset_y_          = menu_image->offset_y_;
         new_backdrop->opacity_           = menu_image->opacity_;
@@ -811,7 +810,6 @@ static void PickMenuBackdrop(void)
         new_backdrop->cache_             = loading_image->cache_;
         new_backdrop->is_empty_          = loading_image->is_empty_;
         new_backdrop->is_font_           = loading_image->is_font_;
-        new_backdrop->liquid_type_       = loading_image->liquid_type_;
         new_backdrop->offset_x_          = loading_image->offset_x_;
         new_backdrop->offset_y_          = loading_image->offset_y_;
         new_backdrop->opacity_           = loading_image->opacity_;

@@ -69,8 +69,6 @@
 #include "w_texture.h"
 #include "w_wad.h"
 
-LiquidSwirl swirling_flats = kLiquidSwirlVanilla;
-
 extern ImageData *ReadAsEpiBlock(Image *rim);
 
 extern epi::File *OpenUserFileOrLump(ImageDefinition *def);
@@ -146,9 +144,6 @@ static void do_Animate(std::list<Image *> &bucket)
         if (rim->animation_.speed == 0) // not animated ?
             continue;
 
-        if (rim->liquid_type_ > kLiquidImageNone && swirling_flats > kLiquidSwirlVanilla)
-            continue;
-
         EPI_ASSERT(rim->animation_.count > 0);
 
         rim->animation_.count -= (!double_framerate.d_ || !(hud_tic & 1)) ? 1 : 0;
@@ -211,7 +206,6 @@ void StoreBlurredImage(const Image *image)
         img->blurred_version_->actual_width_      = img->actual_width_;
         img->blurred_version_->is_empty_          = img->is_empty_;
         img->blurred_version_->is_font_           = img->is_font_;
-        img->blurred_version_->liquid_type_       = img->liquid_type_;
         img->blurred_version_->offset_x_          = img->offset_x_;
         img->blurred_version_->offset_y_          = img->offset_y_;
         img->blurred_version_->opacity_           = img->opacity_;
@@ -260,10 +254,6 @@ static Image *NewImage(int width, int height, int opacity = kOpacityUnknown)
     rim->animation_.current = rim;
     rim->animation_.next    = nullptr;
     rim->animation_.count = rim->animation_.speed = 0;
-
-    rim->liquid_type_ = kLiquidImageNone;
-
-    rim->swirled_game_tic_ = 0;
 
     return rim;
 }
@@ -387,16 +377,6 @@ Image *AddPackImageSmart(const char *name, ImageSource type, const char *packfil
     rim->offset_y_ = offset_y;
 
     rim->name_ = name;
-
-    FlatDefinition *current_flatdef = flatdefs.Find(rim->name_.c_str());
-
-    if (current_flatdef && !current_flatdef->liquid_.empty())
-    {
-        if (epi::StringCaseCompareASCII(current_flatdef->liquid_, "THIN") == 0)
-            rim->liquid_type_ = kLiquidImageThin;
-        else if (epi::StringCaseCompareASCII(current_flatdef->liquid_, "THICK") == 0)
-            rim->liquid_type_ = kLiquidImageThick;
-    }
 
     rim->source_type_                  = type;
     int pn_len                         = strlen(packfile_name);
@@ -529,16 +509,6 @@ static Image *AddImage_Smart(const char *name, ImageSource type, int lump, std::
 
     rim->name_ = name;
 
-    FlatDefinition *current_flatdef = flatdefs.Find(rim->name_.c_str());
-
-    if (current_flatdef && !current_flatdef->liquid_.empty())
-    {
-        if (epi::StringCaseCompareASCII(current_flatdef->liquid_, "THIN") == 0)
-            rim->liquid_type_ = kLiquidImageThin;
-        else if (epi::StringCaseCompareASCII(current_flatdef->liquid_, "THICK") == 0)
-            rim->liquid_type_ = kLiquidImageThick;
-    }
-
     rim->source_type_                 = type;
     rim->source_.graphic.lump         = lump;
     rim->source_.graphic.is_patch     = is_patch;
@@ -628,16 +598,6 @@ static Image *AddImageFlat(const char *name, int lump)
     rim->source_type_      = kImageSourceFlat;
     rim->source_.flat.lump = lump;
     rim->source_palette_   = GetPaletteForLump(lump);
-
-    FlatDefinition *current_flatdef = flatdefs.Find(rim->name_.c_str());
-
-    if (current_flatdef && !current_flatdef->liquid_.empty())
-    {
-        if (epi::StringCaseCompareASCII(current_flatdef->liquid_, "THIN") == 0)
-            rim->liquid_type_ = kLiquidImageThin;
-        else if (epi::StringCaseCompareASCII(current_flatdef->liquid_, "THICK") == 0)
-            rim->liquid_type_ = kLiquidImageThick;
-    }
 
     real_flats.push_back(rim);
 
@@ -1219,15 +1179,6 @@ static GLuint LoadImageOGL(Image *rim, const Colormap *trans, bool do_whiten)
 
     ImageData *tmp_img = ReadAsEpiBlock(rim);
 
-    if (rim->liquid_type_ > kLiquidImageNone &&
-        (swirling_flats == kLiquidSwirlSmmu || swirling_flats == kLiquidSwirlSmmuSlosh))
-    {
-        rim->swirled_game_tic_ = hud_tic / (double_framerate.d_ ? 2 : 1);
-        tmp_img->Swirl(rim->swirled_game_tic_,
-                       rim->liquid_type_); // Using leveltime disabled swirl
-                                           // for intermission screens
-    }
-
     if (rim->opacity_ == kOpacityUnknown)
         rim->opacity_ = DetermineOpacity(tmp_img, &rim->is_empty_);
 
@@ -1694,20 +1645,6 @@ static CachedImage *ImageCacheOGL(Image *rim, const Colormap *trans, bool do_whi
 
     EPI_ASSERT(rc);
 
-    if (rim->liquid_type_ > kLiquidImageNone &&
-        (swirling_flats == kLiquidSwirlSmmu || swirling_flats == kLiquidSwirlSmmuSlosh))
-    {
-        if (!erraticism_active && !time_stop_active &&
-            rim->swirled_game_tic_ != hud_tic / (double_framerate.d_ ? 2 : 1))
-        {
-            if (rc->texture_id != 0)
-            {
-                glDeleteTextures(1, &rc->texture_id);
-                rc->texture_id = 0;
-            }
-        }
-    }
-
     if (rc->texture_id == 0)
     {
         // load image into cache
@@ -1728,10 +1665,7 @@ GLuint ImageCache(const Image *image, bool anim, const Colormap *trans, bool do_
 
     // handle animations
     if (anim)
-    {
-        if (rim->liquid_type_ == kLiquidImageNone || swirling_flats == kLiquidSwirlVanilla)
-            rim = rim->animation_.current;
-    }
+        rim = rim->animation_.current;
 
     if (rim->grayscale_)
         do_whiten = true;
@@ -1875,7 +1809,6 @@ void AnimateImageSet(const Image **images, int number, int speed)
             dupe_image->cache_          = rim->cache_;
             dupe_image->is_empty_       = rim->is_empty_;
             dupe_image->is_font_        = rim->is_font_;
-            dupe_image->liquid_type_    = rim->liquid_type_;
             dupe_image->offset_x_       = rim->offset_x_;
             dupe_image->offset_y_       = rim->offset_y_;
             dupe_image->opacity_        = rim->opacity_;

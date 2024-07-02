@@ -61,36 +61,6 @@ static SoundEffect *sfx_jprise;
 static SoundEffect *sfx_jpdown;
 static SoundEffect *sfx_jpflow;
 
-// Test for "measuring" size of room
-static bool P_RoomPath(PathIntercept *in, void *dataptr)
-{
-    HMM_Vec2 *blocker = (HMM_Vec2 *)dataptr;
-
-    if (in->line)
-    {
-        Line *ld = in->line;
-
-        if (ld->back_sector && ld->front_sector)
-        {
-            if ((EDGE_IMAGE_IS_SKY(ld->back_sector->ceiling) && !EDGE_IMAGE_IS_SKY(ld->front_sector->ceiling)) ||
-                (!EDGE_IMAGE_IS_SKY(ld->back_sector->ceiling) && EDGE_IMAGE_IS_SKY(ld->front_sector->ceiling)))
-            {
-                blocker->X = (ld->vertex_1->X + ld->vertex_2->X) / 2;
-                blocker->Y = (ld->vertex_1->Y + ld->vertex_2->Y) / 2;
-                return false;
-            }
-        }
-
-        if (ld->blocked)
-        {
-            blocker->X = (ld->vertex_1->X + ld->vertex_2->X) / 2;
-            blocker->Y = (ld->vertex_1->Y + ld->vertex_2->Y) / 2;
-            return false;
-        }
-    }
-    return true;
-}
-
 static void UpdatePowerups(Player *player);
 
 static void CalcHeight(Player *player, bool extra_tic)
