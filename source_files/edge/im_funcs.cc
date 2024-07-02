@@ -304,30 +304,6 @@ static void STBImageEPIFileWrite(void *context, void *data, int size)
     dest->Write(data, size);
 }
 
-bool SaveJPEG(std::string filename, ImageData *image)
-{
-    EPI_ASSERT(image->depth_ == 3);
-
-    epi::File *dest = epi::FileOpen(filename, epi::kFileAccessBinary | epi::kFileAccessWrite);
-
-    if (!dest)
-        return false;
-
-    // zero means failure here
-    int result = stbi_write_jpg_to_func(STBImageEPIFileWrite, dest, image->used_width_, image->used_height_,
-                                        image->depth_, image->pixels_, 95);
-
-    delete dest;
-
-    if (result == 0)
-    {
-        epi::FileDelete(filename);
-        return false;
-    }
-    else
-        return true;
-}
-
 bool SavePNG(std::string filename, ImageData *image)
 {
     EPI_ASSERT(image->depth_ >= 3);
