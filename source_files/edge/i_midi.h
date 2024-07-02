@@ -30,6 +30,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <list>
 #include <set>
 
 /*! Raw MIDI event hook */
