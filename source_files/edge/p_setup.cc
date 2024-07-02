@@ -180,7 +180,6 @@ static void GetMUSINFOTracksForLevel(void)
                 mus_number = epi::LexInteger(value);
             else
             {
-                // This mimics Lobo's ad-hoc playlist stuff for UMAPINFO
                 int ddf_track = playlist.FindLast(value.c_str());
                 if (ddf_track != -1) // Entry exists
                 {

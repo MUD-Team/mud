@@ -14,7 +14,6 @@
 #include "m_random.h"
 #include "r_modes.h"
 #include "version.h"
-#include "vm_coal.h"
 #include "w_wad.h"
 
 //------------------------------------------------------------------------

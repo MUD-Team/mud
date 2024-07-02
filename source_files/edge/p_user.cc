@@ -27,7 +27,6 @@
 
 #include "AlmostEquals.h"
 #include "bot_think.h"
-#include "coal.h" // for coal::vm_c
 #include "ddf_colormap.h"
 #include "dm_state.h"
 #include "e_input.h"
@@ -42,11 +41,6 @@
 #include "s_blit.h"
 #include "s_sound.h"
 #include "script/compat/lua_compat.h"
-#include "vm_coal.h"
-
-extern coal::VM *ui_vm;
-extern void      COALSetVector(coal::VM *vm, const char *mod_name, const char *var_name, double val_1, double val_2,
-                               double val_3);
 
 extern ConsoleVariable double_framerate;
 
@@ -859,16 +853,10 @@ bool PlayerThink(Player *player, bool extra_tic)
     player->action_button_down_[0] = (cmd->extended_buttons & kExtendedButtonCodeAction1) ? true : false;
     player->action_button_down_[1] = (cmd->extended_buttons & kExtendedButtonCodeAction2) ? true : false;
 
-    if (LuaUseLuaHUD())
-        LuaSetVector3(LuaGetGlobalVM(), "player", "inventory_event_handler",
-                      HMM_Vec3{{cmd->extended_buttons & kExtendedButtonCodeInventoryPrevious ? 1.0f : 0.0f,
-                                cmd->extended_buttons & kExtendedButtonCodeInventoryUse ? 1.0f : 0.0f,
-                                cmd->extended_buttons & kExtendedButtonCodeInventoryNext ? 1.0f : 0.0f}});
-    else
-        COALSetVector(ui_vm, "player", "inventory_event_handler",
-                      cmd->extended_buttons & kExtendedButtonCodeInventoryPrevious ? 1 : 0,
-                      cmd->extended_buttons & kExtendedButtonCodeInventoryUse ? 1 : 0,
-                      cmd->extended_buttons & kExtendedButtonCodeInventoryNext ? 1 : 0);
+    LuaSetVector3(LuaGetGlobalVM(), "player", "inventory_event_handler",
+                    HMM_Vec3{{cmd->extended_buttons & kExtendedButtonCodeInventoryPrevious ? 1.0f : 0.0f,
+                            cmd->extended_buttons & kExtendedButtonCodeInventoryUse ? 1.0f : 0.0f,
+                            cmd->extended_buttons & kExtendedButtonCodeInventoryNext ? 1.0f : 0.0f}});
 
     // FIXME separate code more cleanly
     if (extra_tic && double_framerate.d_)

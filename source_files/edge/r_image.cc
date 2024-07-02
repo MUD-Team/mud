@@ -163,8 +163,6 @@ static void do_Animate(std::list<Image *> &bucket)
 
 int image_smoothing = 1;
 
-int hq2x_scaling = 1;
-
 // total set of images
 std::list<Image *> real_graphics;
 std::list<Image *> real_textures;
@@ -1150,43 +1148,6 @@ static bool IM_ShouldSmooth(Image *rim)
     return image_smoothing ? true : false;
 }
 
-static bool IM_ShouldHQ2X(Image *rim)
-{
-    // Note: no need to check kImageSourceUser, since those images are
-    //       always PNG or JPEG (etc) and never palettised, hence
-    //       the HQ2x scaling would never apply.
-
-    if (hq2x_scaling == 0)
-        return false;
-
-    if (hq2x_scaling >= 3)
-        return true;
-
-    switch (rim->source_type_)
-    {
-    case kImageSourceGraphic:
-    case kImageSourceRawBlock:
-        // UI elements
-        return true;
-#if 0
-		case kImageSourceTexture:
-			// the "SKY" check here is a hack...
-			if (epi::StringPrefixCaseCompareASCII(rim->name_, "SKY") == 0)
-				return true;
-			break;
-#endif
-    case kImageSourceSprite:
-        if (hq2x_scaling >= 2)
-            return true;
-        break;
-
-    default:
-        break;
-    }
-
-    return false;
-}
-
 static int IM_PixelLimit(Image *rim)
 {
     if (detail_level == 0)
@@ -1270,31 +1231,7 @@ static GLuint LoadImageOGL(Image *rim, const Colormap *trans, bool do_whiten)
     if (rim->opacity_ == kOpacityUnknown)
         rim->opacity_ = DetermineOpacity(tmp_img, &rim->is_empty_);
 
-    if ((tmp_img->depth_ == 1) && IM_ShouldHQ2X(rim))
-    {
-        bool solid = (rim->opacity_ == kOpacitySolid);
-
-        HQ2xPaletteSetup(what_palette, solid ? -1 : kTransparentPixelIndex);
-
-        ImageData *scaled_img = ImageHQ2x(tmp_img, solid, false /* invert */);
-
-        if (rim->is_font_)
-        {
-            scaled_img->RemoveBackground();
-            rim->opacity_ = DetermineOpacity(tmp_img, &rim->is_empty_);
-        }
-
-        if (rim->blur_sigma_ > 0.0f)
-        {
-            ImageData *blurred_img = ImageBlur(scaled_img, rim->blur_sigma_);
-            delete scaled_img;
-            scaled_img = blurred_img;
-        }
-
-        delete tmp_img;
-        tmp_img = scaled_img;
-    }
-    else if (tmp_img->depth_ == 1)
+    if (tmp_img->depth_ == 1)
     {
         ImageData *rgb_img = RGBFromPalettised(tmp_img, what_palette, rim->opacity_);
 
@@ -1860,11 +1797,6 @@ bool InitializeImages(void)
         image_smoothing = 0;
     else if (FindArgument("smoothing") > 0)
         image_smoothing = 1;
-
-    if (FindArgument("hqscale") > 0 || FindArgument("hqall") > 0)
-        hq2x_scaling = 3;
-    else if (FindArgument("nohqscale") > 0)
-        hq2x_scaling = 0;
 
     W_CreateDummyImages();
 

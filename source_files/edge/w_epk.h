@@ -49,7 +49,7 @@ void PopulatePackOnly(DataFile *df);
 // Check pack for valid IWADs. Return associated game_checker index if found
 int CheckPackForIWADs(DataFile *df);
 
-// Populate pack directory and process appropriate files (COAL, DDF, etc)
+// Populate pack directory and process appropriate files (Lua, DDF, etc)
 void ProcessAllInPack(DataFile *df, size_t file_index);
 
 //--- editor settings ---

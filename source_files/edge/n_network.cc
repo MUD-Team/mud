@@ -22,7 +22,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "coal.h"
 #include "ddf_types.h"
 #include "dm_state.h"
 #include "e_input.h"
@@ -37,10 +36,6 @@
 #include "m_argv.h"
 #include "m_random.h"
 #include "script/compat/lua_compat.h"
-#include "vm_coal.h" // for coal::vm_c
-
-extern coal::VM *ui_vm;
-extern void      COALSetFloat(coal::VM *vm, const char *mod_name, const char *var_name, double value);
 
 // only true if packets are exchanged with a server
 bool network_game = false;
@@ -166,10 +161,8 @@ void GrabTicCommands(void)
 
         memcpy(&p->command_, p->input_commands_ + buf, sizeof(EventTicCommand));
     }
-    if (LuaUseLuaHUD())
-        LuaSetFloat(LuaGetGlobalVM(), "sys", "gametic", game_tic / (double_framerate.d_ ? 2 : 1));
-    else
-        COALSetFloat(ui_vm, "sys", "gametic", game_tic / (double_framerate.d_ ? 2 : 1));
+        
+    LuaSetFloat(LuaGetGlobalVM(), "sys", "gametic", game_tic / (double_framerate.d_ ? 2 : 1));
 
     game_tic++;
 }

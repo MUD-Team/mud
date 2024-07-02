@@ -72,8 +72,6 @@ bool save_screenshot_valid   = false;
 bool show_old_config_warning = false;
 
 extern ConsoleVariable midi_soundfont;
-extern bool            pc_speaker_mode;
-int                    var_midi_player       = 0;
 int                    var_sound_stereo      = 0;
 int                    sound_mixing_channels = 0;
 
@@ -86,8 +84,6 @@ static ConfigurationDefault defaults[] = {
     {kConfigInteger, "displaymode", &current_window_mode, EDGE_DEFAULT_DISPLAYMODE},
 
     {kConfigInteger, "sound_stereo", &var_sound_stereo, EDGE_DEFAULT_SOUND_STEREO},
-    {kConfigBoolean, "pc_speaker_mode", &pc_speaker_mode, 0},
-    {kConfigInteger, "midi_player", &var_midi_player, 0},
     {kConfigBoolean, "dynamic_reverb", &dynamic_reverb, 0},
     {kConfigInteger, "mix_channels", &sound_mixing_channels, EDGE_DEFAULT_MIX_CHANNELS},
 
@@ -121,7 +117,6 @@ static ConfigurationDefault defaults[] = {
     {kConfigInteger, "smoothing", &image_smoothing, EDGE_DEFAULT_USE_SMOOTHING},
     {kConfigInteger, "dlights", &use_dynamic_lights, EDGE_DEFAULT_USE_DLIGHTS},
     {kConfigInteger, "detail_level", &detail_level, EDGE_DEFAULT_DETAIL_LEVEL},
-    {kConfigInteger, "hq2x_scaling", &hq2x_scaling, EDGE_DEFAULT_HQ2X_SCALING},
 
     // -KM- 1998/09/01 Useless mouse/joy stuff removed,
     //                 analogue binding added

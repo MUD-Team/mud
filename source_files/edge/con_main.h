@@ -26,12 +26,6 @@
 
 extern std::string working_directory;
 
-constexpr uint8_t kEndoomLines = 25;
-
-const RGBAColor endoom_colors[16] = {0x000000FF, 0x0000AAFF, 0x00AA00FF, 0x00AAAAFF, 0xAA0000FF, 0xAA00AAFF,
-                                     0xAA5500FF, 0xAAAAAAFF, 0x555555FF, 0x5555FFFF, 0x55FF55FF, 0x55FFFFFF,
-                                     0xFF5555FF, 0xFF55FFFF, 0xFFFF55FF, 0xFFFFFFFF};
-
 enum ConsoleVisibility
 {
     kConsoleVisibilityNotVisible, // invisible
@@ -45,8 +39,6 @@ class ConsoleLine
     std::string line_;
 
     RGBAColor color_;
-
-    std::vector<uint8_t> endoom_bytes_;
 
   public:
     ConsoleLine(const std::string &text, RGBAColor col = SG_LIGHT_GRAY_RGBA32) : line_(text), color_(col)
@@ -66,15 +58,9 @@ class ConsoleLine
         line_.append(text);
     }
 
-    void AppendEndoom(uint8_t endoom_byte)
-    {
-        endoom_bytes_.push_back(endoom_byte);
-    }
-
     void Clear()
     {
         line_.clear();
-        endoom_bytes_.clear();
     }
 };
 
@@ -89,10 +75,6 @@ void ConsolePrint(const char *message, ...);
 void ConsoleMessage(const char *message, ...);
 void ConsolePlayerMessage(int plyr, const char *message, ...);
 #endif
-
-void ConsolePrintEndoom();
-
-void ConsoleCreateQuitScreen();
 
 void ClearConsoleLines();
 

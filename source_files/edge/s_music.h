@@ -57,7 +57,6 @@ class AbstractMusicPlayer
 
 extern ConsoleVariable music_volume;
 extern int             entry_playing;
-extern bool            pc_speaker_mode;
 
 /* FUNCTIONS */
 

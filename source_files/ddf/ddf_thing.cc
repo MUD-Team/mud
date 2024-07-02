@@ -1549,7 +1549,6 @@ static DDFSpecialFlags hyper_specials[] = {
     {"TRIGGER_LINES", kHyperFlagNoTriggerLines, 1}, // Lobo: Cannot activate doors etc.
     {"SHOVEABLE", kHyperFlagShoveable, 0},          // Lobo: can be pushed
     {"SPLASH", kHyperFlagNoSplash, 1},              // Lobo: causes no splash on liquids
-    {"DEHACKED_COMPAT", kHyperFlagDehackedCompatibility, 0},
     {"IMMOVABLE", kHyperFlagImmovable, 0},
     {"MUSIC_CHANGER", kHyperFlagMusicChanger, 0},
     {nullptr, 0, 0}};

@@ -30,7 +30,6 @@
 #include "s_blit.h"
 #include "s_cache.h"
 #include "s_fluid.h"
-#include "s_opl.h"
 #include "s_sound.h"
 #include "w_wad.h"
 
@@ -48,7 +47,6 @@ bool sound_device_stereo;
 static bool audio_is_locked = false;
 
 std::vector<std::string> available_soundfonts;
-std::vector<std::string> available_opl_banks;
 extern std::string       game_directory;
 extern std::string       home_directory;
 extern ConsoleVariable   midi_soundfont;
@@ -224,8 +222,6 @@ void StartupMusic(void)
     std::vector<epi::DirectoryEntry> sfd;
     std::string                      soundfont_dir = epi::PathAppend(game_directory, "soundfont");
 
-    // Always add the default/internal GENMIDI lump choice
-    available_opl_banks.push_back("GENMIDI");
     // Set default SF2 location in CVAR if needed
     if (midi_soundfont.s_.empty())
         midi_soundfont = epi::SanitizePath(epi::PathAppend(soundfont_dir, "Default.sf2"));
@@ -243,11 +239,7 @@ void StartupMusic(void)
                 std::string ext = epi::GetExtension(sfd[i].name);
                 epi::StringLowerASCII(ext);
                 if (ext == ".sf2")
-                {
                     available_soundfonts.push_back(epi::SanitizePath(sfd[i].name));
-                }
-                else if (ext == ".op2" || ext == ".ad" || ext == ".opl" || ext == ".tmb")
-                    available_opl_banks.push_back(epi::SanitizePath(sfd[i].name));
             }
         }
     }
@@ -275,8 +267,6 @@ void StartupMusic(void)
                     epi::StringLowerASCII(ext);
                     if (ext == ".sf2")
                         available_soundfonts.push_back(epi::SanitizePath(sfd[i].name));
-                    else if (ext == ".op2" || ext == ".ad" || ext == ".opl" || ext == ".tmb")
-                        available_opl_banks.push_back(epi::SanitizePath(sfd[i].name));
                 }
             }
         }
@@ -284,9 +274,6 @@ void StartupMusic(void)
 
     if (!StartupFluid())
         fluid_disabled = true;
-
-    if (!StartupOpal())
-        opl_disabled = true;
 
     return;
 }

@@ -63,7 +63,6 @@ static ConsoleVisibility console_visible;
 static int   console_wipe_active   = 0;
 static int   console_wipe_position = 0;
 static Font *console_font;
-Font        *endoom_font;
 
 // the console's background
 static Style *console_style;
@@ -75,11 +74,6 @@ extern void StartupProgressMessage(const char *message);
 extern ConsoleVariable pixel_aspect_ratio;
 
 static constexpr uint8_t kMaximumConsoleLines = 160;
-
-// For Quit Screen ENDOOM (create once, always store)
-ConsoleLine *quit_lines[kEndoomLines];
-static int   quit_used_lines        = 0;
-static bool  quit_partial_last_line = false;
 
 // entry [0] is the bottom-most one
 static ConsoleLine *console_lines[kMaximumConsoleLines];
@@ -155,104 +149,6 @@ static void ConsoleAddLine(const char *s, bool partial)
 
     if (console_used_lines < kMaximumConsoleLines)
         console_used_lines++;
-}
-
-static void ConsoleEndoomAddLine(uint8_t endoom_byte, const char *s, bool partial)
-{
-    if (console_partial_last_line)
-    {
-        EPI_ASSERT(console_lines[0]);
-
-        console_lines[0]->Append(s);
-
-        console_lines[0]->AppendEndoom(endoom_byte);
-
-        console_partial_last_line = partial;
-        return;
-    }
-
-    // scroll everything up
-
-    delete console_lines[kMaximumConsoleLines - 1];
-
-    for (int i = kMaximumConsoleLines - 1; i > 0; i--)
-        console_lines[i] = console_lines[i - 1];
-
-    RGBAColor col = current_color;
-
-    if (col == SG_GRAY_RGBA32 && (epi::StringPrefixCaseCompareASCII(s, "WARNING") == 0))
-        col = SG_DARK_ORANGE_RGBA32;
-
-    console_lines[0] = new ConsoleLine(s, col);
-
-    console_lines[0]->AppendEndoom(endoom_byte);
-
-    console_partial_last_line = partial;
-
-    if (console_used_lines < kMaximumConsoleLines)
-        console_used_lines++;
-}
-
-static void ConsoleQuitAddLine(const char *s, bool partial)
-{
-    if (quit_partial_last_line)
-    {
-        EPI_ASSERT(quit_lines[0]);
-
-        quit_lines[0]->Append(s);
-
-        quit_partial_last_line = partial;
-        return;
-    }
-
-    // scroll everything up
-
-    delete quit_lines[kEndoomLines - 1];
-
-    for (int i = kEndoomLines - 1; i > 0; i--)
-        quit_lines[i] = quit_lines[i - 1];
-
-    RGBAColor col = current_color;
-
-    quit_lines[0] = new ConsoleLine(s, col);
-
-    quit_partial_last_line = partial;
-
-    if (quit_used_lines < kEndoomLines)
-        quit_used_lines++;
-}
-
-static void ConsoleQuitEndoomAddLine(uint8_t endoom_byte, const char *s, bool partial)
-{
-    if (quit_partial_last_line)
-    {
-        EPI_ASSERT(quit_lines[0]);
-
-        quit_lines[0]->Append(s);
-
-        quit_lines[0]->AppendEndoom(endoom_byte);
-
-        quit_partial_last_line = partial;
-        return;
-    }
-
-    // scroll everything up
-
-    delete quit_lines[kEndoomLines - 1];
-
-    for (int i = kEndoomLines - 1; i > 0; i--)
-        quit_lines[i] = quit_lines[i - 1];
-
-    RGBAColor col = current_color;
-
-    quit_lines[0] = new ConsoleLine(s, col);
-
-    quit_lines[0]->AppendEndoom(endoom_byte);
-
-    quit_partial_last_line = partial;
-
-    if (quit_used_lines < kEndoomLines)
-        quit_used_lines++;
 }
 
 static void ConsoleAddCmdHistory(const char *s)
@@ -359,90 +255,6 @@ static void SplitIntoLines(char *src)
     current_color = SG_GRAY_RGBA32;
 }
 
-static void EndoomSplitIntoLines(uint8_t endoom_byte, char *src)
-{
-    char *dest = src;
-    char *line = dest;
-
-    while (*src)
-    {
-        if (*src == '\n')
-        {
-            *dest++ = 0;
-
-            ConsoleAddLine(line, false);
-
-            line = dest;
-
-            src++;
-            continue;
-        }
-
-        *dest++ = *src++;
-    }
-
-    *dest++ = 0;
-
-    if (line[0])
-    {
-        ConsoleEndoomAddLine(endoom_byte, line, true);
-    }
-
-    current_color = SG_GRAY_RGBA32;
-}
-
-static void QuitSplitIntoLines(char *src)
-{
-    char *dest = src;
-    char *line = dest;
-
-    while (*src)
-    {
-        if (*src == '\n')
-        {
-            *dest++ = 0;
-
-            ConsoleQuitAddLine(line, false);
-
-            line = dest;
-
-            src++;
-            continue;
-        }
-
-        *dest++ = *src++;
-    }
-
-    *dest++ = 0;
-
-    if (line[0])
-    {
-        ConsoleQuitAddLine(line, true);
-    }
-
-    current_color = SG_GRAY_RGBA32;
-}
-
-static void QuitEndoomSplitIntoLines(uint8_t endoom_byte, char *src)
-{
-    char *dest = src;
-    char *line = dest;
-
-    while (*src)
-    {
-        *dest++ = *src++;
-    }
-
-    *dest++ = 0;
-
-    if (line[0])
-    {
-        ConsoleQuitEndoomAddLine(endoom_byte, line, true);
-    }
-
-    current_color = SG_GRAY_RGBA32;
-}
-
 void ConsolePrint(const char *message, ...)
 {
     va_list argptr;
@@ -453,42 +265,6 @@ void ConsolePrint(const char *message, ...)
     va_end(argptr);
 
     SplitIntoLines(buffer);
-}
-
-void ConsoleEndoomPrintf(uint8_t endoom_byte, const char *message, ...)
-{
-    va_list argptr;
-    char    buffer[1024];
-
-    va_start(argptr, message);
-    vsprintf(buffer, message, argptr);
-    va_end(argptr);
-
-    EndoomSplitIntoLines(endoom_byte, buffer);
-}
-
-void ConsoleQuitPrintf(const char *message, ...)
-{
-    va_list argptr;
-    char    buffer[1024];
-
-    va_start(argptr, message);
-    vsprintf(buffer, message, argptr);
-    va_end(argptr);
-
-    QuitSplitIntoLines(buffer);
-}
-
-void ConsoleQuitEndoomPrintf(uint8_t endoom_byte, const char *message, ...)
-{
-    va_list argptr;
-    char    buffer[1024];
-
-    va_start(argptr, message);
-    vsprintf(buffer, message, argptr);
-    va_end(argptr);
-
-    QuitEndoomSplitIntoLines(endoom_byte, buffer);
 }
 
 void ConsoleMessage(const char *message, ...)
@@ -652,64 +428,6 @@ static void DrawChar(int x, int y, char ch, RGBAColor col)
     glEnd();
 }
 
-static void DrawEndoomChar(float x, float y, char ch, RGBAColor col, RGBAColor col2, bool blink, int enwidth)
-{
-    if (x + FNSZ < 0)
-        return;
-
-    sg_color sgcol = sg_make_color_1i(col2);
-
-    glDisable(GL_TEXTURE_2D);
-
-    glColor4f(sgcol.r, sgcol.g, sgcol.b, 1.0f);
-
-    glBegin(GL_QUADS);
-
-    glVertex2i(x - (enwidth / 2), y);
-
-    glVertex2i(x - (enwidth / 2), y + FNSZ);
-
-    glVertex2i(x + (enwidth / 2), y + FNSZ);
-
-    glVertex2i(x + (enwidth / 2), y);
-
-    glEnd();
-
-    glEnable(GL_TEXTURE_2D);
-
-    sgcol = sg_make_color_1i(col);
-
-    glColor4f(sgcol.r, sgcol.g, sgcol.b, 1.0f);
-
-    if (blink && console_cursor >= 16)
-        ch = 0x20;
-
-    uint8_t px = (uint8_t)ch % 16;
-    uint8_t py = 15 - (uint8_t)ch / 16;
-
-    float tx1 = (px)*endoom_font->font_image_->width_ratio_;
-    float tx2 = (px + 1) * endoom_font->font_image_->width_ratio_;
-
-    float ty1 = (py)*endoom_font->font_image_->height_ratio_;
-    float ty2 = (py + 1) * endoom_font->font_image_->height_ratio_;
-
-    glBegin(GL_POLYGON);
-
-    glTexCoord2f(tx1, ty1);
-    glVertex2i(x - enwidth, y);
-
-    glTexCoord2f(tx1, ty2);
-    glVertex2i(x - enwidth, y + FNSZ);
-
-    glTexCoord2f(tx2, ty2);
-    glVertex2i(x + enwidth, y + FNSZ);
-
-    glTexCoord2f(tx2, ty1);
-    glVertex2i(x + enwidth, y);
-
-    glEnd();
-}
-
 // writes the text on coords (x,y) of the console
 static void DrawText(int x, int y, const char *s, RGBAColor col)
 {
@@ -781,39 +499,6 @@ static void DrawText(int x, int y, const char *s, RGBAColor col)
     glDisable(GL_BLEND);
 }
 
-static void EndoomDrawText(int x, int y, ConsoleLine *endoom_line)
-{
-    // Always whiten the font when used with console output
-    GLuint tex_id = ImageCache(endoom_font->font_image_, true, (const Colormap *)0, true);
-
-    int enwidth = RoundToInteger((float)endoom_font->image_monospace_width_ *
-                                 ((float)FNSZ / endoom_font->image_monospace_width_) / 2);
-
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, tex_id);
-
-    glEnable(GL_BLEND);
-    glEnable(GL_ALPHA_TEST);
-    glAlphaFunc(GL_GREATER, 0);
-
-    for (int i = 0; i < 80; i++)
-    {
-        uint8_t info = endoom_line->endoom_bytes_.at(i);
-
-        DrawEndoomChar(x, y, endoom_line->line_.at(i), endoom_colors[info & 15], endoom_colors[(info >> 4) & 7],
-                       info & 128, enwidth);
-
-        x += enwidth;
-
-        if (x >= current_screen_width)
-            break;
-    }
-
-    glDisable(GL_TEXTURE_2D);
-    glDisable(GL_ALPHA_TEST);
-    glDisable(GL_BLEND);
-}
-
 void ConsoleSetupFont(void)
 {
     if (!console_font)
@@ -824,16 +509,6 @@ void ConsoleSetupFont(void)
         console_font = hud_fonts.Lookup(DEF);
         EPI_ASSERT(console_font);
         console_font->Load();
-    }
-
-    if (!endoom_font)
-    {
-        FontDefinition *DEF = fontdefs.Lookup("ENDFONT");
-        if (!DEF)
-            FatalError("ENDFONT definition missing from DDFFONT!\n");
-        endoom_font = hud_fonts.Lookup(DEF);
-        EPI_ASSERT(endoom_font);
-        endoom_font->Load();
     }
 
     if (!console_style)
@@ -918,8 +593,6 @@ void ConsoleDrawer(void)
 
         if (epi::StringPrefixCompare(CL->line_, "--------") == 0)
             HorizontalLine(y + FNSZ / 2, CL->color_);
-        else if (CL->endoom_bytes_.size() == 80 && CL->line_.size() == 80) // 80 ENDOOM characters + newline
-            EndoomDrawText(0, y, CL);
         else
             DrawText(0, y, CL->line_.c_str(), CL->color_);
 
@@ -1768,88 +1441,6 @@ void ConsoleShowPosition(void)
     y -= FNSZ;
     sprintf(textbuf, "  sub: %d", (int)(p->map_object_->subsector_ - level_subsectors));
     DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
-}
-
-void ConsolePrintEndoom()
-{
-    int      length = 0;
-    uint8_t *data   = nullptr;
-
-    data = OpenPackOrLumpInMemory("ENDOOM", {".bin"}, &length);
-    if (!data)
-        data = OpenPackOrLumpInMemory("ENDTEXT", {".bin"}, &length);
-    if (!data)
-        data = OpenPackOrLumpInMemory("ENDBOOM", {".bin"}, &length);
-    if (!data)
-        data = OpenPackOrLumpInMemory("ENDSTRF", {".bin"}, &length);
-    if (!data)
-    {
-        ConsolePrint("ConsolePrintEndoom: No ENDOOM screen found!\n");
-        return;
-    }
-    if (length != 4000)
-    {
-        ConsolePrint("ConsolePrintEndoom: Lump exists, but is malformed! (Length not "
-                     "equal "
-                     "to 4000 bytes)\n");
-        delete[] data;
-        return;
-    }
-    ConsolePrint("\n\n");
-    int row_counter = 0;
-    for (int i = 0; i < 4000; i += 2)
-    {
-        ConsoleEndoomPrintf(data[i + 1], "%c",
-                            ((int)data[i] == 0 || (int)data[i] == 255) ? 0x20
-                                                                       : (int)data[i]); // Fix crumpled up ENDOOMs lol
-        row_counter++;
-        if (row_counter == 80)
-        {
-            ConsolePrint("\n");
-            row_counter = 0;
-        }
-    }
-    ConsolePrint("\n");
-    delete[] data;
-}
-
-void ConsoleCreateQuitScreen()
-{
-    int      length = 0;
-    uint8_t *data   = nullptr;
-
-    data = OpenPackOrLumpInMemory("ENDOOM", {".bin"}, &length);
-    if (!data)
-        data = OpenPackOrLumpInMemory("ENDTEXT", {".bin"}, &length);
-    if (!data)
-        data = OpenPackOrLumpInMemory("ENDBOOM", {".bin"}, &length);
-    if (!data)
-        data = OpenPackOrLumpInMemory("ENDSTRF", {".bin"}, &length);
-    if (!data)
-    {
-        ConsolePrint("No ENDOOM screen found for this WAD!\n");
-        return;
-    }
-    if (length != 4000)
-    {
-        ConsolePrint("ConsoleCreateQuitScreen: ENDOOM exists, but is malformed! (Length "
-                     "not equal to 4000 bytes)\n");
-        delete[] data;
-        return;
-    }
-    int row_counter = 0;
-    for (int i = 0; i < 4000; i += 2)
-    {
-        ConsoleQuitEndoomPrintf(data[i + 1], "%c",
-                                ((uint8_t)data[i] == 0 || (uint8_t)data[i] == 255) ? 0x20 : (uint8_t)data[i]);
-        row_counter++;
-        if (row_counter == 80)
-        {
-            ConsoleQuitPrintf("\n");
-            row_counter = 0;
-        }
-    }
-    delete[] data;
 }
 
 void ClearConsoleLines()

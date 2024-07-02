@@ -36,9 +36,6 @@ class Language
   private:
     std::vector<LanguageChoice *> choices_;
 
-    // UMAPINFO strings
-    LanguageChoice *umapinfo_choice_;
-
     // the current language choice
     int current_choice_;
 
@@ -65,10 +62,6 @@ class Language
     {
         return (*this)[refname.c_str()];
     }
-
-    // this is for UMAPINFO strings
-    void        AddOrReplace(const char *ref, const char *value);
-    const char *GetReferenceOrNull(const char *refname);
 
     // private (except for code in language.cc)
     LanguageChoice *AddChoice(const char *name);

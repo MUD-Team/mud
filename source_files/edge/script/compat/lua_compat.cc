@@ -5,8 +5,6 @@
 #include "epi_file.h"
 #include "w_wad.h"
 
-bool GetCOALDetected();
-
 lua_State *global_lua_state = nullptr;
 
 struct pending_lua_script_c
@@ -34,11 +32,6 @@ void LuaAddScript(const std::string &data, const std::string &source)
 
 void LuaLoadScripts()
 {
-    if (LuaGetLuaHUDDetected() && GetCOALDetected())
-    {
-        LogWarning("Lua and COAL huds detected, selecting Lua hud\n");
-    }
-
     int top = lua_gettop(global_lua_state);
     for (auto &info : pending_scripts)
     {
@@ -62,26 +55,4 @@ void LuaLoadScripts()
 lua_State *LuaGetGlobalVM()
 {
     return global_lua_state;
-}
-
-static bool lua_detected = false;
-void        LuaSetLuaHUDDetected(bool detected)
-{
-    // check whether redundant call, once enabled stays enabled
-    if (lua_detected)
-    {
-        return;
-    }
-
-    lua_detected = detected;
-}
-
-bool LuaGetLuaHUDDetected()
-{
-    return lua_detected;
-}
-
-bool LuaUseLuaHUD()
-{
-    return lua_detected || !GetCOALDetected();
 }

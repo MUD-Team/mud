@@ -376,7 +376,7 @@ class FluidPlayer : public AbstractMusicPlayer
             fluid_synth_set_gain(edge_fluid, fluid_player_gain.f_);
         }
 
-        while (status_ == kPlaying && !pc_speaker_mode)
+        while (status_ == kPlaying)
         {
             SoundData *buf =
                 SoundQueueGetFreeBuffer(kFluidBuffer, sound_device_stereo ? kMixInterleaved : kMixMono);

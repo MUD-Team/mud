@@ -318,29 +318,6 @@ RADScriptState *FindScriptStateByLabel(RADScript *scr, char *label)
     return nullptr;
 }
 
-void ClearDeathTriggersByMap(const std::string &mapname)
-{
-    for (RADScript *scr = current_scripts; scr; scr = scr->next)
-    {
-        if (epi::StringCaseCompareASCII(scr->mapid, mapname) == 0)
-        {
-            for (RADScriptState *state = scr->first_state; state; state = state->next)
-            {
-                if (state->action == ScriptWaitUntilDead)
-                {
-                    ScriptWaitUntilDeadParameter *wud = (ScriptWaitUntilDeadParameter *)state->param;
-                    wud->tag                          = 0;
-                    for (int n = 0; n < 10; n++)
-                    {
-                        if (wud->mon_names[n])
-                            free((void *)wud->mon_names[n]);
-                    }
-                }
-            }
-        }
-    }
-}
-
 //
 // Looks for all current triggers with the given tag number, and
 // either enables them or disables them (based on `disable').

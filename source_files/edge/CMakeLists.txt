@@ -27,7 +27,6 @@ set (EDGE_SOURCE_FILES
   im_filter.cc
   im_data.cc
   im_funcs.cc
-  l_deh.cc
   m_argv.cc
   m_bbox.cc
   m_cheat.cc
@@ -55,7 +54,6 @@ set (EDGE_SOURCE_FILES
   p_user.cc
   p_forces.cc
   p_telept.cc
-  p_umapinfo.cc
   p_weapon.cc
   rad_act.cc
   rad_pars.cc
@@ -86,10 +84,6 @@ set (EDGE_SOURCE_FILES
   s_music.cc
   s_ogg.cc
   s_fluid.cc
-  s_m4p.cc
-  s_opl.cc
-  s_rad.cc
-  s_sid.cc
   s_wav.cc
   s_flac.cc
   sv_chunk.cc
@@ -111,9 +105,6 @@ set (EDGE_SOURCE_FILES
   w_sprite.cc
   w_texture.cc
   w_wad.cc
-  vm_coal.cc
-  vm_hud.cc 
-  vm_player.cc
   script/lua_debugger.cc
   script/compat/lua_vm.cc
   script/compat/lua_compat.cc
@@ -131,15 +122,10 @@ endif()
 set (EDGE_LINK_LIBRARIES
   edge_ajbsp  
   edge_ddf
-  edge_deh
   edge_epi
   ${SDL2_LIBRARIES}
-  crsid
   fluidlite
-  libRAD
-  m4p
   miniz
-  edge_coal
   lua
   utf8proc
 )
@@ -175,15 +161,11 @@ endif()
 
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/almostequals)
 target_include_directories(edge-classic PRIVATE ../ajbsp)
-target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/crsid)
 target_include_directories(edge-classic PRIVATE ../ddf)
-target_include_directories(edge-classic PRIVATE ../dehacked)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/dr_libs)
 target_include_directories(edge-classic PRIVATE ../epi)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/fluidlite/include)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/hmm)
-target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/libRAD)
-target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/m4p)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/minivorbis)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/miniz)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/pl_mpeg)

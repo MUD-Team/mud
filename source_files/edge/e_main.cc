@@ -85,7 +85,6 @@
 #include "sv_chunk.h"
 #include "sv_main.h"
 #include "version.h"
-#include "vm_coal.h"
 #include "w_files.h"
 #include "w_model.h"
 #include "w_sprite.h"
@@ -600,10 +599,7 @@ void EdgeDisplay(void)
     case kGameStateLevel:
         PaletteTicker();
 
-        if (LuaUseLuaHUD())
-            LuaRunHUD();
-        else
-            COALRunHUD();
+        LuaRunHUD();
 
         if (need_save_screenshot)
         {
@@ -1768,8 +1764,6 @@ static void AddSingleCommandLineFile(std::string name, bool ignore_unknown)
         kind = kFileKindRTS;
     else if (ext == ".ddf" || ext == ".ldf")
         kind = kFileKindDDF;
-    else if (ext == ".deh" || ext == ".bex")
-        kind = kFileKindDehacked;
     else
     {
         if (!ignore_unknown)
@@ -1830,34 +1824,6 @@ static void AddCommandLineFiles(void)
 
             std::string filename = epi::PathAppendIfNotAbsolute(game_directory, program_argument_list[p]);
             AddDataFile(filename, kFileKindRTS);
-        }
-
-        p++;
-    }
-
-    // dehacked/bex....
-
-    p = FindArgument("deh");
-
-    while (p > 0 && p < int(program_argument_list.size()) &&
-           (!ArgumentIsOption(p) || epi::StringCompare(program_argument_list[p], "-deh") == 0))
-    {
-        // the parms after p are Dehacked/BEX filenames,
-        // go until end of parms or another '-' preceded parm
-        if (!ArgumentIsOption(p))
-        {
-            std::string ext = epi::GetExtension(program_argument_list[p]);
-            // sanity check...
-            if (epi::StringCaseCompareASCII(ext, ".wad") == 0 || epi::StringCaseCompareASCII(ext, ".epk") == 0 ||
-                epi::StringCaseCompareASCII(ext, ".pk3") == 0 || epi::StringCaseCompareASCII(ext, ".zip") == 0 ||
-                epi::StringCaseCompareASCII(ext, ".vwad") == 0 || epi::StringCaseCompareASCII(ext, ".ddf") == 0 ||
-                epi::StringCaseCompareASCII(ext, ".rts") == 0)
-            {
-                FatalError("Illegal filename for -deh: %s\n", program_argument_list[p].c_str());
-            }
-
-            std::string filename = epi::PathAppendIfNotAbsolute(game_directory, program_argument_list[p]);
-            AddDataFile(filename, kFileKindDehacked);
         }
 
         p++;
@@ -2027,13 +1993,11 @@ static void EdgeStartup(void)
     // Must be done after WAD and DDF loading to check for potential
     // overrides of lump-specific image/sound/DDF defines
     DoPackSubstitutions();
-    StartupMusic(); // Must be done after all files loaded to locate
-                    // appropriate GENMIDI lump
+    StartupMusic();
     InitializePalette();
 
     DDFCleanUp();
     SetLanguage();
-    ReadUMAPINFOLumps();
 
     InitializeFlats();
     InitializeTextures();
@@ -2043,7 +2007,6 @@ static void EdgeStartup(void)
 
     HUDInit();
     ConsoleStart();
-    ConsoleCreateQuitScreen();
     SpecialWadVerify();
     BuildXGLNodes();
     ShowNotice();
@@ -2062,16 +2025,8 @@ static void EdgeStartup(void)
     InitializeSound();
     NetworkInitialize();
     CheatInitialize();
-    if (LuaUseLuaHUD())
-    {
-        LuaInit();
-        LuaLoadScripts();
-    }
-    else
-    {
-        InitializeCOAL();
-        COALLoadScripts();
-    }
+    LuaInit();
+    LuaLoadScripts();
 }
 
 static void InitialState(void)

@@ -38,9 +38,6 @@ void SpawnScriptTriggers(const char *map_name);
 void ClearScriptTriggers(void);
 void GroupTriggerTags(RADScriptTrigger *trig);
 
-// For UMAPINFO bossaction "clear" directive
-void ClearDeathTriggersByMap(const std::string &mapname);
-
 void                  RunScriptTriggers(void);
 void                  ScriptTicker(void);
 void                  ScriptDrawer(void);

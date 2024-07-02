@@ -207,7 +207,6 @@ class MidiSequencer
                                //! [Non-Standard] Loop End point
             kLoopEnd = 0xE2,   // size == 0 <CUSTOM>
                                //! [Non-Standard] Raw OPL data
-            kRawOPL = 0xE3,    // size == 0 <CUSTOM>
 
             //! [Non-Standard] Loop Start point with support of multi-loops
             kLoopStackBegin = 0xE4,  // size == 1 <CUSTOM>
@@ -857,14 +856,6 @@ class MidiSequencer
     void SetTempo(double tempo);
 
   private:
-    /**
-     * @brief Load file as Id-software-Music-File (Wolfenstein)
-     * @param mfr mem_file_c with opened source file
-     * @param rate For IMF formats, the proper playback rate in Hz
-     * @return true on successful load
-     */
-    bool ParseIMF(epi::MemFile *mfr, uint16_t rate);
-
     /**
      * @brief Load file as EA MUS
      * @param mfr mem_file_c with opened source file

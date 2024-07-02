@@ -36,9 +36,7 @@
 // FIXME: this seems totally arbitrary, review it.
 static constexpr float kVerticalSpacing = 2.0f;
 
-extern ConsoleLine    *quit_lines[kEndoomLines];
 extern int             console_cursor;
-extern Font           *endoom_font;
 extern ConsoleVariable video_overlay;
 extern ConsoleVariable double_framerate;
 
@@ -1109,89 +1107,6 @@ void HUDDrawChar(float left_x, float top_y, const Image *img, char ch, float siz
     HUDRawImage(x1, y1, x2, y2, img, tx1, ty1, tx2, ty2, current_alpha, current_color, nullptr, 0.0, 0.0, ch);
 }
 
-void HUDDrawEndoomChar(float left_x, float top_y, float FNX, const Image *img, char ch, RGBAColor color1,
-                       RGBAColor color2, bool blink)
-{
-    float w, h;
-    float tx1, tx2, ty1, ty2;
-
-    uint8_t character = (uint8_t)ch;
-
-    if (blink && console_cursor >= 16)
-        character = 0x20;
-
-    uint8_t px = character % 16;
-    uint8_t py = 15 - character / 16;
-    tx1        = (px)*endoom_font->font_image_->width_ratio_;
-    tx2        = (px + 1) * endoom_font->font_image_->width_ratio_;
-    ty1        = (py)*endoom_font->font_image_->height_ratio_;
-    ty2        = (py + 1) * endoom_font->font_image_->height_ratio_;
-
-    w = FNX;
-    h = FNX * 2;
-
-    sg_color sgcol = sg_make_color_1i(color2);
-
-    glDisable(GL_TEXTURE_2D);
-
-    glColor4f(sgcol.r, sgcol.g, sgcol.b, current_alpha);
-
-    glBegin(GL_QUADS);
-
-    glVertex2f(left_x, top_y);
-
-    glVertex2f(left_x, top_y + h);
-
-    glVertex2f(left_x + w, top_y + h);
-
-    glVertex2f(left_x + w, top_y);
-
-    glEnd();
-
-    sgcol = sg_make_color_1i(color1);
-
-    glEnable(GL_TEXTURE_2D);
-
-    GLuint tex_id = ImageCache(img, true, (const Colormap *)0, true);
-    glBindTexture(GL_TEXTURE_2D, tex_id);
-
-    if (img->opacity_ == kOpacitySolid)
-        glDisable(GL_ALPHA_TEST);
-    else
-    {
-        glEnable(GL_ALPHA_TEST);
-
-        if (img->opacity_ != kOpacityComplex)
-            glAlphaFunc(GL_GREATER, 0.66f);
-    }
-
-    glColor4f(sgcol.r, sgcol.g, sgcol.b, current_alpha);
-
-    glBegin(GL_QUADS);
-
-    float width_adjust = FNX / 2 + .5;
-
-    glTexCoord2f(tx1, ty1);
-    glVertex2f(left_x - width_adjust, top_y);
-
-    glTexCoord2f(tx2, ty1);
-    glVertex2f(left_x + w + width_adjust, top_y);
-
-    glTexCoord2f(tx2, ty2);
-    glVertex2f(left_x + w + width_adjust, top_y + h);
-
-    glTexCoord2f(tx1, ty2);
-    glVertex2f(left_x - width_adjust, top_y + h);
-
-    glEnd();
-
-    glDisable(GL_TEXTURE_2D);
-    glDisable(GL_ALPHA_TEST);
-    glDisable(GL_BLEND);
-
-    glAlphaFunc(GL_GREATER, 0);
-}
-
 //
 // Write a string using the current font
 //
@@ -1296,55 +1211,15 @@ void HUDDrawText(float x, float y, const char *str, float size)
     }
 }
 
-void HUDDrawQuitText(int line, float FNX, float FNY, float cx)
-{
-    EPI_ASSERT(quit_lines[line]);
-
-    float cy = (float)current_screen_height - ((25 - line) * FNY);
-
-    const Image *img = endoom_font->font_image_;
-
-    EPI_ASSERT(img);
-
-    for (int i = 0; i < 80; i++)
-    {
-        uint8_t info = quit_lines[line]->endoom_bytes_.at(i);
-
-        HUDDrawEndoomChar(cx, cy, FNX, img, quit_lines[line]->line_.at(i), endoom_colors[info & 15],
-                          endoom_colors[(info >> 4) & 7], info & 128);
-
-        cx += FNX;
-    }
-}
-
 //
-// Draw the ENDOOM screen
+// Draw the quit screen
 //
 
 void HUDDrawQuitScreen()
 {
-    EPI_ASSERT(endoom_font);
-
-    if (quit_lines[0])
-    {
-        float FNX = HMM_MIN((float)current_screen_width / 80.0f,
-                            320.0f / 80.0f * ((float)current_screen_height * 0.90f / 200.0f));
-        float FNY = FNX * 2;
-        float cx  = HMM_MAX(0, (((float)current_screen_width - (FNX * 80.0f)) / 2.0f));
-        for (int i = 0; i < kEndoomLines; i++)
-        {
-            HUDDrawQuitText(i, FNX, FNY, cx);
-        }
-        HUDSetAlignment(0, -1);
-        HUDDrawText(160, 195 - HUDStringHeight("Are you sure you want to quit? (Y/N)"),
-                    "Are you sure you want to quit? (Y/N)");
-    }
-    else
-    {
-        HUDSetAlignment(0, -1);
-        HUDDrawText(160, 100 - (HUDStringHeight("Are you sure you want to quit? (Y/N)") / 2),
-                    "Are you sure you want to quit? (Y/N)");
-    }
+    HUDSetAlignment(0, -1);
+    HUDDrawText(160, 100 - (HUDStringHeight("Are you sure you want to quit? (Y/N)") / 2),
+                "Are you sure you want to quit? (Y/N)");
 }
 
 void HUDRenderWorld(float x, float y, float w, float h, MapObject *camera, int flags)

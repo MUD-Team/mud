@@ -496,11 +496,11 @@ enum LineEffectType
     kLineEffectTypeBlockSight = (1 << 8),
     // experimental: transfer upper texture to SKY
     kLineEffectTypeSkyTransfer = (1 << 9),
-    // make all tagged lines scroll using this sidedef's offsets (MBF21)
+    // make all tagged lines scroll using this sidedef's offsets
     kLineEffectTypeTaggedOffsetScroll = (1 << 10),
-    // block land monsters (MBF21)
+    // block land monsters
     kLineEffectTypeBlockGroundedMonsters = (1 << 11),
-    // block players (MBF21)
+    // block players
     kLineEffectTypeBlockPlayers  = (1 << 12),
     kLineEffectTypeStretchWidth  = (1 << 13), // stretch the texture horizontally to line length
     kLineEffectTypeStretchHeight = (1 << 14), // stretch the texture vertically to line length
