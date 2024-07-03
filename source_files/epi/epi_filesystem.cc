@@ -20,7 +20,6 @@
 
 #include "epi.h"
 #include "epi_file.h"
-#include "epi_sdl.h"
 #include "epi_str_compare.h"
 #include "epi_windows.h"
 #ifndef _WIN32
@@ -652,6 +651,7 @@ File *FileOpen(std::string_view name, unsigned int flags)
 
 bool OpenDirectory(const std::string &src)
 {
+#ifdef SOKOL_DISABLED
     // A result of 0 is 'success', but that only means SDL was able to launch
     // some kind of process to attempt to handle the path. -1 is the only result
     // that is guaranteed to be an 'error'
@@ -660,7 +660,9 @@ bool OpenDirectory(const std::string &src)
         LogWarning("OpenDirectory failed to open requested path %s\nError: %s\n", src.c_str(), SDL_GetError());
         return false;
     }
+#endif
     return true;
+
 }
 
 bool FileCopy(std::string_view src, std::string_view dest)

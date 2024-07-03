@@ -26,8 +26,8 @@
 #pragma once
 
 #include <stdint.h>
-
 #include <string>
+#include "sokol_app.h"
 
 //--------------------------------------------------------
 //  SYSTEM functions.
@@ -88,6 +88,9 @@ void StartupControl(void);
 // Causes all control devices to send their events to the engine via
 // the PostEvent() function.
 void ControlGetEvents(void);
+
+// Posts an event to the control event queue
+void ControlPostEvent(const sapp_event& event);
 
 // Shuts down all control devices.  This is the opposite of
 // StartupControl().  Should be called from SystemShutdown(), the

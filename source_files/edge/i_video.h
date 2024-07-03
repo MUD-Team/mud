@@ -15,7 +15,3 @@
 //  GNU General Public License for more details.
 //
 //----------------------------------------------------------------------------
-
-#include "epi_sdl.h"
-
-extern SDL_Window *program_window;

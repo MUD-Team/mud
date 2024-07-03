@@ -105,12 +105,13 @@ endif()
 set (EDGE_LINK_LIBRARIES
   edge_ajbsp  
   edge_ddf
-  edge_epi
-  ${SDL2_LIBRARIES}
+  edge_epi  
   fluidlite
   miniz
   lua
   utf8proc
+  sokol
+  physfs-static
 )
 
 if (APPLE)
@@ -149,9 +150,6 @@ target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/hmm)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/miniz)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/pl_mpeg)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/stb)
-if(WIN32 AND (MSVC OR CLANG))
-  target_include_directories(edge-classic PRIVATE ${EDGE_LIBRARY_DIR}/sdl2/include)
-endif()
 
 target_link_libraries(edge-classic PRIVATE ${EDGE_LINK_LIBRARIES})
 
@@ -164,23 +162,6 @@ set(COPY_FILES "")
 
 set (DEST_DIR "${CMAKE_SOURCE_DIR}")
 list(APPEND COPY_FILES "$<TARGET_FILE:edge-classic>")
-
-# Copy appropriate SDL2.dll to local install directory when built with MSVC/Clang
-if (WIN32)
-  if(MSVC OR CLANG)
-    if (${CMAKE_SIZEOF_VOID_P} MATCHES 8)
-      list(APPEND COPY_FILES "${CMAKE_SOURCE_DIR}/libraries/sdl2/lib/x64/SDL2.dll")
-    else ()
-      list(APPEND COPY_FILES "${CMAKE_SOURCE_DIR}/libraries/sdl2/lib/x86/SDL2.dll")
-    endif ()
-  elseif(MSYS)
-    if (${CMAKE_SIZEOF_VOID_P} MATCHES 8)
-      list(APPEND COPY_FILES "/mingw64/bin/SDL2.dll")
-    else ()
-      list(APPEND COPY_FILES "/mingw32/bin/SDL2.dll")
-    endif ()
-  endif()
-endif()
 
 if (COPY_FILES)
   add_custom_command( TARGET edge-classic POST_BUILD COMMAND_EXPAND_LISTS COMMAND ${CMAKE_COMMAND} -E copy_if_different ${COPY_FILES} ${DEST_DIR})

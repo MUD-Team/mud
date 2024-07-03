@@ -315,13 +315,11 @@ bool GameResponder(InputEvent *ev)
         {
             PauseMusic();
             PauseSound();
-            GrabCursor(false);
         }
         else
         {
             ResumeMusic();
             ResumeSound();
-            GrabCursor(true);
         }
 
         // explicit as probably killed the initial effect

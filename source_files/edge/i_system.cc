@@ -25,15 +25,15 @@
 #include "dm_defs.h"
 #include "e_main.h"
 #include "epi.h"
-#include "epi_sdl.h"
 #include "epi_windows.h"
 #include "g_game.h"
 #include "m_argv.h"
 #include "m_menu.h"
 #include "m_misc.h"
+#include "physfs.h"
 #include "s_sound.h"
+#include "sokol_time.h"
 #include "version.h"
-
 
 extern FILE *debug_file;
 extern FILE *log_file;
@@ -120,11 +120,17 @@ void LogPrint(const char *message, ...)
 
     // Send the message to the console.
     ConsolePrint("%s", printbuf);
+
+    printf("%s", printbuf);
 }
 
 void ShowMessageBox(const char *message, const char *title)
 {
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, title, message, nullptr);
+// SOKOL_FIX
+#ifdef WIN32
+    // SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, title, message, nullptr);
+    MessageBoxA((HWND)sapp_win32_get_hwnd(), message, title, MB_OK);
+#endif
 }
 
 int PureRandomNumber(void)
@@ -159,7 +165,16 @@ void SleepForMilliseconds(int millisecs)
     }
 #endif
 
-    SDL_Delay(millisecs);
+    static bool has_warned = false;
+    if (!has_warned)
+    {
+        has_warned = true;
+        LogWarning("SleepForMilliseconds: using busy wait on platform, please fix");
+    }
+    double now = stm_ms(stm_now());
+    while (stm_ms(stm_now()) - now < millisecs)
+    {
+    }
 }
 
 void SystemShutdown(void)
@@ -180,6 +195,8 @@ void SystemShutdown(void)
         fclose(debug_file);
         debug_file = nullptr;
     }
+
+    PHYSFS_deinit();
 }
 
 //--- editor settings ---

@@ -36,7 +36,6 @@
 #include "e_main.h"
 #include "e_player.h"
 #include "epi.h"
-#include "epi_sdl.h"
 #include "epi_str_util.h"
 #include "hu_stuff.h"
 #include "m_math.h"

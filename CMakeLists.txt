@@ -13,6 +13,8 @@ project(
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+add_compile_definitions("SOKOL_GLCORE")
+
 option(EDGE_SANITIZE "Enable code sanitizing" OFF)
 option(EDGE_PROFILING "Enable Profiling" OFF)
 
@@ -92,14 +94,7 @@ else()
 
 endif()
 
-if (MSVC)
-  set(SDL2_DIR "${CMAKE_SOURCE_DIR}/libraries/sdl2")
-endif()
-
-find_package(SDL2 REQUIRED)
-
 if (APPLE)
-  include_directories(${SDL2_INCLUDE_DIR})  
   if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm64" AND APPLE)
     add_compile_definitions(APPLE_SILICON)
   elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64" AND APPLE)

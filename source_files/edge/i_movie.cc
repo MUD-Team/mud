@@ -19,7 +19,6 @@
 //----------------------------------------------------------------------------
 
 #include "epi.h"
-#include "epi_sdl.h"
 #include "hu_draw.h"
 #include "i_defs_gl.h"
 #include "i_sound.h"
@@ -102,6 +101,7 @@ void MovieVideoCallback(plm_t *mpeg, plm_frame_t *frame, void *user)
 
 void PlayMovie(const std::string &name)
 {
+#ifdef SOKOL_DISABLED
     MovieDefinition *movie = moviedefs.Lookup(name.c_str());
 
     if (!movie)
@@ -424,4 +424,5 @@ void PlayMovie(const std::string &name)
     FinishFrame();
     ResumeMusic();
     return;
+#endif
 }

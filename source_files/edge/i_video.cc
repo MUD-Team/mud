@@ -28,13 +28,8 @@
 #include "r_modes.h"
 #include "version.h"
 
-SDL_Window *program_window;
-
 int graphics_shutdown = 0;
 
-// I think grab_mouse should be an internal bool instead of a cvar...why would a
-// user need to adjust this on the fly? - Dasho
-EDGE_DEFINE_CONSOLE_VARIABLE(grab_mouse, "1", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(vsync, "0", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(gamma_correction, "0", kConsoleVariableFlagArchive, -1.0, 1.0)
 
@@ -55,27 +50,21 @@ EDGE_DEFINE_CONSOLE_VARIABLE(pixel_aspect_ratio, "1.0", kConsoleVariableFlagRead
 // including windowed mode.
 EDGE_DEFINE_CONSOLE_VARIABLE(forced_pixel_aspect_ratio, "0", kConsoleVariableFlagArchive)
 
-static bool grab_state;
-
 extern ConsoleVariable renderer_far_clip;
 extern ConsoleVariable draw_culling;
 extern ConsoleVariable draw_culling_distance;
 
 void GrabCursor(bool enable)
 {
-    if (!program_window || graphics_shutdown)
+    if (graphics_shutdown)
+        return;    
+
+    if (sapp_mouse_locked() == enable)
+    {
         return;
-
-    grab_state = enable;
-
-    if (grab_state && grab_mouse.d_)
-    {
-        SDL_SetRelativeMouseMode(SDL_TRUE);
     }
-    else
-    {
-        SDL_SetRelativeMouseMode(SDL_FALSE);
-    }
+
+    sapp_lock_mouse(enable);
 }
 
 void DeterminePixelAspect()
@@ -118,45 +107,13 @@ void DeterminePixelAspect()
 
 void StartupGraphics(void)
 {
-    std::string driver = ArgumentValue("videodriver");
-
-    if (driver.empty())
-    {
-        const char *check = SDL_getenv("SDL_VIDEODRIVER");
-        if (check)
-            driver = check;
-    }
-
-    if (driver.empty())
-        driver = "default";
-
-    if (epi::StringCaseCompareASCII(driver, "default") != 0)
-    {
-        SDL_setenv("SDL_VIDEODRIVER", driver.c_str(), 1);
-    }
-
-    LogPrint("SDL_Video_Driver: %s\n", driver.c_str());
-
-    if (SDL_InitSubSystem(SDL_INIT_VIDEO) != 0)
-        FatalError("Couldn't init SDL VIDEO!\n%s\n", SDL_GetError());
-
-    if (FindArgument("nograb") > 0)
-        grab_mouse = 0;
-
-    // -AJA- FIXME these are wrong (probably ignored though)
-    SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
-    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 5);
-    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
-    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 0);
-
     // -DS- 2005/06/27 Detect SDL Resolutions
-    SDL_DisplayMode info;
-    SDL_GetDesktopDisplayMode(0, &info);
+    // SDL_DisplayMode info;
+    // SDL_GetDesktopDisplayMode(0, &info);
 
-    desktop_resolution_width  = info.w;
-    desktop_resolution_height = info.h;
+    // SOKOL_FIX
+    desktop_resolution_width  = 1360;
+    desktop_resolution_height = 768;
 
     if (current_screen_width > desktop_resolution_width.d_)
         current_screen_width = desktop_resolution_width.d_;
@@ -165,6 +122,8 @@ void StartupGraphics(void)
 
     LogPrint("Desktop resolution: %dx%d\n", desktop_resolution_width.d_, desktop_resolution_height.d_);
 
+    // sokol fix
+    /*
     int num_modes = SDL_GetNumDisplayModes(0);
 
     for (int i = 0; i < num_modes; i++)
@@ -197,6 +156,14 @@ void StartupGraphics(void)
             }
         }
     }
+    */
+
+    DisplayMode win_mode;
+    win_mode.depth       = 32;
+    win_mode.height      = 768;
+    win_mode.width       = 1360;
+    win_mode.window_mode = kWindowModeWindowed;
+    AddDisplayResolution(&win_mode);
 
     // If needed, set the default window toggle mode to the largest non-native
     // res
@@ -218,29 +185,32 @@ void StartupGraphics(void)
 
     // Fill in borderless mode scrmode with the native display info
     borderless_mode.window_mode = kWindowModeBorderless;
-    borderless_mode.width       = info.w;
-    borderless_mode.height      = info.h;
-    borderless_mode.depth       = SDL_BITSPERPIXEL(info.format);
+    borderless_mode.width       = 1360;
+    borderless_mode.height      = 768;
+    borderless_mode.depth       = 24;
 
     // If needed, also make the default fullscreen toggle mode borderless
     if (toggle_fullscreen_window_mode.d_ == kWindowModeInvalid)
     {
         toggle_fullscreen_window_mode = kWindowModeBorderless;
-        toggle_fullscreen_width       = info.w;
-        toggle_fullscreen_height      = info.h;
-        toggle_fullscreen_depth       = (int)SDL_BITSPERPIXEL(info.format);
+        toggle_fullscreen_width       = 1360;
+        toggle_fullscreen_height      = 768;
+        toggle_fullscreen_depth       = 24;
     }
 
     LogPrint("StartupGraphics: initialisation OK\n");
 }
 
+static bool window_initialized = false;
+
 static bool InitializeWindow(DisplayMode *mode)
 {
+    window_initialized     = true;
     std::string temp_title = game_name.s_;
     temp_title.append(" ").append(edge_version.s_);
 
+    /*
     int resizeable = 0;
-
     program_window =
         SDL_CreateWindow(temp_title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, mode->width, mode->height,
                          SDL_WINDOW_OPENGL |
@@ -257,6 +227,7 @@ static bool InitializeWindow(DisplayMode *mode)
 
     if (mode->window_mode == kWindowModeBorderless)
         SDL_GetWindowSize(program_window, &borderless_mode.width, &borderless_mode.height);
+    */
 
     if (mode->window_mode == kWindowModeWindowed)
     {
@@ -280,6 +251,7 @@ static bool InitializeWindow(DisplayMode *mode)
         toggle_fullscreen_window_mode = kWindowModeBorderless;
     }
 
+    /*
     if (SDL_GL_CreateContext(program_window) == nullptr)
         FatalError("Failed to create OpenGL context.\n");
 
@@ -294,7 +266,7 @@ static bool InitializeWindow(DisplayMode *mode)
     }
     else
         SDL_GL_SetSwapInterval(vsync.d_);
-
+    */
 
     gladLoaderLoadGL();
 
@@ -303,20 +275,19 @@ static bool InitializeWindow(DisplayMode *mode)
 
 bool SetScreenSize(DisplayMode *mode)
 {
-    GrabCursor(false);
-
     LogPrint("SetScreenSize: trying %dx%d %dbpp (%s)\n", mode->width, mode->height, mode->depth,
              mode->window_mode == kWindowModeBorderless
                  ? "borderless"
                  : (mode->window_mode == kWindowModeFullscreen ? "fullscreen" : "windowed"));
 
-    if (program_window == nullptr)
+    if (!window_initialized)
     {
         if (!InitializeWindow(mode))
         {
             return false;
         }
     }
+#ifdef SOKOL_DISABLED
     else if (mode->window_mode == kWindowModeBorderless)
     {
         SDL_SetWindowFullscreen(program_window, SDL_WINDOW_FULLSCREEN_DESKTOP);
@@ -345,22 +316,12 @@ bool SetScreenSize(DisplayMode *mode)
 
         LogPrint("SetScreenSize: mode now %dx%d %dbpp\n", mode->width, mode->height, mode->depth);
     }
-
-    // -AJA- turn off cursor -- BIG performance increase.
-    //       Plus, the combination of no-cursor + grab gives
-    //       continuous relative mouse motion.
-    GrabCursor(true);
-
-#ifdef DEVELOPERS
-    // override SDL signal handlers (the so-called "parachute").
-    signal(SIGFPE, SIG_DFL);
-    signal(SIGSEGV, SIG_DFL);
 #endif
 
     glClearColor(0, 0, 0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    SDL_GL_SwapWindow(program_window);
+    // SDL_GL_SwapWindow(program_window);
 
     return true;
 }
@@ -378,7 +339,7 @@ void StartFrame(void)
 
 void FinishFrame(void)
 {
-    SDL_GL_SwapWindow(program_window);
+    // SDL_GL_SwapWindow(program_window);
 
     EDGE_TracyPlot("draw_render_units", (int64_t)ec_frame_stats.draw_render_units);
     EDGE_TracyPlot("draw_wall_parts", (int64_t)ec_frame_stats.draw_wall_parts);
@@ -389,22 +350,19 @@ void FinishFrame(void)
 
     EDGE_FrameMark;
 
-    if (grab_mouse.CheckModified())
-        GrabCursor(grab_state);
-
     if (vsync.CheckModified())
     {
         if (vsync.d_ == 2)
         {
             // Fallback to normal VSync if Adaptive doesn't work
-            if (SDL_GL_SetSwapInterval(-1) == -1)
-            {
-                vsync = 1;
-                SDL_GL_SetSwapInterval(vsync.d_);
-            }
+            // if (SDL_GL_SetSwapInterval(-1) == -1)
+            //{
+            //    vsync = 1;
+            //    SDL_GL_SetSwapInterval(vsync.d_);
+            // }
         }
-        else
-            SDL_GL_SetSwapInterval(vsync.d_);
+        // else
+        //     SDL_GL_SetSwapInterval(vsync.d_);
     }
 
     if (monitor_aspect_ratio.CheckModified() || forced_pixel_aspect_ratio.CheckModified())
@@ -417,13 +375,6 @@ void ShutdownGraphics(void)
         return;
 
     graphics_shutdown = 1;
-
-    if (SDL_WasInit(SDL_INIT_EVERYTHING))
-    {
-        DeterminePixelAspect();
-
-        SDL_Quit();
-    }
 
     gladLoaderUnloadGL();
 }
