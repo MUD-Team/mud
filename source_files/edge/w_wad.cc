@@ -771,7 +771,7 @@ std::string CheckForEdgeGameLump(epi::File *file)
 {
     int          length;
     RawWadHeader header;
-    std::string game_name;
+    std::string  game_name;
 
     if (!file)
     {
@@ -793,17 +793,16 @@ std::string CheckForEdgeGameLump(epi::File *file)
     {
         RawWadEntry &entry = raw_info[i];
 
-        // This needs a proper EDGEGAME structure/parser or something but 
-        // just assume for now the contents of the lump are the game name - Dasho
         if (epi::StringCompare("EDGEGAME", entry.name) == 0)
         {
-            game_name.resize(entry.size);
+            std::string edge_game;
+            edge_game.resize(entry.size);
             file->Seek(entry.position, epi::File::kSeekpointStart);
             file->Read(game_name.data(), entry.size);
+            epi::Lexer lex(edge_game);
+            game_name = ParseEdgeGameFile(lex);
             delete[] raw_info;
-            // lex here - Dasho
             file->Seek(0, epi::File::kSeekpointStart);
-            game_name = "TEST";
             return game_name;
         }
     }
