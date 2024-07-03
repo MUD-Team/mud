@@ -316,13 +316,8 @@ static int OptionMenuGetCurrentSwitchValue(OptionMenuItem *item)
 //
 //  MAIN MENU
 //
-#ifdef EDGE_WEB
-static constexpr uint8_t kOptionMenuLanguagePosition    = 9;
-static constexpr uint8_t kOptionMenuNetworkHostPosition = 12;
-#else
 static constexpr uint8_t kOptionMenuLanguagePosition    = 10;
 static constexpr uint8_t kOptionMenuNetworkHostPosition = 13;
-#endif
 
 static OptionMenuItem mainoptions[] = {
     {kOptionMenuItemTypeFunction, "MenuBinding", nullptr, 0, nullptr, OptionMenuKeyboardOptions, "Controls"},
@@ -337,9 +332,7 @@ static OptionMenuItem mainoptions[] = {
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
     {kOptionMenuItemTypeFunction, "MenuSound", nullptr, 0, nullptr, OptionMenuSoundOptions, "SoundOptions"},
     {kOptionMenuItemTypeFunction, "MenuVideo", nullptr, 0, nullptr, OptionMenuVideoOptions, "VideoOptions"},
-#ifndef EDGE_WEB
     {kOptionMenuItemTypeFunction, "MenuResolution", nullptr, 0, nullptr, OptionMenuResolutionOptions, "ChangeRes"},
-#endif
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
     {kOptionMenuItemTypeFunction, "MenuLanguage", nullptr, 0, nullptr, OptionMenuChangeLanguage, nullptr},
     {kOptionMenuItemTypeSwitch, "MenuMessages", YesNo, 2, &show_messages, nullptr, "Messages"},

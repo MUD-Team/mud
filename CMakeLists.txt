@@ -13,7 +13,6 @@ project(
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-option(EDGE_GL_ES2 "Enable GLES2 Rendering Backend" OFF)
 option(EDGE_SANITIZE "Enable code sanitizing" OFF)
 option(EDGE_PROFILING "Enable Profiling" OFF)
 
@@ -23,10 +22,6 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" ST
   set(CLANG true)
 else()
   set(CLANG false)
-endif()
-
-if (EMSCRIPTEN)
-  include("${CMAKE_SOURCE_DIR}/cmake/Emscripten.cmake")  
 endif()
 
 if (MSVC)
@@ -120,11 +115,7 @@ if(${CMAKE_SYSTEM} MATCHES "BSD")
   include_directories("/usr/local/include")  
 endif()
 
-if (NOT EDGE_GL_ES2)
-  find_package(OpenGL REQUIRED)
-else()
-  add_definitions(-DEDGE_GL_ES2)
-endif()
+find_package(OpenGL REQUIRED)
 
 # Profiling
 if (EDGE_PROFILING)

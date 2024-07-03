@@ -16,10 +16,6 @@
 //
 //----------------------------------------------------------------------------
 
-#ifdef EDGE_WEB
-#include <emscripten.h>
-#endif
-
 #include "dm_state.h"
 #include "epi.h"
 #include "epi_sdl.h"
@@ -573,29 +569,12 @@ void PrecacheSounds(void)
 void ResumeAudioDevice()
 {
     SDL_PauseAudioDevice(current_sound_device, 0);
-
-#ifdef EDGE_WEB
-    // Yield back to main thread for audio processing
-    if (emscripten_has_asyncify())
-    {
-        emscripten_sleep(100);
-    }
-#endif
 }
 
 void PauseAudioDevice()
 {
     StopAllSoundEffects();
     SDL_PauseAudioDevice(current_sound_device, 1);
-
-#ifdef EDGE_WEB
-    // Yield back to main thread for audio processing
-    // If complied without async support, as with debug build, will stutter
-    if (emscripten_has_asyncify())
-    {
-        emscripten_sleep(100);
-    }
-#endif
 }
 
 //--- editor settings ---

@@ -75,8 +75,6 @@ bool FileCopy(std::string_view src, std::string_view dest);
 bool FileDelete(std::string_view name);
 
 // General Filesystem Functions
-// Performs a sync for platforms with virtualized file systems
-void SyncFilesystem(bool populate = false);
 
 } // namespace epi
 

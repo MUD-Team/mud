@@ -139,10 +139,8 @@ void RendererCheckExtensions(void)
         }
     }
 
-#ifndef EDGE_GL_ES2
     if (!GLAD_GL_VERSION_1_5)
         FatalError("OpenGL supported version below minimum! (Requires OpenGL 1.5).\n");
-#endif
 }
 
 //
@@ -162,9 +160,7 @@ void RendererSoftInit(void)
 
     glDisable(GL_LINE_SMOOTH);
 
-#ifndef EDGE_GL_ES2
     glDisable(GL_POLYGON_SMOOTH);
-#endif
 
     glEnable(GL_NORMALIZE);
 

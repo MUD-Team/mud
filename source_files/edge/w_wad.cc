@@ -1174,9 +1174,7 @@ std::string BuildXGLNodesForWAD(DataFile *df)
             delete mem_wad;
         }
 
-        LogDebug("AJ_BuildNodes: FINISHED\n");
-
-        epi::SyncFilesystem();
+        LogDebug("AJ_BuildNodes: FINISHED\n");        
     }
 
     return xwa_filename;

@@ -178,11 +178,7 @@ EDGE_DEFINE_CONSOLE_VARIABLE(ddf_strict, "0", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(ddf_lax, "0", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(ddf_quiet, "0", kConsoleVariableFlagArchive)
 
-#ifdef EDGE_WEB
-EDGE_DEFINE_CONSOLE_VARIABLE(skip_intros, "1", kConsoleVariableFlagArchive)
-#else
 EDGE_DEFINE_CONSOLE_VARIABLE(skip_intros, "0", kConsoleVariableFlagArchive)
-#endif
 
 static const Image *loading_image = nullptr;
 const Image        *menu_backdrop = nullptr;
@@ -2069,7 +2065,6 @@ void EdgeMain(int argc, const char **argv)
 
     LogDebug("- Entering game loop...\n");
 
-#ifndef EDGE_WEB
     while (!(app_state & kApplicationPendingQuit))
     {
         // We always do this once here, although the engine may
@@ -2083,9 +2078,6 @@ void EdgeMain(int argc, const char **argv)
             SleepForMilliseconds(5);
         }
     }
-#else
-    return;
-#endif
 }
 
 //

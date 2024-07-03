@@ -247,7 +247,6 @@ void SaveDefaults(void)
         }
     }
 
-    epi::SyncFilesystem();
 
     fclose(f);
 }
