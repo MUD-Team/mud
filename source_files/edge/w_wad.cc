@@ -67,14 +67,6 @@
 #include "w_files.h"
 #include "w_texture.h"
 
-// Combination of unique lumps needed to best identify an IWAD
-const std::vector<GameCheck> game_checker = {{
-    {"Custom", "custom", {"EDGEGAME", "EDGEGAME"}},
-    {"Blasphemer", "blasphemer", {"BLASPHEM", "E1M1"}},
-    {"Freedoom 1", "freedoom1", {"FREEDOOM", "E1M1"}},
-    {"Freedoom 2", "freedoom2", {"FREEDOOM", "MAP01"}}
-}};
-
 class WadFile
 {
   public:
@@ -775,15 +767,16 @@ static void CheckForLevel(WadFile *wad, int lump, const char *name, const RawWad
     }
 }
 
-int CheckForUniqueGameLumps(epi::File *file)
+std::string CheckForEdgeGameLump(epi::File *file)
 {
     int          length;
     RawWadHeader header;
+    std::string game_name;
 
     if (!file)
     {
-        LogWarning("CheckForUniqueGameLumps: Received null file_c pointer!\n");
-        return -1;
+        LogWarning("CheckForEdgeGameLump: Received null file_c pointer!\n");
+        return game_name;
     }
 
     // WAD file
@@ -796,55 +789,28 @@ int CheckForUniqueGameLumps(epi::File *file)
     file->Seek(header.directory_start, epi::File::kSeekpointStart);
     file->Read(raw_info, length);
 
-    for (size_t check = 0; check < game_checker.size(); check++)
+    for (size_t i = 0; i < header.total_entries; i++)
     {
-        GameCheck   gamecheck = game_checker[check];
-        const char *lump0     = gamecheck.unique_lumps[0];
-        const char *lump1     = gamecheck.unique_lumps[1];
+        RawWadEntry &entry = raw_info[i];
 
-        // Do not require IWAD header if loading a custom standalone IWAD
-        if (strncmp(header.magic, "IWAD", 4) != 0 && epi::StringCompare(lump0, "EDGEGAME") != 0)
+        // This needs a proper EDGEGAME structure/parser or something but 
+        // just assume for now the contents of the lump are the game name - Dasho
+        if (epi::StringCompare("EDGEGAME", entry.name) == 0)
         {
-            continue;
-        }
-
-        bool lump1_found = false;
-        bool lump2_found = false;
-
-        for (size_t i = 0; i < header.total_entries; i++)
-        {
-            if (lump1_found && lump2_found)
-                break;
-
-            RawWadEntry &entry = raw_info[i];
-
-            if (strncmp(lump0, entry.name, 8) == 0)
-            {
-                // EDGEGAME is the only lump needed for custom standalones
-                if (epi::StringCompare(lump0, "EDGEGAME") == 0)
-                {
-                    delete[] raw_info;
-                    file->Seek(0, epi::File::kSeekpointStart);
-                    return check;
-                }
-                else
-                    lump1_found = true;
-            }
-            if (strncmp(lump1, entry.name, 8) == 0)
-                lump2_found = true;
-        }
-
-        if (lump1_found && lump2_found)
-        {
+            game_name.resize(entry.size);
+            file->Seek(entry.position, epi::File::kSeekpointStart);
+            file->Read(game_name.data(), entry.size);
             delete[] raw_info;
+            // lex here - Dasho
             file->Seek(0, epi::File::kSeekpointStart);
-            return check;
+            game_name = "TEST";
+            return game_name;
         }
     }
 
     delete[] raw_info;
     file->Seek(0, epi::File::kSeekpointStart);
-    return -1;
+    return game_name;
 }
 
 static void ProcessDDFInWad(DataFile *df)
@@ -970,8 +936,7 @@ void ProcessWad(DataFile *df, size_t file_index)
     {
         RawWadEntry &entry = raw_info[i];
 
-        bool allow_ddf = (epi::StringCompare(game_base, "custom") == 0 || df->kind_ == kFileKindPWAD ||
-                          df->kind_ == kFileKindPackWAD || df->kind_ == kFileKindIPK || df->kind_ == kFileKindIFolder);
+        bool allow_ddf = true;
 
         AddLump(df, entry.name, AlignedLittleEndianS32(entry.position), AlignedLittleEndianS32(entry.size),
                 (int)file_index, allow_ddf);

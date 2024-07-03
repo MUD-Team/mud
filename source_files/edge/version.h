@@ -20,7 +20,7 @@
 
 #include "con_var.h"
 
-extern ConsoleVariable window_title;
+extern ConsoleVariable game_name;
 extern ConsoleVariable edge_version;
 extern ConsoleVariable application_name;
 

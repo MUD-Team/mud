@@ -416,22 +416,6 @@ void LoadDefaults(void)
     return;
 }
 
-void LoadBranding(void)
-{
-    epi::File *file = FileOpen(branding_file, epi::kFileAccessRead);
-
-    // Just use hardcoded values if no branding file present
-    if (!file)
-        return;
-
-    // load the file into this string
-    std::string data = file->ReadText();
-
-    delete file;
-
-    ParseConfig(data, false);
-}
-
 void TakeScreenshot(bool show_msg)
 {
     const char *extension = "png";

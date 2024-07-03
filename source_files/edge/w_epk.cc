@@ -1202,35 +1202,6 @@ void PopulatePackOnly(DataFile *df)
     df->pack_->SortEntries();
 }
 
-int CheckPackForIWADs(DataFile *df)
-{
-    PackFile *pack = df->pack_;
-    for (size_t d = 0; d < pack->directories_.size(); d++)
-    {
-        for (size_t i = 0; i < pack->directories_[d].entries_.size(); i++)
-        {
-            PackEntry &entry = pack->directories_[d].entries_[i];
-
-            if (!entry.HasExtension(".wad"))
-                continue;
-
-            epi::File *pack_wad = OpenPackFile(pack, entry.pack_path_);
-
-            if (pack_wad)
-            {
-                int pack_iwad_check = CheckForUniqueGameLumps(pack_wad);
-                if (pack_iwad_check >= 0)
-                {
-                    delete pack_wad;
-                    return pack_iwad_check;
-                }
-            }
-            delete pack_wad;
-        }
-    }
-    return -1;
-}
-
 void ProcessAllInPack(DataFile *df, size_t file_index)
 {
     if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindIFolder)

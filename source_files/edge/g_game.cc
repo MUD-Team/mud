@@ -876,7 +876,6 @@ static bool GameSaveGameToFile(std::string filename, const char *description)
 
     // --- fill in global structure ---
 
-    // globs->game  = SV_DupString(game_base.c_str());
     globs->game      = SaveChunkCopyString(current_map->episode_name_.c_str());
     globs->level     = SaveChunkCopyString(current_map->name_.c_str());
     globs->flags     = level_flags;

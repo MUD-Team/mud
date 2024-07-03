@@ -34,8 +34,6 @@
 #include "w_files.h"
 #include "w_wad.h"
 
-extern std::string game_base;
-
 class TextureSet
 {
   public:

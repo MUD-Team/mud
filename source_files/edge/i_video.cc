@@ -236,7 +236,7 @@ void StartupGraphics(void)
 
 static bool InitializeWindow(DisplayMode *mode)
 {
-    std::string temp_title = window_title.s_;
+    std::string temp_title = game_name.s_;
     temp_title.append(" ").append(edge_version.s_);
 
     int resizeable = 0;

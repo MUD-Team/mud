@@ -27,7 +27,6 @@
 
 // Misc. other strings.
 constexpr const char *kRequiredEPK      = "edge_defs";
-constexpr const char *kBrandingFileName = "branding.cfg";
 
 constexpr const char *kSaveGameBase      = "save";
 constexpr const char *kSaveGameExtension = "esg";
