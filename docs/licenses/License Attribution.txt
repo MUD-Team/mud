@@ -93,18 +93,6 @@ Fraction.hpp - Bisqwit
 stb_image, stb_image_write, stb_rect_pack and stb_truetype libraries - Sean Barrett
 
 ===========================================================================================
-SIL Open Font License
-===========================================================================================
-
-Fira Code (renamed to ECFONT02.ttf) - Copyright 2014-2020 The Fira Code Project Authors
-
-Germania One (renamed to ECFONT03.ttf) - Copyright (c) 2011, John Vargas Beltrán,
-										 with Reserved Font Name "Germania One"
-
-Russo One (renamed to ECFONT01.ttf) - Copyright (c) 2011-2012, Jovanny Lemonad,
-									  with Reserved Font Name "Russo"
-
-===========================================================================================
 zlib License
 ===========================================================================================
 
