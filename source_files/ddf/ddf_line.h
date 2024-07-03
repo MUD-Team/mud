@@ -706,10 +706,6 @@ class LineType
     // -AJA- 1999/12/07: line special flags
     LineSpecial special_flags_;
 
-    // -AJA- 2000/01/09: enable (if +1) or disable (if -1) all radius
-    //       triggers with the same tag as the linedef.
-    int trigger_effect_;
-
     // -AJA- 2000/09/28: BOOM compatibility fields (and more !).
     LineEffectType   line_effect_;
     ScrollingPart    line_parts_;

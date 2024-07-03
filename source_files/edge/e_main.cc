@@ -77,7 +77,6 @@
 #include "r_image.h"
 #include "r_misc.h"
 #include "r_modes.h"
-#include "rad_trig.h"
 #include "s_music.h"
 #include "s_sound.h"
 #include "script/compat/lua_compat.h"
@@ -548,7 +547,6 @@ void EdgeDisplay(void)
         }
 
         HUDDrawer();
-        ScriptDrawer();
         break;
 
     case kGameStateIntermission:
@@ -1392,6 +1390,8 @@ static void AddSingleCommandLineFile(std::string name, bool ignore_unknown)
 
     if (ext == ".edm")
         FatalError("Demos are not supported\n");
+    else if (ext == ".rts")
+        FatalError("Radius Trigger Scripts are not supported\n");
 
     FileKind kind;
 
@@ -1399,8 +1399,6 @@ static void AddSingleCommandLineFile(std::string name, bool ignore_unknown)
         kind = kFileKindPWAD;
     else if (ext == ".pk3" || ext == ".epk" || ext == ".zip" || ext == ".vwad")
         kind = kFileKindEPK;
-    else if (ext == ".rts")
-        kind = kFileKindRTS;
     else if (ext == ".ddf" || ext == ".ldf")
         kind = kFileKindDDF;
     else
@@ -1436,34 +1434,6 @@ static void AddCommandLineFiles(void)
         // go until end of parms or another '-' preceded parm
         if (!ArgumentIsOption(p))
             AddSingleCommandLineFile(program_argument_list[p], false);
-
-        p++;
-    }
-
-    // scripts....
-
-    p = FindArgument("script");
-
-    while (p > 0 && p < int(program_argument_list.size()) &&
-           (!ArgumentIsOption(p) || epi::StringCompare(program_argument_list[p], "-script") == 0))
-    {
-        // the parms after p are script filenames,
-        // go until end of parms or another '-' preceded parm
-        if (!ArgumentIsOption(p))
-        {
-            std::string ext = epi::GetExtension(program_argument_list[p]);
-            // sanity check...
-            if (epi::StringCaseCompareASCII(ext, ".wad") == 0 || epi::StringCaseCompareASCII(ext, ".pk3") == 0 ||
-                epi::StringCaseCompareASCII(ext, ".zip") == 0 || epi::StringCaseCompareASCII(ext, ".epk") == 0 ||
-                epi::StringCaseCompareASCII(ext, ".vwad") == 0 || epi::StringCaseCompareASCII(ext, ".ddf") == 0 ||
-                epi::StringCaseCompareASCII(ext, ".deh") == 0 || epi::StringCaseCompareASCII(ext, ".bex") == 0)
-            {
-                FatalError("Illegal filename for -script: %s\n", program_argument_list[p].c_str());
-            }
-
-            std::string filename = epi::PathAppendIfNotAbsolute(game_directory, program_argument_list[p]);
-            AddDataFile(filename, kFileKindRTS);
-        }
 
         p++;
     }
@@ -1593,7 +1563,6 @@ static void EdgeStartup(void)
     AddCommandLineFiles();
     CheckTurbo();
 
-    InitializeRADScripts();
     ProcessMultipleFiles();
     DDFParseEverything();
     // Must be done after WAD and DDF loading to check for potential

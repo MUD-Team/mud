@@ -88,7 +88,6 @@ static const GlobalCommand global_commands[] = {
     {"MAPLINE", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC, offsetof(SaveGlobals, mapline)},
     {"MAPTHING", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC, offsetof(SaveGlobals, mapthing)},
 
-    {"RSCRIPT", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC, offsetof(SaveGlobals, rscript)},
     {"DDFATK", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC, offsetof(SaveGlobals, ddfatk)},
     {"DDFGAME", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC, offsetof(SaveGlobals, ddfgame)},
     {"DDFLEVL", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC, offsetof(SaveGlobals, ddflevl)},

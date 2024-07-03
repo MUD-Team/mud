@@ -62,8 +62,6 @@ struct State
     // parameter for routine, or nullptr
     void *action_par;
 
-    int rts_tag_type;
-
     // next state ref.  0 means "remove me"
     int nextstate;
 

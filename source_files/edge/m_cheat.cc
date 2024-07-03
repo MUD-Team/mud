@@ -201,10 +201,6 @@ bool CheatResponder(InputEvent *ev)
     int     i;
     Player *pl = players[console_player];
 
-    // disable cheats while in RTS menu
-    if (rts_menu_active)
-        return false;
-
     // if a user keypress...
     if (ev->type != kInputEventKeyDown)
         return false;

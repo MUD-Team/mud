@@ -175,8 +175,6 @@ static SaveField sv_fields_mobj[] = {
                     SaveGamePutFloat),
     EDGE_SAVE_FIELD(dummy_map_object, on_ladder_, "on_ladder", 1, kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
                     SaveGamePutInteger),
-    EDGE_SAVE_FIELD(dummy_map_object, path_trigger_, "path_trigger", 1, kSaveFieldString, 0, nullptr,
-                    SaveGameGetRADScript, SaveGamePutRADScript),
     EDGE_SAVE_FIELD(dummy_map_object, dynamic_light_.r, "dlight_qty", 1, kSaveFieldNumeric, 4, nullptr,
                     SaveGameGetFloat, SaveGamePutFloat),
     EDGE_SAVE_FIELD(dummy_map_object, dynamic_light_.target, "dlight_target", 1, kSaveFieldNumeric, 4, nullptr,

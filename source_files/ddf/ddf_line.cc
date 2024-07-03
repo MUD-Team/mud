@@ -62,7 +62,6 @@ static void DDFLineGetScrollPart(const char *info, void *storage);
 static void DDFLineGetExtraFloor(const char *info, void *storage);
 static void DDFLineGetEFControl(const char *info, void *storage);
 static void DDFLineGetTeleportSpecial(const char *info, void *storage);
-static void DDFLineGetRadTrig(const char *info, void *storage);
 static void DDFLineGetSpecialFlags(const char *info, void *storage);
 static void DDFLineGetSlideType(const char *info, void *storage);
 static void DDFLineGetLineEffect(const char *info, void *storage);
@@ -178,7 +177,6 @@ static const DDFCommandList linedef_commands[] = {
     DDF_FIELD("TRANSLUCENCY", dummy_line, translucency_, DDFMainGetPercent),
     DDF_FIELD("WHEN_APPEAR", dummy_line, appear_, DDFMainGetWhenAppear),
     DDF_FIELD("SPECIAL", dummy_line, special_flags_, DDFLineGetSpecialFlags),
-    DDF_FIELD("RADIUS_TRIGGER", dummy_line, trigger_effect_, DDFLineGetRadTrig),
     DDF_FIELD("LINE_EFFECT", dummy_line, line_effect_, DDFLineGetLineEffect),
     DDF_FIELD("SCROLL_TYPE", dummy_line, scroll_type_, DDFLineGetScrollType),
     DDF_FIELD("LINE_PARTS", dummy_line, line_parts_, DDFLineGetScrollPart),
@@ -774,29 +772,6 @@ void DDFLineGetSpecialFlags(const char *info, void *storage)
         DDFWarnError("Unknown line special: %s", info);
         break;
     }
-}
-
-//
-// DDFLineGetRadTrig
-//
-// Gets the line's radius trigger effect.
-//
-static void DDFLineGetRadTrig(const char *info, void *storage)
-{
-    int *trigger_effect = (int *)storage;
-
-    if (DDFCompareName(info, "ENABLE_TAGGED") == 0)
-    {
-        *trigger_effect = +1;
-        return;
-    }
-    if (DDFCompareName(info, "DISABLE_TAGGED") == 0)
-    {
-        *trigger_effect = -1;
-        return;
-    }
-
-    DDFWarnError("DDFLineGetRadTrig: Unknown effect: %s\n", info);
 }
 
 static const DDFSpecialFlags slidingdoor_names[] = {{"NONE", kSlidingDoorTypeNone, 0},
@@ -1591,7 +1566,6 @@ void LineType::CopyDetail(LineType &src)
     appear_        = src.appear_;
 
     special_flags_  = src.special_flags_;
-    trigger_effect_ = src.trigger_effect_;
     line_effect_    = src.line_effect_;
     line_parts_     = src.line_parts_;
     scroll_type_    = src.scroll_type_;
@@ -1651,7 +1625,6 @@ void LineType::Default(void)
     translucency_   = 1.0f;
     appear_         = kAppearsWhenDefault;
     special_flags_  = kLineSpecialNone;
-    trigger_effect_ = 0;
     line_effect_    = kLineEffectTypeNONE;
     line_parts_     = kScrollingPartNone;
     scroll_type_    = BoomScrollerTypeNone;

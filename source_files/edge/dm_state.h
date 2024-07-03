@@ -55,7 +55,6 @@ extern int deathmatch;
 // Note that there is no way to disable the
 //  status bar explicitely.
 extern bool menu_active; // Menu overlayed?
-extern bool rts_menu_active;
 extern bool paused;      // Game Pause?
 
 // Timer, for scores.

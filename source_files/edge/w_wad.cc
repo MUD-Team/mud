@@ -61,7 +61,6 @@
 #include "i_system.h"
 #include "m_misc.h"
 #include "r_image.h"
-#include "rad_trig.h"
 #include "script/compat/lua_compat.h"
 #include "w_epk.h"
 #include "w_files.h"
@@ -120,7 +119,7 @@ enum LumpKind
     kLumpNormal   = 0,  // fallback value
     kLumpMarker   = 3,  // X_START, X_END, S_SKIN, level name
     kLumpWadTex   = 6,  // palette, pnames, texture1/2
-    kLumpDDFRTS   = 10, // DDF, RTS, Lua lump
+    kLumpDDF      = 10, // DDF, RTS, Lua lump
     kLumpTx       = 14,
     kLumpColormap = 15,
     kLumpFlat     = 16,
@@ -514,21 +513,21 @@ static void AddLump(DataFile *df, const char *raw_name, int pos, int size, int f
     }
     else if (strcmp(info.name, "LUAHUDS") == 0)
     {
-        lump_p->kind = kLumpDDFRTS;
+        lump_p->kind = kLumpDDF;
         if (wad != nullptr)
             wad->lua_huds_ = lump;
         return;
     }
     else if (strcmp(info.name, "ANIMATED") == 0)
     {
-        lump_p->kind = kLumpDDFRTS;
+        lump_p->kind = kLumpDDF;
         if (wad != nullptr)
             wad->animated_ = lump;
         return;
     }
     else if (strcmp(info.name, "SWITCHES") == 0)
     {
-        lump_p->kind = kLumpDDFRTS;
+        lump_p->kind = kLumpDDF;
         if (wad != nullptr)
             wad->switches_ = lump;
         return;
@@ -541,7 +540,7 @@ static void AddLump(DataFile *df, const char *raw_name, int pos, int size, int f
 
         if (type != kDDFTypeUnknown)
         {
-            lump_p->kind          = kLumpDDFRTS;
+            lump_p->kind          = kLumpDDF;
             wad->ddf_lumps_[type] = lump;
             return;
         }

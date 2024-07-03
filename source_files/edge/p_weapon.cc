@@ -36,7 +36,6 @@
 #include "m_random.h"
 #include "p_action.h"
 #include "p_local.h"
-#include "rad_trig.h"
 #include "s_sound.h"
 #include "w_sprite.h"
 #include "w_wad.h"
@@ -1789,30 +1788,6 @@ void A_WeaponTransFade(MapObject *mo)
     }
 
     psp->target_visibility = value;
-}
-
-void A_WeaponEnableRadTrig(MapObject *mo)
-{
-    Player       *p   = mo->player_;
-    PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
-
-    if (psp->state && psp->state->action_par)
-    {
-        int tag = *(int *)psp->state->action_par;
-        ScriptEnableByTag(mo, tag, false, (RADScriptTag)psp->state->rts_tag_type);
-    }
-}
-
-void A_WeaponDisableRadTrig(MapObject *mo)
-{
-    Player       *p   = mo->player_;
-    PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
-
-    if (psp->state && psp->state->action_par)
-    {
-        int tag = *(int *)psp->state->action_par;
-        ScriptEnableByTag(mo, tag, true, (RADScriptTag)psp->state->rts_tag_type);
-    }
 }
 
 void A_WeaponSetSkin(MapObject *mo)

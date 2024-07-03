@@ -17,7 +17,6 @@
 #include "r_modes.h"
 #include "r_sky.h"
 #include "r_state.h"
-#include "rad_trig.h"
 #include "s_sound.h"
 
 extern Player *ui_player_who;
@@ -1066,42 +1065,14 @@ static int PL_play_footstep(lua_State *L)
 //
 static int PL_use_inventory(lua_State *L)
 {
+// RTS removed - this will decrement but do nothing else at the moment - Dasho
+
     int         inv         = (int)luaL_checknumber(L, 1);
-    std::string script_name = "INVENTORY";
 
     if (inv < 1 || inv > kTotalInventoryTypes)
         FatalError("player.use_inventory: bad inventory number: %d\n", inv);
 
-    if (inv < 10)
-        script_name.append("0").append(std::to_string(inv));
-    else
-        script_name.append(std::to_string(inv));
-
     inv--;
-
-    //******
-    // If the same inventory script is already running then
-    // don't start the same one again
-    if (!CheckActiveScriptByTag(nullptr, script_name.c_str()))
-    {
-        if (ui_player_who->inventory_[inv].count > 0)
-        {
-            ui_player_who->inventory_[inv].count -= 1;
-            ScriptEnableByTag(nullptr, script_name.c_str(), false);
-        }
-    }
-
-    return 0;
-}
-
-// player.rts_enable_tagged(tag)
-//
-static int PL_rts_enable_tagged(lua_State *L)
-{
-    std::string name = luaL_checkstring(L, 1);
-
-    if (!name.empty())
-        ScriptEnableByTag(nullptr, name.c_str(), false);
 
     return 0;
 }
@@ -2370,8 +2341,6 @@ static const luaL_Reg playerlib[] = {{"num_players", PL_num_players},
                                      {"use_inventory", PL_use_inventory},
                                      {"inventory", PL_inventory},
                                      {"inventorymax", PL_inventorymax},
-
-                                     {"rts_enable_tagged", PL_rts_enable_tagged},
 
                                      {"counter", PL_counter},
                                      {"counter_max", PL_counter_max},

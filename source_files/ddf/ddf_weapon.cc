@@ -40,7 +40,6 @@ WeaponDefinitionContainer weapondefs;
 static void DDFWGetAmmo(const char *info, void *storage);
 static void DDFWGetUpgrade(const char *info, void *storage);
 static void DDFWGetSpecialFlags(const char *info, void *storage);
-static void DDFWStateGetRADTrigger(const char *arg, State *cur_state);
 
 static WeaponDefinition dummy_weapon;
 
@@ -196,8 +195,6 @@ static const DDFActionCode weapon_actions[] = {{"NOTHING", nullptr, nullptr},
                                                {"TURN_RANDOM", WA_TurnRandom, DDFStateGetInteger},
                                                {"MLOOK_TURN", WA_MlookTurn, DDFStateGetSlope},
 
-                                               {"RTS_ENABLE_TAGGED", A_WeaponEnableRadTrig, DDFWStateGetRADTrigger},
-                                               {"RTS_DISABLE_TAGGED", A_WeaponDisableRadTrig, DDFWStateGetRADTrigger},
                                                {"SEC_SHOOT", A_WeaponShootSA, DDFStateGetAttack},
                                                {"SEC_REFIRE", A_ReFireSA, nullptr},
                                                {"SEC_REFIRE_TO", A_ReFireToSA, DDFStateGetJump},
@@ -639,39 +636,6 @@ static DDFSpecialFlags weapon_specials[] = {{"SILENT_TO_MONSTERS", WeaponFlagSil
                                             {"PARTIAL", WeaponFlagPartialReload, 0},
                                             {"NOAUTOFIRE", WeaponFlagNoAutoFire, 0},
                                             {nullptr, WeaponFlagNone, 0}};
-
-//
-// DDFWStateGetRADTrigger
-//
-static void DDFWStateGetRADTrigger(const char *arg, State *cur_state)
-{
-    if (!arg || !arg[0])
-        return;
-
-    int *val_ptr = new int;
-
-    // Modified RAD_CheckForInt
-    const char *pos    = arg;
-    int         count  = 0;
-    int         length = strlen(arg);
-
-    while (epi::IsDigitASCII(*pos++))
-        count++;
-
-    // Is the value an integer?
-    if (length != count)
-    {
-        *val_ptr                = epi::StringHash32(arg);
-        cur_state->rts_tag_type = 1;
-    }
-    else
-    {
-        *val_ptr                = atoi(arg);
-        cur_state->rts_tag_type = 0;
-    }
-
-    cur_state->action_par = val_ptr;
-}
 
 //
 // DDFWGetSpecialFlags

@@ -649,7 +649,6 @@ static void ProcessDDFInPack(PackFile *pack)
             source += " in ";
             source += bare_filename;
 
-            // this handles RTS scripts too!
             DDFType type = DDFFilenameToType(ent.name_);
 
             if (type != kDDFTypeUnknown)

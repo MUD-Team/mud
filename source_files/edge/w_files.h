@@ -46,8 +46,7 @@ enum FileKind
     kFileKindIFolder,  // standalone game folder
     kFileKindIPackWAD, // IWADs within pack files :/
 
-    kFileKindDDF,      // .ddf or .ldf file
-    kFileKindRTS,      // .rts script  file
+    kFileKindDDF      // .ddf or .ldf file
 };
 
 class WadFile;

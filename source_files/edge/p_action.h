@@ -56,8 +56,6 @@ void A_WeaponPlaySound(MapObject *mo);
 void A_WeaponKillSound(MapObject *mo);
 void A_WeaponTransSet(MapObject *mo);
 void A_WeaponTransFade(MapObject *mo);
-void A_WeaponEnableRadTrig(MapObject *mo);
-void A_WeaponDisableRadTrig(MapObject *mo);
 
 void A_SetCrosshair(MapObject *mo);
 void A_TargetJump(MapObject *mo);
@@ -168,8 +166,6 @@ void A_TouchyRearm(MapObject *mo);
 void A_TouchyDisarm(MapObject *mo);
 void A_BounceRearm(MapObject *mo);
 void A_BounceDisarm(MapObject *mo);
-void A_PathCheck(MapObject *mo);
-void A_PathFollow(MapObject *mo);
 
 void A_DropItem(MapObject *mo);
 void A_Spawn(MapObject *mo);
