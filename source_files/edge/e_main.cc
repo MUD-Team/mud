@@ -38,7 +38,6 @@
 #include <time.h>
 
 #include <algorithm>
-#include <tuple>
 #include <vector>
 
 #include "am_map.h"
@@ -1092,9 +1091,6 @@ static std::string CheckPackForGameFiles(std::string check_pack, FileKind check_
 //
 static void IdentifyVersion(void)
 {
-    // For env checks
-    const char *check = nullptr;
-
     if (epi::IsDirectory(epkfile))
         AddDataFile(epkfile, kFileKindEFolder);
     else
@@ -1108,460 +1104,195 @@ static void IdentifyVersion(void)
 
     // Check -iwad parameter, find out if it is the IWADs directory
     std::string              iwad_par;
-    std::string              iwad_file;
-    std::string              iwad_dir;
-    std::vector<std::string> iwad_dir_vector;
 
-    std::string s = ArgumentValue("iwad");
+    std::string s = ArgumentValue("game");
+
+    if (s.empty()) // legacy/potential launcher compat
+        s = ArgumentValue("iwad");
 
     iwad_par = s;
 
+    // If explicitly passed a parameter for the game selection, validate it and treat
+    // as a fatal error if the path specified is not a valid game
     if (!iwad_par.empty())
     {
-        // Treat directories passed via -iwad as a pack file and check
-        // accordingly
+        std::string game_check;
         if (epi::IsDirectory(iwad_par))
         {
-            std::string game_check = CheckPackForGameFiles(iwad_par, kFileKindIFolder);
+            game_check = CheckPackForGameFiles(iwad_par, kFileKindIFolder);
             if (game_check.empty())
-                FatalError("Folder %s passed via -iwad parameter, but no IWAD or "
+                FatalError("Folder %s passed via -game parameter, but no "
                            "EDGEGAME file detected!\n",
                            iwad_par.c_str());
             else
             {
                 game_name = game_check;
                 AddDataFile(iwad_par, kFileKindIFolder);
+                LogDebug("LOADED GAME = [ %s ]\n", game_name.c_str());
                 return;
             }
         }
+        else if (epi::StringCaseCompareASCII(epi::GetExtension(iwad_par), ".epk") == 0)
+        {
+            game_check = CheckPackForGameFiles(iwad_par, kFileKindIPK);
+            if (game_check.empty())
+                FatalError("EPK %s passed via -game parameter, but no "
+                           "EDGEGAME file detected!\n",
+                           iwad_par.c_str());
+            else
+            {
+                game_name = game_check;
+                AddDataFile(iwad_par, kFileKindIPK);
+                LogDebug("LOADED GAME = [ %s ]\n", game_name.c_str());
+                return;
+            }
+        }
+        else if (epi::StringCaseCompareASCII(epi::GetExtension(iwad_par), ".wad") == 0)
+        {
+            epi::File *game_test = epi::FileOpen(iwad_par, epi::kFileAccessRead | epi::kFileAccessBinary);
+            game_check           = CheckForEdgeGameLump(game_test);
+            delete game_test;
+            if (game_check.empty())
+                FatalError("WAD %s passed via -gane parameter, but no "
+                           "EDGEGAME lump detected!\n",
+                           iwad_par.c_str());
+            else
+            {
+                game_name = game_check;
+                AddDataFile(iwad_par, kFileKindIWAD);
+                LogDebug("LOADED GAME = [ %s ]\n", game_name.c_str());
+                return;
+            }
+        }
+        else
+            FatalError("%s is not a valid extension for a game file! (%s)\n", epi::GetExtension(iwad_par).c_str(), iwad_par.c_str());
     }
     else
     {
-        // In the absence of the -iwad parameter, check files/dirs added via
-        // drag-and-drop for valid IWADs Remove them from the arg list if they
-        // are valid to avoid them potentially being added as PWADs
-        std::vector<SDL_MessageBoxButtonData>                     game_buttons;
-        std::unordered_map<uint32_t, std::tuple<std::string, FileKind, std::string>> game_paths;
+        // In the absence of the -game or -iwad parameter, check files/dirs added via
+        // drag-and-drop for valid games and remove them from the arg list if they
+        // are valid to avoid them potentially being added as PWADs.
+        // This will use the first valid file/folder found, if any.
         for (size_t p = 1; p < program_argument_list.size() && !ArgumentIsOption(p); p++)
         {
             std::string dnd        = program_argument_list[p];
-            std::string test_name;
+            std::string game_check;
             if (epi::IsDirectory(dnd))
             {
-                test_name = CheckPackForGameFiles(dnd, kFileKindIFolder);
-                if (!test_name.empty())
+                game_check = CheckPackForGameFiles(dnd, kFileKindIFolder);
+                if (!game_check.empty())
                 {
-                    uint32_t game_hash = epi::StringHash32(test_name);
-                    if (!game_paths.count(game_hash))
-                    {
-                        game_paths.try_emplace(game_hash, std::make_tuple(dnd, kFileKindIFolder, test_name));
-                        SDL_MessageBoxButtonData temp_button;
-                        temp_button.buttonid = game_hash;
-                        temp_button.text     = test_name.c_str();
-                        game_buttons.push_back(temp_button);
-                    }
+                    game_name = game_check;
+                    AddDataFile(dnd, kFileKindIFolder);
                     program_argument_list.erase(program_argument_list.begin() + p--);
+                    LogDebug("LOADED GAME = [ %s ]\n", game_name.c_str());
+                    return;
                 }
             }
             else if (epi::StringCaseCompareASCII(epi::GetExtension(dnd), ".epk") == 0)
             {
-                test_name= CheckPackForGameFiles(dnd, kFileKindIPK);
-                if (!test_name.empty())
+                game_check = CheckPackForGameFiles(dnd, kFileKindIPK);
+                if (!game_check.empty())
                 {
-                    uint32_t game_hash = epi::StringHash32(test_name);
-                    if (!game_paths.count(game_hash))
-                    {
-                        game_paths.try_emplace(game_hash, std::make_tuple(dnd, kFileKindIPK, test_name));
-                        SDL_MessageBoxButtonData temp_button;
-                        temp_button.buttonid = game_hash;
-                        temp_button.text     = test_name.c_str();
-                        game_buttons.push_back(temp_button);
-                    }
+                    game_name = game_check;
+                    AddDataFile(dnd, kFileKindIPK);
                     program_argument_list.erase(program_argument_list.begin() + p--);
+                    LogDebug("LOADED GAME = [ %s ]\n", game_name.c_str());
+                    return;
                 }
             }
             else if (epi::StringCaseCompareASCII(epi::GetExtension(dnd), ".wad") == 0)
             {
                 epi::File *game_test = epi::FileOpen(dnd, epi::kFileAccessRead | epi::kFileAccessBinary);
-                test_name           = CheckForEdgeGameLump(game_test);
+                game_check           = CheckForEdgeGameLump(game_test);
                 delete game_test;
-                if (!test_name.empty())
+                if (!game_check.empty())
                 {
-                    uint32_t game_hash = epi::StringHash32(test_name);
-                    if (!game_paths.count(game_hash))
-                    {
-                        game_paths.try_emplace(game_hash, std::make_tuple(dnd, kFileKindIWAD, test_name));
-                        SDL_MessageBoxButtonData temp_button;
-                        temp_button.buttonid = game_hash;
-                        temp_button.text     = test_name.c_str();
-                        game_buttons.push_back(temp_button);
-                    }
+                    game_name = game_check;
+                    AddDataFile(dnd, kFileKindIWAD);
                     program_argument_list.erase(program_argument_list.begin() + p--);
+                    LogDebug("LOADED GAME = [ %s ]\n", game_name.c_str());
+                    return;
                 }
-            }
-        }
-        if (game_paths.size() == 1)
-        {
-            const std::tuple<std::string, FileKind, std::string> &selected_game = game_paths.begin()->second;
-            AddDataFile(std::get<0>(selected_game), std::get<1>(selected_game));
-            game_name          = std::get<2>(selected_game);
-            LogDebug("LOADED GAME = [ %s ]\n", game_name.c_str());
-            return;
-        }
-        else if (!game_paths.empty())
-        {
-            EPI_ASSERT(game_paths.size() == game_buttons.size());
-            SDL_MessageBoxData picker_data;
-            SDL_memset(&picker_data, 0, sizeof(SDL_MessageBoxData));
-            picker_data.title = "EDGE-Classic Game Selector";
-            if (game_paths.size() > 8)
-            {
-                picker_data.message    = "No game was specified, but EDGE-Classic found multiple valid "
-                                         "game files (first 8 shown here; consider using a dedicated launcher). "
-                                         "Please select one or press Escape to cancel.";
-                picker_data.numbuttons = 8;
-            }
-            else
-            {
-                picker_data.message    = "No game was specified, but EDGE-Classic found multiple valid "
-                                         "game files. Please select one or press Escape to cancel.";
-                picker_data.numbuttons = game_buttons.size();
-            }
-            picker_data.buttons = game_buttons.data();
-            int button_hit      = 0;
-            if (SDL_ShowMessageBox(&picker_data, &button_hit) != 0)
-                FatalError("Error in game selection dialog: %s!\n", SDL_GetError());
-            else if (button_hit == -1)
-                FatalError("Game selection cancelled.\n");
-            else
-            {
-                const std::tuple<std::string, FileKind, std::string> &selected_game = game_paths.at(button_hit);
-                AddDataFile(std::get<0>(selected_game), std::get<1>(selected_game));
-                game_name          = std::get<2>(selected_game);
-                LogDebug("LOADED GAME = [ %s ]\n", game_name.c_str());
-                return;
             }
         }
     }
 
-    // If we haven't yet set the IWAD directory, then we check
-    // the DOOMWADDIR environment variable
-    check = SDL_getenv("DOOMWADDIR");
-    if (check)
-        s = check;
+    // If we have made it here, attempt to autodetect a valid game in the user's
+    // home and game directories
+    std::string location;
+    int max = 1;
 
-    if (!s.empty() && epi::IsDirectory(s))
-        iwad_dir_vector.push_back(s);
+    if (epi::StringCompare(game_directory, home_directory) != 0)
+        max++;
 
-    // Should the IWAD directory not be set by now, then we
-    // use our standby option of the current directory.
-    if (iwad_dir.empty())
-        iwad_dir = "."; // should this be hardcoded to the game or home
-                        // directory instead? - Dasho
-
-    // Add DOOMWADPATH directories if they exist
-    s.clear();
-    check = SDL_getenv("DOOMWADPATH");
-    if (check)
-        s = check;
-
-    if (!s.empty())
+    for (int i = 0; i < max; i++)
     {
-        for (auto dir : epi::SeparatedStringVector(s, ':'))
-            iwad_dir_vector.push_back(dir);
-    }
+        location = (i == 0 ? game_directory : home_directory);
 
-    // Should the IWAD Parameter not be empty then it means
-    // that one was given which is not a directory. Therefore
-    // we assume it to be a name
-    if (!iwad_par.empty())
-    {
-        std::string fn = iwad_par;
+        std::vector<epi::DirectoryEntry> fsd;
 
-        // Is it missing the extension?
-        if (epi::GetExtension(fn).empty())
+        std::string game_check;
+
+        if (ReadDirectory(fsd, location, "*.wad"))
         {
-            // We will still be checking EPKs if needed; but by the numbers .wad
-            // is a good initial search
-            epi::ReplaceExtension(fn, ".wad");
-        }
-
-        // If no directory given use the IWAD directory
-        std::string dir = epi::GetDirectory(fn);
-        if (dir.empty())
-            iwad_file = epi::PathAppend(iwad_dir, fn);
-        else
-            iwad_file = fn;
-
-        if (!epi::TestFileAccess(iwad_file))
-        {
-            // Check DOOMWADPATH directories if present
-            if (!iwad_dir_vector.empty())
+            for (size_t j = 0; j < fsd.size(); j++)
             {
-                for (size_t i = 0; i < iwad_dir_vector.size(); i++)
+                if (!fsd[j].is_dir)
                 {
-                    iwad_file = epi::PathAppend(iwad_dir_vector[i], fn);
-                    if (epi::TestFileAccess(iwad_file))
-                        goto foundindoomwadpath;
-                }
-            }
-        }
-        else
-            goto foundindoomwadpath;
-
-        // If we get here, try .epk and error out if we still can't access what
-        // was passed to us
-        epi::ReplaceExtension(iwad_file, ".epk");
-
-        if (!epi::TestFileAccess(iwad_file))
-        {
-            // Check DOOMWADPATH directories if present
-            if (!iwad_dir_vector.empty())
-            {
-                for (size_t i = 0; i < iwad_dir_vector.size(); i++)
-                {
-                    iwad_file = epi::PathAppend(iwad_dir_vector[i], fn);
-                    if (epi::TestFileAccess(iwad_file))
-                        goto foundindoomwadpath;
-                }
-                FatalError("IdentifyVersion: Unable to access specified '%s'", fn.c_str());
-            }
-            else
-                FatalError("IdentifyVersion: Unable to access specified '%s'", fn.c_str());
-        }
-
-    foundindoomwadpath:
-
-        std::string test_score;
-
-        if (epi::StringCaseCompareASCII(epi::GetExtension(iwad_file), ".wad") == 0)
-        {
-            epi::File *game_test = epi::FileOpen(iwad_file, epi::kFileAccessRead | epi::kFileAccessBinary);
-            test_score           = CheckForEdgeGameLump(game_test);
-            delete game_test;
-            if (!test_score.empty())
-            {
-                game_name = test_score;
-                AddDataFile(iwad_file, kFileKindIWAD);
-            }
-            else
-                FatalError("IdentifyVersion: Could not identify '%s' as a valid "
-                           "IWAD!\n",
-                           fn.c_str());
-        }
-        else
-        {
-            test_score = CheckPackForGameFiles(iwad_file, kFileKindIPK);
-            if (!test_score.empty())
-            {
-                game_name = test_score;
-                AddDataFile(iwad_file, kFileKindIPK);
-            }
-            else
-                FatalError("IdentifyVersion: Could not identify '%s' as a valid "
-                           "IWAD!\n",
-                           fn.c_str());
-        }
-    }
-    else
-    {
-        std::string location;
-
-        std::vector<SDL_MessageBoxButtonData>                     game_buttons;
-        std::unordered_map<int, std::tuple<std::string, FileKind, std::string>> game_paths;
-
-        int max = 1;
-
-        if (iwad_dir.compare(game_directory) != 0)
-        {
-            // IWAD directory & game directory differ
-            // therefore do a second loop which will
-            // mean we check both.
-            max++;
-        }
-
-        for (int i = 0; i < max; i++)
-        {
-            location = (i == 0 ? iwad_dir : game_directory);
-
-            //
-            // go through the available *.wad files, attempting IWAD
-            // detection for each, adding the file if they exist.
-            //
-            // -ACB- 2000/06/08 Quit after we found a file - don't load
-            //                  more than one IWAD
-            //
-            std::vector<epi::DirectoryEntry> fsd;
-
-            if (!ReadDirectory(fsd, location, "*.wad"))
-            {
-                LogDebug("IdentifyVersion: No WADs found in '%s' directory!\n", location.c_str());
-            }
-            else
-            {
-                for (size_t j = 0; j < fsd.size(); j++)
-                {
-                    if (!fsd[j].is_dir)
+                    epi::File *game_test =
+                        epi::FileOpen(fsd[j].name, epi::kFileAccessRead | epi::kFileAccessBinary);
+                    game_check = CheckForEdgeGameLump(game_test);
+                    delete game_test;
+                    if (!game_check.empty())
                     {
-                        epi::File *game_test =
-                            epi::FileOpen(fsd[j].name, epi::kFileAccessRead | epi::kFileAccessBinary);
-                        std::string test_name = CheckForEdgeGameLump(game_test);
-                        delete game_test;
-                        if (!test_name.empty())
-                        {
-                            uint32_t game_hash = epi::StringHash32(test_name);
-                            if (!game_paths.count(game_hash))
-                            {
-                                game_paths.try_emplace(game_hash, std::make_tuple(fsd[j].name, kFileKindIWAD, test_name));
-                                SDL_MessageBoxButtonData temp_button;
-                                temp_button.buttonid = game_hash;
-                                temp_button.text     = test_name.c_str();
-                                game_buttons.push_back(temp_button);
-                            }
-                        }
-                    }
-                }
-            }
-            if (!ReadDirectory(fsd, location, "*.epk"))
-            {
-                LogDebug("IdentifyVersion: No EPKs found in '%s' directory!\n", location.c_str());
-            }
-            else
-            {
-                for (size_t j = 0; j < fsd.size(); j++)
-                {
-                    if (!fsd[j].is_dir)
-                    {
-                        std::string test_name = CheckPackForGameFiles(fsd[j].name, kFileKindIPK);
-                        if (!test_name.empty())
-                        {
-                            uint32_t game_hash = epi::StringHash32(test_name);
-                            if (!game_paths.count(game_hash))
-                            {
-                                game_paths.try_emplace(game_hash, std::make_tuple(fsd[j].name, kFileKindIPK, test_name));
-                                SDL_MessageBoxButtonData temp_button;
-                                temp_button.buttonid = game_hash;
-                                temp_button.text     = test_name.c_str();
-                                game_buttons.push_back(temp_button);
-                            }
-                        }
+                        game_name = game_check;
+                        AddDataFile(fsd[j].name, kFileKindIWAD);
+                        LogDebug("LOADED GAME = [ %s ]\n", game_name.c_str());
+                        return;
                     }
                 }
             }
         }
-
-        // Separate check for DOOMWADPATH stuff if it exists - didn't want to
-        // mess with the existing stuff above
-
-        if (!iwad_dir_vector.empty())
+        if (ReadDirectory(fsd, location, "*.epk"))
         {
-            for (size_t i = 0; i < iwad_dir_vector.size(); i++)
+            for (size_t j = 0; j < fsd.size(); j++)
             {
-                location = iwad_dir_vector[i].c_str();
-
-                std::vector<epi::DirectoryEntry> fsd;
-
-                if (!ReadDirectory(fsd, location, "*.wad"))
+                if (!fsd[j].is_dir)
                 {
-                    LogDebug("IdentifyVersion: No WADs found in '%s' directory!\n", location.c_str());
-                }
-                else
-                {
-                    for (size_t j = 0; j < fsd.size(); j++)
+                    game_check = CheckPackForGameFiles(fsd[j].name, kFileKindIPK);
+                    if (!game_check.empty())
                     {
-                        if (!fsd[j].is_dir)
-                        {
-                            epi::File *game_test =
-                                epi::FileOpen(fsd[j].name, epi::kFileAccessRead | epi::kFileAccessBinary);
-                            std::string test_name = CheckForEdgeGameLump(game_test);
-                            delete game_test;
-                            if (!test_name.empty())
-                            {
-                                uint32_t game_hash = epi::StringHash32(test_name);
-                                if (!game_paths.count(game_hash))
-                                {
-                                    game_paths.try_emplace(game_hash, std::make_tuple(fsd[j].name, kFileKindIWAD, test_name));
-                                    SDL_MessageBoxButtonData temp_button;
-                                    temp_button.buttonid = game_hash;
-                                    temp_button.text     = test_name.c_str();
-                                    game_buttons.push_back(temp_button);
-                                }
-                            }
-                        }
-                    }
-                }
-                if (!ReadDirectory(fsd, location, "*.epk"))
-                {
-                    LogDebug("IdentifyVersion: No EPKs found in '%s' directory!\n", location.c_str());
-                }
-                else
-                {
-                    for (size_t j = 0; j < fsd.size(); j++)
-                    {
-                        if (!fsd[j].is_dir)
-                        {
-                            std::string test_name = CheckPackForGameFiles(fsd[j].name, kFileKindIPK);
-                            if (!test_name.empty())
-                            {
-                                uint32_t game_hash = epi::StringHash32(test_name);
-                                if (!game_paths.count(game_hash))
-                                {
-                                    game_paths.try_emplace(game_hash, std::make_tuple(fsd[j].name, kFileKindIPK, test_name));
-                                    SDL_MessageBoxButtonData temp_button;
-                                    temp_button.buttonid = game_hash;
-                                    temp_button.text     = test_name.c_str();
-                                    game_buttons.push_back(temp_button);
-                                }
-                            }
-                        }
+                        game_name = game_check;
+                        AddDataFile(fsd[j].name, kFileKindIPK);
+                        LogDebug("LOADED GAME = [ %s ]\n", game_name.c_str());
+                        return;
                     }
                 }
             }
         }
-
-        if (game_paths.empty())
-            FatalError("IdentifyVersion: No IWADs or standalone packs found!\n");
-        else if (game_paths.size() == 1)
+        // Check directories (only at top level of home/game directory)
+        if (ReadDirectory(fsd, location, "*.*"))
         {
-            const std::tuple<std::string, FileKind, std::string> &selected_game = game_paths.begin()->second;
-            AddDataFile(std::get<0>(selected_game), std::get<1>(selected_game));
-            game_name          = std::get<2>(selected_game);
-        }
-        else
-        {
-            EPI_ASSERT(game_paths.size() == game_buttons.size());
-            SDL_MessageBoxData picker_data;
-            SDL_memset(&picker_data, 0, sizeof(SDL_MessageBoxData));
-            picker_data.title = "EDGE-Classic Game Selector";
-            if (game_paths.size() > 8)
+            for (size_t j = 0; j < fsd.size(); j++)
             {
-                picker_data.message    = "No game was specified, but EDGE-Classic found multiple valid "
-                                         "game files (first 8 shown here; consider using a dedicated launcher). "
-                                         "Please select one or press Escape to cancel.";
-                picker_data.numbuttons = 8;
-            }
-            else
-            {
-                picker_data.message    = "No game was specified, but EDGE-Classic found multiple valid "
-                                         "game files. Please select one or press Escape to cancel.";
-                picker_data.numbuttons = game_buttons.size();
-            }
-            picker_data.buttons = game_buttons.data();
-            int button_hit      = 0;
-            if (SDL_ShowMessageBox(&picker_data, &button_hit) != 0)
-                FatalError("Error in game selection dialog: %s!\n", SDL_GetError());
-            else if (button_hit == -1)
-                FatalError("Game selection cancelled.\n");
-            else
-            {
-                const std::tuple<std::string, FileKind, std::string> &selected_game = game_paths.at(button_hit);
-                AddDataFile(std::get<0>(selected_game), std::get<1>(selected_game));
-                game_name          = std::get<2>(selected_game);
+                if (fsd[j].is_dir)
+                {
+                    game_check = CheckPackForGameFiles(fsd[j].name, kFileKindIFolder);
+                    if (!game_check.empty())
+                    {
+                        game_name = game_check;
+                        AddDataFile(fsd[j].name, kFileKindIFolder);
+                        LogDebug("LOADED GAME = [ %s ]\n", game_name.c_str());
+                        return;
+                    }
+                }
             }
         }
     }
 
-    LogDebug("LOADED GAME = [ %s ]\n", game_name.c_str());
+    // If we have made it here, we could not locate a valid game anywhere
+    FatalError("IdentifyVersion: Could not locate a valid game file!\n");
 }
 
 static void CheckTurbo(void)
