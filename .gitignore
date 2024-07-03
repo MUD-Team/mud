@@ -20,10 +20,9 @@ debug.txt
 /*.dll
 edge-classic.cfg
 
-#EPKs
-edge-defs.epk
-edge_defs.epk
-/edge_base/*.epk
+# EPKs
+*.epk
+*.EPK
 
 # EDGE game folders
 /screenshot
@@ -36,4 +35,7 @@ source_files/glew/glew.pc
 *.wad
 *.WAD
 
-/web/preload/*.epk
+# Known supported game folders
+/blasphemer
+/freedoom1
+/freedoom2

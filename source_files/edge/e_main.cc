@@ -1121,7 +1121,7 @@ static void IdentifyVersion(void)
         {
             game_check = CheckPackForGameFiles(iwad_par, kFileKindIFolder);
             if (game_check.empty())
-                FatalError("Folder %s passed via -iwad parameter, but no "
+                FatalError("Folder %s passed via -game parameter, but no "
                            "EDGEGAME file detected!\n",
                            iwad_par.c_str());
             else
@@ -1135,7 +1135,11 @@ static void IdentifyVersion(void)
         else if (epi::StringCaseCompareASCII(epi::GetExtension(iwad_par), ".epk") == 0)
         {
             game_check = CheckPackForGameFiles(iwad_par, kFileKindIPK);
-            if (!game_check.empty())
+            if (game_check.empty())
+                FatalError("EPK %s passed via -game parameter, but no "
+                           "EDGEGAME file detected!\n",
+                           iwad_par.c_str());
+            else
             {
                 game_name = game_check;
                 AddDataFile(iwad_par, kFileKindIPK);
@@ -1148,7 +1152,11 @@ static void IdentifyVersion(void)
             epi::File *game_test = epi::FileOpen(iwad_par, epi::kFileAccessRead | epi::kFileAccessBinary);
             game_check           = CheckForEdgeGameLump(game_test);
             delete game_test;
-            if (!game_check.empty())
+            if (game_check.empty())
+                FatalError("WAD %s passed via -gane parameter, but no "
+                           "EDGEGAME lump detected!\n",
+                           iwad_par.c_str());
+            else
             {
                 game_name = game_check;
                 AddDataFile(iwad_par, kFileKindIWAD);
@@ -1156,6 +1164,8 @@ static void IdentifyVersion(void)
                 return;
             }
         }
+        else
+            FatalError("%s is not a valid extension for a game file! (%s)\n", epi::GetExtension(iwad_par).c_str(), iwad_par.c_str());
     }
     else
     {
