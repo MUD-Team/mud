@@ -1054,13 +1054,6 @@ void MenuSaveGame(int choice)
         return;
     }
 
-    // -AJA- big cop-out here (add RTS menu stuff to MainMenuSaveGame ?)
-    if (rts_menu_active)
-    {
-        StartMenuMessage("You can't save during an RTS menu.\npress a key.", nullptr, false);
-        return;
-    }
-
     MenuReadSaveStrings();
     MenuSetupNextMenu(&SaveMenuDefinition);
 

@@ -56,7 +56,6 @@
 #include "p_weapon.h"
 #include "r_misc.h"
 #include "r_state.h"
-#include "rad_trig.h"
 #include "s_sound.h"
 #include "w_wad.h"
 
@@ -109,33 +108,6 @@ void A_ActivateLineType(MapObject *mo)
     // Note the `nullptr' here: this prevents the activation from failing
     // because the object isn't a PLAYER, for example.
     RemoteActivation(nullptr, values[0], values[1], 0, kLineTriggerAny);
-}
-
-//
-// A_EnableRadTrig
-// A_DisableRadTrig
-//
-// Allows things to enable or disable radius triggers (by tag number),
-// like linetypes can do already.
-//
-void A_EnableRadTrig(MapObject *mo)
-{
-    if (!mo->state_ || !mo->state_->action_par)
-        return;
-
-    int *value = (int *)mo->state_->action_par;
-
-    ScriptEnableByTag(mo, value[0], false, (RADScriptTag)mo->state_->rts_tag_type);
-}
-
-void A_DisableRadTrig(MapObject *mo)
-{
-    if (!mo->state_ || !mo->state_->action_par)
-        return;
-
-    int *value = (int *)mo->state_->action_par;
-
-    ScriptEnableByTag(mo, value[0], true, (RADScriptTag)mo->state_->rts_tag_type);
 }
 
 //
@@ -2566,105 +2538,6 @@ void A_Spawn(MapObject *mo)
     item->side_  = mo->side_;
 
     item->SetSource(mo);
-}
-
-void A_PathCheck(MapObject *mo)
-{
-    // Checks if the creature is a path follower, and if so enters the
-    // meander states.
-
-    if (!mo->path_trigger_ || !mo->info_->meander_state_)
-        return;
-
-    MapObjectSetStateDeferred(mo, mo->info_->meander_state_, 0);
-
-    mo->move_direction_ = kDirectionSlowTurn;
-    mo->move_count_     = 0;
-}
-
-void A_PathFollow(MapObject *mo)
-{
-    // For path-following creatures (spawned via RTS), makes the creature
-    // follow the path by trying to get to the next node.
-
-    if (!mo->path_trigger_)
-        return;
-
-    if (ScriptUpdatePath(mo))
-    {
-        // reached the very last one ?
-        if (!mo->path_trigger_)
-        {
-            mo->move_direction_ = kDirectionNone;
-            return;
-        }
-
-        mo->move_direction_ = kDirectionSlowTurn;
-        return;
-    }
-
-    float dx = mo->path_trigger_->x - mo->x;
-    float dy = mo->path_trigger_->y - mo->y;
-
-    BAMAngle diff = PointToAngle(0, 0, dx, dy) - mo->angle_;
-
-    // movedir value:
-    //   0 for slow turning.
-    //   1 for fast turning.
-    //   2 for walking.
-    //   3 for evasive maneouvres.
-
-    // if (mo->movedir < 2)
-
-    if (mo->move_direction_ == kDirectionSlowTurn || mo->move_direction_ == kDirectionFastTurn)
-    {
-        if (diff > kBAMAngle15 && diff < (kBAMAngle360 - kBAMAngle15))
-        {
-            BAMAngle step = kBAMAngle30;
-
-            if (diff < kBAMAngle180)
-                mo->angle_ += RandomByteDeterministic() * (step >> 8);
-            else
-                mo->angle_ -= RandomByteDeterministic() * (step >> 8);
-
-            return;
-        }
-
-        // we are now facing the next node
-        mo->angle_ += diff;
-        mo->move_direction_ = kDirectionWalking;
-
-        diff = 0;
-    }
-
-    if (mo->move_direction_ == kDirectionWalking)
-    {
-        if (diff < kBAMAngle30)
-            mo->angle_ += kBAMAngle1 * 2;
-        else if (diff > (kBAMAngle360 - kBAMAngle30))
-            mo->angle_ -= kBAMAngle1 * 2;
-        else
-            mo->move_direction_ = kDirectionSlowTurn;
-
-        if (!DoMove(mo, true))
-        {
-            mo->move_direction_ = kDirectionEvasive;
-            mo->angle_          = RandomByteDeterministic() << (kBAMAngleBits - 8);
-            mo->move_count_     = 1 + (RandomByteDeterministic() & 7);
-        }
-        return;
-    }
-
-    // make evasive maneouvres
-    mo->move_count_--;
-
-    if (mo->move_count_ <= 0)
-    {
-        mo->move_direction_ = kDirectionFastTurn;
-        return;
-    }
-
-    DoMove(mo, true);
 }
 
 //-------------------------------------------------------------------

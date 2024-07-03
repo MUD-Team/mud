@@ -47,7 +47,6 @@
 #include "p_local.h"
 #include "r_misc.h"
 #include "r_sky.h" //Lobo 2022: added for our Sky Transfer special
-#include "rad_trig.h"
 #include "s_blit.h"
 #include "s_music.h"
 #include "s_sound.h"
@@ -1624,12 +1623,6 @@ static bool P_ActivateSpecialLine(Line *line, const LineType *special, int tag, 
                 texSwitch = true;
             }
         }
-    }
-
-    if (special->trigger_effect_ && tag > 0)
-    {
-        ScriptEnableByTag(thing, tag, special->trigger_effect_ < 0, kTriggerTagNumber);
-        texSwitch = true;
     }
 
     if (special->ambient_sfx_ && tag > 0)

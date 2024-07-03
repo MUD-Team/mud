@@ -1381,6 +1381,8 @@ bool RunSlidingDoor(Line *door, Line *act_line, MapObject *thing, const LineType
     // work-around for RTS-triggered doors, which cannot setup
     // the 'slide_door' field at level load and hence the code
     // which normally blocks the door does not kick in.
+
+    // RTS removed - do we still need this? Dasho
     door->flags &= ~kLineFlagBlocking;
 
     AddActiveSlider(smov);

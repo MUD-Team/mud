@@ -36,7 +36,6 @@
 #include "m_random.h"
 #include "p_local.h"
 #include "r_misc.h"
-#include "rad_trig.h"
 #include "s_sound.h"
 
 static constexpr uint8_t kBonusAddMinimum = 6;
@@ -1049,8 +1048,6 @@ void KillMapObject(MapObject *source, MapObject *target, const DamageClass *damt
 
     target->flags_ |= kMapObjectFlagCorpse | kMapObjectFlagDropOff;
     target->height_ /= (4 / (target->mbf21_flags_ & kMBF21FlagLowGravity ? 8 : 1));
-
-    ScriptUpdateMonsterDeaths(target);
 
     if (source && source->player_)
     {

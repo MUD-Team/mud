@@ -233,7 +233,8 @@ enum HyperFlag
     // Dasho 2023/12/05: this thing is a MUSINFO Music Changer thing
     // This flag is present because we cannot assume a thing is a
     // music changer just because it has an ID of 14100-14164
-    kHyperFlagMusicChanger = (1 << 23),
+    // No longer used - Dasho
+    //kHyperFlagMusicChanger = (1 << 23),
 };
 
 // MBF21 flags not already covered by extended/hyper flags

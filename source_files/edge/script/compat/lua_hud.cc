@@ -9,7 +9,6 @@
 #include "lua_compat.h"
 #include "r_colormap.h"
 #include "r_misc.h"
-#include "rad_trig.h"
 #include "s_sound.h"
 #include "w_wad.h"
 
@@ -551,7 +550,7 @@ static int HD_draw_number(lua_State *L)
 //
 static int HD_game_paused(lua_State *L)
 {
-    if (paused || menu_active || rts_menu_active || time_stop_active || erraticism_active)
+    if (paused || menu_active || time_stop_active || erraticism_active)
     {
         lua_pushboolean(L, 1);
     }
@@ -873,47 +872,6 @@ static int HD_get_average_hue(lua_State *L)
     return 1;
 }
 
-// hud.rts_enable(tag)
-//
-static int HD_rts_enable(lua_State *L)
-{
-    std::string name = luaL_checkstring(L, 1);
-
-    if (!name.empty())
-        ScriptEnableByTag(nullptr, name.c_str(), false);
-
-    return 0;
-}
-
-// hud.rts_disable(tag)
-//
-static int HD_rts_disable(lua_State *L)
-{
-    std::string name = luaL_checkstring(L, 1);
-
-    if (!name.empty())
-        ScriptEnableByTag(nullptr, name.c_str(), true);
-
-    return 0;
-}
-
-// hud.rts_isactive(tag)
-//
-static int HD_rts_isactive(lua_State *L)
-{
-    std::string name = luaL_checkstring(L, 1);
-
-    if (!name.empty())
-    {
-        if (CheckActiveScriptByTag(nullptr, name.c_str()))
-            lua_pushboolean(L, 1);
-        else
-            lua_pushboolean(L, 0);
-    }
-
-    return 1;
-}
-
 // hud.get_image_width(name)
 //
 static int HD_get_image_width(lua_State *L)
@@ -1010,10 +968,6 @@ static const luaL_Reg hudlib[] = {{"game_mode", HD_game_mode},
                                   {"get_lightest_color", HD_get_lightest_color},
                                   {"get_darkest_color", HD_get_darkest_color},
                                   {"get_average_hue", HD_get_average_hue},
-
-                                  {"rts_enable", HD_rts_enable},
-                                  {"rts_disable", HD_rts_disable},
-                                  {"rts_isactive", HD_rts_isactive},
 
                                   {"get_image_width", HD_get_image_width},
                                   {"get_image_height", HD_get_image_height},

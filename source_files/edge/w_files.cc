@@ -44,7 +44,6 @@
 #include "epi_file.h"
 #include "epi_filesystem.h"
 #include "i_system.h"
-#include "rad_trig.h"
 #include "w_epk.h"
 #include "w_wad.h"
 
@@ -121,26 +120,6 @@ static void W_ExternalDDF(DataFile *df)
     DDFAddFile(type, data, df->name_);
 }
 
-static void W_ExternalRTS(DataFile *df)
-{
-    LogPrint("Reading RTS script: %s\n", df->name_.c_str());
-
-    epi::File *F = epi::FileOpen(df->name_, epi::kFileAccessRead);
-    if (F == nullptr)
-        FatalError("Couldn't open file: %s\n", df->name_.c_str());
-
-    // WISH: load directly into a std::string
-
-    char *raw_data = (char *)F->LoadIntoMemory();
-    if (raw_data == nullptr)
-        FatalError("Couldn't read file: %s\n", df->name_.c_str());
-
-    std::string data(raw_data);
-    delete[] raw_data;
-
-    DDFAddFile(kDDFTypeRadScript, data, df->name_);
-}
-
 void ProcessFile(DataFile *df)
 {
     size_t file_index = data_files.size();
@@ -179,11 +158,6 @@ void ProcessFile(DataFile *df)
     {
         // handle external ddf files (from `-file` option)
         W_ExternalDDF(df);
-    }
-    else if (df->kind_ == kFileKindRTS)
-    {
-        // handle external rts scripts (from `-file` or `-script` option)
-        W_ExternalRTS(df);
     }
 }
 
@@ -332,7 +306,6 @@ static const char *FileKindString(FileKind kind)
         return "pwad";
     case kFileKindIPackWAD:
         return "iwad";
-
     case kFileKindFolder:
         return "dir  ";
     case kFileKindEFolder:
@@ -343,12 +316,8 @@ static const char *FileKindString(FileKind kind)
         return "epk  ";
     case kFileKindIPK:
         return "epk  ";
-
     case kFileKindDDF:
         return "ddf  ";
-    case kFileKindRTS:
-        return "rts  ";
-
     default:
         return "??? ";
     }

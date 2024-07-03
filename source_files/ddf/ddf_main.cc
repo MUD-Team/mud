@@ -37,8 +37,6 @@
 // EDGE
 #include "p_action.h"
 
-void ReadRADScript(const std::string &_data, const std::string &source);
-
 enum DDFReadStatus
 {
     kDDFReadStatusInvalid = 0,
@@ -2045,10 +2043,7 @@ static ddf_reader_t ddf_readers[kTotalDDFTypes] = {
     {kDDFTypeGame, "DDFGAME", "games.ddf", "Games", DDFReadGames},
     {kDDFTypeLevel, "DDFLEVL", "levels.ddf", "Levels", DDFReadLevels},
     {kDDFTypeFlat, "DDFFLAT", "flats.ddf", "Flats", DDFReadFlat},
-    {kDDFTypeMovie, "DDFMOVIE", "movies.ddf", "Movies", DDFReadMovies},
-
-    // RTS scripts are handled differently
-    {kDDFTypeRadScript, "RSCRIPT", "rscript.rts", "RadTrig", nullptr}};
+    {kDDFTypeMovie, "DDFMOVIE", "movies.ddf", "Movies", DDFReadMovies}};
 
 DDFType DDFLumpToType(const std::string &name)
 {
@@ -2065,9 +2060,6 @@ DDFType DDFLumpToType(const std::string &name)
 DDFType DDFFilenameToType(const std::string &path)
 {
     std::string check = epi::GetExtension(path);
-
-    if (epi::StringCaseCompareASCII(check, ".rts") == 0)
-        return kDDFTypeRadScript;
 
     check = epi::GetFilename(path);
 
@@ -2134,16 +2126,7 @@ static void DDFParseUnreadFile(size_t d)
         {
             LogPrint("Parsing %s from: %s\n", ddf_readers[d].lump_name, it.source.c_str());
 
-            if (it.type == kDDFTypeRadScript)
-            {
-                ReadRADScript(it.data, it.source);
-            }
-            else
-            {
-                // FIXME store `source` in cur_ddf_filename (or so)
-
-                (*ddf_readers[d].func)(it.data);
-            }
+            (*ddf_readers[d].func)(it.data);
 
             // can free the memory now
             it.data.clear();

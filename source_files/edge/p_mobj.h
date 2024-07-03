@@ -44,7 +44,6 @@ class Image;
 class AbstractShader;
 
 class Player;
-struct RADScript;
 struct RegionProperties;
 struct State;
 struct Subsector;
@@ -324,9 +323,6 @@ class MapObject : public Position
     // center that we are sitting on.
     float ride_delta_x_ = 0;
     float ride_delta_y_ = 0;
-
-    // -AJA- 1999/09/25: Path support.
-    struct RADScript *path_trigger_ = nullptr;
 
     // if we're on a ladder, this is the linedef #, otherwise -1.
     int on_ladder_ = -1;

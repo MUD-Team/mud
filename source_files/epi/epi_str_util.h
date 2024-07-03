@@ -84,8 +84,9 @@ inline int ToUpperASCII(int character)
 void StringLowerASCII(std::string &s);
 void StringUpperASCII(std::string &s);
 
-// These are for AJBSP/RTS, just de-duplicated
+// These are for AJBSP
 // CStringCopyMax also replaces the old Z_StrNCpy macro
+// RTS also used these, but is gone now...replace? - Dasho
 void  CStringCopyMax(char *destination, const char *source, int max);
 char *CStringNew(int length);
 char *CStringDuplicate(const char *original, int limit = -1);

@@ -37,7 +37,6 @@
 #include "p_blockmap.h"
 #include "p_local.h"
 #include "r_misc.h"
-#include "rad_trig.h"
 #include "s_blit.h"
 #include "s_sound.h"
 #include "script/compat/lua_compat.h"
@@ -154,14 +153,6 @@ static void CalcHeight(Player *player, bool extra_tic)
         }
     }
 
-    //----CALCULATE FREEFALL EFFECT, WITH SOUND EFFECTS (code based on HEXEN)
-    //  CORBIN, on:
-    //  6/6/2011 - Fix this so RTS does NOT interfere with fracunits (it does in
-    //  Hypertension's E1M1 starting script)! 6/7/2011 - Ajaped said to remove
-    //  FRACUNIT...seeya oldness.
-
-    // if ((player->map_object_->momentum_.z <=
-    // -35.0)&&(player->map_object_->momentum_.z >= -40.0))
     if ((player->map_object_->momentum_.Z <= -35.0) && (player->map_object_->momentum_.Z >= -36.0))
         if (player->map_object_->info_->falling_sound_)
         {

@@ -85,8 +85,6 @@ extern SaveStruct sv_struct_slider_move;
 
 extern SaveArray sv_array_button;
 extern SaveArray sv_array_light;
-extern SaveArray sv_array_trigger;
-extern SaveArray sv_array_drawtip;
 extern SaveArray sv_array_plane_move;
 extern SaveArray sv_array_slider_move;
 
@@ -262,15 +260,11 @@ void InitializeSaveSystem(void)
     // sv_misc.c
     AddKnownStruct(&sv_struct_button);
     AddKnownStruct(&sv_struct_light);
-    AddKnownStruct(&sv_struct_trigger);
-    AddKnownStruct(&sv_struct_drawtip);
     AddKnownStruct(&sv_struct_plane_move);
     AddKnownStruct(&sv_struct_slider_move);
 
     AddKnownArray(&sv_array_button);
     AddKnownArray(&sv_array_light);
-    AddKnownArray(&sv_array_trigger);
-    AddKnownArray(&sv_array_drawtip);
     AddKnownArray(&sv_array_plane_move);
     AddKnownArray(&sv_array_slider_move);
 }

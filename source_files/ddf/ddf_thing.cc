@@ -50,7 +50,6 @@ static void DDFMobjGetGlowType(const char *info, void *storage);
 static void DDFMobjGetYAlign(const char *info, void *storage);
 static void DDFMobjGetPercentRange(const char *info, void *storage);
 static void DDFMobjGetAngleRange(const char *info, void *storage);
-static void DDFMobjStateGetRADTrigger(const char *arg, State *cur_state);
 
 static void AddPickupEffect(PickupEffect **list, PickupEffect *cur);
 
@@ -292,14 +291,10 @@ const DDFActionCode thing_actions[] = {{"NOTHING", nullptr, nullptr},
 
                                        {"EXPLODE", A_Explode, nullptr},
                                        {"ACTIVATE_LINETYPE", A_ActivateLineType, DDFStateGetIntPair},
-                                       {"RTS_ENABLE_TAGGED", A_EnableRadTrig, DDFMobjStateGetRADTrigger},
-                                       {"RTS_DISABLE_TAGGED", A_DisableRadTrig, DDFMobjStateGetRADTrigger},
                                        {"TOUCHY_REARM", A_TouchyRearm, nullptr},
                                        {"TOUCHY_DISARM", A_TouchyDisarm, nullptr},
                                        {"BOUNCE_REARM", A_BounceRearm, nullptr},
                                        {"BOUNCE_DISARM", A_BounceDisarm, nullptr},
-                                       {"PATH_CHECK", A_PathCheck, nullptr},
-                                       {"PATH_FOLLOW", A_PathFollow, nullptr},
                                        {"SET_INVULNERABLE", A_SetInvuln, nullptr},
                                        {"CLEAR_INVULNERABLE", A_ClearInvuln, nullptr},
                                        {"SET_PAINCHANCE", A_PainChanceSet, DDFStateGetPercent},
@@ -1548,7 +1543,6 @@ static DDFSpecialFlags hyper_specials[] = {
     {"SHOVEABLE", kHyperFlagShoveable, 0},          // Lobo: can be pushed
     {"SPLASH", kHyperFlagNoSplash, 1},              // Lobo: causes no splash on liquids
     {"IMMOVABLE", kHyperFlagImmovable, 0},
-    {"MUSIC_CHANGER", kHyperFlagMusicChanger, 0},
     {nullptr, 0, 0}};
 
 static DDFSpecialFlags mbf21_specials[] = {{"LOGRAV", kMBF21FlagLowGravity, 0}, {nullptr, 0, 0}};
@@ -1733,39 +1727,6 @@ static void DDFMobjGetAngleRange(const char *info, void *storage)
 
     dest[0] = epi::BAMFromDegrees(val1);
     dest[1] = epi::BAMFromDegrees(val2);
-}
-
-//
-// DDFMobjStateGetRADTrigger
-//
-static void DDFMobjStateGetRADTrigger(const char *arg, State *cur_state)
-{
-    if (!arg || !arg[0])
-        return;
-
-    int *val_ptr = new int;
-
-    // Modified RAD_CheckForInt
-    const char *pos    = arg;
-    int         count  = 0;
-    int         length = strlen(arg);
-
-    while (epi::IsDigitASCII(*pos++))
-        count++;
-
-    // Is the value an integer?
-    if (length != count)
-    {
-        *val_ptr                = epi::StringHash32(arg);
-        cur_state->rts_tag_type = 1;
-    }
-    else
-    {
-        *val_ptr                = atoi(arg);
-        cur_state->rts_tag_type = 0;
-    }
-
-    cur_state->action_par = val_ptr;
 }
 
 //

@@ -41,8 +41,6 @@ enum DDFType
     kDDFTypeSwitch,
     kDDFTypeThing,
     kDDFTypeWeapon,
-    // not strictly DDF, but useful sometimes
-    kDDFTypeRadScript,
     kTotalDDFTypes
 };
 

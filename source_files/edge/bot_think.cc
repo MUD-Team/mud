@@ -41,7 +41,6 @@
 #include "p_weapon.h"
 #include "r_misc.h"
 #include "r_state.h"
-#include "rad_trig.h"
 #include "s_sound.h"
 #include "w_wad.h"
 

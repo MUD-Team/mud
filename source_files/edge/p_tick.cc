@@ -37,7 +37,6 @@
 #include "n_network.h"
 #include "p_local.h"
 #include "p_spec.h"
-#include "rad_trig.h"
 
 int level_time_elapsed;
 
@@ -57,7 +56,7 @@ void MapObjectTicker(bool extra_tic)
         return;
 
     // pause if in menu and at least one tic has been run
-    if (!network_game && (menu_active || rts_menu_active) &&
+    if (!network_game && menu_active &&
         !AlmostEquals(players[console_player]->view_z_, kFloatUnused))
     {
         return;
@@ -87,9 +86,6 @@ void MapObjectTicker(bool extra_tic)
             if (players[pnum])
                 PlayerThink(players[pnum], extra_tic);
     }
-
-    if (!extra_tic || !double_framerate.d_)
-        RunScriptTriggers();
 
     RunForces(extra_tic);
     RunMapObjectThinkers(extra_tic);

@@ -54,9 +54,6 @@ set (EDGE_SOURCE_FILES
   p_forces.cc
   p_telept.cc
   p_weapon.cc
-  rad_act.cc
-  rad_pars.cc
-  rad_trig.cc
   r_draw.cc
   r_shader.cc
   r_render.cc

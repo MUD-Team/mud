@@ -42,6 +42,7 @@
 #include "epi_str_util.h"
 #include "f_finale.h"
 #include "f_interm.h"
+#include "hu_stuff.h"
 #include "i_system.h"
 #include "m_cheat.h"
 #include "m_menu.h"
@@ -53,7 +54,6 @@
 #include "r_misc.h"
 #include "r_modes.h"
 #include "r_sky.h"
-#include "rad_trig.h"
 #include "s_music.h"
 #include "s_sound.h"
 #include "script/compat/lua_compat.h"
@@ -199,9 +199,6 @@ void LoadLevel_Bits(void)
     // -ACB- 1998/08/09 New LevelSetup
     // -KM- 1998/11/25 LevelSetup accepts the autotag
     //
-    ClearScriptTriggers();
-    ScriptMenuFinish(0);
-
     intermission_stats.kills = intermission_stats.items = intermission_stats.secrets = 0;
 
     for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
@@ -220,8 +217,6 @@ void LoadLevel_Bits(void)
     level_time_elapsed = 0;
 
     LevelSetup();
-
-    SpawnScriptTriggers(current_map->name_.c_str());
 
     exit_time     = INT_MAX;
     exit_skip_all = false;
@@ -341,9 +336,6 @@ bool GameResponder(InputEvent *ev)
 
     if (game_state == kGameStateLevel)
     {
-        if (ScriptResponder(ev))
-            return true; // RTS system ate it
-
         if (AutomapResponder(ev))
             return true; // automap ate it
 
@@ -483,7 +475,6 @@ void GameTicker(void)
         MapObjectTicker(false);
         AutomapTicker();
         HUDTicker();
-        ScriptTicker();
 
         // do player reborns if needed
         CheckPlayersReborn();
@@ -642,9 +633,6 @@ static void GameDoCompleted(void)
 
     if (automap_active)
         AutomapStop();
-
-    if (rts_menu_active)
-        ScriptMenuFinish(0);
 
     BotEndLevel();
 
