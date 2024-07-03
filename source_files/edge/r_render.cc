@@ -1843,11 +1843,6 @@ static void RendererWalkMirror(DrawSubsector *dsub, Seg *seg, BAMAngle left, BAM
 
     dsub->mirrors.push_back(mir);
 
-#if defined(EDGE_GL_ES2)
-    // GL4ES mirror fix for renderlist
-    gl4es_flush();
-#endif
-
     // push mirror (translation matrix)
     MirrorPush(mir);
 
@@ -1873,10 +1868,6 @@ static void RendererWalkMirror(DrawSubsector *dsub, Seg *seg, BAMAngle left, BAM
     // pop mirror
     MirrorPop();
 
-#if defined(EDGE_GL_ES2)
-    // GL4ES mirror fix for renderlist
-    gl4es_flush();
-#endif
 }
 
 //
@@ -2802,11 +2793,6 @@ static void RenderMirror(DrawMirror *mir)
 
     FinishUnitBatch();
 
-#if defined(EDGE_GL_ES2)
-    // GL4ES mirror fix for renderlist
-    gl4es_flush();
-#endif
-
     MirrorPush(mir);
     {
         RenderSubList(mir->draw_subsectors, true);
@@ -2817,11 +2803,6 @@ static void RenderMirror(DrawMirror *mir)
         DrawPortalPolygon(mir);
     else
         DrawMirrorPolygon(mir);
-
-#if defined(EDGE_GL_ES2)
-    // GL4ES mirror fix for renderlist
-    gl4es_flush();
-#endif
 
     solid_mode = true;
     StartUnitBatch(solid_mode);

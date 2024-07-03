@@ -27,9 +27,5 @@
 
 #include "gl.h" // GLAD or gl4es
 
-#ifdef EDGE_GL_ES2
-#include "gl4esinit.h"
-#endif
-
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

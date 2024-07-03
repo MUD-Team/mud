@@ -63,11 +63,6 @@ extern ConsoleVariable draw_culling_distance;
 
 void GrabCursor(bool enable)
 {
-#ifdef EDGE_WEB
-    // On web, cursor lock is exclusively handled by selecting canvas
-    return;
-#endif
-
     if (!program_window || graphics_shutdown)
         return;
 
@@ -155,12 +150,6 @@ void StartupGraphics(void)
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 0);
-#ifdef EDGE_GL_ES2
-    SDL_SetHint(SDL_HINT_OPENGL_ES_DRIVER, "1");
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-    initialize_gl4es();
-#endif
 
     // -DS- 2005/06/27 Detect SDL Resolutions
     SDL_DisplayMode info;
@@ -250,11 +239,7 @@ static bool InitializeWindow(DisplayMode *mode)
     std::string temp_title = window_title.s_;
     temp_title.append(" ").append(edge_version.s_);
 
-#if EDGE_WEB
-    int resizeable = SDL_WINDOW_RESIZABLE;
-#else
     int resizeable = 0;
-#endif
 
     program_window =
         SDL_CreateWindow(temp_title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, mode->width, mode->height,
@@ -310,9 +295,8 @@ static bool InitializeWindow(DisplayMode *mode)
     else
         SDL_GL_SetSwapInterval(vsync.d_);
 
-#ifndef EDGE_GL_ES2
+
     gladLoaderLoadGL();
-#endif
 
     return true;
 }
@@ -441,11 +425,7 @@ void ShutdownGraphics(void)
         SDL_Quit();
     }
 
-#ifndef EDGE_GL_ES2
     gladLoaderUnloadGL();
-#else
-    close_gl4es();
-#endif
 }
 
 //--- editor settings ---

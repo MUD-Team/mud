@@ -23,9 +23,6 @@
 #include "epi_sdl.h"
 #include "epi_str_compare.h"
 #include "epi_windows.h"
-#ifdef EDGE_WEB
-#include <emscripten.h>
-#endif
 #ifndef _WIN32
 #include <dirent.h>
 #include <ftw.h>
@@ -710,33 +707,6 @@ bool FileCopy(std::string_view src, std::string_view dest)
     else
         return true;
 }
-
-// Emscripten-specific
-#ifdef EDGE_WEB
-void SyncFilesystem(bool populate)
-{
-    EM_ASM_(
-        {
-            if (Module.edgePreSyncFS)
-            {
-                Module.edgePreSyncFS();
-            }
-            FS.syncfs(
-                $0, function(err) {
-                    if (Module.edgePostSyncFS)
-                    {
-                        Module.edgePostSyncFS();
-                    }
-                });
-        },
-        populate);
-}
-#else
-void SyncFilesystem(bool populate)
-{
-    (void)populate;
-}
-#endif
 
 } // namespace epi
 

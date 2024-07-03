@@ -111,11 +111,7 @@ set (EDGE_SOURCE_FILES
   script/compat/lua_player.cc
   script/compat/lua_hud.cc)
 
-if (EMSCRIPTEN)
-  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} i_web.cc)
-else()
-  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} i_main.cc)
-endif()
+set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} i_main.cc)
 
 set (EDGE_LINK_LIBRARIES
   edge_ajbsp  
@@ -149,13 +145,8 @@ endif()
 
 target_include_directories(edge-classic PRIVATE ./)
 
-if (NOT EDGE_GL_ES2)
-  target_include_directories(edge-classic PRIVATE ${EDGE_LIBRARY_DIR}/glad/include/glad)
-	set(EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} glad ${OPENGL_LIBRARIES})
-else()
-  target_include_directories(edge-classic PRIVATE ${EDGE_LIBRARY_DIR}/gl4es/include ${EDGE_LIBRARY_DIR}/gl4es/include/GL)
-	set(EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} gl4es)
-endif()
+target_include_directories(edge-classic PRIVATE ${EDGE_LIBRARY_DIR}/glad/include/glad)
+set(EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} glad ${OPENGL_LIBRARIES})
 
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/almostequals)
 target_include_directories(edge-classic PRIVATE ../ajbsp)
@@ -181,35 +172,8 @@ target_compile_options(edge-classic PRIVATE
 
 set(COPY_FILES "")
 
-if (NOT EMSCRIPTEN)
-
-  set (DEST_DIR "${CMAKE_SOURCE_DIR}")
-  list(APPEND COPY_FILES "$<TARGET_FILE:edge-classic>")
-
-else()
-
-  set (SOURCE_DIR "${CMAKE_SOURCE_DIR}/build/source_files/edge")
-  set (DEST_DIR "${CMAKE_SOURCE_DIR}/web/site")
-
-  target_link_options(edge-classic PRIVATE "--pre-js=${DEST_DIR}/edge-classic-data.js")
-
-  list(APPEND COPY_FILES "${SOURCE_DIR}/edge-classic.js" "${SOURCE_DIR}/edge-classic.wasm" "${SOURCE_DIR}/edge-classic.wasm.map")
-
-  add_custom_command(
-  TARGET edge-classic
-  PRE_BUILD
-  COMMAND python ${EMPACKAGER} ${DEST_DIR}/edge-classic.data --preload
-    ${CMAKE_SOURCE_DIR}/web/preload@/
-    ${CMAKE_SOURCE_DIR}/edge_base@/edge_base
-    ${CMAKE_SOURCE_DIR}/edge_defs@/edge_defs
-    ${CMAKE_SOURCE_DIR}/soundfont@/soundfont
-    --js-output=${DEST_DIR}/edge-classic-data.js
-    --use-preload-cache
-    --no-node
-    --lz4
-  )
-
-endif()
+set (DEST_DIR "${CMAKE_SOURCE_DIR}")
+list(APPEND COPY_FILES "$<TARGET_FILE:edge-classic>")
 
 # Copy appropriate SDL2.dll to local install directory when built with MSVC/Clang
 if (WIN32)
