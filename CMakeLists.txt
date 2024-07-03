@@ -26,12 +26,8 @@ endif()
 
 if (MSVC)
 
-  # These are needed for MSVC to play ball as much as possible
-  # with the /EHs- flag
-  add_definitions("-D_HAS_EXCEPTIONS=0 -D_STATIC_CPPLIB")
-
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /fp:fast /EHs- /GR-")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fp:fast /EHs- /GR-")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /fp:fast /GR-")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fp:fast /GR-")
 
   if (NOT CLANG)
     # get the number of logical cores for parallel build
