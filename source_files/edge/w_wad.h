@@ -39,21 +39,6 @@ struct WadTextureResource
     int texture2 = -1;
 };
 
-struct GameCheck
-{
-    // Friendly string for selector dialog box (if multiple games found)
-    // TODO: Read EDGEGAME file/lump for custom friendly title
-    const char *display_name;
-
-    // game_base to set if this IWAD is used
-    const char *base;
-
-    // (usually) unique lumps to check for in a potential IWAD
-    const char *unique_lumps[2];
-};
-
-extern const std::vector<GameCheck> game_checker;
-
 int CheckLumpNumberForName(const char *name);
 // Like above, but returns the data file index instead of the sortedlump index
 int CheckDataFileIndexForName(const char *name);
@@ -97,8 +82,8 @@ bool IsLumpInPwad(const char *name);
 
 bool IsLumpInAnyWad(const char *name);
 
-// Returns index into game_checker vector if valid game found, else -1
-int CheckForUniqueGameLumps(epi::File *file);
+// Returns game name if EDGEGAME lump found, otherwise empty string
+std::string CheckForEdgeGameLump(epi::File *file);
 
 void BuildXGLNodes(void);
 

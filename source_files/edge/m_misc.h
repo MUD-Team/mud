@@ -51,7 +51,6 @@ struct ConfigurationDefault
 
 void ResetDefaults(int dummy, ConsoleVariable *dummy_cvar = nullptr);
 void LoadDefaults(void);
-void LoadBranding(void);
 void SaveDefaults(void);
 
 void TakeScreenshot(bool show_msg);

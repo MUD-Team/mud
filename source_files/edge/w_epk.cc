@@ -22,7 +22,6 @@
 
 #include "ddf_colormap.h"
 #include "ddf_main.h"
-#include "ddf_wadfixes.h"
 #include "epi.h"
 #include "epi_file.h"
 #include "epi_filesystem.h"
@@ -1183,7 +1182,7 @@ static void ProcessWADsInPack(PackFile *pack)
                     entry.name_, (pack->parent_->kind_ == kFileKindIFolder || pack->parent_->kind_ == kFileKindIPK)
                                      ? kFileKindIPackWAD
                                      : kFileKindPackWAD);
-                pack_wad_df->name_ = entry.name_;
+                pack_wad_df->name_ = epi::MakePathRelative(pack->parent_->name_, entry.name_);
                 pack_wad_df->file_ = pack_wad_mem;
                 ProcessFile(pack_wad_df);
             }
@@ -1203,35 +1202,6 @@ void PopulatePackOnly(DataFile *df)
     df->pack_->SortEntries();
 }
 
-int CheckPackForIWADs(DataFile *df)
-{
-    PackFile *pack = df->pack_;
-    for (size_t d = 0; d < pack->directories_.size(); d++)
-    {
-        for (size_t i = 0; i < pack->directories_[d].entries_.size(); i++)
-        {
-            PackEntry &entry = pack->directories_[d].entries_[i];
-
-            if (!entry.HasExtension(".wad"))
-                continue;
-
-            epi::File *pack_wad = OpenPackFile(pack, entry.pack_path_);
-
-            if (pack_wad)
-            {
-                int pack_iwad_check = CheckForUniqueGameLumps(pack_wad);
-                if (pack_iwad_check >= 0)
-                {
-                    delete pack_wad;
-                    return pack_iwad_check;
-                }
-            }
-            delete pack_wad;
-        }
-    }
-    return -1;
-}
-
 void ProcessAllInPack(DataFile *df, size_t file_index)
 {
     if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindIFolder)
@@ -1240,17 +1210,6 @@ void ProcessAllInPack(DataFile *df, size_t file_index)
         df->pack_ = ProcessZip(df);
 
     df->pack_->SortEntries();
-
-    // parse the WADFIXES file from edge_defs folder or `edge_defs.epk`
-    // immediately
-    if ((df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEEPK) && file_index == 0)
-    {
-        LogPrint("Loading WADFIXES\n");
-        epi::File *wadfixes = OpenPackFile(df->pack_, "wadfixes.ddf");
-        if (wadfixes)
-            DDFReadFixes(wadfixes->ReadText());
-        delete wadfixes;
-    }
 
     // Only load some things here; the rest are deferred until
     // after all files loaded so that pack substitutions can work properly

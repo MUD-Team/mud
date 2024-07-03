@@ -25,7 +25,10 @@
 
 #pragma once
 
+#include <string>
+
 #include "con_var.h"
+#include "epi_lexer.h"
 
 void EdgeMain(int argc, const char **argv);
 void EdgeIdle(void);
@@ -39,6 +42,8 @@ void AdvanceTitle(void);
 void StartTitle(void);
 
 void StartupProgressMessage(const char *message);
+
+std::string ParseEdgeGameFile(epi::Lexer &lex);
 
 enum ApplicationStateFlag
 {

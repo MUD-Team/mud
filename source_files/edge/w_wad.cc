@@ -46,7 +46,6 @@
 #include "ddf_colormap.h"
 #include "ddf_main.h"
 #include "ddf_switch.h"
-#include "ddf_wadfixes.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "dstrings.h"
@@ -67,35 +66,6 @@
 #include "w_epk.h"
 #include "w_files.h"
 #include "w_texture.h"
-
-#define EDGE_ENABLE_STRIFE 0
-
-// Combination of unique lumps needed to best identify an IWAD
-const std::vector<GameCheck> game_checker = {{
-    {"Custom", "custom", {"EDGEGAME", "EDGEGAME"}},
-    {"Blasphemer", "blasphemer", {"BLASPHEM", "E1M1"}},
-    {"Freedoom 1", "freedoom1", {"FREEDOOM", "E1M1"}},
-    {"Freedoom 2", "freedoom2", {"FREEDOOM", "MAP01"}},
-    {"REKKR", "rekkr", {"REKCREDS", "E1M1"}},
-    {"HacX", "hacx", {"HACX-R", "MAP01"}},
-    {"Harmony", "harmony", {"0HAWK01", "DBIGFONT"}}, // Original Harmony Release
-    {"Harmony Compat", "harmonyc", {"0HAWK01", "DMAPINFO"}}, // Harmony Compatible Release
-    {"Chex Quest 3M", "chex3vm", {"ENDOOM", "MAP01"}},  // Chex Quest 3: Vanilla Edition
-                                                        // Modder/Doom 2 Base
-    {"Chex Quest 3", "chex3v", {"ENDOOM", "BOSSBACK"}},  // Chex Quest 3: Vanilla Edition
-    {"Chex Quest 1", "chex1", {"ENDOOM", "E4M1"}},
-    {"Heretic", "heretic", {"MUS_E1M1", "E1M1"}},
-    {"Plutonia", "plutonia", {"CAMO1", "MAP01"}},
-    {"Evilution", "tnt", {"REDTNT2", "MAP01"}},
-    {"Doom", "doom", {"BFGGA0", "E2M1"}},
-    {"Doom BFG", "doom", {"DMENUPIC", "M_MULTI"}},
-    {"Doom Demo", "doom1", {"SHOTA0", "E1M1"}},
-    {"Doom II", "doom2", {"BFGGA0", "MAP01"}},
-    {"Doom II BFG", "doom2", {"DMENUPIC", "MAP33"}},
-#if EDGE_ENABLE_STRIFE
-    {"Strife", "strife", {"VELLOGO", "RGELOGO"}}     // Dev/internal use - Definitely nowhwere near playable
-#endif
-}};
 
 class WadFile
 {
@@ -797,15 +767,16 @@ static void CheckForLevel(WadFile *wad, int lump, const char *name, const RawWad
     }
 }
 
-int CheckForUniqueGameLumps(epi::File *file)
+std::string CheckForEdgeGameLump(epi::File *file)
 {
     int          length;
     RawWadHeader header;
+    std::string  game_name;
 
     if (!file)
     {
-        LogWarning("CheckForUniqueGameLumps: Received null file_c pointer!\n");
-        return -1;
+        LogWarning("CheckForEdgeGameLump: Received null file_c pointer!\n");
+        return game_name;
     }
 
     // WAD file
@@ -818,134 +789,27 @@ int CheckForUniqueGameLumps(epi::File *file)
     file->Seek(header.directory_start, epi::File::kSeekpointStart);
     file->Read(raw_info, length);
 
-    for (size_t check = 0; check < game_checker.size(); check++)
+    for (size_t i = 0; i < header.total_entries; i++)
     {
-        GameCheck   gamecheck = game_checker[check];
-        const char *lump0     = gamecheck.unique_lumps[0];
-        const char *lump1     = gamecheck.unique_lumps[1];
+        RawWadEntry &entry = raw_info[i];
 
-        // Do not require IWAD header if loading Harmony, REKKR, BFG Edition
-        // WADs, Chex Quest or a custom standalone IWAD
-        if (strncmp(header.magic, "IWAD", 4) != 0 && epi::StringCompare(lump0, "DMENUPIC") != 0 &&
-            epi::StringCompare(lump0, "REKCREDS") != 0 && epi::StringCompare(lump0, "0HAWK01") != 0 &&
-            epi::StringCompare(lump0, "EDGEGAME") != 0 && epi::StringCompare(lump0, "ENDOOM") != 0)
+        if (epi::StringCompare("EDGEGAME", entry.name) == 0)
         {
-            continue;
-        }
-
-        bool lump1_found = false;
-        bool lump2_found = false;
-
-        for (size_t i = 0; i < header.total_entries; i++)
-        {
-            if (lump1_found && lump2_found)
-                break;
-
-            RawWadEntry &entry = raw_info[i];
-
-            if (strncmp(lump0, entry.name, 8) == 0)
-            {
-                // EDGEGAME is the only lump needed for custom standalones
-                if (epi::StringCompare(lump0, "EDGEGAME") == 0)
-                {
-                    delete[] raw_info;
-                    file->Seek(0, epi::File::kSeekpointStart);
-                    return check;
-                }
-                // Either really smart or really dumb Chex Quest detection
-                // method
-                else if (epi::StringCompare(lump0, "ENDOOM") == 0)
-                {
-                    EPI_ASSERT(entry.size == 4000);
-                    file->Seek(entry.position, epi::File::kSeekpointStart);
-                    uint8_t *endoom = new uint8_t[entry.size];
-                    file->Read(endoom, entry.size);
-                    // CQ3: Vanilla
-                    if (endoom[1174] == 'c' && endoom[1176] == 'h' && endoom[1178] == 'e' && endoom[1180] == 'x' &&
-                        endoom[1182] == 'q' && endoom[1184] == 'u' && endoom[1186] == 'e' && endoom[1188] == 's' &&
-                        endoom[1190] == 't' && endoom[1192] == '.' && endoom[1194] == 'o' && endoom[1196] == 'r' &&
-                        endoom[1198] == 'g')
-                    {
-                        lump1_found = true;
-                    }
-                    // CQ1
-                    else if (endoom[1026] == 'c' && endoom[1028] == 'h' && endoom[1030] == 'e' && endoom[1032] == 'x' &&
-                        endoom[1034] == 'q' && endoom[1036] == 'u' && endoom[1038] == 'e' && endoom[1040] == 's' &&
-                        endoom[1042] == 't')
-                    {
-                        lump1_found = true;
-                    }
-                    delete[] endoom;
-                }
-                else
-                    lump1_found = true;
-            }
-            if (strncmp(lump1, entry.name, 8) == 0)
-                lump2_found = true;
-        }
-
-        if (lump1_found && lump2_found)
-        {
+            std::string edge_game;
+            edge_game.resize(entry.size);
+            file->Seek(entry.position, epi::File::kSeekpointStart);
+            file->Read(game_name.data(), entry.size);
+            epi::Lexer lex(edge_game);
+            game_name = ParseEdgeGameFile(lex);
             delete[] raw_info;
             file->Seek(0, epi::File::kSeekpointStart);
-            return check;
+            return game_name;
         }
     }
 
     delete[] raw_info;
     file->Seek(0, epi::File::kSeekpointStart);
-    return -1;
-}
-
-void ProcessFixersForWAD(DataFile *df)
-{
-    // Special handling for Doom 2 BFG Edition
-    if (df->kind_ == kFileKindIWAD || df->kind_ == kFileKindIPackWAD)
-    {
-        if (CheckLumpNumberForName("MAP33") > -1 && CheckLumpNumberForName("DMENUPIC") > -1)
-        {
-            std::string fix_path = epi::PathAppend(game_directory, "edge_fixes/doom2_bfg.epk");
-            if (epi::TestFileAccess(fix_path))
-            {
-                AddPendingFile(fix_path, kFileKindEPK);
-
-                LogPrint("WADFIXES: Applying fixes for Doom 2 BFG Edition\n");
-            }
-            else
-                LogWarning("WADFIXES: Doom 2 BFG Edition detected, but fix not found "
-                           "in edge_fixes directory!\n");
-            return;
-        }
-    }
-
-    std::string fix_checker;
-
-    fix_checker = df->wad_->md5_string_;
-
-    if (fix_checker.empty())
-        return;
-
-    for (size_t i = 0; i < fixdefs.size(); i++)
-    {
-        if (epi::StringCaseCompareASCII(fix_checker, fixdefs[i]->md5_string_) == 0)
-        {
-            std::string fix_path = epi::PathAppend(game_directory, "edge_fixes");
-            fix_path             = epi::PathAppend(fix_path, fix_checker.append(".epk"));
-            if (epi::TestFileAccess(fix_path))
-            {
-                AddPendingFile(fix_path, kFileKindEPK);
-
-                LogPrint("WADFIXES: Applying fixes for %s\n", fixdefs[i]->name_.c_str());
-            }
-            else
-            {
-                LogWarning("WADFIXES: %s defined, but no fix WAD located in "
-                           "edge_fixes!\n",
-                           fixdefs[i]->name_.c_str());
-                return;
-            }
-        }
-    }
+    return game_name;
 }
 
 static void ProcessDDFInWad(DataFile *df)
@@ -1071,8 +935,7 @@ void ProcessWad(DataFile *df, size_t file_index)
     {
         RawWadEntry &entry = raw_info[i];
 
-        bool allow_ddf = (epi::StringCompare(game_base, "custom") == 0 || df->kind_ == kFileKindPWAD ||
-                          df->kind_ == kFileKindPackWAD || df->kind_ == kFileKindIPK || df->kind_ == kFileKindIFolder);
+        bool allow_ddf = true;
 
         AddLump(df, entry.name, AlignedLittleEndianS32(entry.position), AlignedLittleEndianS32(entry.size),
                 (int)file_index, allow_ddf);
@@ -1150,7 +1013,7 @@ std::string BuildXGLNodesForWAD(DataFile *df)
         uint8_t   *raw_wad    = nullptr;
         int        raw_length = 0;
 
-        if (df->kind_ == kFileKindPackWAD)
+        if (df->kind_ == kFileKindPackWAD || df->kind_ == kFileKindIPackWAD)
         {
             mem_wad    = OpenFileFromPack(df->name_);
             raw_length = mem_wad->GetLength();
@@ -1168,7 +1031,7 @@ std::string BuildXGLNodesForWAD(DataFile *df)
         ajbsp::FinishXWA();
         ajbsp::CloseWad();
 
-        if (df->kind_ == kFileKindPackWAD)
+        if (df->kind_ == kFileKindPackWAD || df->kind_ == kFileKindIPackWAD)
         {
             delete[] raw_wad;
             delete mem_wad;

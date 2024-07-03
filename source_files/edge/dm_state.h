@@ -90,10 +90,6 @@ constexpr uint8_t kMaximumArmor  = 200;
 
 // File handling stuff.
 extern std::string configuration_file;
-extern std::string branding_file;
-
-extern std::string game_base;
-
 extern std::string cache_directory;
 extern std::string game_directory;
 extern std::string home_directory;

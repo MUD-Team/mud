@@ -147,6 +147,30 @@ static ImageData *ReadFlatAsEpiBlock(Image *rim)
 {
     EPI_ASSERT(rim->source_type_ == kImageSourceFlat || rim->source_type_ == kImageSourceRawBlock);
 
+    int         lump          = rim->source_.graphic.lump;
+    const char *packfile_name = rim->source_.graphic.packfile_name;
+
+    // handle PNG/JPEG/TGA images
+    if (!rim->source_.graphic.is_raw)
+    {
+        epi::File *f;
+
+        if (packfile_name)
+            f = OpenFileFromPack(packfile_name);
+        else
+            f = LoadLumpAsFile(lump);
+
+        ImageData *img = LoadImageData(f);
+
+        // close it
+        delete f;
+
+        if (!img)
+            FatalError("Error loading image in lump: %s\n", packfile_name ? packfile_name : GetLumpNameFromIndex(lump));
+
+        return img;
+    }
+
     int tw = HMM_MAX(rim->total_width_, 1);
     int th = HMM_MAX(rim->total_height_, 1);
 
@@ -161,7 +185,23 @@ static ImageData *ReadFlatAsEpiBlock(Image *rim)
     img->Clear(playpal_black);
 
     // read in pixels
-    const uint8_t *src = (const uint8_t *)LoadLumpIntoMemory(rim->source_.flat.lump);
+    const uint8_t *src = nullptr;
+
+    if (packfile_name)
+    {
+        epi::File *f = OpenFileFromPack(packfile_name);
+        if (f)
+        {
+            src = (const uint8_t *)f->LoadIntoMemory();
+        }
+        else
+            FatalError("ReadFlatAsEpiBlock: Failed to load %s!\n", packfile_name);
+        delete f;
+    }
+    else
+    {
+        src = (const uint8_t *)LoadLumpIntoMemory(rim->source_.flat.lump);
+    }
 
     for (int y = 0; y < h; y++)
         for (int x = 0; x < w; x++)

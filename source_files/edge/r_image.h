@@ -104,6 +104,7 @@ class Image
             int          lump;
             char        *packfile_name;
             bool         is_patch;
+            bool         is_raw;
             bool         user_defined;
             ImageSpecial special;
         } graphic;

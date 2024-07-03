@@ -46,9 +46,6 @@ std::vector<std::string> GetPackSpriteList(PackFile *pack);
 // Only populate the pack directory; used for ad-hoc folder/EPK checks
 void PopulatePackOnly(DataFile *df);
 
-// Check pack for valid IWADs. Return associated game_checker index if found
-int CheckPackForIWADs(DataFile *df);
-
 // Populate pack directory and process appropriate files (Lua, DDF, etc)
 void ProcessAllInPack(DataFile *df, size_t file_index);
 
