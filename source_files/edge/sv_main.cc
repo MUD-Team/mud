@@ -35,265 +35,7 @@
 #include "p_local.h"
 #include "p_spec.h"
 #include "r_state.h"
-#include "sv_chunk.h"
 #include "w_wad.h"
-
-SaveStruct *sv_known_structs;
-SaveArray  *sv_known_arrays;
-
-// the current element of an array being read/written
-void *sv_current_elem;
-
-// sv_mobj.c
-extern SaveStruct sv_struct_mobj;
-extern SaveStruct sv_struct_spawnpoint;
-extern SaveStruct sv_struct_iteminque;
-
-extern SaveArray sv_array_mobj;
-extern SaveArray sv_array_iteminque;
-
-// sv_play.c
-extern SaveStruct sv_struct_player;
-extern SaveStruct sv_struct_playerweapon;
-extern SaveStruct sv_struct_playerammo;
-extern SaveStruct sv_struct_playerinv;
-extern SaveStruct sv_struct_playercounter;
-extern SaveStruct sv_struct_psprite;
-
-extern SaveArray sv_array_player;
-
-// sv_level.c
-extern SaveStruct sv_struct_surface;
-extern SaveStruct sv_struct_side;
-extern SaveStruct sv_struct_line;
-extern SaveStruct sv_struct_regprops;
-extern SaveStruct sv_struct_exfloor;
-extern SaveStruct sv_struct_sector;
-
-extern SaveArray sv_array_side;
-extern SaveArray sv_array_line;
-extern SaveArray sv_array_exfloor;
-extern SaveArray sv_array_sector;
-
-// sv_misc.c
-extern SaveStruct sv_struct_button;
-extern SaveStruct sv_struct_light;
-extern SaveStruct sv_struct_trigger;
-extern SaveStruct sv_struct_drawtip;
-extern SaveStruct sv_struct_plane_move;
-extern SaveStruct sv_struct_slider_move;
-
-extern SaveArray sv_array_button;
-extern SaveArray sv_array_light;
-extern SaveArray sv_array_plane_move;
-extern SaveArray sv_array_slider_move;
-
-//----------------------------------------------------------------------------
-//
-//  GET ROUTINES
-//
-
-bool SaveGameGetInteger(void *storage, int index, void *extra)
-{
-    (void)extra;
-
-    ((uint32_t *)storage)[index] = SaveChunkGetInteger();
-    return true;
-}
-
-bool SaveGameGetAngle(void *storage, int index, void *extra)
-{
-    (void)extra;
-
-    ((BAMAngle *)storage)[index] = SaveChunkGetAngle();
-    return true;
-}
-
-bool SaveGameGetFloat(void *storage, int index, void *extra)
-{
-    (void)extra;
-
-    ((float *)storage)[index] = SaveChunkGetFloat();
-    return true;
-}
-
-bool SaveGameGetBoolean(void *storage, int index, void *extra)
-{
-    (void)extra;
-
-    ((bool *)storage)[index] = SaveChunkGetInteger() ? true : false;
-    return true;
-}
-
-bool SaveGameGetVec2(void *storage, int index, void *extra)
-{
-    (void)extra;
-
-    ((HMM_Vec2 *)storage)[index].X = SaveChunkGetFloat();
-    ((HMM_Vec2 *)storage)[index].Y = SaveChunkGetFloat();
-    return true;
-}
-
-bool SaveGameGetVec3(void *storage, int index, void *extra)
-{
-    (void)extra;
-
-    ((HMM_Vec3 *)storage)[index].X = SaveChunkGetFloat();
-    ((HMM_Vec3 *)storage)[index].Y = SaveChunkGetFloat();
-    ((HMM_Vec3 *)storage)[index].Z = SaveChunkGetFloat();
-    return true;
-}
-
-//
-// For backwards compatibility with old savegames, keep the mlook angle
-// stored in the savegame file as a slope.  Because we forbid looking
-// directly up and down, there is no problem with infinity.
-//
-bool SaveGameGetAngleFromSlope(void *storage, int index, void *extra)
-{
-    (void)extra;
-
-    ((BAMAngle *)storage)[index] = epi::BAMFromATan(SaveChunkGetFloat());
-    return true;
-}
-
-//----------------------------------------------------------------------------
-//
-//  COMMON PUT ROUTINES
-//
-
-void SaveGamePutInteger(void *storage, int index, void *extra)
-{
-    SaveChunkPutInteger(((uint32_t *)storage)[index]);
-}
-
-void SaveGamePutAngle(void *storage, int index, void *extra)
-{
-    SaveChunkPutAngle(((BAMAngle *)storage)[index]);
-}
-
-void SaveGamePutFloat(void *storage, int index, void *extra)
-{
-    SaveChunkPutFloat(((float *)storage)[index]);
-}
-
-void SaveGamePutBoolean(void *storage, int index, void *extra)
-{
-    SaveChunkPutInteger(((bool *)storage)[index] ? 1 : 0);
-}
-
-void SaveGamePutVec2(void *storage, int index, void *extra)
-{
-    SaveChunkPutFloat(((HMM_Vec2 *)storage)[index].X);
-    SaveChunkPutFloat(((HMM_Vec2 *)storage)[index].Y);
-}
-
-void SaveGamePutVec3(void *storage, int index, void *extra)
-{
-    SaveChunkPutFloat(((HMM_Vec3 *)storage)[index].X);
-    SaveChunkPutFloat(((HMM_Vec3 *)storage)[index].Y);
-    SaveChunkPutFloat(((HMM_Vec3 *)storage)[index].Z);
-}
-
-void SaveGamePutAngleToSlope(void *storage, int index, void *extra)
-{
-    BAMAngle val = ((BAMAngle *)storage)[index];
-
-    EPI_ASSERT(val < kBAMAngle90 || val > kBAMAngle270);
-
-    SaveChunkPutFloat(epi::BAMTan(val));
-}
-
-//----------------------------------------------------------------------------
-//
-//  ADMININISTRATION
-//
-
-static void AddKnownStruct(SaveStruct *S)
-{
-    S->next          = sv_known_structs;
-    sv_known_structs = S;
-}
-
-static void AddKnownArray(SaveArray *A)
-{
-    A->next         = sv_known_arrays;
-    sv_known_arrays = A;
-}
-
-void InitializeSaveSystem(void)
-{
-    // One-time initialisation.  Sets up lists of known structures
-    // and arrays.
-
-    // sv_mobj.c
-    AddKnownStruct(&sv_struct_mobj);
-    AddKnownStruct(&sv_struct_spawnpoint);
-    AddKnownStruct(&sv_struct_iteminque);
-
-    AddKnownArray(&sv_array_mobj);
-    AddKnownArray(&sv_array_iteminque);
-
-    // sv_play.c
-    AddKnownStruct(&sv_struct_player);
-    AddKnownStruct(&sv_struct_playerweapon);
-    AddKnownStruct(&sv_struct_playerammo);
-    AddKnownStruct(&sv_struct_playerinv);
-    AddKnownStruct(&sv_struct_playercounter);
-    AddKnownStruct(&sv_struct_psprite);
-
-    AddKnownArray(&sv_array_player);
-
-    // sv_level.c
-    AddKnownStruct(&sv_struct_surface);
-    AddKnownStruct(&sv_struct_side);
-    AddKnownStruct(&sv_struct_line);
-    AddKnownStruct(&sv_struct_regprops);
-    AddKnownStruct(&sv_struct_exfloor);
-    AddKnownStruct(&sv_struct_sector);
-
-    AddKnownArray(&sv_array_side);
-    AddKnownArray(&sv_array_line);
-    AddKnownArray(&sv_array_exfloor);
-    AddKnownArray(&sv_array_sector);
-
-    // sv_misc.c
-    AddKnownStruct(&sv_struct_button);
-    AddKnownStruct(&sv_struct_light);
-    AddKnownStruct(&sv_struct_plane_move);
-    AddKnownStruct(&sv_struct_slider_move);
-
-    AddKnownArray(&sv_array_button);
-    AddKnownArray(&sv_array_light);
-    AddKnownArray(&sv_array_plane_move);
-    AddKnownArray(&sv_array_slider_move);
-}
-
-SaveStruct *SaveStructLookup(const char *name)
-{
-    SaveStruct *cur;
-
-    for (cur = sv_known_structs; cur; cur = cur->next)
-        if (strcmp(cur->struct_name, name) == 0)
-            return cur;
-
-    // not found
-    return nullptr;
-}
-
-SaveArray *SaveArrayLookup(const char *name)
-{
-    SaveArray *cur;
-
-    for (cur = sv_known_arrays; cur; cur = cur->next)
-        if (strcmp(cur->array_name, name) == 0)
-            return cur;
-
-    // not found
-    return nullptr;
-}
-
-//----------------------------------------------------------------------------
 
 const char *SaveSlotName(int slot)
 {
@@ -333,6 +75,9 @@ std::string SV_DirName(const char *slot_name)
 
 void SaveClearSlot(const char *slot_name)
 {
+// Stubbed out pending save system rework - Dasho
+    return;
+/*
     std::string full_dir = SV_DirName(slot_name);
 
     // make sure the directory exists
@@ -356,12 +101,15 @@ void SaveClearSlot(const char *slot_name)
         LogDebug("  Deleting %s\n", cur_file.c_str());
 
         epi::FileDelete(cur_file);
-    }
+    }*/
 }
 
 void SaveCopySlot(const char *src_name, const char *dest_name)
 {
-    std::string src_dir  = SV_DirName(src_name);
+// Stubbed out pending save system rework - Dasho
+    return;
+
+    /*std::string src_dir  = SV_DirName(src_name);
     std::string dest_dir = SV_DirName(dest_name);
 
     std::vector<epi::DirectoryEntry> fsd;
@@ -387,7 +135,7 @@ void SaveCopySlot(const char *src_name, const char *dest_name)
 
         if (!epi::FileCopy(src_file, dest_file))
             FatalError("SV_CopySlot: failed to copy '%s' to '%s'\n", src_file.c_str(), dest_file.c_str());
-    }
+    }*/
 }
 
 //--- editor settings ---

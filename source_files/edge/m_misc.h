@@ -54,7 +54,6 @@ void LoadDefaults(void);
 void SaveDefaults(void);
 
 void TakeScreenshot(bool show_msg);
-void CreateSaveScreenshot(void);
 
 #ifdef __GNUC__
 void WarningOrError(const char *error, ...) __attribute__((format(printf, 1, 2)));
@@ -64,7 +63,6 @@ void WarningOrError(const char *error, ...);
 void DebugOrError(const char *error, ...);
 #endif
 
-extern bool save_screenshot_valid;
 extern bool show_obituaries;
 extern int  var_sound_stereo;
 extern int  sound_mixing_channels;

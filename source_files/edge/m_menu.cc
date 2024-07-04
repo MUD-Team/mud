@@ -64,7 +64,6 @@
 #include "r_modes.h"
 #include "s_music.h"
 #include "s_sound.h"
-#include "sv_chunk.h"
 #include "sv_main.h"
 #include "w_wad.h"
 
@@ -460,127 +459,20 @@ void MenuLoadSavePage(int choice)
 //
 void MenuReadSaveStrings(void)
 {
-    int i, version;
-
-    SaveGlobals *globs;
-
-    for (i = 0; i < kTotalSaveSlots; i++)
+// Truncated pending save system rework - Dasho
+    for (int i = 0; i < kTotalSaveSlots; i++)
     {
-        save_extended_information_slots[i].empty   = false;
-        save_extended_information_slots[i].corrupt = true;
+        save_extended_information_slots[i].empty   = true;
+        save_extended_information_slots[i].corrupt = false;
 
         save_extended_information_slots[i].skill        = -1;
         save_extended_information_slots[i].network_game = -1;
 
-        save_extended_information_slots[i].description[0] = 0;
         save_extended_information_slots[i].time_string[0] = 0;
         save_extended_information_slots[i].map_name[0]    = 0;
         save_extended_information_slots[i].game_name[0]   = 0;
 
-        int         slot = save_page * kTotalSaveSlots + i;
-        std::string fn(SaveFilename(SaveSlotName(slot), "head"));
-
-        if (!SaveFileOpenRead(fn))
-        {
-            save_extended_information_slots[i].empty   = true;
-            save_extended_information_slots[i].corrupt = false;
-            continue;
-        }
-
-        if (!SaveFileVerifyHeader(&version))
-        {
-            SaveFileCloseRead();
-            continue;
-        }
-
-        globs = SaveGlobalsLoad();
-
-        // close file now -- we only need the globals
-        SaveFileCloseRead();
-
-        if (!globs)
-            continue;
-
-        // --- pull info from global structure ---
-
-        if (!globs->game || !globs->level || !globs->description)
-        {
-            SaveGlobalsFree(globs);
-            continue;
-        }
-
-        save_extended_information_slots[i].corrupt = false;
-
-        epi::CStringCopyMax(save_extended_information_slots[i].game_name, globs->game, 32 - 1);
-        epi::CStringCopyMax(save_extended_information_slots[i].map_name, globs->level, 10 - 1);
-
-        epi::CStringCopyMax(save_extended_information_slots[i].description, globs->description, kSaveStringSize - 1);
-
-        if (globs->desc_date)
-            epi::CStringCopyMax(save_extended_information_slots[i].time_string, globs->desc_date, 32 - 1);
-
-        save_extended_information_slots[i].skill        = globs->skill;
-        save_extended_information_slots[i].network_game = globs->netgame;
-
-        SaveGlobalsFree(globs);
-
-        epi::ReplaceExtension(fn, ".replace");
-        if (epi::FileExists(fn))
-        {
-            delete save_extended_information_slots[i].save_image_data;
-            save_extended_information_slots[i].save_image_data = nullptr;
-            if (save_extended_information_slots[i].save_texture_id)
-                glDeleteTextures(1, &save_extended_information_slots[i].save_texture_id);
-            save_extended_information_slots[i].save_texture_id = 0;
-            save_extended_information_slots[i].save_image_page = save_page;
-            epi::FileDelete(fn);
-        }
-
-        // Save screenshot
-        epi::ReplaceExtension(fn, ".png");
-
-        if (epi::FileExists(fn) && (!save_extended_information_slots[i].save_image_data ||
-                                    save_page != save_extended_information_slots[i].save_image_page))
-        {
-            delete save_extended_information_slots[i].save_image_data;
-            if (save_extended_information_slots[i].save_texture_id)
-                glDeleteTextures(1, &save_extended_information_slots[i].save_texture_id);
-            epi::File *svimg_file = epi::FileOpen(fn, epi::kFileAccessRead | epi::kFileAccessBinary);
-            if (svimg_file)
-            {
-                save_extended_information_slots[i].save_image_data = LoadImageData(svimg_file);
-                if (save_extended_information_slots[i].save_image_data)
-                {
-                    save_extended_information_slots[i].save_texture_id =
-                        UploadTexture(save_extended_information_slots[i].save_image_data, 2, (1 << 30));
-                    save_extended_information_slots[i].save_image_page = save_page;
-                    delete svimg_file;
-                }
-                else
-                {
-                    LogWarning("Error reading MainMenuSaveGame screenshot %s!\n", fn.c_str());
-                    save_extended_information_slots[i].save_image_data = nullptr;
-                    save_extended_information_slots[i].save_texture_id = 0; // just in case
-                    save_extended_information_slots[i].save_image_page = save_page;
-                    delete svimg_file;
-                }
-            }
-        }
-    }
-
-    // fix up descriptions
-    for (i = 0; i < kTotalSaveSlots; i++)
-    {
-        if (save_extended_information_slots[i].corrupt)
-        {
-            strncpy(save_extended_information_slots[i].description, language["Corrupt_Slot"], kSaveStringSize - 1);
-            continue;
-        }
-        else if (save_extended_information_slots[i].empty)
-        {
-            strncpy(save_extended_information_slots[i].description, language["EmptySlot"], kSaveStringSize - 1);
-            continue;
-        }
+        strncpy(save_extended_information_slots[i].description, language["EmptySlot"], kSaveStringSize - 1);
     }
 }
 
@@ -1056,9 +948,6 @@ void MenuSaveGame(int choice)
 
     MenuReadSaveStrings();
     MenuSetupNextMenu(&SaveMenuDefinition);
-
-    need_save_screenshot  = true;
-    save_screenshot_valid = false;
 }
 
 //
@@ -1087,9 +976,6 @@ void MenuQuickSave(void)
         StartControlPanel();
         MenuReadSaveStrings();
         MenuSetupNextMenu(&SaveMenuDefinition);
-
-        need_save_screenshot  = true;
-        save_screenshot_valid = false;
 
         quicksave_slot = -2; // means to pick a slot now
         return;
@@ -3012,7 +2898,6 @@ void MenuClear(void)
     }
 
     menu_active           = false;
-    save_screenshot_valid = false;
     option_menu_on        = 0;
 }
 

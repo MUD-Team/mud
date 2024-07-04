@@ -57,7 +57,6 @@
 #include "s_music.h"
 #include "s_sound.h"
 #include "script/compat/lua_compat.h"
-#include "sv_chunk.h"
 #include "sv_main.h"
 #include "version.h"
 #include "w_wad.h"
@@ -110,25 +109,21 @@ GameFlags level_flags;
 
 //--------------------------------------------
 
-static int  defer_load_slot;
-static int  defer_save_slot;
-static char defer_save_description[32];
-
 // deferred stuff...
 static NewGameParameters *defer_params = nullptr;
 
-static void GameDoNewGame(void);
-static void GameDoLoadGame(void);
-static void GameDoCompleted(void);
-static void GameDoSaveGame(void);
-static void GameDoEndGame(void);
+static void DoNewGame(void);
+static void DoLoadGame(void);
+static void DoCompleted(void);
+static void DoSaveGame(void);
+static void DoEndGame(void);
 
 static void InitNew(NewGameParameters &params);
 static void RespawnPlayer(Player *p);
 static void SpawnInitialPlayers(void);
 
-static bool GameLoadGameFromFile(std::string filename, bool is_hub = false);
-static bool GameSaveGameToFile(std::string filename, const char *description);
+static bool LoadGameFromFile(std::string filename, bool is_hub = false);
+static bool SaveGameToFile(std::string filename, const char *description);
 
 static void HandleLevelFlag(bool *special, MapFlag flag)
 {
@@ -262,7 +257,7 @@ void DoLoadLevel(void)
         {
             LogPrint("Loading HUB...\n");
 
-            if (!GameLoadGameFromFile(fn, true))
+            if (!LoadGameFromFile(fn, true))
                 FatalError("LOAD-HUB failed with filename: %s\n", fn.c_str());
 
             SpawnInitialPlayers();
@@ -392,7 +387,7 @@ void DoBigGameStuff(void)
         switch (action)
         {
         case kGameActionNewGame:
-            GameDoNewGame();
+            DoNewGame();
             break;
 
         case kGameActionLoadLevel:
@@ -400,15 +395,15 @@ void DoBigGameStuff(void)
             break;
 
         case kGameActionLoadGame:
-            GameDoLoadGame();
+            DoLoadGame();
             break;
 
         case kGameActionSaveGame:
-            GameDoSaveGame();
+            DoSaveGame();
             break;
 
         case kGameActionIntermission:
-            GameDoCompleted();
+            DoCompleted();
             break;
 
         case kGameActionFinale:
@@ -420,7 +415,7 @@ void DoBigGameStuff(void)
             break;
 
         case kGameActionEndGame:
-            GameDoEndGame();
+            DoEndGame();
             break;
 
         default:
@@ -613,7 +608,7 @@ void ExitToHub(int map_number, int tag)
 //   (d) exit_hub_tag
 //   (e) intermission_stats.kills (etc)
 //
-static void GameDoCompleted(void)
+static void DoCompleted(void)
 {
     EPI_ASSERT(current_map);
 
@@ -658,7 +653,7 @@ static void GameDoCompleted(void)
 
                 std::string fn(SaveFilename("current", mapname));
 
-                if (!GameSaveGameToFile(fn, "__HUB_SAVE__"))
+                if (!SaveGameToFile(fn, "__HUB_SAVE__"))
                     FatalError("SAVE-HUB failed with filename: %s\n", fn.c_str());
 
                 if (!current_hub_first)
@@ -688,121 +683,14 @@ static void GameDoCompleted(void)
 
 void DeferredLoadGame(int slot)
 {
-    // Can be called by the startup code or the menu task.
-
-    defer_load_slot = slot;
-    game_action     = kGameActionLoadGame;
+// Stubbed out pending save system rework - Dasho
+    return;
 }
 
-static bool GameLoadGameFromFile(std::string filename, bool is_hub)
+static bool LoadGameFromFile(std::string filename, bool is_hub)
 {
-    if (!SaveFileOpenRead(filename))
-    {
-        LogPrint("LOAD-GAME: cannot open %s\n", filename.c_str());
-        return false;
-    }
-
-    int version;
-
-    if (!SaveFileVerifyHeader(&version) || !SaveFileVerifyContents())
-    {
-        LogPrint("LOAD-GAME: Savegame is corrupt !\n");
-        SaveFileCloseRead();
-        return false;
-    }
-
-    BeginSaveGameLoad(is_hub);
-
-    SaveGlobals *globs = SaveGlobalsLoad();
-
-    if (!globs)
-        FatalError("LOAD-GAME: Bad savegame file (no GLOB)\n");
-
-    // --- pull info from global structure ---
-
-    if (is_hub)
-    {
-        current_map = LookupMap(globs->level);
-        if (!current_map)
-            FatalError("LOAD-HUB: No such map %s !  Check WADS\n", globs->level);
-
-        SetDisplayPlayer(console_player);
-        automap_active = false;
-
-        ResetTics();
-    }
-    else
-    {
-        NewGameParameters params;
-
-        params.map_ = LookupMap(globs->level);
-        if (!params.map_)
-            FatalError("LOAD-GAME: No such map %s !  Check WADS\n", globs->level);
-
-        EPI_ASSERT(params.map_->episode_);
-
-        params.skill_      = (SkillLevel)globs->skill;
-        params.deathmatch_ = (globs->netgame >= 2) ? (globs->netgame - 1) : 0;
-
-        params.random_seed_ = globs->p_random;
-
-        // this player is a dummy one, replaced during actual load
-        params.SinglePlayer(0);
-
-        params.CopyFlags(&globs->flags);
-
-        InitNew(params);
-
-        current_hub_tag   = globs->hub_tag;
-        current_hub_first = globs->hub_first ? LookupMap(globs->hub_first) : nullptr;
-    }
-
-    LoadLevel_Bits();
-
-    // -- Check LEVEL consistency (crc) --
-
-    if (globs->mapsector.count != total_level_sectors || globs->mapsector.crc != map_sectors_crc.GetCRC() ||
-        globs->mapline.count != total_level_lines || globs->mapline.crc != map_lines_crc.GetCRC() ||
-        globs->mapthing.count != total_map_things || globs->mapthing.crc != map_things_crc.GetCRC())
-    {
-        SaveFileCloseRead();
-
-        FatalError("LOAD-GAME: Level data does not match !  Check WADs\n");
-    }
-
-    if (!is_hub)
-    {
-        level_time_elapsed = globs->level_time;
-        exit_time          = globs->exit_time;
-
-        intermission_stats.kills   = globs->total_kills;
-        intermission_stats.items   = globs->total_items;
-        intermission_stats.secrets = globs->total_secrets;
-    }
-
-    if (globs->sky_image) // backwards compat (sky_image added 2003/12/19)
-        sky_image = globs->sky_image;
-
-    // clear line/sector lookup caches
-    DDFBoomClearGeneralizedTypes();
-
-    if (LoadAllSaveChunks() && SaveGetError() == 0)
-    { /* all went well */
-    }
-    else
-    {
-        // something went horribly wrong...
-        // FIXME (oneday) : show message & go back to title screen
-
-        FatalError("Bad Save Game !\n");
-    }
-
-    SaveGlobalsFree(globs);
-
-    FinishSaveGameLoad();
-    SaveFileCloseRead();
-
-    return true; // OK
+// Stubbed out pending save system rework - Dasho
+    return false;
 }
 
 //
@@ -811,26 +699,10 @@ static bool GameLoadGameFromFile(std::string filename, bool is_hub)
 //
 //   ?? nothing else ??
 //
-static void GameDoLoadGame(void)
+static void DoLoadGame(void)
 {
-    const char *dir_name = SaveSlotName(defer_load_slot);
-    LogDebug("GameDoLoadGame : %s\n", dir_name);
-
-    SaveClearSlot("current");
-    SaveCopySlot(dir_name, "current");
-
-    std::string fn(SaveFilename("current", "head"));
-
-    if (!GameLoadGameFromFile(fn))
-    {
-        // !!! FIXME: what to do?
-    }
-
-    HUDStart();
-
-    SetPalette(kPaletteNormal, 0);
-
-    LuaLoadGame();
+// Stubbed out pending save system rework - Dasho
+    return;
 }
 
 //
@@ -841,97 +713,20 @@ static void GameDoLoadGame(void)
 //
 void DeferredSaveGame(int slot, const char *description)
 {
-    defer_save_slot = slot;
-    strcpy(defer_save_description, description);
-
-    game_action = kGameActionSaveGame;
+// Stubbed out pending save system rework - Dasho
+    return;
 }
 
-static bool GameSaveGameToFile(std::string filename, const char *description)
+static bool SaveGameToFile(std::string filename, const char *description)
 {
-    time_t cur_time;
-    char   timebuf[100];
-
-    epi::FileDelete(filename);
-
-    if (!SaveFileOpenWrite(filename, 0xEC))
-    {
-        LogPrint("Unable to create savegame file: %s\n", filename.c_str());
-        return false; /* NOT REACHED */
-    }
-
-    SaveGlobals *globs = SaveGlobalsNew();
-
-    // --- fill in global structure ---
-
-    globs->game      = SaveChunkCopyString(current_map->episode_name_.c_str());
-    globs->level     = SaveChunkCopyString(current_map->name_.c_str());
-    globs->flags     = level_flags;
-    globs->hub_tag   = current_hub_tag;
-    globs->hub_first = current_hub_first ? SaveChunkCopyString(current_hub_first->name_.c_str()) : nullptr;
-
-    globs->skill    = game_skill;
-    globs->netgame  = network_game ? (1 + deathmatch) : 0;
-    globs->p_random = RandomStateRead();
-
-    globs->console_player = console_player; // NB: not used
-
-    globs->level_time = level_time_elapsed;
-    globs->exit_time  = exit_time;
-
-    globs->total_kills   = intermission_stats.kills;
-    globs->total_items   = intermission_stats.items;
-    globs->total_secrets = intermission_stats.secrets;
-
-    globs->sky_image = sky_image;
-
-    time(&cur_time);
-    strftime(timebuf, 99, "%H:%M  %Y-%m-%d", localtime(&cur_time));
-
-    globs->description = SaveChunkCopyString(description);
-    globs->desc_date   = SaveChunkCopyString(timebuf);
-
-    globs->mapsector.count = total_level_sectors;
-    globs->mapsector.crc   = map_sectors_crc.GetCRC();
-    globs->mapline.count   = total_level_lines;
-    globs->mapline.crc     = map_lines_crc.GetCRC();
-    globs->mapthing.count  = total_map_things;
-    globs->mapthing.crc    = map_things_crc.GetCRC();
-
-    BeginSaveGameSave();
-
-    SaveGlobalsSave(globs);
-    SaveAllSaveChunks();
-
-    SaveGlobalsFree(globs);
-
-    FinishSaveGameSave();
-    SaveFileCloseWrite();    
-
-    return true; // OK
+// Stubbed out pending save system rework - Dasho
+    return false;
 }
 
-static void GameDoSaveGame(void)
+static void DoSaveGame(void)
 {
-    LuaSaveGame();
-
-    std::string fn(SaveFilename("current", "head"));
-
-    if (GameSaveGameToFile(fn, defer_save_description))
-    {
-        const char *dir_name = SaveSlotName(defer_save_slot);
-
-        SaveClearSlot(dir_name);
-        SaveCopySlot("current", dir_name);
-
-        ConsolePrint("%s", language["GameSaved"]);
-    }
-    else
-    {
-        // !!! FIXME: what to do?
-    }
-
-    defer_save_description[0] = 0;
+// Stubbed out pending save system rework - Dasho
+    return;
 }
 
 //
@@ -1027,7 +822,7 @@ bool MapExists(const MapDefinition *map)
 // REQUIRED STATE:
 //   (a) defer_params
 //
-static void GameDoNewGame(void)
+static void DoNewGame(void)
 {
     EPI_ASSERT(defer_params);
 
@@ -1142,7 +937,7 @@ void DeferredEndGame(void)
 // REQUIRED STATE:
 //    ?? nothing ??
 //
-static void GameDoEndGame(void)
+static void DoEndGame(void)
 {
     DestroyAllPlayers();
 
