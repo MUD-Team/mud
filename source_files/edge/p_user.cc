@@ -874,11 +874,11 @@ void CreatePlayer(int pnum, bool is_bot)
 
     if (!sfx_jpidle)
     {
-        sfx_jpidle = sfxdefs.GetEffect("JPIDLE");
-        sfx_jpmove = sfxdefs.GetEffect("JPMOVE");
-        sfx_jprise = sfxdefs.GetEffect("JPRISE");
-        sfx_jpdown = sfxdefs.GetEffect("JPDOWN");
-        sfx_jpflow = sfxdefs.GetEffect("JPFLOW");
+        sfx_jpidle = sfxdefs.GetEffect("JPIDLE", false);
+        sfx_jpmove = sfxdefs.GetEffect("JPMOVE", false);
+        sfx_jprise = sfxdefs.GetEffect("JPRISE", false);
+        sfx_jpdown = sfxdefs.GetEffect("JPDOWN", false);
+        sfx_jpflow = sfxdefs.GetEffect("JPFLOW", false);
     }
 }
 

@@ -80,7 +80,6 @@
 #include "s_music.h"
 #include "s_sound.h"
 #include "script/compat/lua_compat.h"
-#include "sv_chunk.h"
 #include "sv_main.h"
 #include "version.h"
 #include "w_files.h"
@@ -107,7 +106,6 @@ static int screenshot_rate;
 
 // For screenies...
 bool m_screenshot_required = false;
-bool need_save_screenshot  = false;
 
 bool custom_MenuMain       = false;
 bool custom_MenuEpisode    = false;
@@ -539,12 +537,6 @@ void EdgeDisplay(void)
         PaletteTicker();
 
         LuaRunHUD();
-
-        if (need_save_screenshot)
-        {
-            CreateSaveScreenshot();
-            need_save_screenshot = false;
-        }
 
         HUDDrawer();
         break;
@@ -1586,7 +1578,6 @@ static void EdgeStartup(void)
     BuildXGLNodes();
     ShowNotice();
 
-    InitializeSaveSystem();
     PrecacheSounds();
     InitializeSprites();
     ProcessTXHINamespaces();

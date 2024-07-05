@@ -67,7 +67,6 @@
 //
 // DEFAULTS
 //
-bool save_screenshot_valid   = false;
 bool show_old_config_warning = false;
 
 extern ConsoleVariable midi_soundfont;
@@ -455,39 +454,6 @@ void TakeScreenshot(bool show_msg)
     }
 
     delete img;
-}
-
-void CreateSaveScreenshot(void)
-{
-    const char *extension = "png";
-
-    std::string temp(epi::StringFormat("%s/%s.%s", "current", "head", extension));
-    std::string filename = epi::PathAppend(save_directory, temp);
-
-    epi::FileDelete(filename);
-
-    ImageData *img = new ImageData(current_screen_width, current_screen_height, 3);
-
-    ReadScreen(0, 0, current_screen_width, current_screen_height, img->PixelAt(0, 0));
-
-    // ReadScreen produces a bottom-up image, need to invert it
-    img->Invert();
-
-    bool result;
-    result = SavePNG(filename, img);
-
-    if (result)
-        LogPrint("Captured to file: %s\n", filename.c_str());
-    else
-        LogPrint("Error saving file: %s\n", filename.c_str());
-
-    delete img;
-
-    epi::ReplaceExtension(filename, ".replace");
-
-    epi::File *replace_touch = epi::FileOpen(filename, epi::kFileAccessWrite);
-
-    delete replace_touch;
 }
 
 void WarningOrError(const char *error, ...)

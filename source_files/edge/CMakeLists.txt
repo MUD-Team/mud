@@ -81,15 +81,7 @@ set (EDGE_SOURCE_FILES
   s_fluid.cc
   s_wav.cc
   s_flac.cc
-  sv_chunk.cc
-  sv_glob.cc
-  sv_level.cc
-  sv_load.cc
   sv_main.cc
-  sv_misc.cc
-  sv_mobj.cc
-  sv_play.cc
-  sv_save.cc
   snd_data.cc
   snd_gather.cc
   snd_types.cc
