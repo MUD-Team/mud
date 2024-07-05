@@ -75,12 +75,10 @@ set (EDGE_SOURCE_FILES
   s_blit.cc
   s_cache.cc
   s_sound.cc
-  s_mp3.cc
   s_music.cc
   s_ogg.cc
   s_fluid.cc
   s_wav.cc
-  s_flac.cc
   sv_main.cc
   snd_data.cc
   snd_gather.cc

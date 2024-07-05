@@ -84,7 +84,7 @@ utf8proc library - Copyright (c) 2014-2021 Steven G. Johnson, Jiahao Chen, Tony 
 Public Domain
 ===========================================================================================
 
-dr_wav, dr_mp3, and dr_flac libraries - David Reid
+dr_wav library - David Reid
 
 Fraction.hpp - Bisqwit
 

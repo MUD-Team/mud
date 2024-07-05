@@ -26,10 +26,7 @@ enum SoundFormat
 {
     kSoundUnknown = 0,
     kSoundWAV,
-    kSoundFLAC,
     kSoundOGG,
-    kSoundMP3,
-    kSoundMUS,
     kSoundMIDI,
     kSoundDoom
 };

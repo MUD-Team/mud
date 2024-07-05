@@ -40,7 +40,6 @@
 #include "m_random.h"
 #include "p_mobj.h"
 #include "r_defs.h"
-#include "s_mp3.h"
 #include "s_ogg.h"
 #include "s_sound.h"
 #include "s_wav.h"
@@ -100,11 +99,6 @@ static bool LoadWav(SoundData *buf, uint8_t *lump, int length)
 static bool LoadOGG(SoundData *buf, const uint8_t *lump, int length)
 {
     return LoadOGGSound(buf, lump, length);
-}
-
-static bool LoadMP3(SoundData *buf, const uint8_t *lump, int length)
-{
-    return LoadMP3Sound(buf, lump, length);
 }
 
 //----------------------------------------------------------------------------
@@ -196,10 +190,6 @@ static bool DoCacheLoad(SoundEffectDefinition *def, SoundData *buf)
 
     case kSoundOGG:
         OK = LoadOGG(buf, data, length);
-        break;
-
-    case kSoundMP3:
-        OK = LoadMP3(buf, data, length);
         break;
 
     case kSoundDoom:

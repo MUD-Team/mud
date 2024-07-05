@@ -31,46 +31,14 @@ SoundFormat DetectSoundFormat(uint8_t *data, int song_len)
         return kSoundWAV;
     }
 
-    if (data[0] == 'f' && data[1] == 'L' && data[2] == 'a' && data[3] == 'C')
-    {
-        return kSoundFLAC;
-    }
-
     if (data[0] == 'O' && data[1] == 'g' && data[2] == 'g' && data[3] == 'S')
     {
         return kSoundOGG;
     }
 
-    if (data[0] == 'M' && data[1] == 'U' && data[2] == 'S')
-    {
-        return kSoundMUS;
-    }
-
     if (data[0] == 'M' && data[1] == 'T' && data[2] == 'h' && data[3] == 'd')
     {
         return kSoundMIDI;
-    }
-
-    // GMF MIDI
-    if (data[0] == 'G' && data[1] == 'M' && data[2] == 'F' && data[3] == '\x1')
-    {
-        return kSoundMIDI;
-    }
-
-    // Electronic Arts MIDI
-    if (song_len > data[0] && data[0] >= 0x5D)
-    {
-        int offset = data[0] - 0x10;
-        if (data[offset] == 'r' && data[offset + 1] == 's' && data[offset + 2] == 'x' && data[offset + 3] == 'x' &&
-            data[offset + 4] == '}' && data[offset + 5] == 'u')
-            return kSoundMIDI;
-    }
-
-    // Moving on to more specialized or less reliable detections
-
-    if ((data[0] == 'I' && data[1] == 'D' && data[2] == '3') || (data[0] == 0xFF && ((data[1] >> 4 & 0xF) == 0xF)))
-    {
-        return kSoundMP3;
     }
 
     if (data[0] == 0x3)
@@ -90,20 +58,10 @@ SoundFormat SoundFilenameToFormat(std::string_view filename)
     if (ext == ".wav" || ext == ".wave")
         return kSoundWAV;
 
-    if (ext == ".flac")
-        return kSoundFLAC;
-
     if (ext == ".ogg")
         return kSoundOGG;
 
-    if (ext == ".mp3")
-        return kSoundMP3;
-
-    // Test MUS vs EA-MIDI MUS ?
-    if (ext == ".mus")
-        return kSoundMUS;
-
-    if (ext == ".mid" || ext == ".midi" || ext == ".rmi" || ext == ".rmid")
+    if (ext == ".mid" || ext == ".midi")
         return kSoundMIDI;
 
     // Not sure if these will ever be encountered in the wild, but according to

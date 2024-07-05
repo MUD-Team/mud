@@ -30,10 +30,7 @@ enum DDFMusicType
 {
     kDDFMusicUnknown = 0,
     kDDFMusicMIDI,
-    kDDFMusicMUS,
     kDDFMusicOGG,
-    kDDFMusicMP3,
-    kDDFMusicFLAC,
     kTotalDDFMusicTypes
 };
 

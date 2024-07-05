@@ -30,9 +30,7 @@
 #include "epi_str_util.h"
 #include "i_system.h"
 #include "m_misc.h"
-#include "s_flac.h"
 #include "s_fluid.h"
-#include "s_mp3.h"
 #include "s_ogg.h"
 #include "s_sound.h"
 #include "snd_types.h"
@@ -162,19 +160,7 @@ void ChangeMusic(int entry_number, bool loop)
         music_player = PlayOGGMusic(data, length, loop);
         break;
 
-    case kSoundMP3:
-        delete F;
-        music_player = PlayMP3Music(data, length, loop);
-        break;
-
-    case kSoundFLAC:
-        delete F;
-        music_player = PlayFLACMusic(data, length, loop);
-        break;
-
     case kSoundMIDI:
-    case kSoundMUS:
-    case kSoundWAV: // RIFF MIDI has the same header as WAV
         delete F;
         music_player = PlayFluidMusic(data, length, loop);
         break;
