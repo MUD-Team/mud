@@ -62,35 +62,6 @@ static void LoadSilence(SoundData *buf)
     memset(buf->data_left_, 0, length * sizeof(int16_t));
 }
 
-static bool LoadDoom(SoundData *buf, const uint8_t *lump, int length)
-{
-    buf->frequency_ = lump[2] + (lump[3] << 8);
-
-    if (buf->frequency_ < 8000 || buf->frequency_ > 48000)
-        LogWarning("Sound Load: weird frequency: %d Hz\n", buf->frequency_);
-
-    if (buf->frequency_ < 4000)
-        buf->frequency_ = 4000;
-
-    length -= 8;
-
-    if (length <= 0)
-        return false;
-
-    buf->Allocate(length, kMixMono);
-
-    // convert to signed 16-bit format
-    const uint8_t *src   = lump + 8;
-    const uint8_t *s_end = src + length;
-
-    int16_t *dest = buf->data_left_;
-
-    for (; src < s_end; src++)
-        *dest++ = (*src ^ 0x80) << 8;
-
-    return true;
-}
-
 static bool LoadWav(SoundData *buf, uint8_t *lump, int length)
 {
     return LoadWAVSound(buf, lump, length);
@@ -190,10 +161,6 @@ static bool DoCacheLoad(SoundEffectDefinition *def, SoundData *buf)
 
     case kSoundOGG:
         OK = LoadOGG(buf, data, length);
-        break;
-
-    case kSoundDoom:
-        OK = LoadDoom(buf, data, length);
         break;
 
     default:

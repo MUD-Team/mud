@@ -41,11 +41,6 @@ SoundFormat DetectSoundFormat(uint8_t *data, int song_len)
         return kSoundMIDI;
     }
 
-    if (data[0] == 0x3)
-    {
-        return kSoundDoom;
-    }
-
     return kSoundUnknown;
 }
 
@@ -63,11 +58,6 @@ SoundFormat SoundFilenameToFormat(std::string_view filename)
 
     if (ext == ".mid" || ext == ".midi")
         return kSoundMIDI;
-
-    // Not sure if these will ever be encountered in the wild, but according to
-    // the VGMPF Wiki they are valid DMX file extensions
-    if (ext == ".lmp" || ext == ".dsp" || ext == ".pcs" || ext == ".gsp" || ext == ".gsw")
-        return kSoundDoom;
 
     return kSoundUnknown;
 }

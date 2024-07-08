@@ -741,8 +741,7 @@ void ProcessPackSubstitutions(PackFile *pack, int pack_index)
 
             epi::StringLowerASCII(ext);
 
-            if (ext == ".png" || ext == ".tga" || ext == ".jpg" || ext == ".jpeg" ||
-                ext == ".lmp") // Note: .lmp is assumed to be Doom-format image
+            if (ext == ".png" || ext == ".lmp") // Note: .lmp is assumed to be Doom-format image
             {
                 std::string texname;
 
@@ -880,8 +879,7 @@ void ProcessHiresPackSubstitutions(PackFile *pack, int pack_index)
 
         epi::StringLowerASCII(ext);
 
-        if (ext == ".png" || ext == ".tga" || ext == ".jpg" || ext == ".jpeg" ||
-            ext == ".lmp") // Note: .lmp is assumed to be Doom-format image
+        if (ext == ".png" || ext == ".lmp") // Note: .lmp is assumed to be Doom-format image
         {
             std::string texname;
 
@@ -1134,8 +1132,7 @@ std::vector<std::string> GetPackSpriteList(PackFile *pack)
 
             epi::StringLowerASCII(ext);
 
-            if (ext == ".png" || ext == ".tga" || ext == ".jpg" || ext == ".jpeg" ||
-                ext == ".lmp") // Note: .lmp is assumed to be Doom-format image
+            if (ext == ".png" || ext == ".lmp") // Note: .lmp is assumed to be Doom-format image
             {
                 std::string texname;
                 epi::TextureNameFromFilename(texname, stem);

@@ -259,15 +259,7 @@ Image *AddPackImageSmart(const char *name, ImageSource type, const char *packfil
     int  header_len = HMM_MIN((int)sizeof(header), packfile_len);
     auto fmt        = DetectImageFormat(header, header_len, packfile_len);
 
-    if (fmt == kImageOther)
-    {
-        // close it
-        delete f;
-
-        LogWarning("Unsupported image format in '%s'\n", packfile_name);
-        return nullptr;
-    }
-    else if (fmt == kImageUnknown)
+    if (fmt == kImageUnknown)
     {
         // close it
         delete f;
@@ -319,7 +311,7 @@ Image *AddPackImageSmart(const char *name, ImageSource type, const char *packfil
 
         is_patch = true;
     }
-    else // PNG, TGA or JPEG
+    else // PNG
     {
         if (!GetImageInfo(f, &width, &height, &bpp) || width <= 0 || height <= 0)
         {
@@ -395,15 +387,7 @@ static Image *AddImage_Smart(const char *name, ImageSource type, int lump, std::
     int  header_len = HMM_MIN((int)sizeof(header), lump_len);
     auto fmt        = DetectImageFormat(header, header_len, lump_len);
 
-    if (fmt == kImageOther)
-    {
-        // close it
-        delete f;
-
-        LogWarning("Unsupported image format in '%s' lump\n", GetLumpNameFromIndex(lump));
-        return nullptr;
-    }
-    else if (fmt == kImageUnknown)
+    if (fmt == kImageUnknown)
     {
         // close it
         delete f;
@@ -455,7 +439,7 @@ static Image *AddImage_Smart(const char *name, ImageSource type, int lump, std::
 
         is_patch = true;
     }
-    else // PNG, TGA or JPEG
+    else // PNG
     {
         if (!GetImageInfo(f, &width, &height, &bpp) || width <= 0 || height <= 0)
         {
@@ -694,8 +678,6 @@ static Image *AddImageUser(ImageDefinition *def)
         int file_size = f->GetLength();
 
         // determine format and size information.
-        // for FILE and PACK get format from filename, but note that when
-        // it is wrong (like a PNG called "foo.jpeg"), it can still work.
         ImageFormat fmt = kImageUnknown;
 
         if (def->type_ == kImageDataLump)
@@ -723,13 +705,6 @@ static Image *AddImageUser(ImageDefinition *def)
                 return AddImage_DOOM(def, true);
 
             LogWarning("Unknown image format in: %s\n", filename);
-            return nullptr;
-        }
-
-        if (fmt == kImageOther)
-        {
-            delete f;
-            LogWarning("Unsupported image format in: %s\n", filename);
             return nullptr;
         }
 

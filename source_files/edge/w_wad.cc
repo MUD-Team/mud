@@ -1653,7 +1653,7 @@ bool DisableStockSkybox(const char *ActualSky)
             TurnOffSkybox = true;                             // turn off or not? hmmm...
             return TurnOffSkybox;
         }
-        else                                                  // could be a png or jpg i.e. TX_ or HI_
+        else                                                  // could be a png i.e. TX_ or HI_
         {
             lumpnum = CheckLumpNumberForName(tempImage->name_.c_str());
             // lumpnum = tempImage->source.graphic.lump;

@@ -243,10 +243,7 @@ static void ImageParseLump(const char *spec)
         // store the lump name
         dynamic_image->info_ = (colon + 1);
 
-        if (DDFCompareName(keyword, "PNG") == 0 || DDFCompareName(keyword, "TGA") == 0 ||
-            DDFCompareName(keyword, "JPG") == 0 || DDFCompareName(keyword, "JPEG") == 0 ||
-            DDFCompareName(keyword, "EXT") == 0) // 2.x used this for auto-detection of regular images, but
-                                                  // we do this regardless of the extension
+        if (DDFCompareName(keyword, "PNG") == 0)
         {
             dynamic_image->format_ = kLumpImageFormatStandard;
         }
@@ -256,7 +253,7 @@ static void ImageParseLump(const char *spec)
         }
         else
         {
-            DDFError("Unknown image format: %s (use PNG,JPEG,TGA or DOOM)\n", keyword);
+            DDFError("Unknown image format: %s (use PNG or DOOM)\n", keyword);
         }
     }
 }

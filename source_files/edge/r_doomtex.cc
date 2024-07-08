@@ -150,7 +150,7 @@ static ImageData *ReadFlatAsEpiBlock(Image *rim)
     int         lump          = rim->source_.graphic.lump;
     const char *packfile_name = rim->source_.graphic.packfile_name;
 
-    // handle PNG/JPEG/TGA images
+    // handle PNG
     if (!rim->source_.graphic.is_raw)
     {
         epi::File *f;
@@ -320,7 +320,7 @@ static ImageData *ReadPatchAsEpiBlock(Image *rim)
     int         lump          = rim->source_.graphic.lump;
     const char *packfile_name = rim->source_.graphic.packfile_name;
 
-    // handle PNG/JPEG/TGA images
+    // handle PNG
     if (!rim->source_.graphic.is_patch)
     {
         epi::File *f;

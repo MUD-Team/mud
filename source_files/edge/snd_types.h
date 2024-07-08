@@ -27,8 +27,7 @@ enum SoundFormat
     kSoundUnknown = 0,
     kSoundWAV,
     kSoundOGG,
-    kSoundMIDI,
-    kSoundDoom
+    kSoundMIDI
 };
 
 // determine sound format from the file.

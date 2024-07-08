@@ -32,13 +32,7 @@ EPI_XX(_)
 
 // images
 EPI_XX(PNG)
-EPI_XX(TGA)
-EPI_XX(JPG)
-EPI_XX(JPEG)
 EPI_XX(LMP)
-EPI_XX(GIF)
-EPI_XX(BMP)
-EPI_XX(DDS)
 
 // instrument banks
 EPI_XX(SF2)
@@ -60,10 +54,6 @@ EPI_XX(MID)
 EPI_XX(MIDI)
 EPI_XX(RMI)
 EPI_XX(RMID)
-EPI_XX(DSP)
-EPI_XX(PCS)
-EPI_XX(GSP)
-EPI_XX(GSW)
 
 //------------ UDMF ---------------------------
 

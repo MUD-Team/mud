@@ -63,7 +63,7 @@ enum ImageTransparencyFix
 
 enum LumpImageFormat
 {
-    kLumpImageFormatStandard = 0, // something standard, e.g. PNG, TGA or JPEG
+    kLumpImageFormatStandard = 0, // something standard, e.g. PNG
     kLumpImageFormatDoom     = 1, // the DOOM "patch" format (in a wad lump)
 };
 
