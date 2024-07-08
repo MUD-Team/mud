@@ -54,8 +54,7 @@ void RenderImage(float x, float y, float w, float h, const Image *image, float t
 
     sg_color sgcol = sg_white;
 
-    GLuint tex_id = ImageCache(image, true, (textmap && (textmap->special_ & kColorSpecialWhiten)) ? nullptr : palremap,
-                               (textmap && (textmap->special_ & kColorSpecialWhiten)) ? true : false);
+    GLuint tex_id = ImageCache(image, true, (textmap && (textmap->special_ & kColorSpecialWhiten)) ? true : false);
 
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, tex_id);

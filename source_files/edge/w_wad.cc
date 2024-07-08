@@ -138,9 +138,6 @@ static std::vector<LumpInfo> lump_info;
 
 static std::vector<int> sorted_lumps;
 
-// the first datafile which contains a PLAYPAL lump
-static int palette_datafile = -1;
-
 static bool within_colmap_list;
 static bool within_xgl_list;
 
@@ -272,13 +269,7 @@ static void AddLump(DataFile *df, const char *raw_name, int pos, int size, int f
 
     WadFile *wad = df->wad_;
 
-    if (strcmp(info.name, "PLAYPAL") == 0)
-    {
-        if (palette_datafile < 0)
-            palette_datafile = file_index;
-        return;
-    }
-    else if (strcmp(info.name, "LUAHUDS") == 0)
+    if (strcmp(info.name, "LUAHUDS") == 0)
     {
         lump_p->kind = kLumpDDF;
         if (wad != nullptr)
@@ -705,28 +696,6 @@ epi::File *LoadLumpAsFile(int lump)
 epi::File *LoadLumpAsFile(const char *name)
 {
     return LoadLumpAsFile(GetLumpNumberForName(name));
-}
-
-//
-// GetPaletteForLump
-//
-// Returns the palette lump that should be used for the given lump
-// (presumably an image), otherwise -1 (indicating that the global
-// palette should be used).
-//
-// NOTE: when the same WAD as the lump does not contain a palette,
-// there are two possibilities: search backwards for the "closest"
-// palette, or simply return -1.  Neither one is ideal, though I tend
-// to think that searching backwards is more intuitive.
-//
-// NOTE 2: the palette_datafile stuff is there so we always return -1
-// for the "GLOBAL" palette.
-//
-int GetPaletteForLump(int lump)
-{
-    EPI_ASSERT(IsLumpIndexValid(lump));
-
-    return CheckLumpNumberForName("PLAYPAL");
 }
 
 static int QuickFindLumpMap(const char *buf)

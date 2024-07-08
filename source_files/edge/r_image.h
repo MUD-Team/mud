@@ -223,7 +223,7 @@ void         AnimateImageSet(const Image **images, int number, int speed);
 void CreateFallbackFlat(void);
 void CreateFallbackTexture(void);
 
-GLuint ImageCache(const Image *image, bool anim = true, const Colormap *trans = nullptr, bool do_whiten = false);
+GLuint ImageCache(const Image *image, bool anim = true, bool do_whiten = false);
 void   ImagePrecache(const Image *image);
 
 // this only needed during initialisation -- r_things.cpp

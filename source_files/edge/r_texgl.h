@@ -33,10 +33,6 @@ enum TextureUploadFlag
 
 GLuint UploadTexture(ImageData *img, int flags = kUploadNone, int max_pix = (1 << 30));
 
-ImageData *RGBFromPalettised(ImageData *src, const uint8_t *palette, int opacity);
-
-void PaletteRemapRGBA(ImageData *img, const uint8_t *new_pal, const uint8_t *old_pal);
-
 int DetermineOpacity(ImageData *img, bool *is_empty_);
 
 void BlackenClearAreas(ImageData *img);

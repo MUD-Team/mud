@@ -219,7 +219,16 @@ void RendererPaletteEffect(Player *player)
     }
     else
     {
-        PalettedColourToRGB(playpal_black, rgb_data, player->last_damage_colour_, player->damage_count_);
+        RGBAColor last_damage_colour = player->last_damage_colour_;
+        float damageAmount = (float)player->damage_count_;
+
+        float r = (float)epi::GetRGBARed(last_damage_colour) / 255.0;
+        float g = (float)epi::GetRGBAGreen(last_damage_colour) / 255.0;
+        float b = (float)epi::GetRGBABlue(last_damage_colour) / 255.0;
+
+        rgb_data[0] = (uint8_t)HMM_MAX(0, HMM_MIN(255, r * damageAmount * 2.5));
+        rgb_data[1] = (uint8_t)HMM_MAX(0, HMM_MIN(255, g * damageAmount * 2.5));
+        rgb_data[2] = (uint8_t)HMM_MAX(0, HMM_MIN(255, b * damageAmount * 2.5));
 
         int rgb_max = HMM_MAX(rgb_data[0], HMM_MAX(rgb_data[1], rgb_data[2]));
 

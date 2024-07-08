@@ -91,9 +91,6 @@ struct CachedImage
     // parent image
     Image *parent;
 
-    // colormap used for translated image, normally nullptr
-    const Colormap *translation_map;
-
     // general hue of image (skewed towards pure colors)
     RGBAColor hue;
 
@@ -614,7 +611,7 @@ static int IM_PixelLimit(Image *rim)
         return (1 << 22);
 }
 
-static GLuint LoadImageOGL(Image *rim, const Colormap *trans, bool do_whiten)
+static GLuint LoadImageOGL(Image *rim, bool do_whiten)
 {
     bool clamp  = IM_ShouldClamp(rim);
     bool mip    = IM_ShouldMipmap(rim);
@@ -638,47 +635,15 @@ static GLuint LoadImageOGL(Image *rim, const Colormap *trans, bool do_whiten)
             smooth = false;
     }
 
-    const uint8_t *what_palette    = (const uint8_t *)&playpal_data[0];
-
-    static uint8_t trans_pal[256 * 3];
-
-    if (trans != nullptr)
-    {
-        // Note: we don't care about source_palette here. It's likely that
-        // the translation table itself would not match the other palette,
-        // and so we would still end up with messed up colours.
-
-        TranslatePalette(trans_pal, what_palette, trans);
-        what_palette = trans_pal;
-    }
-
     ImageData *tmp_img = ReadAsEpiBlock(rim);
 
     if (rim->opacity_ == kOpacityUnknown)
         rim->opacity_ = DetermineOpacity(tmp_img, &rim->is_empty_);
 
-    if (tmp_img->depth_ == 1)
+    if (rim->is_font_)
     {
-        ImageData *rgb_img = RGBFromPalettised(tmp_img, what_palette, rim->opacity_);
-
-        if (rim->is_font_)
-        {
-            rgb_img->RemoveBackground();
-            rim->opacity_ = DetermineOpacity(tmp_img, &rim->is_empty_);
-        }
-
-        delete tmp_img;
-        tmp_img = rgb_img;
-    }
-    else if (tmp_img->depth_ >= 3)
-    {
-        if (rim->is_font_)
-        {
-            tmp_img->RemoveBackground();
-            rim->opacity_ = DetermineOpacity(tmp_img, &rim->is_empty_);
-        }
-        if (trans != nullptr)
-            PaletteRemapRGBA(tmp_img, what_palette, (const uint8_t *)&playpal_data[0]);
+        tmp_img->RemoveBackground();
+        rim->opacity_ = DetermineOpacity(tmp_img, &rim->is_empty_);
     }
 
     if (rim->hsv_rotation_ || rim->hsv_saturation_ > -1 || rim->hsv_value_)
@@ -901,7 +866,7 @@ const Image *ImageForFogWall(RGBAColor fog_color)
 //  IMAGE USAGE
 //
 
-static CachedImage *ImageCacheOGL(Image *rim, const Colormap *trans, bool do_whiten)
+static CachedImage *ImageCacheOGL(Image *rim, bool do_whiten)
 {
     // check if image + translation is already cached
 
@@ -922,17 +887,6 @@ static CachedImage *ImageCacheOGL(Image *rim, const Colormap *trans, bool do_whi
         if (do_whiten && rc->is_whitened)
             break;
 
-        if (rc->translation_map == trans)
-        {
-            if (do_whiten)
-            {
-                if (rc->is_whitened)
-                    break;
-            }
-            else if (!rc->is_whitened)
-                break;
-        }
-
         rc = nullptr;
     }
 
@@ -942,7 +896,6 @@ static CachedImage *ImageCacheOGL(Image *rim, const Colormap *trans, bool do_whi
         rc = new CachedImage;
 
         rc->parent          = rim;
-        rc->translation_map = trans;
         rc->hue             = kRGBANoValue;
         rc->texture_id      = 0;
         rc->is_whitened     = do_whiten ? true : false;
@@ -960,7 +913,7 @@ static CachedImage *ImageCacheOGL(Image *rim, const Colormap *trans, bool do_whi
     if (rc->texture_id == 0)
     {
         // load image into cache
-        rc->texture_id = LoadImageOGL(rim, trans, do_whiten);
+        rc->texture_id = LoadImageOGL(rim, do_whiten);
     }
 
     return rc;
@@ -970,7 +923,7 @@ static CachedImage *ImageCacheOGL(Image *rim, const Colormap *trans, bool do_whi
 // The top-level routine for caching in an image.  Mainly just a
 // switch to more specialised routines.
 //
-GLuint ImageCache(const Image *image, bool anim, const Colormap *trans, bool do_whiten)
+GLuint ImageCache(const Image *image, bool anim, bool do_whiten)
 {
     // Intentional Const Override
     Image *rim = (Image *)image;
@@ -982,7 +935,7 @@ GLuint ImageCache(const Image *image, bool anim, const Colormap *trans, bool do_
     if (rim->grayscale_)
         do_whiten = true;
 
-    CachedImage *rc = ImageCacheOGL(rim, trans, do_whiten);
+    CachedImage *rc = ImageCacheOGL(rim, do_whiten);
 
     EPI_ASSERT(rc->parent);
 

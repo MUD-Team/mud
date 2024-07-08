@@ -262,9 +262,6 @@ void SoftInitializeResolution(void)
     else
         current_font_size = 2;
 
-    // -ES- 1999/08/29 Fixes the garbage palettes, and the blank 16-bit console
-    SetPalette(kPaletteNormal, 0);
-
     // re-initialise various bits of GL state
     RendererSoftInit();
 

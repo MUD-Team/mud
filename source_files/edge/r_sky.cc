@@ -853,21 +853,12 @@ int UpdateSkyboxTextures(void)
         ImageLookup(UserSkyFaceName(sky_image->name_.c_str(), kSkyboxNorth), kImageNamespaceTexture, kImageLookupNull);
 
     // Set colors for culling fog and faux skybox caps - Dasho
-    const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
     ImageData *tmp_img_data = ReadAsEpiBlock((Image *)sky_image);
-    if (tmp_img_data->depth_ == 1)
-    {
-        ImageData *rgb_img_data = RGBFromPalettised(tmp_img_data, what_palette, sky_image->opacity_);
-        delete tmp_img_data;
-        tmp_img_data = rgb_img_data;
-    }
     culling_fog_color =
         sg_make_color_1i(tmp_img_data->AverageColor(0, sky_image->actual_width_, 0, sky_image->actual_height_ / 2));
     sky_cap_color = sg_make_color_1i(tmp_img_data->AverageColor(
         0, sky_image->actual_width_, sky_image->actual_height_ * 3 / 4, sky_image->actual_height_));
     delete tmp_img_data;
-    if (what_palette != (const uint8_t *)&playpal_data[0])
-        delete[] what_palette;
 
     if (info->face[kSkyboxNorth])
     {

@@ -50,121 +50,7 @@
 
 extern ConsoleVariable force_flat_lighting;
 
-// -AJA- 1999/06/30: added this
-uint8_t playpal_data[14][256][3];
-
-// -AJA- 1999/09/18: fixes problem with black text etc.
-static bool loaded_playpal = false;
-
-// -AJA- 1999/07/03: moved these here from st_stuff.c:
-// Palette indices.
-// For bonus gold-shifts
-
-static constexpr uint8_t kBonusPaletteIndex  = 9;
-static constexpr uint8_t kTotalBonusPalettes = 4;
-
-// Radiation suit, green shift.
-static constexpr uint8_t kRadiationPaletteIndex = 13;
-
 EDGE_DEFINE_CONSOLE_VARIABLE(sector_brightness_correction, "5", kConsoleVariableFlagArchive)
-
-// colour indices from palette
-int playpal_black, playpal_white, playpal_gray;
-
-//
-// Find the closest matching colour in the palette.
-//
-static int FindBestRGBMatch(int r, int g, int b)
-{
-    int i;
-
-    int best      = 0;
-    int best_dist = 1 << 30;
-
-    for (i = 0; i < 256; i++)
-    {
-        int d_r = HMM_ABS(r - playpal_data[0][i][0]);
-        int d_g = HMM_ABS(g - playpal_data[0][i][1]);
-        int d_b = HMM_ABS(b - playpal_data[0][i][2]);
-
-        int dist = d_r * d_r + d_g * d_g + d_b * d_b;
-
-        if (dist == 0)
-            return i;
-
-        if (dist < best_dist)
-        {
-            best      = i;
-            best_dist = dist;
-        }
-    }
-
-    return best;
-}
-
-void InitializePalette(void)
-{
-    int t, i;
-
-    int            pal_length = 0;
-    const uint8_t *pal        = (const uint8_t *)OpenPackOrLumpInMemory("PLAYPAL", {".pal"}, &pal_length);
-
-    if (!pal)
-        FatalError("InitializePalette: Error opening PLAYPAL!\n");
-
-    // read in palette colours
-    for (t = 0; t < 14; t++)
-    {
-        for (i = 0; i < 256; i++)
-        {
-            playpal_data[t][i][0] = pal[(t * 256 + i) * 3 + 0];
-            playpal_data[t][i][1] = pal[(t * 256 + i) * 3 + 1];
-            playpal_data[t][i][2] = pal[(t * 256 + i) * 3 + 2];
-        }
-    }
-
-    delete[] pal;
-    loaded_playpal = true;
-
-    // lookup useful colours
-    playpal_black = FindBestRGBMatch(0, 0, 0);
-    playpal_white = FindBestRGBMatch(255, 255, 255);
-    playpal_gray  = FindBestRGBMatch(239, 239, 239);
-
-    LogPrint("Loaded global palette.\n");
-
-    LogDebug("Black:%d White:%d Gray:%d\n", playpal_black, playpal_white, playpal_gray);
-}
-
-static int cur_palette = -1;
-
-void SetPalette(int type, float amount)
-{
-    int palette = 0;
-
-    // -AJA- 1999/09/17: fixes problems with black text etc.
-    if (!loaded_playpal)
-        return;
-
-    if (amount >= 0.95f)
-        amount = 0.95f;
-
-    switch (type)
-    {
-    case kPaletteBonus:
-        palette = (int)(kBonusPaletteIndex + amount * kTotalBonusPalettes);
-        break;
-
-    case kPaletteSuit:
-        palette = kRadiationPaletteIndex;
-        break;
-    }
-
-    if (palette == cur_palette)
-        return;
-
-    cur_palette = palette;
-}
 
 //
 // Computes the right "colourmap" (more precisely, coltable) to put into
@@ -211,128 +97,6 @@ static void LoadColourmap(const Colormap *colm)
     delete[] data;
 }
 
-static const uint8_t *GetTranslationTable(const Colormap *colmap)
-{
-    // Do we need to load or recompute this colourmap ?
-
-    if (colmap->cache_.data == nullptr)
-        LoadColourmap(colmap);
-
-    return (const uint8_t *)colmap->cache_.data;
-}
-
-void TranslatePalette(uint8_t *new_pal, const uint8_t *old_pal, const Colormap *trans)
-{
-    // is the colormap just using GL_COLOUR?
-    if (trans->length_ == 0)
-    {
-        int r = epi::GetRGBARed(trans->gl_color_);
-        int g = epi::GetRGBAGreen(trans->gl_color_);
-        int b = epi::GetRGBABlue(trans->gl_color_);
-
-        for (int j = 0; j < 256; j++)
-        {
-            new_pal[j * 3 + 0] = old_pal[j * 3 + 0] * (r + 1) / 256;
-            new_pal[j * 3 + 1] = old_pal[j * 3 + 1] * (g + 1) / 256;
-            new_pal[j * 3 + 2] = old_pal[j * 3 + 2] * (b + 1) / 256;
-        }
-    }
-    else
-    {
-        // do the actual translation
-        const uint8_t *trans_table = GetTranslationTable(trans);
-
-        for (int j = 0; j < 256; j++)
-        {
-            int k = trans_table[j];
-
-            new_pal[j * 3 + 0] = old_pal[k * 3 + 0];
-            new_pal[j * 3 + 1] = old_pal[k * 3 + 1];
-            new_pal[j * 3 + 2] = old_pal[k * 3 + 2];
-        }
-    }
-}
-
-static int AnalyseColourmap(const uint8_t *table, int alpha, int *r, int *g, int *b)
-{
-    /* analyse whole colourmap */
-    int r_tot = 0;
-    int g_tot = 0;
-    int b_tot = 0;
-    int total = 0;
-
-    for (int j = 0; j < 256; j++)
-    {
-        int r0 = playpal_data[0][j][0];
-        int g0 = playpal_data[0][j][1];
-        int b0 = playpal_data[0][j][2];
-
-        // give the grey-scales more importance
-        int weight = (r0 == g0 && g0 == b0) ? 3 : 1;
-
-        r0 = (255 * alpha + r0 * (255 - alpha)) / 255;
-        g0 = (255 * alpha + g0 * (255 - alpha)) / 255;
-        b0 = (255 * alpha + b0 * (255 - alpha)) / 255;
-
-        int r1 = playpal_data[0][table[j]][0];
-        int g1 = playpal_data[0][table[j]][1];
-        int b1 = playpal_data[0][table[j]][2];
-
-        int r_div = 255 * HMM_MAX(4, r1) / HMM_MAX(4, r0);
-        int g_div = 255 * HMM_MAX(4, g1) / HMM_MAX(4, g0);
-        int b_div = 255 * HMM_MAX(4, b1) / HMM_MAX(4, b0);
-
-        r_div = HMM_MAX(4, HMM_MIN(4096, r_div));
-        g_div = HMM_MAX(4, HMM_MIN(4096, g_div));
-        b_div = HMM_MAX(4, HMM_MIN(4096, b_div));
-
-        r_tot += r_div * weight;
-        g_tot += g_div * weight;
-        b_tot += b_div * weight;
-        total += weight;
-    }
-
-    (*r) = r_tot / total;
-    (*g) = g_tot / total;
-    (*b) = b_tot / total;
-
-    // scale down when too large to fit
-    int ity = HMM_MAX(*r, HMM_MAX(*g, *b));
-
-    if (ity > 255)
-    {
-        (*r) = (*r) * 255 / ity;
-        (*g) = (*g) * 255 / ity;
-        (*b) = (*b) * 255 / ity;
-    }
-
-    // compute distance score
-    total = 0;
-
-    for (int k = 0; k < 256; k++)
-    {
-        int r0 = playpal_data[0][k][0];
-        int g0 = playpal_data[0][k][1];
-        int b0 = playpal_data[0][k][2];
-
-        // on-screen colour: c' = c * M * (1 - A) + M * A
-        int sr = (r0 * (*r) / 255 * (255 - alpha) + (*r) * alpha) / 255;
-        int sg = (g0 * (*g) / 255 * (255 - alpha) + (*g) * alpha) / 255;
-        int sb = (b0 * (*b) / 255 * (255 - alpha) + (*b) * alpha) / 255;
-
-        int r1 = playpal_data[0][table[k]][0];
-        int g1 = playpal_data[0][table[k]][1];
-        int b1 = playpal_data[0][table[k]][2];
-
-        // FIXME: use weighting (more for greyscale)
-        total += (sr - r1) * (sr - r1);
-        total += (sg - g1) * (sg - g1);
-        total += (sb - b1) * (sb - b1);
-    }
-
-    return total / 256;
-}
-
 void TransformColourmap(Colormap *colmap)
 {
     const uint8_t *table = colmap->cache_.data;
@@ -348,37 +112,6 @@ void TransformColourmap(Colormap *colmap)
     {
         if (colmap->gl_color_ != kRGBANoValue)
             colmap->font_colour_ = colmap->gl_color_;
-        else
-        {
-            EPI_ASSERT(table);
-
-            // for fonts, we only care about the GRAY colour
-            int r = playpal_data[0][table[playpal_gray]][0] * 255 / 239;
-            int g = playpal_data[0][table[playpal_gray]][1] * 255 / 239;
-            int b = playpal_data[0][table[playpal_gray]][2] * 255 / 239;
-
-            r = HMM_MIN(255, HMM_MAX(0, r));
-            g = HMM_MIN(255, HMM_MAX(0, g));
-            b = HMM_MIN(255, HMM_MAX(0, b));
-
-            colmap->font_colour_ = epi::MakeRGBA(r, g, b);
-        }
-    }
-
-    if (colmap->gl_color_ == kRGBANoValue)
-    {
-        EPI_ASSERT(table);
-
-        int r, g, b;
-
-        // int score =
-        AnalyseColourmap(table, 0, &r, &g, &b);
-
-        r = HMM_MIN(255, HMM_MAX(0, r));
-        g = HMM_MIN(255, HMM_MAX(0, g));
-        b = HMM_MIN(255, HMM_MAX(0, b));
-
-        colmap->gl_color_ = epi::MakeRGBA(r, g, b);
     }
 
     LogDebug("TransformColourmap [%s]\n", colmap->name_.c_str());
@@ -387,17 +120,13 @@ void TransformColourmap(Colormap *colmap)
 
 void GetColormapRGB(const Colormap *colmap, float *r, float *g, float *b)
 {
-    if (colmap->gl_color_ == kRGBANoValue)
+    if (colmap->gl_color_ != kRGBANoValue)
     {
-        // Intention Const Override
-        TransformColourmap((Colormap *)colmap);
+        RGBAColor col = colmap->gl_color_;
+        (*r) = ((col >> 24) & 0xFF) / 255.0f;
+        (*g) = ((col >> 16) & 0xFF) / 255.0f;
+        (*b) = ((col >> 8) & 0xFF) / 255.0f;
     }
-
-    RGBAColor col = colmap->gl_color_;
-
-    (*r) = ((col >> 24) & 0xFF) / 255.0f;
-    (*g) = ((col >> 16) & 0xFF) / 255.0f;
-    (*b) = ((col >> 8) & 0xFF) / 255.0f;
 }
 
 RGBAColor GetFontColor(const Colormap *colmap)
@@ -451,67 +180,6 @@ RGBAColor ParseFontColor(const char *name, bool strict)
         rgb ^= 0x00010100;
 
     return rgb;
-}
-
-//
-// Returns an RGB value from an index value - used the current
-// palette.  The byte pointer is assumed to point a 3-byte array.
-//
-void PalettedColourToRGB(int indexcol, uint8_t *returncol, RGBAColor last_damage_colour, float damageAmount)
-{
-    if ((cur_palette == kPaletteNormal) || (cur_palette == kPalettePain))
-    {
-        float r = (float)epi::GetRGBARed(last_damage_colour) / 255.0;
-        float g = (float)epi::GetRGBAGreen(last_damage_colour) / 255.0;
-        float b = (float)epi::GetRGBABlue(last_damage_colour) / 255.0;
-
-        returncol[0] = (uint8_t)HMM_MAX(0, HMM_MIN(255, r * damageAmount * 2.5));
-        returncol[1] = (uint8_t)HMM_MAX(0, HMM_MIN(255, g * damageAmount * 2.5));
-        returncol[2] = (uint8_t)HMM_MAX(0, HMM_MIN(255, b * damageAmount * 2.5));
-    }
-    else
-    {
-        returncol[0] = playpal_data[cur_palette][indexcol][0];
-        returncol[1] = playpal_data[cur_palette][indexcol][1];
-        returncol[2] = playpal_data[cur_palette][indexcol][2];
-    }
-}
-
-// -AJA- 1999/07/03: Rewrote this routine, since the palette handling
-// has been moved to v_colour.c/h (and made more flexible).  Later on it
-// might be good to DDF-ify all this, allowing other palette lumps and
-// being able to set priorities for the different effects.
-
-void PaletteTicker(void)
-{
-    int   palette = kPaletteNormal;
-    float amount  = 0;
-
-    Player *p = players[display_player];
-    EPI_ASSERT(p);
-
-    int cnt = p->damage_count_;
-
-    if (cnt)
-    {
-        palette = kPalettePain;
-        amount  = (cnt + 7) / 160.0f; // 64.0f;
-    }
-    else if (p->bonus_count_)
-    {
-        palette = kPaletteBonus;
-        amount  = (p->bonus_count_ + 7) / 32.0f;
-    }
-    else if (p->powers_[kPowerTypeAcidSuit] > 4 * 32 || fmod(p->powers_[kPowerTypeAcidSuit], 16) >= 8)
-    {
-        palette = kPaletteSuit;
-        amount  = 1.0f;
-    }
-
-    // This routine will limit `amount' to acceptable values, and will
-    // only update the video palette/colormaps when the palette actually
-    // changes.
-    SetPalette(palette, amount);
 }
 
 //----------------------------------------------------------------------------
@@ -668,29 +336,7 @@ class ColormapShader : public AbstractShader
     {
         ImageData img(256, 64, 4);
 
-        const uint8_t *map    = nullptr;
-        int            length = 32;
-
-        if (colormap_ && colormap_->length_ > 0)
-        {
-            map    = GetTranslationTable(colormap_);
-            length = colormap_->length_;
-
-            for (int ci = 0; ci < 32; ci++)
-            {
-                int cmap_idx = length * ci / 32;
-
-                // +4 gets the white pixel -- FIXME: doom specific
-                const uint8_t new_col = map[cmap_idx * 256 + 4];
-
-                int r = playpal_data[0][new_col][0];
-                int g = playpal_data[0][new_col][1];
-                int b = playpal_data[0][new_col][2];
-
-                whites_[ci] = epi::MakeRGBA(r, g, b);
-            }
-        }
-        else if (colormap_) // GL_COLOUR
+        if (colormap_) // GL_COLOUR
         {
             for (int ci = 0; ci < 32; ci++)
             {

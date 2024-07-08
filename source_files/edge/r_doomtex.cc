@@ -240,9 +240,6 @@ static ImageData *ReadUserAsEpiBlock(Image *rim)
 {
     EPI_ASSERT(rim->source_type_ == kImageSourceUser);
 
-    // clear initial image to black / transparent
-    /// ALREADY DONE: memset(dest, playpal_black, tw * th * bpp);
-
     ImageDefinition *def = rim->source_.user.def;
 
     switch (def->type_)
@@ -265,9 +262,7 @@ static ImageData *ReadUserAsEpiBlock(Image *rim)
 // ReadAsEpiBlock
 //
 // Read the image from the wad into an image_data_c class.
-// The image returned is normally palettised (bpp == 1), and the
-// palette must be determined from rim->source_palette_.  Mainly
-// just a switch to more specialised image readers.
+// Mainly just a switch to more specialised image readers.
 //
 // Never returns nullptr.
 //

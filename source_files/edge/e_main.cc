@@ -533,8 +533,6 @@ void EdgeDisplay(void)
     switch (game_state)
     {
     case kGameStateLevel:
-        PaletteTicker();
-
         LuaRunHUD();
 
         HUDDrawer();
@@ -1558,7 +1556,6 @@ static void EdgeStartup(void)
     // overrides of lump-specific image/sound/DDF defines
     DoPackSubstitutions();
     StartupMusic();
-    InitializePalette();
 
     DDFCleanUp();
     SetLanguage();

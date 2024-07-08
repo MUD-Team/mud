@@ -55,7 +55,6 @@ const char *GetLumpNameFromIndex(int lump);
 epi::File *LoadLumpAsFile(int lump);
 epi::File *LoadLumpAsFile(const char *name);
 
-int               GetPaletteForLump(int lump);
 int               GetDataFileIndexForLump(int lump);
 
 bool IsLumpInPwad(const char *name);

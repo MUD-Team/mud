@@ -92,22 +92,7 @@ void ImageData::Shrink(uint16_t new_w, uint16_t new_h)
     int step_y = height_ / new_h;
     int total  = step_x * step_y;
 
-    if (depth_ == 1)
-    {
-        for (int dy = 0; dy < new_h; dy++)
-            for (int dx = 0; dx < new_w; dx++)
-            {
-                uint8_t *dest_pix = pixels_ + (dy * new_w + dx) * 3;
-
-                int sx = dx * step_x;
-                int sy = dy * step_y;
-
-                const uint8_t *src_pix = PixelAt(sx, sy);
-
-                *dest_pix = *src_pix;
-            }
-    }
-    else if (depth_ == 3)
+    if (depth_ == 3)
     {
         for (int dy = 0; dy < new_h; dy++)
             for (int dx = 0; dx < new_w; dx++)
