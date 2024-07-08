@@ -764,8 +764,6 @@ static int HD_get_average_color(lua_State *L)
     double         to_y         = luaL_optnumber(L, 5, 1000000);
     const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
     const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
-    if (tmp_img_c->source_palette_ >= 0)
-        what_palette = (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
     ImageData *tmp_img_data = ReadAsEpiBlock((Image *)tmp_img_c);
     if (tmp_img_data->depth_ == 1)
     {
@@ -794,8 +792,6 @@ static int HD_get_lightest_color(lua_State *L)
     double         to_y         = luaL_optnumber(L, 5, 1000000);
     const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
     const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
-    if (tmp_img_c->source_palette_ >= 0)
-        what_palette = (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
     ImageData *tmp_img_data = ReadAsEpiBlock((Image *)tmp_img_c);
     if (tmp_img_data->depth_ == 1)
     {
@@ -823,8 +819,6 @@ static int HD_get_darkest_color(lua_State *L)
     double         to_y         = luaL_optnumber(L, 5, 1000000);
     const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
     const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
-    if (tmp_img_c->source_palette_ >= 0)
-        what_palette = (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
     ImageData *tmp_img_data = ReadAsEpiBlock((Image *)tmp_img_c);
     if (tmp_img_data->depth_ == 1)
     {
@@ -852,8 +846,6 @@ static int HD_get_average_hue(lua_State *L)
     double         to_y         = luaL_optnumber(L, 5, 1000000);
     const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
     const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
-    if (tmp_img_c->source_palette_ >= 0)
-        what_palette = (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
     ImageData *tmp_img_data = ReadAsEpiBlock((Image *)tmp_img_c);
     if (tmp_img_data->depth_ == 1)
     {

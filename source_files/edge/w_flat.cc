@@ -45,58 +45,11 @@
 #include "w_files.h"
 #include "w_model.h"
 #include "w_sprite.h"
-#include "w_texture.h"
 #include "w_wad.h"
 
 EDGE_DEFINE_CONSOLE_VARIABLE(precache_textures, "1", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(precache_sprites, "1", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(precache_models, "1", kConsoleVariableFlagArchive)
-
-
-static void AddTXAnimation(AnimationDefinition *anim, ImageNamespace NStype)
-{
-    int start_offset= -1;
-    int end_offset = -1;
-
-    int total = (int)TX_names.size();
-
-    if (total == 1)
-        return;
-
-    for (int i = 0; i < total; i++)
-    {
-        if (DDFCompareName(anim->start_name_.c_str(), TX_names[i].c_str()) == 0)
-            start_offset = i;
-
-        if (DDFCompareName(anim->end_name_.c_str(), TX_names[i].c_str()) == 0)
-            end_offset = i;
-
-        if (end_offset != -1 && start_offset != -1) //all done
-            break;
-    }
-
-    if (end_offset == -1 || start_offset == -1)
-        return;
-
-    if (start_offset >= end_offset)
-        return;
-
-
-    total = end_offset - start_offset + 1;
-    
-    const Image **texs = new const Image *[total];
-    int indexer = 0;
-
-    for (int i = start_offset; i < end_offset + 1; i++)
-    {
-        texs[indexer] = ImageLookup(TX_names[i].c_str(), NStype, kImageLookupNull);
-        indexer++;
-    }
-
-    AnimateImageSet(texs, total, anim->speed_);
-    delete[] texs;
-    
-}
 
 //
 // AddFlatAnimation
@@ -120,66 +73,6 @@ static void AddTXAnimation(AnimationDefinition *anim, ImageNamespace NStype)
 //
 static void AddFlatAnimation(AnimationDefinition *anim)
 {
-    if (anim->pics_.empty()) // old way
-    {
-        int start = CheckLumpNumberForName(anim->start_name_.c_str());
-        int end   = CheckLumpNumberForName(anim->end_name_.c_str());
-
-        int file;
-        int s_offset, e_offset;
-
-        int i;
-
-        if (start == -1 || end == -1)
-        {
-            // sequence not valid.  Maybe it is the DOOM 1 IWAD.
-
-            //AddTXAnimation(anim, kImageNamespaceFlat); //Lobo 2024: try plan B here too?
-            return;
-        }
-
-        file = FindFlatSequence(anim->start_name_.c_str(), anim->end_name_.c_str(), &s_offset, &e_offset);
-
-        if (file < 0)
-        {
-            LogWarning("Missing flat animation: %s-%s not in any wad.\n", anim->start_name_.c_str(),
-                       anim->end_name_.c_str());
-            
-            AddTXAnimation(anim, kImageNamespaceFlat); //Lobo 2024: try plan B
-            return;
-        }
-
-        std::vector<int> *lumps = GetFlatListForWAD(file);
-        if (lumps == nullptr)
-            return;
-
-        int total = (int)lumps->size();
-
-        EPI_ASSERT(s_offset <= e_offset);
-        EPI_ASSERT(e_offset < total);
-
-        // determine animation sequence
-        total = e_offset - s_offset + 1;
-
-        const Image **flats = new const Image *[total];
-
-        // lookup each flat
-        for (i = 0; i < total; i++)
-        {
-            const char *name = GetLumpNameFromIndex((*lumps)[s_offset + i]);
-
-            // Note we use ImageFromFlat() here.  It might seem like a good
-            // optimisation to use the lump number directly, but we can't do
-            // that -- the lump list does NOT take overriding flats (in newer
-            // pwads) into account.
-
-            flats[i] = ImageLookup(name, kImageNamespaceFlat, kImageLookupNull | kImageLookupExact | kImageLookupNoNew);
-        }
-
-        AnimateImageSet(flats, total, anim->speed_);
-        delete[] flats;
-    }
-
     // -AJA- 2004/10/27: new SEQUENCE command for anims
 
     int total = (int)anim->pics_.size();
@@ -227,40 +120,6 @@ static void AddFlatAnimation(AnimationDefinition *anim)
 //
 static void AddTextureAnimation(AnimationDefinition *anim)
 {
-    if (anim->pics_.empty()) // old way
-    {
-        int set, s_offset, e_offset;
-
-        set = FindTextureSequence(anim->start_name_.c_str(), anim->end_name_.c_str(), &s_offset, &e_offset);
-
-        if (set < 0)
-        {
-            // sequence not valid.  Maybe it is the DOOM 1 IWAD.
-
-            AddTXAnimation(anim, kImageNamespaceTexture); //Lobo 2024: try plan B
-
-            return;
-        }
-
-        EPI_ASSERT(s_offset <= e_offset);
-
-        int           total = e_offset - s_offset + 1;
-        const Image **texs  = new const Image *[total];
-
-        // lookup each texture
-        for (int i = 0; i < total; i++)
-        {
-            const char *name = TextureNameInSet(set, s_offset + i);
-            texs[i] =
-                ImageLookup(name, kImageNamespaceTexture, kImageLookupNull | kImageLookupExact | kImageLookupNoNew);
-        }
-
-        AnimateImageSet(texs, total, anim->speed_);
-        delete[] texs;
-
-        return;
-    }
-
     // -AJA- 2004/10/27: new SEQUENCE command for anims
 
     int total = (int)anim->pics_.size();
@@ -314,65 +173,6 @@ struct CompareFlatPredicate
         return A < B;
     }
 };
-
-//
-// InitializeFlats
-//
-void InitializeFlats(void)
-{
-    int max_file = GetTotalFiles();
-    int j, file;
-
-    std::vector<int> flats;
-
-    LogPrint("InitializeFlats...\n");
-
-    // iterate over each file, creating our big array of flats
-
-    for (file = 0; file < max_file; file++)
-    {
-        std::vector<int> *lumps = GetFlatListForWAD(file);
-        if (lumps == nullptr)
-            continue;
-
-        int lumpnum = (int)lumps->size();
-
-        for (j = 0; j < lumpnum; j++)
-        {
-            flats.push_back((int)(*lumps)[j]);
-        }
-    }
-
-    if (flats.size() == 0)
-    {
-        LogWarning("No flats found! Generating fallback flat!\n");
-        CreateFallbackFlat();
-        return;
-    }
-
-    // now sort the flats, primarily by increasing name, secondarily by
-    // increasing lump number (a measure of newness).
-
-    std::sort(flats.begin(), flats.end(), CompareFlatPredicate());
-
-    // remove duplicate names.  We rely on the fact that newer lumps
-    // have greater lump values than older ones.  Because the QSORT took
-    // newness into account, only the last entry in a run of identically
-    // named flats needs to be kept.
-
-    for (j = 1; j < (int)flats.size(); j++)
-    {
-        int a = flats[j - 1];
-        int b = flats[j];
-
-        if (strcmp(GetLumpNameFromIndex(a), GetLumpNameFromIndex(b)) == 0)
-        {
-            flats[j - 1] = -1;
-        }
-    }
-
-    CreateFlats(flats);
-}
 
 //
 // InitializeAnimations

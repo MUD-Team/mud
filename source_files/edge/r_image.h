@@ -98,30 +98,12 @@ class Image
     union {
         // case kImageSourceGraphic:
         // case kImageSourceSprite:
-        // case kImageSourceTXHI:
         struct
         {
-            int          lump;
             char        *packfile_name;
-            bool         is_patch;
-            bool         is_raw;
-            bool         user_defined;
             ImageSpecial special;
+            ImageNamespace belong;
         } graphic;
-
-        // case kImageSourceFlat:
-        // case kImageSourceRawBlock:
-        struct
-        {
-            int   lump;
-            char *packfile_name;
-        } flat;
-
-        // case kImageSourceTexture:
-        struct
-        {
-            struct TextureDefinition *tdef;
-        } texture;
 
         // case kImageSourceDummy:
         struct
@@ -136,9 +118,6 @@ class Image
             ImageDefinition *def;
         } user;
     } source_;
-
-    // palette lump, or -1 to use the "GLOBAL" palette
-    int source_palette_;
 
     // --- information about caching ---
 
@@ -227,10 +206,6 @@ const Image *ImageForDummySkin(void);
 const Image *ImageForHomDetect(void);
 const Image *ImageForFogWall(RGBAColor fog_color);
 
-// savegame code (Only)
-const Image *ImageParseSaveString(char type, const char *name);
-void         ImageMakeSaveString(const Image *image, char *type, char *namebuf);
-
 //
 //  IMAGE USAGE
 //
@@ -241,12 +216,8 @@ bool InitializeImages(void);
 void AnimationTicker(void);
 void DeleteAllImages(void);
 
-void         CreateFlats(std::vector<int> &lumps);
-void         CreateTextures(struct TextureDefinition **defs, int number);
-const Image *CreateSprite(const char *name, int lump, bool is_weapon);
 const Image *CreatePackSprite(std::string packname, PackFile *pack, bool is_weapon);
 void         CreateUserImages(void);
-void         ImageAddTxHx(int lump, const char *name, bool hires);
 void         AnimateImageSet(const Image **images, int number, int speed);
 
 void CreateFallbackFlat(void);
@@ -260,32 +231,16 @@ const Image **GetUserSprites(int *count);
 
 int MakeValidTextureSize(int value);
 
-// Store a duplicate version of the image_c with smoothing forced
-void StoreBlurredImage(const Image *image);
-
 enum ImageSource
 {
     // Source was a graphic name
     kImageSourceGraphic = 0,
 
-    // INTERNAL ONLY: Source was a raw block of 320x200 or 320x158 bytes
-    // (Heretic)
-    kImageSourceRawBlock,
-
     // Source was a sprite name
     kImageSourceSprite,
 
-    // Source was a flat name
-    kImageSourceFlat,
-
-    // Source was a texture name
-    kImageSourceTexture,
-
     // INTERNAL ONLY: Source is from IMAGE.DDF
     kImageSourceUser,
-
-    // INTERNAL ONLY: Source is from TX_START/END or HI_START/END
-    kImageSourceTXHI,
 
     // INTERNAL ONLY: Source is dummy image
     kImageSourceDummy,
@@ -296,8 +251,6 @@ extern std::list<Image *> real_graphics;
 extern std::list<Image *> real_textures;
 extern std::list<Image *> real_flats;
 extern std::list<Image *> real_sprites;
-extern std::vector<std::string> TX_names;
-
 
 Image *AddPackImageSmart(const char *name, ImageSource type, const char *packfile_name, std::list<Image *> &container,
                          const Image *replaces = nullptr);

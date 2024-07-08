@@ -88,7 +88,6 @@ set (EDGE_SOURCE_FILES
   w_model.cc
   w_epk.cc
   w_sprite.cc
-  w_texture.cc
   w_wad.cc
   script/lua_debugger.cc
   script/compat/lua_vm.cc

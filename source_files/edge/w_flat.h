@@ -30,7 +30,6 @@
 
 #pragma once
 
-void InitializeFlats(void);
 void InitializeAnimations(void);
 void PrecacheLevelGraphics(void);
 

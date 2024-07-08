@@ -19,6 +19,7 @@
 #include "im_funcs.h"
 
 #include "epi.h"
+#include "epi_endian.h"
 #include "epi_filesystem.h"
 #include "epi_str_util.h"
 #define STB_RECT_PACK_IMPLEMENTATION
@@ -45,8 +46,6 @@ ImageAtlas::~ImageAtlas()
 
 ImageFormat DetectImageFormat(uint8_t *header, int header_length, int file_size)
 {
-    // AJA 2022: based on code I wrote for Eureka...
-
     if (header_length < 12)
         return kImageUnknown;
 
@@ -56,21 +55,6 @@ ImageFormat DetectImageFormat(uint8_t *header, int header_length, int file_size)
         header[5] == 0x0A)
     {
         return kImagePNG;
-    }
-
-    // check for DOOM patches last
-    {
-        int width  = (int)header[0] + (int)(header[1] << 8);
-        int height = (int)header[2] + (int)(header[3] << 8);
-
-        int ofs_x = (int)header[4] + (int)((signed char)header[5] * 256);
-        int ofs_y = (int)header[6] + (int)((signed char)header[7] * 256);
-
-        if (width > 0 && width <= 4096 && abs(ofs_x) <= 4096 && height > 0 && height <= 1024 && abs(ofs_y) <= 4096 &&
-            file_size > width * 4 /* columnofs */)
-        {
-            return kImageDoom;
-        }
     }
 
     return kImageUnknown; // uh oh!
@@ -84,9 +68,6 @@ ImageFormat ImageFormatFromFilename(const std::string &filename)
 
     if (ext == ".png")
         return kImagePNG;
-
-    if (ext == ".lmp") // Kind of a gamble, but whatever
-        return kImageDoom;
 
     return kImageUnknown;
 }

@@ -30,23 +30,12 @@
 #include "dm_defs.h"
 #include "epi_file.h"
 
-struct WadTextureResource
-{
-    // lump numbers, or -1 if nonexistent
-    int palette  = -1;
-    int pnames   = -1;
-    int texture1 = -1;
-    int texture2 = -1;
-};
-
 int CheckLumpNumberForName(const char *name);
 // Like above, but returns the data file index instead of the sortedlump index
 int CheckDataFileIndexForName(const char *name);
 
-int CheckGraphicLumpNumberForName(const char *name);
 int CheckXGLLumpNumberForName(const char *name);
 int CheckMapLumpNumberForName(const char *name);
-int CheckPatchLumpNumberForName(const char *name);
 
 // Unlike check, will FatalError if not present
 int GetLumpNumberForName(const char *name);
@@ -67,16 +56,7 @@ epi::File *LoadLumpAsFile(int lump);
 epi::File *LoadLumpAsFile(const char *name);
 
 int               GetPaletteForLump(int lump);
-int               FindFlatSequence(const char *start, const char *end, int *s_offset, int *e_offset);
-std::vector<int> *GetFlatListForWAD(int file);
-std::vector<int> *GetSpriteListForWAD(int file);
-std::vector<int> *GetPatchListForWAD(int file);
-void              GetTextureLumpsForWAD(int file, WadTextureResource *res);
-void              ProcessTXHINamespaces(void);
 int               GetDataFileIndexForLump(int lump);
-
-// auxiliary functions to help us deal with when to use skyboxes
-bool DisableStockSkybox(const char *ActualSky);
 
 bool IsLumpInPwad(const char *name);
 

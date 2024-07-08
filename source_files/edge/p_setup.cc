@@ -60,7 +60,6 @@
 #include "sokol_color.h"
 #include "sv_main.h"
 #include "w_files.h"
-#include "w_texture.h"
 #include "w_wad.h"
 
 #define EDGE_SEG_INVALID       ((Seg *)-3)
