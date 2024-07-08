@@ -884,7 +884,7 @@ static CachedImage *ImageCacheOGL(Image *rim, bool do_whiten)
             continue;
         }
 
-        if (do_whiten && rc->is_whitened)
+        if ((!do_whiten && !rc->is_whitened) || (do_whiten && rc->is_whitened))
             break;
 
         rc = nullptr;

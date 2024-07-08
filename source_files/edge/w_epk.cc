@@ -810,33 +810,6 @@ void ProcessPackSubstitutions(PackFile *pack, int pack_index)
             }
         }
     }
-    d = pack->FindDirectory("colormaps");
-    if (d > 0)
-    {
-        for (size_t i = 0; i < pack->directories_[d].entries_.size(); i++)
-        {
-            PackEntry &entry = pack->directories_[d].entries_[i];
-
-            std::string stem = epi::GetStem(entry.name_);
-
-            bool add_it = true;
-
-            for (Colormap *colm : colormaps)
-            {
-                if (!colm->lump_name_.empty() &&
-                    epi::StringCaseCompareASCII(colm->lump_name_, epi::GetStem(entry.name_)) == 0 &&
-                    CheckDataFileIndexForName(colm->lump_name_.c_str()) < pack_index)
-                {
-                    colm->lump_name_.clear();
-                    colm->pack_name_ = entry.pack_path_;
-                    add_it           = false;
-                }
-            }
-
-            if (add_it)
-                DDFAddRawColourmap(stem.c_str(), pack->EntryLength(d, i), entry.pack_path_.c_str());
-        }
-    }
 }
 
 bool FindPackFile(PackFile *pack, const std::string &name)

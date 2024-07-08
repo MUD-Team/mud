@@ -32,7 +32,6 @@ EPI_XX(_)
 
 // images
 EPI_XX(PNG)
-EPI_XX(LMP)
 
 // instrument banks
 EPI_XX(SF2)

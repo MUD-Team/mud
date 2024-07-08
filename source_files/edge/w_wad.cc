@@ -69,7 +69,6 @@ class WadFile
 {
   public:
     // lists for sprites, flats, patches (stuff between markers)
-    std::vector<int> colormap_lumps_;
     std::vector<int> xgl_lumps_;
 
     // level markers and skin markers
@@ -90,7 +89,7 @@ class WadFile
 
   public:
     WadFile()
-        : colormap_lumps_(), xgl_lumps_(),
+        : xgl_lumps_(),
           level_markers_(), skin_markers_(), lua_huds_(-1),
           animated_(-1), switches_(-1), md5_string_()
     {
@@ -110,7 +109,6 @@ enum LumpKind
     kLumpNormal   = 0,  // fallback value
     kLumpMarker   = 3,  // X_START, X_END, S_SKIN, level name
     kLumpDDF      = 10, // DDF, RTS, Lua lump
-    kLumpColormap = 15,
     kLumpXGL      = 20,
 };
 
@@ -138,21 +136,7 @@ static std::vector<LumpInfo> lump_info;
 
 static std::vector<int> sorted_lumps;
 
-static bool within_colmap_list;
 static bool within_xgl_list;
-
-//
-// Is the name a colourmap list start/end flag?
-//
-static bool IsC_START(char *name)
-{
-    return (strncmp(name, "C_START", 8) == 0);
-}
-
-static bool IsC_END(char *name)
-{
-    return (strncmp(name, "C_END", 8) == 0);
-}
 
 //
 // Is the name a XGL nodes start/end flag?
@@ -312,24 +296,9 @@ static void AddLump(DataFile *df, const char *raw_name, int pos, int size, int f
         return;
     }
 
-    // -- handle sprite, flat & patch lists --
+    // -- handle node lists --
 
-    if (IsC_START(lump_p->name))
-    {
-        lump_p->kind       = kLumpMarker;
-        within_colmap_list = true;
-        return;
-    }
-    else if (IsC_END(lump_p->name))
-    {
-        if (!within_colmap_list)
-            LogWarning("Unexpected C_END marker in wad.\n");
-
-        lump_p->kind       = kLumpMarker;
-        within_colmap_list = false;
-        return;
-    }
-    else if (IsXG_START(lump_p->name))
+    if (IsXG_START(lump_p->name))
     {
         lump_p->kind    = kLumpMarker;
         within_xgl_list = true;
@@ -351,12 +320,6 @@ static void AddLump(DataFile *df, const char *raw_name, int pos, int size, int f
 
     if (wad == nullptr)
         return;
-
-    if (within_colmap_list)
-    {
-        lump_p->kind = kLumpColormap;
-        wad->colormap_lumps_.push_back(lump);
-    }
 
     if (within_xgl_list)
     {
@@ -535,12 +498,6 @@ static void ProcessBoomStuffInWad(DataFile *df)
         DDFConvertSwitchesLump(data, length);
         delete[] data;
     }
-
-    // handle BOOM Colourmaps (between C_START and C_END)
-    for (int lump : df->wad_->colormap_lumps_)
-    {
-        DDFAddRawColourmap(GetLumpNameFromIndex(lump), GetLumpLength(lump), nullptr, lump);
-    }
 }
 
 void ProcessWad(DataFile *df, size_t file_index)
@@ -548,8 +505,8 @@ void ProcessWad(DataFile *df, size_t file_index)
     WadFile *wad = new WadFile();
     df->wad_     = wad;
 
-    // reset the colormap/node list stuff
-    within_colmap_list = within_xgl_list = false;
+    // reset the node list stuff
+    within_xgl_list = false;
 
     RawWadHeader header;
 
@@ -597,8 +554,6 @@ void ProcessWad(DataFile *df, size_t file_index)
 
     // check for unclosed sprite/flat/patch lists
     const char *filename = df->name_.c_str();
-    if (within_colmap_list)
-        LogWarning("Missing C_END marker in %s.\n", filename);
     if (within_xgl_list)
         LogWarning("Missing XG_END marker in %s.\n", filename);
 
