@@ -26,11 +26,7 @@
 enum ImageFormat
 {
     kImageUnknown = 0,
-    kImagePNG,
-    kImageTGA,
-    kImageJPEG,
-    kImageDoom,
-    kImageOther // e.g. gif, dds, bmp
+    kImagePNG 
 };
 
 class ImageAtlasRectangle
@@ -67,7 +63,7 @@ ImageFormat DetectImageFormat(uint8_t *header, int header_lengh, int file_size);
 // determine image format from the filename (by its extension).
 ImageFormat ImageFormatFromFilename(const std::string &filename);
 
-// loads the given image, which must be PNG, TGA or JPEG format.
+// loads the given image, which must be PNG, format.
 // Returns nullptr if something went wrong.  The result image will be RGB
 // or RGBA (never paletted).  The image size (width and height) will be
 // rounded to the next power-of-two.
@@ -84,7 +80,7 @@ ImageAtlas *PackImages(const std::unordered_map<int, ImageData *> &image_pack_da
 
 // reads the principle information from the image header.
 // (should be much faster than loading the whole image).
-// The image must be PNG, TGA or JPEG format, it cannot be used
+// The image must be PNG format, it cannot be used
 // with DOOM patches.  Returns false if something went wrong.
 //
 // NOTE: size returned here is the real size, and may be different

@@ -135,14 +135,7 @@ void Font::LoadPatches()
     if (missing)
     {
         ImageData *tmp_img = ReadAsEpiBlock((Image *)(missing));
-        if (tmp_img->depth_ == 1)
-        {
-            ImageData *rgb_img = RGBFromPalettised(tmp_img, (const uint8_t *)&playpal_data[0], missing->opacity_);
-            delete tmp_img;
-            missing_imdata = rgb_img;
-        }
-        else
-            missing_imdata = tmp_img;
+        missing_imdata = tmp_img;
         missing_imdata->offset_x_ = missing->offset_x_;
         missing_imdata->offset_y_ = missing->offset_y_;
         missing_imdata->scale_x_  = missing->scale_x_;
@@ -168,13 +161,6 @@ void Font::LoadPatches()
             if (images[idx])
             {
                 ImageData *tmp_img = ReadAsEpiBlock((Image *)(images[idx]));
-                if (tmp_img->depth_ == 1)
-                {
-                    ImageData *rgb_img =
-                        RGBFromPalettised(tmp_img, (const uint8_t *)&playpal_data[0], images[idx]->opacity_);
-                    delete tmp_img;
-                    tmp_img = rgb_img;
-                }
                 tmp_img->offset_x_ = images[idx]->offset_x_;
                 tmp_img->offset_y_ = images[idx]->offset_y_;
                 tmp_img->scale_x_  = images[idx]->scale_x_;

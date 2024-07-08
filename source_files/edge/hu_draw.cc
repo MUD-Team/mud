@@ -367,8 +367,7 @@ void HUDRawImage(float hx1, float hy1, float hx2, float hy2, const Image *image,
         return;
     }
 
-    // GLuint tex_id = ImageCache(image, true, palremap, do_whiten);
-    GLuint tex_id = ImageCache(image, true, nullptr, do_whiten);
+    GLuint tex_id = ImageCache(image, true, do_whiten);
 
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, tex_id);

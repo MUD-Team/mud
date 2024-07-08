@@ -19,13 +19,12 @@
 #include "im_funcs.h"
 
 #include "epi.h"
+#include "epi_endian.h"
 #include "epi_filesystem.h"
 #include "epi_str_util.h"
 #define STB_RECT_PACK_IMPLEMENTATION
 #include "stb_rect_pack.h"
 #define STBI_ONLY_PNG
-#define STBI_ONLY_TGA
-#define STBI_ONLY_JPEG
 #define STBI_NO_STDIO
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -47,8 +46,6 @@ ImageAtlas::~ImageAtlas()
 
 ImageFormat DetectImageFormat(uint8_t *header, int header_length, int file_size)
 {
-    // AJA 2022: based on code I wrote for Eureka...
-
     if (header_length < 12)
         return kImageUnknown;
 
@@ -58,62 +55,6 @@ ImageFormat DetectImageFormat(uint8_t *header, int header_length, int file_size)
         header[5] == 0x0A)
     {
         return kImagePNG;
-    }
-
-    // check some other common image formats....
-
-    if (header[0] == 0xFF && header[1] == 0xD8 && header[2] == 0xFF && header[3] >= 0xE0 &&
-        ((header[6] == 'J' && header[7] == 'F') || (header[6] == 'E' && header[7] == 'x')))
-    {
-        return kImageJPEG;
-    }
-
-    if (header[0] == 'G' && header[1] == 'I' && header[2] == 'F' && header[3] == '8' && header[4] >= '7' &&
-        header[4] <= '9' && header[5] == 'a')
-    {
-        return kImageOther; /* GIF */
-    }
-
-    if (header[0] == 'D' && header[1] == 'D' && header[2] == 'S' && header[3] == 0x20 && header[4] == 124 &&
-        header[5] == 0 && header[6] == 0)
-    {
-        return kImageOther; /* DDS (DirectDraw Surface) */
-    }
-
-    // TGA (Targa) is not clearly marked, but better than Doom patches,
-    // so check it next.
-
-    if (header_length >= 18)
-    {
-        int width  = (int)header[12] + ((int)header[13] << 8);
-        int height = (int)header[14] + ((int)header[15] << 8);
-
-        uint8_t cmap_type = header[1];
-        uint8_t img_type  = header[2];
-        uint8_t depth     = header[16];
-
-        if (width > 0 && width <= 2048 && height > 0 && height <= 2048 && (cmap_type == 0 || cmap_type == 1) &&
-            ((img_type | 8) >= 8 && (img_type | 8) <= 11) &&
-            (depth == 8 || depth == 15 || depth == 16 || depth == 24 || depth == 32))
-        {
-            return kImageTGA;
-        }
-    }
-
-    // check for DOOM patches last
-
-    {
-        int width  = (int)header[0] + (int)(header[1] << 8);
-        int height = (int)header[2] + (int)(header[3] << 8);
-
-        int ofs_x = (int)header[4] + (int)((signed char)header[5] * 256);
-        int ofs_y = (int)header[6] + (int)((signed char)header[7] * 256);
-
-        if (width > 0 && width <= 4096 && abs(ofs_x) <= 4096 && height > 0 && height <= 1024 && abs(ofs_y) <= 4096 &&
-            file_size > width * 4 /* columnofs */)
-        {
-            return kImageDoom;
-        }
     }
 
     return kImageUnknown; // uh oh!
@@ -127,18 +68,6 @@ ImageFormat ImageFormatFromFilename(const std::string &filename)
 
     if (ext == ".png")
         return kImagePNG;
-
-    if (ext == ".tga")
-        return kImageTGA;
-
-    if (ext == ".jpg" || ext == ".jpeg")
-        return kImageJPEG;
-
-    if (ext == ".lmp") // Kind of a gamble, but whatever
-        return kImageDoom;
-
-    if (ext == ".gif" || ext == ".bmp" || ext == ".dds")
-        return kImageOther;
 
     return kImageUnknown;
 }

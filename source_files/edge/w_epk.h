@@ -36,9 +36,6 @@ bool FindPackFile(PackFile *pack, const std::string &name);
 // Check images/sound/etc that may override WAD-oriented lumps or definitions
 void ProcessPackSubstitutions(PackFile *pack, int pack_index);
 
-// Process /hires folder contents
-void ProcessHiresPackSubstitutions(PackFile *pack, int pack_index);
-
 // Check /sprites directory for sprites to automatically add during
 // InitializeSprites
 std::vector<std::string> GetPackSpriteList(PackFile *pack);

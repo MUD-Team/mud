@@ -433,7 +433,7 @@ static void DrawText(int x, int y, const char *s, RGBAColor col)
     if (console_font->definition_->type_ == kFontTypeImage)
     {
         // Always whiten the font when used with console output
-        GLuint tex_id = ImageCache(console_font->font_image_, true, (const Colormap *)0, true);
+        GLuint tex_id = ImageCache(console_font->font_image_, true, true);
 
         glEnable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, tex_id);

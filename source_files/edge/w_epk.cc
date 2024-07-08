@@ -741,44 +741,20 @@ void ProcessPackSubstitutions(PackFile *pack, int pack_index)
 
             epi::StringLowerASCII(ext);
 
-            if (ext == ".png" || ext == ".tga" || ext == ".jpg" || ext == ".jpeg" ||
-                ext == ".lmp") // Note: .lmp is assumed to be Doom-format image
+            if (ext == ".png")
             {
                 std::string texname;
 
                 epi::TextureNameFromFilename(texname, stem);
 
-                bool add_it = true;
-
-                // Check DDFIMAGE definitions to see if this is replacing a lump
-                // type def
-                for (ImageDefinition *img : imagedefs)
-                {
-                    if (img->type_ == kImageDataLump && epi::StringCaseCompareASCII(img->info_, texname) == 0 &&
-                        CheckDataFileIndexForName(texname.c_str()) < pack_index)
-                    {
-                        img->type_ = kImageDataPackage;
-                        img->info_ = entry.pack_path_;
-                        add_it     = false;
-                    }
-                }
-
-                // If no DDF just see if a bare lump with the same name comes
-                // later
-                if (CheckDataFileIndexForName(texname.c_str()) > pack_index)
-                    add_it = false;
-
-                if (!add_it)
-                    continue;
-
                 LogDebug("- Adding image file in EPK: %s\n", entry.pack_path_.c_str());
 
                 if (dir_name == "textures")
-                    AddPackImageSmart(texname.c_str(), kImageSourceTXHI, entry.pack_path_.c_str(), real_textures);
+                    AddPackImageSmart(texname.c_str(), kImageSourceGraphic, entry.pack_path_.c_str(), real_textures);
                 else if (dir_name == "graphics")
                     AddPackImageSmart(texname.c_str(), kImageSourceGraphic, entry.pack_path_.c_str(), real_graphics);
                 else if (dir_name == "flats")
-                    AddPackImageSmart(texname.c_str(), kImageSourceFlat, entry.pack_path_.c_str(), real_flats);
+                    AddPackImageSmart(texname.c_str(), kImageSourceGraphic, entry.pack_path_.c_str(), real_flats);
                 else if (dir_name == "skins") // Not sure about this still
                     AddPackImageSmart(texname.c_str(), kImageSourceSprite, entry.pack_path_.c_str(), real_sprites);
             }
@@ -832,104 +808,6 @@ void ProcessPackSubstitutions(PackFile *pack, int pack_index)
                     }
                 }
             }
-        }
-    }
-    d = pack->FindDirectory("colormaps");
-    if (d > 0)
-    {
-        for (size_t i = 0; i < pack->directories_[d].entries_.size(); i++)
-        {
-            PackEntry &entry = pack->directories_[d].entries_[i];
-
-            std::string stem = epi::GetStem(entry.name_);
-
-            bool add_it = true;
-
-            for (Colormap *colm : colormaps)
-            {
-                if (!colm->lump_name_.empty() &&
-                    epi::StringCaseCompareASCII(colm->lump_name_, epi::GetStem(entry.name_)) == 0 &&
-                    CheckDataFileIndexForName(colm->lump_name_.c_str()) < pack_index)
-                {
-                    colm->lump_name_.clear();
-                    colm->pack_name_ = entry.pack_path_;
-                    add_it           = false;
-                }
-            }
-
-            if (add_it)
-                DDFAddRawColourmap(stem.c_str(), pack->EntryLength(d, i), entry.pack_path_.c_str());
-        }
-    }
-}
-
-void ProcessHiresPackSubstitutions(PackFile *pack, int pack_index)
-{
-    int d = pack->FindDirectory("hires");
-
-    if (d < 0)
-        return;
-
-    for (size_t i = 0; i < pack->directories_[d].entries_.size(); i++)
-    {
-        PackEntry &entry = pack->directories_[d].entries_[i];
-
-        // split filename in stem + extension
-        std::string stem = epi::GetStem(entry.name_);
-        std::string ext  = epi::GetExtension(entry.name_);
-
-        epi::StringLowerASCII(ext);
-
-        if (ext == ".png" || ext == ".tga" || ext == ".jpg" || ext == ".jpeg" ||
-            ext == ".lmp") // Note: .lmp is assumed to be Doom-format image
-        {
-            std::string texname;
-
-            epi::TextureNameFromFilename(texname, stem);
-
-            // See if a bare lump with the same name comes later
-            if (CheckDataFileIndexForName(texname.c_str()) > pack_index)
-                continue;
-
-            LogDebug("- Adding Hires substitute from EPK: %s\n", entry.pack_path_.c_str());
-
-            const Image *rim = ImageContainerLookup(real_textures, texname.c_str(), -2);
-            if (rim && rim->source_type_ != kImageSourceUser)
-            {
-                AddPackImageSmart(texname.c_str(), kImageSourceTXHI, entry.pack_path_.c_str(), real_textures, rim);
-                continue;
-            }
-
-            rim = ImageContainerLookup(real_flats, texname.c_str(), -2);
-            if (rim && rim->source_type_ != kImageSourceUser)
-            {
-                AddPackImageSmart(texname.c_str(), kImageSourceTXHI, entry.pack_path_.c_str(), real_flats, rim);
-                continue;
-            }
-
-            rim = ImageContainerLookup(real_sprites, texname.c_str(), -2);
-            if (rim && rim->source_type_ != kImageSourceUser)
-            {
-                AddPackImageSmart(texname.c_str(), kImageSourceTXHI, entry.pack_path_.c_str(), real_sprites, rim);
-                continue;
-            }
-
-            // we do it this way to force the original graphic to be loaded
-            rim = ImageLookup(texname.c_str(), kImageNamespaceGraphic, kImageLookupExact | kImageLookupNull);
-
-            if (rim && rim->source_type_ != kImageSourceUser)
-            {
-                AddPackImageSmart(texname.c_str(), kImageSourceTXHI, entry.pack_path_.c_str(), real_graphics, rim);
-                continue;
-            }
-
-            LogDebug("HIRES replacement '%s' has no counterpart.\n", texname.c_str());
-
-            AddPackImageSmart(texname.c_str(), kImageSourceTXHI, entry.pack_path_.c_str(), real_textures);
-        }
-        else
-        {
-            LogWarning("Unknown image type in EPK: %s\n", entry.name_.c_str());
         }
     }
 }
@@ -1134,8 +1012,7 @@ std::vector<std::string> GetPackSpriteList(PackFile *pack)
 
             epi::StringLowerASCII(ext);
 
-            if (ext == ".png" || ext == ".tga" || ext == ".jpg" || ext == ".jpeg" ||
-                ext == ".lmp") // Note: .lmp is assumed to be Doom-format image
+            if (ext == ".png")
             {
                 std::string texname;
                 epi::TextureNameFromFilename(texname, stem);

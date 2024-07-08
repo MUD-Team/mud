@@ -23,18 +23,17 @@
 class ImageData
 {
   public:
-    short width_;
-    short height_;
+    uint16_t width_;
+    uint16_t height_;
 
     // Bytes Per Pixel, determines image mode:
-    // 1 = palettised
     // 3 = format is RGB
     // 4 = format is RGBA
-    short depth_;
+    uint8_t depth_;
 
     // for image loading, these will be the actual image size
-    short used_width_;
-    short used_height_;
+    uint16_t used_width_;
+    uint16_t used_height_;
 
     // in case offset/scaling from a parent image_c need to be stored (atlases)
     float offset_x_;
@@ -45,7 +44,7 @@ class ImageData
     uint8_t *pixels_;
 
   public:
-    ImageData(int width, int height, int depth = 3);
+    ImageData(uint16_t width, uint16_t height, uint8_t depth = 3);
     ~ImageData();
 
     void Clear(uint8_t val = 0);
@@ -57,12 +56,12 @@ class ImageData
         return pixels_ + (y * width_ + x) * depth_;
     }
 
-    inline void CopyPixel(int sx, int sy, int dx, int dy)
+    inline void CopyPixel(uint16_t sx, uint16_t sy, uint16_t dx, uint16_t dy)
     {
         uint8_t *src  = PixelAt(sx, sy);
         uint8_t *dest = PixelAt(dx, dy);
 
-        for (int i = 0; i < depth_; i++)
+        for (uint16_t i = 0; i < depth_; i++)
             *dest++ = *src++;
     }
 
@@ -77,17 +76,17 @@ class ImageData
     // For RGB(A) images the pixel values are averaged.
     // Palettised images are not averaged, instead the bottom
     // left pixel in each group becomes the final pixel.
-    void Shrink(int new_width, int new_height);
+    void Shrink(uint16_t new_width, uint16_t new_height);
 
     // like Shrink(), but for RGBA images the source alpha is
     // used as a weighting factor for the shrunken color, hence
     // purely transparent pixels never affect the final color
     // of a pixel group.
-    void ShrinkMasked(int new_width, int new_height);
+    void ShrinkMasked(uint16_t new_width, uint16_t new_height);
 
     // scale the image up to a larger size.
     // The old size and the new size must be powers of two.
-    void Grow(int new_width, int new_height);
+    void Grow(uint16_t new_width, uint16_t new_height);
 
     // convert an RGBA image to RGB.  Partially transparent colors
     // (alpha < 255) are blended with black.
@@ -95,7 +94,7 @@ class ImageData
 
     // Set uniform alpha value for all pixels in an image
     // If RGB, will convert to RGBA
-    void SetAlpha(int alpha);
+    void SetAlpha(uint8_t alpha);
 
     // test each alpha value in the RGBA image against the threshold:
     // lesser values become 0, and greater-or-equal values become 255.
@@ -121,7 +120,7 @@ class ImageData
     // For the IMAGE DDFFONT type, determines the width of a character
     // by finding the row with the largest distance between the first
     // and last non-background-colored pixel
-    int ImageCharacterWidth(int x1, int y1, int x2, int y2);
+    uint16_t ImageCharacterWidth(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
 
     // compute the average Hue of the RGB(A) image, storing the
     // result in the 'hue' array (r, g, b).  The average intensity
@@ -141,8 +140,8 @@ class ImageData
     // fill the margins of non-power-of-two images with a copy of the
     // left and/or top parts of the image.  This doesn't make it tile
     // properly, but it looks better than having areas of black.
-    void FillMarginX(int actual_width);
-    void FillMarginY(int actual_height);
+    void FillMarginX(uint16_t actual_width);
+    void FillMarginY(uint16_t actual_height);
 
     // Change various HSV color values if needed
     void SetHsv(int rotation, int saturation, int value);

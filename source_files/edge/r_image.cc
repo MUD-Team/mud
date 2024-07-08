@@ -65,7 +65,6 @@
 #include "r_texgl.h"
 #include "w_epk.h"
 #include "w_files.h"
-#include "w_texture.h"
 #include "w_wad.h"
 
 extern ImageData *ReadAsEpiBlock(Image *rim);
@@ -91,9 +90,6 @@ struct CachedImage
 {
     // parent image
     Image *parent;
-
-    // colormap used for translated image, normally nullptr
-    const Colormap *translation_map;
 
     // general hue of image (skewed towards pure colors)
     RGBAColor hue;
@@ -163,8 +159,6 @@ std::list<Image *> real_textures;
 std::list<Image *> real_flats;
 std::list<Image *> real_sprites;
 
-std::vector<std::string> TX_names;
-
 const Image *sky_flat_image;
 
 static const Image *dummy_sprite;
@@ -181,7 +175,7 @@ static std::list<CachedImage *> image_cache;
 
 Image::Image()
     : actual_width_(0), actual_height_(0), total_width_(0), total_height_(0), width_ratio_(0.0), height_ratio_(0.0),
-      source_type_(kImageSourceDummy), source_palette_(-1), cache_()
+      source_type_(kImageSourceDummy), cache_()
 {
     name_ = "_UNINIT_";
 
@@ -226,7 +220,6 @@ static Image *CreateDummyImage(const char *name, RGBAColor fg, RGBAColor bg)
     rim->name_ = name;
 
     rim->source_type_    = kImageSourceDummy;
-    rim->source_palette_ = -1;
 
     rim->source_.dummy.fg = fg;
     rim->source_.dummy.bg = bg;
@@ -252,74 +245,20 @@ Image *AddPackImageSmart(const char *name, ImageSource type, const char *packfil
     int width = 0, height = 0, bpp = 0;
     int offset_x = 0, offset_y = 0;
 
-    bool is_patch = false;
-    bool is_raw = false;
     bool solid    = false;
 
     int  header_len = HMM_MIN((int)sizeof(header), packfile_len);
     auto fmt        = DetectImageFormat(header, header_len, packfile_len);
 
-    if (fmt == kImageOther)
+    if (fmt == kImageUnknown)
     {
         // close it
         delete f;
 
-        LogWarning("Unsupported image format in '%s'\n", packfile_name);
+        LogWarning("Graphic '%s' does not seem to be a graphic.\n", name);
         return nullptr;
     }
-    else if (fmt == kImageUnknown)
-    {
-        // close it
-        delete f;
-
-        // check for Heretic images, which are raw 320x200
-        if (packfile_len == 320 * 200 && type == kImageSourceGraphic)
-        {
-            width  = 320;
-            height = 200;
-            solid  = true;
-            type   = kImageSourceRawBlock;
-            is_raw = true;
-        }
-        // check for AUTOPAGE images, which are raw 320x158
-        else if (packfile_len == 320 * 158 && type == kImageSourceGraphic)
-        {
-            width  = 320;
-            height = 158;
-            solid  = true;
-            type   = kImageSourceRawBlock;
-            is_raw = true;
-        }
-        // check for flats
-        else if ((packfile_len == 64 * 64 || packfile_len == 64 * 65) && type == kImageSourceGraphic)
-        {
-            width  = 64;
-            height = 64;
-            solid  = true;
-            type   = kImageSourceFlat;
-            is_raw = true;
-        }
-        else
-        {
-            LogWarning("Graphic '%s' does not seem to be a graphic.\n", name);
-            return nullptr;
-        }
-    }
-    else if (fmt == kImageDoom)
-    {
-        // close it
-        delete f;
-
-        const Patch *pat = (Patch *)header;
-
-        width    = AlignedLittleEndianS16(pat->width);
-        height   = AlignedLittleEndianS16(pat->height);
-        offset_x = AlignedLittleEndianS16(pat->left_offset);
-        offset_y = AlignedLittleEndianS16(pat->top_offset);
-
-        is_patch = true;
-    }
-    else // PNG, TGA or JPEG
+    else // PNG
     {
         if (!GetImageInfo(f, &width, &height, &bpp) || width <= 0 || height <= 0)
         {
@@ -328,6 +267,29 @@ Image *AddPackImageSmart(const char *name, ImageSource type, const char *packfil
         }
 
         solid = (bpp == 3);      
+
+        // grAb chunk check (may go away in the future, but should work with SLADE lmp->png conversions for now - Dasho)
+        f->Seek(0, epi::File::kSeekpointStart);
+        uint8_t *raw_image = f->LoadIntoMemory();
+
+        for (uint32_t i = 0; i < packfile_len; i++)
+        {
+            // Check for 'grAb' header
+            if (raw_image[i] == 0x08 && raw_image[i + 1] == 'g' && raw_image[i + 2] == 'r' && raw_image[i + 3] == 'A' && raw_image[i + 4] == 'b')
+            {
+                memcpy(&offset_x, &raw_image[i + 5], 4);
+                memcpy(&offset_y, &raw_image[i + 9], 4);
+                offset_x = AlignedBigEndianS32(offset_x);
+                offset_y = AlignedBigEndianS32(offset_y);
+                break;
+            }
+
+            // Stop at the 'IDAT' chunk
+            if (raw_image[i] == 'I' && raw_image[i + 1] == 'D' && raw_image[i + 2] == 'A' && raw_image[i + 3] == 'T')
+                break;
+        }
+
+        delete[] raw_image;
 
         // close it
         delete f;
@@ -344,320 +306,29 @@ Image *AddPackImageSmart(const char *name, ImageSource type, const char *packfil
     rim->source_type_                  = type;
     int pn_len                         = strlen(packfile_name);
     rim->source_.graphic.packfile_name = (char *)calloc(pn_len + 1, 1);
-    epi::CStringCopyMax(rim->source_.graphic.packfile_name, packfile_name, pn_len);
-    rim->source_.graphic.is_patch     = is_patch;
-    rim->source_.graphic.is_raw       = is_raw;
-    rim->source_.graphic.user_defined = false; // This should only get set to true with DDFIMAGE specified DOOM
-                                               // format images
-    rim->source_palette_ = -1;
-
-    if (replaces)
-    {
-        rim->scale_x_ = replaces->actual_width_ / (float)width;
-        rim->scale_y_ = replaces->actual_height_ / (float)height;
-
-        if (!is_patch && replaces->source_type_ == kImageSourceSprite)
-        {
-            rim->offset_x_ = replaces->offset_x_;
-            rim->offset_y_ = replaces->offset_y_;
-        }
-    }
-
-    container.push_back(rim);
-
-    return rim;
-}
-
-static Image *AddImage_Smart(const char *name, ImageSource type, int lump, std::list<Image *> &container,
-                             const Image *replaces = nullptr)
-{
-    /* used for Graphics, Sprites and TX/HI stuff */
-
-    int lump_len = GetLumpLength(lump);
-
-    epi::File *f = LoadLumpAsFile(lump);
-    EPI_ASSERT(f);
-
-    // determine format and size information
-    uint8_t header[32];
-    memset(header, 255, sizeof(header));
-
-    f->Read(header, sizeof(header));
-    f->Seek(0, epi::File::kSeekpointStart);
-
-    int width = 0, height = 0, bpp = 0;
-    int offset_x = 0, offset_y = 0;
-
-    bool is_patch = false;
-    bool is_raw = false;
-    bool solid    = false;
-
-    int  header_len = HMM_MIN((int)sizeof(header), lump_len);
-    auto fmt        = DetectImageFormat(header, header_len, lump_len);
-
-    if (fmt == kImageOther)
-    {
-        // close it
-        delete f;
-
-        LogWarning("Unsupported image format in '%s' lump\n", GetLumpNameFromIndex(lump));
-        return nullptr;
-    }
-    else if (fmt == kImageUnknown)
-    {
-        // close it
-        delete f;
-
-        // check for Heretic images, which are raw 320x200
-        if (lump_len == 320 * 200 && type == kImageSourceGraphic)
-        {
-            width  = 320;
-            height = 200;
-            solid  = true;
-            type   = kImageSourceRawBlock;
-            is_raw = true;
-        }
-        // check for AUTOPAGE images, which are raw 320x158
-        else if (lump_len == 320 * 158 && type == kImageSourceGraphic)
-        {
-            width  = 320;
-            height = 158;
-            solid  = true;
-            type   = kImageSourceRawBlock;
-            is_raw = true;
-        }
-        // check for flats
-        else if ((lump_len == 64 * 64 || lump_len == 64 * 65) && type == kImageSourceGraphic)
-        {
-            width  = 64;
-            height = 64;
-            solid  = true;
-            type   = kImageSourceFlat;
-            is_raw = true;
-        }
-        else
-        {
-            LogWarning("Graphic '%s' does not seem to be a graphic.\n", name);
-            return nullptr;
-        }
-    }
-    else if (fmt == kImageDoom)
-    {
-        // close it
-        delete f;
-
-        const Patch *pat = (Patch *)header;
-
-        width    = AlignedLittleEndianS16(pat->width);
-        height   = AlignedLittleEndianS16(pat->height);
-        offset_x = AlignedLittleEndianS16(pat->left_offset);
-        offset_y = AlignedLittleEndianS16(pat->top_offset);
-
-        is_patch = true;
-    }
-    else // PNG, TGA or JPEG
-    {
-        if (!GetImageInfo(f, &width, &height, &bpp) || width <= 0 || height <= 0)
-        {
-            LogWarning("Error scanning image in '%s' lump\n", GetLumpNameFromIndex(lump));
-            return nullptr;
-        }
-
-        solid = (bpp == 3);
-
-        // close it
-        delete f;
-    }
-
-    // create new image
-    Image *rim = NewImage(width, height, solid ? kOpacitySolid : kOpacityUnknown);
-
-    rim->offset_x_ = offset_x;
-    rim->offset_y_ = offset_y;
-
-    rim->name_ = name;
-
-    rim->source_type_                 = type;
-    rim->source_.graphic.lump         = lump;
-    rim->source_.graphic.is_patch     = is_patch;
-    rim->source_.graphic.is_raw       = is_raw;
-    rim->source_.graphic.user_defined = false; // This should only get set to true with DDFIMAGE specified DOOM
-                                               // format images
-    rim->source_palette_ = GetPaletteForLump(lump);
-
-    if (replaces)
-    {
-        rim->scale_x_ = replaces->actual_width_ / (float)width;
-        rim->scale_y_ = replaces->actual_height_ / (float)height;
-
-        if (!is_patch && replaces->source_type_ == kImageSourceSprite)
-        {
-            rim->offset_x_ = replaces->offset_x_;
-            rim->offset_y_ = replaces->offset_y_;
-        }
-    }
-
-    container.push_back(rim);
-
-    return rim;
-}
-
-static Image *AddImageTexture(const char *name, TextureDefinition *tdef)
-{
-    Image *rim;
-
-    rim = NewImage(tdef->width, tdef->height);
-
-    rim->name_ = name;
-
-    if (tdef->scale_x)
-        rim->scale_x_ = 8.0 / tdef->scale_x;
-    if (tdef->scale_y)
-        rim->scale_y_ = 8.0 / tdef->scale_y;
-
-    rim->source_type_         = kImageSourceTexture;
-    rim->source_.texture.tdef = tdef;
-    rim->source_palette_      = tdef->palette_lump;
-
-    real_textures.push_back(rim);
-
-    return rim;
-}
-
-static Image *AddImageFlat(const char *name, int lump)
-{
-    Image *rim;
-    int    len, size;
-
-    len = GetLumpLength(lump);
-
-    switch (len)
-    {
-    case 64 * 64:
-        size = 64;
-        break;
-
-    // support for odd-size Heretic flats
-    case 64 * 65:
-        size = 64;
-        break;
-
-    // -- EDGE feature: bigger than normal flats --
-    case 128 * 128:
-        size = 128;
-        break;
-    case 256 * 256:
-        size = 256;
-        break;
-    case 512 * 512:
-        size = 512;
-        break;
-    case 1024 * 1024:
-        size = 1024;
-        break;
-
-    default:
-        return nullptr;
-    }
-
-    rim = NewImage(size, size, kOpacitySolid);
-
-    rim->name_ = name;
-
-    rim->source_type_      = kImageSourceFlat;
-    rim->source_.flat.lump = lump;
-    rim->source_.graphic.is_raw = true;
-    rim->source_palette_   = GetPaletteForLump(lump);
-
-    real_flats.push_back(rim);
-
-    return rim;
-}
-
-static Image *AddImage_DOOM(ImageDefinition *def, bool user_defined = false)
-{
-    const char *name      = def->name_.c_str();
-    const char *lump_name = def->info_.c_str();
-
-    Image *rim = nullptr;
-
-    if (def->type_ == kImageDataPackage)
-    {
-        switch (def->belong_)
-        {
-        case kImageNamespaceGraphic:
-            rim = AddPackImageSmart(name, kImageSourceGraphic, lump_name, real_graphics);
-            break;
-        case kImageNamespaceTexture:
-            rim = AddPackImageSmart(name, kImageSourceTexture, lump_name, real_textures);
-            break;
-        case kImageNamespaceFlat:
-            rim = AddPackImageSmart(name, kImageSourceFlat, lump_name, real_flats);
-            break;
-        case kImageNamespaceSprite:
-            rim = AddPackImageSmart(name, kImageSourceSprite, lump_name, real_sprites);
-            break;
-
-        default:
-            FatalError("INTERNAL ERROR: Bad belong value: %d\n", def->belong_);
-        }
-    }
+    if (container == real_flats)
+        rim->source_.graphic.belong = kImageNamespaceFlat;
+    else if (container == real_textures)
+        rim->source_.graphic.belong = kImageNamespaceTexture;
+    else if (container == real_sprites)
+        rim->source_.graphic.belong = kImageNamespaceSprite;
     else
-    {
-        switch (def->belong_)
-        {
-        case kImageNamespaceGraphic:
-            rim = AddImage_Smart(name, kImageSourceGraphic, GetLumpNumberForName(lump_name), real_graphics);
-            break;
-        case kImageNamespaceTexture:
-            rim = AddImage_Smart(name, kImageSourceTexture, GetLumpNumberForName(lump_name), real_textures);
-            break;
-        case kImageNamespaceFlat:
-            rim = AddImage_Smart(name, kImageSourceFlat, GetLumpNumberForName(lump_name), real_flats);
-            break;
-        case kImageNamespaceSprite:
-            rim = AddImage_Smart(name, kImageSourceSprite, GetLumpNumberForName(lump_name), real_sprites);
-            break;
+        rim->source_.graphic.belong = kImageNamespaceGraphic;
+    epi::CStringCopyMax(rim->source_.graphic.packfile_name, packfile_name, pn_len);
 
-        default:
-            FatalError("INTERNAL ERROR: Bad belong value: %d\n", def->belong_);
+    if (replaces)
+    {
+        rim->scale_x_ = replaces->actual_width_ / (float)width;
+        rim->scale_y_ = replaces->actual_height_ / (float)height;
+
+        if (replaces->source_type_ == kImageSourceSprite)
+        {
+            rim->offset_x_ = replaces->offset_x_;
+            rim->offset_y_ = replaces->offset_y_;
         }
     }
 
-    if (rim == nullptr)
-    {
-        LogWarning("Unable to add image lump: %s\n", lump_name);
-        return nullptr;
-    }
-
-    rim->offset_x_ += def->x_offset_;
-    rim->offset_y_ += def->y_offset_;
-
-    rim->scale_x_ = def->scale_ * def->aspect_;
-    rim->scale_y_ = def->scale_;
-
-    rim->is_font_ = def->is_font_;
-
-    rim->hsv_rotation_   = def->hsv_rotation_;
-    rim->hsv_saturation_ = def->hsv_saturation_;
-    rim->hsv_value_      = def->hsv_value_;
-
-    rim->source_.graphic.special = kImageSpecialNone;
-
-    if (user_defined)
-    {
-        rim->source_.graphic.user_defined = true;
-        rim->source_.graphic.special      = def->special_;
-    }
-
-    if (def->special_ & kImageSpecialCrosshair)
-    {
-        float dy = (200.0f - rim->actual_height_ * rim->scale_y_) / 2.0f; // - WEAPONTOP;
-        rim->offset_y_ += int(dy / rim->scale_y_);
-    }
-
-    if (def->special_ & kImageSpecialGrayscale)
-        rim->grayscale_ = true;
+    container.push_back(rim);
 
     return rim;
 }
@@ -666,9 +337,6 @@ static Image *AddImageUser(ImageDefinition *def)
 {
     int  width = 0, height = 0, bpp = 0;
     bool solid = false;
-
-    if (def->type_ == kImageDataLump && def->format_ == kLumpImageFormatDoom)
-        return AddImage_DOOM(def, true);
 
     switch (def->type_)
     {
@@ -679,7 +347,6 @@ static Image *AddImageUser(ImageDefinition *def)
         solid  = true;
         break;
 
-    case kImageDataLump:
     case kImageDataFile:
     case kImageDataPackage: {
         const char *filename = def->info_.c_str();
@@ -687,49 +354,17 @@ static Image *AddImageUser(ImageDefinition *def)
         epi::File *f = OpenUserFileOrLump(def);
         if (f == nullptr)
         {
-            LogWarning("Unable to open image %s: %s\n", (def->type_ == kImageDataLump) ? "lump" : "file", filename);
+            LogWarning("Unable to open image file: %s\n", filename);
             return nullptr;
         }
-
-        int file_size = f->GetLength();
 
         // determine format and size information.
-        // for FILE and PACK get format from filename, but note that when
-        // it is wrong (like a PNG called "foo.jpeg"), it can still work.
-        ImageFormat fmt = kImageUnknown;
+        ImageFormat fmt = ImageFormatFromFilename(def->info_);
 
-        if (def->type_ == kImageDataLump)
-        {
-            uint8_t header[32];
-            memset(header, 255, sizeof(header));
-
-            f->Read(header, sizeof(header));
-            f->Seek(0, epi::File::kSeekpointStart);
-
-            int header_len = HMM_MIN((int)sizeof(header), file_size);
-            fmt            = DetectImageFormat(header, header_len, file_size);
-        }
-        else
-            fmt = ImageFormatFromFilename(def->info_);
-
-        // when a lump uses DOOM patch format, use the other method.
-        // for lumps, assume kImageUnknown is a mis-detection of DOOM patch
-        // and hope for the best.
-        if (fmt == kImageDoom || fmt == kImageUnknown)
+        if (fmt == kImageUnknown)
         {
             delete f; // close file
-
-            if (fmt == kImageDoom)
-                return AddImage_DOOM(def, true);
-
             LogWarning("Unknown image format in: %s\n", filename);
-            return nullptr;
-        }
-
-        if (fmt == kImageOther)
-        {
-            delete f;
-            LogWarning("Unsupported image format in: %s\n", filename);
             return nullptr;
         }
 
@@ -805,82 +440,6 @@ static Image *AddImageUser(ImageDefinition *def)
     return rim;
 }
 
-//
-// Used to fill in the image array with flats from the WAD.  The set
-// of lumps is those that occurred between F_START and F_END in each
-// existing wad file, with duplicates set to -1.
-//
-// NOTE: should only be called once, as it assumes none of the flats
-// in the list have names colliding with existing flat images.
-//
-void CreateFlats(std::vector<int> &lumps)
-{
-    for (size_t i = 0; i < lumps.size(); i++)
-    {
-        if (lumps[i] >= 0)
-        {
-            const char *name = GetLumpNameFromIndex(lumps[i]);
-            AddImageFlat(name, lumps[i]);
-        }
-    }
-}
-
-//
-// Used to fill in the image array with textures from the WAD.  The
-// list of texture definitions comes from each TEXTURE1/2 lump in each
-// existing wad file, with duplicates set to nullptr.
-//
-// NOTE: should only be called once, as it assumes none of the
-// textures in the list have names colliding with existing texture
-// images.
-//
-void CreateTextures(struct TextureDefinition **defs, int number)
-{
-    int i;
-
-    EPI_ASSERT(defs);
-
-    for (i = 0; i < number; i++)
-    {
-        if (defs[i] == nullptr)
-            continue;
-
-        AddImageTexture(defs[i]->name, defs[i]);
-    }
-}
-
-//
-// Used to fill in the image array with sprites from the WAD.  The
-// lumps come from those occurring between S_START and S_END markers
-// in each existing wad.
-//
-// NOTE: it is assumed that each new sprite is unique i.e. the name
-// does not collide with any existing sprite image.
-//
-const Image *CreateSprite(const char *name, int lump, bool is_weapon)
-{
-    EPI_ASSERT(lump >= 0);
-
-    Image *rim = AddImage_Smart(name, kImageSourceSprite, lump, real_sprites);
-    if (!rim)
-        return nullptr;
-
-    // adjust sprite offsets so that (0,0) is normal
-    if (is_weapon)
-    {
-        rim->offset_x_ += (320.0f / 2.0f - rim->actual_width_ / 2.0f); // loss of accuracy
-        rim->offset_y_ += (200.0f - 32.0f - rim->actual_height_);
-    }
-    else
-    {
-        // rim->offset_x_ -= rim->actual_width_ / 2;   // loss of accuracy
-        rim->offset_x_ -= ((float)rim->actual_width_) / 2.0f; // Lobo 2023: dancing eye fix
-        rim->offset_y_ -= rim->actual_height_;
-    }
-
-    return rim;
-}
-
 const Image *CreatePackSprite(std::string packname, PackFile *pack, bool is_weapon)
 {
     EPI_ASSERT(pack);
@@ -915,52 +474,8 @@ void CreateUserImages(void)
     {
         if (def == nullptr)
             continue;
-
-        if (def->belong_ != kImageNamespacePatch)
-            AddImageUser(def);
+        AddImageUser(def);
     }
-}
-
-void ImageAddTxHx(int lump, const char *name, bool hires)
-{
-    if (hires)
-    {
-        const Image *rim = ImageContainerLookup(real_textures, name, -2);
-        if (rim && rim->source_type_ != kImageSourceUser)
-        {
-            AddImage_Smart(name, kImageSourceTXHI, lump, real_textures, rim);
-            return;
-        }
-
-        rim = ImageContainerLookup(real_flats, name, -2);
-        if (rim && rim->source_type_ != kImageSourceUser)
-        {
-            AddImage_Smart(name, kImageSourceTXHI, lump, real_flats, rim);
-            return;
-        }
-
-        rim = ImageContainerLookup(real_sprites, name, -2);
-        if (rim && rim->source_type_ != kImageSourceUser)
-        {
-            AddImage_Smart(name, kImageSourceTXHI, lump, real_sprites, rim);
-            return;
-        }
-
-        // we do it this way to force the original graphic to be loaded
-        rim = ImageLookup(name, kImageNamespaceGraphic, kImageLookupExact | kImageLookupNull);
-
-        if (rim && rim->source_type_ != kImageSourceUser)
-        {
-            AddImage_Smart(name, kImageSourceTXHI, lump, real_graphics, rim);
-            return;
-        }
-
-        LogDebug("HIRES replacement '%s' has no counterpart.\n", name);
-    }
-
-    TX_names.push_back(name);
-
-    AddImage_Smart(name, kImageSourceTXHI, lump, real_textures);
 }
 
 //
@@ -980,7 +495,7 @@ const Image **GetUserSprites(int *count)
     {
         Image *rim = *it;
 
-        if (rim->source_type_ == kImageSourceUser || rim->source_.graphic.user_defined)
+        if (rim->source_type_ == kImageSourceUser)
             (*count) += 1;
     }
 
@@ -997,7 +512,7 @@ const Image **GetUserSprites(int *count)
     {
         Image *rim = *it;
 
-        if (rim->source_type_ == kImageSourceUser || rim->source_.graphic.user_defined)
+        if (rim->source_type_ == kImageSourceUser)
             array[pos++] = rim;
     }
 
@@ -1019,9 +534,16 @@ static bool IM_ShouldClamp(const Image *rim)
     switch (rim->source_type_)
     {
     case kImageSourceGraphic:
-    case kImageSourceRawBlock:
     case kImageSourceSprite:
-        return true;
+    switch (rim->source_.graphic.belong)
+        {
+        case kImageNamespaceGraphic:
+        case kImageNamespaceSprite:
+            return true;
+
+        default:
+            return false;
+        }
 
     case kImageSourceUser:
         switch (rim->source_.user.def->belong_)
@@ -1047,10 +569,16 @@ static bool IM_ShouldMipmap(Image *rim)
 
     switch (rim->source_type_)
     {
-    case kImageSourceTexture:
-    case kImageSourceFlat:
-    case kImageSourceTXHI:
-        return true;
+    case kImageSourceGraphic:
+    switch (rim->source_.graphic.belong)
+        {
+        case kImageNamespaceTexture:
+        case kImageNamespaceFlat:
+            return true;
+
+        default:
+            return false;
+        }
 
     case kImageSourceUser:
         switch (rim->source_.user.def->belong_)
@@ -1083,7 +611,7 @@ static int IM_PixelLimit(Image *rim)
         return (1 << 22);
 }
 
-static GLuint LoadImageOGL(Image *rim, const Colormap *trans, bool do_whiten)
+static GLuint LoadImageOGL(Image *rim, bool do_whiten)
 {
     bool clamp  = IM_ShouldClamp(rim);
     bool mip    = IM_ShouldMipmap(rim);
@@ -1106,69 +634,16 @@ static GLuint LoadImageOGL(Image *rim, const Colormap *trans, bool do_whiten)
         else if (rim->source_.user.def->special_ & kImageSpecialNoSmooth)
             smooth = false;
     }
-    else if (rim->source_type_ == kImageSourceGraphic && rim->source_.graphic.user_defined)
-    {
-        if (rim->source_.graphic.special & kImageSpecialClamp)
-            clamp = true;
-
-        if (rim->source_.graphic.special & kImageSpecialMip)
-            mip = true;
-        else if (rim->source_.graphic.special & kImageSpecialNoMip)
-            mip = false;
-
-        if (rim->source_.graphic.special & kImageSpecialSmooth)
-            smooth = true;
-        else if (rim->source_.graphic.special & kImageSpecialNoSmooth)
-            smooth = false;
-    }
-
-    const uint8_t *what_palette    = (const uint8_t *)&playpal_data[0];
-    bool           what_pal_cached = false;
-
-    static uint8_t trans_pal[256 * 3];
-
-    if (trans != nullptr)
-    {
-        // Note: we don't care about source_palette here. It's likely that
-        // the translation table itself would not match the other palette,
-        // and so we would still end up with messed up colours.
-
-        TranslatePalette(trans_pal, what_palette, trans);
-        what_palette = trans_pal;
-    }
-    else if (rim->source_palette_ >= 0)
-    {
-        what_palette    = (const uint8_t *)LoadLumpIntoMemory(rim->source_palette_);
-        what_pal_cached = true;
-    }
 
     ImageData *tmp_img = ReadAsEpiBlock(rim);
 
     if (rim->opacity_ == kOpacityUnknown)
         rim->opacity_ = DetermineOpacity(tmp_img, &rim->is_empty_);
 
-    if (tmp_img->depth_ == 1)
+    if (rim->is_font_)
     {
-        ImageData *rgb_img = RGBFromPalettised(tmp_img, what_palette, rim->opacity_);
-
-        if (rim->is_font_)
-        {
-            rgb_img->RemoveBackground();
-            rim->opacity_ = DetermineOpacity(tmp_img, &rim->is_empty_);
-        }
-
-        delete tmp_img;
-        tmp_img = rgb_img;
-    }
-    else if (tmp_img->depth_ >= 3)
-    {
-        if (rim->is_font_)
-        {
-            tmp_img->RemoveBackground();
-            rim->opacity_ = DetermineOpacity(tmp_img, &rim->is_empty_);
-        }
-        if (trans != nullptr)
-            PaletteRemapRGBA(tmp_img, what_palette, (const uint8_t *)&playpal_data[0]);
+        tmp_img->RemoveBackground();
+        rim->opacity_ = DetermineOpacity(tmp_img, &rim->is_empty_);
     }
 
     if (rim->hsv_rotation_ || rim->hsv_saturation_ > -1 || rim->hsv_value_)
@@ -1184,9 +659,6 @@ static GLuint LoadImageOGL(Image *rim, const Colormap *trans, bool do_whiten)
                               max_pix);
 
     delete tmp_img;
-
-    if (what_pal_cached)
-        delete[] what_palette;
 
     return tex_id;
 }
@@ -1213,23 +685,6 @@ static const Image *BackupTexture(const char *tex_name, int flags)
         rim = ImageContainerLookup(real_graphics, tex_name);
         if (rim)
             return rim;
-
-        // backup backup backup plan: see if it's a graphic in the P/PP_START
-        // P/PP_END namespace and make/return an image if valid
-        int checkfile = CheckDataFileIndexForName(tex_name);
-        int checklump = CheckLumpNumberForName(tex_name);
-        if (checkfile > -1 && checklump > -1)
-        {
-            for (auto patch_lump : *GetPatchListForWAD(checkfile))
-            {
-                if (patch_lump == checklump)
-                {
-                    rim = AddImage_Smart(tex_name, kImageSourceGraphic, patch_lump, real_graphics);
-                    if (rim)
-                        return rim;
-                }
-            }
-        }
     }
 
     if (flags & kImageLookupNull)
@@ -1262,20 +717,7 @@ static const Image *BackupFlat(const char *flat_name, int flags)
 {
     const Image *rim;
 
-    // backup plan 1: if lump exists and is right size, add it.
-    if (!(flags & kImageLookupNoNew))
-    {
-        int i = CheckLumpNumberForName(flat_name);
-
-        if (i >= 0)
-        {
-            rim = AddImageFlat(flat_name, i);
-            if (rim)
-                return rim;
-        }
-    }
-
-    // backup plan 2: Texture with the same name ?
+    // backup plan: Texture with the same name ?
     if (!(flags & kImageLookupExact))
     {
         rim = ImageContainerLookup(real_textures, flat_name);
@@ -1310,26 +752,9 @@ static const Image *BackupGraphic(const char *gfx_name, int flags)
     // backup plan 1: look for sprites and heretic-background
     if ((flags & (kImageLookupExact | kImageLookupFont)) == 0)
     {
-        rim = ImageContainerLookup(real_graphics, gfx_name, kImageSourceRawBlock);
-        if (rim)
-            return rim;
-
         rim = ImageContainerLookup(real_sprites, gfx_name);
         if (rim)
             return rim;
-    }
-
-    // not already loaded ?  Check if lump exists in wad, if so add it.
-    if (!(flags & kImageLookupNoNew))
-    {
-        int i = CheckGraphicLumpNumberForName(gfx_name);
-
-        if (i >= 0)
-        {
-            rim = AddImage_Smart(gfx_name, kImageSourceGraphic, i, real_graphics);
-            if (rim)
-                return rim;
-        }
     }
 
     if (flags & kImageLookupNull)
@@ -1436,112 +861,12 @@ const Image *ImageForFogWall(RGBAColor fog_color)
     return fogwall;
 }
 
-const Image *ImageParseSaveString(char type, const char *name)
-{
-    // Used by the savegame code.
-
-    // this name represents the sky (historical reasons)
-    if (type == 'd' && epi::StringCaseCompareASCII(name, "DUMMY__2") == 0)
-    {
-        return sky_flat_image;
-    }
-
-    switch (type)
-    {
-    case 'K':
-        return sky_flat_image;
-
-    case 'F':
-        return ImageLookup(name, kImageNamespaceFlat);
-
-    case 'P':
-        return ImageLookup(name, kImageNamespaceGraphic);
-
-    case 'S':
-        return ImageLookup(name, kImageNamespaceSprite);
-
-    default:
-        LogWarning("ImageParseSaveString: unknown type '%c'\n", type);
-        /* FALL THROUGH */
-
-    case 'd': /* dummy */
-    case 'T':
-        return ImageLookup(name, kImageNamespaceTexture);
-    }
-}
-
-void ImageMakeSaveString(const Image *image, char *type, char *namebuf)
-{
-    // Used by the savegame code
-
-    if (image == sky_flat_image)
-    {
-        *type = 'K';
-        strcpy(namebuf, "F_SKY1");
-        return;
-    }
-
-    const Image *rim = (const Image *)image;
-
-    strcpy(namebuf, rim->name_.c_str());
-
-    /* handle User images (convert to a more general type) */
-    if (rim->source_type_ == kImageSourceUser)
-    {
-        switch (rim->source_.user.def->belong_)
-        {
-        case kImageNamespaceTexture:
-            (*type) = 'T';
-            return;
-        case kImageNamespaceFlat:
-            (*type) = 'F';
-            return;
-        case kImageNamespaceSprite:
-            (*type) = 'S';
-            return;
-
-        default: /* kImageNamespaceGraphic */
-            (*type) = 'P';
-            return;
-        }
-    }
-
-    switch (rim->source_type_)
-    {
-    case kImageSourceRawBlock:
-    case kImageSourceGraphic:
-        (*type) = 'P';
-        return;
-
-    case kImageSourceTXHI:
-    case kImageSourceTexture:
-        (*type) = 'T';
-        return;
-
-    case kImageSourceFlat:
-        (*type) = 'F';
-        return;
-
-    case kImageSourceSprite:
-        (*type) = 'S';
-        return;
-
-    case kImageSourceDummy:
-        (*type) = 'd';
-        return;
-
-    default:
-        FatalError("ImageMakeSaveString: bad type %d\n", rim->source_type_);
-        break;
-    }
-}
-
 //----------------------------------------------------------------------------
 //
 //  IMAGE USAGE
 //
 
-static CachedImage *ImageCacheOGL(Image *rim, const Colormap *trans, bool do_whiten)
+static CachedImage *ImageCacheOGL(Image *rim, bool do_whiten)
 {
     // check if image + translation is already cached
 
@@ -1559,19 +884,8 @@ static CachedImage *ImageCacheOGL(Image *rim, const Colormap *trans, bool do_whi
             continue;
         }
 
-        if (do_whiten && rc->is_whitened)
+        if ((!do_whiten && !rc->is_whitened) || (do_whiten && rc->is_whitened))
             break;
-
-        if (rc->translation_map == trans)
-        {
-            if (do_whiten)
-            {
-                if (rc->is_whitened)
-                    break;
-            }
-            else if (!rc->is_whitened)
-                break;
-        }
 
         rc = nullptr;
     }
@@ -1582,7 +896,6 @@ static CachedImage *ImageCacheOGL(Image *rim, const Colormap *trans, bool do_whi
         rc = new CachedImage;
 
         rc->parent          = rim;
-        rc->translation_map = trans;
         rc->hue             = kRGBANoValue;
         rc->texture_id      = 0;
         rc->is_whitened     = do_whiten ? true : false;
@@ -1600,7 +913,7 @@ static CachedImage *ImageCacheOGL(Image *rim, const Colormap *trans, bool do_whi
     if (rc->texture_id == 0)
     {
         // load image into cache
-        rc->texture_id = LoadImageOGL(rim, trans, do_whiten);
+        rc->texture_id = LoadImageOGL(rim, do_whiten);
     }
 
     return rc;
@@ -1610,7 +923,7 @@ static CachedImage *ImageCacheOGL(Image *rim, const Colormap *trans, bool do_whi
 // The top-level routine for caching in an image.  Mainly just a
 // switch to more specialised routines.
 //
-GLuint ImageCache(const Image *image, bool anim, const Colormap *trans, bool do_whiten)
+GLuint ImageCache(const Image *image, bool anim, bool do_whiten)
 {
     // Intentional Const Override
     Image *rim = (Image *)image;
@@ -1622,7 +935,7 @@ GLuint ImageCache(const Image *image, bool anim, const Colormap *trans, bool do_
     if (rim->grayscale_)
         do_whiten = true;
 
-    CachedImage *rc = ImageCacheOGL(rim, trans, do_whiten);
+    CachedImage *rc = ImageCacheOGL(rim, do_whiten);
 
     EPI_ASSERT(rc->parent);
 
@@ -1769,7 +1082,6 @@ void AnimateImageSet(const Image **images, int number, int speed)
             dupe_image->scale_x_        = rim->scale_x_;
             dupe_image->scale_y_        = rim->scale_y_;
             dupe_image->source_         = rim->source_;
-            dupe_image->source_palette_ = rim->source_palette_;
             dupe_image->source_type_    = rim->source_type_;
             dupe_image->total_height_   = rim->total_height_;
             dupe_image->total_width_    = rim->total_width_;

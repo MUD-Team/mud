@@ -25,8 +25,7 @@ enum ImageNamespace
     kImageNamespaceGraphic = 0,
     kImageNamespaceTexture,
     kImageNamespaceFlat,
-    kImageNamespaceSprite,
-    kImageNamespacePatch,
+    kImageNamespaceSprite
 };
 
 //
@@ -36,9 +35,7 @@ enum ImageDataType
 {
     kImageDataColor = 0, // solid colour
     kImageDataFile,      // load from an image file
-    kImageDataLump,      // load from lump in a WAD
-    kImageDataPackage,   // load from an EPK package
-    kImageDataCompose    // compose from patches
+    kImageDataPackage    // load from an EPK package
 };
 
 enum ImageSpecial
@@ -61,19 +58,6 @@ enum ImageTransparencyFix
     kTransparencyFixBlacken = 1, // make 100% transparent pixels Black
 };
 
-enum LumpImageFormat
-{
-    kLumpImageFormatStandard = 0, // something standard, e.g. PNG, TGA or JPEG
-    kLumpImageFormatDoom     = 1, // the DOOM "patch" format (in a wad lump)
-};
-
-struct ComposePatch
-{
-    std::string name;
-    int         x = 0;
-    int         y = 0;
-};
-
 class ImageDefinition
 {
   public:
@@ -91,11 +75,7 @@ class ImageDefinition
 
     RGBAColor colour_;                                // kImageDataColor
 
-    std::string     info_;                            // kImageDataPackage, kImageDataFile, kImageDataLump
-    LumpImageFormat format_;                          //
-
-    int                       compose_w_, compose_h_; // kImageDataCompose
-    std::vector<ComposePatch> patches_;               //
+    std::string     info_;                            // kImageDataPackage, kImageDataFile
 
     ImageSpecial special_;
 

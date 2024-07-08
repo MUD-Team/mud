@@ -212,32 +212,6 @@ static int WhatRot(SpriteFrame *frame, const char *name, int pos)
     }
 }
 
-static void InstallSpriteLump(SpriteDefinition *def, int lump, const char *lumpname, int pos, uint8_t flip)
-{
-    SpriteFrame *frame = WhatFrame(def, lumpname, pos);
-    if (!frame)
-        return;
-
-    // don't disturb any frames already loaded
-    if (frame->finished_)
-        return;
-
-    int rot = WhatRot(frame, lumpname, pos + 1);
-    if (rot < 0)
-        return;
-
-    EPI_ASSERT(0 <= rot && rot < 16);
-
-    if (frame->images_[rot])
-        return;
-
-    frame->images_[rot] = CreateSprite(lumpname, lump, frame->is_weapon_);
-    frame->flip_[rot] = flip;
-
-    if (rot == 0 && frame->rotations_ == 1)
-        frame->finished_ = true;
-}
-
 static void InstallSpritePack(SpriteDefinition *def, PackFile *pack, std::string spritebase, std::string packname,
                               int pos, uint8_t flip)
 {
@@ -294,55 +268,7 @@ static void InstallSpriteImage(SpriteDefinition *def, const Image *img, const ch
 //
 static void FillSpriteFrames(int file)
 {
-    if (data_files[file]->wad_)
-    {
-        std::vector<int> *lumps = GetSpriteListForWAD(file);
-        if (lumps == nullptr)
-            return;
-
-        int lumpnum = (int)lumps->size();
-        if (lumpnum == 0)
-            return;
-
-        // check all lumps for prefixes matching the ones in the sprite
-        // list.  Both lists have already been sorted to make this as fast
-        // as possible.
-
-        int S = 0, L = 0;
-
-        for (; S < sprite_map_length; S++)
-        {
-            std::string sprname = sprite_map[S]->name_;
-            size_t      spr_len = sprname.size();
-            for (; L < lumpnum; L++)
-            {
-                const char *lumpname = GetLumpNameFromIndex((*lumps)[L]);
-
-                if (strlen(lumpname) != spr_len + 2 && strlen(lumpname) != spr_len + 4)
-                {
-                    continue;
-                }
-
-                // ignore model skins
-                if (strlen(lumpname) == spr_len + 4 && lumpname[spr_len] == 'S' && lumpname[spr_len + 1] == 'K' &&
-                    lumpname[spr_len + 2] == 'N')
-                {
-                    continue;
-                }
-
-                if (epi::StringCompareMax(sprname, lumpname, spr_len) != 0)
-                    continue;
-
-                // we have a match
-                InstallSpriteLump(sprite_map[S], (*lumps)[L], lumpname, spr_len, 0);
-
-                if (strlen(lumpname) == spr_len + 4)
-                    InstallSpriteLump(sprite_map[S], (*lumps)[L], lumpname, spr_len + 2, 1);
-            }
-            L = 0;
-        }
-    }
-    else if (data_files[file]->pack_)
+    if (data_files[file]->pack_)
     {
         std::vector<std::string> packsprites = GetPackSpriteList(data_files[file]->pack_);
         if (!packsprites.empty())
@@ -427,44 +353,6 @@ static void FillSpriteFramesUser()
 
             if (epi::StringCompareMax(sprname, img_name, spr_len) != 0)
                 continue;
-
-            // Fix offsets if Doom formatted
-            // Not sure if this is the 'proper' place to do this yet - Dasho
-            if (images[L]->source_.graphic.is_patch)
-            {
-                // const override
-                Image     *change_img   = (Image *)images[L];
-                epi::File *offset_check = nullptr;
-                if (images[L]->source_.graphic.packfile_name)
-                    offset_check = OpenFileFromPack(images[L]->source_.graphic.packfile_name);
-                else
-                    offset_check = LoadLumpAsFile(images[L]->source_.graphic.lump);
-
-                if (!offset_check)
-                    FatalError("FillSpriteFramesUser: Error loading %s!\n", images[L]->name_.c_str());
-
-                uint8_t header[32];
-                memset(header, 255, sizeof(header));
-                offset_check->Read(header, sizeof(header));
-                delete offset_check;
-
-                const Patch *pat      = (Patch *)header;
-                change_img->offset_x_ = AlignedLittleEndianS16(pat->left_offset);
-                change_img->offset_y_ = AlignedLittleEndianS16(pat->top_offset);
-                // adjust sprite offsets so that (0,0) is normal
-                if (sprite_map[S]->HasWeapon())
-                {
-                    change_img->offset_x_ += (320.0f / 2.0f - change_img->actual_width_ / 2.0f); // loss of accuracy
-                    change_img->offset_y_ += (200.0f - 32.0f - change_img->actual_height_);
-                }
-                else
-                {
-                    // rim->offset_x_ -= rim->actual_width_ / 2;   // loss of
-                    // accuracy
-                    change_img->offset_x_ -= ((float)change_img->actual_width_) / 2.0f; // Lobo 2023: dancing eye fix
-                    change_img->offset_y_ -= change_img->actual_height_;
-                }
-            }
 
             // we have a match
             InstallSpriteImage(sprite_map[S], images[L], img_name, spr_len, 0);

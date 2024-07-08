@@ -952,8 +952,6 @@ static void DoEndGame(void)
 
     game_state = kGameStateNothing;
 
-    SetPalette(kPaletteNormal, 0);
-
     StopMusic();
 
     PickLoadingScreen();

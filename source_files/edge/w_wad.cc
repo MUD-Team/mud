@@ -64,18 +64,11 @@
 #include "script/compat/lua_compat.h"
 #include "w_epk.h"
 #include "w_files.h"
-#include "w_texture.h"
 
 class WadFile
 {
   public:
     // lists for sprites, flats, patches (stuff between markers)
-    std::vector<int> sprite_lumps_;
-    std::vector<int> flat_lumps_;
-    std::vector<int> patch_lumps_;
-    std::vector<int> colormap_lumps_;
-    std::vector<int> tx_lumps_;
-    std::vector<int> hires_lumps_;
     std::vector<int> xgl_lumps_;
 
     // level markers and skin markers
@@ -84,9 +77,6 @@ class WadFile
 
     // ddf and rts lump list
     int ddf_lumps_[kTotalDDFTypes];
-
-    // texture information
-    WadTextureResource wadtex_;
 
     // LUA scripts
     int lua_huds_;
@@ -99,8 +89,8 @@ class WadFile
 
   public:
     WadFile()
-        : sprite_lumps_(), flat_lumps_(), patch_lumps_(), colormap_lumps_(), tx_lumps_(), hires_lumps_(), xgl_lumps_(),
-          level_markers_(), skin_markers_(), wadtex_(), lua_huds_(-1),
+        : xgl_lumps_(),
+          level_markers_(), skin_markers_(), lua_huds_(-1),
           animated_(-1), switches_(-1), md5_string_()
     {
         for (int d = 0; d < kTotalDDFTypes; d++)
@@ -118,14 +108,7 @@ enum LumpKind
 {
     kLumpNormal   = 0,  // fallback value
     kLumpMarker   = 3,  // X_START, X_END, S_SKIN, level name
-    kLumpWadTex   = 6,  // palette, pnames, texture1/2
     kLumpDDF      = 10, // DDF, RTS, Lua lump
-    kLumpTx       = 14,
-    kLumpColormap = 15,
-    kLumpFlat     = 16,
-    kLumpSprite   = 17,
-    kLumpPatch    = 18,
-    kLumpHiRes    = 19,
     kLumpXGL      = 20,
 };
 
@@ -153,153 +136,7 @@ static std::vector<LumpInfo> lump_info;
 
 static std::vector<int> sorted_lumps;
 
-// the first datafile which contains a PLAYPAL lump
-static int palette_datafile = -1;
-
-// Sprites & Flats
-static bool within_sprite_list;
-static bool within_flat_list;
-static bool within_patch_list;
-static bool within_colmap_list;
-static bool within_tex_list;
-static bool within_hires_list;
 static bool within_xgl_list;
-
-//
-// Is the name a sprite list start flag?
-// If lax syntax match, fix up to standard syntax.
-//
-static bool IsS_START(char *name)
-{
-    if (strncmp(name, "SS_START", 8) == 0)
-    {
-        // fix up flag to standard syntax
-        // Note: strncpy will pad will nulls
-        strncpy(name, "S_START", 8);
-        return 1;
-    }
-
-    return (strncmp(name, "S_START", 8) == 0);
-}
-
-//
-// Is the name a sprite list end flag?
-// If lax syntax match, fix up to standard syntax.
-//
-static bool IsS_END(char *name)
-{
-    if (strncmp(name, "SS_END", 8) == 0)
-    {
-        // fix up flag to standard syntax
-        strncpy(name, "S_END", 8);
-        return 1;
-    }
-
-    return (strncmp(name, "S_END", 8) == 0);
-}
-
-//
-// Is the name a flat list start flag?
-// If lax syntax match, fix up to standard syntax.
-//
-static bool IsF_START(char *name)
-{
-    if (strncmp(name, "FF_START", 8) == 0)
-    {
-        // fix up flag to standard syntax
-        strncpy(name, "F_START", 8);
-        return 1;
-    }
-
-    return (strncmp(name, "F_START", 8) == 0);
-}
-
-//
-// Is the name a flat list end flag?
-// If lax syntax match, fix up to standard syntax.
-//
-static bool IsF_END(char *name)
-{
-    if (strncmp(name, "FF_END", 8) == 0)
-    {
-        // fix up flag to standard syntax
-        strncpy(name, "F_END", 8);
-        return 1;
-    }
-
-    return (strncmp(name, "F_END", 8) == 0);
-}
-
-//
-// Is the name a patch list start flag?
-// If lax syntax match, fix up to standard syntax.
-//
-static bool IsP_START(char *name)
-{
-    if (strncmp(name, "PP_START", 8) == 0)
-    {
-        // fix up flag to standard syntax
-        strncpy(name, "P_START", 8);
-        return 1;
-    }
-
-    return (strncmp(name, "P_START", 8) == 0);
-}
-
-//
-// Is the name a patch list end flag?
-// If lax syntax match, fix up to standard syntax.
-//
-static bool IsP_END(char *name)
-{
-    if (strncmp(name, "PP_END", 8) == 0)
-    {
-        // fix up flag to standard syntax
-        strncpy(name, "P_END", 8);
-        return 1;
-    }
-
-    return (strncmp(name, "P_END", 8) == 0);
-}
-
-//
-// Is the name a colourmap list start/end flag?
-//
-static bool IsC_START(char *name)
-{
-    return (strncmp(name, "C_START", 8) == 0);
-}
-
-static bool IsC_END(char *name)
-{
-    return (strncmp(name, "C_END", 8) == 0);
-}
-
-//
-// Is the name a texture list start/end flag?
-//
-static bool IsTX_START(char *name)
-{
-    return (strncmp(name, "TX_START", 8) == 0);
-}
-
-static bool IsTX_END(char *name)
-{
-    return (strncmp(name, "TX_END", 8) == 0);
-}
-
-//
-// Is the name a high-resolution start/end flag?
-//
-static bool IsHI_START(char *name)
-{
-    return (strncmp(name, "HI_START", 8) == 0);
-}
-
-static bool IsHI_END(char *name)
-{
-    return (strncmp(name, "HI_END", 8) == 0);
-}
 
 //
 // Is the name a XGL nodes start/end flag?
@@ -312,17 +149,6 @@ static bool IsXG_START(char *name)
 static bool IsXG_END(char *name)
 {
     return (strncmp(name, "XG_END", 8) == 0);
-}
-
-//
-// Is the name a dummy sprite/flat/patch marker ?
-//
-static bool IsDummySF(const char *name)
-{
-    return (
-        strncmp(name, "S1_START", 8) == 0 || strncmp(name, "S2_START", 8) == 0 || strncmp(name, "S3_START", 8) == 0 ||
-        strncmp(name, "F1_START", 8) == 0 || strncmp(name, "F2_START", 8) == 0 || strncmp(name, "F3_START", 8) == 0 ||
-        strncmp(name, "P1_START", 8) == 0 || strncmp(name, "P2_START", 8) == 0 || strncmp(name, "P3_START", 8) == 0);
 }
 
 //
@@ -340,46 +166,6 @@ bool WadFile::HasLevel(const char *name) const
             return true;
 
     return false;
-}
-
-void GetTextureLumpsForWAD(int file, WadTextureResource *res)
-{
-    EPI_ASSERT(0 <= file && file < (int)data_files.size());
-    EPI_ASSERT(res);
-
-    DataFile *df  = data_files[file];
-    WadFile  *wad = df->wad_;
-
-    if (wad == nullptr)
-    {
-        // leave the wadtex_resource_c in initial state
-        return;
-    }
-
-    res->palette  = wad->wadtex_.palette;
-    res->pnames   = wad->wadtex_.pnames;
-    res->texture1 = wad->wadtex_.texture1;
-    res->texture2 = wad->wadtex_.texture2;
-
-    // find an earlier PNAMES lump when missing.
-    // Ditto for palette.
-
-    if (res->texture1 >= 0 || res->texture2 >= 0)
-    {
-        int cur;
-
-        for (cur = file; res->pnames == -1 && cur > 0; cur--)
-        {
-            if (data_files[cur]->wad_ != nullptr)
-                res->pnames = data_files[cur]->wad_->wadtex_.pnames;
-        }
-
-        for (cur = file; res->palette == -1 && cur > 0; cur--)
-        {
-            if (data_files[cur]->wad_ != nullptr)
-                res->palette = data_files[cur]->wad_->wadtex_.palette;
-        }
-    }
 }
 
 //
@@ -433,20 +219,6 @@ static void SortLumps(void)
 }
 
 //
-// SortSpriteLumps
-//
-// Put the sprite list in sorted order (of name), required by
-// R_InitSprites (speed optimisation).
-//
-static void SortSpriteLumps(WadFile *wad)
-{
-    if (wad->sprite_lumps_.size() < 2)
-        return;
-
-    std::sort(wad->sprite_lumps_.begin(), wad->sprite_lumps_.end(), Compare_lump_pred());
-}
-
-//
 // LUMP BASED ROUTINES.
 //
 
@@ -481,37 +253,7 @@ static void AddLump(DataFile *df, const char *raw_name, int pos, int size, int f
 
     WadFile *wad = df->wad_;
 
-    if (strcmp(info.name, "PLAYPAL") == 0)
-    {
-        lump_p->kind = kLumpWadTex;
-        if (wad != nullptr)
-            wad->wadtex_.palette = lump;
-        if (palette_datafile < 0)
-            palette_datafile = file_index;
-        return;
-    }
-    else if (strcmp(info.name, "PNAMES") == 0)
-    {
-        lump_p->kind = kLumpWadTex;
-        if (wad != nullptr)
-            wad->wadtex_.pnames = lump;
-        return;
-    }
-    else if (strcmp(info.name, "TEXTURE1") == 0)
-    {
-        lump_p->kind = kLumpWadTex;
-        if (wad != nullptr)
-            wad->wadtex_.texture1 = lump;
-        return;
-    }
-    else if (strcmp(info.name, "TEXTURE2") == 0)
-    {
-        lump_p->kind = kLumpWadTex;
-        if (wad != nullptr)
-            wad->wadtex_.texture2 = lump;
-        return;
-    }
-    else if (strcmp(info.name, "LUAHUDS") == 0)
+    if (strcmp(info.name, "LUAHUDS") == 0)
     {
         lump_p->kind = kLumpDDF;
         if (wad != nullptr)
@@ -554,99 +296,9 @@ static void AddLump(DataFile *df, const char *raw_name, int pos, int size, int f
         return;
     }
 
-    // -- handle sprite, flat & patch lists --
+    // -- handle node lists --
 
-    if (IsS_START(lump_p->name))
-    {
-        lump_p->kind       = kLumpMarker;
-        within_sprite_list = true;
-        return;
-    }
-    else if (IsS_END(lump_p->name))
-    {
-        if (!within_sprite_list)
-            LogWarning("Unexpected S_END marker in wad.\n");
-
-        lump_p->kind       = kLumpMarker;
-        within_sprite_list = false;
-        return;
-    }
-    else if (IsF_START(lump_p->name))
-    {
-        lump_p->kind     = kLumpMarker;
-        within_flat_list = true;
-        return;
-    }
-    else if (IsF_END(lump_p->name))
-    {
-        if (!within_flat_list)
-            LogWarning("Unexpected F_END marker in wad.\n");
-
-        lump_p->kind     = kLumpMarker;
-        within_flat_list = false;
-        return;
-    }
-    else if (IsP_START(lump_p->name))
-    {
-        lump_p->kind      = kLumpMarker;
-        within_patch_list = true;
-        return;
-    }
-    else if (IsP_END(lump_p->name))
-    {
-        if (!within_patch_list)
-            LogWarning("Unexpected P_END marker in wad.\n");
-
-        lump_p->kind      = kLumpMarker;
-        within_patch_list = false;
-        return;
-    }
-    else if (IsC_START(lump_p->name))
-    {
-        lump_p->kind       = kLumpMarker;
-        within_colmap_list = true;
-        return;
-    }
-    else if (IsC_END(lump_p->name))
-    {
-        if (!within_colmap_list)
-            LogWarning("Unexpected C_END marker in wad.\n");
-
-        lump_p->kind       = kLumpMarker;
-        within_colmap_list = false;
-        return;
-    }
-    else if (IsTX_START(lump_p->name))
-    {
-        lump_p->kind    = kLumpMarker;
-        within_tex_list = true;
-        return;
-    }
-    else if (IsTX_END(lump_p->name))
-    {
-        if (!within_tex_list)
-            LogWarning("Unexpected TX_END marker in wad.\n");
-
-        lump_p->kind    = kLumpMarker;
-        within_tex_list = false;
-        return;
-    }
-    else if (IsHI_START(lump_p->name))
-    {
-        lump_p->kind      = kLumpMarker;
-        within_hires_list = true;
-        return;
-    }
-    else if (IsHI_END(lump_p->name))
-    {
-        if (!within_hires_list)
-            LogWarning("Unexpected HI_END marker in wad.\n");
-
-        lump_p->kind      = kLumpMarker;
-        within_hires_list = false;
-        return;
-    }
-    else if (IsXG_START(lump_p->name))
+    if (IsXG_START(lump_p->name))
     {
         lump_p->kind    = kLumpMarker;
         within_xgl_list = true;
@@ -663,47 +315,11 @@ static void AddLump(DataFile *df, const char *raw_name, int pos, int size, int f
     }
 
     // ignore zero size lumps or dummy markers
-    if (lump_p->size == 0 || IsDummySF(lump_p->name))
+    if (lump_p->size == 0)
         return;
 
     if (wad == nullptr)
         return;
-
-    if (within_sprite_list)
-    {
-        lump_p->kind = kLumpSprite;
-        wad->sprite_lumps_.push_back(lump);
-    }
-
-    if (within_flat_list)
-    {
-        lump_p->kind = kLumpFlat;
-        wad->flat_lumps_.push_back(lump);
-    }
-
-    if (within_patch_list)
-    {
-        lump_p->kind = kLumpPatch;
-        wad->patch_lumps_.push_back(lump);
-    }
-
-    if (within_colmap_list)
-    {
-        lump_p->kind = kLumpColormap;
-        wad->colormap_lumps_.push_back(lump);
-    }
-
-    if (within_tex_list)
-    {
-        lump_p->kind = kLumpTx;
-        wad->tx_lumps_.push_back(lump);
-    }
-
-    if (within_hires_list)
-    {
-        lump_p->kind = kLumpHiRes;
-        wad->hires_lumps_.push_back(lump);
-    }
 
     if (within_xgl_list)
     {
@@ -882,12 +498,6 @@ static void ProcessBoomStuffInWad(DataFile *df)
         DDFConvertSwitchesLump(data, length);
         delete[] data;
     }
-
-    // handle BOOM Colourmaps (between C_START and C_END)
-    for (int lump : df->wad_->colormap_lumps_)
-    {
-        DDFAddRawColourmap(GetLumpNameFromIndex(lump), GetLumpLength(lump), nullptr, lump);
-    }
 }
 
 void ProcessWad(DataFile *df, size_t file_index)
@@ -895,11 +505,8 @@ void ProcessWad(DataFile *df, size_t file_index)
     WadFile *wad = new WadFile();
     df->wad_     = wad;
 
-    // reset the sprite/flat/patch list stuff
-    within_sprite_list = within_flat_list = false;
-    within_patch_list = within_colmap_list = false;
-    within_tex_list = within_hires_list = false;
-    within_xgl_list                     = false;
+    // reset the node list stuff
+    within_xgl_list = false;
 
     RawWadHeader header;
 
@@ -947,24 +554,10 @@ void ProcessWad(DataFile *df, size_t file_index)
 
     // check for unclosed sprite/flat/patch lists
     const char *filename = df->name_.c_str();
-    if (within_sprite_list)
-        LogWarning("Missing S_END marker in %s.\n", filename);
-    if (within_flat_list)
-        LogWarning("Missing F_END marker in %s.\n", filename);
-    if (within_patch_list)
-        LogWarning("Missing P_END marker in %s.\n", filename);
-    if (within_colmap_list)
-        LogWarning("Missing C_END marker in %s.\n", filename);
-    if (within_tex_list)
-        LogWarning("Missing TX_END marker in %s.\n", filename);
-    if (within_hires_list)
-        LogWarning("Missing HI_END marker in %s.\n", filename);
     if (within_xgl_list)
         LogWarning("Missing XG_END marker in %s.\n", filename);
 
     SortLumps();
-
-    SortSpriteLumps(wad);
 
     // compute MD5 hash over wad directory
     epi::MD5Hash dir_md5;
@@ -1058,28 +651,6 @@ epi::File *LoadLumpAsFile(int lump)
 epi::File *LoadLumpAsFile(const char *name)
 {
     return LoadLumpAsFile(GetLumpNumberForName(name));
-}
-
-//
-// GetPaletteForLump
-//
-// Returns the palette lump that should be used for the given lump
-// (presumably an image), otherwise -1 (indicating that the global
-// palette should be used).
-//
-// NOTE: when the same WAD as the lump does not contain a palette,
-// there are two possibilities: search backwards for the "closest"
-// palette, or simply return -1.  Neither one is ideal, though I tend
-// to think that searching backwards is more intuitive.
-//
-// NOTE 2: the palette_datafile stuff is there so we always return -1
-// for the "GLOBAL" palette.
-//
-int GetPaletteForLump(int lump)
-{
-    EPI_ASSERT(IsLumpIndexValid(lump));
-
-    return CheckLumpNumberForName("PLAYPAL");
 }
 
 static int QuickFindLumpMap(const char *buf)
@@ -1183,39 +754,6 @@ int CheckDataFileIndexForName(const char *name)
     return lump_info[sorted_lumps[i]].file;
 }
 
-int CheckGraphicLumpNumberForName(const char *name)
-{
-    // this looks for a graphic lump, skipping anything which would
-    // not be suitable (especially flats and HIRES replacements).
-
-    int  i;
-    char buf[9];
-
-    if (strlen(name) > 8)
-    {
-        LogDebug("CheckLumpNumberForName: Name '%s' longer than 8 chars!\n", name);
-        return -1;
-    }
-
-    for (i = 0; name[i]; i++)
-    {
-        buf[i] = epi::ToUpperASCII(name[i]);
-    }
-    buf[i] = 0;
-
-    // search backwards
-    for (i = (int)lump_info.size() - 1; i >= 0; i--)
-    {
-        if (lump_info[i].kind == kLumpNormal || lump_info[i].kind == kLumpSprite || lump_info[i].kind == kLumpPatch)
-        {
-            if (strncmp(lump_info[i].name, buf, 8) == 0)
-                return i;
-        }
-    }
-
-    return -1; // not found
-}
-
 int CheckXGLLumpNumberForName(const char *name)
 {
     // limit search to stuff between XG_START and XG_END.
@@ -1292,51 +830,6 @@ int GetLumpNumberForName(const char *name)
 }
 
 //
-// CheckPatchLumpNumberForName
-//
-// Returns -1 if name not found.
-//
-// -AJA- 2004/06/24: Patches should be within the P_START/P_END markers,
-//       so we should look there first.  Also we should never return a
-//       flat as a tex-patch.
-//
-int CheckPatchLumpNumberForName(const char *name)
-{
-    int  i;
-    char buf[10];
-
-    for (i = 0; name[i]; i++)
-    {
-#ifdef DEVELOPERS
-        if (i > 8)
-            FatalError("CheckPatchLumpNumberForName: '%s' longer than 8 chars!", name);
-#endif
-        buf[i] = epi::ToUpperASCII(name[i]);
-    }
-    buf[i] = 0;
-
-    i = QuickFindLumpMap(buf);
-
-    if (i < 0)
-        return -1; // not found
-
-    for (; i < (int)lump_info.size() && epi::StringCompareMax(lump_info[sorted_lumps[i]].name, buf, 8) == 0; i++)
-    {
-        LumpInfo *L = &lump_info[sorted_lumps[i]];
-
-        if (L->kind == kLumpPatch || L->kind == kLumpSprite || L->kind == kLumpNormal)
-        {
-            // allow kLumpNormal to support patches outside of the
-            // P_START/END markers.  We especially want to disallow
-            // flat and colourmap lumps.
-            return sorted_lumps[i];
-        }
-    }
-
-    return -1; // nothing suitable
-}
-
-//
 // IsLumpIndexValid
 //
 // Verifies that the given lump number is valid and has the given
@@ -1368,90 +861,6 @@ int GetLumpLength(int lump)
         FatalError("GetLumpLength: %i >= numlumps", lump);
 
     return lump_info[lump].size;
-}
-
-//
-// FindFlatSequence
-//
-// Returns the file number containing the sequence, or -1 if not
-// found.  Search is from newest wad file to oldest wad file.
-//
-int FindFlatSequence(const char *start, const char *end, int *s_offset, int *e_offset)
-{
-    for (int file = (int)data_files.size() - 1; file >= 0; file--)
-    {
-        DataFile *df  = data_files[file];
-        WadFile  *wad = df->wad_;
-
-        if (wad == nullptr)
-            continue;
-
-        // look for start name
-        int i;
-        for (i = 0; i < (int)wad->flat_lumps_.size(); i++)
-        {
-            if (strncmp(start, GetLumpNameFromIndex(wad->flat_lumps_[i]), 8) == 0)
-                break;
-        }
-
-        if (i >= (int)wad->flat_lumps_.size())
-            continue;
-
-        (*s_offset) = i;
-
-        // look for end name
-        for (i++; i < (int)wad->flat_lumps_.size(); i++)
-        {
-            if (strncmp(end, GetLumpNameFromIndex(wad->flat_lumps_[i]), 8) == 0)
-            {
-                (*e_offset) = i;
-                return file;
-            }
-        }
-    }
-
-    // not found
-    return -1;
-}
-
-// returns nullptr for an empty list.
-std::vector<int> *GetFlatListForWAD(int file)
-{
-    EPI_ASSERT(0 <= file && file < (int)data_files.size());
-
-    DataFile *df  = data_files[file];
-    WadFile  *wad = df->wad_;
-
-    if (wad != nullptr)
-        return &wad->flat_lumps_;
-
-    return nullptr;
-}
-
-std::vector<int> *GetSpriteListForWAD(int file)
-{
-    EPI_ASSERT(0 <= file && file < (int)data_files.size());
-
-    DataFile *df  = data_files[file];
-    WadFile  *wad = df->wad_;
-
-    if (wad != nullptr)
-        return &wad->sprite_lumps_;
-
-    return nullptr;
-}
-
-std::vector<int> *GetPatchListForWAD(int file)
-{
-    EPI_ASSERT(0 <= file && file < (int)data_files.size());
-
-    DataFile *df  = data_files[file];
-    WadFile  *wad = df->wad_;
-
-    if (wad != nullptr)
-        return &wad->patch_lumps_;
-
-    return nullptr;
 }
 
 int GetDataFileIndexForLump(int lump)
@@ -1539,153 +948,6 @@ std::string LoadLumpAsString(const char *name)
 const char *GetLumpNameFromIndex(int lump)
 {
     return lump_info[lump].name;
-}
-
-void ProcessTXHINamespaces(void)
-{
-    // Add the textures that occur in between TX_START/TX_END markers
-
-    // TODO: collect names, remove duplicates
-
-    StartupProgressMessage("Adding standalone textures...");
-
-    for (int file = 0; file < (int)data_files.size(); file++)
-    {
-        DataFile *df  = data_files[file];
-        WadFile  *wad = df->wad_;
-
-        if (wad == nullptr)
-            continue;
-
-        for (int i = 0; i < (int)wad->tx_lumps_.size(); i++)
-        {
-            int lump = wad->tx_lumps_[i];
-            ImageAddTxHx(lump, GetLumpNameFromIndex(lump), false);
-        }
-    }
-
-    StartupProgressMessage("Adding high-resolution textures...");
-
-    // Add the textures that occur in between HI_START/HI_END markers
-
-    for (int file = 0; file < (int)data_files.size(); file++)
-    {
-        DataFile *df = data_files[file];
-
-        if (df->wad_)
-        {
-            for (int i = 0; i < (int)df->wad_->hires_lumps_.size(); i++)
-            {
-                int lump = df->wad_->hires_lumps_[i];
-                ImageAddTxHx(lump, GetLumpNameFromIndex(lump), true);
-            }
-        }
-        else if (df->pack_)
-        {
-            ProcessHiresPackSubstitutions(df->pack_, file);
-        }
-    }
-}
-
-static const char *UserSkyboxName(const char *base, int face)
-{
-    static char       buffer[64];
-    static const char letters[] = "NESWTB";
-
-    sprintf(buffer, "%s_%c", base, letters[face]);
-    return buffer;
-}
-
-// DisableStockSkybox
-//
-// Check if a loaded pwad has a custom sky.
-// If so, turn off our EWAD skybox.
-//
-// Returns true if found
-bool DisableStockSkybox(const char *ActualSky)
-{
-    bool         TurnOffSkybox = false;
-    const Image *tempImage;
-    int          filenum = -1;
-    int          lumpnum = -1;
-
-    // First we should try for "SKY1_N" type names but only
-    // use it if it's in a pwad i.e. a users skybox
-    tempImage = ImageLookup(UserSkyboxName(ActualSky, 0), kImageNamespaceTexture, kImageLookupNull);
-    if (tempImage)
-    {
-        if (tempImage->source_type_ == kImageSourceUser) // from images.ddf
-        {
-            lumpnum = CheckLumpNumberForName(tempImage->name_.c_str());
-
-            if (lumpnum != -1)
-            {
-                filenum = GetDataFileIndexForLump(lumpnum);
-            }
-
-            if (filenum != -1) // make sure we actually have a file
-            {
-                // we only want pwads
-                if (data_files[filenum]->kind_ == kFileKindPWAD || data_files[filenum]->kind_ == kFileKindPackWAD)
-                {
-                    LogDebug("SKYBOX: Sky is: %s. Type:%d lumpnum:%d filenum:%d \n", tempImage->name_.c_str(),
-                             tempImage->source_type_, lumpnum, filenum);
-                    TurnOffSkybox = false;
-                    return TurnOffSkybox; // get out of here
-                }
-            }
-        }
-    }
-
-    // If we're here then there are no user skyboxes.
-    // Lets check for single texture ones instead.
-    tempImage = ImageLookup(ActualSky, kImageNamespaceTexture, kImageLookupNull);
-
-    if (tempImage)                                          // this should always be true but check just in case
-    {
-        if (tempImage->source_type_ == kImageSourceTexture) // Normal doom format sky
-        {
-            filenum = GetDataFileIndexForLump(tempImage->source_.texture.tdef->patches->patch);
-        }
-        else if (tempImage->source_type_ == kImageSourceUser) // texture from images.ddf
-        {
-            LogDebug("SKYBOX: Sky is: %s. Type:%d  \n", tempImage->name_.c_str(), tempImage->source_type_);
-            TurnOffSkybox = true;                             // turn off or not? hmmm...
-            return TurnOffSkybox;
-        }
-        else                                                  // could be a png or jpg i.e. TX_ or HI_
-        {
-            lumpnum = CheckLumpNumberForName(tempImage->name_.c_str());
-            // lumpnum = tempImage->source.graphic.lump;
-            if (lumpnum != -1)
-            {
-                filenum = GetDataFileIndexForLump(lumpnum);
-            }
-        }
-
-        if (tempImage->source_type_ == kImageSourceDummy) // probably a skybox?
-        {
-            TurnOffSkybox = false;
-        }
-
-        if (filenum == 0) // it's the IWAD so we're done
-        {
-            TurnOffSkybox = false;
-        }
-
-        if (filenum != -1) // make sure we actually have a file
-        {
-            // we only want pwads
-            if (data_files[filenum]->kind_ == kFileKindPWAD || data_files[filenum]->kind_ == kFileKindPackWAD)
-            {
-                TurnOffSkybox = true;
-            }
-        }
-    }
-
-    LogDebug("SKYBOX: Sky is: %s. Type:%d lumpnum:%d filenum:%d \n", tempImage->name_.c_str(), tempImage->source_type_,
-             lumpnum, filenum);
-    return TurnOffSkybox;
 }
 
 // IsLumpInPwad

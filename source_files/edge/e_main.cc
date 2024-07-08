@@ -85,7 +85,6 @@
 #include "w_files.h"
 #include "w_model.h"
 #include "w_sprite.h"
-#include "w_texture.h"
 #include "w_wad.h"
 
 extern ConsoleVariable double_framerate;
@@ -534,8 +533,6 @@ void EdgeDisplay(void)
     switch (game_state)
     {
     case kGameStateLevel:
-        PaletteTicker();
-
         LuaRunHUD();
 
         HUDDrawer();
@@ -752,7 +749,6 @@ static void PickMenuBackdrop(void)
         new_backdrop->scale_x_           = menu_image->scale_x_;
         new_backdrop->scale_y_           = menu_image->scale_y_;
         new_backdrop->source_            = menu_image->source_;
-        new_backdrop->source_palette_    = menu_image->source_palette_;
         new_backdrop->source_type_       = menu_image->source_type_;
         new_backdrop->total_height_      = menu_image->total_height_;
         new_backdrop->total_width_       = menu_image->total_width_;
@@ -782,7 +778,6 @@ static void PickMenuBackdrop(void)
         new_backdrop->scale_x_           = loading_image->scale_x_;
         new_backdrop->scale_y_           = loading_image->scale_y_;
         new_backdrop->source_            = loading_image->source_;
-        new_backdrop->source_palette_    = loading_image->source_palette_;
         new_backdrop->source_type_       = loading_image->source_type_;
         new_backdrop->total_height_      = loading_image->total_height_;
         new_backdrop->total_width_       = loading_image->total_width_;
@@ -1561,13 +1556,10 @@ static void EdgeStartup(void)
     // overrides of lump-specific image/sound/DDF defines
     DoPackSubstitutions();
     StartupMusic();
-    InitializePalette();
 
     DDFCleanUp();
     SetLanguage();
 
-    InitializeFlats();
-    InitializeTextures();
     CreateUserImages();
     PickLoadingScreen();
     PickMenuBackdrop();
@@ -1580,7 +1572,6 @@ static void EdgeStartup(void)
 
     PrecacheSounds();
     InitializeSprites();
-    ProcessTXHINamespaces();
     InitializeModels();
 
     MenuInitialize();

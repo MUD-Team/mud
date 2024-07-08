@@ -41,7 +41,6 @@ static ImageDefinition dummy_image;
 
 static const DDFCommandList image_commands[] = {
     DDF_FIELD("IMAGE_DATA", dummy_image, type_, DDFImageGetType),
-    DDF_FIELD("PATCHES", dummy_image, patches_, DDFImageGetPatches),
     DDF_FIELD("SPECIAL", dummy_image, special_, DDFImageGetSpecial),
     DDF_FIELD("X_OFFSET", dummy_image, x_offset_, DDFMainGetFloat),
     DDF_FIELD("Y_OFFSET", dummy_image, y_offset_, DDFMainGetFloat),
@@ -71,9 +70,6 @@ static ImageNamespace GetImageNamespace(const char *prefix)
 
     if (DDFCompareName(prefix, "spr") == 0)
         return kImageNamespaceSprite;
-
-    if (DDFCompareName(prefix, "patch") == 0)
-        return kImageNamespacePatch;
 
     DDFError("Invalid image prefix '%s' (use: gfx,tex,flat,spr)\n", prefix);
     return kImageNamespaceFlat; /* NOT REACHED */
@@ -143,10 +139,6 @@ static void ImageParseField(const char *field, const char *contents, int index, 
     LogDebug("IMAGE_PARSE: %s = %s;\n", field, contents);
 #endif
 
-    // ensure previous patches are cleared when beginning a new set
-    if (DDFCompareName(field, "PATCHES") == 0 && index == 0)
-        dynamic_image->patches_.clear();
-
     if (DDFMainParseField(image_commands, field, contents, (uint8_t *)dynamic_image))
         return; // OK
 
@@ -155,14 +147,6 @@ static void ImageParseField(const char *field, const char *contents, int index, 
 
 static void ImageFinishEntry(void)
 {
-    if (dynamic_image->type_ == kImageDataFile || dynamic_image->type_ == kImageDataPackage)
-    {
-        if (epi::GetExtension(dynamic_image->info_) == ".lmp")
-            dynamic_image->format_ = kLumpImageFormatDoom;
-        else
-            dynamic_image->format_ = kLumpImageFormatStandard;
-    }
-
     // Add these automatically so modders don't have to remember them
     if (dynamic_image->is_font_)
     {
@@ -218,63 +202,6 @@ static void ImageParseInfo(const char *value)
     dynamic_image->info_ = value;
 }
 
-static void ImageParseLump(const char *spec)
-{
-    const char *colon = DDFMainDecodeList(spec, ':', true);
-
-    if (colon == nullptr)
-    {
-        dynamic_image->info_   = spec;
-        dynamic_image->format_ = kLumpImageFormatStandard;
-    }
-    else
-    {
-        // all this is mainly for backwards compatibility, but the
-        // format "DOOM" does affect how the lump is handled.
-
-        if (colon == spec || colon[1] == 0 || (colon - spec) >= 16)
-            DDFError("Malformed image lump spec: 'LUMP:%s'\n", spec);
-
-        char keyword[20];
-
-        strncpy(keyword, spec, colon - spec);
-        keyword[colon - spec] = 0;
-
-        // store the lump name
-        dynamic_image->info_ = (colon + 1);
-
-        if (DDFCompareName(keyword, "PNG") == 0 || DDFCompareName(keyword, "TGA") == 0 ||
-            DDFCompareName(keyword, "JPG") == 0 || DDFCompareName(keyword, "JPEG") == 0 ||
-            DDFCompareName(keyword, "EXT") == 0) // 2.x used this for auto-detection of regular images, but
-                                                  // we do this regardless of the extension
-        {
-            dynamic_image->format_ = kLumpImageFormatStandard;
-        }
-        else if (DDFCompareName(keyword, "DOOM") == 0)
-        {
-            dynamic_image->format_ = kLumpImageFormatDoom;
-        }
-        else
-        {
-            DDFError("Unknown image format: %s (use PNG,JPEG,TGA or DOOM)\n", keyword);
-        }
-    }
-}
-
-static void ImageParseCompose(const char *info)
-{
-    const char *colon = DDFMainDecodeList(info, ':', true);
-
-    if (colon == nullptr || colon == info || colon[1] == 0)
-        DDFError("Malformed image compose spec: %s\n", info);
-
-    dynamic_image->compose_w_ = atoi(info);
-    dynamic_image->compose_h_ = atoi(colon + 1);
-
-    if (dynamic_image->compose_w_ <= 0 || dynamic_image->compose_h_ <= 0)
-        DDFError("Illegal image compose size: %d x %d\n", dynamic_image->compose_w_, dynamic_image->compose_h_);
-}
-
 static void DDFImageGetType(const char *info, void *storage)
 {
     const char *colon = DDFMainDecodeList(info, ':', true);
@@ -303,20 +230,10 @@ static void DDFImageGetType(const char *info, void *storage)
         dynamic_image->type_ = kImageDataFile;
         ImageParseInfo(colon + 1);
     }
-    else if (DDFCompareName(keyword, "LUMP") == 0)
-    {
-        dynamic_image->type_ = kImageDataLump;
-        ImageParseLump(colon + 1);
-    }
     else if (DDFCompareName(keyword, "PACK") == 0)
     {
         dynamic_image->type_ = kImageDataPackage;
         ImageParseInfo(colon + 1);
-    }
-    else if (DDFCompareName(keyword, "COMPOSE") == 0)
-    {
-        dynamic_image->type_ = kImageDataCompose;
-        ImageParseCompose(colon + 1);
     }
     else
         DDFError("Unknown image type: %s\n", keyword);
@@ -368,28 +285,6 @@ static void DDFImageGetFixTrans(const char *info, void *storage)
         DDFError("Unknown FIX_TRANS type: %s\n", info);
 }
 
-static void DDFImageGetPatches(const char *info, void *storage)
-{
-    // the syntax is: `NAME : XOFFSET : YOFFSET`.
-    // in the future we may accept more stuff at the end.
-
-    const char *colon1 = DDFMainDecodeList(info, ':', true);
-    if (colon1 == nullptr || colon1 == info || colon1[1] == 0)
-        DDFError("Malformed patch spec: %s\n", info);
-
-    const char *colon2 = DDFMainDecodeList(colon1 + 1, ':', true);
-    if (colon2 == nullptr || colon2 == colon1 + 1 || colon2[1] == 0)
-        DDFError("Malformed patch spec: %s\n", info);
-
-    ComposePatch patch;
-
-    patch.name = std::string(info, (int)(colon1 - info));
-    patch.x    = atoi(colon1 + 1);
-    patch.y    = atoi(colon2 + 1);
-
-    dynamic_image->patches_.push_back(patch);
-}
-
 // ---> imagedef_c class
 
 ImageDefinition::ImageDefinition() : name_(), belong_(kImageNamespaceGraphic), info_()
@@ -405,11 +300,6 @@ void ImageDefinition::CopyDetail(const ImageDefinition &src)
     type_   = src.type_;
     colour_ = src.colour_;
     info_   = src.info_;
-    format_ = src.format_;
-
-    compose_w_ = src.compose_w_;
-    compose_h_ = src.compose_h_;
-    patches_   = src.patches_;
 
     special_        = src.special_;
     x_offset_       = src.x_offset_;
@@ -430,10 +320,6 @@ void ImageDefinition::Default()
 
     type_   = kImageDataColor;
     colour_ = SG_BLACK_RGBA32;
-    format_ = kLumpImageFormatStandard;
-
-    compose_w_ = compose_h_ = 0;
-    patches_.clear();
 
     special_  = kImageSpecialNone;
     x_offset_ = y_offset_ = 0;

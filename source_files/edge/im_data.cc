@@ -27,7 +27,7 @@
 #include "epi_color.h"
 #include "sokol_color.h"
 
-ImageData::ImageData(int width, int height, int depth)
+ImageData::ImageData(uint16_t width, uint16_t height, uint8_t depth)
     : width_(width), height_(height), depth_(depth), used_width_(width), used_height_(height)
 {
     pixels_   = new uint8_t[width * height * depth];
@@ -84,7 +84,7 @@ void ImageData::Invert()
     delete[] line_data;
 }
 
-void ImageData::Shrink(int new_w, int new_h)
+void ImageData::Shrink(uint16_t new_w, uint16_t new_h)
 {
     EPI_ASSERT(new_w <= width_ && new_h <= height_);
 
@@ -92,22 +92,7 @@ void ImageData::Shrink(int new_w, int new_h)
     int step_y = height_ / new_h;
     int total  = step_x * step_y;
 
-    if (depth_ == 1)
-    {
-        for (int dy = 0; dy < new_h; dy++)
-            for (int dx = 0; dx < new_w; dx++)
-            {
-                uint8_t *dest_pix = pixels_ + (dy * new_w + dx) * 3;
-
-                int sx = dx * step_x;
-                int sy = dy * step_y;
-
-                const uint8_t *src_pix = PixelAt(sx, sy);
-
-                *dest_pix = *src_pix;
-            }
-    }
-    else if (depth_ == 3)
+    if (depth_ == 3)
     {
         for (int dy = 0; dy < new_h; dy++)
             for (int dx = 0; dx < new_w; dx++)
@@ -173,7 +158,7 @@ void ImageData::Shrink(int new_w, int new_h)
     height_ = new_h;
 }
 
-void ImageData::ShrinkMasked(int new_w, int new_h)
+void ImageData::ShrinkMasked(uint16_t new_w, uint16_t new_h)
 {
     if (depth_ != 4)
     {
@@ -235,7 +220,7 @@ void ImageData::ShrinkMasked(int new_w, int new_h)
     height_ = new_h;
 }
 
-void ImageData::Grow(int new_w, int new_h)
+void ImageData::Grow(uint16_t new_w, uint16_t new_h)
 {
     EPI_ASSERT(new_w >= width_ && new_h >= height_);
 
@@ -286,7 +271,7 @@ void ImageData::RemoveAlpha()
     depth_ = 3;
 }
 
-void ImageData::SetAlpha(int alphaness)
+void ImageData::SetAlpha(uint8_t alphaness)
 {
     if (depth_ < 3)
         return;
@@ -400,7 +385,7 @@ void ImageData::EightWaySymmetry()
     FourWaySymmetry();
 }
 
-int ImageData::ImageCharacterWidth(int x1, int y1, int x2, int y2)
+uint16_t ImageData::ImageCharacterWidth(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2)
 {
     uint8_t *src         = pixels_;
     int      last_last   = x1;
@@ -646,7 +631,7 @@ RGBAColor ImageData::DarkestColor(int from_x, int to_x, int from_y, int to_y)
     return epi::MakeRGBA(darkest_r, darkest_g, darkest_b);
 }
 
-void ImageData::FillMarginX(int actual_w)
+void ImageData::FillMarginX(uint16_t actual_w)
 {
     if (actual_w >= width_)
         return;
@@ -660,7 +645,7 @@ void ImageData::FillMarginX(int actual_w)
     }
 }
 
-void ImageData::FillMarginY(int actual_h)
+void ImageData::FillMarginY(uint16_t actual_h)
 {
     if (actual_h >= height_)
         return;
