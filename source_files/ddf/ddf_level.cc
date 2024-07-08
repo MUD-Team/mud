@@ -206,7 +206,7 @@ void DDFReadLevels(const std::string &data)
     DDFReadInfo levels;
 
     levels.tag      = "LEVELS";
-    levels.lumpname = "DDFLEVL";
+    levels.short_name = "DDFLEVL";
 
     levels.start_entry  = LevelStartEntry;
     levels.parse_field  = LevelParseField;

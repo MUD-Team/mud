@@ -73,28 +73,13 @@ class WadFile
 
     // level markers and skin markers
     std::vector<int> level_markers_;
-    std::vector<int> skin_markers_;
-
-    // ddf and rts lump list
-    int ddf_lumps_[kTotalDDFTypes];
-
-    // LUA scripts
-    int lua_huds_;
-
-    // BOOM stuff
-    int animated_;
-    int switches_;
 
     std::string md5_string_;
 
   public:
     WadFile()
-        : xgl_lumps_(),
-          level_markers_(), skin_markers_(), lua_huds_(-1),
-          animated_(-1), switches_(-1), md5_string_()
+        : xgl_lumps_(), level_markers_(), md5_string_()
     {
-        for (int d = 0; d < kTotalDDFTypes; d++)
-            ddf_lumps_[d] = -1;
     }
 
     ~WadFile()
@@ -108,7 +93,6 @@ enum LumpKind
 {
     kLumpNormal   = 0,  // fallback value
     kLumpMarker   = 3,  // X_START, X_END, S_SKIN, level name
-    kLumpDDF      = 10, // DDF, RTS, Lua lump
     kLumpXGL      = 20,
 };
 
@@ -149,14 +133,6 @@ static bool IsXG_START(char *name)
 static bool IsXG_END(char *name)
 {
     return (strncmp(name, "XG_END", 8) == 0);
-}
-
-//
-// Is the name a skin specifier ?
-//
-static bool IsSkin(const char *name)
-{
-    return (strncmp(name, "S_SKIN", 6) == 0);
 }
 
 bool WadFile::HasLevel(const char *name) const
@@ -225,7 +201,7 @@ static void SortLumps(void)
 //
 // AddLump
 //
-static void AddLump(DataFile *df, const char *raw_name, int pos, int size, int file_index, bool allow_ddf)
+static void AddLump(DataFile *df, const char *raw_name, int pos, int size, int file_index)
 {
     int lump = (int)lump_info.size();
 
@@ -252,49 +228,6 @@ static void AddLump(DataFile *df, const char *raw_name, int pos, int size, int f
     // -- handle special names --
 
     WadFile *wad = df->wad_;
-
-    if (strcmp(info.name, "LUAHUDS") == 0)
-    {
-        lump_p->kind = kLumpDDF;
-        if (wad != nullptr)
-            wad->lua_huds_ = lump;
-        return;
-    }
-    else if (strcmp(info.name, "ANIMATED") == 0)
-    {
-        lump_p->kind = kLumpDDF;
-        if (wad != nullptr)
-            wad->animated_ = lump;
-        return;
-    }
-    else if (strcmp(info.name, "SWITCHES") == 0)
-    {
-        lump_p->kind = kLumpDDF;
-        if (wad != nullptr)
-            wad->switches_ = lump;
-        return;
-    }
-
-    // -KM- 1998/12/16 Load DDF/RSCRIPT file from wad.
-    if (allow_ddf && wad != nullptr)
-    {
-        DDFType type = DDFLumpToType(info.name);
-
-        if (type != kDDFTypeUnknown)
-        {
-            lump_p->kind          = kLumpDDF;
-            wad->ddf_lumps_[type] = lump;
-            return;
-        }
-    }
-
-    if (IsSkin(info.name))
-    {
-        lump_p->kind = kLumpMarker;
-        if (wad != nullptr)
-            wad->skin_markers_.push_back(lump);
-        return;
-    }
 
     // -- handle node lists --
 
@@ -382,124 +315,6 @@ static void CheckForLevel(WadFile *wad, int lump, const char *name, const RawWad
     }
 }
 
-std::string CheckForEdgeGameLump(epi::File *file)
-{
-    int          length;
-    RawWadHeader header;
-    std::string  game_name;
-
-    if (!file)
-    {
-        LogWarning("CheckForEdgeGameLump: Received null file_c pointer!\n");
-        return game_name;
-    }
-
-    // WAD file
-    // TODO: handle Read failure
-    file->Read(&header, sizeof(RawWadHeader));
-    header.total_entries   = AlignedLittleEndianS32(header.total_entries);
-    header.directory_start = AlignedLittleEndianS32(header.directory_start);
-    length                 = header.total_entries * sizeof(RawWadEntry);
-    RawWadEntry *raw_info  = new RawWadEntry[header.total_entries];
-    file->Seek(header.directory_start, epi::File::kSeekpointStart);
-    file->Read(raw_info, length);
-
-    for (size_t i = 0; i < header.total_entries; i++)
-    {
-        RawWadEntry &entry = raw_info[i];
-
-        if (epi::StringCompare("EDGEGAME", entry.name) == 0)
-        {
-            std::string edge_game;
-            edge_game.resize(entry.size);
-            file->Seek(entry.position, epi::File::kSeekpointStart);
-            file->Read(game_name.data(), entry.size);
-            epi::Lexer lex(edge_game);
-            game_name = ParseEdgeGameFile(lex);
-            delete[] raw_info;
-            file->Seek(0, epi::File::kSeekpointStart);
-            return game_name;
-        }
-    }
-
-    delete[] raw_info;
-    file->Seek(0, epi::File::kSeekpointStart);
-    return game_name;
-}
-
-static void ProcessDDFInWad(DataFile *df)
-{
-    std::string bare_filename = epi::GetFilename(df->name_);
-
-    for (size_t d = 0; d < kTotalDDFTypes; d++)
-    {
-        int lump = df->wad_->ddf_lumps_[d];
-
-        if (lump >= 0)
-        {
-            LogPrint("Loading %s lump in %s\n", GetLumpNameFromIndex(lump), bare_filename.c_str());
-
-            std::string data   = LoadLumpAsString(lump);
-            std::string source = GetLumpNameFromIndex(lump);
-
-            source += " in ";
-            source += bare_filename;
-
-            DDFAddFile((DDFType)d, data, source);
-        }
-    }
-}
-
-static void ProcessLuaInWad(DataFile *df)
-{
-    std::string bare_filename = epi::GetFilename(df->name_);
-
-    WadFile *wad = df->wad_;
-
-    if (wad->lua_huds_ >= 0)
-    {
-        int lump = wad->lua_huds_;
-
-        std::string data   = LoadLumpAsString(lump);
-        std::string source = GetLumpNameFromIndex(lump);
-
-        source += " in ";
-        source += bare_filename;
-
-        LuaAddScript(data, source);
-    }
-}
-
-static void ProcessBoomStuffInWad(DataFile *df)
-{
-    // handle Boom's ANIMATED and SWITCHES lumps
-
-    int animated = df->wad_->animated_;
-    int switches = df->wad_->switches_;
-
-    if (animated >= 0)
-    {
-        LogPrint("Loading ANIMATED from: %s\n", df->name_.c_str());
-
-        int      length = -1;
-        uint8_t *data   = LoadLumpIntoMemory(animated, &length);
-
-        DDFConvertAnimatedLump(data, length);
-        delete[] data;
-    }
-
-    if (switches >= 0)
-    {
-        LogPrint("Loading SWITCHES from: %s\n", df->name_.c_str());
-
-        int      length = -1;
-        uint8_t *data   = LoadLumpIntoMemory(switches, &length);
-
-        DDFConvertSwitchesLump(data, length);
-        delete[] data;
-    }
-}
-
 void ProcessWad(DataFile *df, size_t file_index)
 {
     WadFile *wad = new WadFile();
@@ -541,10 +356,8 @@ void ProcessWad(DataFile *df, size_t file_index)
     {
         RawWadEntry &entry = raw_info[i];
 
-        bool allow_ddf = true;
-
         AddLump(df, entry.name, AlignedLittleEndianS32(entry.position), AlignedLittleEndianS32(entry.size),
-                (int)file_index, allow_ddf);
+                (int)file_index);
 
         // this will be uppercase
         const char *level_name = lump_info[startlump + i].name;
@@ -568,10 +381,6 @@ void ProcessWad(DataFile *df, size_t file_index)
     LogDebug("   md5hash = %s\n", wad->md5_string_.c_str());
 
     delete[] raw_info;
-
-    ProcessBoomStuffInWad(df);
-    ProcessDDFInWad(df);
-    ProcessLuaInWad(df);
 }
 
 std::string BuildXGLNodesForWAD(DataFile *df)
@@ -633,24 +442,6 @@ std::string BuildXGLNodesForWAD(DataFile *df)
     }
 
     return xwa_filename;
-}
-
-epi::File *LoadLumpAsFile(int lump)
-{
-    EPI_ASSERT(IsLumpIndexValid(lump));
-
-    LumpInfo *l = &lump_info[lump];
-
-    DataFile *df = data_files[l->file];
-
-    EPI_ASSERT(df->file_);
-
-    return new epi::SubFile(df->file_, l->position, l->size);
-}
-
-epi::File *LoadLumpAsFile(const char *name)
-{
-    return LoadLumpAsFile(GetLumpNumberForName(name));
 }
 
 static int QuickFindLumpMap(const char *buf)
@@ -723,37 +514,6 @@ int CheckLumpNumberForName(const char *name)
     return sorted_lumps[i];
 }
 
-//
-// CheckDataFileIndexForName
-//
-// Returns data_files index or -1 if name not found.
-//
-//
-int CheckDataFileIndexForName(const char *name)
-{
-    int  i;
-    char buf[9];
-
-    if (strlen(name) > 8)
-    {
-        LogDebug("CheckLumpNumberForName: Name '%s' longer than 8 chars!\n", name);
-        return -1;
-    }
-
-    for (i = 0; name[i]; i++)
-    {
-        buf[i] = epi::ToUpperASCII(name[i]);
-    }
-    buf[i] = 0;
-
-    i = QuickFindLumpMap(buf);
-
-    if (i < 0)
-        return -1; // not found
-
-    return lump_info[sorted_lumps[i]].file;
-}
-
 int CheckXGLLumpNumberForName(const char *name)
 {
     // limit search to stuff between XG_START and XG_END.
@@ -815,21 +575,6 @@ int CheckMapLumpNumberForName(const char *name)
 }
 
 //
-// GetLumpNumberForName
-//
-// Calls CheckLumpNumberForName, but bombs out if not found.
-//
-int GetLumpNumberForName(const char *name)
-{
-    int i;
-
-    if ((i = CheckLumpNumberForName(name)) == -1)
-        FatalError("GetLumpNumberForName: \'%.8s\' not found!", name);
-
-    return i;
-}
-
-//
 // IsLumpIndexValid
 //
 // Verifies that the given lump number is valid and has the given
@@ -861,13 +606,6 @@ int GetLumpLength(int lump)
         FatalError("GetLumpLength: %i >= numlumps", lump);
 
     return lump_info[lump].size;
-}
-
-int GetDataFileIndexForLump(int lump)
-{
-    EPI_ASSERT(IsLumpIndexValid(lump));
-
-    return lump_info[lump].file;
 }
 
 int GetKindForLump(int lump)
@@ -919,136 +657,66 @@ uint8_t *LoadLumpIntoMemory(int lump, int *length)
     return data;
 }
 
-uint8_t *LoadLumpIntoMemory(const char *name, int *length)
-{
-    return LoadLumpIntoMemory(GetLumpNumberForName(name), length);
-}
-
-std::string LoadLumpAsString(int lump)
-{
-    // WISH: optimise this to remove temporary buffer
-    int      length;
-    uint8_t *data = LoadLumpIntoMemory(lump, &length);
-
-    std::string result((char *)data, length);
-
-    delete[] data;
-
-    return result;
-}
-
-std::string LoadLumpAsString(const char *name)
-{
-    return LoadLumpAsString(GetLumpNumberForName(name));
-}
-
+// IsFileInAddon
 //
-// GetLumpNameFromIndex
-//
-const char *GetLumpNameFromIndex(int lump)
-{
-    return lump_info[lump].name;
-}
-
-// IsLumpInPwad
-//
-// check if a lump is in a pwad
+// check if a file is in a file that
+// was loaded after the main game file
+// in our load order
 //
 // Returns true if found
-bool IsLumpInPwad(const char *name)
+bool IsFileInAddon(const char *name)
 {
     if (!name)
         return false;
 
-    // first check images.ddf
-    const Image *tempImage;
+    // if we're here then check EPKs/folders
+    bool in_addon = false;
 
-    tempImage = ImageLookup(name);
-    if (tempImage)
+    // search from newest file to oldest
+    for (int i = (int)data_files.size() - 1; i >= 2; i--) // ignore edge_defs and the game file itself
     {
-        if (tempImage->source_type_ == kImageSourceUser) // from images.ddf
+        DataFile *df = data_files[i];
+        if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEPK)
         {
-            return true;
-        }
-    }
-
-    // if we're here then check pwad lumps
-    int  lumpnum = CheckLumpNumberForName(name);
-    int  filenum = -1;
-    bool in_pwad = false;
-
-    if (lumpnum != -1)
-    {
-        filenum = GetDataFileIndexForLump(lumpnum);
-
-        if (filenum >= 2) // ignore edge_defs and the IWAD itself
-        {
-            DataFile *df = data_files[filenum];
-
-            // we only want pwads
-            if (df->kind_ == kFileKindPWAD || df->kind_ == kFileKindPackWAD)
+            if (FindStemInPack(df->pack_, name))
             {
-                in_pwad = true;
+                in_addon = true;
+                break;
             }
         }
     }
 
-    if (!in_pwad) // Check EPKs/folders now
-    {
-        // search from newest file to oldest
-        for (int i = (int)data_files.size() - 1; i >= 2; i--) // ignore edge_defs and the IWAD itself
-        {
-            DataFile *df = data_files[i];
-            if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEPK ||
-                df->kind_ == kFileKindEEPK)
-            {
-                if (FindStemInPack(df->pack_, name))
-                {
-                    in_pwad = true;
-                    break;
-                }
-            }
-        }
-    }
-
-    return in_pwad;
+    return in_addon;
 }
 
-// IsLumpInAnyWad
+// IsFileAnywhere
 //
-// check if a lump is in any wad/epk at all
+// check if a file is in any folder/epk at all
 //
 // Returns true if found
-bool IsLumpInAnyWad(const char *name)
+bool IsFileAnywhere(const char *name)
 {
     if (!name)
         return false;
 
-    int  lumpnum   = CheckLumpNumberForName(name);
-    bool in_anywad = false;
+    bool in_any_file = false;
 
-    if (lumpnum != -1)
-        in_anywad = true;
-
-    if (!in_anywad)
+    // search from oldest to newest
+    for (int i = 0; i < (int)data_files.size() - 1; i++)
     {
-        // search from oldest to newest
-        for (int i = 0; i < (int)data_files.size() - 1; i++)
+        DataFile *df = data_files[i];
+        if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEPK ||
+            df->kind_ == kFileKindEEPK || df->kind_ == kFileKindIFolder || df->kind_ == kFileKindIPK)
         {
-            DataFile *df = data_files[i];
-            if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEPK ||
-                df->kind_ == kFileKindEEPK || df->kind_ == kFileKindIFolder || df->kind_ == kFileKindIPK)
+            if (FindStemInPack(df->pack_, name))
             {
-                if (FindStemInPack(df->pack_, name))
-                {
-                    in_anywad = true;
-                    break;
-                }
+                in_any_file = true;
+                break;
             }
         }
     }
 
-    return in_anywad;
+    return in_any_file;
 }
 
 //--- editor settings ---

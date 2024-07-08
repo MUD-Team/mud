@@ -65,8 +65,8 @@ struct DDFCommandList
 //
 struct DDFReadInfo
 {
-    // name of the lump, for error messages
-    const char *lumpname;
+    // acronym for error messages
+    const char *short_name;
 
     // the file has to start with <tag>
     const char *tag;

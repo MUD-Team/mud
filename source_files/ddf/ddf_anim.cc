@@ -38,17 +38,8 @@ static AnimationDefinition dummy_anim;
 static const DDFCommandList anim_commands[] = {DDF_FIELD("TYPE", dummy_anim, type_, DDFAnimGetType),
                                                DDF_FIELD("SEQUENCE", dummy_anim, pics_, DDFAnimGetPic),
                                                DDF_FIELD("SPEED", dummy_anim, speed_, DDFMainGetTime),
-                                               DDF_FIELD("FIRST", dummy_anim, start_name_, DDFMainGetLumpName),
-                                               DDF_FIELD("LAST", dummy_anim, end_name_, DDFMainGetLumpName),
 
                                                {nullptr, nullptr, 0, nullptr}};
-
-// Floor/ceiling animation sequences, defined by first and last frame,
-// i.e. the flat (64x64 tile) name or texture name to be used.
-//
-// The full animation sequence is given using all the flats between
-// the start and end entry, in the order found in the WAD file.
-//
 
 // -ACB- 2004/06/03 Replaced array and size with purpose-built class
 AnimationDefinitionContainer animdefs;
@@ -112,7 +103,7 @@ static void AnimParseField(const char *field, const char *contents, int index, b
     if (DDFMainParseField(anim_commands, field, contents, (uint8_t *)dynamic_anim))
         return;
 
-    DDFWarnError("Unknown anims.ddf command: %s\n", field);
+    DDFError("Unknown anims.ddf command: %s\n", field);
 }
 
 static void AnimFinishEntry(void)
@@ -125,13 +116,8 @@ static void AnimFinishEntry(void)
 
     if (dynamic_anim->pics_.empty())
     {
-        if (dynamic_anim->start_name_.empty() || dynamic_anim->end_name_.empty())
-        {
-            DDFError("Missing animation sequence.\n");
-        }
-
         if (dynamic_anim->type_ == AnimationDefinition::kAnimationTypeGraphic)
-            DDFError("TYPE=GRAPHIC animations must use the SEQUENCE command.\n");
+            DDFError("Animation missing the SEQUENCE command.\n");
     }
 }
 
@@ -151,7 +137,7 @@ void DDFReadAnims(const std::string &data)
     DDFReadInfo anims;
 
     anims.tag      = "ANIMATIONS";
-    anims.lumpname = "DDFANIM";
+    anims.short_name = "DDFANIM";
 
     anims.start_entry  = AnimStartEntry;
     anims.parse_field  = AnimParseField;
@@ -194,7 +180,7 @@ static void DDFAnimGetType(const char *info, void *storage)
         (*type) = AnimationDefinition::kAnimationTypeGraphic;
     else
     {
-        DDFWarnError("Unknown animation type: %s\n", info);
+        DDFError("Unknown animation type: %s\n", info);
         (*type) = AnimationDefinition::kAnimationTypeFlat;
     }
 }
@@ -223,8 +209,6 @@ void AnimationDefinition::CopyDetail(AnimationDefinition &src)
 {
     type_       = src.type_;
     pics_       = src.pics_;
-    start_name_ = src.start_name_;
-    end_name_   = src.end_name_;
     speed_      = src.speed_;
 }
 
@@ -237,81 +221,7 @@ void AnimationDefinition::Default()
 
     pics_.clear();
 
-    start_name_.clear();
-    end_name_.clear();
-
     speed_ = 8;
-}
-
-//----------------------------------------------------------------------------
-
-void DDFConvertAnimatedLump(const uint8_t *data, int size)
-{
-    // handles the Boom ANIMATED lump (in a wad).
-
-    if (size < 23)
-        return;
-
-    std::string text = "<ANIMATIONS>\n\n";
-
-    for (; size >= 23; data += 23, size -= 23)
-    {
-        if (data[0] & 0x80) // end marker
-            break;
-
-        int speed = data[19] + (data[20] << 8);
-        if (speed < 1)
-            speed = 1;
-
-        char last[9];
-        char first[9];
-
-        // Clear to zeroes to prevent garbage from being added
-        memset(last, 0, 9);
-        memset(first, 0, 9);
-
-        // make sure names are NUL-terminated
-        memcpy(last, data + 1, 8);
-        first[8] = 0;
-        memcpy(first, data + 10, 8);
-        last[8] = 0;
-
-        LogDebug("- ANIMATED LUMP: start '%s' : end '%s'\n", first, last);
-
-        // ignore zero-length names
-        if (first[0] == 0 || last[0] == 0)
-            continue;
-
-        // create the DDF equivalent...
-        text += "[";
-        text += first;
-        text += "]\n";
-
-        if (data[0] & 1)
-            text += "type = TEXTURE;\n";
-        else
-            text += "type  = FLAT;\n";
-
-        text += "first = \"";
-        text += first;
-        text += "\";\n";
-
-        text += "last  = \"";
-        text += last;
-        text += "\";\n";
-
-        char speed_buf[64];
-        snprintf(speed_buf, sizeof(speed_buf), "%dT", speed);
-
-        text += "speed = ";
-        text += speed_buf;
-        text += ";\n\n";
-    }
-
-    // DEBUG:
-    // DDFDumpFile(text);
-
-    DDFAddFile(kDDFTypeAnim, text, "Boom ANIMATED lump");
 }
 
 //--- editor settings ---

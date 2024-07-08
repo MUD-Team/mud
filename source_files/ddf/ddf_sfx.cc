@@ -31,7 +31,6 @@ SoundEffectDefinitionContainer sfxdefs;
 static SoundEffectDefinition dummy_sfx;
 
 static const DDFCommandList sfx_commands[] = {
-    DDF_FIELD("LUMP_NAME", dummy_sfx, lump_name_, DDFMainGetLumpName),
     DDF_FIELD("PACK_NAME", dummy_sfx, pack_name_, DDFMainGetString),
     DDF_FIELD("FILE_NAME", dummy_sfx, file_name_, DDFMainGetString),
     DDF_FIELD("SINGULAR", dummy_sfx, singularity_, DDFMainGetNumeric),
@@ -107,9 +106,9 @@ static void SoundParseField(const char *field, const char *contents, int index, 
 
 static void SoundFinishEntry(void)
 {
-    if (dynamic_sfx->lump_name_.empty() && dynamic_sfx->file_name_.empty() && dynamic_sfx->pack_name_.empty())
+    if (dynamic_sfx->file_name_.empty() && dynamic_sfx->pack_name_.empty())
     {
-        DDFError("Missing LUMP_NAME or PACK_NAME for sound.\n");
+        DDFError("Missing FILE_NAME or PACK_NAME for sound.\n");
     }
 }
 
@@ -123,7 +122,7 @@ void DDFReadSFX(const std::string &data)
     DDFReadInfo sfx_r;
 
     sfx_r.tag      = "SOUNDS";
-    sfx_r.lumpname = "DDFSFX";
+    sfx_r.short_name = "DDFSFX";
 
     sfx_r.start_entry  = SoundStartEntry;
     sfx_r.parse_field  = SoundParseField;
@@ -189,7 +188,6 @@ SoundEffectDefinition::~SoundEffectDefinition()
 //
 void SoundEffectDefinition::CopyDetail(SoundEffectDefinition &src)
 {
-    lump_name_        = src.lump_name_;
     file_name_        = src.file_name_;
     pack_name_        = src.pack_name_;
 
@@ -210,7 +208,6 @@ void SoundEffectDefinition::CopyDetail(SoundEffectDefinition &src)
 //
 void SoundEffectDefinition::Default()
 {
-    lump_name_.clear();
     file_name_.clear();
     pack_name_.clear();
 

@@ -795,7 +795,7 @@ void DDFReadThings(const std::string &data)
     DDFReadInfo things;
 
     things.tag      = "THINGS";
-    things.lumpname = "DDFTHING";
+    things.short_name = "DDFTHING";
 
     things.start_entry  = ThingStartEntry;
     things.parse_field  = ThingParseField;

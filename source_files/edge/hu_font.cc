@@ -325,20 +325,11 @@ void Font::LoadFontTTF()
 
         if (!truetype_buffer_)
         {
-            epi::File *F;
+            truetype_buffer_ = OpenMatchingPackFileInMemory(epi::GetStem(definition_->truetype_name_), {".ttf", ".otf"}, nullptr);
 
-            if (!epi::GetExtension(definition_->truetype_name_).empty()) // check for pack file
-                F = OpenFileFromPack(definition_->truetype_name_);
-            else
-                F = LoadLumpAsFile(CheckLumpNumberForName(definition_->truetype_name_.c_str()));
-
-            if (!F)
+            if (!truetype_buffer_)
                 FatalError("LoadFontTTF: '%s' not found for font %s.\n", definition_->truetype_name_.c_str(),
                            definition_->name_.c_str());
-
-            truetype_buffer_ = F->LoadIntoMemory();
-
-            delete F;
         }
 
         if (!truetype_info_)

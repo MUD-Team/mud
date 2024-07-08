@@ -572,8 +572,7 @@ static void UpdatePowerups(Player *player)
     {
         float s = player->powers_[kPowerTypeInvulnerable];
 
-        // -ACB- FIXME!!! Catch lookup failure!
-        player->effect_colourmap_ = colormaps.Lookup("ALLWHITE");
+        player->effect_colourmap_ = colormaps.Lookup("INVULNERABILITY");
         player->effect_left_      = (s <= 0) ? 0 : HMM_MIN(int(s), kMaximumEffectTime);
     }
     else if (player->powers_[kPowerTypeInfrared] > 0)
@@ -586,8 +585,7 @@ static void UpdatePowerups(Player *player)
     {
         float s = player->powers_[kPowerTypeNightVision];
 
-        // -ACB- FIXME!!! Catch lookup failure!
-        player->effect_colourmap_ = colormaps.Lookup("ALLGREEN");
+        player->effect_colourmap_ = colormaps.Lookup("INFRAVISION");
         player->effect_left_      = (s <= 0) ? 0 : HMM_MIN(int(s), kMaximumEffectTime);
     }
     else if (player->powers_[kPowerTypeBerserk] > 0) // Lobo 2021: Un-Hardcode Berserk colour tint
@@ -874,11 +872,11 @@ void CreatePlayer(int pnum, bool is_bot)
 
     if (!sfx_jpidle)
     {
-        sfx_jpidle = sfxdefs.GetEffect("JPIDLE", false);
-        sfx_jpmove = sfxdefs.GetEffect("JPMOVE", false);
-        sfx_jprise = sfxdefs.GetEffect("JPRISE", false);
-        sfx_jpdown = sfxdefs.GetEffect("JPDOWN", false);
-        sfx_jpflow = sfxdefs.GetEffect("JPFLOW", false);
+        sfx_jpidle = sfxdefs.GetEffect("FLIGHT_IDLE", false);
+        sfx_jpmove = sfxdefs.GetEffect("FLIGHT_MOVE", false);
+        sfx_jprise = sfxdefs.GetEffect("FLIGHT_ASCEND", false);
+        sfx_jpdown = sfxdefs.GetEffect("FLIGHT_DESCEND", false);
+        sfx_jpflow = sfxdefs.GetEffect("FLIGHT_EXPIRING", false);
     }
 }
 

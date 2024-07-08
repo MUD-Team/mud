@@ -106,7 +106,7 @@ void DDFReadFlat(const std::string &data)
     DDFReadInfo flats;
 
     flats.tag      = "FLATS";
-    flats.lumpname = "DDFFLAT";
+    flats.short_name = "DDFFLAT";
 
     flats.start_entry  = FlatStartEntry;
     flats.parse_field  = FlatParseField;

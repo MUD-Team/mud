@@ -45,8 +45,6 @@ extern int key_gamma_toggle;
 
 // the so-called "bastard sfx" used for the menus
 extern struct SoundEffect *sound_effect_swtchn;
-extern struct SoundEffect *sound_effect_tink;
-extern struct SoundEffect *sound_effect_radio;
 extern struct SoundEffect *sound_effect_oof;
 extern struct SoundEffect *sound_effect_pstop;
 extern struct SoundEffect *sound_effect_stnmov;

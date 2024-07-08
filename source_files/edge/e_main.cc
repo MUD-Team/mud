@@ -908,20 +908,7 @@ static void InitializeDirectories(void)
 
     // Note: This might need adjusting for Apple
     std::string s = SDL_GetBasePath();
-
     game_directory = s;
-    s              = ArgumentValue("game");
-    if (!s.empty())
-        game_directory = s;
-
-    // add parameter file "appdir/parms" if it exists.
-    std::string parms = epi::PathAppend(game_directory, "parms");
-
-    if (epi::TestFileAccess(parms))
-    {
-        // Insert it right after the app parameter
-        ApplyResponseFile(parms);
-    }
 
     // config file - check for portable config
     s = ArgumentValue("config");
@@ -963,19 +950,11 @@ static void InitializeDirectories(void)
         configuration_file = epi::PathAppend(home_directory, config_filename.s_);
 
     // edge_defs.epk file
-    s = ArgumentValue("defs");
-    if (!s.empty())
-    {
+    s = epi::PathAppend(game_directory, "edge_defs");
+    if (epi::IsDirectory(s))
         epkfile = s;
-    }
     else
-    {
-        std::string defs_test = epi::PathAppend(game_directory, "edge_defs");
-        if (epi::IsDirectory(defs_test))
-            epkfile = defs_test;
-        else
-            epkfile.append(".epk");
-    }
+        epkfile.append(".epk");
 
     // cache directory
     cache_directory = epi::PathAppend(home_directory, kCacheDirectory);
@@ -1039,9 +1018,6 @@ std::string ParseEdgeGameFile(epi::Lexer &lex)
             return value;
         }
     }
-    // if we get here, clear and return the empty string
-    value.clear();
-    return value;
 }
 
 // If a valid EDGEGAME is found, parse and return the game name
@@ -1132,23 +1108,6 @@ static void IdentifyVersion(void)
                 return;
             }
         }
-        else if (epi::StringCaseCompareASCII(epi::GetExtension(iwad_par), ".wad") == 0)
-        {
-            epi::File *game_test = epi::FileOpen(iwad_par, epi::kFileAccessRead | epi::kFileAccessBinary);
-            game_check           = CheckForEdgeGameLump(game_test);
-            delete game_test;
-            if (game_check.empty())
-                FatalError("WAD %s passed via -gane parameter, but no "
-                           "EDGEGAME lump detected!\n",
-                           iwad_par.c_str());
-            else
-            {
-                game_name = game_check;
-                AddDataFile(iwad_par, kFileKindIWAD);
-                LogDebug("LOADED GAME = [ %s ]\n", game_name.c_str());
-                return;
-            }
-        }
         else
             FatalError("%s is not a valid extension for a game file! (%s)\n", epi::GetExtension(iwad_par).c_str(), iwad_par.c_str());
     }
@@ -1186,20 +1145,6 @@ static void IdentifyVersion(void)
                     return;
                 }
             }
-            else if (epi::StringCaseCompareASCII(epi::GetExtension(dnd), ".wad") == 0)
-            {
-                epi::File *game_test = epi::FileOpen(dnd, epi::kFileAccessRead | epi::kFileAccessBinary);
-                game_check           = CheckForEdgeGameLump(game_test);
-                delete game_test;
-                if (!game_check.empty())
-                {
-                    game_name = game_check;
-                    AddDataFile(dnd, kFileKindIWAD);
-                    program_argument_list.erase(program_argument_list.begin() + p--);
-                    LogDebug("LOADED GAME = [ %s ]\n", game_name.c_str());
-                    return;
-                }
-            }
         }
     }
 
@@ -1219,26 +1164,6 @@ static void IdentifyVersion(void)
 
         std::string game_check;
 
-        if (ReadDirectory(fsd, location, "*.wad"))
-        {
-            for (size_t j = 0; j < fsd.size(); j++)
-            {
-                if (!fsd[j].is_dir)
-                {
-                    epi::File *game_test =
-                        epi::FileOpen(fsd[j].name, epi::kFileAccessRead | epi::kFileAccessBinary);
-                    game_check = CheckForEdgeGameLump(game_test);
-                    delete game_test;
-                    if (!game_check.empty())
-                    {
-                        game_name = game_check;
-                        AddDataFile(fsd[j].name, kFileKindIWAD);
-                        LogDebug("LOADED GAME = [ %s ]\n", game_name.c_str());
-                        return;
-                    }
-                }
-            }
-        }
         if (ReadDirectory(fsd, location, "*.epk"))
         {
             for (size_t j = 0; j < fsd.size(); j++)

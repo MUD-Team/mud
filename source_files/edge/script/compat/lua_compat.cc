@@ -44,7 +44,7 @@ void LuaLoadScripts()
         }
     }
 
-    if (IsLumpInPwad("STBAR"))
+    if (IsFileInAddon("STBAR"))
     {
         LuaSetBoolean(global_lua_state, "hud", "custom_stbar", true);
     }

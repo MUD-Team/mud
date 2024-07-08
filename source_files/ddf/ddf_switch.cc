@@ -119,7 +119,7 @@ void DDFReadSwitch(const std::string &data)
     DDFReadInfo switches;
 
     switches.tag      = "SWITCHES";
-    switches.lumpname = "DDFSWTH";
+    switches.short_name = "DDFSWTH";
 
     switches.start_entry  = SwitchStartEntry;
     switches.parse_field  = SwitchParseField;
@@ -214,65 +214,6 @@ SwitchDefinition *SwitchDefinitionContainer::Find(const char *name)
     }
 
     return nullptr;
-}
-
-//----------------------------------------------------------------------------
-
-void DDFConvertSwitchesLump(const uint8_t *data, int size)
-{
-    // handles the Boom SWITCHES lump (in a wad).
-
-    if (size < 20)
-        return;
-
-    std::string text = "<SWITCHES>\n\n";
-
-    for (; size >= 20; data += 20, size -= 20)
-    {
-        if (data[18] == 0) // end marker
-            break;
-
-        char off_name[9];
-        char on_name[9];
-
-        // clear to zeroes to prevent garbage being passed to DDF
-        memset(off_name, 0, 9);
-        memset(on_name, 0, 9);
-
-        // make sure names are NUL-terminated
-        memcpy(off_name, data + 0, 8);
-        off_name[8] = 0;
-        memcpy(on_name, data + 9, 8);
-        on_name[8] = 0;
-
-        LogDebug("- SWITCHES LUMP: off '%s' : on '%s'\n", off_name, on_name);
-
-        // ignore zero-length names
-        if (off_name[0] == 0 || on_name[0] == 0)
-            continue;
-
-        // create the DDF equivalent...
-        text += "[";
-        text += on_name;
-        text += "]\n";
-
-        text += "on_texture  = \"";
-        text += on_name;
-        text += "\";\n";
-
-        text += "off_texture = \"";
-        text += off_name;
-        text += "\";\n";
-
-        text += "on_sound  = \"SWTCHN\";\n";
-        text += "off_sound = \"SWTCHN\";\n";
-        text += "\n";
-    }
-
-    // DEBUG:
-    // DDFDumpFile(text);
-
-    DDFAddFile(kDDFTypeSwitch, text, "Boom SWITCHES lump");
 }
 
 //--- editor settings ---

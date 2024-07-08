@@ -30,12 +30,6 @@ enum ColorSpecial
     kColorSpecialWhiten = 0x0002
 };
 
-struct ColormapCache
-{
-    uint8_t *data;
-    int      size;
-};
-
 class Colormap
 {
   public:
@@ -49,21 +43,12 @@ class Colormap
     // Member vars...
     std::string name_;
 
-    std::string lump_name_;
-    int lump_index_; // for raw BOOM colourmaps
-    std::string pack_name_;
-
-    int start_;
-    int length_;
-
     ColorSpecial special_;
 
     // colours for GL renderer
     RGBAColor gl_color_;
 
     RGBAColor font_colour_; // (computed only, not in DDF)
-
-    ColormapCache cache_;
 
     void *analysis_;
 

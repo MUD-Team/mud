@@ -134,20 +134,14 @@ ModelDefinition *LoadModelFromLump(int model_num)
 
     ModelDefinition *def = new ModelDefinition(basename.c_str());
 
-    std::string lumpname;
     std::string packname;
     std::string skinname;
 
-    int        lump_num  = -1;
     int        pack_num  = -1;
     epi::File *f         = nullptr;
     bool       pack_file = false;
 
-    // try MD3 first, then MD2, then MDL, then voxels
-
-    // This section is going to get kinda weird with the introduction of EPKs
-    lumpname = epi::StringFormat("%sMD3", basename.c_str());
-    lump_num = CheckDataFileIndexForName(lumpname.c_str());
+    // try MD3 first, then MD2, then MDL
     packname = epi::StringFormat("%s.md3", basename.c_str());
     pack_num = CheckPackFilesForName(packname);
     if (pack_num == -1)
@@ -156,31 +150,19 @@ ModelDefinition *LoadModelFromLump(int model_num)
         pack_num = CheckPackFilesForName(packname);
     }
 
-    if (lump_num > -1 || pack_num > -1)
+    if (pack_num > -1)
     {
-        if (pack_num > lump_num)
+        f = OpenFileFromPack(packname);
+        if (f)
         {
-            f = OpenFileFromPack(packname);
-            if (f)
-            {
-                LogDebug("Loading MD3 model from pack file : %s\n", packname.c_str());
-                def->md2_model_ = MD3Load(f);
-                pack_file       = true;
-            }
-        }
-        else
-        {
-            LogDebug("Loading MD3 model from lump : %s\n", lumpname.c_str());
-            f = LoadLumpAsFile(lumpname.c_str());
-            if (f)
-                def->md2_model_ = MD3Load(f);
+            LogDebug("Loading MD3 model from pack file : %s\n", packname.c_str());
+            def->md2_model_ = MD3Load(f);
+            pack_file       = true;
         }
     }
 
     if (!f)
     {
-        lumpname = epi::StringFormat("%sMD2", basename.c_str());
-        lump_num = CheckDataFileIndexForName(lumpname.c_str());
         packname = epi::StringFormat("%s.md2", basename.c_str());
         pack_num = CheckPackFilesForName(packname);
         if (pack_num == -1)
@@ -188,32 +170,20 @@ ModelDefinition *LoadModelFromLump(int model_num)
             packname = epi::StringFormat("%sMD2.md2", basename.c_str());
             pack_num = CheckPackFilesForName(packname);
         }
-        if (lump_num > -1 || pack_num > -1)
+        if (pack_num > -1)
         {
-            if (pack_num > lump_num)
+            f = OpenFileFromPack(packname);
+            if (f)
             {
-                f = OpenFileFromPack(packname);
-                if (f)
-                {
-                    LogDebug("Loading MD2 model from pack file : %s\n", packname.c_str());
-                    def->md2_model_ = MD2Load(f);
-                    pack_file       = true;
-                }
-            }
-            else
-            {
-                LogDebug("Loading MD2 model from lump : %s\n", lumpname.c_str());
-                f = LoadLumpAsFile(lumpname.c_str());
-                if (f)
-                    def->md2_model_ = MD2Load(f);
+                LogDebug("Loading MD2 model from pack file : %s\n", packname.c_str());
+                def->md2_model_ = MD2Load(f);
+                pack_file       = true;
             }
         }
     }
 
     if (!f)
     {
-        lumpname = epi::StringFormat("%sMDL", basename.c_str());
-        lump_num = CheckDataFileIndexForName(lumpname.c_str());
         packname = epi::StringFormat("%s.mdl", basename.c_str());
         pack_num = CheckPackFilesForName(packname);
         if (pack_num == -1)
@@ -221,30 +191,20 @@ ModelDefinition *LoadModelFromLump(int model_num)
             packname = epi::StringFormat("%sMDL.mdl", basename.c_str());
             pack_num = CheckPackFilesForName(packname);
         }
-        if (lump_num > -1 || pack_num > -1)
+        if (pack_num > -1)
         {
-            if (pack_num > lump_num)
+            f = OpenFileFromPack(packname);
+            if (f)
             {
-                f = OpenFileFromPack(packname);
-                if (f)
-                {
-                    LogDebug("Loading MDL model from pack file : %s\n", packname.c_str());
-                    def->mdl_model_ = MDLLoad(f);
-                    pack_file       = true;
-                }
-            }
-            else
-            {
-                LogDebug("Loading MDL model from lump : %s\n", lumpname.c_str());
-                f = LoadLumpAsFile(lumpname.c_str());
-                if (f)
-                    def->mdl_model_ = MDLLoad(f);
+                LogDebug("Loading MDL model from pack file : %s\n", packname.c_str());
+                def->mdl_model_ = MDLLoad(f);
+                pack_file       = true;
             }
         }
     }
 
     if (!f)
-        FatalError("Missing model lump for: %s\n!", basename.c_str());
+        FatalError("Missing model file for: %s\n!", basename.c_str());
 
     EPI_ASSERT(def->md2_model_ || def->mdl_model_);
 
@@ -273,16 +233,13 @@ ModelDefinition *LoadModelFromLump(int model_num)
         }
     }
 
-    // need at least one skin (MD2/MD3 only; MDLs and VXLs should have them
+    // need at least one skin (MD2/MD3 only; MDLs should have them
     // baked in already)
     if (def->md2_model_)
     {
         if (!def->skins_[1]) // What happened to skin 0? - Dasho
         {
-            if (pack_file)
-                FatalError("Missing model skin: %s1\n", basename.c_str());
-            else
-                FatalError("Missing model skin: %sSKN1\n", basename.c_str());
+            FatalError("Missing model skin: %s1\n", basename.c_str());
         }
     }
 

@@ -89,7 +89,7 @@ epi::File *OpenFileFromPack(const std::string &name);
 
 void DoPackSubstitutions(void);
 
-uint8_t *OpenPackOrLumpInMemory(const std::string &name, const std::vector<std::string> &extensions, int *length);
+uint8_t *OpenMatchingPackFileInMemory(const std::string &name, const std::vector<std::string> &extensions, int *length);
 
 int CheckPackFilesForName(const std::string &name);
 

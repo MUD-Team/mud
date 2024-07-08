@@ -31,38 +31,20 @@
 #include "epi_file.h"
 
 int CheckLumpNumberForName(const char *name);
-// Like above, but returns the data file index instead of the sortedlump index
-int CheckDataFileIndexForName(const char *name);
 
 int CheckXGLLumpNumberForName(const char *name);
 int CheckMapLumpNumberForName(const char *name);
 
-// Unlike check, will FatalError if not present
-int GetLumpNumberForName(const char *name);
-
 int GetLumpLength(int lump);
 
 uint8_t *LoadLumpIntoMemory(int lump, int *length = nullptr);
-uint8_t *LoadLumpIntoMemory(const char *name, int *length = nullptr);
-
-std::string LoadLumpAsString(int lump);
-std::string LoadLumpAsString(const char *name);
 
 bool        IsLumpIndexValid(int lump);
 bool        VerifyLump(int lump, const char *name);
-const char *GetLumpNameFromIndex(int lump);
 
-epi::File *LoadLumpAsFile(int lump);
-epi::File *LoadLumpAsFile(const char *name);
+bool IsFileInAddon(const char *name);
 
-int               GetDataFileIndexForLump(int lump);
-
-bool IsLumpInPwad(const char *name);
-
-bool IsLumpInAnyWad(const char *name);
-
-// Returns game name if EDGEGAME lump found, otherwise empty string
-std::string CheckForEdgeGameLump(epi::File *file);
+bool IsFileAnywhere(const char *name);
 
 void BuildXGLNodes(void);
 

@@ -323,12 +323,12 @@ static void MakeBoomFloor(LineType *line, int number)
     {
     case 0: // Down
         line->f_.speed_down_ = 1 << speed;
-        line->f_.sfxdown_    = sfxdefs.GetEffect("STNMOV");
+        line->f_.sfxdown_    = sfxdefs.GetEffect("CRUSHER_MOVE");
         break;
 
     case 1: // Up;
         line->f_.speed_up_ = 1 << speed;
-        line->f_.sfxup_    = sfxdefs.GetEffect("STNMOV");
+        line->f_.sfxup_    = sfxdefs.GetEffect("CRUSHER_MOVE");
         break;
     }
 
@@ -415,12 +415,12 @@ static void MakeBoomCeiling(LineType *line, int number)
     {
     case 0: // Down
         line->c_.speed_down_ = 1 << speed;
-        line->c_.sfxdown_    = sfxdefs.GetEffect("STNMOV");
+        line->c_.sfxdown_    = sfxdefs.GetEffect("CRUSHER_MOVE");
         break;
 
     case 1: // Up;
         line->c_.speed_up_ = 1 << speed;
-        line->c_.sfxup_    = sfxdefs.GetEffect("STNMOV");
+        line->c_.sfxup_    = sfxdefs.GetEffect("CRUSHER_MOVE");
         break;
     }
 
@@ -456,13 +456,13 @@ static void MakeBoomDoor(LineType *line, int number)
 
     if (line->c_.speed_up_ > 7)
     {
-        line->c_.sfxup_   = sfxdefs.GetEffect("BDOPN");
-        line->c_.sfxdown_ = sfxdefs.GetEffect("BDCLS");
+        line->c_.sfxup_   = sfxdefs.GetEffect("FAST_DOOR_OPEN");
+        line->c_.sfxdown_ = sfxdefs.GetEffect("FAST_DOOR_CLOSE");
     }
     else
     {
-        line->c_.sfxup_   = sfxdefs.GetEffect("DOROPN");
-        line->c_.sfxdown_ = sfxdefs.GetEffect("DORCLS");
+        line->c_.sfxup_   = sfxdefs.GetEffect("DOOR_OPEN");
+        line->c_.sfxdown_ = sfxdefs.GetEffect("DOOR_CLOSE");
     }
 
     switch (kind & 2)
@@ -515,13 +515,13 @@ static void MakeBoomLockedDoor(LineType *line, int number)
 
     if (line->c_.speed_up_ > 7)
     {
-        line->c_.sfxup_   = sfxdefs.GetEffect("BDOPN");
-        line->c_.sfxdown_ = sfxdefs.GetEffect("BDCLS");
+        line->c_.sfxup_   = sfxdefs.GetEffect("FAST_DOOR_OPEN");
+        line->c_.sfxdown_ = sfxdefs.GetEffect("FAST_DOOR_CLOSE");
     }
     else
     {
-        line->c_.sfxup_   = sfxdefs.GetEffect("DOROPN");
-        line->c_.sfxdown_ = sfxdefs.GetEffect("DORCLS");
+        line->c_.sfxup_   = sfxdefs.GetEffect("DOOR_OPEN");
+        line->c_.sfxdown_ = sfxdefs.GetEffect("DOOR_CLOSE");
     }
 
     line->c_.wait_ = 150;
@@ -591,8 +591,8 @@ static void MakeBoomLift(LineType *line, int number)
 
     line->f_.speed_up_   = 2 << speed;
     line->f_.speed_down_ = line->f_.speed_up_;
-    line->f_.sfxstart_   = sfxdefs.GetEffect("PSTART");
-    line->f_.sfxstop_    = sfxdefs.GetEffect("PSTOP");
+    line->f_.sfxstart_   = sfxdefs.GetEffect("PLATFORM_START");
+    line->f_.sfxstop_    = sfxdefs.GetEffect("PLATFORM_STOP");
 
     switch (target)
     {
@@ -665,7 +665,7 @@ static void MakeBoomStair(LineType *line, int number)
     line->f_.speed_down_ = (1 << speed) / 4.0f;
     line->f_.speed_up_   = line->f_.speed_down_;
 
-    line->f_.sfxdown_ = sfxdefs.GetEffect("STNMOV");
+    line->f_.sfxdown_ = sfxdefs.GetEffect("STAIR_MOVE");
     line->f_.sfxup_   = line->f_.sfxdown_;
 
     if (igntxt)
@@ -690,7 +690,7 @@ static void MakeBoomCrusher(LineType *line, int number)
 
     if (!silent)
     {
-        line->c_.sfxup_   = sfxdefs.GetEffect("STNMOV");
+        line->c_.sfxup_   = sfxdefs.GetEffect("CRUSHER_MOVE");
         line->c_.sfxdown_ = line->c_.sfxup_;
     }
 }

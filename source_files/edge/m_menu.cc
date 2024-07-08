@@ -117,8 +117,6 @@ static int chosen_episode;
 
 // SOUNDS
 SoundEffect *sound_effect_swtchn;
-SoundEffect *sound_effect_tink;
-SoundEffect *sound_effect_radio;
 SoundEffect *sound_effect_oof;
 SoundEffect *sound_effect_pstop;
 SoundEffect *sound_effect_stnmov;
@@ -3005,34 +3003,34 @@ void MenuInitialize(void)
         // Check for custom menu graphics in pwads:
         // If we have them then use them instead of our
         //  text-based ones.
-        if (IsLumpInPwad("M_NEWG"))
+        if (IsFileInAddon("M_NEWG"))
             custom_MenuMain = true;
 
-        if (IsLumpInPwad("M_LOADG"))
+        if (IsFileInAddon("M_LOADG"))
             custom_MenuMain = true;
 
-        if (IsLumpInPwad("M_SAVEG"))
+        if (IsFileInAddon("M_SAVEG"))
             custom_MenuMain = true;
 
-        if (IsLumpInPwad("M_EPISOD"))
+        if (IsFileInAddon("M_EPISOD"))
             custom_MenuEpisode = true;
 
-        if (IsLumpInPwad("M_EPI1"))
+        if (IsFileInAddon("M_EPI1"))
             custom_MenuEpisode = true;
 
-        if (IsLumpInPwad("M_EPI2"))
+        if (IsFileInAddon("M_EPI2"))
             custom_MenuEpisode = true;
 
-        if (IsLumpInPwad("M_EPI3"))
+        if (IsFileInAddon("M_EPI3"))
             custom_MenuEpisode = true;
 
-        if (IsLumpInPwad("M_EPI4"))
+        if (IsFileInAddon("M_EPI4"))
             custom_MenuEpisode = true;
 
-        if (IsLumpInPwad("M_JKILL"))
+        if (IsFileInAddon("M_JKILL"))
             custom_MenuDifficulty = true;
 
-        if (IsLumpInPwad("M_NMARE"))
+        if (IsFileInAddon("M_NMARE"))
             custom_MenuDifficulty = true;
     }
 
@@ -3042,15 +3040,15 @@ void MenuInitialize(void)
 
     menu_doom = ImageLookup("M_DOOM");
 
-    if (IsLumpInAnyWad("HELP1")) // doom or shareware doom
+    if (IsFileAnywhere("HELP1")) // doom or shareware doom
     {
         menu_read_this[0] = ImageLookup("HELP1");
-        if (IsLumpInAnyWad("HELP2"))
+        if (IsFileAnywhere("HELP2"))
             menu_read_this[1] = ImageLookup("HELP2");  // Shareware doom
         else
             menu_read_this[1] = ImageLookup("CREDIT"); // Full doom
     }
-    else if (IsLumpInAnyWad("HELP")) // doom 2
+    else if (IsFileAnywhere("HELP")) // doom 2
     {
         menu_read_this[0]           = ImageLookup("HELP");
         menu_read_this[1]           = ImageLookup("CREDIT"); // Unnecessary since we won't see it anyway...
@@ -3067,8 +3065,6 @@ void MenuInitialize(void)
     // Lobo 2022: Use new sfx definitions so we don't have to share names with
     // normal doom sfx.
     sound_effect_swtchn = sfxdefs.GetEffect("MENU_IN");  // Enter Menu
-    sound_effect_tink   = sfxdefs.GetEffect("TINK");     // unused
-    sound_effect_radio  = sfxdefs.GetEffect("RADIO");    // unused
     sound_effect_oof    = sfxdefs.GetEffect("MENU_INV"); // invalid choice
     sound_effect_pstop  = sfxdefs.GetEffect("MENU_MOV"); // moving cursor in a menu
     sound_effect_stnmov = sfxdefs.GetEffect("MENU_SLD"); // slider move
