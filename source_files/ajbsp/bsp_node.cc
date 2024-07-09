@@ -18,6 +18,8 @@
 //
 //------------------------------------------------------------------------
 
+#include <limits.h>
+
 #include "HandmadeMath.h"
 #include "bsp_local.h"
 #include "bsp_utility.h"
