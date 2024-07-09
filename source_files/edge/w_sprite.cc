@@ -35,7 +35,6 @@
 #include "e_main.h"
 #include "e_search.h"
 #include "epi.h"
-#include "epi_doomdefs.h"
 #include "epi_endian.h"
 #include "epi_filesystem.h"
 #include "epi_str_compare.h"
@@ -45,7 +44,7 @@
 #include "r_things.h"
 #include "w_epk.h"
 #include "w_files.h"
-#include "w_wad.h"
+
 
 //
 // A sprite definition: a number of animation frames.

@@ -65,7 +65,7 @@
 #include "s_music.h"
 #include "s_sound.h"
 #include "sv_main.h"
-#include "w_wad.h"
+#include "w_files.h"
 
 // Program stuff
 int key_screenshot;
@@ -1155,10 +1155,10 @@ static void CreateEpisodeMenu(void)
 
         if (ddf_map_name_check)
         {
-            if (CheckLumpNumberForName(ddf_map_name_check->lump_.c_str()) == -1)
+            if (!IsFileAnywhere(ddf_map_name_check->name_.c_str()))
                 continue;
         }
-        else if (CheckLumpNumberForName(g->firstmap_.c_str()) == -1)
+        else if (!IsFileAnywhere(g->firstmap_.c_str()))
             continue;
 
         EpisodeMenu[e].status          = 1;
@@ -1454,7 +1454,6 @@ static void QuitResponse(int ch)
     {
         int  numsounds = 0;
         char refname[64];
-        char sound[64];
         int  i, start;
 
         // Count the quit messages
@@ -1475,10 +1474,10 @@ static void QuitResponse(int ch)
             do
             {
                 sprintf(refname, "QuitSnd%d", i + 1);
-                sprintf(sound, "DS%s", language[refname]);
-                if (CheckLumpNumberForName(sound) != -1)
+                SoundEffect *quit_sound = sfxdefs.GetEffect(language[refname]);
+                if (quit_sound)
                 {
-                    StartSoundEffect(sfxdefs.GetEffect(language[refname]));
+                    StartSoundEffect(quit_sound);
                     break;
                 }
                 i = (i + 1) % numsounds;

@@ -85,7 +85,6 @@
 #include "w_files.h"
 #include "w_model.h"
 #include "w_sprite.h"
-#include "w_wad.h"
 
 extern ConsoleVariable double_framerate;
 extern ConsoleVariable busy_wait;
@@ -653,14 +652,14 @@ void PickLoadingScreen(void)
             MapDefinition *ddf_map_name_check = mapdefs.Lookup(g->firstmap_.c_str());
             if (ddf_map_name_check)
             {
-                if (CheckLumpNumberForName(ddf_map_name_check->lump_.c_str()) == -1)
+                if (!IsFileAnywhere(ddf_map_name_check->name_.c_str()))
                 {
                     title_game = (title_game + 1) % gamedefs.size();
                     title_pic  = 0;
                     continue;
                 }
             }
-            else if (CheckLumpNumberForName(g->firstmap_.c_str()) == -1)
+            else if (!IsFileAnywhere(g->firstmap_.c_str()))
             {
                 title_game = (title_game + 1) % gamedefs.size();
                 title_pic  = 0;
@@ -714,7 +713,7 @@ static void PickMenuBackdrop(void)
         }
 
         // ignore non-existing episodes.
-        if (title_pic == 0 && (g->firstmap_ == "" || CheckLumpNumberForName(g->firstmap_.c_str()) == -1))
+        if (title_pic == 0 && (g->firstmap_ == "" || !IsFileAnywhere(g->firstmap_.c_str())))
         {
             title_game = (title_game + 1) % gamedefs.size();
             title_pic  = 0;
@@ -836,14 +835,14 @@ void AdvanceTitle(void)
             MapDefinition *ddf_map_name_check = mapdefs.Lookup(g->firstmap_.c_str());
             if (ddf_map_name_check)
             {
-                if (CheckLumpNumberForName(ddf_map_name_check->lump_.c_str()) == -1)
+                if (!IsFileAnywhere(ddf_map_name_check->name_.c_str()))
                 {
                     title_game = (title_game + 1) % gamedefs.size();
                     title_pic  = 0;
                     continue;
                 }
             }
-            else if (CheckLumpNumberForName(g->firstmap_.c_str()) == -1)
+            else if (!IsFileAnywhere(g->firstmap_.c_str()))
             {
                 title_game = (title_game + 1) % gamedefs.size();
                 title_pic  = 0;
@@ -1307,9 +1306,7 @@ static void AddSingleCommandLineFile(std::string name, bool ignore_unknown)
 
     FileKind kind;
 
-    if (ext == ".wad")
-        kind = kFileKindPWAD;
-    else if (ext == ".pk3" || ext == ".epk" || ext == ".zip" || ext == ".vwad")
+    if (ext == ".pk3" || ext == ".epk" || ext == ".zip")
         kind = kFileKindEPK;
     else if (ext == ".ddf" || ext == ".ldf")
         kind = kFileKindDDF;

@@ -51,7 +51,7 @@
 #include "r_modes.h"
 #include "s_sound.h"
 #include "sv_main.h"
-#include "w_wad.h"
+
 
 extern GameFlags default_game_flags;
 

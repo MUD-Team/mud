@@ -48,7 +48,7 @@
 #include "r_modes.h"
 #include "s_music.h"
 #include "s_sound.h"
-#include "w_wad.h"
+#include "w_files.h"
 
 //
 // Data needed to add patches to full screen intermission pics.

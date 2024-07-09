@@ -34,7 +34,6 @@
 #include "con_var.h"
 #include "e_input.h"
 #include "epi.h"
-#include "epi_doomdefs.h"
 #include "epi_str_compare.h"
 #include "hu_draw.h"
 #include "hu_style.h"

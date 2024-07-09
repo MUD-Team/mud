@@ -35,7 +35,6 @@
 #include "r_modes.h"
 #include "r_texgl.h"
 #include "w_files.h"
-#include "w_wad.h"
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "stb_truetype.h"
 

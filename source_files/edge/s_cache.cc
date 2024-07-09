@@ -46,7 +46,7 @@
 #include "snd_data.h"
 #include "snd_types.h"
 #include "w_files.h"
-#include "w_wad.h"
+
 
 extern int  sound_device_frequency;
 

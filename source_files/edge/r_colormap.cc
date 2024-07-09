@@ -46,7 +46,7 @@
 #include "r_texgl.h"
 #include "r_units.h"
 #include "w_files.h"
-#include "w_wad.h"
+
 
 extern ConsoleVariable force_flat_lighting;
 

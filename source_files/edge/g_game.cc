@@ -59,7 +59,7 @@
 #include "script/compat/lua_compat.h"
 #include "sv_main.h"
 #include "version.h"
-#include "w_wad.h"
+#include "w_files.h"
 
 extern ConsoleVariable double_framerate;
 
@@ -815,15 +815,7 @@ void DeferredNewGame(NewGameParameters &params)
 
 bool MapExists(const MapDefinition *map)
 {
-    int lump_number = CheckMapLumpNumberForName(map->lump_.c_str());
-
-    if (lump_number < 0)
-        return false;
-
-    if (!IsLumpIndexValid(lump_number+1) || !VerifyLump(lump_number+1, "TEXTMAP"))
-        return false;
-
-    return true;
+    return IsFileAnywhere(map->name_.c_str());
 }
 
 //

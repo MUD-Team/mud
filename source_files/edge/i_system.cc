@@ -33,7 +33,7 @@
 #include "m_misc.h"
 #include "s_sound.h"
 #include "version.h"
-#include "w_wad.h"
+
 
 extern FILE *debug_file;
 extern FILE *log_file;

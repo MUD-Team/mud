@@ -33,23 +33,15 @@
 
 enum FileKind
 {
-    kFileKindIWAD = 0, // iwad file
-    kFileKindPWAD,     // normal .wad file
-    kFileKindXWAD,     // ajbsp node wad
-
-    kFileKindFolder,   // a folder somewhere
-    kFileKindEFolder,  // edge folder, priority loading
-    kFileKindEPK,      // edge package (.epk)
-    kFileKindEEPK,     // edge epks, priority loading (same extension as epk)
-    kFileKindPackWAD,  // WADs within pack files; should only be used for maps
-    kFileKindIPK,      // standalone game EPK (same extension as epk)
-    kFileKindIFolder,  // standalone game folder
-    kFileKindIPackWAD, // IWADs within pack files :/
-
-    kFileKindDDF      // .ddf or .ldf file
+    kFileKindFolder = 0,   // a folder somewhere
+    kFileKindEFolder,      // edge folder, priority loading
+    kFileKindEPK,          // edge package (.epk)
+    kFileKindEEPK,         // edge epks, priority loading (same extension as epk)
+    kFileKindIPK,          // standalone game EPK (same extension as epk)
+    kFileKindIFolder,      // standalone game folder
+    kFileKindDDF           // .ddf or .ldf file
 };
 
-class WadFile;
 class PackFile;
 
 class DataFile
@@ -63,9 +55,6 @@ class DataFile
 
     // file object   [ TODO review when active ]
     epi::File *file_;
-
-    // for kFileKindIWAD, PWAD, EWad, XWAD.
-    WadFile *wad_;
 
     // for kFileKindEPK
     PackFile *pack_;
@@ -92,6 +81,10 @@ void DoPackSubstitutions(void);
 uint8_t *OpenMatchingPackFileInMemory(const std::string &name, const std::vector<std::string> &extensions, int *length);
 
 int CheckPackFilesForName(const std::string &name);
+
+bool IsFileInAddon(const char *name);
+
+bool IsFileAnywhere(const char *name);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

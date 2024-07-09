@@ -35,14 +35,13 @@
 #include "AlmostEquals.h"
 #include "dm_state.h"
 #include "epi.h"
-#include "epi_doomdefs.h"
 #include "g_game.h"
 #include "m_random.h"
 #include "p_action.h"
 #include "p_local.h"
 #include "r_misc.h"
 #include "s_sound.h"
-#include "w_wad.h"
+
 
 DirectionType opposite[] = {kDirectionWest,      kDirectionSouthwest, kDirectionSouth,
                             kDirectionSoutheast, kDirectionEast,      kDirectionNorthEast,

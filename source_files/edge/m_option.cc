@@ -109,7 +109,7 @@
 #include "s_fluid.h"
 #include "s_music.h"
 #include "s_sound.h"
-#include "w_wad.h"
+
 
 int  option_menu_on    = 0;
 bool function_key_menu = false;

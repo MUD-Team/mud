@@ -29,7 +29,7 @@
 #include "s_music.h"
 #include "s_sound.h"
 #include "w_files.h"
-#include "w_wad.h"
+
 #define PL_MPEG_IMPLEMENTATION
 #include "pl_mpeg.h"
 #include "sokol_color.h"

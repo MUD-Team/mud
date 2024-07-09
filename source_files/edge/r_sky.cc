@@ -35,7 +35,7 @@
 #include "r_texgl.h"
 #include "r_units.h"
 #include "w_flat.h"
-#include "w_wad.h"
+
 
 const Image *sky_image;
 

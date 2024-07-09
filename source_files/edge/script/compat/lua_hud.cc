@@ -10,7 +10,7 @@
 #include "r_colormap.h"
 #include "r_misc.h"
 #include "s_sound.h"
-#include "w_wad.h"
+
 
 extern ConsoleVariable double_framerate;
 extern bool            erraticism_active;

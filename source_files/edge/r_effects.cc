@@ -27,7 +27,7 @@
 #include "r_misc.h"
 #include "r_modes.h"
 #include "r_texgl.h"
-#include "w_wad.h"
+
 
 int render_view_extra_light;
 

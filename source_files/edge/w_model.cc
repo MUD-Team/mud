@@ -29,7 +29,7 @@
 #include "r_mdl.h"
 #include "r_things.h"
 #include "w_files.h"
-#include "w_wad.h"
+
 
 // Model storage
 static ModelDefinition **models;

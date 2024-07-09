@@ -42,7 +42,6 @@
 #include "r_misc.h"
 #include "r_state.h"
 #include "s_sound.h"
-#include "w_wad.h"
 
 // this ranges from 0 (VERY EASY) to 4 (VERY HARD)
 EDGE_DEFINE_CONSOLE_VARIABLE(bot_skill, "2", kConsoleVariableFlagArchive)

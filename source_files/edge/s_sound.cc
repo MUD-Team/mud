@@ -28,7 +28,7 @@
 #include "s_blit.h"
 #include "s_cache.h"
 #include "s_sound.h"
-#include "w_wad.h"
+
 
 extern float room_area;
 

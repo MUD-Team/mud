@@ -22,10 +22,9 @@
 
 #include "bsp_local.h"
 #include "bsp_utility.h"
-#include "bsp_wad.h"
-#include "epi_doomdefs.h"
 #include "epi_ename.h"
 #include "epi_endian.h"
+#include "epi_filesystem.h"
 #include "epi_lexer.h"
 #include "epi_str_util.h"
 #include "miniz.h"
@@ -51,25 +50,112 @@ enum UDMFTypes
     kUDMFLinedef = 5
 };
 
-WadFile *cur_wad;
-WadFile *xwa_wad;
+struct RawV2Vertex
+{
+    int32_t x, y;
+};
+
+struct RawBoundingBox
+{
+    int16_t maximum_y, minimum_y;
+    int16_t minimum_x, maximum_x;
+};
+struct RawV5Node
+{
+    // this structure used by ZDoom nodes too
+
+    int16_t        x, y;                           // starting point
+    int16_t        delta_x, delta_y;               // offset to ending point
+    RawBoundingBox bounding_box_1, bounding_box_2; // bounding rectangles
+    uint32_t       right, left;                    // children: Node or SSector (if high bit is set)
+};
+
+BuildInfo current_build_info;
+static std::string current_map_name;
+
+//----------------------------------------------------------------------
+
+static FILE    *zout_file = nullptr;
+static z_stream zout_stream;
+static Bytef    zout_buffer[1024];
+
+static void ZLibBeginLump(FILE *out_file)
+{
+    zout_file = out_file;
+
+    zout_stream.zalloc = (alloc_func)0;
+    zout_stream.zfree  = (free_func)0;
+    zout_stream.opaque = (voidpf)0;
+
+    if (Z_OK != deflateInit(&zout_stream, Z_DEFAULT_COMPRESSION))
+        FatalError("AJBSP: Trouble setting up zlib compression\n");
+
+    zout_stream.next_out  = zout_buffer;
+    zout_stream.avail_out = sizeof(zout_buffer);
+}
+
+static void ZLibAppendLump(const void *data, int length)
+{
+    zout_stream.next_in  = (Bytef *)data; // const override
+    zout_stream.avail_in = length;
+
+    while (zout_stream.avail_in > 0)
+    {
+        int err = deflate(&zout_stream, Z_NO_FLUSH);
+
+        if (err != Z_OK)
+            FatalError("AJBSP: Trouble compressing %d bytes (zlib)\n", length);
+
+        if (zout_stream.avail_out == 0)
+        {
+            fwrite(zout_buffer, sizeof(zout_buffer), 1, zout_file);
+            zout_stream.next_out  = zout_buffer;
+            zout_stream.avail_out = sizeof(zout_buffer);
+        }
+    }
+}
+
+static void ZLibFinishLump(void)
+{
+    int left_over;
+
+    zout_stream.next_in  = Z_NULL;
+    zout_stream.avail_in = 0;
+
+    for (;;)
+    {
+        int err = deflate(&zout_stream, Z_FINISH);
+
+        if (err == Z_STREAM_END)
+            break;
+
+        if (err != Z_OK)
+            FatalError("AJBSP: Trouble finishing compression (zlib)\n");
+
+        if (zout_stream.avail_out == 0)
+        {
+            fwrite(zout_buffer, sizeof(zout_buffer), 1, zout_file);
+            zout_stream.next_out  = zout_buffer;
+            zout_stream.avail_out = sizeof(zout_buffer);
+        }
+    }
+
+    left_over = sizeof(zout_buffer) - zout_stream.avail_out;
+
+    if (left_over > 0)
+        fwrite(zout_buffer, left_over, 1, zout_file);
+
+    deflateEnd(&zout_stream);
+
+    zout_file = nullptr;
+}
+
 
 //------------------------------------------------------------------------
 // LEVEL : Level structure read/write functions.
 //------------------------------------------------------------------------
 
 // Note: ZDoom format support based on code (C) 2002,2003 Randy Heit
-
-// per-level variables
-
-const char *level_current_name;
-
-int level_current_idx;
-int level_current_start;
-
-MapFormat level_format;
-
-bool level_long_name;
 
 // objects of loaded level, and stuff we've built
 std::vector<Vertex *>  level_vertices;
@@ -233,15 +319,6 @@ void FreeWallTips()
 
 /* ----- reading routines ------------------------------ */
 
-static const char *GetLevelName(int level_index)
-{
-    EPI_ASSERT(cur_wad != nullptr);
-
-    int lump_idx = cur_wad->LevelHeader(level_index);
-
-    return cur_wad->GetLump(lump_idx)->Name();
-}
-
 static Vertex *SafeLookupVertex(int num)
 {
     if (num >= level_vertices.size())
@@ -263,10 +340,6 @@ static inline Sidedef *SafeLookupSidedef(int num)
 
 void ParseThingField(Thing *thing, const int &key, const std::string &value)
 {
-    // Do we need more precision than an int for things? I think this would only
-    // be an issue if/when polyobjects happen, as I think other thing types are
-    // ignored - Dasho
-
     if (key == epi::kENameX)
         thing->x = RoundToInteger(epi::LexDouble(value));
     else if (key == epi::kENameY)
@@ -431,6 +504,7 @@ void ParseUDMF_Block(epi::Lexer &lex, int cur_type)
 
 void ParseUDMF_Pass(const std::string &data, int pass)
 {
+    // pass = 0 : namespace/basic structure validation
     // pass = 1 : vertices, sectors, things
     // pass = 2 : sidedefs
     // pass = 3 : linedefs
@@ -451,10 +525,23 @@ void ParseUDMF_Pass(const std::string &data, int pass)
             return;
         }
 
-        // ignore top-level assignments
         if (lex.Match("="))
         {
             lex.Next(section);
+
+            if (pass == 0)
+            {
+                if (section != "doom" && section != "heretic" && section != "edge-classic" &&
+                        section != "zdoomtranslated")
+                {
+                    FatalError("UDMF: %s uses unsupported namespace "
+                                "\"%s\"!\nSupported namespaces are \"doom\", "
+                                "\"heretic\", \"edge-classic\", or "
+                                "\"zdoomtranslated\"!\n",
+                                current_map_name.c_str(), section.c_str());
+                }
+            }
+
             if (!lex.Match(";"))
                 FatalError("AJBSP: Malformed TEXTMAP lump: missing ';'\n");
             continue;
@@ -462,6 +549,9 @@ void ParseUDMF_Pass(const std::string &data, int pass)
 
         if (!lex.Match("{"))
             FatalError("AJBSP: Malformed TEXTMAP lump: missing '{'\n");
+
+        if (pass == 0)
+            return;
 
         int cur_type = 0;
 
@@ -498,27 +588,19 @@ void ParseUDMF_Pass(const std::string &data, int pass)
     }
 }
 
-void ParseUDMF()
+void ParseUDMF(const std::string &textmap)
 {
-    Lump *lump = FindLevelLump("TEXTMAP");
-
-    if (lump == nullptr || !lump->Seek(0))
-        FatalError("AJBSP: Error finding TEXTMAP lump.\n");
-
-    // load the lump into this string
-    std::string data(lump->Length(), 0);
-    if (!lump->Read(data.data(), lump->Length()))
-        FatalError("AJBSP: Error reading TEXTMAP lump.\n");
-
-    // now parse it...
+    if (textmap.empty())
+        FatalError("AJBSP: Empty TEXTMAP lump?\n");
 
     // the UDMF spec does not require objects to be in a dependency order.
     // for example: sidedefs may occur *after* the linedefs which refer to
     // them.  hence we perform multiple passes over the TEXTMAP data.
 
-    ParseUDMF_Pass(data, 1);
-    ParseUDMF_Pass(data, 2);
-    ParseUDMF_Pass(data, 3);
+    ParseUDMF_Pass(textmap, 0);
+    ParseUDMF_Pass(textmap, 1);
+    ParseUDMF_Pass(textmap, 2);
+    ParseUDMF_Pass(textmap, 3);
 
     num_old_vert = level_vertices.size();
 }
@@ -758,14 +840,9 @@ void PutZNodes(Node *root)
         FatalError("AJBSP: PutZNodes miscounted (%d != %d)\n", node_cur_index, level_nodes.size());
 }
 
-void SaveXGL3Format(Lump *lump, Node *root_node)
+void SaveXGL3Format(FILE *lump, Node *root_node)
 {
-    // WISH : compute a max_size
-
-    if (current_build_info.compress_nodes)
-        lump->Write(level_ZGL3_magic, 4);
-    else
-        lump->Write(level_XGL3_magic, 4);
+    fwrite(level_ZGL3_magic, 4, 1, lump);
 
     ZLibBeginLump(lump);
 
@@ -779,19 +856,14 @@ void SaveXGL3Format(Lump *lump, Node *root_node)
 
 /* ----- whole-level routines --------------------------- */
 
-void LoadLevel()
+void LoadLevel(const std::string &textmap)
 {
-    Lump *LEV = cur_wad->GetLump(level_current_start);
-
-    level_current_name = LEV->Name();
-    level_long_name    = false;
-
-    StartupProgressMessage(epi::StringFormat("Building nodes for %s\n", level_current_name).c_str());
+    StartupProgressMessage(epi::StringFormat("Building nodes for %s\n", current_map_name.c_str()).c_str());
 
     num_new_vert   = 0;
     num_real_lines = 0;
 
-    ParseUDMF();
+    ParseUDMF(textmap);
 
     LogDebug("    Loaded %d vertices, %d sectors, %d sides, %d lines, %d things\n", level_vertices.size(),
              level_sectors.size(), level_sidedefs.size(), level_linedefs.size(), level_things.size());
@@ -800,9 +872,6 @@ void LoadLevel()
     DetectOverlappingLines();
 
     CalculateWallTips();
-
-    // -JL- Find sectors containing polyobjs
-    DetectPolyobjSectors();
 }
 
 void FreeLevel()
@@ -819,224 +888,48 @@ void FreeLevel()
     FreeIntersections();
 }
 
-BuildResult SaveXWA(Node *root_node)
+BuildResult SaveXWA(std::string_view filename, Node *root_node)
 {
-    xwa_wad->BeginWrite();
+    FILE *nodes_out = epi::FileOpenRaw(filename, epi::kFileAccessBinary | epi::kFileAccessWrite);
 
-    const char *level_name = GetLevelName(level_current_idx);
-    Lump       *lump       = xwa_wad->AddLump(level_name);
+    if (!nodes_out)
+        FatalError("AJBSP: Failed to open %s for writing!\n", std::string(filename).c_str());
 
     if (num_real_lines == 0)
-    {
-        lump->Finish();
-    }
+        FatalError("AJBSP: %s is for an empty level?\n", std::string(filename).c_str());
     else
     {
         SortSegs();
-        SaveXGL3Format(lump, root_node);
+        SaveXGL3Format(nodes_out, root_node);
     }
 
-    xwa_wad->EndWrite();
+    fclose(nodes_out);
 
     return kBuildOK;
-}
-
-//----------------------------------------------------------------------
-
-static Lump *zout_lump;
-
-static z_stream zout_stream;
-static Bytef    zout_buffer[1024];
-
-void ZLibBeginLump(Lump *lump)
-{
-    zout_lump = lump;
-
-    if (!current_build_info.compress_nodes)
-        return;
-
-    zout_stream.zalloc = (alloc_func)0;
-    zout_stream.zfree  = (free_func)0;
-    zout_stream.opaque = (voidpf)0;
-
-    if (Z_OK != deflateInit(&zout_stream, Z_DEFAULT_COMPRESSION))
-        FatalError("AJBSP: Trouble setting up zlib compression\n");
-
-    zout_stream.next_out  = zout_buffer;
-    zout_stream.avail_out = sizeof(zout_buffer);
-}
-
-void ZLibAppendLump(const void *data, int length)
-{
-    if (!current_build_info.compress_nodes)
-    {
-        zout_lump->Write(data, length);
-        return;
-    }
-
-    zout_stream.next_in  = (Bytef *)data; // const override
-    zout_stream.avail_in = length;
-
-    while (zout_stream.avail_in > 0)
-    {
-        int err = deflate(&zout_stream, Z_NO_FLUSH);
-
-        if (err != Z_OK)
-            FatalError("AJBSP: Trouble compressing %d bytes (zlib)\n", length);
-
-        if (zout_stream.avail_out == 0)
-        {
-            zout_lump->Write(zout_buffer, sizeof(zout_buffer));
-
-            zout_stream.next_out  = zout_buffer;
-            zout_stream.avail_out = sizeof(zout_buffer);
-        }
-    }
-}
-
-void ZLibFinishLump(void)
-{
-    if (!current_build_info.compress_nodes)
-    {
-        zout_lump->Finish();
-        zout_lump = nullptr;
-        return;
-    }
-
-    int left_over;
-
-    // ASSERT(zout_stream.avail_out > 0)
-
-    zout_stream.next_in  = Z_NULL;
-    zout_stream.avail_in = 0;
-
-    for (;;)
-    {
-        int err = deflate(&zout_stream, Z_FINISH);
-
-        if (err == Z_STREAM_END)
-            break;
-
-        if (err != Z_OK)
-            FatalError("AJBSP: Trouble finishing compression (zlib)\n");
-
-        if (zout_stream.avail_out == 0)
-        {
-            zout_lump->Write(zout_buffer, sizeof(zout_buffer));
-
-            zout_stream.next_out  = zout_buffer;
-            zout_stream.avail_out = sizeof(zout_buffer);
-        }
-    }
-
-    left_over = sizeof(zout_buffer) - zout_stream.avail_out;
-
-    if (left_over > 0)
-        zout_lump->Write(zout_buffer, left_over);
-
-    deflateEnd(&zout_stream);
-
-    zout_lump->Finish();
-    zout_lump = nullptr;
-}
-
-/* ---------------------------------------------------------------- */
-
-Lump *FindLevelLump(const char *name)
-{
-    int idx = cur_wad->LevelLookupLump(level_current_idx, name);
-
-    if (idx < 0)
-        return nullptr;
-
-    return cur_wad->GetLump(idx);
 }
 
 //------------------------------------------------------------------------
 // MAIN STUFF
 //------------------------------------------------------------------------
 
-BuildInfo current_build_info;
-
 void ResetInfo()
 {
     current_build_info.total_minor_issues = 0;
     current_build_info.total_warnings     = 0;
-    current_build_info.compress_nodes     = true;
     current_build_info.split_cost         = kSplitCostDefault;
+    current_map_name.clear();
 }
 
-void OpenWad(std::string filename)
-{
-    cur_wad = WadFile::Open(filename, 'r');
-    if (cur_wad == nullptr)
-        FatalError("AJBSP: Cannot open file: %s\n", filename.c_str());
-}
+/* ----- build nodes for a single UDMF level ----- */
 
-void OpenMem(std::string filename, uint8_t *Rawdata, int Rawlength)
-{
-    cur_wad = WadFile::OpenMem(filename, Rawdata, Rawlength);
-    if (cur_wad == nullptr)
-        FatalError("AJBSP: Cannot open file from memory: %s\n", filename.c_str());
-}
-
-void CreateXWA(std::string filename)
-{
-    xwa_wad = WadFile::Open(filename, 'w');
-    if (xwa_wad == nullptr)
-        FatalError("AJBSP: Cannot create file: %s\n", filename.c_str());
-
-    xwa_wad->BeginWrite();
-    xwa_wad->AddLump("XG_START")->Finish();
-    xwa_wad->EndWrite();
-}
-
-void FinishXWA()
-{
-    xwa_wad->BeginWrite();
-    xwa_wad->AddLump("XG_END")->Finish();
-    xwa_wad->EndWrite();
-}
-
-void CloseWad()
-{
-    if (cur_wad != nullptr)
-    {
-        // this closes the file
-        delete cur_wad;
-        cur_wad = nullptr;
-    }
-
-    if (xwa_wad != nullptr)
-    {
-        delete xwa_wad;
-        xwa_wad = nullptr;
-    }
-}
-
-int LevelsInWad()
-{
-    if (cur_wad == nullptr)
-        return 0;
-
-    return cur_wad->LevelCount();
-}
-
-/* ----- build nodes for a single level ----- */
-
-BuildResult BuildLevel(int level_index)
+BuildResult BuildLevel(std::string_view mapname, std::string_view filename, const std::string &textmap)
 {
     Node      *root_node = nullptr;
     Subsector *root_sub  = nullptr;
 
-    level_current_idx   = level_index;
-    level_current_start = cur_wad->LevelHeader(level_index);
-    level_format        = cur_wad->LevelFormat(level_index);
+    current_map_name = mapname;
 
-    if (level_format != kMapFormatUDMF)
-        FatalError("%s is not a UDMF level!\n", cur_wad->GetLump(level_index)->Name());
-
-    LoadLevel();
+    LoadLevel(textmap);
 
     BuildResult ret = kBuildOK;
 
@@ -1064,13 +957,14 @@ BuildResult BuildLevel(int level_index)
 
         ClockwiseBSPTree();
 
-        if (xwa_wad != nullptr)
-            ret = SaveXWA(root_node);
+        if (!filename.empty())
+            ret = SaveXWA(filename, root_node);
         else
-            FatalError("AJBSP: Cannot save nodes to XWA file!\n");
+            FatalError("AJBSP: Cannot save nodes to %s!\n", std::string(filename).c_str());
     }
     else
-    { /* build was Cancelled by the user */
+    {
+        FatalError("AJBSP: Failed building %s!\n", std::string(filename).c_str());
     }
 
     FreeLevel();

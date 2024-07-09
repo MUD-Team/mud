@@ -45,12 +45,12 @@
 #include "epi_filesystem.h"
 #include "i_system.h"
 #include "w_epk.h"
-#include "w_wad.h"
+
 
 std::vector<DataFile *> data_files;
 
 DataFile::DataFile(std::string name, FileKind kind)
-    : name_(name), kind_(kind), file_(nullptr), wad_(nullptr), pack_(nullptr)
+    : name_(name), kind_(kind), file_(nullptr), pack_(nullptr)
 {
 }
 
@@ -89,10 +89,6 @@ size_t AddPendingFile(std::string file, FileKind kind)
     return index;
 }
 
-extern void ProcessWad(DataFile *df, size_t file_index);
-
-extern std::string BuildXGLNodesForWAD(DataFile *df);
-
 static void W_ExternalDDF(DataFile *df)
 {
     DDFType type = DDFFilenameToType(df->name_);
@@ -130,26 +126,7 @@ void ProcessFile(DataFile *df)
 
     LogPrint("  Processing: %s\n", filename.c_str());
 
-    if (df->kind_ <= kFileKindXWAD)
-    {
-        epi::File *file = epi::FileOpen(filename, epi::kFileAccessRead | epi::kFileAccessBinary);
-        if (file == nullptr)
-        {
-            FatalError("Couldn't open file: %s\n", filename.c_str());
-            return;
-        }
-
-        df->file_ = file;
-
-        ProcessWad(df, file_index);
-    }
-    else if (df->kind_ == kFileKindPackWAD || df->kind_ == kFileKindIPackWAD)
-    {
-        EPI_ASSERT(df->file_); // This should already be handled by the pack
-                               // processing
-        ProcessWad(df, file_index);
-    }
-    else if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEPK ||
+    if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEPK ||
              df->kind_ == kFileKindEEPK || df->kind_ == kFileKindIPK || df->kind_ == kFileKindIFolder)
     {
         ProcessAllInPack(df, file_index);
@@ -180,26 +157,6 @@ void ProcessMultipleFiles()
         }
 
         pending_files.clear();
-    }
-}
-
-void BuildXGLNodes(void)
-{
-    for (size_t i = 0; i < data_files.size(); i++)
-    {
-        DataFile *df = data_files[i];
-
-        if (df->kind_ == kFileKindIWAD || df->kind_ == kFileKindPWAD || df->kind_ == kFileKindPackWAD ||
-            df->kind_ == kFileKindIPackWAD)
-        {
-            std::string xwa_filename = BuildXGLNodesForWAD(df);
-
-            if (!xwa_filename.empty())
-            {
-                DataFile *new_df = new DataFile(xwa_filename, kFileKindXWAD);
-                ProcessFile(new_df);
-            }
-        }
     }
 }
 
@@ -284,18 +241,8 @@ static const char *FileKindString(FileKind kind)
 {
     switch (kind)
     {
-    case kFileKindIWAD:
-        return "iwad";
-    case kFileKindPWAD:
-        return "pwad";
     case kFileKindEEPK:
         return "edge";
-    case kFileKindXWAD:
-        return "xwad";
-    case kFileKindPackWAD:
-        return "pwad";
-    case kFileKindIPackWAD:
-        return "iwad";
     case kFileKindFolder:
         return "dir  ";
     case kFileKindEFolder:
@@ -323,6 +270,60 @@ void ShowLoadedFiles()
 
         LogPrint(" %2d:  %-4s  \"%s\"\n", i + 1, FileKindString(df->kind_), epi::SanitizePath(df->name_).c_str());
     }
+}
+
+// IsFileInAddon
+//
+// check if a file is in a file that
+// was loaded after the main game file
+// in our load order
+//
+// Returns true if found
+bool IsFileInAddon(const char *name)
+{
+    if (!name)
+        return false;
+
+    // if we're here then check EPKs/folders
+    bool in_addon = false;
+
+    // search from newest file to oldest
+    for (int i = (int)data_files.size() - 1; i >= 2; i--) // ignore edge_defs and the game file itself
+    {
+        DataFile *df = data_files[i];
+        if (df->pack_ && FindStemInPack(df->pack_, name))
+        {
+            in_addon = true;
+            break;
+        }
+    }
+
+    return in_addon;
+}
+
+// IsFileAnywhere
+//
+// check if a file is in any folder/epk at all
+//
+// Returns true if found
+bool IsFileAnywhere(const char *name)
+{
+    if (!name)
+        return false;
+
+    bool in_any_file = false;
+
+    // search from oldest to newest
+    for (const DataFile *df : data_files)
+    {
+        if (df->pack_ && FindStemInPack(df->pack_, name))
+        {
+            in_any_file = true;
+            break;
+        }
+    }
+
+    return in_any_file;
 }
 
 //--- editor settings ---

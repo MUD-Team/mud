@@ -30,7 +30,7 @@
 #include "s_blit.h"
 #include "s_cache.h"
 #include "snd_gather.h"
-#include "w_wad.h"
+
 
 extern bool sound_device_stereo; // FIXME: encapsulation
 

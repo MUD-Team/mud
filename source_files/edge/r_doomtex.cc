@@ -37,7 +37,6 @@
 #include "e_main.h"
 #include "e_search.h"
 #include "epi.h"
-#include "epi_doomdefs.h"
 #include "epi_endian.h"
 #include "epi_file.h"
 #include "epi_filesystem.h"
@@ -54,7 +53,7 @@
 #include "r_sky.h"
 #include "r_texgl.h"
 #include "w_files.h"
-#include "w_wad.h"
+
 
 // Dummy image, for when texture/flat/graphic is unknown.  Row major
 // order.  Could be packed, but why bother ?
