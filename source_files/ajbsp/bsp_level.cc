@@ -250,222 +250,13 @@ static Vertex *SafeLookupVertex(int num)
     return level_vertices[num];
 }
 
-static Sector *SafeLookupSector(uint16_t num)
+static inline Sidedef *SafeLookupSidedef(int num)
 {
-    if (num == 0xFFFF)
-        return nullptr;
-
-    if (num >= level_sectors.size())
-        FatalError("AJBSP: illegal sector number #%d\n", (int)num);
-
-    return level_sectors[num];
-}
-
-static inline Sidedef *SafeLookupSidedef(uint16_t num)
-{
-    if (num == 0xFFFF)
-        return nullptr;
-
     // silently ignore illegal sidedef numbers
     if (num >= (unsigned int)level_sidedefs.size())
         return nullptr;
 
     return level_sidedefs[num];
-}
-
-void GetVertices()
-{
-    int count = 0;
-
-    Lump *lump = FindLevelLump("VERTEXES");
-
-    if (lump)
-        count = lump->Length() / (int)sizeof(RawVertex);
-
-#if AJBSP_DEBUG_LOAD
-    LogDebug("GetVertices: num = %d\n", count);
-#endif
-
-    if (lump == nullptr || count == 0)
-        return;
-
-    if (!lump->Seek(0))
-        FatalError("AJBSP: Error seeking to vertices.\n");
-
-    for (int i = 0; i < count; i++)
-    {
-        RawVertex raw;
-
-        if (!lump->Read(&raw, sizeof(raw)))
-            FatalError("AJBSP: Error reading vertices.\n");
-
-        Vertex *vert = NewVertex();
-
-        vert->x_ = (double)AlignedLittleEndianS16(raw.x);
-        vert->y_ = (double)AlignedLittleEndianS16(raw.y);
-    }
-
-    num_old_vert = level_vertices.size();
-}
-
-void GetSectors()
-{
-    int count = 0;
-
-    Lump *lump = FindLevelLump("SECTORS");
-
-    if (lump)
-        count = lump->Length() / (int)sizeof(RawSector);
-
-    if (lump == nullptr || count == 0)
-        return;
-
-    if (!lump->Seek(0))
-        FatalError("AJBSP: Error seeking to sectors.\n");
-
-#if AJBSP_DEBUG_LOAD
-    LogDebug("GetSectors: num = %d\n", count);
-#endif
-
-    for (int i = 0; i < count; i++)
-    {
-        RawSector raw;
-
-        if (!lump->Read(&raw, sizeof(raw)))
-            FatalError("AJBSP: Error reading sectors.\n");
-
-        Sector *sector = NewSector();
-
-        (void)sector;
-    }
-}
-
-void GetThings()
-{
-    int count = 0;
-
-    Lump *lump = FindLevelLump("THINGS");
-
-    if (lump)
-        count = lump->Length() / (int)sizeof(RawThing);
-
-    if (lump == nullptr || count == 0)
-        return;
-
-    if (!lump->Seek(0))
-        FatalError("AJBSP: Error seeking to things.\n");
-
-#if AJBSP_DEBUG_LOAD
-    LogDebug("GetThings: num = %d\n", count);
-#endif
-
-    for (int i = 0; i < count; i++)
-    {
-        RawThing raw;
-
-        if (!lump->Read(&raw, sizeof(raw)))
-            FatalError("AJBSP: Error reading things.\n");
-
-        Thing *thing = NewThing();
-
-        thing->x    = AlignedLittleEndianS16(raw.x);
-        thing->y    = AlignedLittleEndianS16(raw.y);
-        thing->type = AlignedLittleEndianU16(raw.type);
-    }
-}
-
-void GetSidedefs()
-{
-    int count = 0;
-
-    Lump *lump = FindLevelLump("SIDEDEFS");
-
-    if (lump)
-        count = lump->Length() / (int)sizeof(RawSidedef);
-
-    if (lump == nullptr || count == 0)
-        return;
-
-    if (!lump->Seek(0))
-        FatalError("AJBSP: Error seeking to sidedefs.\n");
-
-#if AJBSP_DEBUG_LOAD
-    LogDebug("GetSidedefs: num = %d\n", count);
-#endif
-
-    for (int i = 0; i < count; i++)
-    {
-        RawSidedef raw;
-
-        if (!lump->Read(&raw, sizeof(raw)))
-            FatalError("AJBSP: Error reading sidedefs.\n");
-
-        Sidedef *side = NewSidedef();
-
-        side->sector = SafeLookupSector(AlignedLittleEndianS16(raw.sector));
-    }
-}
-
-void GetLinedefs()
-{
-    int count = 0;
-
-    Lump *lump = FindLevelLump("LINEDEFS");
-
-    if (lump)
-        count = lump->Length() / (int)sizeof(RawLinedef);
-
-    if (lump == nullptr || count == 0)
-        return;
-
-    if (!lump->Seek(0))
-        FatalError("AJBSP: Error seeking to linedefs.\n");
-
-#if AJBSP_DEBUG_LOAD
-    LogDebug("GetLinedefs: num = %d\n", count);
-#endif
-
-    for (int i = 0; i < count; i++)
-    {
-        RawLinedef raw;
-
-        if (!lump->Read(&raw, sizeof(raw)))
-            FatalError("AJBSP: Error reading linedefs.\n");
-
-        Linedef *line;
-
-        Vertex *start = SafeLookupVertex(AlignedLittleEndianU16(raw.start));
-        Vertex *end   = SafeLookupVertex(AlignedLittleEndianU16(raw.end));
-
-        start->is_used_ = true;
-        end->is_used_   = true;
-
-        line = NewLinedef();
-
-        line->start = start;
-        line->end   = end;
-
-        // check for zero-length line
-        line->zero_length = (fabs(start->x_ - end->x_) < kEpsilon) && (fabs(start->y_ - end->y_) < kEpsilon);
-
-        line->type     = AlignedLittleEndianU16(raw.type);
-        uint16_t flags = AlignedLittleEndianU16(raw.flags);
-        int16_t  tag   = AlignedLittleEndianS16(raw.tag);
-
-        line->two_sided   = (flags & kLineFlagTwoSided) != 0;
-        line->is_precious = (tag >= 900 && tag < 1000); // Why is this the case? Need to investigate - Dasho
-
-        line->right = SafeLookupSidedef(AlignedLittleEndianU16(raw.right));
-        line->left  = SafeLookupSidedef(AlignedLittleEndianU16(raw.left));
-
-        if (line->right || line->left)
-            num_real_lines++;
-
-        line->self_referencing = (line->left && line->right && (line->left->sector == line->right->sector));
-
-        if (line->self_referencing)
-            line->is_precious = true;
-    }
 }
 
 /* ----- UDMF reading routines ------------------------- */
@@ -1000,30 +791,7 @@ void LoadLevel()
     num_new_vert   = 0;
     num_real_lines = 0;
 
-    if (level_format == kMapFormatUDMF)
-    {
-        ParseUDMF();
-    }
-    else
-    {
-        GetVertices();
-        GetSectors();
-        GetSidedefs();
-
-        if (level_format == kMapFormatHexen)
-        {
-            FatalError("AJBSP: Level %s is Hexen format (not supported).\n", level_current_name);
-        }
-        else
-        {
-            GetLinedefs();
-            GetThings();
-        }
-
-        // always prune vertices at end of lump, otherwise all the
-        // unused vertices from seg splits would keep accumulating.
-        PruneVerticesAtEnd();
-    }
+    ParseUDMF();
 
     LogDebug("    Loaded %d vertices, %d sectors, %d sides, %d lines, %d things\n", level_vertices.size(),
              level_sectors.size(), level_sidedefs.size(), level_linedefs.size(), level_things.size());
@@ -1034,8 +802,7 @@ void LoadLevel()
     CalculateWallTips();
 
     // -JL- Find sectors containing polyobjs
-    if (level_format == kMapFormatUDMF)
-        DetectPolyobjSectors();
+    DetectPolyobjSectors();
 }
 
 void FreeLevel()
@@ -1265,6 +1032,9 @@ BuildResult BuildLevel(int level_index)
     level_current_idx   = level_index;
     level_current_start = cur_wad->LevelHeader(level_index);
     level_format        = cur_wad->LevelFormat(level_index);
+
+    if (level_format != kMapFormatUDMF)
+        FatalError("%s is not a UDMF level!\n", cur_wad->GetLump(level_index)->Name());
 
     LoadLevel();
 

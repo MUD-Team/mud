@@ -815,7 +815,15 @@ void DeferredNewGame(NewGameParameters &params)
 
 bool MapExists(const MapDefinition *map)
 {
-    return (CheckLumpNumberForName(map->lump_.c_str()) >= 0);
+    int lump_number = CheckMapLumpNumberForName(map->lump_.c_str());
+
+    if (lump_number < 0)
+        return false;
+
+    if (!IsLumpIndexValid(lump_number+1) || !VerifyLump(lump_number+1, "TEXTMAP"))
+        return false;
+
+    return true;
 }
 
 //

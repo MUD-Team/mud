@@ -271,42 +271,10 @@ static void AddLump(DataFile *df, const char *raw_name, int pos, int size, int f
 //
 static void CheckForLevel(WadFile *wad, int lump, const char *name, const RawWadEntry *raw, int remaining)
 {
-    // we only test four lumps (it is enough), but fewer definitely
-    // means this is not a level marker.
+    // UDMF requires at a minimum the TEXTMAP lump and ENDMAP marker, so anything less than two
+    // remaining is not a valid map - Dasho
     if (remaining < 2)
         return;
-
-    if (strncmp(raw[1].name, "THINGS", 8) == 0 && strncmp(raw[2].name, "LINEDEFS", 8) == 0 &&
-        strncmp(raw[3].name, "SIDEDEFS", 8) == 0 && strncmp(raw[4].name, "VERTEXES", 8) == 0)
-    {
-        if (strlen(name) > 5)
-        {
-            LogWarning("Level name '%s' is too long !!\n", name);
-            return;
-        }
-
-        // check for duplicates (Slige sometimes does this)
-        if (wad->HasLevel(name))
-        {
-            LogWarning("Duplicate level '%s' ignored.\n", name);
-            return;
-        }
-
-        wad->level_markers_.push_back(lump);
-        return;
-    }
-
-    // handle GL nodes here too
-
-    if (strncmp(raw[1].name, "GL_VERT", 8) == 0 && strncmp(raw[2].name, "GL_SEGS", 8) == 0 &&
-        strncmp(raw[3].name, "GL_SSECT", 8) == 0 && strncmp(raw[4].name, "GL_NODES", 8) == 0)
-    {
-        wad->level_markers_.push_back(lump);
-        return;
-    }
-
-    // UDMF
-    // 1.1 Doom/Heretic namespaces supported at the moment
 
     if (strncmp(raw[1].name, "TEXTMAP", 8) == 0)
     {
