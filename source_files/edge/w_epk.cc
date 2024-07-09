@@ -20,11 +20,14 @@
 #include <unordered_map>
 #include <vector>
 
+#include "bsp.h"
 #include "ddf_colormap.h"
 #include "ddf_main.h"
+#include "dm_state.h"
 #include "epi.h"
 #include "epi_file.h"
 #include "epi_filesystem.h"
+#include "epi_md5.h"
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
 #include "miniz.h"
@@ -32,7 +35,7 @@
 #include "script/compat/lua_compat.h"
 #include "snd_types.h"
 #include "w_files.h"
-#include "w_wad.h"
+
 
 static std::string known_image_directories[5] = {"flats", "graphics", "skins", "textures", "sprites"};
 
@@ -997,6 +1000,35 @@ std::vector<std::string> GetPackSpriteList(PackFile *pack)
     return found_sprites;
 }
 
+// Build nodes if not already present for any text files in the /maps directory
+// Maybe cache the textmaps so we don't have to re-read them on level load? - Dasho
+static void ProcessMapsInPack(PackFile *pack)
+{
+    int d = pack->FindDirectory("maps");
+    if (d > 0)
+    {
+        for (size_t i = 0; i < pack->directories_[d].entries_.size(); i++)
+        {
+            PackEntry &entry = pack->directories_[d].entries_[i];
+            if (epi::StringCaseCompareASCII(epi::GetExtension(entry.pack_path_), ".txt") == 0)
+            {
+                epi::MD5Hash udmf_hash;
+                epi::File *udmf_file = OpenPackFile(pack, entry.pack_path_);
+                if (!udmf_file)
+                    FatalError("Error opening %s\n", entry.full_path_.c_str());
+                std::string udmf_string = udmf_file->ReadText();
+                delete udmf_file;
+                udmf_hash.Compute((const uint8_t *)udmf_string.data(), udmf_string.size());
+                std::string node_file = epi::PathAppend(cache_directory, epi::StringFormat("%s-%s.zgl",epi::GetStem(entry.pack_path_).c_str(), udmf_hash.ToString().c_str()));
+                if (!epi::FileExists(node_file))
+                {
+                    ajbsp::BuildLevel(epi::GetStem(entry.pack_path_), node_file, udmf_string);
+                }
+            }
+        }
+    }
+}
+
 // Generate automatic DDF for sound effects. This should happen prior to DDF processing
 // so that DDFSFX entries can override them.
 static void ProcessSoundsInPack(PackFile *pack)
@@ -1031,38 +1063,6 @@ static void ProcessSoundsInPack(PackFile *pack)
     }
 }
 
-static void ProcessWADsInPack(PackFile *pack)
-{
-    for (size_t d = 0; d < pack->directories_.size(); d++)
-    {
-        for (size_t i = 0; i < pack->directories_[d].entries_.size(); i++)
-        {
-            PackEntry &entry = pack->directories_[d].entries_[i];
-
-            if (!entry.HasExtension(".wad"))
-                continue;
-
-            epi::File *pack_wad = OpenPackFile(pack, entry.pack_path_);
-
-            if (pack_wad)
-            {
-                uint8_t      *raw_pack_wad = pack_wad->LoadIntoMemory();
-                epi::MemFile *pack_wad_mem = new epi::MemFile(raw_pack_wad, pack_wad->GetLength(), true);
-                delete[] raw_pack_wad; // copied on pack_wad_mem creation
-                DataFile *pack_wad_df = new DataFile(
-                    entry.name_, (pack->parent_->kind_ == kFileKindIFolder || pack->parent_->kind_ == kFileKindIPK)
-                                     ? kFileKindIPackWAD
-                                     : kFileKindPackWAD);
-                pack_wad_df->name_ = epi::MakePathRelative(pack->parent_->name_, entry.name_);
-                pack_wad_df->file_ = pack_wad_mem;
-                ProcessFile(pack_wad_df);
-            }
-
-            delete pack_wad;
-        }
-    }
-}
-
 void PopulatePackOnly(DataFile *df)
 {
     if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindIFolder)
@@ -1094,8 +1094,15 @@ void ProcessAllInPack(DataFile *df, size_t file_index)
     if ((df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEEPK) && file_index == 0)
         ProcessLuaAPIInPack(df->pack_);
     ProcessLuaHUDInPack(df->pack_);
+}
 
-    ProcessWADsInPack(df->pack_);
+void BuildXGLNodes()
+{
+    for (const DataFile *df : data_files)
+    {
+        if (df->pack_)
+            ProcessMapsInPack(df->pack_);
+    }
 }
 
 //--- editor settings ---

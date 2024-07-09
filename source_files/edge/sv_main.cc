@@ -35,7 +35,7 @@
 #include "p_local.h"
 #include "p_spec.h"
 #include "r_state.h"
-#include "w_wad.h"
+
 
 const char *SaveSlotName(int slot)
 {

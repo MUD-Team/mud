@@ -35,7 +35,7 @@
 #include "s_sound.h"
 #include "snd_types.h"
 #include "w_files.h"
-#include "w_wad.h"
+
 
 // music slider value
 EDGE_DEFINE_CONSOLE_VARIABLE(music_volume, "0.15", kConsoleVariableFlagArchive)

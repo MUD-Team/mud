@@ -36,7 +36,6 @@
 #include "s_sound.h"
 #include "version.h"
 #include "w_files.h"
-#include "w_wad.h"
 
 static constexpr uint8_t kMaximumConsoleArguments = 64;
 

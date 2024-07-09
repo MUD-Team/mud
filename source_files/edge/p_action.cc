@@ -57,7 +57,7 @@
 #include "r_misc.h"
 #include "r_state.h"
 #include "s_sound.h"
-#include "w_wad.h"
+
 
 extern FlatDefinition *P_GetThingFlatDef(MapObject *thing);
 

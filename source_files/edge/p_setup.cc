@@ -36,10 +36,11 @@
 #include "dm_state.h"
 #include "e_main.h"
 #include "epi_crc.h"
-#include "epi_doomdefs.h"
 #include "epi_ename.h"
 #include "epi_endian.h"
+#include "epi_filesystem.h"
 #include "epi_lexer.h"
+#include "epi_md5.h"
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
 #include "g_game.h"
@@ -60,7 +61,7 @@
 #include "sokol_color.h"
 #include "sv_main.h"
 #include "w_files.h"
-#include "w_wad.h"
+
 
 #define EDGE_SEG_INVALID       ((Seg *)-3)
 #define EDGE_SUBSECTOR_INVALID ((Subsector *)-3)
@@ -68,8 +69,6 @@
 extern unsigned int root_node;
 
 static bool level_active = false;
-
-EDGE_DEFINE_CONSOLE_VARIABLE(udmf_strict_namespace, "0", kConsoleVariableFlagArchive)
 
 //
 // MAP related Lookup tables.
@@ -110,8 +109,8 @@ epi::CRC32 map_things_crc;
 
 int total_map_things;
 
-static int         udmf_lump_number;
-static std::string udmf_lump;
+static std::string udmf_string;
+static std::string node_file;
 
 // a place to store sidedef numbers of the loaded linedefs.
 // There is two values for every line: side0 and side1.
@@ -390,7 +389,7 @@ static inline void ComputeLinedefData(Line *ld, int side0, int side1)
     // handle missing RIGHT sidedef (idea taken from MBF)
     if (side0 == -1)
     {
-        LogWarning("Bad WAD: level %s linedef #%d is missing RIGHT side\n", current_map->lump_.c_str(),
+        LogWarning("Bad WAD: level %s linedef #%d is missing RIGHT side\n", current_map->name_.c_str(),
                    (int)(ld - level_lines));
         side0 = 0;
     }
@@ -399,7 +398,7 @@ static inline void ComputeLinedefData(Line *ld, int side0, int side1)
     {
         LogWarning("Bad WAD: level %s has linedef #%d marked TWOSIDED, "
                    "but it has only one side.\n",
-                   current_map->lump_.c_str(), (int)(ld - level_lines));
+                   current_map->name_.c_str(), (int)(ld - level_lines));
 
         ld->flags &= ~kLineFlagTwoSided;
     }
@@ -510,7 +509,7 @@ static void AssignSubsectorsToSectors()
 
 // Adapted from EDGE 2.X's ZNode loading routine; only handles XGL3/ZGL3 as that
 // is all our built-in AJBSP produces now
-static void LoadXGL3Nodes(int lumpnum)
+static void LoadXGL3Nodes()
 {
     int                  i, xglen = 0;
     uint8_t             *xgldata = nullptr;
@@ -519,10 +518,15 @@ static void LoadXGL3Nodes(int lumpnum)
 
     LogDebug("LoadXGL3Nodes:\n");
 
-    xglen   = GetLumpLength(lumpnum);
-    xgldata = (uint8_t *)LoadLumpIntoMemory(lumpnum);
-    if (!xgldata)
+    epi::File *xgl_file = epi::FileOpen(node_file, epi::kFileAccessRead | epi::kFileAccessBinary);
+
+    if (!xgl_file)
         FatalError("LoadXGL3Nodes: Couldn't load lump\n");
+
+    xgldata = xgl_file->LoadIntoMemory();
+    xglen = xgl_file->GetLength();
+
+    delete xgl_file;
 
     if (xglen < 12)
     {
@@ -711,7 +715,7 @@ static void LoadXGL3Nodes(int lumpnum)
         Seg **prevptr = &ss->segs;
 
         if (countsegs == 0)
-            FatalError("LoadXGL3Nodes: level %s has invalid SSECTORS.\n", current_map->lump_.c_str());
+            FatalError("LoadXGL3Nodes: level %s has invalid SSECTORS.\n", current_map->name_.c_str());
 
         ss->sector     = nullptr;
         ss->thing_list = nullptr;
@@ -796,7 +800,7 @@ static void LoadXGL3Nodes(int lumpnum)
 
 static void LoadUDMFVertexes()
 {
-    epi::Lexer lex(udmf_lump);
+    epi::Lexer lex(udmf_string);
 
     LogDebug("LoadUDMFVertexes: parsing TEXTMAP\n");
     int cur_vertex = 0;
@@ -906,7 +910,7 @@ static void LoadUDMFVertexes()
 
 static void LoadUDMFSectors()
 {
-    epi::Lexer lex(udmf_lump);
+    epi::Lexer lex(udmf_string);
 
     LogDebug("LoadUDMFSectors: parsing TEXTMAP\n");
     int cur_sector = 0;
@@ -1211,7 +1215,7 @@ static void LoadUDMFSectors()
 
 static void LoadUDMFSideDefs()
 {
-    epi::Lexer lex(udmf_lump);
+    epi::Lexer lex(udmf_string);
 
     LogDebug("LoadUDMFSectors: parsing TEXTMAP\n");
 
@@ -1427,13 +1431,13 @@ static void LoadUDMFSideDefs()
 
         if (side0 >= nummapsides)
         {
-            LogWarning("Bad WAD: level %s linedef #%d has bad RIGHT side.\n", current_map->lump_.c_str(), i);
+            LogWarning("Bad WAD: level %s linedef #%d has bad RIGHT side.\n", current_map->name_.c_str(), i);
             side0 = nummapsides - 1;
         }
 
         if (side1 != -1 && side1 >= nummapsides)
         {
-            LogWarning("Bad WAD: level %s linedef #%d has bad LEFT side.\n", current_map->lump_.c_str(), i);
+            LogWarning("Bad WAD: level %s linedef #%d has bad LEFT side.\n", current_map->name_.c_str(), i);
             side1 = nummapsides - 1;
         }
 
@@ -1477,7 +1481,7 @@ static void LoadUDMFSideDefs()
 
 static void LoadUDMFLineDefs()
 {
-    epi::Lexer lex(udmf_lump);
+    epi::Lexer lex(udmf_string);
 
     LogDebug("LoadUDMFLineDefs: parsing TEXTMAP\n");
 
@@ -1668,7 +1672,7 @@ static void LoadUDMFLineDefs()
 
 static void LoadUDMFThings()
 {
-    epi::Lexer lex(udmf_lump);
+    epi::Lexer lex(udmf_string);
 
     LogDebug("LoadUDMFThings: parsing TEXTMAP\n");
     for (;;)
@@ -1876,7 +1880,7 @@ static void LoadUDMFThings()
 
 static void LoadUDMFCounts()
 {
-    epi::Lexer lex(udmf_lump);
+    epi::Lexer lex(udmf_string);
 
     for (;;)
     {
@@ -1894,17 +1898,14 @@ static void LoadUDMFCounts()
         {
             lex.Next(section);
 
-            if (udmf_strict_namespace.d_)
+            if (section != "doom" && section != "heretic" && section != "edge-classic" &&
+                section != "zdoomtranslated")
             {
-                if (section != "doom" && section != "heretic" && section != "edge-classic" &&
-                    section != "zdoomtranslated")
-                {
-                    LogWarning("UDMF: %s uses unsupported namespace "
-                               "\"%s\"!\nSupported namespaces are \"doom\", "
-                               "\"heretic\", \"edge-classic\", or "
-                               "\"zdoomtranslated\"!\n",
-                               current_map->lump_.c_str(), section.c_str());
-                }
+                FatalError("UDMF: %s uses unsupported namespace "
+                            "\"%s\"!\nSupported namespaces are \"doom\", "
+                            "\"heretic\", \"edge-classic\", or "
+                            "\"zdoomtranslated\"!\n",
+                            current_map->name_.c_str(), section.c_str());
             }
 
             if (!lex.Match(";"))
@@ -2676,41 +2677,27 @@ void LevelSetup(void)
     respawn_queue_head   = nullptr;
     map_object_list_head = nullptr;
     seen_monsters.clear();
+    udmf_string.clear();
+    node_file.clear();
 
-    // get lump for map header e.g. MAP01
-    int lumpnum = CheckMapLumpNumberForName(current_map->lump_.c_str());
-    if (lumpnum < 0)
-        FatalError("No such level: %s\n", current_map->lump_.c_str());
+    epi::File *udmf_file = OpenFileFromPack(epi::StringFormat("maps/%s.txt", current_map->name_.c_str()));
+    if (!udmf_file)
+        FatalError("No such level: maps/%s.txt\n", current_map->name_.c_str());
+    udmf_string = udmf_file->ReadText();
+    delete udmf_file;
+
+    if (udmf_string.empty())
+        FatalError("Internal error: can't load UDMF lump.\n");
+
+    // This needs to be cached somewhere, but it will work here while developing - Dasho
+    epi::MD5Hash udmf_hash;
+    udmf_hash.Compute((const uint8_t *)udmf_string.data(), udmf_string.size());
+    node_file = epi::PathAppend(cache_directory, epi::StringFormat("%s-%s.zgl", current_map->name_.c_str(), udmf_hash.ToString().c_str()));
 
     // get lump for XGL3 nodes from an XWA file
-    int xgl_lump = CheckXGLLumpNumberForName(current_map->lump_.c_str());
-
-    // ignore XGL nodes if it occurs _before_ the normal level marker.
-    // [ something has gone horribly wrong if this happens! ]
-    if (xgl_lump < lumpnum)
-        xgl_lump = -1;
-
-    // shouldn't happen (as during startup we checked for XWA files)
-    if (xgl_lump < 0)
-        FatalError("Internal error: missing XGL nodes.\n");
-
-    // -CW- 2017/01/29: check for UDMF map lump
-    if (VerifyLump(lumpnum + 1, "TEXTMAP"))
-    {
-        udmf_lump_number    = lumpnum + 1;
-        int      raw_length = 0;
-        uint8_t *raw_udmf   = LoadLumpIntoMemory(udmf_lump_number, &raw_length);
-        udmf_lump.clear();
-        udmf_lump.resize(raw_length);
-        memcpy(udmf_lump.data(), raw_udmf, raw_length);
-        if (udmf_lump.empty())
-            FatalError("Internal error: can't load UDMF lump.\n");
-        delete[] raw_udmf;
-    }
-    else
-    {
-        FatalError("%s is not a UDMF map!\n", current_map->name_.c_str());
-    }
+    // shouldn't happen (as during startup we checked for or built these)
+    if (!epi::FileExists(node_file))
+        FatalError("Internal error: Missing node file %s.\n", node_file.c_str());
 
     // clear CRC values
     map_sectors_crc.Reset();
@@ -2743,7 +2730,7 @@ void LevelSetup(void)
 
     delete[] temp_line_sides;
 
-    LoadXGL3Nodes(xgl_lump);
+    LoadXGL3Nodes();
 
     GroupLines();
 

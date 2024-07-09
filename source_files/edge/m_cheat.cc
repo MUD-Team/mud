@@ -49,7 +49,6 @@
 #include "p_mobj.h"
 #include "s_music.h"
 #include "s_sound.h"
-#include "w_wad.h"
 
 extern ConsoleVariable debug_fps;
 extern ConsoleVariable debug_position;

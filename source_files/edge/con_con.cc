@@ -49,7 +49,6 @@
 #include "r_image.h"
 #include "r_modes.h"
 #include "w_files.h"
-#include "w_wad.h"
 
 static constexpr uint8_t kConsoleWipeTics = 12;
 

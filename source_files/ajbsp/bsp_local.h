@@ -27,9 +27,6 @@
 namespace ajbsp
 {
 
-class Lump;
-class WadFile;
-
 // storage of node building parameters
 
 extern BuildInfo current_build_info;
@@ -97,12 +94,6 @@ struct Sector
 {
     // sector index.  Always valid after loading & pruning.
     int index;
-
-    // most info (floor_h, floor_tex, etc) omitted.  We don't need to
-    // write the SECTORS lump, only read it.
-
-    // -JL- non-zero if this sector contains a polyobj.
-    bool has_polyobject;
 };
 
 struct Sidedef
@@ -376,13 +367,6 @@ Subsector *NewSubsec();
 Node      *NewNode();
 WallTip   *NewWallTip();
 
-Lump *FindLevelLump(const char *name);
-
-// Zlib compression support
-void ZLibBeginLump(Lump *lump);
-void ZLibAppendLump(const void *data, int length);
-void ZLibFinishLump(void);
-
 //------------------------------------------------------------------------
 // ANALYZE : Analyzing level structures
 //------------------------------------------------------------------------
@@ -390,7 +374,6 @@ void ZLibFinishLump(void);
 // detection routines
 void DetectOverlappingVertices(void);
 void DetectOverlappingLines(void);
-void DetectPolyobjSectors(void);
 
 // pruning routines
 void PruneVerticesAtEnd(void);

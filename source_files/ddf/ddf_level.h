@@ -123,7 +123,6 @@ class MapDefinition
     std::string namegraphic_;
     std::string leavingbggraphic_;
     std::string enteringbggraphic_;
-    std::string lump_;
     std::string sky_;
     std::string surround_;
 

@@ -46,5 +46,7 @@ void PopulatePackOnly(DataFile *df);
 // Populate pack directory and process appropriate files (Lua, DDF, etc)
 void ProcessAllInPack(DataFile *df, size_t file_index);
 
+void BuildXGLNodes();
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

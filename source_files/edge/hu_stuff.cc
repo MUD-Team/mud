@@ -39,7 +39,6 @@
 #include "m_menu.h"
 #include "n_network.h"
 #include "s_sound.h"
-#include "w_wad.h"
 
 //
 // Locally used constants, shortcuts.

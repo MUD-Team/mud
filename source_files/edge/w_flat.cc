@@ -45,7 +45,7 @@
 #include "w_files.h"
 #include "w_model.h"
 #include "w_sprite.h"
-#include "w_wad.h"
+
 
 EDGE_DEFINE_CONSOLE_VARIABLE(precache_textures, "1", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(precache_sprites, "1", kConsoleVariableFlagArchive)

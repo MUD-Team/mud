@@ -35,7 +35,7 @@
 #include "r_gldefs.h"
 #include "r_image.h"
 #include "r_sky.h"
-#include "w_wad.h"
+
 
 // clamp cache used by runits to avoid an extremely expensive gl tex param
 // lookup

@@ -3,7 +3,7 @@
 #include "lua_compat.h"
 
 #include "epi_file.h"
-#include "w_wad.h"
+#include "w_files.h"
 
 lua_State *global_lua_state = nullptr;
 

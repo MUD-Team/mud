@@ -38,7 +38,7 @@
 #include "p_local.h"
 #include "s_sound.h"
 #include "w_sprite.h"
-#include "w_wad.h"
+
 
 extern ConsoleVariable view_bobbing;
 extern ConsoleVariable erraticism;

@@ -11,7 +11,6 @@ add_library(edge_ajbsp
 	bsp_misc.cc
 	bsp_node.cc
 	bsp_utility.cc
-	bsp_wad.cc
 )
 
 target_include_directories(edge_ajbsp PRIVATE ${EDGE_LIBRARY_DIR}/almostequals)

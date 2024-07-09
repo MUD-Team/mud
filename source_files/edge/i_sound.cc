@@ -31,7 +31,6 @@
 #include "s_cache.h"
 #include "s_fluid.h"
 #include "s_sound.h"
-#include "w_wad.h"
 
 // If true, sound system is off/not working. Changed to false if sound init ok.
 bool no_sound = false;

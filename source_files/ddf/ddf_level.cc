@@ -24,7 +24,8 @@
 #include "ddf_colormap.h"
 #include "ddf_local.h"
 #include "epi_str_compare.h"
-#include "w_wad.h"
+#include "epi_str_util.h"
+#include "w_files.h"
 
 static void DDFLevelGetSpecials(const char *info);
 static void DDFLevelGetPic(const char *info, void *storage);
@@ -62,7 +63,6 @@ static const DDFCommandList level_commands[] = {
     DDF_SUB_LIST("PRE", dummy_level, f_pre_, finale_commands),
     DDF_SUB_LIST("END", dummy_level, f_end_, finale_commands),
 
-    DDF_FIELD("LUMPNAME", dummy_level, lump_, DDFMainGetLumpName),
     DDF_FIELD("DESCRIPTION", dummy_level, description_, DDFMainGetString),
     DDF_FIELD("AUTHOR", dummy_level, author_, DDFMainGetString),
     DDF_FIELD("NAME_GRAPHIC", dummy_level, namegraphic_, DDFMainGetLumpName),
@@ -400,7 +400,6 @@ void MapDefinition::CopyDetail(MapDefinition &src)
 {
     description_ = src.description_;
     namegraphic_ = src.namegraphic_;
-    lump_        = src.lump_;
     sky_         = src.sky_;
     surround_    = src.surround_;
     author_      = src.author_;
@@ -439,7 +438,6 @@ void MapDefinition::Default()
 {
     description_.clear();
     namegraphic_.clear();
-    lump_.clear();
     sky_.clear();
     surround_.clear();
     author_.clear();
@@ -521,14 +519,13 @@ MapDefinition *MapDefinitionContainer::Lookup(const char *refname)
     //  levels.ddf entry.
 
     // 1. check if the actual map lump exists
-    if (CheckLumpNumberForName(refname) >= 0 && GetKindForLump(CheckLumpNumberForName(refname)) == 3) // kLumpMarker
+    if (IsFileAnywhere(refname))
     {
         // 2. make a levels.ddf entry
         MapDefinition *temp_level;
         temp_level               = new MapDefinition;
         temp_level->name_        = refname;
         temp_level->description_ = refname;
-        temp_level->lump_        = refname;
 
         // 3. we also need to assign an episode
         GameDefinition *temp_gamedef;

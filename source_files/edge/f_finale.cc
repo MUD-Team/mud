@@ -58,7 +58,6 @@
 #include "s_sound.h"
 #include "sokol_color.h"
 #include "w_model.h"
-#include "w_wad.h"
 
 enum FinaleStage
 {

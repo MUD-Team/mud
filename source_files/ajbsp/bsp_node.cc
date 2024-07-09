@@ -18,10 +18,11 @@
 //
 //------------------------------------------------------------------------
 
+#include <limits.h>
+
 #include "HandmadeMath.h"
 #include "bsp_local.h"
 #include "bsp_utility.h"
-#include "bsp_wad.h"
 
 #define AJBSP_DEBUG_PICKNODE 0
 #define AJBSP_DEBUG_SPLIT    0
@@ -533,7 +534,7 @@ void EvaluateFastWorker(QuadTree *tree, Seg **best_H, Seg **best_V, int mid_x, i
         if (part->linedef_ == nullptr)
             continue;
 
-        /* ignore self-ref and polyobj stuff as partition candidates */
+        /* ignore self-ref lines as partition candidates */
         if (part->linedef_->is_precious)
             continue;
 

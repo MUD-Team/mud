@@ -215,5 +215,110 @@ constexpr uint8_t kAxisForward   = 3;
 constexpr uint8_t kAxisStrafe    = 4;
 constexpr uint8_t kAxisFly       = 5; // includes SWIM up/down
 
+// Indicates a leaf.
+constexpr uint32_t kLeafSubsector = (uint32_t)(1 << 31);
+
+//
+// LineDef attributes.
+//
+
+enum LineFlag
+{
+    // solid, is an obstacle
+    kLineFlagBlocking = 0x0001,
+
+    // blocks monsters only
+    kLineFlagBlockMonsters = 0x0002,
+
+    // backside will not be present at all if not two sided
+    kLineFlagTwoSided = 0x0004,
+
+    // If a texture is pegged, the texture will have
+    // the end exposed to air held constant at the
+    // top or bottom of the texture (stairs or pulled
+    // down things) and will move with a height change
+    // of one of the neighbor sectors.
+    //
+    // Unpegged textures allways have the first row of
+    // the texture at the top pixel of the line for both
+    // top and bottom textures (use next to windows).
+
+    // upper texture unpegged
+    kLineFlagUpperUnpegged = 0x0008,
+
+    // lower texture unpegged
+    kLineFlagLowerUnpegged = 0x0010,
+
+    // in AutoMap: don't map as two sided: IT'S A SECRET!
+    kLineFlagSecret = 0x0020,
+
+    // sound rendering: don't let sound cross two of these
+    kLineFlagSoundBlock = 0x0040,
+
+    // don't draw on the automap at all
+    kLineFlagDontDraw = 0x0080,
+
+    // set as if already seen, thus drawn in automap
+    kLineFlagMapped = 0x0100,
+
+    // -AJA- this one is from Boom. Allows multiple lines to
+    //       be pushed simultaneously.
+    kLineFlagBoomPassThrough = 0x0200,
+
+    // 0x0400 is Eternity's 3DMidTex flag - Dasho
+
+    // Clear extended line flags (BOOM or later spec); needed to repair
+    // mapping/editor errors with historical maps (i.e., E2M7)
+    kLineFlagClearBoomFlags = 0x0800,
+
+    // MBF21
+    kLineFlagBlockGroundedMonsters = 0x1000,
+
+    // MBF21
+    kLineFlagBlockPlayers = 0x2000,
+
+    // ----- internal flags -----
+
+    kLineFlagMirror = (1 << 16),
+
+    // -AJA- These two from XDoom.
+    // Dasho - Moved to internal flag range to make room for MBF21 stuff
+    kLineFlagShootBlock = (1 << 17),
+
+    kLineFlagSightBlock = (1 << 18),
+};
+
+//
+// Sector attributes.
+//
+
+enum BoomSectorFlag
+{
+    kBoomSectorFlagTypeMask   = 0x001F,
+    kBoomSectorFlagDamageMask = 0x0060,
+    kBoomSectorFlagSecret     = 0x0080,
+    kBoomSectorFlagFriction   = 0x0100,
+    kBoomSectorFlagPush       = 0x0200,
+    kBoomSectorFlagNoSounds   = 0x0400,
+    kBoomSectorFlagQuietPlane = 0x0800
+};
+
+//
+// Thing attributes.
+//
+
+enum ThingOption
+{
+    kThingEasy            = 1,
+    kThingMedium          = 2,
+    kThingHard            = 4,
+    kThingAmbush          = 8,
+    kThingNotSinglePlayer = 16,
+    kThingNotDeathmatch   = 32,
+    kThingNotCooperative  = 64,
+    kThingFriend          = 128,
+    kThingReserved        = 256,
+};
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
