@@ -33,8 +33,6 @@ class WadFile;
 enum MapFormat
 {
     kMapFormatInvalid = 0,
-    kMapFormatDoom,
-    kMapFormatHexen,
     kMapFormatUDMF
 };
 

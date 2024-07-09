@@ -110,7 +110,6 @@ epi::CRC32 map_things_crc;
 
 int total_map_things;
 
-static bool        udmf_level;
 static int         udmf_lump_number;
 static std::string udmf_lump;
 
@@ -119,58 +118,6 @@ static std::string udmf_lump;
 static int *temp_line_sides;
 
 EDGE_DEFINE_CONSOLE_VARIABLE(goobers, "0", kConsoleVariableFlagNone)
-
-static void LoadVertexes(int lump)
-{
-    const uint8_t   *data;
-    int              i;
-    const RawVertex *ml;
-    Vertex          *li;
-
-    if (!VerifyLump(lump, "VERTEXES"))
-        FatalError("Bad WAD: level %s missing VERTEXES.\n", current_map->lump_.c_str());
-
-    // Determine number of lumps:
-    //  total lump length / vertex record length.
-    total_level_vertexes = GetLumpLength(lump) / sizeof(RawVertex);
-
-    if (total_level_vertexes == 0)
-        FatalError("Bad WAD: level %s contains 0 vertexes.\n", current_map->lump_.c_str());
-
-    level_vertexes = new Vertex[total_level_vertexes];
-
-    // Load data into cache.
-    data = LoadLumpIntoMemory(lump);
-
-    ml = (const RawVertex *)data;
-    li = level_vertexes;
-
-    int min_x = 0;
-    int min_y = 0;
-    int max_x = 0;
-    int max_y = 0;
-
-    // Copy and convert vertex coordinates,
-    // internal representation as fixed.
-    for (i = 0; i < total_level_vertexes; i++, li++, ml++)
-    {
-        li->X = AlignedLittleEndianS16(ml->x);
-        li->Y = AlignedLittleEndianS16(ml->y);
-        li->Z = -40000.0f;
-        li->W = 40000.0f;
-        min_x = HMM_MIN((int)li->X, min_x);
-        min_y = HMM_MIN((int)li->Y, min_y);
-        max_x = HMM_MAX((int)li->X, max_x);
-        max_y = HMM_MAX((int)li->Y, max_y);
-    }
-
-    GenerateBlockmap(min_x, min_y, max_x, max_y);
-
-    CreateThingBlockmap();
-
-    // Free buffer memory.
-    delete[] data;
-}
 
 static void SegCommonStuff(Seg *seg, int linedef_in)
 {
@@ -236,127 +183,6 @@ static void GroupSectorTags(Sector *dest, Sector *seclist, int numsecs)
             return;
         }
     }
-}
-
-static void LoadSectors(int lump)
-{
-    const uint8_t   *data;
-    int              i;
-    const RawSector *ms;
-    Sector          *ss;
-
-    if (!VerifyLump(lump, "SECTORS"))
-    {
-        // Check if SECTORS is immediately after
-        // THINGS/LINEDEFS/SIDEDEFS/VERTEXES
-        lump -= 3;
-        if (!VerifyLump(lump, "SECTORS"))
-            FatalError("Bad WAD: level %s missing SECTORS.\n", current_map->lump_.c_str());
-    }
-
-    total_level_sectors = GetLumpLength(lump) / sizeof(RawSector);
-
-    if (total_level_sectors == 0)
-        FatalError("Bad WAD: level %s contains 0 sectors.\n", current_map->lump_.c_str());
-
-    level_sectors = new Sector[total_level_sectors];
-    EPI_CLEAR_MEMORY(level_sectors, Sector, total_level_sectors);
-
-    data = LoadLumpIntoMemory(lump);
-    map_sectors_crc.AddBlock((const uint8_t *)data, GetLumpLength(lump));
-
-    ms = (const RawSector *)data;
-    ss = level_sectors;
-    for (i = 0; i < total_level_sectors; i++, ss++, ms++)
-    {
-        char buffer[10];
-
-        ss->floor_height   = AlignedLittleEndianS16(ms->floor_height);
-        ss->ceiling_height = AlignedLittleEndianS16(ms->ceiling_height);
-
-        // return to wolfenstein?
-        if (goobers.d_)
-        {
-            ss->floor_height   = 0;
-            ss->ceiling_height = (ms->floor_height == ms->ceiling_height) ? 0 : 128.0f;
-        }
-
-        ss->original_height = (ss->floor_height + ss->ceiling_height);
-
-        ss->floor.translucency = 1.0f;
-        ss->floor.x_matrix.X   = 1;
-        ss->floor.x_matrix.Y   = 0;
-        ss->floor.y_matrix.X   = 0;
-        ss->floor.y_matrix.Y   = 1;
-
-        ss->ceiling = ss->floor;
-
-        epi::CStringCopyMax(buffer, ms->floor_texture, 8);
-        ss->floor.image = ImageLookup(buffer, kImageNamespaceFlat);
-
-        if (ss->floor.image)
-        {
-            FlatDefinition *current_flatdef = flatdefs.Find(ss->floor.image->name_.c_str());
-            if (current_flatdef)
-            {
-                ss->bob_depth  = current_flatdef->bob_depth_;
-                ss->sink_depth = current_flatdef->sink_depth_;
-            }
-        }
-
-        epi::CStringCopyMax(buffer, ms->ceil_texture, 8);
-        ss->ceiling.image = ImageLookup(buffer, kImageNamespaceFlat);
-
-        if (!ss->floor.image)
-        {
-            LogWarning("Bad Level: sector #%d has missing floor texture.\n", i);
-            ss->floor.image = ImageLookup("FLAT1", kImageNamespaceFlat);
-        }
-        if (!ss->ceiling.image)
-        {
-            LogWarning("Bad Level: sector #%d has missing ceiling texture.\n", i);
-            ss->ceiling.image = ss->floor.image;
-        }
-
-        // convert negative tags to zero
-        ss->tag = HMM_MAX(0, AlignedLittleEndianS16(ms->tag));
-
-        ss->properties.light_level = AlignedLittleEndianS16(ms->light);
-
-        int type = AlignedLittleEndianS16(ms->type);
-
-        ss->properties.type    = HMM_MAX(0, type);
-        ss->properties.special = LookupSectorType(ss->properties.type);
-
-        ss->extrafloor_maximum = 0;
-
-        ss->properties.colourmap = nullptr;
-
-        ss->properties.gravity   = kGravityDefault;
-        ss->properties.friction  = kFrictionDefault;
-        ss->properties.viscosity = kViscosityDefault;
-        ss->properties.drag      = kDragDefault;
-
-        if (ss->properties.special && ss->properties.special->fog_color_ != kRGBANoValue)
-        {
-            ss->properties.fog_color   = ss->properties.special->fog_color_;
-            ss->properties.fog_density = 0.01f * ss->properties.special->fog_density_;
-        }
-        else
-        {
-            ss->properties.fog_color   = kRGBANoValue;
-            ss->properties.fog_density = 0;
-        }
-
-        ss->active_properties = &ss->properties;
-
-        ss->sound_player = -1;
-
-        // -AJA- 1999/07/29: Keep sectors with same tag in a list.
-        GroupSectorTags(ss, level_sectors, i);
-    }
-
-    delete[] data;
 }
 
 static void SetupRootNode(void)
@@ -512,105 +338,12 @@ static MapObject *SpawnMapThing(const MapObjectDefinition *info, float x, float 
     {
         mo->side_ = 1; //~0;
         mo->hyper_flags_ |= kHyperFlagUltraLoyal;
-        /*
-        player_t *player;
-        player = players[0];
-        mo->SetSupportObj(player->map_object_);
-        P_LookForPlayers(mo, mo->info_->sight_angle_);
-        */
     }
     // Lobo 2022: added tagged mobj support ;)
     if (tag > 0)
         mo->tag_ = tag;
 
     return mo;
-}
-
-static void LoadThings(int lump)
-{
-    float    x, y, z;
-    BAMAngle angle;
-    int      options, typenum;
-    int      i;
-
-    const uint8_t             *data;
-    const RawThing            *mt;
-    const MapObjectDefinition *objtype;
-
-    if (!VerifyLump(lump, "THINGS"))
-        FatalError("Bad WAD: level %s missing THINGS.\n", current_map->lump_.c_str());
-
-    total_map_things = GetLumpLength(lump) / sizeof(RawThing);
-
-    if (total_map_things == 0)
-        FatalError("Bad WAD: level %s contains 0 things.\n", current_map->lump_.c_str());
-
-    data = LoadLumpIntoMemory(lump);
-    map_things_crc.AddBlock((const uint8_t *)data, GetLumpLength(lump));
-
-    // -AJA- 2004/11/04: check the options in all things to see whether
-    // we can use new option flags or not.  Same old wads put 1 bits in
-    // unused locations (unusued for original Doom anyway).  The logic
-    // here is based on PrBoom, but PrBoom checks each thing separately.
-
-    bool limit_options = false;
-
-    mt = (const RawThing *)data;
-
-    for (i = 0; i < total_map_things; i++)
-    {
-        options = AlignedLittleEndianU16(mt[i].options);
-
-        if (options & kThingReserved)
-            limit_options = true;
-    }
-
-    for (i = 0; i < total_map_things; i++, mt++)
-    {
-        x       = (float)AlignedLittleEndianS16(mt->x);
-        y       = (float)AlignedLittleEndianS16(mt->y);
-        angle   = epi::BAMFromDegrees((float)AlignedLittleEndianS16(mt->angle));
-        typenum = AlignedLittleEndianU16(mt->type);
-        options = AlignedLittleEndianU16(mt->options);
-
-        if (limit_options)
-            options &= 0x001F;
-
-        objtype = mobjtypes.Lookup(typenum);
-
-        // MOBJTYPE not found, don't crash out: JDS Compliance.
-        // -ACB- 1998/07/21
-        if (objtype == nullptr)
-        {
-            UnknownThingWarning(typenum, x, y);
-            continue;
-        }
-
-        Sector *sec = PointInSubsector(x, y)->sector;
-
-        z = sec->floor_height;
-
-        if (objtype->flags_ & kMapObjectFlagSpawnCeiling)
-            z = sec->ceiling_height - objtype->height_;
-
-        if ((options & kThingReserved) == 0 && (options & kExtrafloorMask))
-        {
-            int floor_num = (options & kExtrafloorMask) >> kExtrafloorBitShift;
-
-            for (Extrafloor *ef = sec->bottom_extrafloor; ef; ef = ef->higher)
-            {
-                z = ef->top_height;
-
-                floor_num--;
-                if (floor_num == 0)
-                    break;
-            }
-        }
-
-        SpawnMapThing(objtype, x, y, z, sec, angle, options, 0);
-    }
-
-    delete[] data;
 }
 
 static inline void ComputeLinedefData(Line *ld, int side0, int side1)
@@ -654,11 +387,6 @@ static inline void ComputeLinedefData(Line *ld, int side0, int side1)
         ld->bounding_box[kBoundingBoxTop]    = v1->Y;
     }
 
-    if (!udmf_level && side0 == 0xFFFF)
-        side0 = -1;
-    if (!udmf_level && side1 == 0xFFFF)
-        side1 = -1;
-
     // handle missing RIGHT sidedef (idea taken from MBF)
     if (side0 == -1)
     {
@@ -680,93 +408,6 @@ static inline void ComputeLinedefData(Line *ld, int side0, int side1)
     temp_line_sides[(ld - level_lines) * 2 + 1] = side1;
 
     total_level_sides += (side1 == -1) ? 1 : 2;
-}
-
-static void LoadLineDefs(int lump)
-{
-    // -AJA- New handling for sidedefs.  Since sidedefs can be "packed" in
-    //       a wad (i.e. shared by several linedefs) we need to unpack
-    //       them.  This is to prevent potential problems with scrollers,
-    //       the CHANGE_TEX command in RTS, etc, and also to implement
-    //       "wall tiles" properly.
-
-    if (!VerifyLump(lump, "LINEDEFS"))
-        FatalError("Bad WAD: level %s missing LINEDEFS.\n", current_map->lump_.c_str());
-
-    total_level_lines = GetLumpLength(lump) / sizeof(RawLinedef);
-
-    if (total_level_lines == 0)
-        FatalError("Bad WAD: level %s contains 0 linedefs.\n", current_map->lump_.c_str());
-
-    level_lines = new Line[total_level_lines];
-
-    EPI_CLEAR_MEMORY(level_lines, Line, total_level_lines);
-
-    temp_line_sides = new int[total_level_lines * 2];
-
-    const uint8_t *data = LoadLumpIntoMemory(lump);
-    map_lines_crc.AddBlock((const uint8_t *)data, GetLumpLength(lump));
-
-    Line             *ld  = level_lines;
-    const RawLinedef *mld = (const RawLinedef *)data;
-
-    for (int i = 0; i < total_level_lines; i++, mld++, ld++)
-    {
-        ld->flags    = AlignedLittleEndianU16(mld->flags);
-        ld->tag      = HMM_MAX(0, AlignedLittleEndianS16(mld->tag));
-        ld->vertex_1 = &level_vertexes[AlignedLittleEndianU16(mld->start)];
-        ld->vertex_2 = &level_vertexes[AlignedLittleEndianU16(mld->end)];
-
-        // Check for BoomClear flag bit and clear applicable specials
-        // (PassThru may still be intentionally added further down)
-        if (ld->flags & kLineFlagClearBoomFlags)
-            ld->flags &= ~(kLineFlagBoomPassThrough | kLineFlagBlockGroundedMonsters | kLineFlagBlockPlayers);
-
-        ld->special = LookupLineType(HMM_MAX(0, AlignedLittleEndianS16(mld->type)));
-
-        if (ld->special && ld->special->type_ == kLineTriggerWalkable)
-            ld->flags |= kLineFlagBoomPassThrough;
-
-        if (ld->special && ld->special->type_ == kLineTriggerNone &&
-            (ld->special->s_xspeed_ || ld->special->s_yspeed_ || ld->special->scroll_type_ > BoomScrollerTypeNone ||
-             ld->special->line_effect_ == kLineEffectTypeVectorScroll ||
-             ld->special->line_effect_ == kLineEffectTypeOffsetScroll ||
-             ld->special->line_effect_ == kLineEffectTypeTaggedOffsetScroll))
-            ld->flags |= kLineFlagBoomPassThrough;
-
-        if (ld->special && ld->special->slope_type_ & kSlopeTypeDetailFloor)
-            ld->flags |= kLineFlagBoomPassThrough;
-
-        if (ld->special && ld->special->slope_type_ & kSlopeTypeDetailCeiling)
-            ld->flags |= kLineFlagBoomPassThrough;
-
-        if (ld->special && ld->special == linetypes.Lookup(0)) // Add passthru to unknown/templated
-            ld->flags |= kLineFlagBoomPassThrough;
-
-        int side0 = AlignedLittleEndianU16(mld->right);
-        int side1 = AlignedLittleEndianU16(mld->left);
-
-        ComputeLinedefData(ld, side0, side1);
-
-        // check for possible extrafloors, updating the extrafloor_maximum count
-        // for the sectors in question.
-
-        if (ld->tag && ld->special && ld->special->ef_.type_)
-        {
-            for (int j = 0; j < total_level_sectors; j++)
-            {
-                if (level_sectors[j].tag != ld->tag)
-                    continue;
-
-                level_sectors[j].extrafloor_maximum++;
-                total_level_extrafloors++;
-            }
-        }
-
-        BlockmapAddLine(ld);
-    }
-
-    delete[] data;
 }
 
 static Sector *DetermineSubsectorSector(Subsector *ss, int pass)
@@ -1755,15 +1396,6 @@ static void LoadUDMFSideDefs()
             sd->top.boom_colormap    = colormaps.Lookup(top_tex);
             sd->middle.boom_colormap = colormaps.Lookup(middle_tex);
             sd->bottom.boom_colormap = colormaps.Lookup(bottom_tex);
-
-            /*if (sd->top.image && fabs(sd->top.offset.Y) > sd->top.image->ScaledHeightActual())
-                sd->top.offset.Y = fmodf(sd->top.offset.Y, sd->top.image->ScaledHeightActual());
-
-            if (sd->middle.image && fabs(sd->middle.offset.Y) > sd->middle.image->ScaledHeightActual())
-                sd->middle.offset.Y = fmodf(sd->middle.offset.Y, sd->middle.image->ScaledHeightActual());
-
-            if (sd->bottom.image && fabs(sd->bottom.offset.Y) > sd->bottom.image->ScaledHeightActual())
-                sd->bottom.offset.Y = fmodf(sd->bottom.offset.Y, sd->bottom.image->ScaledHeightActual());*/
         }
         else // consume other blocks
         {
@@ -2323,140 +1955,6 @@ static void LoadUDMFCounts()
     temp_line_sides = new int[total_level_lines * 2];
 }
 
-static void TransferMapSideDef(const RawSidedef *msd, Side *sd, bool two_sided)
-{
-    char upper_tex[10];
-    char middle_tex[10];
-    char lower_tex[10];
-
-    int sec_num = AlignedLittleEndianS16(msd->sector);
-
-    sd->top.translucency = 1.0f;
-    sd->top.offset.X     = AlignedLittleEndianS16(msd->x_offset);
-    sd->top.offset.Y     = AlignedLittleEndianS16(msd->y_offset);
-    sd->top.x_matrix.X   = 1;
-    sd->top.x_matrix.Y   = 0;
-    sd->top.y_matrix.X   = 0;
-    sd->top.y_matrix.Y   = 1;
-
-    sd->middle = sd->top;
-    sd->bottom = sd->top;
-
-    if (sec_num < 0)
-    {
-        LogWarning("Level %s has sidedef with bad sector ref (%d)\n", current_map->lump_.c_str(), sec_num);
-        sec_num = 0;
-    }
-    sd->sector = &level_sectors[sec_num];
-
-    epi::CStringCopyMax(upper_tex, msd->upper_texture, 8);
-    epi::CStringCopyMax(middle_tex, msd->mid_texture, 8);
-    epi::CStringCopyMax(lower_tex, msd->lower_texture, 8);
-
-    sd->top.image = ImageLookup(upper_tex, kImageNamespaceTexture, kImageLookupNull);
-
-    if (sd->top.image == nullptr)
-    {
-        if (goobers.d_)
-            sd->top.image = ImageLookup(upper_tex, kImageNamespaceTexture);
-        else
-            sd->top.image = ImageLookup(upper_tex, kImageNamespaceTexture);
-    }
-
-    sd->middle.image = ImageLookup(middle_tex, kImageNamespaceTexture);
-    sd->bottom.image = ImageLookup(lower_tex, kImageNamespaceTexture);
-
-    // handle BOOM colormaps with [242] linetype
-    sd->top.boom_colormap    = colormaps.Lookup(upper_tex);
-    sd->middle.boom_colormap = colormaps.Lookup(middle_tex);
-    sd->bottom.boom_colormap = colormaps.Lookup(lower_tex);
-
-    if (sd->middle.image && two_sided)
-    {
-        sd->middle_mask_offset = sd->middle.offset.Y;
-        sd->middle.offset.Y    = 0;
-    }
-
-    /*if (sd->top.image && fabs(sd->top.offset.Y) > sd->top.image->ScaledHeightActual())
-        sd->top.offset.Y = fmodf(sd->top.offset.Y, sd->top.image->ScaledHeightActual());
-
-    if (sd->middle.image && fabs(sd->middle.offset.Y) > sd->middle.image->ScaledHeightActual())
-        sd->middle.offset.Y = fmodf(sd->middle.offset.Y, sd->middle.image->ScaledHeightActual());
-
-    if (sd->bottom.image && fabs(sd->bottom.offset.Y) > sd->bottom.image->ScaledHeightActual())
-        sd->bottom.offset.Y = fmodf(sd->bottom.offset.Y, sd->bottom.image->ScaledHeightActual());*/
-}
-
-static void LoadSideDefs(int lump)
-{
-    int               i;
-    const uint8_t    *data;
-    const RawSidedef *msd;
-    Side             *sd;
-
-    int nummapsides;
-
-    if (!VerifyLump(lump, "SIDEDEFS"))
-        FatalError("Bad WAD: level %s missing SIDEDEFS.\n", current_map->lump_.c_str());
-
-    nummapsides = GetLumpLength(lump) / sizeof(RawSidedef);
-
-    if (nummapsides == 0)
-        FatalError("Bad WAD: level %s contains 0 sidedefs.\n", current_map->lump_.c_str());
-
-    level_sides = new Side[total_level_sides];
-
-    EPI_CLEAR_MEMORY(level_sides, Side, total_level_sides);
-
-    data = LoadLumpIntoMemory(lump);
-    msd  = (const RawSidedef *)data;
-
-    sd = level_sides;
-
-    EPI_ASSERT(temp_line_sides);
-
-    for (i = 0; i < total_level_lines; i++)
-    {
-        Line *ld = level_lines + i;
-
-        int side0 = temp_line_sides[i * 2 + 0];
-        int side1 = temp_line_sides[i * 2 + 1];
-
-        EPI_ASSERT(side0 != -1);
-
-        if (side0 >= nummapsides)
-        {
-            LogWarning("Bad WAD: level %s linedef #%d has bad RIGHT side.\n", current_map->lump_.c_str(), i);
-            side0 = nummapsides - 1;
-        }
-
-        if (side1 != -1 && side1 >= nummapsides)
-        {
-            LogWarning("Bad WAD: level %s linedef #%d has bad LEFT side.\n", current_map->lump_.c_str(), i);
-            side1 = nummapsides - 1;
-        }
-
-        ld->side[0] = sd;
-        TransferMapSideDef(msd + side0, sd, (side1 != -1));
-        ld->front_sector = sd->sector;
-        sd++;
-
-        if (side1 != -1)
-        {
-            ld->side[1] = sd;
-            TransferMapSideDef(msd + side1, sd, true);
-            ld->back_sector = sd->sector;
-            sd++;
-        }
-
-        EPI_ASSERT(sd <= level_sides + total_level_sides);
-    }
-
-    EPI_ASSERT(sd == level_sides + total_level_sides);
-
-    delete[] data;
-}
-
 //
 // SetupExtrafloors
 //
@@ -2737,7 +2235,7 @@ void GroupLines(void)
         // Allow vertex slope if a triangular sector or a rectangular
         // sector in which two adjacent verts have an identical z-height
         // and the other two have it unset
-        if (sector->line_count == 3 && udmf_level)
+        if (sector->line_count == 3)
         {
             sector->floor_vertex_slope_high_low   = {{-40000, 40000}};
             sector->ceiling_vertex_slope_high_low = {{-40000, 40000}};
@@ -2827,7 +2325,7 @@ void GroupLines(void)
                     sector->ceiling_vertex_slope_high_low.X = sector->ceiling_height;
             }
         }
-        if (sector->line_count == 4 && udmf_level)
+        if (sector->line_count == 4)
         {
             int floor_z_lines                     = 0;
             int ceil_z_lines                      = 0;
@@ -3199,7 +2697,6 @@ void LevelSetup(void)
     // -CW- 2017/01/29: check for UDMF map lump
     if (VerifyLump(lumpnum + 1, "TEXTMAP"))
     {
-        udmf_level          = true;
         udmf_lump_number    = lumpnum + 1;
         int      raw_length = 0;
         uint8_t *raw_udmf   = LoadLumpIntoMemory(udmf_lump_number, &raw_length);
@@ -3212,8 +2709,7 @@ void LevelSetup(void)
     }
     else
     {
-        udmf_level       = false;
-        udmf_lump_number = -1;
+        FatalError("%s is not a UDMF map!\n", current_map->name_.c_str());
     }
 
     // clear CRC values
@@ -3235,25 +2731,11 @@ void LevelSetup(void)
     total_level_sectors       = 0;
     total_level_lines         = 0;
 
-    if (!udmf_level)
-    {
-        if (IsLumpIndexValid(lumpnum + kLumpBehavior) && VerifyLump(lumpnum + kLumpBehavior, "BEHAVIOR"))
-        {
-            FatalError("Level %s is Hexen format (not supported).\n", current_map->lump_.c_str());
-        }
-        LoadVertexes(lumpnum + kLumpVertexes);
-        LoadSectors(lumpnum + kLumpSectors);
-        LoadLineDefs(lumpnum + kLumpLinedefs);
-        LoadSideDefs(lumpnum + kLumpSidedefs);
-    }
-    else
-    {
-        LoadUDMFCounts();
-        LoadUDMFVertexes();
-        LoadUDMFSectors();
-        LoadUDMFLineDefs();
-        LoadUDMFSideDefs();
-    }
+    LoadUDMFCounts();
+    LoadUDMFVertexes();
+    LoadUDMFSectors();
+    LoadUDMFLineDefs();
+    LoadUDMFSideDefs();
 
     SetupExtrafloors();
     SetupSlidingDoors();
@@ -3284,10 +2766,7 @@ void LevelSetup(void)
 
     unknown_thing_map.clear();
 
-    if (!udmf_level)
-        LoadThings(lumpnum + kLumpThings);
-    else
-        LoadUDMFThings();
+    LoadUDMFThings();
 
         // OK, CRC values have now been computed
 #ifdef DEVELOPERS
@@ -3308,8 +2787,6 @@ void LevelSetup(void)
 
     // setup categories based on game mode (SP/COOP/DM)
     UpdateSoundCategoryLimits();
-
-    // FIXME: cache sounds (esp. for player)
 
     ChangeMusic(current_map->music_, true); // start level music
 
