@@ -181,7 +181,7 @@ void DDFReadSectors(const std::string &data)
     DDFReadInfo sects;
 
     sects.tag      = "SECTORS";
-    sects.lumpname = "DDFSECT";
+    sects.short_name = "DDFSECT";
 
     sects.start_entry  = SectorStartEntry;
     sects.parse_field  = SectorParseField;

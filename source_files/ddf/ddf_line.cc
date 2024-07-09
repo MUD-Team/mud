@@ -418,7 +418,7 @@ void DDFReadLines(const std::string &data)
     DDFReadInfo lines;
 
     lines.tag      = "LINES";
-    lines.lumpname = "DDFLINE";
+    lines.short_name = "DDFLINE";
 
     lines.start_entry  = LinedefStartEntry;
     lines.parse_field  = LinedefParseField;

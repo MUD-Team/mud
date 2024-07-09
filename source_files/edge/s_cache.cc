@@ -105,24 +105,15 @@ static bool DoCacheLoad(SoundEffectDefinition *def, SoundData *buf)
         F              = epi::FileOpen(fn, epi::kFileAccessRead | epi::kFileAccessBinary);
         if (!F)
         {
-            DebugOrError("SFX Loader: Can't Find File '%s'\n", fn.c_str());
+            DebugOrError("SFX Loader: Can't Find file '%s'\n", fn.c_str());
             return false;
         }
         fmt = SoundFilenameToFormat(def->file_name_);
     }
     else
     {
-        int lump = -1;
-        lump     = CheckLumpNumberForName(def->lump_name_.c_str());
-        if (lump < 0)
-        {
-            // Just write a debug message for SFX lumps; this prevents spam
-            // amongst the various IWADs
-            DebugOrError("SFX Loader: Missing sound lump: %s\n", def->lump_name_.c_str());
-            return false;
-        }
-        F = LoadLumpAsFile(lump);
-        EPI_ASSERT(F);
+        DebugOrError("SFX Loader: No filename given for %s\n", def->name_.c_str());
+        return false;
     }
 
     // Load the data into the buffer

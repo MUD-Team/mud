@@ -44,10 +44,6 @@ class AnimationDefinition
     // -AJA- 2004/10/27: new SEQUENCE command for anims
     std::vector<std::string> pics_;
 
-    // first and last names in TEXTURE1/2 lump
-    std::string start_name_;
-    std::string end_name_;
-
     // how many 1/35s ticks each frame lasts
     int speed_;
 
@@ -87,9 +83,6 @@ class AnimationDefinitionContainer : public std::vector<AnimationDefinition *>
 extern AnimationDefinitionContainer animdefs; // -ACB- 2004/06/03 Implemented
 
 void DDFReadAnims(const std::string &data);
-
-// handle the BOOM lump
-void DDFConvertAnimatedLump(const uint8_t *data, int size);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

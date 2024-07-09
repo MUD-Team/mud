@@ -89,7 +89,7 @@ static void MovieParseField(const char *field, const char *contents, int index, 
 static void MovieFinishEntry(void)
 {
     if (dynamic_movie->type_ == kMovieDataNone)
-        DDFError("No lump or packfile defined for %s!\n", dynamic_movie->name_.c_str());
+        DDFError("No packfile defined for %s!\n", dynamic_movie->name_.c_str());
 }
 
 static void MovieClearAll(void)
@@ -102,7 +102,7 @@ void DDFReadMovies(const std::string &data)
     DDFReadInfo movies;
 
     movies.tag      = "MOVIES";
-    movies.lumpname = "DDFMOVIE";
+    movies.short_name = "DDFMOVIE";
 
     movies.start_entry  = MovieStartEntry;
     movies.parse_field  = MovieParseField;
@@ -144,12 +144,7 @@ static void DDFMovieGetType(const char *info, void *storage)
     strncpy(keyword, info, colon - info);
     keyword[colon - info] = 0;
 
-    if (DDFCompareName(keyword, "LUMP") == 0)
-    {
-        dynamic_movie->type_ = kMovieDataLump;
-        MovieParseInfo(colon + 1);
-    }
-    else if (DDFCompareName(keyword, "PACK") == 0)
+    if (DDFCompareName(keyword, "PACK") == 0)
     {
         dynamic_movie->type_ = kMovieDataPackage;
         MovieParseInfo(colon + 1);

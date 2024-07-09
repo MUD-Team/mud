@@ -32,7 +32,7 @@ PlaylistEntryContainer playlist;
 static void DDFMusicParseInfo(const char *info)
 {
     static const char *const musstrtype[] = {"UNKNOWN", "MIDI", "OGG", nullptr};
-    static const char *const musinftype[] = {"UNKNOWN", "LUMP", "FILE", "PACK", nullptr};
+    static const char *const musinftype[] = {"UNKNOWN", "FILE", "PACK", nullptr};
 
     char charbuff[256];
     int  pos, i;
@@ -72,7 +72,7 @@ static void DDFMusicParseInfo(const char *info)
         else
         {
             dynamic_plentry->infotype_ = (DDFMusicDataType)i;
-            // Remained is the string reference: filename/lumpname
+            // Remained is the string reference: filename
             pos++;
             dynamic_plentry->info_ = &info[pos];
             return;
@@ -188,7 +188,7 @@ void DDFReadMusicPlaylist(const std::string &data)
     DDFReadInfo playlistinfo;
 
     playlistinfo.tag      = "PLAYLISTS";
-    playlistinfo.lumpname = "DDFPLAY";
+    playlistinfo.short_name = "DDFPLAY";
 
     playlistinfo.start_entry  = PlaylistStartEntry;
     playlistinfo.parse_field  = PlaylistParseField;

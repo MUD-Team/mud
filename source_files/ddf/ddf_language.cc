@@ -140,7 +140,7 @@ void DDFReadLangs(const std::string &data)
     DDFReadInfo languages;
 
     languages.tag      = "LANGUAGES";
-    languages.lumpname = "DDFLANG";
+    languages.short_name = "DDFLANG";
 
     languages.start_entry  = LanguageStartEntry;
     languages.parse_field  = LanguageParseField;

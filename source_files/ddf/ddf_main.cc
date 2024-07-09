@@ -718,7 +718,7 @@ void DDFMainReadFile(DDFReadInfo *readinfo, const std::string &data)
     bool firstgo       = true;
 
     cur_ddf_line_num = 1;
-    cur_ddf_filename = std::string(readinfo->lumpname);
+    cur_ddf_filename = readinfo->short_name;
     cur_ddf_entryname.clear();
 
     // WISH: don't make this copy, parse directly from the string
@@ -832,7 +832,7 @@ void DDFMainReadFile(DDFReadInfo *readinfo, const std::string &data)
 
             if (epi::StringPrefixCaseCompareASCII(std::string_view(memfileptr, 13), "#NOPATCHMENUS") == 0)
             {
-                if (epi::StringCaseCompareASCII(readinfo->lumpname, "DDFSTYLE") == 0)
+                if (epi::StringCaseCompareASCII(readinfo->short_name, "DDFSTYLE") == 0)
                 {
                     styledefs.patch_menus_allowed_ = false;
                 }

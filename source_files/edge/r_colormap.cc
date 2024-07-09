@@ -52,70 +52,13 @@ extern ConsoleVariable force_flat_lighting;
 
 EDGE_DEFINE_CONSOLE_VARIABLE(sector_brightness_correction, "5", kConsoleVariableFlagArchive)
 
-//
-// Computes the right "colourmap" (more precisely, coltable) to put into
-// the dc_colourmap & ds_colourmap variables for use by the column &
-// span drawers.
-//
-static void LoadColourmap(const Colormap *colm)
-{
-    int      size;
-    uint8_t *data;
-
-    // we are writing to const marked memory here. Here is the only place
-    // the cache struct is touched.
-    ColormapCache *cache = (ColormapCache *)&colm->cache_;
-
-    if (colm->pack_name_ != "")
-    {
-        epi::File *f = OpenFileFromPack(colm->pack_name_);
-        if (f == nullptr)
-            FatalError("No such colormap file: %s\n", colm->pack_name_.c_str());
-        size = f->GetLength();
-        data = f->LoadIntoMemory();
-        delete f; // close file
-    }
-    else if (colm->lump_index_ > -1)
-    {
-        data = LoadLumpIntoMemory(colm->lump_index_, &size);
-    }
-    else
-    {
-        data = LoadLumpIntoMemory(colm->lump_name_.c_str(), &size);
-    }
-
-    if ((colm->start_ + colm->length_) * 256 > size)
-    {
-        FatalError("Colourmap [%s] is too small ! (LENGTH too big)\n", colm->name_.c_str());
-    }
-
-    cache->size = colm->length_ * 256;
-    cache->data = new uint8_t[cache->size];
-
-    memcpy(cache->data, data + (colm->start_ * 256), cache->size);
-
-    delete[] data;
-}
-
 void TransformColourmap(Colormap *colmap)
 {
-    const uint8_t *table = colmap->cache_.data;
-
-    if (table == nullptr && (!colmap->lump_name_.empty() || !colmap->pack_name_.empty()))
-    {
-        LoadColourmap(colmap);
-
-        table = (uint8_t *)colmap->cache_.data;
-    }
-
     if (colmap->font_colour_ == kRGBANoValue)
     {
         if (colmap->gl_color_ != kRGBANoValue)
             colmap->font_colour_ = colmap->gl_color_;
     }
-
-    LogDebug("TransformColourmap [%s]\n", colmap->name_.c_str());
-    LogDebug("- gl_color_   = #%06x\n", colmap->gl_color_);
 }
 
 void GetColormapRGB(const Colormap *colmap, float *r, float *g, float *b)

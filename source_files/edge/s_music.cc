@@ -88,7 +88,7 @@ void ChangeMusic(int entry_number, bool loop)
         F = epi::FileOpen(fn, epi::kFileAccessRead | epi::kFileAccessBinary);
         if (!F)
         {
-            LogWarning("ChangeMusic: Can't Find File '%s'\n", fn.c_str());
+            LogWarning("ChangeMusic: Can't find file '%s'\n", fn.c_str());
             return;
         }
         break;
@@ -98,26 +98,14 @@ void ChangeMusic(int entry_number, bool loop)
         F = OpenFileFromPack(play->info_);
         if (!F)
         {
-            LogWarning("ChangeMusic: PK3 entry '%s' not found.\n", play->info_.c_str());
+            LogWarning("ChangeMusic: pack entry '%s' not found.\n", play->info_.c_str());
             return;
         }
-        break;
-    }
-
-    case kDDFMusicDataLump: {
-        int lump = CheckLumpNumberForName(play->info_.c_str());
-        if (lump < 0)
-        {
-            LogWarning("ChangeMusic: LUMP '%s' not found.\n", play->info_.c_str());
-            return;
-        }
-
-        F = LoadLumpAsFile(lump);
         break;
     }
 
     default:
-        LogPrint("ChangeMusic: invalid method %d for MUS/MIDI\n", play->infotype_);
+        LogPrint("ChangeMusic: invalid type %d for music\n", play->infotype_);
         return;
     }
 
@@ -140,16 +128,8 @@ void ChangeMusic(int entry_number, bool loop)
 
     SoundFormat fmt = kSoundUnknown;
 
-    if (play->infotype_ == kDDFMusicDataLump)
-    {
-        // lumps must use auto-detection based on their contents
-        fmt = DetectSoundFormat(data, length);
-    }
-    else
-    {
-        // for FILE and PACK, use the file extension
-        fmt = SoundFilenameToFormat(play->info_);
-    }
+    // for FILE and PACK, use the file extension
+    fmt = SoundFilenameToFormat(play->info_);
 
     // NOTE: players are responsible for freeing 'data'
 

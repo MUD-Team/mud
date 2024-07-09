@@ -86,8 +86,5 @@ extern SwitchDefinitionContainer switchdefs; // -ACB- 2004/06/04 Implemented
 
 void DDFReadSwitch(const std::string &data);
 
-// handle the BOOM lump
-void DDFConvertSwitchesLump(const uint8_t *data, int size);
-
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

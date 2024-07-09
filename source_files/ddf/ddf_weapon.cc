@@ -572,7 +572,7 @@ void DDFReadWeapons(const std::string &data)
     DDFReadInfo weapons;
 
     weapons.tag      = "WEAPONS";
-    weapons.lumpname = "DDFWEAP";
+    weapons.short_name = "DDFWEAP";
 
     weapons.start_entry  = WeaponStartEntry;
     weapons.parse_field  = WeaponParseField;

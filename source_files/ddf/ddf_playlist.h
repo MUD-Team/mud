@@ -37,10 +37,9 @@ enum DDFMusicType
 enum DDFMusicDataType
 {
     kDDFMusicDataUnknown    = 0,
-    kDDFMusicDataLump       = 1,
-    kDDFMusicDataFile       = 2,
-    kDDFMusicDataPackage    = 3,
-    kTotalDDFMusicDataTypes = 4
+    kDDFMusicDataFile,
+    kDDFMusicDataPackage,
+    kTotalDDFMusicDataTypes
 };
 
 class PlaylistEntry

@@ -662,11 +662,12 @@ void A_PlayerScream(MapObject *mo)
 
     sound = mo->info_->deathsound_;
 
-    if ((mo->health_ < -50) && (IsLumpInAnyWad("DSPDIEHI")))
+    if (mo->health_ < -50)
     {
         // if the player dies and unclipped health is < -50%...
-
-        sound = sfxdefs.GetEffect("PDIEHI");
+        SoundEffect *really_dead = sfxdefs.GetEffect("PLAYER_OVERKILL");
+        if (really_dead)
+            sound = really_dead;
     }
 
     StartSoundEffect(sound, GetSoundEffectCategory(mo), mo);

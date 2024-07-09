@@ -161,19 +161,6 @@ static void AddGraphicAnimation(AnimationDefinition *anim)
     delete[] users;
 }
 
-struct CompareFlatPredicate
-{
-    inline bool operator()(const int &A, const int &B) const
-    {
-        int cmp = strcmp(GetLumpNameFromIndex(A), GetLumpNameFromIndex(B));
-        if (cmp < 0)
-            return true;
-        if (cmp > 0)
-            return false;
-        return A < B;
-    }
-};
-
 //
 // InitializeAnimations
 //

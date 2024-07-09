@@ -108,7 +108,7 @@ static void FontFinishEntry(void)
         DDFError("Missing font image name.\n");
 
     if (dynamic_font->type_ == kFontTypeTrueType && dynamic_font->truetype_name_.empty())
-        DDFError("Missing font TTF/OTF lump/file name.\n");
+        DDFError("Missing font TTF/OTF file name.\n");
 
     if (dynamic_font->type_ == kFontTypeTrueType && !dynamic_font->truetype_smoothing_string_.empty())
     {
@@ -131,7 +131,7 @@ void DDFReadFonts(const std::string &data)
     DDFReadInfo fonts;
 
     fonts.tag      = "FONTS";
-    fonts.lumpname = "DDFFONT";
+    fonts.short_name = "DDFFONT";
 
     fonts.start_entry  = FontStartEntry;
     fonts.parse_field  = FontParseField;

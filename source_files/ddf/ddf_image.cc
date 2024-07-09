@@ -167,7 +167,7 @@ void DDFReadImages(const std::string &data)
     DDFReadInfo images;
 
     images.tag      = "IMAGES";
-    images.lumpname = "DDFIMAGE";
+    images.short_name = "DDFIMAGE";
 
     images.start_entry  = ImageStartEntry;
     images.parse_field  = ImageParseField;

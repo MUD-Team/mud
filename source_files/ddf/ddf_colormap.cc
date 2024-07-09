@@ -29,12 +29,7 @@ void DDFColmapGetSpecial(const char *info, void *storage);
 
 static Colormap dummy_colmap;
 
-static const DDFCommandList colmap_commands[] = {DDF_FIELD("LUMP", dummy_colmap, lump_name_, DDFMainGetLumpName),
-                                                 DDF_FIELD("LUMP_INDEX", dummy_colmap, lump_index_, DDFMainGetNumeric),
-                                                 DDF_FIELD("PACK", dummy_colmap, pack_name_, DDFMainGetString),
-                                                 DDF_FIELD("START", dummy_colmap, start_, DDFMainGetNumeric),
-                                                 DDF_FIELD("LENGTH", dummy_colmap, length_, DDFMainGetNumeric),
-                                                 DDF_FIELD("SPECIAL", dummy_colmap, special_, DDFColmapGetSpecial),
+static const DDFCommandList colmap_commands[] = {DDF_FIELD("SPECIAL", dummy_colmap, special_, DDFColmapGetSpecial),
                                                  DDF_FIELD("GL_COLOUR", dummy_colmap, gl_color_, DDFMainGetRGB),
 
                                                  {nullptr, nullptr, 0, nullptr}};
@@ -96,31 +91,17 @@ static void ColmapParseField(const char *field, const char *contents, int index,
     if (DDFMainParseField(colmap_commands, field, contents, (uint8_t *)dynamic_colmap))
         return; // OK
 
-    DDFWarnError("Unknown colmap.ddf command: %s\n", field);
+    DDFError("Unknown colmap.ddf command: %s\n", field);
 }
 
 static void ColmapFinishEntry(void)
 {
-    if (dynamic_colmap->start_ < 0)
+    if (dynamic_colmap->gl_color_ == kRGBANoValue)
     {
-        DDFWarnError("Bad START value for colmap: %d\n", dynamic_colmap->start_);
-        dynamic_colmap->start_ = 0;
-    }
-
-    // don't need a length when using GL_COLOUR
-    if (!dynamic_colmap->lump_name_.empty() && !dynamic_colmap->pack_name_.empty() && dynamic_colmap->length_ <= 0)
-    {
-        DDFWarnError("Bad LENGTH value for colmap: %d\n", dynamic_colmap->length_);
-        dynamic_colmap->length_ = 1;
-    }
-
-    if (dynamic_colmap->lump_name_.empty() && dynamic_colmap->pack_name_.empty() &&
-        dynamic_colmap->gl_color_ == kRGBANoValue && dynamic_colmap->lump_index_ == -1)
-    {
-        DDFWarnError("Colourmap entry missing LUMP, PACK, LUMP_INDEX or GL_COLOUR.\n");
+        DDFWarnError("Colourmap entry missing GL_COLOUR.\n");
         // We are now assuming that the intent is to remove all
         // colmaps with this name (i.e., "null" it), as the only way to get here
-        // is to create an empty entry or use gl_color_=NONE; - Dasho
+        // is to create an empty entry or use gl_color_= NONE; - Dasho
         std::string doomed_name = dynamic_colmap->name_;
         for (std::vector<Colormap *>::iterator iter = colormaps.begin(); iter != colormaps.end(); iter++)
         {
@@ -147,7 +128,7 @@ void DDFReadColourMaps(const std::string &data)
     DDFReadInfo colm_r;
 
     colm_r.tag      = "COLOURMAPS";
-    colm_r.lumpname = "DDFCOLM";
+    colm_r.short_name = "DDFCOLM";
 
     colm_r.start_entry  = ColmapStartEntry;
     colm_r.parse_field  = ColmapParseField;
@@ -230,18 +211,11 @@ Colormap::~Colormap()
 //
 void Colormap::CopyDetail(Colormap &src)
 {
-    lump_name_ = src.lump_name_;
-    pack_name_ = src.pack_name_;
-    lump_index_ = src.lump_index_;
-
-    start_   = src.start_;
-    length_  = src.length_;
     special_ = src.special_;
 
     gl_color_    = src.gl_color_;
     font_colour_ = src.font_colour_;
 
-    cache_.data = nullptr;
     analysis_   = nullptr;
 }
 
@@ -250,18 +224,11 @@ void Colormap::CopyDetail(Colormap &src)
 //
 void Colormap::Default()
 {
-    lump_name_.clear();
-    pack_name_.clear();
-    lump_index_ = -1;
-
-    start_   = 0;
-    length_  = 0;
     special_ = kColorSpecialNone;
 
     gl_color_    = kRGBANoValue;
     font_colour_ = kRGBANoValue;
 
-    cache_.data = nullptr;
     analysis_   = nullptr;
 }
 

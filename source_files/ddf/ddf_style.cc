@@ -190,7 +190,7 @@ void DDFReadStyles(const std::string &data)
     DDFReadInfo styles;
 
     styles.tag      = "STYLES";
-    styles.lumpname = "DDFSTYLE";
+    styles.short_name = "DDFSTYLE";
 
     styles.start_entry  = StyleStartEntry;
     styles.parse_field  = StyleParseField;

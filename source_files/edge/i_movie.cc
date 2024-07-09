@@ -120,18 +120,13 @@ void PlayMovie(const std::string &name)
 
     int      length = 0;
 
-    if (movie->type_ == kMovieDataLump)
-        movie_bytes = LoadLumpIntoMemory(movie->info_.c_str(), &length);
-    else
+    epi::File *mf = OpenFileFromPack(movie->info_.c_str());
+    if (mf)
     {
-        epi::File *mf = OpenFileFromPack(movie->info_.c_str());
-        if (mf)
-        {
-            movie_bytes  = mf->LoadIntoMemory();
-            length = mf->GetLength();
-        }
-        delete mf;
+        movie_bytes  = mf->LoadIntoMemory();
+        length = mf->GetLength();
     }
+    delete mf;
 
     if (!movie_bytes)
     {

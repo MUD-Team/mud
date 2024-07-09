@@ -169,7 +169,7 @@ void DDFReadGames(const std::string &data)
     DDFReadInfo games;
 
     games.tag      = "GAMES";
-    games.lumpname = "DDFGAME";
+    games.short_name = "DDFGAME";
 
     games.start_entry  = GameStartEntry;
     games.parse_field  = GameParseField;

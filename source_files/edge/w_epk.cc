@@ -764,51 +764,12 @@ void ProcessPackSubstitutions(PackFile *pack, int pack_index)
             }
         }
     }
-    // Only sub out sounds and music if they would replace an existing DDF entry
-    // This MAY expand to create automatic simple DDFSFX entries if they aren't
-    // defined anywhere else
-    d = pack->FindDirectory("sounds");
-    if (d > 0)
-    {
-        for (size_t i = 0; i < pack->directories_[d].entries_.size(); i++)
-        {
-            PackEntry &entry = pack->directories_[d].entries_[i];
-            for (SoundEffectDefinition *sfx : sfxdefs)
-            {
-                // Assume that same stem name is meant to replace an identically
-                // named lump entry
-                if (!sfx->lump_name_.empty())
-                {
-                    if (epi::StringCaseCompareASCII(epi::GetStem(entry.name_), sfx->lump_name_) == 0 &&
-                        CheckDataFileIndexForName(sfx->lump_name_.c_str()) < pack_index)
-                    {
-                        sfx->pack_name_ = entry.pack_path_;
-                        sfx->lump_name_.clear();
-                    }
-                }
-            }
-        }
-    }
+    
+    // Stub for now; revisit when WAD support is removed - Dasho
     d = pack->FindDirectory("music");
     if (d > 0)
     {
-        for (size_t i = 0; i < pack->directories_[d].entries_.size(); i++)
-        {
-            PackEntry &entry = pack->directories_[d].entries_[i];
-            for (PlaylistEntry *song : playlist)
-            {
-                if (epi::GetExtension(song->info_).empty())
-                {
-                    if (song->infotype_ == kDDFMusicDataLump &&
-                        epi::StringCaseCompareASCII(epi::GetStem(entry.name_), song->info_) == 0 &&
-                        CheckDataFileIndexForName(song->info_.c_str()) < pack_index)
-                    {
-                        song->info_     = entry.pack_path_;
-                        song->infotype_ = kDDFMusicDataPackage;
-                    }
-                }
-            }
-        }
+        
     }
 }
 
@@ -1036,6 +997,40 @@ std::vector<std::string> GetPackSpriteList(PackFile *pack)
     return found_sprites;
 }
 
+// Generate automatic DDF for sound effects. This should happen prior to DDF processing
+// so that DDFSFX entries can override them.
+static void ProcessSoundsInPack(PackFile *pack)
+{
+    int d = pack->FindDirectory("sounds");
+    if (d > 0)
+    {
+        std::string text = "<SOUNDS>\n\n";
+
+        for (size_t i = 0; i < pack->directories_[d].entries_.size(); i++)
+        {
+            PackEntry &entry = pack->directories_[d].entries_[i];
+            if (SoundFilenameToFormat(entry.name_) != kSoundUnknown)
+            {
+                std::string sfxname = epi::GetStem(entry.name_);
+                epi::StringUpperASCII(sfxname);
+                // generate DDF for it...
+                text += "[";
+                text += sfxname;
+                text += "]\n";
+
+                text += "PACK_NAME = \"";
+                text += entry.name_;
+                text += "\";\n";
+
+                text += "PRIORITY  = 64;\n";
+                text += "\n";
+            }
+        }
+
+        DDFAddFile(kDDFTypeSFX, text, pack->parent_->name_.c_str());
+    }
+}
+
 static void ProcessWADsInPack(PackFile *pack)
 {
     for (size_t d = 0; d < pack->directories_.size(); d++)
@@ -1086,6 +1081,8 @@ void ProcessAllInPack(DataFile *df, size_t file_index)
         df->pack_ = ProcessZip(df);
 
     df->pack_->SortEntries();
+
+    ProcessSoundsInPack(df->pack_);
 
     // Only load some things here; the rest are deferred until
     // after all files loaded so that pack substitutions can work properly

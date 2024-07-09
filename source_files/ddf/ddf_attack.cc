@@ -330,7 +330,7 @@ void DDFReadAtks(const std::string &data)
     DDFReadInfo attacks;
 
     attacks.tag      = "ATTACKS";
-    attacks.lumpname = "DDFATK";
+    attacks.short_name = "DDFATK";
 
     attacks.start_entry  = AttackStartEntry;
     attacks.parse_field  = AttackParseField;

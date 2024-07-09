@@ -243,35 +243,25 @@ epi::File *OpenFileFromPack(const std::string &name)
 
 //----------------------------------------------------------------------------
 
-uint8_t *OpenPackOrLumpInMemory(const std::string &name, const std::vector<std::string> &extensions, int *length)
+uint8_t *OpenMatchingPackFileInMemory(const std::string &name, const std::vector<std::string> &extensions, int *length)
 {
-    int lump_df  = -1;
-    int lump_num = CheckLumpNumberForName(name.c_str());
-    if (lump_num > -1)
-        lump_df = GetDataFileIndexForLump(lump_num);
-
     for (int i = (int)data_files.size() - 1; i >= 0; i--)
     {
-        if (i > lump_df)
+        DataFile *df = data_files[i];
+        if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEPK ||
+            df->kind_ == kFileKindEEPK || df->kind_ == kFileKindIFolder || df->kind_ == kFileKindIPK)
         {
-            DataFile *df = data_files[i];
-            if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEPK ||
-                df->kind_ == kFileKindEEPK || df->kind_ == kFileKindIFolder || df->kind_ == kFileKindIPK)
+            epi::File *F = OpenPackMatch(df->pack_, name, extensions);
+            if (F != nullptr)
             {
-                epi::File *F = OpenPackMatch(df->pack_, name, extensions);
-                if (F != nullptr)
-                {
-                    uint8_t *raw_packfile = F->LoadIntoMemory();
+                uint8_t *raw_packfile = F->LoadIntoMemory();
+                if (length)
                     *length               = F->GetLength();
-                    delete F;
-                    return raw_packfile;
-                }
+                delete F;
+                return raw_packfile;
             }
         }
     }
-
-    if (lump_num > -1)
-        return LoadLumpIntoMemory(lump_num, length);
 
     // not found
     return nullptr;

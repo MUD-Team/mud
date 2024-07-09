@@ -142,7 +142,7 @@ int ConsoleCommandReadme(char **argv, int argc)
     epi::File *readme_file = nullptr;
 
     // Check well known readme filenames
-    for (auto name : readme_names)
+    for (const std::string &name : readme_names)
     {
         readme_file = OpenFileFromPack(name);
         if (readme_file)
@@ -161,30 +161,6 @@ int ConsoleCommandReadme(char **argv, int argc)
             if (readme_file)
                 break;
         }
-    }
-
-    // Check for WADINFO or README lumps
-    if (!readme_file)
-    {
-        if (IsLumpInAnyWad("WADINFO"))
-            readme_file = LoadLumpAsFile("WADINFO");
-        else if (IsLumpInAnyWad("README"))
-            readme_file = LoadLumpAsFile("README");
-    }
-
-    // Check for an EDGEGAME lump or file and print (if it has text; these
-    // aren't required to)
-    if (!readme_file)
-    {
-        // Datafile at index 1 should always be either the IWAD or standalone
-        // EPK
-        if (data_files[1]->wad_)
-        {
-            if (IsLumpInAnyWad("EDGEGAME"))
-                readme_file = LoadLumpAsFile("EDGEGAME");
-        }
-        else
-            readme_file = OpenFileFromPack("EDGEGAME.txt");
     }
 
     if (!readme_file)
