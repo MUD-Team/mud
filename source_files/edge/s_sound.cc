@@ -28,6 +28,7 @@
 #include "s_blit.h"
 #include "s_cache.h"
 #include "s_sound.h"
+#include "sokol_audio.h"
 
 
 extern float room_area;
@@ -270,16 +271,6 @@ void InitializeSound(void)
     SoundQueueInitialize();
 
     UnlockAudio();
-}
-
-void ShutdownSound(void)
-{
-    if (no_sound)
-        return;
-
-    SoundQueueShutdown();
-
-    FreeSoundChannels();
 }
 
 // Not-rejigged-yet stuff..

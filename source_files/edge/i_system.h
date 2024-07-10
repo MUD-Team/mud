@@ -156,12 +156,13 @@ void StartupAudio(void);
 // Shuts down the sound system.  This is the companion function to
 // StartupSound().  This must be called by SystemShutdown(), the
 // main code never calls this function.
-void AudioShutdown(void);
+void ShutdownAudio(void);
 
 // Governs whether or not to provide sokol_audio with an empty
 // buffer or to mix channels from the queue. At the moment this
 // is only necessary during startup to keep sokol_audio from firing
-// before the buffer queue is initialized
+// before the buffer queue is initialized or during shutdown to
+// prevent it from using buffers that don't exist anymore
 void LockAudio(void);
 void UnlockAudio(void);
 

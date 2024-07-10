@@ -36,6 +36,7 @@
 #include "sokol_audio.h"
 
 static saudio_desc sound_device_check;
+static bool sound_initialized;
 
 // If true, sound system is off/not working. Changed to false if sound init ok.
 bool no_sound = false;
@@ -69,6 +70,8 @@ static bool TryOpenSound(int want_freq, bool want_stereo)
     saudio_setup(&sound_device_check);
 
     LogPrint("StartupSound: trying %d Hz %s\n", want_freq, want_stereo ? "Stereo" : "Mono");
+
+    sound_initialized = true;
 
     return true;
 }
@@ -127,16 +130,22 @@ void StartupAudio(void)
     return;
 }
 
-void AudioShutdown(void)
+void ShutdownAudio(void)
 {
     if (no_sound)
         return;
 
-    ShutdownSound();
+    LockAudio();
 
-    no_sound = true;
+    SoundQueueShutdown();
 
-    saudio_shutdown();
+    FreeSoundChannels();
+
+    if (sound_initialized)
+    {
+        saudio_shutdown();
+        sound_initialized = false;
+    }
 }
 
 void LockAudio(void)

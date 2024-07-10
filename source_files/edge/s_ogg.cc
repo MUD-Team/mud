@@ -277,7 +277,7 @@ bool OGGPlayer::StreamIntoBuffer(SoundData *buf)
             return false; /* NOT REACHED */
         }
 
-        got_size /= (is_stereo_ ? 2 : 1) * sizeof(int16_t);
+        got_size /= (is_stereo_ ? 2 : 1) * sizeof(float);
 
         if (is_stereo_ && !sound_device_stereo)
             ConvertToMono(buf->data_ + samples, mono_buffer_, got_size);
@@ -468,7 +468,6 @@ bool LoadOGGSound(SoundData *buf, const uint8_t *data, int length)
     }
 
     bool is_stereo  = (vorbis_inf->channels > 1);
-    int  ogg_endian = (kByteOrder == kLittleEndian) ? 0 : 1;
 
     buf->frequency_ = vorbis_inf->rate;
 
@@ -480,9 +479,8 @@ bool LoadOGGSound(SoundData *buf, const uint8_t *data, int length)
 
         float *buffer = gather.MakeChunk(want, is_stereo);
 
-        int section;
-        int got_size = ov_read(&ogg_stream, (char *)buffer, want * (is_stereo ? 2 : 1) * sizeof(int16_t), ogg_endian,
-                               sizeof(int16_t), 1 /* signed data */, &section);
+        int section = 0;
+        int got_size = ov_read_float(&ogg_stream, (float ***)buffer, want, &section);
 
         if (got_size == OV_HOLE) // ignore corruption
         {
@@ -503,7 +501,7 @@ bool LoadOGGSound(SoundData *buf, const uint8_t *data, int length)
             break;
         }
 
-        got_size /= (is_stereo ? 2 : 1) * sizeof(int16_t);
+        got_size /= (is_stereo ? 2 : 1) * sizeof(float);
 
         gather.CommitChunk(got_size);
     }
