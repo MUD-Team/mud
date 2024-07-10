@@ -353,7 +353,7 @@ void MixAllSoundChannels(void *stream, int len)
     if (no_sound || len <= 0)
         return;
 
-    int pairs = len / sound_device_bytes_per_sample;
+    int pairs = len;
 
     int samples = pairs;
     if (sound_device_stereo)
@@ -489,8 +489,6 @@ void ReallocateSoundChannels(int total)
 
 void UpdateSounds(Position *listener, BAMAngle angle)
 {
-    // NOTE: assume SDL_LockAudio has been called
-
     listen_x = listener ? listener->x : 0;
     listen_y = listener ? listener->y : 0;
     listen_z = listener ? listener->z : 0;
@@ -529,25 +527,21 @@ void SoundQueueInitialize(void)
     if (no_sound)
         return;
 
-    LockAudio();
+    if (free_queue_buffers.empty())
     {
-        if (free_queue_buffers.empty())
+        for (int i = 0; i < kMaximumQueueBuffers; i++)
         {
-            for (int i = 0; i < kMaximumQueueBuffers; i++)
-            {
-                free_queue_buffers.push_back(new SoundData());
-            }
+            free_queue_buffers.push_back(new SoundData());
         }
-
-        if (!queue_channel)
-            queue_channel = new SoundChannel();
-
-        queue_channel->state_ = kChannelEmpty;
-        queue_channel->data_  = nullptr;
-
-        queue_channel->ComputeMusicVolume();
     }
-    UnlockAudio();
+
+    if (!queue_channel)
+        queue_channel = new SoundChannel();
+
+    queue_channel->state_ = kChannelEmpty;
+    queue_channel->data_  = nullptr;
+
+    queue_channel->ComputeMusicVolume();
 }
 
 void SoundQueueShutdown(void)
@@ -555,29 +549,25 @@ void SoundQueueShutdown(void)
     if (no_sound)
         return;
 
-    LockAudio();
+    if (queue_channel)
     {
-        if (queue_channel)
+        // free all data on the playing / free lists.
+        // The SoundData destructor takes care of data_left_/R.
+
+        for (; !playing_queue_buffers.empty(); playing_queue_buffers.pop_front())
         {
-            // free all data on the playing / free lists.
-            // The SoundData destructor takes care of data_left_/R.
-
-            for (; !playing_queue_buffers.empty(); playing_queue_buffers.pop_front())
-            {
-                delete playing_queue_buffers.front();
-            }
-            for (; !free_queue_buffers.empty(); free_queue_buffers.pop_front())
-            {
-                delete free_queue_buffers.front();
-            }
-
-            queue_channel->data_ = nullptr;
-
-            delete queue_channel;
-            queue_channel = nullptr;
+            delete playing_queue_buffers.front();
         }
+        for (; !free_queue_buffers.empty(); free_queue_buffers.pop_front())
+        {
+            delete free_queue_buffers.front();
+        }
+
+        queue_channel->data_ = nullptr;
+
+        delete queue_channel;
+        queue_channel = nullptr;
     }
-    UnlockAudio();
 }
 
 void SoundQueueStop(void)
@@ -587,17 +577,13 @@ void SoundQueueStop(void)
 
     EPI_ASSERT(queue_channel);
 
-    LockAudio();
+    for (; !playing_queue_buffers.empty(); playing_queue_buffers.pop_front())
     {
-        for (; !playing_queue_buffers.empty(); playing_queue_buffers.pop_front())
-        {
-            free_queue_buffers.push_back(playing_queue_buffers.front());
-        }
-
-        queue_channel->state_ = kChannelFinished;
-        queue_channel->data_  = nullptr;
+        free_queue_buffers.push_back(playing_queue_buffers.front());
     }
-    UnlockAudio();
+
+    queue_channel->state_ = kChannelFinished;
+    queue_channel->data_  = nullptr;
 }
 
 SoundData *SoundQueueGetFreeBuffer(int samples, int buf_mode)
@@ -607,17 +593,13 @@ SoundData *SoundQueueGetFreeBuffer(int samples, int buf_mode)
 
     SoundData *buf = nullptr;
 
-    LockAudio();
+    if (!free_queue_buffers.empty())
     {
-        if (!free_queue_buffers.empty())
-        {
-            buf = free_queue_buffers.front();
-            free_queue_buffers.pop_front();
+        buf = free_queue_buffers.front();
+        free_queue_buffers.pop_front();
 
-            buf->Allocate(samples, buf_mode);
-        }
+        buf->Allocate(samples, buf_mode);
     }
-    UnlockAudio();
 
     return buf;
 }
@@ -627,18 +609,14 @@ void SoundQueueAddBuffer(SoundData *buf, int freq)
     EPI_ASSERT(!no_sound);
     EPI_ASSERT(buf);
 
-    LockAudio();
+    buf->frequency_ = freq;
+
+    playing_queue_buffers.push_back(buf);
+
+    if (queue_channel->state_ != kChannelPlaying)
     {
-        buf->frequency_ = freq;
-
-        playing_queue_buffers.push_back(buf);
-
-        if (queue_channel->state_ != kChannelPlaying)
-        {
-            QueueNextBuffer();
-        }
+        QueueNextBuffer();
     }
-    UnlockAudio();
 }
 
 void SoundQueueReturnBuffer(SoundData *buf)
@@ -646,11 +624,7 @@ void SoundQueueReturnBuffer(SoundData *buf)
     EPI_ASSERT(!no_sound);
     EPI_ASSERT(buf);
 
-    LockAudio();
-    {
-        free_queue_buffers.push_back(buf);
-    }
-    UnlockAudio();
+    free_queue_buffers.push_back(buf);
 }
 
 //--- editor settings ---

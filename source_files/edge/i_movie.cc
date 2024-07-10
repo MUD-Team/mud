@@ -19,6 +19,7 @@
 //----------------------------------------------------------------------------
 
 #include "epi.h"
+#include "epi_sdl.h"
 #include "hu_draw.h"
 #include "i_defs_gl.h"
 #include "i_sound.h"
@@ -134,8 +135,7 @@ void PlayMovie(const std::string &name)
 
     if (!no_sound && !(movie->special_ & kMovieSpecialMute) && plm_get_num_audio_streams(decoder) > 0)
     {
-        movie_sample_rate = plm_get_samplerate(decoder);
-        if (!MovieSetupAudioStream(movie_sample_rate))
+        if (!MovieSetupAudioStream(sound_device_frequency))
         {
             plm_destroy(decoder);
             delete[] movie_bytes;

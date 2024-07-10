@@ -21,8 +21,4 @@
 #include <string>
 #include <vector>
 
-#include "epi_sdl.h"
-
 extern std::vector<std::string> available_soundfonts;
-
-extern SDL_AudioDeviceID current_sound_device;

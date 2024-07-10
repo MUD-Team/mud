@@ -158,9 +158,10 @@ void StartupAudio(void);
 // main code never calls this function.
 void AudioShutdown(void);
 
-// wrappers around the SDL functions of the same name,
-// however UnlockAudio() may be called at any time,
-// even when LockAudio() hasn't been called.
+// Governs whether or not to provide sokol_audio with an empty
+// buffer or to mix channels from the queue. At the moment this
+// is only necessary during startup to keep sokol_audio from firing
+// before the buffer queue is initialized
 void LockAudio(void);
 void UnlockAudio(void);
 
