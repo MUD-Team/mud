@@ -308,34 +308,26 @@ SoundEffectDefinition *LookupEffectDef(const SoundEffect *s)
 
 static void S_PlaySound(int idx, SoundEffectDefinition *def, int category, Position *pos, int flags, SoundData *buf)
 {
-    // LogPrint("S_PlaySound on idx #%d DEF:%p\n", idx, def);
-
-    // LogPrint("Looked up def: %p, caching...\n", def);
-
     SoundChannel *chan = mix_channels[idx];
 
     chan->state_ = kChannelPlaying;
     chan->data_  = buf;
 
-    // LogPrint("chan=%p data=%p\n", chan, chan->data);
-
     chan->definition_ = def;
     chan->position_   = pos;
-    chan->category_   = category; //?? store use_cat and orig_cat
+    chan->category_   = category;
 
     // volume computed during mixing (?)
     chan->volume_left_  = 0;
     chan->volume_right_ = 0;
 
     chan->offset_ = 0;
-    chan->length_ = chan->data_->length_ << 10;
+    chan->length_ = chan->data_->length_;
 
     chan->loop_ = false;
     chan->boss_ = (flags & kSoundEffectBoss) ? true : false;
 
     chan->ComputeDelta();
-
-    // LogPrint("FINISHED: delta=0x%lx\n", chan->delta);
 }
 
 static void DoStartFX(SoundEffectDefinition *def, int category, Position *pos, int flags, SoundData *buf)

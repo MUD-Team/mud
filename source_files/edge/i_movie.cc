@@ -43,22 +43,12 @@ static bool             skip_bar_active;
 static GLuint           canvas             = 0;
 static uint8_t         *rgb_data           = nullptr;
 static plm_t           *decoder            = nullptr;
-static SDL_AudioStream *movie_audio_stream = nullptr;
 static int              movie_sample_rate  = 0;
 static float            skip_time;
 static uint8_t         *movie_bytes        = nullptr;
 
 static bool MovieSetupAudioStream(int rate)
 {
-    movie_audio_stream =
-        SDL_NewAudioStream(AUDIO_F32, 2, rate, AUDIO_S16, sound_device_stereo ? 2 : 1, sound_device_frequency);
-
-    if (!movie_audio_stream)
-    {
-        LogWarning("PlayMovie: Failed to setup audio stream: %s\n", SDL_GetError());
-        return false;
-    }
-
     plm_set_audio_lead_time(decoder, (double)1024 / (double)rate);
 
     PauseMusic();
@@ -74,20 +64,12 @@ void MovieAudioCallback(plm_t *mpeg, plm_samples_t *samples, void *user)
 {
     (void)mpeg;
     (void)user;
-    SDL_AudioStreamPut(movie_audio_stream, samples->interleaved, sizeof(float) * samples->count * 2);
-    int avail = SDL_AudioStreamAvailable(movie_audio_stream);
-    if (avail)
+    SoundData *movie_buf = SoundQueueGetFreeBuffer(PLM_AUDIO_SAMPLES_PER_FRAME, sound_device_stereo ? kMixInterleaved : kMixMono);
+    if (movie_buf)
     {
-        SoundData *movie_buf = SoundQueueGetFreeBuffer(avail / 2, sound_device_stereo ? kMixInterleaved : kMixMono);
-        if (movie_buf)
-        {
-            movie_buf->length_ =
-                SDL_AudioStreamGet(movie_audio_stream, movie_buf->data_left_, avail) / (sound_device_stereo ? 4 : 2);
-            if (movie_buf->length_ > 0)
-                SoundQueueAddBuffer(movie_buf, sound_device_frequency);
-            else
-                SoundQueueReturnBuffer(movie_buf);
-        }
+        movie_buf->length_ = PLM_AUDIO_SAMPLES_PER_FRAME;
+        memcpy(movie_buf->data_, samples->interleaved, PLM_AUDIO_SAMPLES_PER_FRAME * sizeof(float));
+        SoundQueueAddBuffer(movie_buf, sound_device_frequency);
     }
 }
 
@@ -138,12 +120,6 @@ void PlayMovie(const std::string &name)
     {
         plm_destroy(decoder);
         decoder = nullptr;
-    }
-
-    if (movie_audio_stream)
-    {
-        SDL_FreeAudioStream(movie_audio_stream);
-        movie_audio_stream = nullptr;
     }
 
     decoder = plm_create_with_memory(movie_bytes, length, FALSE);
@@ -232,7 +208,7 @@ void PlayMovie(const std::string &name)
     memset(rgb_data, 0, num_pixels);
     plm_set_video_decode_callback(decoder, MovieVideoCallback, nullptr);
     plm_set_audio_decode_callback(decoder, MovieAudioCallback, nullptr);
-    if (!no_sound && movie_audio_stream)
+    if (!no_sound)
     {
         plm_set_audio_enabled(decoder, TRUE);
         plm_set_audio_stream(decoder, 0);
@@ -415,11 +391,6 @@ void PlayMovie(const std::string &name)
     decoder = nullptr;
     delete[] movie_bytes;
     movie_bytes = nullptr;
-    if (movie_audio_stream)
-    {
-        SDL_FreeAudioStream(movie_audio_stream);
-        movie_audio_stream = nullptr;
-    }
     if (rgb_data)
     {
         delete[] rgb_data;

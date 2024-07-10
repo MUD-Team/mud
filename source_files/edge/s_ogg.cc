@@ -74,7 +74,7 @@ class OGGPlayer : public AbstractMusicPlayer
     OggVorbis_File ogg_stream_;
     vorbis_info   *vorbis_info_ = nullptr;
 
-    int16_t *mono_buffer_;
+    float *mono_buffer_;
 
   public:
     bool OpenMemory(uint8_t *data, int length);
@@ -171,7 +171,7 @@ long oggplayer_memtell(void *datasource)
 
 OGGPlayer::OGGPlayer() : status_(kNotLoaded), vorbis_info_(nullptr)
 {
-    mono_buffer_ = new int16_t[kMusicBuffer * 2];
+    mono_buffer_ = new float[kMusicBuffer * 2];
 }
 
 OGGPlayer::~OGGPlayer()
@@ -226,36 +226,32 @@ void OGGPlayer::PostOpen()
     status_ = kStopped;
 }
 
-static void ConvertToMono(int16_t *dest, const int16_t *src, int len)
+static void ConvertToMono(float *dest, const float *src, int len)
 {
-    const int16_t *s_end = src + len * 2;
+    const float *s_end = src + len * 2;
 
     for (; src < s_end; src += 2)
     {
         // compute average of samples
-        *dest++ = ((int)src[0] + (int)src[1]) >> 1;
+        *dest++ = (src[0] + src[1]) * 0.5f;
     }
 }
 
 bool OGGPlayer::StreamIntoBuffer(SoundData *buf)
 {
-    int ogg_endian = (kByteOrder == kLittleEndian) ? 0 : 1;
-
     int samples = 0;
 
     while (samples < kMusicBuffer)
     {
-        int16_t *data_buf;
+        float *data_buf;
 
         if (is_stereo_ && !sound_device_stereo)
             data_buf = mono_buffer_;
         else
-            data_buf = buf->data_left_ + samples * (is_stereo_ ? 2 : 1);
+            data_buf = buf->data_ + samples * (is_stereo_ ? 2 : 1);
 
         int section;
-        int got_size = ov_read(&ogg_stream_, (char *)data_buf,
-                               (kMusicBuffer - samples) * (is_stereo_ ? 2 : 1) * sizeof(int16_t), ogg_endian,
-                               sizeof(int16_t), 1 /* signed data */, &section);
+        int got_size = ov_read_float(&ogg_stream_, (float ***)&data_buf, (kMusicBuffer - samples) * (is_stereo_ ? 2 : 1) * sizeof(float), &section);
 
         if (got_size == OV_HOLE) // ignore corruption
             continue;
@@ -284,7 +280,7 @@ bool OGGPlayer::StreamIntoBuffer(SoundData *buf)
         got_size /= (is_stereo_ ? 2 : 1) * sizeof(int16_t);
 
         if (is_stereo_ && !sound_device_stereo)
-            ConvertToMono(buf->data_left_ + samples, mono_buffer_, got_size);
+            ConvertToMono(buf->data_ + samples, mono_buffer_, got_size);
 
         samples += got_size;
     }
@@ -482,7 +478,7 @@ bool LoadOGGSound(SoundData *buf, const uint8_t *data, int length)
     {
         int want = 2048;
 
-        int16_t *buffer = gather.MakeChunk(want, is_stereo);
+        float *buffer = gather.MakeChunk(want, is_stereo);
 
         int section;
         int got_size = ov_read(&ogg_stream, (char *)buffer, want * (is_stereo ? 2 : 1) * sizeof(int16_t), ogg_endian,

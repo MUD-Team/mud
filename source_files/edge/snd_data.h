@@ -23,8 +23,7 @@
 enum SoundBufferMix
 {
     kMixMono        = 0,
-    kMixStereo      = 1,
-    kMixInterleaved = 2
+    kMixInterleaved = 1
 };
 
 class SoundData
@@ -34,12 +33,8 @@ class SoundData
     int frequency_; // frequency
     int mode_;      // one of the kMixxxx values
 
-    // signed 16-bit samples.
-    // For kMixMono, both pointers refer to the same memory.
-    // For kMixInterleaved, only data_left_ is used and contains
-    // both channels, left samples before right samples.
-    int16_t *data_left_;
-    int16_t *data_right_;
+    // 32-bit floating point samples.
+    float *data_;
 
     // values for the engine to use
     void *definition_data_;
