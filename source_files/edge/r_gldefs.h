@@ -143,25 +143,12 @@ struct DrawFloor
 
     MapSurface *floor, *ceiling;
 
-    Extrafloor *extrafloor;
-
     // properties used herein
     RegionProperties *properties;
 
     // list of things
     // (not sorted until RenderFloor is called).
     DrawThing *things;
-};
-
-struct DrawMirror
-{
-    Seg *seg = nullptr;
-
-    BAMAngle left, right;
-
-    bool is_portal = false;
-
-    std::list<DrawSubsector *> draw_subsectors;
 };
 
 struct DrawSeg // HOPEFULLY this can go away
@@ -181,14 +168,10 @@ struct DrawSubsector
 
     std::list<DrawSeg *> segs;
 
-    std::list<DrawMirror *> mirrors;
-
     bool visible;
     bool sorted;
 };
 
-extern int detail_level;
-extern int use_dynamic_lights;
 extern int sprite_kludge;
 
 const Image *GetOtherSprite(int sprite, int frame, bool *flip);
@@ -204,21 +187,6 @@ DrawThing     *GetDrawThing();
 DrawFloor     *GetDrawFloor();
 DrawSeg       *GetDrawSeg();
 DrawSubsector *GetDrawSub();
-DrawMirror    *GetDrawMirror();
-
-//
-//  MIRRORS
-//
-
-extern int total_active_mirrors;
-
-void MirrorCoordinate(float &x, float &y);
-void MirrorHeight(float &z);
-void MirrorAngle(BAMAngle &ang);
-
-bool  MirrorReflective(void);
-float MirrorXYScale(void);
-float MirrorZScale(void);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

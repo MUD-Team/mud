@@ -169,22 +169,10 @@ int   FindThingGap(VerticalGap *gaps, int gap_num, float z1, float z2);
 void  ComputeGaps(Line *ld);
 float ComputeThingGap(MapObject *thing, Sector *sec, float z, float *f, float *c, float floor_slope_z = 0.0f,
                       float ceiling_slope_z = 0.0f);
-void  AddExtraFloor(Sector *sec, Line *line);
 void  RecomputeGapsAroundSector(Sector *sec);
-void  FloodExtraFloors(Sector *sector);
 
 bool CheckAreaForThings(float *bbox);
 bool CheckSliderPathForThings(Line *ld);
-
-enum ExtrafloorFit
-{
-    kFitOk = 0,
-    kFitStuckInCeiling,
-    kFitStuckInFloor,
-    kFitStuckInExtraFloor
-};
-
-ExtrafloorFit CheckExtrafloorFit(Sector *sec, float z1, float z2);
 
 //
 // P_MAP
@@ -211,7 +199,6 @@ bool       SolidSectorMove(Sector *sec, bool is_ceiling, float dh, int crush = 1
 bool       CheckAbsolutePosition(MapObject *thing, float x, float y, float z);
 bool       CheckSight(MapObject *src, MapObject *dest);
 bool       CheckSightToPoint(MapObject *src, float x, float y, float z);
-bool       QuickVerticalSightCheck(MapObject *src, MapObject *dest);
 void       RadiusAttack(MapObject *spot, MapObject *source, float radius, float damage, const DamageClass *damtype,
                         bool thrust_only);
 

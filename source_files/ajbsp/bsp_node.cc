@@ -366,12 +366,6 @@ bool EvalPartitionWorker(QuadTree *tree, Seg *part, double best_cost, EvalInfo *
         //       may fail to detect the sector being cut in half.  Thanks
         //       to Janis Legzdinsh for spotting this obscure bug.
 
-        if (fa <= kEpsilon || fb <= kEpsilon)
-        {
-            if (check->linedef_ != nullptr && check->linedef_->is_precious)
-                info->cost += 40.0 * split_cost * kPreciousCostMultiplier;
-        }
-
         /* check for right side */
         if (a > -kEpsilon && b > -kEpsilon)
         {
@@ -429,15 +423,7 @@ bool EvalPartitionWorker(QuadTree *tree, Seg *part, double best_cost, EvalInfo *
 
         info->splits++;
 
-        // If the linedef associated with this seg has a tag >= 900, treat
-        // it as precious; i.e. don't split it unless all other options
-        // are exhausted.  This is used to protect deep water and invisible
-        // lifts/stairs from being messed up accidentally by splits.
-
-        if (check->linedef_ && check->linedef_->is_precious)
-            info->cost += 100.0 * split_cost * kPreciousCostMultiplier;
-        else
-            info->cost += 100.0 * split_cost;
+        info->cost += 100.0 * split_cost;
 
         // -AJA- check if the split point is very close to one end, which
         //       is an undesirable situation (producing very short segs).
@@ -532,10 +518,6 @@ void EvaluateFastWorker(QuadTree *tree, Seg **best_H, Seg **best_V, int mid_x, i
     {
         /* ignore minisegs as partition candidates */
         if (part->linedef_ == nullptr)
-            continue;
-
-        /* ignore self-ref lines as partition candidates */
-        if (part->linedef_->is_precious)
             continue;
 
         if (AlmostEquals(part->pdy_, 0.0))

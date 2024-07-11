@@ -602,12 +602,7 @@ static bool IM_ShouldSmooth(Image *rim)
 
 static int IM_PixelLimit(Image *rim)
 {
-    if (detail_level == 0)
-        return (1 << 18);
-    else if (detail_level == 1)
-        return (1 << 20);
-    else
-        return (1 << 22);
+     return (1 << 22);
 }
 
 static GLuint LoadImageOGL(Image *rim, bool do_whiten)

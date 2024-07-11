@@ -41,8 +41,6 @@ struct RendererVertex
     HMM_Vec3 normal;
 };
 
-extern sg_color culling_fog_color;
-
 void StartUnitBatch(bool sort_em);
 void FinishUnitBatch(void);
 void RenderCurrentUnits(void);

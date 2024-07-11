@@ -84,8 +84,6 @@ int                 total_level_sectors;
 Sector             *level_sectors;
 int                 total_level_subsectors;
 Subsector          *level_subsectors;
-int                 total_level_extrafloors;
-Extrafloor         *level_extrafloors;
 int                 total_level_nodes;
 BspNode            *level_nodes;
 int                 total_level_lines;
@@ -115,8 +113,6 @@ static std::string node_file;
 // a place to store sidedef numbers of the loaded linedefs.
 // There is two values for every line: side0 and side1.
 static int *temp_line_sides;
-
-EDGE_DEFINE_CONSOLE_VARIABLE(goobers, "0", kConsoleVariableFlagNone)
 
 static void SegCommonStuff(Seg *seg, int linedef_in)
 {
@@ -940,20 +936,23 @@ static void LoadUDMFSectors()
 
         if (section == "sector")
         {
-            int       cz = 0, fz = 0;
+            int       cz = 0, fz = 0, liquid_z = 0;
             float     fx = 0.0f, fy = 0.0f, cx = 0.0f, cy = 0.0f;
             float     fx_sc = 1.0f, fy_sc = 1.0f, cx_sc = 1.0f, cy_sc = 1.0f;
             float     falph = 1.0f, calph = 1.0f;
             float     rf = 0.0f, rc = 0.0f;
             float     gravfactor = 1.0f;
-            int       light = 160, type = 0, tag = 0;
+            int       light = 160, liquid_light = 144, type = 0, tag = 0;
             RGBAColor fog_color   = SG_BLACK_RGBA32;
             RGBAColor light_color = SG_WHITE_RGBA32;
+            RGBAColor liquid_color = SG_STEEL_BLUE_RGBA32;
             int       fog_density = 0;
             char      floor_tex[10];
             char      ceil_tex[10];
+            char      liquid_tex[10];
             strcpy(floor_tex, "-");
             strcpy(ceil_tex, "-");
+            strcpy(liquid_tex, "-");
             for (;;)
             {
                 if (lex.Match("}"))
@@ -1053,6 +1052,18 @@ static void LoadUDMFSectors()
                 case epi::kENameGravity:
                     gravfactor = epi::LexDouble(value);
                     break;
+                case epi::kENameLiquidheight:
+                    liquid_z = epi::LexInteger(value);
+                    break;
+                case epi::kENameLiquidcolor:
+                    liquid_color = ((uint32_t)epi::LexInteger(value) << 8 | 0xFF);
+                    break;
+                case epi::kENameLiquidtexture:
+                    epi::CStringCopyMax(liquid_tex, value.c_str(), 8);
+                    break;
+                case epi::kENameLiquidlight:
+                    liquid_light = epi::LexInteger(value);
+                    break;
                 default:
                     break;
                 }
@@ -1060,13 +1071,6 @@ static void LoadUDMFSectors()
             Sector *ss         = level_sectors + cur_sector;
             ss->floor_height   = fz;
             ss->ceiling_height = cz;
-
-            // return to wolfenstein?
-            if (goobers.d_)
-            {
-                ss->floor_height   = 0;
-                ss->ceiling_height = (AlmostEquals(fz, cz)) ? 0 : 128.0f;
-            }
 
             ss->original_height = (ss->floor_height + ss->ceiling_height);
 
@@ -1076,7 +1080,7 @@ static void LoadUDMFSectors()
             ss->floor.y_matrix.X   = 0;
             ss->floor.y_matrix.Y   = 1;
 
-            ss->ceiling = ss->floor;
+            ss->ceiling = ss->deep_water_surface = ss->floor;
             ss->ceiling.translucency = calph;
 
             // rotations
@@ -1131,8 +1135,6 @@ static void LoadUDMFSectors()
             // convert negative types to zero
             ss->properties.type    = HMM_MAX(0, type);
             ss->properties.special = LookupSectorType(ss->properties.type);
-
-            ss->extrafloor_maximum = 0;
 
             ss->properties.colourmap = nullptr;
 
@@ -1191,6 +1193,43 @@ static void LoadUDMFSectors()
             }
 
             ss->active_properties = &ss->properties;
+
+            // New to MUD: boom height replacement key/value pairs
+            ss->deep_water_surface.image = ImageLookup(liquid_tex, kImageNamespaceFlat, kImageLookupNull);
+
+            if (ss->deep_water_surface.image)
+            {
+                ss->has_deep_water = true;
+                ss->deep_water_height = liquid_z;
+                if (liquid_color == kRGBANoValue) // ensure no accidental collision
+                    liquid_color ^= 0x00010100;
+                // Make colormap if necessary
+                for (Colormap *cmap : colormaps)
+                {
+                    if (cmap->gl_color_ != kRGBANoValue && cmap->gl_color_ == liquid_color)
+                    {
+                        ss->deep_water_properties.colourmap = cmap;
+                        break;
+                    }
+                }
+                if (!ss->deep_water_properties.colourmap || ss->properties.colourmap->gl_color_ != liquid_color)
+                {
+                    Colormap *ad_hoc         = new Colormap;
+                    ad_hoc->name_            = epi::StringFormat("UDMF_%d", liquid_color); // Internal
+                    ad_hoc->gl_color_        = liquid_color;
+                    ss->deep_water_properties.colourmap = ad_hoc;
+                    colormaps.push_back(ad_hoc);
+                }
+                ss->deep_water_properties.light_level = liquid_light;
+                ss->deep_water_surface.translucency = 1.0f;
+                ss->deep_water_properties.friction = 0.9f;
+                ss->deep_water_properties.viscosity = 0.7f;
+                ss->deep_water_properties.gravity = 0.1f;
+                ss->deep_water_properties.drag = 0.95f;
+                ss->deep_water_properties.special = new SectorType();
+                SectorType *water_special = (SectorType *)ss->deep_water_properties.special; // const override
+                water_special->special_flags_ = (SectorFlag)(kSectorFlagDeepWater|kSectorFlagSwimming|kSectorFlagAirLess);
+            }
 
             ss->sound_player = -1;
 
@@ -1370,12 +1409,7 @@ static void LoadUDMFSideDefs()
             sd->top.image = ImageLookup(top_tex, kImageNamespaceTexture, kImageLookupNull);
 
             if (sd->top.image == nullptr)
-            {
-                if (goobers.d_)
-                    sd->top.image = ImageLookup(bottom_tex, kImageNamespaceTexture);
-                else
-                    sd->top.image = ImageLookup(top_tex, kImageNamespaceTexture);
-            }
+                sd->top.image = ImageLookup(top_tex, kImageNamespaceTexture);
 
             sd->middle.image = ImageLookup(middle_tex, kImageNamespaceTexture);
             sd->bottom.image = ImageLookup(bottom_tex, kImageNamespaceTexture);
@@ -1395,11 +1429,6 @@ static void LoadUDMFSideDefs()
             sd->bottom.offset.Y += lowy/low_scy;
             sd->middle.offset.Y += midy/mid_scy;
             sd->top.offset.Y += highy/high_scy;
-
-            // handle BOOM colormaps with [242] linetype
-            sd->top.boom_colormap    = colormaps.Lookup(top_tex);
-            sd->middle.boom_colormap = colormaps.Lookup(middle_tex);
-            sd->bottom.boom_colormap = colormaps.Lookup(bottom_tex);
         }
         else // consume other blocks
         {
@@ -1636,18 +1665,6 @@ static void LoadUDMFLineDefs()
                 ld->flags |= kLineFlagBoomPassThrough;
 
             ComputeLinedefData(ld, side0, side1);
-
-            if (ld->tag && ld->special && ld->special->ef_.type_)
-            {
-                for (int j = 0; j < total_level_sectors; j++)
-                {
-                    if (level_sectors[j].tag != ld->tag)
-                        continue;
-
-                    level_sectors[j].extrafloor_maximum++;
-                    total_level_extrafloors++;
-                }
-            }
 
             BlockmapAddLine(ld);
 
@@ -1956,41 +1973,6 @@ static void LoadUDMFCounts()
     temp_line_sides = new int[total_level_lines * 2];
 }
 
-//
-// SetupExtrafloors
-//
-// This is done after loading sectors (which sets extrafloor_maximum to 0)
-// and after loading linedefs (which increases it for each new
-// extrafloor).  So now we know the maximum number of extrafloors
-// that can ever be needed.
-//
-// Note: this routine doesn't create any extrafloors (this is done
-// later when their linetypes are activated).
-//
-static void SetupExtrafloors(void)
-{
-    int     i, ef_index = 0;
-    Sector *ss;
-
-    if (total_level_extrafloors == 0)
-        return;
-
-    level_extrafloors = new Extrafloor[total_level_extrafloors];
-
-    EPI_CLEAR_MEMORY(level_extrafloors, Extrafloor, total_level_extrafloors);
-
-    for (i = 0, ss = level_sectors; i < total_level_sectors; i++, ss++)
-    {
-        ss->extrafloor_first = level_extrafloors + ef_index;
-
-        ef_index += ss->extrafloor_maximum;
-
-        EPI_ASSERT(ef_index <= total_level_extrafloors);
-    }
-
-    EPI_ASSERT(ef_index == total_level_extrafloors);
-}
-
 static void SetupSlidingDoors(void)
 {
     for (int i = 0; i < total_level_lines; i++)
@@ -2036,12 +2018,6 @@ static void SetupVertGaps(void)
 
         ld->maximum_gaps = ld->back_sector ? 1 : 0;
 
-        // factor in extrafloors
-        ld->maximum_gaps += ld->front_sector->extrafloor_maximum;
-
-        if (ld->back_sector)
-            ld->maximum_gaps += ld->back_sector->extrafloor_maximum;
-
         line_gaps += ld->maximum_gaps;
     }
 
@@ -2049,7 +2025,7 @@ static void SetupVertGaps(void)
     {
         Sector *sec = level_sectors + i;
 
-        sec->maximum_gaps = sec->extrafloor_maximum + 1;
+        sec->maximum_gaps = 1;
 
         sect_sight_gaps += sec->maximum_gaps;
     }
@@ -2091,78 +2067,6 @@ static void SetupVertGaps(void)
     }
 
     EPI_ASSERT(cur_gap == (level_vertical_gaps + total_level_vertical_gaps));
-}
-
-static void DetectDeepWaterTrick(void)
-{
-    uint8_t *self_subs = new uint8_t[total_level_subsectors];
-
-    memset(self_subs, 0, total_level_subsectors);
-
-    for (int i = 0; i < total_level_segs; i++)
-    {
-        const Seg *seg = level_segs + i;
-
-        if (seg->miniseg)
-            continue;
-
-        EPI_ASSERT(seg->front_subsector);
-
-        if (seg->linedef->back_sector && seg->linedef->front_sector == seg->linedef->back_sector)
-        {
-            self_subs[seg->front_subsector - level_subsectors] |= 1;
-        }
-        else
-        {
-            self_subs[seg->front_subsector - level_subsectors] |= 2;
-        }
-    }
-
-    int count;
-    int pass = 0;
-
-    do
-    {
-        pass++;
-
-        count = 0;
-
-        for (int j = 0; j < total_level_subsectors; j++)
-        {
-            Subsector *sub = level_subsectors + j;
-            const Seg *seg;
-
-            if (self_subs[j] != 1)
-                continue;
-
-            const Seg *Xseg = 0;
-
-            for (seg = sub->segs; seg; seg = seg->subsector_next)
-            {
-                EPI_ASSERT(seg->back_subsector);
-
-                int k = seg->back_subsector - level_subsectors;
-
-                if (self_subs[k] & 2)
-                {
-                    if (!Xseg)
-                        Xseg = seg;
-                }
-            }
-
-            if (Xseg)
-            {
-                sub->deep_water_reference = Xseg->back_subsector->deep_water_reference
-                                                ? Xseg->back_subsector->deep_water_reference
-                                                : Xseg->back_subsector->sector;
-                self_subs[j]              = 3;
-
-                count++;
-            }
-        }
-    } while (count > 0 && pass < 100);
-
-    delete[] self_subs;
 }
 
 //
@@ -2517,13 +2421,6 @@ static void CreateVertexSeclists(void)
     LogDebug("Created %d seclists from %d vertices (%1.1f%%)\n", num_triples, total_level_vertexes,
              num_triples * 100 / (float)total_level_vertexes);
 
-    // multiple passes for each linedef:
-    //   pass #1 takes care of normal sectors
-    //   pass #2 handles any extrafloors
-    //
-    // Rationale: normal sectors are more important, hence they
-    //            should be allocated to the limited slots first.
-
     for (i = 0; i < total_level_lines; i++)
     {
         Line *ld = level_lines + i;
@@ -2533,27 +2430,6 @@ static void CreateVertexSeclists(void)
             Sector *sec = side ? ld->back_sector : ld->front_sector;
 
             AddSectorToVertices(branches, ld, sec);
-        }
-    }
-
-    for (i = 0; i < total_level_lines; i++)
-    {
-        Line *ld = level_lines + i;
-
-        for (int side = 0; side < 2; side++)
-        {
-            Sector *sec = side ? ld->back_sector : ld->front_sector;
-
-            if (!sec)
-                continue;
-
-            Extrafloor *ef;
-
-            for (ef = sec->bottom_extrafloor; ef; ef = ef->higher)
-                AddSectorToVertices(branches, ld, ef->extrafloor_line->front_sector);
-
-            for (ef = sec->bottom_liquid; ef; ef = ef->higher)
-                AddSectorToVertices(branches, ld, ef->extrafloor_line->front_sector);
         }
     }
 
@@ -2649,8 +2525,6 @@ void ShutdownLevel(void)
 
     delete[] level_gl_vertexes;
     level_gl_vertexes = nullptr;
-    delete[] level_extrafloors;
-    level_extrafloors = nullptr;
     delete[] level_vertical_gaps;
     level_vertical_gaps = nullptr;
     delete[] level_line_buffer;
@@ -2711,7 +2585,6 @@ void LevelSetup(void)
     // Sectors must be loaded before Segs
 
     total_level_sides         = 0;
-    total_level_extrafloors   = 0;
     total_level_vertical_gaps = 0;
     total_map_things          = 0;
     total_level_vertexes      = 0;
@@ -2724,7 +2597,6 @@ void LevelSetup(void)
     LoadUDMFLineDefs();
     LoadUDMFSideDefs();
 
-    SetupExtrafloors();
     SetupSlidingDoors();
     SetupVertGaps();
 
@@ -2733,8 +2605,6 @@ void LevelSetup(void)
     LoadXGL3Nodes();
 
     GroupLines();
-
-    DetectDeepWaterTrick();
 
     ComputeSkyHeights();
 
@@ -2745,7 +2615,6 @@ void LevelSetup(void)
     ClearBodyQueue();
 
     // set up world state
-    // (must be before loading things to create Extrafloors)
     SpawnMapSpecials1();
 
     // -AJA- 1999/10/21: Clear out player starts (ready to load).

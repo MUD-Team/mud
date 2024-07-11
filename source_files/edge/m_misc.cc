@@ -102,8 +102,6 @@ static ConfigurationDefault defaults[] = {
     {kConfigBoolean, "weaponkick", &global_flags.kicking, EDGE_DEFAULT_KICKING},
     {kConfigBoolean, "weaponswitch", &global_flags.weapon_switch, EDGE_DEFAULT_WEAPON_SWITCH},
     {kConfigInteger, "smoothing", &image_smoothing, EDGE_DEFAULT_USE_SMOOTHING},
-    {kConfigInteger, "dlights", &use_dynamic_lights, EDGE_DEFAULT_USE_DLIGHTS},
-    {kConfigInteger, "detail_level", &detail_level, EDGE_DEFAULT_DETAIL_LEVEL},
 
     // -KM- 1998/09/01 Useless mouse/joy stuff removed,
     //                 analogue binding added

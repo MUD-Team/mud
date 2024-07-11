@@ -129,6 +129,11 @@ Note: All <bool> fields default to false unless mentioned otherwise.
                                  // - EDGE-Classic additionally supports fogdensity values of 510-1020, which would be equivalent to the 50-100% SECTORS.DDF
                                  //   FOG_DENSITY scale, but map editors may clamp this value to 510. Switching editors, manually editing
                                  //   the map's TEXTMAP, or using a DDF sector fog special instead may be necessary in these cases.
+
+      liquidheight = <integer>;     // Height of liquid surface. Default = 0.
+      liquidtexture = <string>;     // Flat to use for liquid surface. No valid default.
+      liquidcolor = <integer>;      // Fog color for this sector, in 0xRRGGBB format. Default is X11's Steel Blue color (0x4682B4).
+      liquidlightlevel = <integer>; // Light level when view height is under the liquid surface. Default is 144. (darker than default sector light levels)
    }
 
    thing

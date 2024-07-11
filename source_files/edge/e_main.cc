@@ -163,8 +163,6 @@ EDGE_DEFINE_CONSOLE_VARIABLE(team_name, "EDGE Team", kConsoleVariableFlagNoReset
 EDGE_DEFINE_CONSOLE_VARIABLE(application_name, "EDGE-Classic", kConsoleVariableFlagNoReset)
 EDGE_DEFINE_CONSOLE_VARIABLE(homepage, "https://edge-classic.github.io", kConsoleVariableFlagNoReset)
 
-EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(title_scaling, "0", kConsoleVariableFlagArchive, 0, 1)
-
 EDGE_DEFINE_CONSOLE_VARIABLE(force_infighting, "0", kConsoleVariableFlagArchive)
 
 EDGE_DEFINE_CONSOLE_VARIABLE(ddf_strict, "0", kConsoleVariableFlagArchive)
@@ -215,8 +213,6 @@ class StartupProgress
         HUDFrameSetup();
         if (loading_image)
         {
-            if (title_scaling.d_) // Fill Border
-                HUDStretchImage(-320, -200, 960, 600, loading_image, 0, 0);
             HUDDrawImageTitleWS(loading_image);
             HUDSolidBox(25, 25, 295, 175, SG_BLACK_RGBA32);
         }
@@ -372,11 +368,6 @@ static void SetGlobalVariables(void)
 
     if (FindArgument("infight") > 0)
         force_infighting = 1;
-
-    if (FindArgument("dlights") > 0)
-        use_dynamic_lights = 1;
-    else if (FindArgument("nodlights") > 0)
-        use_dynamic_lights = 0;
 
     if (!global_flags.enemies_respawn)
     {
@@ -612,8 +603,6 @@ static void TitleDrawer(void)
 {
     if (title_image)
     {
-        if (title_scaling.d_) // Fill Border
-            HUDStretchImage(-320, -200, 960, 600, title_image, 0, 0);
         HUDDrawImageTitleWS(title_image);
     }
     else

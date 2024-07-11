@@ -391,8 +391,6 @@ static void DrawLevelFinished(void)
             HUDTileImage(-240, 0, 820, 200, leaving_background_image);
         else
         {
-            if (title_scaling.d_) // Fill Border
-                HUDStretchImage(-320, -200, 960, 600, leaving_background_image, 0, 0);
             HUDDrawImageTitleWS(leaving_background_image);
         }
     }
@@ -556,8 +554,6 @@ static void DrawEnteringLevel(void)
             HUDTileImage(-240, 0, 820, 200, entering_background_image);
         else
         {
-            if (title_scaling.d_) // Fill Border
-                HUDStretchImage(-320, -200, 960, 600, entering_background_image, 0, 0);
             HUDDrawImageTitleWS(entering_background_image);
         }
     }
@@ -1796,8 +1792,6 @@ void IntermissionDrawer(void)
                              background_image); // Lobo: Widescreen support
             else
             {
-                if (title_scaling.d_) // Fill Border
-                    HUDStretchImage(-320, -200, 960, 600, background_image, 0, 0);
                 HUDDrawImageTitleWS(background_image);
             }
 

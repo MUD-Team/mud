@@ -498,7 +498,7 @@ void ParseUDMF_Block(epi::Lexer &lex, int cur_type)
         line->self_referencing = (line->left && line->right && (line->left->sector == line->right->sector));
 
         if (line->self_referencing)
-            line->is_precious = true;
+            LogWarning("AJBSP: Map %s has self-referencing linedefs, which are not supported!\n", current_map_name.c_str());
     }
 }
 

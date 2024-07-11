@@ -50,8 +50,6 @@
 
 extern float ApproximateDistance(float dx, float dy, float dz);
 
-extern ConsoleVariable draw_culling;
-extern ConsoleVariable cull_fog_color;
 extern bool            need_to_draw_sky;
 
 /*============== MD2 FORMAT DEFINITIONS ====================*/
@@ -954,9 +952,6 @@ static inline void ModelCoordFunc(MD2CoordinateData *data, int v_idx, HMM_Vec3 *
     float y1 = LerpIt(vert1->y, vert2->y, data->lerp_);
     float z1 = LerpIt(vert1->z, vert2->z, data->lerp_) + data->bias_;
 
-    if (MirrorReflective())
-        y1 = -y1;
-
     data->CalcPos(pos, x1, y1, z1);
 
     const MD2Vertex *n_vert = (data->lerp_ < 0.5) ? vert1 : vert2;
@@ -1034,10 +1029,7 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon_, int fr
     if (mo->hyper_flags_ & kHyperFlagNoZBufferUpdate)
         blending |= kBlendingNoZBuffer;
 
-    if (MirrorReflective())
-        blending |= kBlendingCullFront;
-    else
-        blending |= kBlendingCullBack;
+    blending |= kBlendingCullBack;
 
     data.map_object_ = mo;
     data.model_      = md;
@@ -1053,8 +1045,8 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon_, int fr
 
     data.is_weapon_ = is_weapon_;
 
-    data.xy_scale_ = scale * aspect * MirrorXYScale();
-    data.z_scale_  = scale * MirrorZScale();
+    data.xy_scale_ = scale * aspect;
+    data.z_scale_  = scale;
     data.bias_     = bias_;
 
     bool tilt = is_weapon_ || (mo->flags_ & kMapObjectFlagMissile) || (mo->hyper_flags_ & kHyperFlagForceModelTilt);
@@ -1062,8 +1054,6 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon_, int fr
     BAMAngleToMatrix(tilt ? ~mo->vertical_angle_ : 0, &data.mouselook_x_matrix_, &data.mouselook_z_matrix_);
 
     BAMAngle ang = mo->angle_ + rotation;
-
-    MirrorAngle(ang);
 
     BAMAngleToMatrix(~ang, &data.rotation_x_matrix_, &data.rotation_y_matrix_);
 
@@ -1111,7 +1101,7 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon_, int fr
 
         ShadeNormals(shader, &data, true);
 
-        if (use_dynamic_lights && render_view_extra_light < 250)
+        if (render_view_extra_light < 250)
         {
             float r = mo->radius_;
 
@@ -1125,7 +1115,7 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon_, int fr
 
     /* draw the model */
 
-    int num_pass = data.is_fuzzy_ ? 1 : (detail_level > 0 ? 4 : 3);
+    int num_pass = data.is_fuzzy_ ? 1 : 4;
 
     RGBAColor fc_to_use = mo->subsector_->sector->properties.fog_color;
     float     fd_to_use = mo->subsector_->sector->properties.fog_density;
@@ -1144,7 +1134,7 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon_, int fr
         }
     }
 
-    if (!draw_culling.d_ && fc_to_use != kRGBANoValue)
+    if (fc_to_use != kRGBANoValue)
     {
         GLfloat fc[4];
         fc[0] = (float)epi::GetRGBARed(fc_to_use) / 255.0f;
@@ -1152,45 +1142,8 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon_, int fr
         fc[2] = (float)epi::GetRGBABlue(fc_to_use) / 255.0f;
         fc[3] = 1.0f;
         glClearColor(fc[0], fc[1], fc[2], 1.0f);
-        glFogi(GL_FOG_MODE, GL_EXP);
         glFogfv(GL_FOG_COLOR, fc);
         glFogf(GL_FOG_DENSITY, std::log1p(fd_to_use));
-        glEnable(GL_FOG);
-    }
-    else if (draw_culling.d_)
-    {
-        sg_color fogColor;
-        if (need_to_draw_sky)
-        {
-            switch (cull_fog_color.d_)
-            {
-            case 0:
-                fogColor = culling_fog_color;
-                break;
-            case 1:
-                // Not pure white, but 1.0f felt like a little much - Dasho
-                fogColor = sg_silver;
-                break;
-            case 2:
-                fogColor = {0.25f, 0.25f, 0.25f, 1.0f};
-                break;
-            case 3:
-                fogColor = sg_black;
-                break;
-            default:
-                fogColor = culling_fog_color;
-                break;
-            }
-        }
-        else
-        {
-            fogColor = sg_black;
-        }
-        glClearColor(fogColor.r, fogColor.g, fogColor.b, 1.0f);
-        glFogi(GL_FOG_MODE, GL_LINEAR);
-        glFogfv(GL_FOG_COLOR, &fogColor.r);
-        glFogf(GL_FOG_START, renderer_far_clip.f_ - 750.0f);
-        glFogf(GL_FOG_END, renderer_far_clip.f_ - 250.0f);
         glEnable(GL_FOG);
     }
     else

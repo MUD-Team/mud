@@ -204,7 +204,7 @@ class MapObject : public Position
     // current subsector
     struct Subsector *subsector_ = nullptr;
 
-    // properties from extrafloor the thing is in
+    // properties from vertical region the thing is in (extrafloor only? - Dasho)
     struct RegionProperties *region_properties_ = nullptr;
 
     // Vert slope stuff maybe

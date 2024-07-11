@@ -70,18 +70,14 @@
 
 // Sound and Music
 #define EDGE_DEFAULT_SOUND_STEREO (1) // Stereo
-#define EDGE_DEFAULT_MIX_CHANNELS (2) // 32 channels
+#define EDGE_DEFAULT_MIX_CHANNELS (1) // 64 channels
 
 // Video Options
 #define EDGE_DEFAULT_USE_SMOOTHING (0)
-#define EDGE_DEFAULT_USE_DLIGHTS   (1)
-#define EDGE_DEFAULT_DETAIL_LEVEL  (2)
 #define EDGE_DEFAULT_SCREEN_HUD    (0)
 #define EDGE_DEFAULT_CROSSHAIR     (0)
 #define EDGE_DEFAULT_MAP_OVERLAY   (0)
 #define EDGE_DEFAULT_ROTATEMAP     (0)
-#define EDGE_DEFAULT_INVUL_FX      (1) // TEXTURED
-#define EDGE_DEFAULT_PNG_SCRSHOTS  (1)
 
 // Gameplay Options
 #define EDGE_DEFAULT_AUTOAIM        (0)

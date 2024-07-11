@@ -1440,49 +1440,10 @@ void MenuFinishReadThis(int choice)
     MenuSetupNextMenu(&MainMenuDefinition);
 }
 
-//
-// -KM- 1998/12/16 Handle sfx that don't exist in this version.
-// -KM- 1999/01/31 Generate quitsounds from default.ldf
-//
 static void QuitResponse(int ch)
 {
     if (ch != 'y' && ch != kGamepadA && ch != kMouse1)
         return;
-
-    if (!network_game)
-    {
-        int  numsounds = 0;
-        char refname[64];
-        int  i, start;
-
-        // Count the quit messages
-        do
-        {
-            sprintf(refname, "QuitSnd%d", numsounds + 1);
-            if (language.IsValidRef(refname))
-                numsounds++;
-            else
-                break;
-        } while (true);
-
-        if (numsounds)
-        {
-            // cycle through all the quit sounds, until one of them exists
-            // (some of the default quit sounds do not exist in DOOM 1)
-            start = i = RandomByte() % numsounds;
-            do
-            {
-                sprintf(refname, "QuitSnd%d", i + 1);
-                SoundEffect *quit_sound = sfxdefs.GetEffect(language[refname]);
-                if (quit_sound)
-                {
-                    StartSoundEffect(quit_sound);
-                    break;
-                }
-                i = (i + 1) % numsounds;
-            } while (i != start);
-        }
-    }
 
     // -ACB- 1999/09/20 New exit code order
     // Write the default config file first
@@ -1509,39 +1470,8 @@ static void QuitResponse(int ch)
 //
 void QuitEdge(int choice)
 {
-    char ref[64];
-
-    std::string msg;
-
-    int num_quitmessages = 0;
-
-    // Count the quit messages
-    do
-    {
-        num_quitmessages++;
-
-        sprintf(ref, "QUITMSG%d", num_quitmessages);
-    } while (language.IsValidRef(ref));
-
-    // we stopped at one higher than the last
-    num_quitmessages--;
-
-    // -ACB- 2004/08/14 Allow fallback to just the "PressToQuit" message
-    if (num_quitmessages > 0)
-    {
-        // Pick one at random
-        sprintf(ref, "QUITMSG%d", 1 + (RandomByte() % num_quitmessages));
-
-        // Construct the quit message in full
-        msg = epi::StringFormat("%s\n\n%s", language[ref], language["PressToQuit"]);
-    }
-    else
-    {
-        msg = std::string(language["PressToQuit"]);
-    }
-
     // Trigger the message
-    StartMenuMessage(msg.c_str(), QuitResponse, true);
+    StartMenuMessage(language["PressToQuit"], QuitResponse, true);
 }
 
 // Accessible from console's 'quit now' command
@@ -2827,10 +2757,7 @@ void MenuDrawer(void)
     if (menu_backdrop && (option_menu_on || network_game_menu_on ||
                           (current_menu->draw_function == MenuDrawLoad || current_menu->draw_function == MenuDrawSave)))
     {
-        if (title_scaling.d_) // Fill Border
-            HUDStretchImage(-320, -200, 960, 600, menu_backdrop, 0, 0);
-        else
-            HUDSolidBox(-320, -200, 960, 600, 0);
+        HUDSolidBox(-320, -200, 960, 600, 0);
         HUDDrawImageTitleWS(menu_backdrop);
     }
 

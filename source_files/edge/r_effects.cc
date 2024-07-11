@@ -115,20 +115,14 @@ void RendererRainbowEffect(Player *player)
     }
 
     // AJA 2022: handle BOOM colormaps (linetype 242)
+    // Now sector deep_water - Dasho
     Sector *sector = player->map_object_->subsector_->sector;
 
-    if (sector->height_sector != nullptr)
+    if (sector->has_deep_water)
     {
         const Colormap *colmap = nullptr;
-
-        // see which region the camera is in
-        if (view_z > sector->height_sector->ceiling_height)
-            colmap = sector->height_sector_side->top.boom_colormap;
-        else if (view_z < sector->height_sector->floor_height)
-            colmap = sector->height_sector_side->bottom.boom_colormap;
-        else
-            colmap = sector->height_sector_side->middle.boom_colormap;
-
+        if (view_z < sector->deep_water_height)
+            colmap = sector->deep_water_properties.colourmap;
         render_view_effect_colormap = colmap;
     }
 }

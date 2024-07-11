@@ -44,14 +44,7 @@ bool custom_skybox;
 // needed for SKY
 extern ImageData *ReadAsEpiBlock(Image *rim);
 
-extern ConsoleVariable draw_culling;
-
 static sg_color sky_cap_color;
-
-static SkyStretch current_sky_stretch = kSkyStretchUnset;
-
-EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(sky_stretch_mode, "0", kConsoleVariableFlagArchive, 0, 3);
-
 struct SectorSkyRing
 {
     // which group of connected skies (0 if none)
@@ -262,12 +255,8 @@ static void SetupSkyMatrices(void)
 
         glRotatef(270.0f - epi::DegreesFromBAM(view_vertical_angle), 1.0f, 0.0f, 0.0f);
         glRotatef(90.0f - epi::DegreesFromBAM(view_angle), 0.0f, 0.0f, 1.0f);
-        if (current_sky_stretch == kSkyStretchStretch)
-            glTranslatef(0.0f, 0.0f,
-                         (renderer_far_clip.f_ * 2 * 0.15));  // Draw center above horizon a little
-        else
-            glTranslatef(0.0f, 0.0f,
-                         -(renderer_far_clip.f_ * 2 * 0.15)); // Draw center below horizon a little
+        glTranslatef(0.0f, 0.0f,
+                        -(renderer_far_clip.f_ * 2 * 0.15)); // Draw center below horizon a little
     }
 }
 
@@ -323,7 +312,7 @@ static void RenderSkySlice(float top, float bottom, float atop, float abottom, f
     float tc_y1 = (top + 1.0f) * (ty * 0.5f);
     float tc_y2 = (bottom + 1.0f) * (ty * 0.5f);
 
-    if (current_sky_stretch == kSkyStretchMirror && bottom < -0.5f)
+    if (bottom < -0.5f)
     {
         tc_y1 = -tc_y1;
         tc_y2 = -tc_y2;
@@ -373,11 +362,6 @@ static void RenderSkyCylinder(void)
 {
     GLuint sky = ImageCache(sky_image, false, render_view_effect_colormap);
 
-    if (current_map->forced_skystretch_ > kSkyStretchUnset)
-        current_sky_stretch = current_map->forced_skystretch_;
-    else
-        current_sky_stretch = (SkyStretch)sky_stretch_mode.d_;
-
     // Center skybox a bit below the camera view
     SetupSkyMatrices();
 
@@ -388,16 +372,11 @@ static void RenderSkyCylinder(void)
                                   // projection Calculate some stuff based on sky height
     float sky_h_ratio;
     float solid_sky_h;
-    if (sky_image->ScaledHeightActual() > 128 && current_sky_stretch != kSkyStretchStretch)
+    if (sky_image->ScaledHeightActual() > 128)
         sky_h_ratio = (float)sky_image->ScaledHeightActual() / 256;
-    else if (current_sky_stretch == kSkyStretchVanilla)
-        sky_h_ratio = 0.5f;
     else
         sky_h_ratio = 1.0f;
-    if (current_sky_stretch == kSkyStretchVanilla)
-        solid_sky_h = sky_h_ratio * 0.98f;
-    else
-        solid_sky_h = sky_h_ratio * 0.75f;
+    solid_sky_h = sky_h_ratio * 0.75f;
     float cap_z = dist * sky_h_ratio;
 
     RGBAColor fc_to_use = current_map->outdoor_fog_color_;
@@ -409,11 +388,10 @@ static void RenderSkyCylinder(void)
         fd_to_use = view_properties->fog_density;
     }
 
-    if (!draw_culling.d_ && fc_to_use != kRGBANoValue)
+    if (fc_to_use != kRGBANoValue)
     {
         sg_color fc = sg_make_color_1i(fc_to_use);
         glClearColor(fc.r, fc.g, fc.b, fc.a);
-        glFogi(GL_FOG_MODE, GL_EXP);
         glFogfv(GL_FOG_COLOR, &fc.r);
         glFogf(GL_FOG_DENSITY, std::log1p(fd_to_use * 0.005f));
         glEnable(GL_FOG);
@@ -429,11 +407,7 @@ static void RenderSkyCylinder(void)
     glEnd();
 
     // Render bottom cap
-    if (current_sky_stretch > kSkyStretchMirror)
-        glColor4f(culling_fog_color.r, culling_fog_color.g, culling_fog_color.b, 1.0f);
     glBegin(GL_QUADS);
-    if (current_sky_stretch == kSkyStretchVanilla)
-        cap_z = 0;
     glVertex3f(-cap_dist, -cap_dist, -cap_z);
     glVertex3f(-cap_dist, cap_dist, -cap_z);
     glVertex3f(cap_dist, cap_dist, -cap_z);
@@ -455,97 +429,30 @@ static void RenderSkyCylinder(void)
     glEnable(GL_ALPHA_TEST);
     glEnable(GL_BLEND);
 
-    if (current_sky_stretch == kSkyStretchMirror)
+    if (sky_image->ScaledHeightActual() > 128)
     {
-        if (sky_image->ScaledHeightActual() > 128)
-        {
-            RenderSkySlice(sky_h_ratio, solid_sky_h, 0.0f, 1.0f, dist, tx,
-                           ty); // Top Fade
-            RenderSkySlice(solid_sky_h, 0.0f, 1.0f, 1.0f, dist, tx,
-                           ty); // Top Solid
-            RenderSkySlice(0.0f, -solid_sky_h, 1.0f, 1.0f, dist, tx,
-                           ty); // Bottom Solid
-            RenderSkySlice(-solid_sky_h, -sky_h_ratio, 1.0f, 0.0f, dist, tx,
-                           ty); // Bottom Fade
-        }
-        else
-        {
-            RenderSkySlice(1.0f, 0.75f, 0.0f, 1.0f, dist, tx, ty); // Top Fade
-            RenderSkySlice(0.75f, 0.0f, 1.0f, 1.0f, dist, tx, ty); // Top Solid
-            RenderSkySlice(0.0f, -0.75f, 1.0f, 1.0f, dist, tx,
-                           ty);                                    // Bottom Solid
-            RenderSkySlice(-0.75f, -1.0f, 1.0f, 0.0f, dist, tx,
-                           ty);                                    // Bottom Fade
-        }
+        RenderSkySlice(sky_h_ratio, solid_sky_h, 0.0f, 1.0f, dist, tx,
+                        ty); // Top Fade
+        RenderSkySlice(solid_sky_h, 0.0f, 1.0f, 1.0f, dist, tx,
+                        ty); // Top Solid
+        RenderSkySlice(0.0f, -solid_sky_h, 1.0f, 1.0f, dist, tx,
+                        ty); // Bottom Solid
+        RenderSkySlice(-solid_sky_h, -sky_h_ratio, 1.0f, 0.0f, dist, tx,
+                        ty); // Bottom Fade
     }
-    else if (current_sky_stretch == kSkyStretchRepeat)
+    else
     {
-        if (sky_image->ScaledHeightActual() > 128)
-        {
-            RenderSkySlice(sky_h_ratio, solid_sky_h, 0.0f, 1.0f, dist, tx,
-                           ty); // Top Fade
-            RenderSkySlice(solid_sky_h, -solid_sky_h, 1.0f, 1.0f, dist, tx,
-                           ty); // Middle Solid
-            RenderSkySlice(-solid_sky_h, -sky_h_ratio, 1.0f, 0.0f, dist, tx,
-                           ty); // Bottom Fade
-        }
-        else
-        {
-            RenderSkySlice(1.0f, 0.75f, 0.0f, 1.0f, dist, tx, ty); // Top Fade
-            RenderSkySlice(0.75f, -0.75f, 1.0f, 1.0f, dist, tx,
-                           ty);                                    // Middle Solid
-            RenderSkySlice(-0.75f, -1.0f, 1.0f, 0.0f, dist, tx,
-                           ty);                                    // Bottom Fade
-        }
-    }
-    else if (current_sky_stretch == kSkyStretchStretch)
-    {
-        if (sky_image->ScaledHeightActual() > 128)
-        {
-            ty = ((float)sky_image->ScaledHeightActual() / 256.0f);
-            RenderSkySlice(sky_h_ratio, solid_sky_h, 0.0f, 1.0f, dist, tx,
-                           ty); // Top Fade
-            RenderSkySlice(solid_sky_h, -solid_sky_h, 1.0f, 1.0f, dist, tx,
-                           ty); // Middle Solid
-            RenderSkySlice(-solid_sky_h, -sky_h_ratio, 1.0f, 0.0f, dist, tx,
-                           ty); // Bottom Fade
-        }
-        else
-        {
-            ty = 1.0f;
-            RenderSkySlice(1.0f, 0.75f, 0.0f, 1.0f, dist, tx, ty); // Top Fade
-            RenderSkySlice(0.75f, -0.75f, 1.0f, 1.0f, dist, tx,
-                           ty);                                    // Middle Solid
-            RenderSkySlice(-0.75f, -1.0f, 1.0f, 0.0f, dist, tx,
-                           ty);                                    // Bottom Fade
-        }
-    }
-    else // Vanilla (or sane value if somehow this gets set out of expected
-         // range)
-    {
-        if (sky_image->ScaledHeightActual() > 128)
-        {
-            RenderSkySlice(sky_h_ratio, solid_sky_h, 0.0f, 1.0f, dist / 2, tx,
-                           ty);                                                                   // Top Fade
-            RenderSkySlice(solid_sky_h, sky_h_ratio - solid_sky_h, 1.0f, 1.0f, dist / 2, tx, ty); // Middle Solid
-            RenderSkySlice(sky_h_ratio - solid_sky_h, 0.0f, 1.0f, 0.0f, dist / 2, tx, ty);        // Bottom Fade
-        }
-        else
-        {
-            ty *= 1.5f;
-            RenderSkySlice(1.0f, 0.98f, 0.0f, 1.0f, dist / 3, tx,
-                           ty); // Top Fade
-            RenderSkySlice(0.98f, 0.35f, 1.0f, 1.0f, dist / 3, tx,
-                           ty); // Middle Solid
-            RenderSkySlice(0.35f, 0.33f, 1.0f, 0.0f, dist / 3, tx,
-                           ty); // Bottom Fade
-        }
+        RenderSkySlice(1.0f, 0.75f, 0.0f, 1.0f, dist, tx, ty); // Top Fade
+        RenderSkySlice(0.75f, 0.0f, 1.0f, 1.0f, dist, tx, ty); // Top Solid
+        RenderSkySlice(0.0f, -0.75f, 1.0f, 1.0f, dist, tx,
+                        ty);                                    // Bottom Solid
+        RenderSkySlice(-0.75f, -1.0f, 1.0f, 0.0f, dist, tx,
+                        ty);                                    // Bottom Fade
     }
 
     glDisable(GL_BLEND);
     glDisable(GL_ALPHA_TEST);
-    if (!draw_culling.d_)
-        glDisable(GL_FOG);
+    glDisable(GL_FOG);
 
     RendererRevertSkyMatrices();
 }
@@ -591,11 +498,10 @@ static void RenderSkybox(void)
         fd_to_use = view_properties->fog_density;
     }
 
-    if (!draw_culling.d_ && fc_to_use != kRGBANoValue)
+    if (fc_to_use != kRGBANoValue)
     {
         sg_color fc = sg_make_color_1i(fc_to_use);
         glClearColor(fc.r, fc.g, fc.b, fc.a);
-        glFogi(GL_FOG_MODE, GL_EXP);
         glFogfv(GL_FOG_COLOR, &fc.r);
         glFogf(GL_FOG_DENSITY, std::log1p(fd_to_use * 0.01f));
         glEnable(GL_FOG);
@@ -710,8 +616,7 @@ static void RenderSkybox(void)
     glEnd();
 
     glDisable(GL_TEXTURE_2D);
-    if (!draw_culling.d_)
-        glDisable(GL_FOG);
+    glDisable(GL_FOG);
 
     RendererRevertSkyMatrices();
 }
@@ -729,9 +634,6 @@ void FinishSky(void)
 
     glDepthMask(GL_FALSE);
 
-    if (draw_culling.d_)
-        glDisable(GL_DEPTH_TEST);
-
     if (!renderer_dumb_sky.d_)
         glDepthFunc(GL_GREATER);
 
@@ -739,9 +641,6 @@ void FinishSky(void)
         RenderSkybox();
     else
         RenderSkyCylinder();
-
-    if (draw_culling.d_)
-        glEnable(GL_DEPTH_TEST);
 
     glDepthFunc(GL_LEQUAL);
     glDepthMask(GL_TRUE);
@@ -756,8 +655,6 @@ void RenderSkyPlane(Subsector *sub, float h)
     if (renderer_dumb_sky.d_)
         return;
 
-    MirrorHeight(h);
-
     glNormal3f(0, 0, (view_z > h) ? 1.0f : -1.0f);
 
     Seg *seg = sub->segs;
@@ -766,14 +663,12 @@ void RenderSkyPlane(Subsector *sub, float h)
 
     float x0 = seg->vertex_1->X;
     float y0 = seg->vertex_1->Y;
-    MirrorCoordinate(x0, y0);
     seg = seg->subsector_next;
     if (!seg)
         return;
 
     float x1 = seg->vertex_1->X;
     float y1 = seg->vertex_1->Y;
-    MirrorCoordinate(x1, y1);
     seg = seg->subsector_next;
     if (!seg)
         return;
@@ -782,7 +677,6 @@ void RenderSkyPlane(Subsector *sub, float h)
     {
         float x2 = seg->vertex_1->X;
         float y2 = seg->vertex_1->Y;
-        MirrorCoordinate(x2, y2);
 
         glVertex3f(x0, y0, h);
         glVertex3f(x1, y1, h);
@@ -805,12 +699,6 @@ void RenderSkyWall(Seg *seg, float h1, float h2)
     float y1 = seg->vertex_1->Y;
     float x2 = seg->vertex_2->X;
     float y2 = seg->vertex_2->Y;
-
-    MirrorCoordinate(x1, y1);
-    MirrorCoordinate(x2, y2);
-
-    MirrorHeight(h1);
-    MirrorHeight(h2);
 
     glNormal3f(y2 - y1, x1 - x2, 0);
 
@@ -852,10 +740,8 @@ int UpdateSkyboxTextures(void)
     info->face[kSkyboxNorth] =
         ImageLookup(UserSkyFaceName(sky_image->name_.c_str(), kSkyboxNorth), kImageNamespaceTexture, kImageLookupNull);
 
-    // Set colors for culling fog and faux skybox caps - Dasho
+    // Set colors for faux skybox caps - Dasho
     ImageData *tmp_img_data = ReadAsEpiBlock((Image *)sky_image);
-    culling_fog_color =
-        sg_make_color_1i(tmp_img_data->AverageColor(0, sky_image->actual_width_, 0, sky_image->actual_height_ / 2));
     sky_cap_color = sg_make_color_1i(tmp_img_data->AverageColor(
         0, sky_image->actual_width_, sky_image->actual_height_ * 3 / 4, sky_image->actual_height_));
     delete tmp_img_data;

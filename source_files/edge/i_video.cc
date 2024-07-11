@@ -51,8 +51,6 @@ EDGE_DEFINE_CONSOLE_VARIABLE(pixel_aspect_ratio, "1.0", kConsoleVariableFlagRead
 EDGE_DEFINE_CONSOLE_VARIABLE(forced_pixel_aspect_ratio, "0", kConsoleVariableFlagArchive)
 
 extern ConsoleVariable renderer_far_clip;
-extern ConsoleVariable draw_culling;
-extern ConsoleVariable draw_culling_distance;
 
 void GrabCursor(bool enable)
 {
@@ -331,10 +329,7 @@ void StartFrame(void)
     ec_frame_stats.Clear();
     glClearColor(0, 0, 0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    if (draw_culling.d_)
-        renderer_far_clip.f_ = draw_culling_distance.f_;
-    else
-        renderer_far_clip.f_ = 64000.0;
+    renderer_far_clip.f_ = 64000.0;
 }
 
 void FinishFrame(void)

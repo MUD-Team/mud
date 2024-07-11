@@ -287,10 +287,8 @@ static void DDFGameGetPic(const char *info, void *storage)
     dynamic_gamedef->titlepics_.push_back(info);
 }
 
-static DDFSpecialFlags lighting_names[] = {{"DOOM", kLightingModelDoom, 0},
-                                           {"DOOMISH", kLightingModelDoomish, 0},
+static DDFSpecialFlags lighting_names[] = {{"DOOMISH", kLightingModelDoomish, 0},
                                            {"FLAT", kLightingModelFlat, 0},
-                                           {"VERTEX", kLightingModelVertex, 0},
                                            {nullptr, 0, 0}};
 
 void DDFGameGetLighting(const char *info, void *storage)

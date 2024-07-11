@@ -120,11 +120,6 @@ extern ConsoleVariable crosshair_size;
 extern ConsoleVariable midi_soundfont;
 extern ConsoleVariable erraticism;
 extern ConsoleVariable double_framerate;
-extern ConsoleVariable draw_culling;
-extern ConsoleVariable draw_culling_distance;
-extern ConsoleVariable cull_fog_color;
-extern ConsoleVariable distance_cull_thinkers;
-extern ConsoleVariable max_dynamic_lights;
 extern ConsoleVariable vsync;
 extern ConsoleVariable view_bobbing;
 extern ConsoleVariable gore_level;
@@ -134,8 +129,6 @@ extern ConsoleVariable skip_intros;
 
 extern ConsoleVariable sector_brightness_correction;
 extern ConsoleVariable gamma_correction;
-extern ConsoleVariable title_scaling;
-extern ConsoleVariable sky_stretch_mode;
 extern ConsoleVariable force_flat_lighting;
 
 static int monitor_size;
@@ -157,7 +150,6 @@ extern int entry_playing;
 static void OptionMenuKeyboardOptions(int key_pressed, ConsoleVariable *console_variable = nullptr);
 static void OptionMenuVideoOptions(int key_pressed, ConsoleVariable *console_variable = nullptr);
 static void OptionMenuGameplayOptions(int key_pressed, ConsoleVariable *console_variable = nullptr);
-static void OptionMenuPerformanceOptions(int key_pressed, ConsoleVariable *console_variable = nullptr);
 static void OptionMenuAccessibilityOptions(int key_pressed, ConsoleVariable *console_variable = nullptr);
 static void OptionMenuAnalogueOptions(int key_pressed, ConsoleVariable *console_variable = nullptr);
 static void OptionMenuSoundOptions(int key_pressed, ConsoleVariable *console_variable = nullptr);
@@ -178,7 +170,6 @@ static void OptionMenuChangeBobbing(int key_pressed, ConsoleVariable *console_va
 static void OptionMenuChangeMonitorSize(int key_pressed, ConsoleVariable *console_variable = nullptr);
 static void OptionMenuChangeKicking(int key_pressed, ConsoleVariable *console_variable = nullptr);
 static void OptionMenuChangeWeaponSwitch(int key_pressed, ConsoleVariable *console_variable = nullptr);
-static void OptionMenuChangeMipMap(int key_pressed, ConsoleVariable *console_variable = nullptr);
 
 // -ES- 1998/08/20 Added resolution options
 // -ACB- 1998/08/29 Moved to top and tried different system
@@ -280,11 +271,6 @@ static int keyscan;
 
 static Style *options_menu_default_style;
 
-static void OptionMenuChangeMixChan(int key_pressed, ConsoleVariable *console_variable)
-{
-    UpdateSoundCategoryLimits();
-}
-
 static int OptionMenuGetCurrentSwitchValue(OptionMenuItem *item)
 {
     int retval = 0;
@@ -315,7 +301,7 @@ static int OptionMenuGetCurrentSwitchValue(OptionMenuItem *item)
 //  MAIN MENU
 //
 static constexpr uint8_t kOptionMenuLanguagePosition    = 10;
-static constexpr uint8_t kOptionMenuNetworkHostPosition = 13;
+static constexpr uint8_t kOptionMenuNetworkHostPosition = 12;
 
 static OptionMenuItem mainoptions[] = {
     {kOptionMenuItemTypeFunction, "MenuBinding", nullptr, 0, nullptr, OptionMenuKeyboardOptions, "Controls"},
@@ -323,8 +309,6 @@ static OptionMenuItem mainoptions[] = {
      "AnalogueOptions"},
     {kOptionMenuItemTypeFunction, "MenuGameplay", nullptr, 0, nullptr, OptionMenuGameplayOptions,
      "GameplayOptions"},
-    {kOptionMenuItemTypeFunction, "MenuPerformance", nullptr, 0, nullptr, OptionMenuPerformanceOptions,
-     "PerformanceOptions"},
     {kOptionMenuItemTypeFunction, "MenuAccessibility", nullptr, 0, nullptr, OptionMenuAccessibilityOptions,
      "AccessibilityOptions"},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
@@ -362,12 +346,6 @@ static OptionMenuItem vidoptions[] = {
      OptionMenuUpdateConsoleVariableFromInt, nullptr, &force_flat_lighting},
     {kOptionMenuItemTypeSwitch, "Framerate Target", "35 FPS/70 FPS", 2, &double_framerate.d_,
      OptionMenuUpdateConsoleVariableFromInt, nullptr, &double_framerate},
-    {kOptionMenuItemTypeSwitch, "Smoothing", YesNo, 2, &image_smoothing, OptionMenuChangeMipMap, nullptr},
-    {kOptionMenuItemTypeSwitch, "Title/Intermission Scaling", "Normal/Border Fill", 2, &title_scaling.d_,
-     OptionMenuUpdateConsoleVariableFromInt, nullptr, &title_scaling},
-    {kOptionMenuItemTypeSwitch, "Sky Scaling", "Mirror/Repeat/Stretch/Vanilla", 4, &sky_stretch_mode.d_,
-     OptionMenuUpdateConsoleVariableFromInt, nullptr, &sky_stretch_mode},
-    {kOptionMenuItemTypeSwitch, "Dynamic Lighting", YesNo, 2, &use_dynamic_lights, nullptr, nullptr},
     {kOptionMenuItemTypeSwitch, "Crosshair", "None/Dot/Angle/Plus/Spiked/Thin/Cross/Carat/Circle/Double", 10,
      &crosshair_style.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr, &crosshair_style},
     {kOptionMenuItemTypeSwitch, "Crosshair Color", "White/Blue/Green/Cyan/Red/Pink/Yellow/Orange", 8,
@@ -472,9 +450,6 @@ static OptionMenuItem soundoptions[] = {
     {kOptionMenuItemTypeFunction, "MIDI Soundfont", nullptr, 0, nullptr, OptionMenuChangeSoundfont, nullptr},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {kOptionMenuItemTypeSwitch, "Mix Channels", "32/64/96/128/160/192/224/256", 8, &sound_mixing_channels,
-     OptionMenuChangeMixChan, nullptr},
-    {kOptionMenuItemTypeBoolean, "Precache SFX", YesNo, 2, &precache_sound_effects, nullptr, "NeedRestart"},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
 };
 
@@ -542,36 +517,6 @@ static OptionMenuDefinition gameplay_optmenu = {playoptions,
                                                 0,
                                                 "",
                                                 language["MenuGameplay"]};
-
-//
-//  PERFORMANCE OPTIONS
-//
-//
-static OptionMenuItem perfoptions[] = {
-    {kOptionMenuItemTypeSwitch, "Detail Level", "Low/Medium/High", 3, &detail_level, OptionMenuChangeMipMap, nullptr},
-    {kOptionMenuItemTypeBoolean, "Draw Distance Culling", YesNo, 2, &draw_culling.d_,
-     OptionMenuUpdateConsoleVariableFromInt, "Sector/Level Fog will be disabled when this is On", &draw_culling},
-    {kOptionMenuItemTypeSlider, "Maximum Draw Distance", nullptr, 0, &draw_culling_distance.f_,
-     OptionMenuUpdateConsoleVariableFromFloat, "Only effective when Draw Distance Culling is On", &draw_culling_distance, 200.0f,
-     1000.0f, 8000.0f, "%g Units"},
-    {kOptionMenuItemTypeSwitch, "Outdoor Culling Fog Color", "Match Sky/White/Grey/Black", 4, &cull_fog_color.d_,
-     OptionMenuUpdateConsoleVariableFromInt, "Only effective when Draw Distance Culling is On", &cull_fog_color},
-    {kOptionMenuItemTypeBoolean, "Slow Thinkers Over Distance", YesNo, 2, &distance_cull_thinkers.d_,
-     OptionMenuUpdateConsoleVariableFromInt, "Only recommended for extreme monster/projectile counts",
-     &distance_cull_thinkers},
-    {kOptionMenuItemTypeSwitch, "Maximum Dynamic Lights", "Unlimited/20/40/60/80/100", 6, &max_dynamic_lights.d_,
-     OptionMenuUpdateConsoleVariableFromInt, "Control how many dynamic lights are rendered per tick",
-     &max_dynamic_lights},
-};
-
-static OptionMenuDefinition perf_optmenu = {perfoptions,
-                                            sizeof(perfoptions) / sizeof(OptionMenuItem),
-                                            &options_menu_default_style,
-                                            160,
-                                            46,
-                                            0,
-                                            "",
-                                            language["MenuPerformance"]};
 
 //
 //  ACCESSIBILITY OPTIONS
@@ -871,7 +816,6 @@ void OptionMenuInitialize()
     sound_optmenu.name         = language["MenuSound"];
     f4sound_optmenu.name       = language["MenuSound"];
     gameplay_optmenu.name      = language["MenuGameplay"];
-    perf_optmenu.name          = language["MenuPerformance"];
     accessibility_optmenu.name = language["MenuAccessibility"];
     movement_optmenu.name      = language["MenuBinding"];
     attack_optmenu.name        = language["MenuBinding"];
@@ -1649,20 +1593,6 @@ static void OptionMenuGameplayOptions(int key_pressed, ConsoleVariable *console_
 }
 
 //
-// OptionMenuPerformanceOptions
-//
-static void OptionMenuPerformanceOptions(int key_pressed, ConsoleVariable *console_variable)
-{
-    // not allowed in netgames (changing most of these options would
-    // break synchronisation with the other machines).
-    if (network_game)
-        return;
-
-    current_menu = &perf_optmenu;
-    current_item = current_menu->items + current_menu->pos;
-}
-
-//
 // OptionMenuAccessibilityOptions
 //
 static void OptionMenuAccessibilityOptions(int key_pressed, ConsoleVariable *console_variable)
@@ -1788,12 +1718,6 @@ static void OptionMenuChangeFastparm(int key_pressed, ConsoleVariable *console_v
         return;
 
     level_flags.fast_monsters = global_flags.fast_monsters;
-}
-
-// this used by both MIPMIP, SMOOTHING and DETAIL options
-static void OptionMenuChangeMipMap(int key_pressed, ConsoleVariable *console_variable)
-{
-    DeleteAllImages();
 }
 
 static void OptionMenuChangeBobbing(int key_pressed, ConsoleVariable *console_variable)

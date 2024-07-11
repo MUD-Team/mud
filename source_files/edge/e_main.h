@@ -59,7 +59,5 @@ extern bool custom_MenuMain;
 extern bool custom_MenuEpisode;
 extern bool custom_MenuDifficulty;
 
-extern ConsoleVariable title_scaling;
-
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
