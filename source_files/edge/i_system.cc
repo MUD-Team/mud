@@ -164,10 +164,7 @@ void SleepForMilliseconds(int millisecs)
 
 void SystemShutdown(void)
 {
-    // make sure audio is unlocked (e.g. FatalError occurred)
-    UnlockAudio();
-
-    ShutdownSound();
+    ShutdownAudio();
     ShutdownControl();
     ShutdownGraphics();
 

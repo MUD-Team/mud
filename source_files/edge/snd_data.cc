@@ -24,7 +24,7 @@
 #include "epi.h"
 
 SoundData::SoundData()
-    : length_(0), frequency_(0), mode_(0), data_left_(nullptr), data_right_(nullptr), definition_data_(nullptr)
+    : length_(0), frequency_(0), mode_(0), data_(nullptr), definition_data_(nullptr)
 {
 }
 
@@ -37,26 +37,22 @@ void SoundData::Free()
 {
     length_ = 0;
 
-    if (data_right_ && data_right_ != data_left_)
-        delete[] data_right_;
+    if (data_)
+        delete[] data_;
 
-    if (data_left_)
-        delete[] data_left_;
-
-    data_left_  = nullptr;
-    data_right_ = nullptr;
+    data_  = nullptr;
 }
 
 void SoundData::Allocate(int samples, int buf_mode)
 {
     // early out when requirements are already met
-    if (data_left_ && length_ >= samples && mode_ == buf_mode)
+    if (data_ && length_ >= samples && mode_ == buf_mode)
     {
         length_ = samples; // FIXME: perhaps keep allocated count
         return;
     }
 
-    if (data_left_ || data_right_)
+    if (data_)
     {
         Free();
     }
@@ -67,18 +63,11 @@ void SoundData::Allocate(int samples, int buf_mode)
     switch (buf_mode)
     {
     case kMixMono:
-        data_left_  = new int16_t[samples];
-        data_right_ = data_left_;
-        break;
-
-    case kMixStereo:
-        data_left_  = new int16_t[samples];
-        data_right_ = new int16_t[samples];
+        data_  = new float[samples];
         break;
 
     case kMixInterleaved:
-        data_left_  = new int16_t[samples * 2];
-        data_right_ = data_left_;
+        data_  = new float[samples * 2];
         break;
 
     default:

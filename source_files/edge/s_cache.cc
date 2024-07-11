@@ -47,7 +47,7 @@
 #include "snd_types.h"
 #include "w_files.h"
 
-
+extern bool sound_device_stereo;
 extern int  sound_device_frequency;
 
 static std::vector<SoundData *> sound_effects_cache;
@@ -57,9 +57,9 @@ static void LoadSilence(SoundData *buf)
     int length = 256;
 
     buf->frequency_ = sound_device_frequency;
-    buf->Allocate(length, kMixMono);
+    buf->Allocate(length, sound_device_stereo ? kMixInterleaved : kMixMono);
 
-    memset(buf->data_left_, 0, length * sizeof(int16_t));
+    memset(buf->data_, 0, length * sizeof(float) * (sound_device_stereo ? 2 : 1));
 }
 
 static bool LoadWav(SoundData *buf, uint8_t *lump, int length)

@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------
-//  EDGE Sound System Header for SDL
+//  EDGE Sound System Header for Sokol
 //----------------------------------------------------------------------------
 //
 //  Copyright (c) 1999-2024 The EDGE Team.
@@ -21,8 +21,4 @@
 #include <string>
 #include <vector>
 
-#include "epi_sdl.h"
-
 extern std::vector<std::string> available_soundfonts;
-
-extern SDL_AudioDeviceID current_sound_device;

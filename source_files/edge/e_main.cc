@@ -1434,7 +1434,7 @@ void EdgeShutdown(void)
     }
 
     LevelShutdown();
-    ShutdownSound();
+    ShutdownAudio();
     RendererShutdown();
     NetworkShutdown();
 }

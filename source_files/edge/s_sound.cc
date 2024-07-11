@@ -28,6 +28,7 @@
 #include "s_blit.h"
 #include "s_cache.h"
 #include "s_sound.h"
+#include "sokol_audio.h"
 
 
 extern float room_area;
@@ -269,24 +270,7 @@ void InitializeSound(void)
 
     SoundQueueInitialize();
 
-    // okidoke, start the ball rolling!
-    SDL_PauseAudioDevice(current_sound_device, 0);
-}
-
-void ShutdownSound(void)
-{
-    if (no_sound)
-        return;
-
-    SDL_PauseAudioDevice(current_sound_device, 1);
-
-    // make sure mixing thread is not running our code
-    SDL_LockAudioDevice(current_sound_device);
-    SDL_UnlockAudioDevice(current_sound_device);
-
-    SoundQueueShutdown();
-
-    FreeSoundChannels();
+    UnlockAudio();
 }
 
 // Not-rejigged-yet stuff..
@@ -308,34 +292,26 @@ SoundEffectDefinition *LookupEffectDef(const SoundEffect *s)
 
 static void S_PlaySound(int idx, SoundEffectDefinition *def, int category, Position *pos, int flags, SoundData *buf)
 {
-    // LogPrint("S_PlaySound on idx #%d DEF:%p\n", idx, def);
-
-    // LogPrint("Looked up def: %p, caching...\n", def);
-
     SoundChannel *chan = mix_channels[idx];
 
     chan->state_ = kChannelPlaying;
     chan->data_  = buf;
 
-    // LogPrint("chan=%p data=%p\n", chan, chan->data);
-
     chan->definition_ = def;
     chan->position_   = pos;
-    chan->category_   = category; //?? store use_cat and orig_cat
+    chan->category_   = category;
 
     // volume computed during mixing (?)
     chan->volume_left_  = 0;
     chan->volume_right_ = 0;
 
     chan->offset_ = 0;
-    chan->length_ = chan->data_->length_ << 10;
+    chan->length_ = chan->data_->length_;
 
     chan->loop_ = false;
     chan->boss_ = (flags & kSoundEffectBoss) ? true : false;
 
     chan->ComputeDelta();
-
-    // LogPrint("FINISHED: delta=0x%lx\n", chan->delta);
 }
 
 static void DoStartFX(SoundEffectDefinition *def, int category, Position *pos, int flags, SoundData *buf)
@@ -446,11 +422,7 @@ void StartSoundEffect(SoundEffect *sfx, int category, Position *pos, int flags)
     if (!buf)
         return;
 
-    LockAudio();
-    {
-        DoStartFX(def, category, pos, flags, buf);
-    }
-    UnlockAudio();
+    DoStartFX(def, category, pos, flags, buf);
 }
 
 void StopSoundEffect(Position *pos)
@@ -458,20 +430,16 @@ void StopSoundEffect(Position *pos)
     if (no_sound)
         return;
 
-    LockAudio();
+    for (int i = 0; i < total_channels; i++)
     {
-        for (int i = 0; i < total_channels; i++)
-        {
-            SoundChannel *chan = mix_channels[i];
+        SoundChannel *chan = mix_channels[i];
 
-            if (chan->state_ == kChannelPlaying && chan->position_ == pos)
-            {
-                // LogPrint("StopSoundEffect: killing #%d\n", i);
-                KillSoundChannel(i);
-            }
+        if (chan->state_ == kChannelPlaying && chan->position_ == pos)
+        {
+            // LogPrint("StopSoundEffect: killing #%d\n", i);
+            KillSoundChannel(i);
         }
     }
-    UnlockAudio();
 }
 
 void StopLevelSoundEffects(void)
@@ -479,19 +447,15 @@ void StopLevelSoundEffects(void)
     if (no_sound)
         return;
 
-    LockAudio();
+    for (int i = 0; i < total_channels; i++)
     {
-        for (int i = 0; i < total_channels; i++)
-        {
-            SoundChannel *chan = mix_channels[i];
+        SoundChannel *chan = mix_channels[i];
 
-            if (chan->state_ != kChannelEmpty && chan->category_ != kCategoryUi)
-            {
-                KillSoundChannel(i);
-            }
+        if (chan->state_ != kChannelEmpty && chan->category_ != kCategoryUi)
+        {
+            KillSoundChannel(i);
         }
     }
-    UnlockAudio();
 }
 
 void StopAllSoundEffects(void)
@@ -499,19 +463,15 @@ void StopAllSoundEffects(void)
     if (no_sound)
         return;
 
-    LockAudio();
+    for (int i = 0; i < total_channels; i++)
     {
-        for (int i = 0; i < total_channels; i++)
-        {
-            SoundChannel *chan = mix_channels[i];
+        SoundChannel *chan = mix_channels[i];
 
-            if (chan->state_ != kChannelEmpty)
-            {
-                KillSoundChannel(i);
-            }
+        if (chan->state_ != kChannelEmpty)
+        {
+            KillSoundChannel(i);
         }
     }
-    UnlockAudio();
 }
 
 void SoundTicker(void)
@@ -519,23 +479,19 @@ void SoundTicker(void)
     if (no_sound)
         return;
 
-    LockAudio();
+    if (game_state == kGameStateLevel)
     {
-        if (game_state == kGameStateLevel)
-        {
-            EPI_ASSERT(::total_players > 0);
+        EPI_ASSERT(::total_players > 0);
 
-            MapObject *pmo = ::players[display_player]->map_object_;
-            EPI_ASSERT(pmo);
+        MapObject *pmo = ::players[display_player]->map_object_;
+        EPI_ASSERT(pmo);
 
-            UpdateSounds(pmo, pmo->angle_);
-        }
-        else
-        {
-            UpdateSounds(nullptr, 0);
-        }
+        UpdateSounds(pmo, pmo->angle_);
     }
-    UnlockAudio();
+    else
+    {
+        UpdateSounds(nullptr, 0);
+    }
 }
 
 void UpdateSoundCategoryLimits(void)
@@ -543,15 +499,11 @@ void UpdateSoundCategoryLimits(void)
     if (no_sound)
         return;
 
-    LockAudio();
-    {
-        int want_chan = channel_counts[sound_mixing_channels];
+    int want_chan = channel_counts[sound_mixing_channels];
 
-        ReallocateSoundChannels(want_chan);
+    ReallocateSoundChannels(want_chan);
 
-        SetupCategoryLimits();
-    }
-    UnlockAudio();
+    SetupCategoryLimits();
 }
 
 void PrecacheSounds(void)
@@ -568,13 +520,12 @@ void PrecacheSounds(void)
 
 void ResumeAudioDevice()
 {
-    SDL_PauseAudioDevice(current_sound_device, 0);
+
 }
 
 void PauseAudioDevice()
 {
     StopAllSoundEffects();
-    SDL_PauseAudioDevice(current_sound_device, 1);
 }
 
 //--- editor settings ---

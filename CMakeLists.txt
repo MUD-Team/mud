@@ -105,6 +105,8 @@ if (APPLE)
   elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64" AND APPLE)
     add_compile_definitions(NOT_APPLE_SILICON)
   endif()
+elseif (UNIX)
+  find_package(ALSA REQUIRED)
 endif()
 
 if(${CMAKE_SYSTEM} MATCHES "BSD")

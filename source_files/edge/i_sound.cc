@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------
-//  EDGE Sound System for SDL
+//  EDGE Sound System for Sokol
 //----------------------------------------------------------------------------
 //
 //  Copyright (c) 1999-2024 The EDGE Team.
@@ -31,85 +31,55 @@
 #include "s_cache.h"
 #include "s_fluid.h"
 #include "s_sound.h"
+#define SOKOL_AUDIO_IMPL
+#define SOKOL_ASSERT(c) EPI_ASSERT(c)
+#include "sokol_audio.h"
+
+static saudio_desc sound_device_check;
+static bool sound_initialized;
 
 // If true, sound system is off/not working. Changed to false if sound init ok.
 bool no_sound = false;
-
-static SDL_AudioSpec sound_device_check;
-SDL_AudioDeviceID    current_sound_device;
 
 int  sound_device_frequency;
 int  sound_device_bytes_per_sample;
 int  sound_device_samples_per_buffer;
 bool sound_device_stereo;
 
-static bool audio_is_locked = false;
+static bool audio_is_locked = true;
 
 std::vector<std::string> available_soundfonts;
 extern std::string       game_directory;
 extern std::string       home_directory;
 extern ConsoleVariable   midi_soundfont;
 
-void SoundFillCallback(void *udata, Uint8 *stream, int len)
+void SoundFillCallback(float* buffer, int num_frames, int num_channels)
 {
-    (void)udata;
-    SDL_memset(stream, 0, len);
-    MixAllSoundChannels(stream, len);
+    memset(buffer, 0, num_frames * num_channels * sizeof(float));
+    if (!audio_is_locked)
+        MixAllSoundChannels(buffer, num_frames);
 }
 
 static bool TryOpenSound(int want_freq, bool want_stereo)
 {
-    SDL_AudioSpec trydev;
-    SDL_zero(trydev);
+    sound_device_check.logger.func = nullptr; // Point to slog_func later - Dasho
+    sound_device_check.stream_cb = SoundFillCallback;
+    sound_device_check.num_channels = want_stereo ? 2 : 1;
+    sound_device_check.sample_rate = want_freq;
+    sound_device_check.buffer_frames = 1024;
+    saudio_setup(&sound_device_check);
 
     LogPrint("StartupSound: trying %d Hz %s\n", want_freq, want_stereo ? "Stereo" : "Mono");
 
-    trydev.freq     = want_freq;
-    trydev.format   = AUDIO_S16SYS;
-    trydev.channels = want_stereo ? 2 : 1;
-    trydev.samples  = 1024;
-    trydev.callback = SoundFillCallback;
+    sound_initialized = true;
 
-    current_sound_device = SDL_OpenAudioDevice(nullptr, 0, &trydev, &sound_device_check, 0);
-
-    if (current_sound_device > 0)
-        return true;
-
-    LogPrint("  failed: %s\n", SDL_GetError());
-
-    return false;
+    return true;
 }
 
 void StartupAudio(void)
 {
     if (no_sound)
         return;
-
-    std::string driver = ArgumentValue("audiodriver");
-
-    if (driver.empty())
-    {
-        const char *check = SDL_getenv("SDL_AUDIODRIVER");
-        if (check)
-            driver = check;
-    }
-
-    if (driver.empty())
-        driver = "default";
-
-    if (epi::StringCaseCompareASCII(driver, "default") != 0)
-    {
-        SDL_setenv("SDL_AUDIODRIVER", driver.c_str(), 1);
-    }
-
-    LogPrint("SDL_Audio_Driver: %s\n", driver.c_str());
-
-    if (SDL_InitSubSystem(SDL_INIT_AUDIO) != 0)
-    {
-        LogPrint("StartupSound: Couldn't init SDL AUDIO! %s\n", SDL_GetError());
-        no_sound = true;
-        return;
-    }
 
     int  want_freq   = 44100;
     bool want_stereo = (var_sound_stereo >= 1);
@@ -131,46 +101,24 @@ void StartupAudio(void)
         return;
     }
 
-    // These checks shouldn't really fail, as SDL2 allows us to force our
-    // desired format and convert silently if needed, but they might end up
-    // being a good safety net - Dasho
-
-    if (sound_device_check.format != AUDIO_S16SYS)
-    {
-        LogPrint("StartupSound: unsupported format: %d\n", sound_device_check.format);
-        SDL_CloseAudioDevice(current_sound_device);
-        no_sound = true;
-        return;
-    }
-
-    if (sound_device_check.channels >= 3)
-    {
-        LogPrint("StartupSound: unsupported channel num: %d\n", sound_device_check.channels);
-        SDL_CloseAudioDevice(current_sound_device);
-
-        no_sound = true;
-        return;
-    }
-
-    if (want_stereo && sound_device_check.channels != 2)
+    if (want_stereo && sound_device_check.num_channels != 2)
         LogPrint("StartupSound: stereo sound not available.\n");
-    else if (!want_stereo && sound_device_check.channels != 1)
+    else if (!want_stereo && sound_device_check.num_channels != 1)
         LogPrint("StartupSound: mono sound not available.\n");
 
-    if (sound_device_check.freq < (want_freq - want_freq / 100) ||
-        sound_device_check.freq > (want_freq + want_freq / 100))
+    if (sound_device_check.sample_rate != want_freq)
     {
         LogPrint("StartupSound: %d Hz sound not available.\n", want_freq);
     }
 
-    sound_device_bytes_per_sample   = (sound_device_check.channels) * 2;
-    sound_device_samples_per_buffer = sound_device_check.size / sound_device_bytes_per_sample;
+    sound_device_bytes_per_sample   = sizeof(float); // keep this line in case we ever change audio backends or this size becomes variable - Dasho
+    sound_device_samples_per_buffer = sound_device_check.buffer_frames;
 
     EPI_ASSERT(sound_device_bytes_per_sample > 0);
     EPI_ASSERT(sound_device_samples_per_buffer > 0);
 
-    sound_device_frequency = sound_device_check.freq;
-    sound_device_stereo    = (sound_device_check.channels == 2);
+    sound_device_frequency = sound_device_check.sample_rate;
+    sound_device_stereo    = (sound_device_check.num_channels == 2);
 
     // update Sound Options menu
     if (sound_device_stereo != (var_sound_stereo >= 1))
@@ -182,37 +130,32 @@ void StartupAudio(void)
     return;
 }
 
-void AudioShutdown(void)
+void ShutdownAudio(void)
 {
     if (no_sound)
         return;
 
-    ShutdownSound();
+    LockAudio();
 
-    no_sound = true;
+    SoundQueueShutdown();
 
-    SDL_CloseAudioDevice(current_sound_device);
+    FreeSoundChannels();
+
+    if (sound_initialized)
+    {
+        saudio_shutdown();
+        sound_initialized = false;
+    }
 }
 
 void LockAudio(void)
 {
-    if (audio_is_locked)
-    {
-        UnlockAudio();
-        FatalError("LockAudio: called twice without unlock!\n");
-    }
-
-    SDL_LockAudioDevice(current_sound_device);
     audio_is_locked = true;
 }
 
 void UnlockAudio(void)
 {
-    if (audio_is_locked)
-    {
-        SDL_UnlockAudioDevice(current_sound_device);
-        audio_is_locked = false;
-    }
+    audio_is_locked = false;
 }
 
 void StartupMusic(void)
