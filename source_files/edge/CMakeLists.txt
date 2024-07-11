@@ -98,6 +98,10 @@ set (EDGE_SOURCE_FILES
 
 set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} i_main.cc)
 
+if (WIN32)
+  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} w32_res.rc)
+endif()
+
 set (EDGE_LINK_LIBRARIES
   edge_ajbsp  
   edge_ddf
@@ -109,8 +113,10 @@ set (EDGE_LINK_LIBRARIES
   utf8proc
 )
 
-if (WIN32)
-  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} w32_res.rc)
+if (APPLE)
+  set (EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} "-framework AudioToolbox")
+elseif (UNIX)
+  set (EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} asound)
 endif()
 
 if (EDGE_PROFILING)

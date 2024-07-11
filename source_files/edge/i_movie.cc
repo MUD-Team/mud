@@ -79,9 +79,9 @@ void MovieAudioCallback(plm_t *mpeg, plm_samples_t *samples, void *user)
             float *src = samples->interleaved;
             float *dest = movie_buf->data_;
             float *dest_end = movie_buf->data_ + PLM_AUDIO_SAMPLES_PER_FRAME;
-            for (; dest < dest_end;)
+            for (; dest < dest_end; src += 2)
             {
-                *dest++ = (*src++ + *src++) * 0.5f;
+                *dest++ = (src[0] + src[1]) * 0.5f;
             }
             SoundQueueAddBuffer(movie_buf, movie_sample_rate);
         }
