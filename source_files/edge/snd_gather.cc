@@ -131,9 +131,9 @@ void SoundGatherer::TransferMono(GatherChunk *chunk, SoundData *buf, int pos)
 
     if (chunk->is_stereo_)
     {
-        for (; dest < dest_end; src += 2)
+        for (;dest < dest_end;)
         {
-            *dest++ = (src[0] + src[1]) * 0.5f;
+            *dest++ = (*src++ + *src++) * 0.5f;
         }
     }
     else

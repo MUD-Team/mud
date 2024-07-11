@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------
-//  EDGE Sound System for SDL
+//  EDGE Sound System for Sokol
 //----------------------------------------------------------------------------
 //
 //  Copyright (c) 1999-2024 The EDGE Team.
@@ -111,8 +111,8 @@ void StartupAudio(void)
         LogPrint("StartupSound: %d Hz sound not available.\n", want_freq);
     }
 
-    sound_device_bytes_per_sample   = (sound_device_check.num_channels) * sizeof(float);
-    sound_device_samples_per_buffer = sound_device_check.buffer_frames * sizeof(float) / sound_device_bytes_per_sample;
+    sound_device_bytes_per_sample   = sizeof(float); // keep this line in case we ever change audio backends or this size becomes variable - Dasho
+    sound_device_samples_per_buffer = sound_device_check.buffer_frames;
 
     EPI_ASSERT(sound_device_bytes_per_sample > 0);
     EPI_ASSERT(sound_device_samples_per_buffer > 0);

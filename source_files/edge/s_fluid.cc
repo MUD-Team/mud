@@ -71,10 +71,10 @@ static void ConvertToMono(float *dest, const float *src, int len)
 {
     const float *s_end = src + len * 2;
 
-    for (; src < s_end; src += 2)
+    for (; src < s_end;)
     {
         // compute average of samples
-        *dest++ = (src[0] + src[1]) * 0.5f;
+        *dest++ = (*src++ + *src++) * 0.5f;
     }
 }
 

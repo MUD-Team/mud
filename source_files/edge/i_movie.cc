@@ -50,8 +50,8 @@ static uint8_t         *movie_bytes        = nullptr;
 
 static bool MovieSetupAudioStream(int rate)
 {
-    plm_set_audio_lead_time(decoder, (double)1024 / (double)rate);
-
+    plm_set_audio_lead_time(decoder, (double)1024 / ((double)rate));
+    movie_sample_rate = rate;
     PauseMusic();
     // Need to flush Queue to keep movie audio/video from desyncing initially (I
     // think) - Dasho
@@ -69,8 +69,22 @@ void MovieAudioCallback(plm_t *mpeg, plm_samples_t *samples, void *user)
     if (movie_buf)
     {
         movie_buf->length_ = PLM_AUDIO_SAMPLES_PER_FRAME;
-        memcpy(movie_buf->data_, samples->interleaved, PLM_AUDIO_SAMPLES_PER_FRAME * sizeof(float));
-        SoundQueueAddBuffer(movie_buf, sound_device_frequency);
+        if (sound_device_stereo)
+        {
+            memcpy(movie_buf->data_, samples->interleaved, PLM_AUDIO_SAMPLES_PER_FRAME * 2 * sizeof(float));
+            SoundQueueAddBuffer(movie_buf, movie_sample_rate);
+        }
+        else
+        {
+            float *src = samples->interleaved;
+            float *dest = movie_buf->data_;
+            float *dest_end = movie_buf->data_ + PLM_AUDIO_SAMPLES_PER_FRAME;
+            for (; dest < dest_end;)
+            {
+                *dest++ = (*src++ + *src++) * 0.5f;
+            }
+            SoundQueueAddBuffer(movie_buf, movie_sample_rate);
+        }
     }
 }
 
@@ -135,7 +149,7 @@ void PlayMovie(const std::string &name)
 
     if (!no_sound && !(movie->special_ & kMovieSpecialMute) && plm_get_num_audio_streams(decoder) > 0)
     {
-        if (!MovieSetupAudioStream(sound_device_frequency))
+        if (!MovieSetupAudioStream(plm_get_samplerate(decoder)))
         {
             plm_destroy(decoder);
             delete[] movie_bytes;
