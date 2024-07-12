@@ -3,6 +3,8 @@ set(system_libs "")
 
 if (APPLE)
     set(system_libs ${system_libs} "-framework QuartzCore" "-framework Cocoa" "-framework AudioToolbox" "-framework OpenGL")    
+elseif(LINUX)
+    set(system_libs X11 Xi Xcursor GL asound dl m)
 endif()
 
 add_library(sokol sokol.cc)

@@ -20,6 +20,7 @@
 
 #include <chrono>
 #include <thread>
+#include <stdarg.h>
 
 #include "con_main.h"
 #include "dm_defs.h"
