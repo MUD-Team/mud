@@ -130,6 +130,8 @@ void ShowMessageBox(const char *message, const char *title)
 #ifdef WIN32
     // SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, title, message, nullptr);
     MessageBoxA((HWND)sapp_win32_get_hwnd(), message, title, MB_OK);
+#else
+    printf("%s: %s", title, message);
 #endif
 }
 
@@ -169,7 +171,7 @@ void SleepForMilliseconds(int millisecs)
     if (!has_warned)
     {
         has_warned = true;
-        LogWarning("SleepForMilliseconds: using busy wait on platform, please fix");
+        LogWarning("SleepForMilliseconds: using busy wait on platform, please fix\n");
     }
     double now = stm_ms(stm_now());
     while (stm_ms(stm_now()) - now < millisecs)

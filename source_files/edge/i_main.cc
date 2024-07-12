@@ -92,6 +92,12 @@ sapp_desc sokol_main(int argc, char *argv[])
     desc.win32_console_utf8   = true;
     desc.win32_console_create = true;
 
+#ifdef __APPLE__
+    // temporary hack while on GL 1.x
+    desc.gl_major_version = 1;
+    desc.gl_minor_version = 0;
+#endif
+
     return desc;
 }
 
