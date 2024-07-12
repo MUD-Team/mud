@@ -1,5 +1,7 @@
+add_subdirectory(sokol)
 add_subdirectory(glad)
 add_subdirectory(fluidlite)
 add_subdirectory(miniz)
 add_subdirectory(lua)
 add_subdirectory(utf8proc)
+add_subdirectory(physfs)

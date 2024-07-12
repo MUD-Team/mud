@@ -42,7 +42,6 @@
 #include "e_main.h"
 #include "epi.h"
 #include "epi_filesystem.h"
-#include "epi_sdl.h"
 #include "epi_str_util.h"
 #include "f_interm.h"
 #include "g_game.h"
@@ -1492,10 +1491,7 @@ static void QuitResponse(int ch)
 
     LogPrint("Exiting...\n");
 
-    EdgeShutdown();
-    SystemShutdown();
-
-    CloseProgram(EXIT_SUCCESS);
+    sapp_quit();
 }
 
 //
@@ -1703,7 +1699,9 @@ bool MenuResponder(InputEvent *ev)
 
     int ch = ev->value.key.sym;
 
-    SDL_Keymod mod = SDL_GetModState();
+    // SOKOL_FIX
+    int mod = 0;
+    //SDL_Keymod mod = SDL_GetModState();
 
     // -ACB- 1999/10/11 F1 is responsible for print screen at any time
     if (ch == kFunction1 || ch == kPrintScreen)
@@ -1774,8 +1772,10 @@ bool MenuResponder(InputEvent *ev)
             return true;
         }
 
-        if (mod & KMOD_SHIFT || mod & KMOD_CAPS)
-            ch = epi::ToUpperASCII(ch);
+        // SOKOL_FIX
+        //if (mod & KMOD_SHIFT || mod & KMOD_CAPS)
+        //    ch = epi::ToUpperASCII(ch);
+
         if (ch == '-')
             ch = '_';
 
@@ -1841,8 +1841,9 @@ bool MenuResponder(InputEvent *ev)
             break;
 
         default:
-            if (mod & KMOD_SHIFT || mod & KMOD_CAPS)
-                ch = epi::ToUpperASCII(ch);
+            // SOKOL_FIX
+            //if (mod & KMOD_SHIFT || mod & KMOD_CAPS)
+            //    ch = epi::ToUpperASCII(ch);
             EPI_ASSERT(save_style);
             if (ch >= 32 && ch <= 127 && save_string_character_index < kSaveStringSize - 1 &&
                 save_style->fonts_[1]->StringWidth(save_extended_information_slots[save_slot].description) <

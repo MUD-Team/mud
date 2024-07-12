@@ -86,7 +86,6 @@
 #include "e_input.h"
 #include "epi.h"
 #include "epi_filesystem.h"
-#include "epi_sdl.h"
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
 #include "g_game.h"
@@ -149,7 +148,6 @@ extern ConsoleVariable joystick_deadzone_axis_3;
 extern ConsoleVariable joystick_deadzone_axis_4;
 extern ConsoleVariable joystick_deadzone_axis_5;
 
-extern SDL_Joystick *joystick_info;
 extern int           JoystickGetAxis(int n);
 extern void          OptionMenuNetworkHostBegun(void);
 
@@ -1064,7 +1062,8 @@ void OptionMenuDrawer()
                 }
                 else
                 {
-                    const char *joyname = SDL_JoystickNameForIndex(joystick_device - 1);
+                    // SOKOL_FIX
+                    const char *joyname = "SOKOL_FIX";//SDL_JoystickNameForIndex(joystick_device - 1);
                     if (joyname)
                     {
                         HUDWriteText(style, fontType, (current_menu->menu_center) + 15, curry,

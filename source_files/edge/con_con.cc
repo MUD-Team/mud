@@ -199,6 +199,11 @@ void SetConsoleVisible(ConsoleVisibility v)
         console_wipe_active   = true;
         console_wipe_position = (v == kConsoleVisibilityMaximal) ? 0 : kConsoleWipeTics;
     }
+
+    if (console_visible != kConsoleVisibilityNotVisible)
+    {
+        GrabCursor(false);
+    }
 }
 
 static void StripWhitespace(char *src)

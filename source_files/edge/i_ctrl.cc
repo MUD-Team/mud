@@ -28,179 +28,175 @@
 #include "i_video.h"
 #include "m_argv.h"
 #include "r_modes.h"
+#include "sokol_time.h"
 
 // FIXME: Combine all these SDL bool vars into an int/enum'd flags structure
 
 extern ConsoleVariable double_framerate;
 
-// Work around for alt-tabbing
-bool alt_is_down;
-bool eat_mouse_motion = true;
+static std::vector<sapp_event> s_control_events;
 
-bool no_joystick;                     // what a wowser, joysticks completely disabled
+bool no_joystick;                // what a wowser, joysticks completely disabled
 
-int joystick_device;                  // choice in menu, 0 for none
+int joystick_device;             // choice in menu, 0 for none
 
-static int          total_joysticks;
-static int          current_joystick; // 0 for none
-static bool         need_mouse_recapture = false;
-SDL_Joystick       *joystick_info        = nullptr;
-SDL_GameController *gamepad_info         = nullptr;
-SDL_JoystickID      current_gamepad      = -1;
+static int total_joysticks  = 0;
+static int current_joystick = 0; // 0 for none
+
+#ifdef SOKOL_DISABLED
+SDL_Joystick       *joystick_info   = nullptr;
+SDL_GameController *gamepad_info    = nullptr;
+SDL_JoystickID      current_gamepad = -1;
+#endif
 
 // Track trigger state to avoid pushing multiple unnecessary trigger events
 bool right_trigger_pulled = false;
 bool left_trigger_pulled  = false;
 
 //
-// Translates a key from SDL -> EDGE
+// Translates a key from Sokol -> EDGE
 // Returns -1 if no suitable translation exists.
 //
-int TranslateSDLKey(SDL_Scancode key)
+int TranslateSokolKey(sapp_keycode key)
 {
     switch (key)
     {
-    case SDL_SCANCODE_GRAVE:
+    case SAPP_KEYCODE_GRAVE_ACCENT:
         return kTilde;
-    case SDL_SCANCODE_MINUS:
+    case SAPP_KEYCODE_MINUS:
         return kMinus;
-    case SDL_SCANCODE_EQUALS:
+    case SAPP_KEYCODE_EQUAL:
         return kEquals;
 
-    case SDL_SCANCODE_TAB:
+    case SAPP_KEYCODE_TAB:
         return kTab;
-    case SDL_SCANCODE_RETURN:
+    case SAPP_KEYCODE_ENTER:
         return kEnter;
-    case SDL_SCANCODE_ESCAPE:
+    case SAPP_KEYCODE_ESCAPE:
         return kEscape;
-    case SDL_SCANCODE_BACKSPACE:
+    case SAPP_KEYCODE_BACKSPACE:
         return kBackspace;
 
-    case SDL_SCANCODE_UP:
+    case SAPP_KEYCODE_UP:
         return kUpArrow;
-    case SDL_SCANCODE_DOWN:
+    case SAPP_KEYCODE_DOWN:
         return kDownArrow;
-    case SDL_SCANCODE_LEFT:
+    case SAPP_KEYCODE_LEFT:
         return kLeftArrow;
-    case SDL_SCANCODE_RIGHT:
+    case SAPP_KEYCODE_RIGHT:
         return kRightArrow;
 
-    case SDL_SCANCODE_HOME:
+    case SAPP_KEYCODE_HOME:
         return kHome;
-    case SDL_SCANCODE_END:
+    case SAPP_KEYCODE_END:
         return kEnd;
-    case SDL_SCANCODE_INSERT:
+    case SAPP_KEYCODE_INSERT:
         return kInsert;
-    case SDL_SCANCODE_DELETE:
+    case SAPP_KEYCODE_DELETE:
         return kDelete;
-    case SDL_SCANCODE_PAGEUP:
+    case SAPP_KEYCODE_PAGE_UP:
         return kPageUp;
-    case SDL_SCANCODE_PAGEDOWN:
+    case SAPP_KEYCODE_PAGE_DOWN:
         return kPageDown;
 
-    case SDL_SCANCODE_F1:
+    case SAPP_KEYCODE_F1:
         return kFunction1;
-    case SDL_SCANCODE_F2:
+    case SAPP_KEYCODE_F2:
         return kFunction2;
-    case SDL_SCANCODE_F3:
+    case SAPP_KEYCODE_F3:
         return kFunction3;
-    case SDL_SCANCODE_F4:
+    case SAPP_KEYCODE_F4:
         return kFunction4;
-    case SDL_SCANCODE_F5:
+    case SAPP_KEYCODE_F5:
         return kFunction5;
-    case SDL_SCANCODE_F6:
+    case SAPP_KEYCODE_F6:
         return kFunction6;
-    case SDL_SCANCODE_F7:
+    case SAPP_KEYCODE_F7:
         return kFunction7;
-    case SDL_SCANCODE_F8:
+    case SAPP_KEYCODE_F8:
         return kFunction8;
-    case SDL_SCANCODE_F9:
+    case SAPP_KEYCODE_F9:
         return kFunction9;
-    case SDL_SCANCODE_F10:
+    case SAPP_KEYCODE_F10:
         return kFunction10;
-    case SDL_SCANCODE_F11:
+    case SAPP_KEYCODE_F11:
         return kFunction11;
-    case SDL_SCANCODE_F12:
+    case SAPP_KEYCODE_F12:
         return kFunction12;
 
-    case SDL_SCANCODE_KP_0:
+    case SAPP_KEYCODE_KP_0:
         return kKeypad0;
-    case SDL_SCANCODE_KP_1:
+    case SAPP_KEYCODE_KP_1:
         return kKeypad1;
-    case SDL_SCANCODE_KP_2:
+    case SAPP_KEYCODE_KP_2:
         return kKeypad2;
-    case SDL_SCANCODE_KP_3:
+    case SAPP_KEYCODE_KP_3:
         return kKeypad3;
-    case SDL_SCANCODE_KP_4:
+    case SAPP_KEYCODE_KP_4:
         return kKeypad4;
-    case SDL_SCANCODE_KP_5:
+    case SAPP_KEYCODE_KP_5:
         return kKeypad5;
-    case SDL_SCANCODE_KP_6:
+    case SAPP_KEYCODE_KP_6:
         return kKeypad6;
-    case SDL_SCANCODE_KP_7:
+    case SAPP_KEYCODE_KP_7:
         return kKeypad7;
-    case SDL_SCANCODE_KP_8:
+    case SAPP_KEYCODE_KP_8:
         return kKeypad8;
-    case SDL_SCANCODE_KP_9:
+    case SAPP_KEYCODE_KP_9:
         return kKeypad9;
 
-    case SDL_SCANCODE_KP_PERIOD:
+    case SAPP_KEYCODE_KP_DECIMAL:
         return kKeypadDot;
-    case SDL_SCANCODE_KP_PLUS:
+    case SAPP_KEYCODE_KP_ADD:
         return kKeypadPlus;
-    case SDL_SCANCODE_KP_MINUS:
+    case SAPP_KEYCODE_KP_SUBTRACT:
         return kKeypadMinus;
-    case SDL_SCANCODE_KP_MULTIPLY:
+    case SAPP_KEYCODE_KP_MULTIPLY:
         return kKeypadStar;
-    case SDL_SCANCODE_KP_DIVIDE:
+    case SAPP_KEYCODE_KP_DIVIDE:
         return kKeypadSlash;
-    case SDL_SCANCODE_KP_EQUALS:
+    case SAPP_KEYCODE_KP_EQUAL:
         return kKeypadEquals;
-    case SDL_SCANCODE_KP_ENTER:
+    case SAPP_KEYCODE_KP_ENTER:
         return kKeypadEnter;
 
-    case SDL_SCANCODE_PRINTSCREEN:
+    case SAPP_KEYCODE_PRINT_SCREEN:
         return kPrintScreen;
-    case SDL_SCANCODE_CAPSLOCK:
+    case SAPP_KEYCODE_CAPS_LOCK:
         return kCapsLock;
-    case SDL_SCANCODE_NUMLOCKCLEAR:
+    case SAPP_KEYCODE_NUM_LOCK:
         return kNumberLock;
-    case SDL_SCANCODE_SCROLLLOCK:
+    case SAPP_KEYCODE_SCROLL_LOCK:
         return kScrollLock;
-    case SDL_SCANCODE_PAUSE:
+    case SAPP_KEYCODE_PAUSE:
         return kPause;
 
-    case SDL_SCANCODE_LSHIFT:
-    case SDL_SCANCODE_RSHIFT:
+    case SAPP_KEYCODE_LEFT_SHIFT:
+    case SAPP_KEYCODE_RIGHT_SHIFT:
         return kRightShift;
-    case SDL_SCANCODE_LCTRL:
-    case SDL_SCANCODE_RCTRL:
+    case SAPP_KEYCODE_LEFT_CONTROL:
+    case SAPP_KEYCODE_RIGHT_CONTROL:
         return kRightControl;
-    case SDL_SCANCODE_LGUI:
-    case SDL_SCANCODE_LALT:
+    case SAPP_KEYCODE_LEFT_SUPER:
+    case SAPP_KEYCODE_LEFT_ALT:
         return kLeftAlt;
-    case SDL_SCANCODE_RGUI:
-    case SDL_SCANCODE_RALT:
+    case SAPP_KEYCODE_RIGHT_SUPER:
+    case SAPP_KEYCODE_RIGHT_ALT:
         return kRightAlt;
 
     default:
         break;
     }
 
-    if (key <= 0x7f)
-        return epi::ToLowerASCII(SDL_GetKeyFromScancode(key));
+    // TODO: Use evt.char_code which is only valid for CHAR events
+    if (key >= 32 && key <= 96)
+        return epi::ToLowerASCII(key);
 
     return -1;
 }
 
 void HandleFocusGain(void)
 {
-    // Hide cursor and grab input
-    GrabCursor(true);
-
-    // Ignore any pending mouse motion
-    eat_mouse_motion = true;
-
     // Now active again
     app_state |= kApplicationActive;
 }
@@ -215,20 +211,18 @@ void HandleFocusLost(void)
     app_state &= ~kApplicationActive;
 }
 
-void HandleKeyEvent(SDL_Event *ev)
+static void HandleKeyEvent(sapp_event *ev)
 {
-    if (ev->type != SDL_KEYDOWN && ev->type != SDL_KEYUP)
+    if (ev->type != SAPP_EVENTTYPE_KEY_DOWN && ev->type != SAPP_EVENTTYPE_KEY_UP)
         return;
 
-    SDL_Scancode sym = ev->key.keysym.scancode;
-
     InputEvent event;
-    event.value.key.sym = TranslateSDLKey(sym);
+    event.value.key.sym = TranslateSokolKey(ev->key_code);
 
     // handle certain keys which don't behave normally
-    if (sym == SDL_SCANCODE_CAPSLOCK || sym == SDL_SCANCODE_NUMLOCKCLEAR)
+    if (ev->key_code == SAPP_KEYCODE_CAPS_LOCK || ev->key_code == SAPP_KEYCODE_NUM_LOCK)
     {
-        if (ev->type != SDL_KEYDOWN)
+        if (ev->type != SAPP_EVENTTYPE_KEY_DOWN)
             return;
         event.type = kInputEventKeyDown;
         PostEvent(&event);
@@ -238,7 +232,7 @@ void HandleKeyEvent(SDL_Event *ev)
         return;
     }
 
-    event.type = (ev->type == SDL_KEYDOWN) ? kInputEventKeyDown : kInputEventKeyUp;
+    event.type = (ev->type == SAPP_EVENTTYPE_KEY_DOWN) ? kInputEventKeyDown : kInputEventKeyUp;
 
     if (event.value.key.sym < 0)
     {
@@ -246,60 +240,34 @@ void HandleKeyEvent(SDL_Event *ev)
         return;
     }
 
-    if (event.value.key.sym == kTab && alt_is_down)
-    {
-        alt_is_down = false;
-        return;
-    }
-
-    if (event.value.key.sym == kEnter && alt_is_down)
-    {
-        alt_is_down = false;
-        ToggleFullscreen();
-        if (current_window_mode == kWindowModeWindowed)
-        {
-            GrabCursor(false);
-            need_mouse_recapture = true;
-        }
-        return;
-    }
-
-    if (event.value.key.sym == kLeftAlt)
-        alt_is_down = (event.type == kInputEventKeyDown);
-
     PostEvent(&event);
 }
 
-void HandleMouseButtonEvent(SDL_Event *ev)
+static void HandleCharEvent(sapp_event *ev)
+{
+}
+
+void HandleMouseButtonEvent(sapp_event *ev)
 {
     InputEvent event;
 
-    if (ev->type == SDL_MOUSEBUTTONDOWN)
+    if (ev->type == SAPP_EVENTTYPE_MOUSE_DOWN)
         event.type = kInputEventKeyDown;
-    else if (ev->type == SDL_MOUSEBUTTONUP)
+    else if (ev->type == SAPP_EVENTTYPE_MOUSE_UP)
         event.type = kInputEventKeyUp;
     else
         return;
 
-    switch (ev->button.button)
+    switch (ev->mouse_button)
     {
-    case 1:
+    case 0:
         event.value.key.sym = kMouse1;
         break;
-    case 2:
+    case 1:
         event.value.key.sym = kMouse2;
         break;
-    case 3:
+    case 2:
         event.value.key.sym = kMouse3;
-        break;
-    case 4:
-        event.value.key.sym = kMouse4;
-        break;
-    case 5:
-        event.value.key.sym = kMouse5;
-        break;
-    case 6:
-        event.value.key.sym = kMouse6;
         break;
 
     default:
@@ -309,7 +277,7 @@ void HandleMouseButtonEvent(SDL_Event *ev)
     PostEvent(&event);
 }
 
-void HandleMouseWheelEvent(SDL_Event *ev)
+void HandleMouseWheelEvent(sapp_event *ev)
 {
     InputEvent event;
     InputEvent release;
@@ -317,12 +285,12 @@ void HandleMouseWheelEvent(SDL_Event *ev)
     event.type   = kInputEventKeyDown;
     release.type = kInputEventKeyUp;
 
-    if (ev->wheel.y > 0)
+    if (ev->scroll_y > 0)
     {
         event.value.key.sym   = kMouseWheelUp;
         release.value.key.sym = kMouseWheelUp;
     }
-    else if (ev->wheel.y < 0)
+    else if (ev->scroll_y < 0)
     {
         event.value.key.sym   = kMouseWheelDown;
         release.value.key.sym = kMouseWheelDown;
@@ -335,6 +303,7 @@ void HandleMouseWheelEvent(SDL_Event *ev)
     PostEvent(&release);
 }
 
+#ifdef SOKOL_DISABLED
 static void HandleGamepadButtonEvent(SDL_Event *ev)
 {
     // ignore other gamepads;
@@ -414,13 +383,14 @@ static void HandleGamepadTriggerEvent(SDL_Event *ev)
 
     PostEvent(&event);
 }
+#endif
 
-void HandleMouseMotionEvent(SDL_Event *ev)
+void HandleMouseMotionEvent(sapp_event *ev)
 {
     int dx, dy;
 
-    dx = ev->motion.xrel;
-    dy = ev->motion.yrel;
+    dx = ev->mouse_dx;
+    dy = ev->mouse_dy;
 
     if (dx || dy)
     {
@@ -436,14 +406,20 @@ void HandleMouseMotionEvent(SDL_Event *ev)
 
 int JoystickGetAxis(int n) // n begins at 0
 {
+    // SOKOL_FIX
+    return 0;
+
+#ifdef SOKOL_DISABLED
     if (no_joystick || !joystick_info || !gamepad_info)
         return 0;
 
     return SDL_GameControllerGetAxis(gamepad_info, (SDL_GameControllerAxis)n);
+#endif
 }
-
+#ifdef SOKOL_DISABLED
 static void I_OpenJoystick(int index)
 {
+
     EPI_ASSERT(1 <= index && index <= total_joysticks);
 
     joystick_info = SDL_JoystickOpen(index - 1);
@@ -568,74 +544,78 @@ static void CheckJoystickChanged(void)
     else
         total_joysticks = new_total_joysticks;
 }
+#endif
 
 //
 // Event handling while the application is active
 //
-void ActiveEventProcess(SDL_Event *sdl_ev)
+void ActiveEventProcess(sapp_event *ev)
 {
-    switch (sdl_ev->type)
-    {
-    case SDL_WINDOWEVENT: {
-        if (sdl_ev->window.event == SDL_WINDOWEVENT_FOCUS_LOST)
-        {
-            HandleFocusLost();
-        }
+    bool mouse_locked = sapp_mouse_locked();
 
+    switch (ev->type)
+    {
+    case SAPP_EVENTTYPE_UNFOCUSED: {
+        HandleFocusLost();
         break;
     }
 
-    case SDL_KEYDOWN:
-    case SDL_KEYUP:
-        HandleKeyEvent(sdl_ev);
+    case SAPP_EVENTTYPE_CHAR:
+        HandleCharEvent(ev);
         break;
 
-    case SDL_MOUSEBUTTONDOWN:
-    case SDL_MOUSEBUTTONUP:
-        if (need_mouse_recapture)
+    case SAPP_EVENTTYPE_KEY_DOWN:
+    case SAPP_EVENTTYPE_KEY_UP:
+        HandleKeyEvent(ev);
+        break;
+
+    case SAPP_EVENTTYPE_MOUSE_DOWN:
+        if (!mouse_locked)
         {
             GrabCursor(true);
-            need_mouse_recapture = false;
-            break;
         }
-        HandleMouseButtonEvent(sdl_ev);
+    case SAPP_EVENTTYPE_MOUSE_UP:
+        if (mouse_locked)
+        {
+            HandleMouseButtonEvent(ev);
+        }
+
         break;
 
-    case SDL_MOUSEWHEEL:
-        if (!need_mouse_recapture)
-            HandleMouseWheelEvent(sdl_ev);
+    case SAPP_EVENTTYPE_MOUSE_SCROLL:
+        if (mouse_locked)
+        {
+            HandleMouseWheelEvent(ev);
+        }
         break;
 
-    case SDL_CONTROLLERBUTTONDOWN:
-    case SDL_CONTROLLERBUTTONUP:
-        HandleGamepadButtonEvent(sdl_ev);
-        break;
+    // case SDL_CONTROLLERBUTTONDOWN:
+    // case SDL_CONTROLLERBUTTONUP:
+    //     HandleGamepadButtonEvent(ev);
+    //     break;
 
     // Analog triggers should be the only thing handled here -Dasho
-    case SDL_CONTROLLERAXISMOTION:
-        HandleGamepadTriggerEvent(sdl_ev);
-        break;
+    // case SDL_CONTROLLERAXISMOTION:
+    //    HandleGamepadTriggerEvent(ev);
+    //    break;
 
-    case SDL_MOUSEMOTION:
-        if (eat_mouse_motion)
+    case SAPP_EVENTTYPE_MOUSE_MOVE:
+        if (mouse_locked)
         {
-            eat_mouse_motion = false; // One motion needs to be discarded
-            break;
+            HandleMouseMotionEvent(ev);
         }
-        if (!need_mouse_recapture)
-            HandleMouseMotionEvent(sdl_ev);
         break;
 
-    case SDL_QUIT:
+    case SAPP_EVENTTYPE_QUIT_REQUESTED:
         // Note we deliberate clear all other flags here. Its our method of
         // ensuring nothing more is done with events.
         app_state = kApplicationPendingQuit;
         break;
 
-    case SDL_CONTROLLERDEVICEADDED:
-    case SDL_CONTROLLERDEVICEREMOVED:
-        CheckJoystickChanged();
-        break;
+    // case SDL_CONTROLLERDEVICEADDED:
+    // case SDL_CONTROLLERDEVICEREMOVED:
+    //     CheckJoystickChanged();
+    //     break;
 
     default:
         break; // Don't care
@@ -645,28 +625,26 @@ void ActiveEventProcess(SDL_Event *sdl_ev)
 //
 // Event handling while the application is not active
 //
-void InactiveEventProcess(SDL_Event *sdl_ev)
+void InactiveEventProcess(sapp_event *ev)
 {
-    switch (sdl_ev->type)
+    switch (ev->type)
     {
-    case SDL_WINDOWEVENT:
+    case SAPP_EVENTTYPE_FOCUSED:
         if (app_state & kApplicationPendingQuit)
             break; // Don't care: we're going to exit
-
-        if (sdl_ev->window.event == SDL_WINDOWEVENT_FOCUS_GAINED)
-            HandleFocusGain();
+        HandleFocusGain();
         break;
 
-    case SDL_QUIT:
+    case SAPP_EVENTTYPE_QUIT_REQUESTED:
         // Note we deliberate clear all other flags here. Its our method of
         // ensuring nothing more is done with events.
         app_state = kApplicationPendingQuit;
         break;
 
-    case SDL_CONTROLLERDEVICEADDED:
-    case SDL_CONTROLLERDEVICEREMOVED:
-        CheckJoystickChanged();
-        break;
+        // case SDL_CONTROLLERDEVICEADDED:
+        // case SDL_CONTROLLERDEVICEREMOVED:
+        //     CheckJoystickChanged();
+        //     break;
 
     default:
         break; // Don't care
@@ -688,7 +666,7 @@ void I_ShowGamepads(void)
     }
 
     LogPrint("Gamepads:\n");
-
+#ifdef SOKOL_DISABLED
     for (int i = 0; i < total_joysticks; i++)
     {
         const char *name = SDL_GameControllerNameForIndex(i);
@@ -697,8 +675,10 @@ void I_ShowGamepads(void)
 
         LogPrint("  %2d : %s\n", i + 1, name);
     }
+#endif
 }
 
+#ifdef SOKOL_DISABLED
 void StartupJoystick(void)
 {
     current_joystick = 0;
@@ -733,32 +713,46 @@ void StartupJoystick(void)
     }
 }
 
+#endif
+
 /****** Input Event Generation ******/
 
 void StartupControl(void)
 {
-    alt_is_down = false;
+    s_control_events.reserve(4096);
 
-    StartupJoystick();
+    // StartupJoystick();
+}
+
+void ControlPostEvent(const sapp_event &event)
+{
+    s_control_events.emplace_back(event);
 }
 
 void ControlGetEvents(void)
 {
     EDGE_ZoneScoped;
 
-    SDL_Event sdl_ev;
-
-    while (SDL_PollEvent(&sdl_ev))
+    for (size_t i = 0; i < s_control_events.size(); i++)
     {
+        sapp_event &event = s_control_events[i];
+
         if (app_state & kApplicationActive)
-            ActiveEventProcess(&sdl_ev);
+        {
+            ActiveEventProcess(&event);
+        }
         else
-            InactiveEventProcess(&sdl_ev);
+        {
+            InactiveEventProcess(&event);
+        }
     }
+
+    s_control_events.clear();
 }
 
 void ShutdownControl(void)
 {
+#ifdef SOKOL_DISABLED
     if (gamepad_info)
     {
         SDL_GameControllerClose(gamepad_info);
@@ -769,11 +763,12 @@ void ShutdownControl(void)
         SDL_JoystickClose(joystick_info);
         joystick_info = nullptr;
     }
+#endif
 }
 
 int GetTime(void)
 {
-    Uint32 t = SDL_GetTicks();
+    uint32_t t = (uint32_t)stm_ms(stm_now());
 
     int factor = (double_framerate.d_ ? 70 : 35);
 
@@ -783,7 +778,7 @@ int GetTime(void)
 
 int GetMilliseconds(void)
 {
-    return SDL_GetTicks();
+    return (int)stm_ms(stm_now());
 }
 
 //--- editor settings ---

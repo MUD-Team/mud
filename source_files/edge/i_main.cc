@@ -19,36 +19,87 @@
 #include "dm_defs.h"
 #include "e_main.h"
 #include "epi_filesystem.h"
-#include "epi_sdl.h"
 #include "epi_str_util.h"
 #include "i_system.h"
 #include "m_argv.h"
+#include "sokol_app.h"
+#include "sokol_log.h"
+#include "sokol_time.h"
 #include "version.h"
+#include "physfs.h"
 
 std::string executable_path = ".";
 
-extern "C"
+// SOKOL_FIXME
+static int          s_argc = 0;
+static const char **s_argv;
+
+static void InitCallback()
 {
-    int main(int argc, char *argv[])
+    void EdgeInit(int argc, const char **argv);
+    EdgeInit(s_argc, s_argv);
+}
+
+static void CleanupCallback()
+{
+    EdgeShutdown();
+    SystemShutdown();
+}
+
+static void FrameCallback()
+{
+    void EdgeTick();
+    EdgeTick();
+}
+
+static void EventCallback(const sapp_event *event)
+{
+    ControlPostEvent(*event);
+}
+
+sapp_desc sokol_main(int argc, char *argv[])
+{
+    stm_setup();
+
+    if (!argc || !argv[0] || PHYSFS_init(argv[0]) == 0)
     {
-        if (SDL_Init(0) < 0)
-            FatalError("Couldn't init SDL!!\n%s\n", SDL_GetError());
-
-        executable_path = SDL_GetBasePath();
-
-#ifdef _WIN32
-        // -AJA- change current dir to match executable
-        if (!epi::CurrentDirectorySet(executable_path))
-            FatalError("Couldn't set program directory to %s!!\n", executable_path.c_str());
-#endif
-
-        // Run EDGE. it never returns
-        EdgeMain(argc, (const char **)argv);
-
-        return 0;
+        FatalError("Could not initialize PHYSFS:\n%d\n", PHYSFS_getLastErrorCode());
     }
 
-} // extern "C"
+    s_argc = argc;
+    s_argv = (const char **) argv;
+
+    executable_path = PHYSFS_getBaseDir();
+
+#ifdef _WIN32
+    // -AJA- change current dir to match executable
+    if (!epi::CurrentDirectorySet(executable_path))
+        FatalError("Couldn't set program directory to %s!!\n", executable_path.c_str());
+#endif
+
+    sapp_desc desc = {0};
+
+    desc.init_cb              = InitCallback;
+    desc.frame_cb             = FrameCallback;
+    desc.cleanup_cb           = CleanupCallback;
+    desc.event_cb             = EventCallback;
+    desc.width                = 1360;
+    desc.height               = 768;
+    desc.high_dpi             = false;
+    desc.logger.func          = slog_func;
+    desc.window_title         = "MUD";    
+
+    desc.win32_console_utf8   = true;
+    desc.win32_console_create = true;
+
+#ifdef __APPLE__
+    // temporary hack while on GL 1.x
+    desc.gl_major_version = 1;
+    desc.gl_minor_version = 0;
+#endif
+
+    return desc;
+}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

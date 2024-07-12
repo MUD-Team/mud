@@ -51,7 +51,6 @@
 #include "edge_profiling.h"
 #include "epi_file.h"
 #include "epi_filesystem.h"
-#include "epi_sdl.h"
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
 #include "f_finale.h"
@@ -71,6 +70,7 @@
 #include "n_network.h"
 #include "p_setup.h"
 #include "p_spec.h"
+#include "physfs.h"
 #include "r_colormap.h"
 #include "r_draw.h"
 #include "r_gldefs.h"
@@ -140,7 +140,7 @@ GameFlags default_game_flags = {
 
 GameFlags global_flags;
 
-bool mus_pause_stop  = false;
+bool mus_pause_stop = false;
 
 std::string configuration_file;
 std::string epkfile;
@@ -896,6 +896,11 @@ void TitleTicker(void)
     }
 }
 
+static std::string GetPrefDirectory()
+{
+    return std::string(PHYSFS_getPrefDir("MUD Team", "MUD Client"));
+}
+
 //
 // Detects which directories to search for DDFs, WADs and other files in.
 //
@@ -906,7 +911,8 @@ static void InitializeDirectories(void)
     // Get the App Directory from parameter.
 
     // Note: This might need adjusting for Apple
-    std::string s = SDL_GetBasePath();
+    std::string s = PHYSFS_getBaseDir();
+
     game_directory = s;
 
     // config file - check for portable config
@@ -931,13 +937,8 @@ static void InitializeDirectories(void)
             home_directory = s;
     }
 
-#ifdef _WIN32
     if (home_directory.empty())
-        home_directory = SDL_GetPrefPath(nullptr, application_name.c_str());
-#else
-    if (home_directory.empty())
-        home_directory = SDL_GetPrefPath(team_name.c_str(), application_name.c_str());
-#endif
+        home_directory = GetPrefDirectory();
 
     if (!epi::IsDirectory(home_directory))
     {
@@ -1063,7 +1064,7 @@ static void IdentifyVersion(void)
     LogDebug("- Identify Version\n");
 
     // Check -iwad parameter, find out if it is the IWADs directory
-    std::string              iwad_par;
+    std::string iwad_par;
 
     std::string s = ArgumentValue("game");
 
@@ -1108,7 +1109,8 @@ static void IdentifyVersion(void)
             }
         }
         else
-            FatalError("%s is not a valid extension for a game file! (%s)\n", epi::GetExtension(iwad_par).c_str(), iwad_par.c_str());
+            FatalError("%s is not a valid extension for a game file! (%s)\n", epi::GetExtension(iwad_par).c_str(),
+                       iwad_par.c_str());
     }
     else
     {
@@ -1118,7 +1120,7 @@ static void IdentifyVersion(void)
         // This will use the first valid file/folder found, if any.
         for (size_t p = 1; p < program_argument_list.size() && !ArgumentIsOption(p); p++)
         {
-            std::string dnd        = program_argument_list[p];
+            std::string dnd = program_argument_list[p];
             std::string game_check;
             if (epi::IsDirectory(dnd))
             {
@@ -1150,7 +1152,7 @@ static void IdentifyVersion(void)
     // If we have made it here, attempt to autodetect a valid game in the user's
     // home and game directories
     std::string location;
-    int max = 1;
+    int         max = 1;
 
     if (epi::StringCompare(game_directory, home_directory) != 0)
         max++;
@@ -1424,17 +1426,7 @@ static void InitializeDDF(void)
 
 void EdgeShutdown(void)
 {
-    StopMusic();
-
-    // Pause to allow sounds to finish
-    for (int loop = 0; loop < 30; loop++)
-    {
-        SoundTicker();
-        SleepForMilliseconds(50);
-    }
-
     LevelShutdown();
-    ShutdownAudio();
     RendererShutdown();
     NetworkShutdown();
 }
@@ -1621,7 +1613,7 @@ static void InitialState(void)
 //
 // -ACB- 2004/05/31 Moved into a namespace, the c++ revolution begins....
 //
-void EdgeMain(int argc, const char **argv)
+void EdgeInit(int argc, const char **argv)
 {
     // Seed RandomByte RNG
     InitRandomState();
@@ -1638,8 +1630,11 @@ void EdgeMain(int argc, const char **argv)
     LogPrint("%s v%s initialisation complete.\n", application_name.c_str(), edge_version.c_str());
 
     LogDebug("- Entering game loop...\n");
+}
 
-    while (!(app_state & kApplicationPendingQuit))
+void EdgeTick()
+{
+    if (!(app_state & kApplicationPendingQuit))
     {
         // We always do this once here, although the engine may
         // makes in own calls to keep on top of the event processing

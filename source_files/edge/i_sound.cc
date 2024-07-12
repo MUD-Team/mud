@@ -135,6 +135,8 @@ void ShutdownAudio(void)
     if (no_sound)
         return;
 
+    StopMusic();        
+
     LockAudio();
 
     SoundQueueShutdown();
