@@ -23,11 +23,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y libsdl2-dev
-
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
@@ -56,22 +51,12 @@ jobs:
         run: invoke-webrequest https://github.com/skeeto/w64devkit/releases/download/v1.23.0/w64devkit-i686-1.23.0.zip -outfile ${{github.workspace}}\w64devkit.zip
       - name: Extract w64devkit
         run: expand-archive -path ${{github.workspace}}\w64devkit.zip -destinationpath ${{github.workspace}}
-      - name: Download SDL2-devel
-        run: invoke-webrequest https://github.com/libsdl-org/SDL/releases/download/release-2.30.3/SDL2-devel-2.30.3-mingw.zip -outfile ${{github.workspace}}\sdl2-devel.zip
-      - name: Extract SDL2-devel
-        run: expand-archive -path ${{github.workspace}}\sdl2-devel.zip -destinationpath ${{github.workspace}}
-      - name: Copy SDL2-devel contents to w64devkit
-        run: |
-          robocopy ${{github.workspace}}\SDL2-2.30.3\i686-w64-mingw32 ${{github.workspace}}\w64devkit\i686-w64-mingw32 /s ; if ($lastexitcode -lt 8) { $global:LASTEXITCODE = $null }
-          robocopy ${{github.workspace}}\SDL2-2.30.3\i686-w64-mingw32 ${{github.workspace}}\w64devkit /s ; if ($lastexitcode -lt 8) { $global:LASTEXITCODE = $null }
       - name: Set environment variables and build
         run: |
           $env:Path = "${{github.workspace}}\w64devkit\bin;" + $env:Path
           cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_FLAGS="-isystem ${{github.workspace}}\w64devkit\include" -G "MinGW Makefiles"
           cmake --build build --config ${{env.BUILD_TYPE}}
           strip ${{github.workspace}}\edge-classic.exe
-      - name: Copy SDL2 DLL
-        run: copy-item -path ${{github.workspace}}\SDL2-2.30.3\i686-w64-mingw32\bin\SDL2.dll -destination ${{github.workspace}}
       - uses: actions/upload-artifact@v4
         with:
           name: edge-classic-mingw
@@ -81,7 +66,6 @@ jobs:
             edge_defs
             soundfont
             edge-classic.exe
-            *.dll
           retention-days: ${{env.RETENTION_DAYS}}
 
   build-msvc:
@@ -94,14 +78,13 @@ jobs:
         run: cmake --build build --config ${{env.BUILD_TYPE}}
       - uses: actions/upload-artifact@v4
         with:
-          name: edge-classic-msvc-es2
+          name: edge-classic-msvc
           path: |
             autoload
             edge_base
             edge_defs
             soundfont
             edge-classic.exe
-            *.dll
           retention-days: ${{env.RETENTION_DAYS}}
 
   build-macos:
@@ -109,10 +92,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-
-    - name: Install dependencies
-      run: |
-        brew install sdl2
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
