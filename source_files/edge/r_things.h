@@ -33,7 +33,6 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo);
 void SortRenderThings(DrawFloor *dfloor);
 
 void RenderWeaponSprites(Player *p);
-void RenderWeaponModel(Player *p);
 void RenderCrosshair(Player *p);
 
 //--- editor settings ---

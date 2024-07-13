@@ -67,8 +67,6 @@ set (EDGE_SOURCE_FILES
   r_state.cc
   r_colormap.cc
   r_modes.cc
-  r_mdl.cc
-  r_md2.cc
   r_image.cc
   r_doomtex.cc
   r_texgl.cc
@@ -85,7 +83,6 @@ set (EDGE_SOURCE_FILES
   snd_types.cc
   w_files.cc
   w_flat.cc
-  w_model.cc
   w_epk.cc
   w_sprite.cc
   script/lua_debugger.cc

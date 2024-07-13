@@ -43,7 +43,6 @@
 #include "r_image.h"
 #include "r_sky.h"
 #include "w_files.h"
-#include "w_model.h"
 #include "w_sprite.h"
 
 
@@ -267,9 +266,10 @@ void PrecacheLevelGraphics(void)
     if (precache_textures.d_)
         PrecacheTextures();
 
+/*
     if (precache_models.d_)
         PrecacheModels();
-
+*/
     PrecacheSky();
 }
 

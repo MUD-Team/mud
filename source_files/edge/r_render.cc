@@ -1673,28 +1673,6 @@ static void RenderSubsector(DrawSubsector *dsub)
     }
 }
 
-static void DoWeaponModel(void)
-{
-    Player *pl = view_camera_map_object->player_;
-
-    if (!pl)
-        return;
-
-    // clear the depth buffer, so that the weapon is never clipped
-    // by the world geometry.  NOTE: a tad expensive, but I don't
-    // know how any better way to prevent clipping -- the model
-    // needs the depth buffer for overlapping parts of itself.
-
-    glClear(GL_DEPTH_BUFFER_BIT);
-
-    solid_mode = false;
-    StartUnitBatch(solid_mode);
-
-    RenderWeaponModel(pl);
-
-    FinishUnitBatch();
-}
-
 //
 // RendererWalkBspNode
 //
@@ -1784,25 +1762,6 @@ static void RenderTrueBsp(void)
 
     state->SetDefaultStateFull();
 
-    // Lobo 2022:
-    // Allow changing the order of weapon model rendering to be
-    // after RenderWeaponSprites() so that FLASH states are
-    // drawn in front of the weapon
-    bool FlashFirst = false;
-
-    if (v_player)
-    {
-        if (v_player->ready_weapon_ >= 0)
-        {
-            FlashFirst = v_player->weapons_[v_player->ready_weapon_].info->render_invert_;
-        }
-    }
-
-    if (FlashFirst == false)
-    {
-        DoWeaponModel();
-    }
-
     glDisable(GL_DEPTH_TEST);
 
     // now draw 2D stuff like psprites, and add effects
@@ -1816,16 +1775,6 @@ static void RenderTrueBsp(void)
         RendererPaletteEffect(v_player);
         SetupMatrices2D();
         RenderCrosshair(v_player);
-    }
-
-    if (FlashFirst == true)
-    {
-        SetupMatrices3d();
-        glClear(GL_DEPTH_BUFFER_BIT);
-        glEnable(GL_DEPTH_TEST);
-        DoWeaponModel();
-        glDisable(GL_DEPTH_TEST);
-        SetupMatrices2D();
     }
 
 #if (DEBUG >= 3)
