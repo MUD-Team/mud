@@ -86,8 +86,6 @@ static constexpr uint8_t kRespawnDelay = (kTicRate / 2);
 
 extern ConsoleVariable double_framerate;
 
-EDGE_DEFINE_CONSOLE_VARIABLE(distance_cull_thinkers, "0", kConsoleVariableFlagArchive)
-
 EDGE_DEFINE_CONSOLE_VARIABLE(gravity_factor, "1.0", kConsoleVariableFlagArchive)
 
 // List of all objects in map.
@@ -724,18 +722,15 @@ static inline void AddRegionProperties(const MapObject *mo, float bz, float tz, 
 //
 // P_CalcFullProperties
 //
-// Calculates the properties (gravity etc..) acting on an object,
-// especially when the object is in multiple extrafloors with
-// different properties.
+// Calculates the properties (gravity etc..) acting on an object
 //
 // Only used for players for now (too expensive to be used by
-// everything).
+// everything). (Is this true now with extrafloors gone? - Dasho)
 //
 void CalculateFullRegionProperties(const MapObject *mo, RegionProperties *new_p)
 {
     Sector *sector = mo->subsector_->sector;
 
-    Extrafloor *S, *L, *C;
     float       floor_h;
 
     float bz = mo->z;
@@ -758,37 +753,10 @@ void CalculateFullRegionProperties(const MapObject *mo, RegionProperties *new_p)
     if (sector->floor_vertex_slope)
         floor_h = mo->floor_z_;
 
-    S = sector->bottom_extrafloor;
-    L = sector->bottom_liquid;
-
-    while (S || L)
-    {
-        if (!L || (S && S->bottom_height < L->bottom_height))
-        {
-            C = S;
-            S = S->higher;
-        }
-        else
-        {
-            C = L;
-            L = L->higher;
-        }
-
-        EPI_ASSERT(C);
-
-        // ignore "hidden" liquids
-        if (C->bottom_height < floor_h || C->bottom_height > sector->ceiling_height)
-            continue;
-
-        if (bz < C->bottom_height)
-            new_p->friction = C->properties->friction;
-
-        AddRegionProperties(mo, bz, tz, new_p, floor_h, C->top_height, C->properties, false);
-
-        floor_h = C->top_height;
-    }
-
-    AddRegionProperties(mo, bz, tz, new_p, floor_h, sector->ceiling_height, sector->active_properties, true);
+    if (sector->has_deep_water && tz < sector->deep_water_height)
+        AddRegionProperties(mo, bz, tz, new_p, floor_h, sector->ceiling_height, &sector->deep_water_properties, true);
+    else
+        AddRegionProperties(mo, bz, tz, new_p, floor_h, sector->ceiling_height, sector->active_properties, true);
 }
 
 //
@@ -1918,37 +1886,13 @@ void RunMapObjectThinkers(bool extra_tic)
                 continue;
             if (!double_framerate.d_)
             {
-                if (!distance_cull_thinkers.d_ ||
-                    (game_tic / 2 %
-                         RoundToInteger(1 + PointToDistance(players[console_player]->map_object_->x,
-                                                                    players[console_player]->map_object_->y, mo->x,
-                                                                    mo->y) /
-                                                1500) ==
-                     0))
-                    P_MobjThinker(mo, extra_tic);
+                P_MobjThinker(mo, extra_tic);
             }
             else
             {
-                if (extra_tic)
-                {
-                    if (!(mo->flags_ & kMapObjectFlagMissile))
-                        continue;
-                    else if (!distance_cull_thinkers.d_ ||
-                             ((game_tic / 4) %
-                                  RoundToInteger(1 + PointToDistance(players[console_player]->map_object_->x,
-                                                                             players[console_player]->map_object_->y,
-                                                                             mo->x, mo->y) /
-                                                         1500) ==
-                              0))
-                        P_MobjThinker(mo, extra_tic);
-                }
-                else if (!distance_cull_thinkers.d_ ||
-                         ((game_tic / 4) %
-                              RoundToInteger(1 + PointToDistance(players[console_player]->map_object_->x,
-                                                                         players[console_player]->map_object_->y, mo->x,
-                                                                         mo->y) /
-                                                     1500) ==
-                          0))
+                if (extra_tic && !(mo->flags_ & kMapObjectFlagMissile))
+                    continue;
+                else
                     P_MobjThinker(mo, extra_tic);
             }
         }
@@ -2046,33 +1990,8 @@ void SpawnBlood(float x, float y, float z, float damage, BAMAngle angle, const M
 
 FlatDefinition *P_GetThingFlatDef(MapObject *thing)
 {
-    FlatDefinition *current_flatdef = nullptr;
-
-    // If no 3D floors, just return the flat
-    if (thing->subsector_->sector->extrafloor_used == 0)
-    {
-        current_flatdef = flatdefs.Find(thing->subsector_->sector->floor.image->name_.c_str());
-    }
-    // Start from the lowest exfloor and check if the player is standing on it,
-    // then return the control sector's flat
-    else
-    {
-        float       player_floor_height = thing->floor_z_;
-        Extrafloor *floor_checker       = thing->subsector_->sector->bottom_extrafloor;
-        Extrafloor *liquid_checker      = thing->subsector_->sector->bottom_liquid;
-        for (Extrafloor *ef = floor_checker; ef; ef = ef->higher)
-        {
-            if (AlmostEquals(player_floor_height, ef->top_height))
-                current_flatdef = flatdefs.Find(ef->extrafloor_line->front_sector->floor.image->name_.c_str());
-        }
-        for (Extrafloor *ef = liquid_checker; ef; ef = ef->higher)
-        {
-            if (AlmostEquals(player_floor_height, ef->top_height))
-                current_flatdef = flatdefs.Find(ef->extrafloor_line->front_sector->floor.image->name_.c_str());
-        }
-    }
-
-    return current_flatdef;
+    // Needs to be an EName - Dasho
+    return flatdefs.Find(thing->subsector_->sector->floor.image->name_.c_str());
 }
 
 //---------------------------------------------------------------------------

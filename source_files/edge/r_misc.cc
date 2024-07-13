@@ -131,15 +131,10 @@ static float ApproximateAtan2(float y, float x)
         return (angle);
 }
 //
-BAMAngle PointToAngle(float x1, float y1, float x, float y, bool precise)
+BAMAngle PointToAngle(float x1, float y1, float x, float y)
 {
     x -= x1;
     y -= y1;
-
-    if (precise)
-    {
-        return (AlmostEquals(x, 0.0f) && AlmostEquals(y, 0.0f)) ? 0 : epi::BAMFromDegrees(atan2(y, x) * (180 / HMM_PI));
-    }
 
     return epi::BAMFromDegrees(ApproximateAtan2(y, x) * (180 / HMM_PI));
 }
@@ -221,44 +216,7 @@ Subsector *PointInSubsector(float x, float y)
 
 RegionProperties *GetPointProperties(Subsector *sub, float z)
 {
-    Extrafloor *S, *L, *C;
-    float       floor_h;
-
-    // traverse extrafloors upwards
-
-    floor_h = sub->sector->floor_height;
-
-    S = sub->sector->bottom_extrafloor;
-    L = sub->sector->bottom_liquid;
-
-    while (S || L)
-    {
-        if (!L || (S && S->bottom_height < L->bottom_height))
-        {
-            C = S;
-            S = S->higher;
-        }
-        else
-        {
-            C = L;
-            L = L->higher;
-        }
-
-        EPI_ASSERT(C);
-
-        // ignore liquids in the middle of THICK solids, or below real
-        // floor or above real ceiling
-        //
-        if (C->bottom_height < floor_h || C->bottom_height > sub->sector->ceiling_height)
-            continue;
-
-        if (z < C->top_height)
-            return C->properties;
-
-        floor_h = C->top_height;
-    }
-
-    // extrafloors were exhausted, must be top area
+    // Review if vert slopes matter here - Dasho   
     return sub->sector->active_properties;
 }
 
@@ -269,19 +227,16 @@ static constexpr uint16_t kMaximumDrawThings     = 32768;
 static constexpr uint16_t kMaximumDrawFloors     = 32768;
 static constexpr uint32_t kMaximumDrawSegs       = 65536;
 static constexpr uint32_t kMaximumDrawSubsectors = 65536;
-static constexpr uint16_t kMaximumDrawMirrors    = 512;
 
 static std::vector<DrawThing>     draw_things;
 static std::vector<DrawFloor>     draw_floors;
 static std::vector<DrawSeg>       draw_segs;
 static std::vector<DrawSubsector> draw_subsectors;
-static std::vector<DrawMirror>    draw_mirrors;
 
 static int draw_thing_position;
 static int draw_floor_position;
 static int draw_seg_position;
 static int draw_subsector_position;
-static int draw_mirror_position;
 
 //
 // AllocateDrawStructs
@@ -294,7 +249,6 @@ void AllocateDrawStructs(void)
     draw_floors.resize(kMaximumDrawFloors);
     draw_segs.resize(kMaximumDrawSegs);
     draw_subsectors.resize(kMaximumDrawSubsectors);
-    draw_mirrors.resize(kMaximumDrawMirrors);
 }
 
 // bsp clear function
@@ -305,7 +259,6 @@ void ClearBSP(void)
     draw_floor_position     = 0;
     draw_seg_position       = 0;
     draw_subsector_position = 0;
-    draw_mirror_position    = 0;
 }
 
 void FreeBSP(void)
@@ -314,7 +267,6 @@ void FreeBSP(void)
     draw_floors.clear();
     draw_segs.clear();
     draw_subsectors.clear();
-    draw_mirrors.clear();
 
     ClearBSP();
 }
@@ -357,16 +309,6 @@ DrawSubsector *GetDrawSub()
     }
 
     return &draw_subsectors[draw_subsector_position++];
-}
-
-DrawMirror *GetDrawMirror()
-{
-    if (draw_mirror_position >= kMaximumDrawMirrors)
-    {
-        FatalError("Max Draw Mirrors Exceeded");
-    }
-
-    return &draw_mirrors[draw_mirror_position++];
 }
 
 //--- editor settings ---

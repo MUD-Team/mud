@@ -258,9 +258,6 @@ static bool CheckAbsoluteLineCallback(Line *ld, void *data)
     // The spawning thing's position touches the given line.
     // If this should not be allowed, return false.
 
-    if (move_check.mover->player_ && ld->special && (ld->special->portal_effect_ & kPortalEffectTypeStandard))
-        return true;
-
     if (!ld->back_sector || ld->gap_number == 0)
         return false; // one sided line
 
@@ -445,9 +442,6 @@ static bool CheckRelativeLineCallback(Line *ld, void *data)
     // NOTE: specials are NOT sorted by order,
     // so two special lines that are only 8 pixels apart
     // could be crossed in either order.
-
-    if (move_check.mover->player_ && ld->special && (ld->special->portal_effect_ & kPortalEffectTypeStandard))
-        return true;
 
     if (!ld->back_sector)
     {
@@ -2059,22 +2053,11 @@ static bool ShootTraverseCallback(PathIntercept *in, void *dataptr)
         //(1.) check if shot has hit a floor or ceiling...
         if (side)
         {
-            Extrafloor *ef;
             MapSurface *floor_s   = &side->sector->floor;
             float       floor_h   = side->sector->floor_height;
             Sector     *sec_check = nullptr;
             if (ld->side[sidenum ^ 1])
                 sec_check = ld->side[sidenum ^ 1]->sector;
-
-            // FIXME: must go in correct order
-            for (ef = side->sector->bottom_extrafloor; ef; ef = ef->higher)
-            {
-                if (!ShootCheckGap(x, y, z, floor_h, floor_s, ef->bottom_height, ef->bottom, sec_check, ld))
-                    return false;
-
-                floor_s = ef->top;
-                floor_h = ef->top_height;
-            }
 
             if (!ShootCheckGap(x, y, z, floor_h, floor_s, side->sector->ceiling_height, &side->sector->ceiling,
                                sec_check, ld))
@@ -2528,7 +2511,7 @@ static bool PTR_UseTraverse(PathIntercept *in, void *dataptr)
 
     Side *side = ld->side[sidenum];
 
-    // update open vertical range (extrafloors are NOT checked)
+    // update open vertical range
     if (side)
     {
         use_lower = HMM_MAX(use_lower, side->sector->floor_height);
@@ -2836,31 +2819,14 @@ static void ChangeSectorHeights(Sector *sec, float floor_height, float ceiling_h
 //
 // CheckSolidSectorMove
 //
-// Checks if the sector (and any attached extrafloors) can be moved.
+// Checks if the sector can be moved.
 // Only checks againgst hitting other solid floors, things are NOT
 // considered here.  Returns true if OK, otherwise false.
 //
 bool CheckSolidSectorMove(Sector *sec, bool is_ceiling, float dh)
 {
-    Extrafloor *ef;
-
     if (AlmostEquals(dh, 0.0f))
         return true;
-
-    //
-    // first check real sector
-    //
-
-    if (is_ceiling && dh < 0 && sec->top_extrafloor && (sec->ceiling_height - dh < sec->top_extrafloor->top_height))
-    {
-        return false;
-    }
-
-    if (!is_ceiling && dh > 0 && sec->bottom_extrafloor &&
-        (sec->floor_height + dh > sec->bottom_extrafloor->bottom_height))
-    {
-        return false;
-    }
 
     // Test fix for Doom 1 E3M4 crusher bug - Dasho
     if (is_ceiling && dh < 0 && AlmostEquals(sec->ceiling_height, sec->floor_height))
@@ -2869,73 +2835,7 @@ bool CheckSolidSectorMove(Sector *sec, bool is_ceiling, float dh)
             sec->ceiling_move->destination_height = sec->floor_height - dh;
     }
 
-    // don't allow a dummy sector to go FUBAR
-    if (sec->control_floors)
-    {
-        if (is_ceiling && (sec->ceiling_height + dh < sec->floor_height))
-            return false;
-
-        if (!is_ceiling && (sec->floor_height + dh > sec->ceiling_height))
-            return false;
-    }
-
-    //
-    // second, check attached extrafloors
-    //
-
-    for (ef = sec->control_floors; ef; ef = ef->control_sector_next)
-    {
-        // liquids can go anywhere, anytime
-        if (ef->extrafloor_definition->type_ & kExtraFloorTypeLiquid)
-            continue;
-
-        // moving a thin extrafloor ?
-        if (!is_ceiling && !(ef->extrafloor_definition->type_ & kExtraFloorTypeThick))
-        {
-            float new_h = ef->top_height + dh;
-
-            if (dh > 0 && new_h > (ef->higher ? ef->higher->bottom_height : ef->sector->ceiling_height))
-            {
-                return false;
-            }
-
-            if (dh < 0 && new_h < (ef->lower ? ef->lower->top_height : ef->sector->floor_height))
-            {
-                return false;
-            }
-            continue;
-        }
-
-        // moving the top of a thick extrafloor ?
-        if (is_ceiling && (ef->extrafloor_definition->type_ & kExtraFloorTypeThick))
-        {
-            float new_h = ef->top_height + dh;
-
-            if (dh < 0 && new_h < ef->bottom_height)
-                return false;
-
-            if (dh > 0 && new_h > (ef->higher ? ef->higher->bottom_height : ef->sector->ceiling_height))
-            {
-                return false;
-            }
-            continue;
-        }
-
-        // moving the bottom of a thick extrafloor ?
-        if (!is_ceiling && (ef->extrafloor_definition->type_ & kExtraFloorTypeThick))
-        {
-            float new_h = ef->bottom_height + dh;
-
-            if (dh > 0 && new_h > ef->top_height)
-                return false;
-
-            if (dh < 0 && new_h < (ef->lower ? ef->lower->top_height : ef->sector->floor_height))
-            {
-                return false;
-            }
-            continue;
-        }
-    }
+    // May need more checks here - Dasho
 
     return true;
 }
@@ -2943,7 +2843,7 @@ bool CheckSolidSectorMove(Sector *sec, bool is_ceiling, float dh)
 //
 // SolidSectorMove
 //
-// Moves the sector and any attached extrafloors.  You MUST call
+// Moves the sector.  You MUST call
 // CheckSolidSectorMove() first to check if move is possible.
 //
 // Things are checked here, and will be moved if they overlap the
@@ -2953,8 +2853,6 @@ bool CheckSolidSectorMove(Sector *sec, bool is_ceiling, float dh)
 //
 bool SolidSectorMove(Sector *sec, bool is_ceiling, float dh, int crush, bool nocarething)
 {
-    Extrafloor *ef;
-
     if (AlmostEquals(dh, 0.0f))
         return false;
 
@@ -2971,81 +2869,18 @@ bool SolidSectorMove(Sector *sec, bool is_ceiling, float dh, int crush, bool noc
         sec->floor_height += dh;
 
     RecomputeGapsAroundSector(sec);
-    FloodExtraFloors(sec);
 
     if (!nocarething)
     {
         if (is_ceiling)
         {
-            float h = sec->top_extrafloor ? sec->top_extrafloor->top_height : sec->floor_height;
+            float h = sec->floor_height;
             ChangeSectorHeights(sec, h, sec->ceiling_height, 0, dh);
         }
         else
         {
-            float h = sec->bottom_extrafloor ? sec->bottom_extrafloor->bottom_height : sec->ceiling_height;
+            float h = sec->ceiling_height;
             ChangeSectorHeights(sec, sec->floor_height, h, dh, 0);
-        }
-    }
-
-    //
-    // second, update attached extrafloors
-    //
-
-    for (ef = sec->control_floors; ef; ef = ef->control_sector_next)
-    {
-        if (ef->extrafloor_definition->type_ & kExtraFloorTypeThick)
-        {
-            ef->top_height    = sec->ceiling_height;
-            ef->bottom_height = sec->floor_height;
-        }
-        else
-        {
-            ef->top_height = ef->bottom_height = sec->floor_height;
-        }
-
-        RecomputeGapsAroundSector(ef->sector);
-        FloodExtraFloors(ef->sector);
-    }
-
-    if (!nocarething)
-    {
-        for (ef = sec->control_floors; ef; ef = ef->control_sector_next)
-        {
-            // liquids can go anywhere, anytime
-            if (ef->extrafloor_definition->type_ & kExtraFloorTypeLiquid)
-                continue;
-
-            // moving a thin extrafloor ?
-            if (!is_ceiling && !(ef->extrafloor_definition->type_ & kExtraFloorTypeThick))
-            {
-                if (dh > 0)
-                {
-                    float h = ef->higher ? ef->higher->bottom_height : ef->sector->ceiling_height;
-                    ChangeSectorHeights(ef->sector, ef->top_height, h, dh, 0);
-                }
-                else if (dh < 0)
-                {
-                    float h = ef->lower ? ef->lower->top_height : ef->sector->floor_height;
-                    ChangeSectorHeights(ef->sector, h, ef->top_height, 0, dh);
-                }
-                continue;
-            }
-
-            // moving the top of a thick extrafloor ?
-            if (is_ceiling && (ef->extrafloor_definition->type_ & kExtraFloorTypeThick))
-            {
-                float h = ef->higher ? ef->higher->bottom_height : ef->sector->ceiling_height;
-                ChangeSectorHeights(ef->sector, ef->top_height, h, dh, 0);
-                continue;
-            }
-
-            // moving the bottom of a thick extrafloor ?
-            if (!is_ceiling && (ef->extrafloor_definition->type_ & kExtraFloorTypeThick))
-            {
-                float h = ef->lower ? ef->lower->top_height : ef->sector->floor_height;
-                ChangeSectorHeights(ef->sector, h, ef->bottom_height, 0, dh);
-                continue;
-            }
         }
     }
 
@@ -3092,10 +2927,6 @@ static bool CorpseCheckCallback(MapObject *thing, void *data)
 
     if (fabs(thing->x - raiser_try_x) > maxdist || fabs(thing->y - raiser_try_y) > maxdist)
         return true; // not actually touching
-
-    // -AJA- don't raise corpses blocked by extrafloors
-    if (!QuickVerticalSightCheck(raiser_try_object, thing))
-        return true;
 
     // -AJA- don't raise players unless on their side
     if (thing->player_ && (raiser_try_object->info_->side_ & thing->info_->side_) == 0)

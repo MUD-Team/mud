@@ -480,50 +480,6 @@ static float ScaleFactorForPlane(MapSurface &surf, float line_len, bool use_heig
         return surf.image->ScaledWidthActual() / line_len;
 }
 
-static void P_EFTransferTrans(Sector *ctrl, Sector *sec, Line *line, const ExtraFloorDefinition *ef, float trans)
-{
-    int i;
-
-    // floor and ceiling
-
-    if (ctrl->floor.translucency > trans)
-        ctrl->floor.translucency = trans;
-
-    if (ctrl->ceiling.translucency > trans)
-        ctrl->ceiling.translucency = trans;
-
-    // sides
-
-    if (!(ef->type_ & kExtraFloorTypeThick))
-        return;
-
-    if (ef->type_ & (kExtraFloorTypeSideUpper | kExtraFloorTypeSideLower))
-    {
-        for (i = 0; i < sec->line_count; i++)
-        {
-            Line *L = sec->lines[i];
-            Side *S = nullptr;
-
-            if (L->front_sector == sec)
-                S = L->side[1];
-            else if (L->back_sector == sec)
-                S = L->side[0];
-
-            if (!S)
-                continue;
-
-            if (ef->type_ & kExtraFloorTypeSideUpper)
-                S->top.translucency = trans;
-            else // kExtraFloorTypeSideLower
-                S->bottom.translucency = trans;
-        }
-
-        return;
-    }
-
-    line->side[0]->middle.translucency = trans;
-}
-
 //
 // Lobo:2021 Setup our special debris linetype.
 //
@@ -953,140 +909,6 @@ static void SectorEffect(Sector *target, Line *source, const LineType *special)
         target->ceiling.y_matrix.X *= factor;
         target->ceiling.y_matrix.Y *= factor;
     }
-
-    // killough 3/7/98 and AJA 2022:
-    // support for drawn heights coming from different sector
-    if (special->sector_effect_ & kSectorEffectTypeBoomHeights)
-    {
-        target->height_sector      = source->front_sector;
-        target->height_sector_side = source->side[0];
-        // Quick band-aid fix for Line 242 "windows" - Dasho
-        if (target->ceiling_height - target->floor_height < 1)
-        {
-            target->ceiling_height = source->front_sector->ceiling_height;
-            target->floor_height   = source->front_sector->floor_height;
-            for (int i = 0; i < target->line_count; i++)
-            {
-                if (target->lines[i]->side[1])
-                {
-                    target->lines[i]->blocked = false;
-                    if (target->lines[i]->side[0]->middle.image && target->lines[i]->side[1]->middle.image &&
-                        target->lines[i]->side[0]->middle.image == target->lines[i]->side[1]->middle.image)
-                    {
-                        target->lines[i]->side[0]->middle_mask_offset = 0;
-                        target->lines[i]->side[1]->middle_mask_offset = 0;
-                        for (Seg *seg = target->subsectors->segs; seg != nullptr; seg = seg->subsector_next)
-                        {
-                            if (seg->linedef == target->lines[i])
-                                seg->linedef->flags |= kLineFlagLowerUnpegged;
-                        }
-                    }
-                }
-            }
-        }
-        else
-        {
-            for (int i = 0; i < target->line_count; i++)
-            {
-                if (target->lines[i]->side[1])
-                    target->lines[i]->blocked = false;
-            }
-        }
-    }
-}
-
-static void P_PortalEffect(Line *ld)
-{
-    // already linked?
-    if (ld->portal_pair)
-        return;
-
-    if (ld->side[1])
-    {
-        LogWarning("Portal on line #%d disabled: Not one-sided!\n", (int)(ld - level_lines));
-        return;
-    }
-
-    if (ld->special->portal_effect_ & kPortalEffectTypeMirror)
-    {
-        ld->flags |= kLineFlagMirror;
-        return;
-    }
-
-    if (ld->tag <= 0)
-    {
-        LogWarning("Portal on line #%d disabled: Missing tag.\n", (int)(ld - level_lines));
-        return;
-    }
-
-    bool is_camera = (ld->special->portal_effect_ & kPortalEffectTypeCamera) ? true : false;
-
-    for (int i = 0; i < total_level_lines; i++)
-    {
-        Line *other = level_lines + i;
-
-        if (other == ld)
-            continue;
-
-        if (other->tag != ld->tag)
-            continue;
-
-        float h1 = ld->front_sector->ceiling_height - ld->front_sector->floor_height;
-        float h2 = other->front_sector->ceiling_height - other->front_sector->floor_height;
-
-        if (h1 < 1 || h2 < 1)
-        {
-            LogWarning("Portal on line #%d disabled: sector is closed.\n", (int)(ld - level_lines));
-            return;
-        }
-
-        if (is_camera)
-        {
-            // camera are much less restrictive than pass-able portals
-            // (they are also one-way).
-
-            ld->portal_pair = other;
-            return;
-        }
-
-        if (other->portal_pair)
-        {
-            LogWarning("Portal on line #%d disabled: Partner already a portal.\n", (int)(ld - level_lines));
-            return;
-        }
-
-        if (other->side[1])
-        {
-            LogWarning("Portal on line #%d disabled: Partner not one-sided.\n", (int)(ld - level_lines));
-            return;
-        }
-
-        float h_ratio = h1 / h2;
-
-        if (h_ratio < 0.95f || h_ratio > 1.05f)
-        {
-            LogWarning("Portal on line #%d disabled: Partner is different height.\n", (int)(ld - level_lines));
-            return;
-        }
-
-        float len_ratio = ld->length / other->length;
-
-        if (len_ratio < 0.95f || len_ratio > 1.05f)
-        {
-            LogWarning("Portal on line #%d disabled: Partner is different length.\n", (int)(ld - level_lines));
-            return;
-        }
-
-        ld->portal_pair    = other;
-        other->portal_pair = ld;
-
-        // let renderer (etc) know the portal information
-        other->special = ld->special;
-
-        return; // Success !!
-    }
-
-    LogWarning("Portal on line #%d disabled: Cannot find partner!\n", (int)(ld - level_lines));
 }
 
 static SlopePlane *DetailSlope_BoundIt(Line *ld, Sector *sec, float dz1, float dz2)
@@ -1767,22 +1589,30 @@ static inline void PlayerInProperties(Player *player, float bz, float tz, float 
         }
     }
 
-    if ((special->special_flags_ & kSectorFlagAirLess) && mouth_z >= floor_height && mouth_z <= ceiling_height)
+    // MUD: New swim check
+    if (special->special_flags_ & kSectorFlagDeepWater)
     {
         player->airless_ = true;
-    }
-
-    if ((special->special_flags_ & kSectorFlagSwimming) && mouth_z >= floor_height && mouth_z <= ceiling_height)
-    {
         player->swimming_ = true;
-        *swim_special     = special;
+       *swim_special     = special;
     }
-
-    if ((special->special_flags_ & kSectorFlagSwimming) && player->map_object_->z >= floor_height &&
-        player->map_object_->z <= ceiling_height)
+    else
     {
-        player->wet_feet_ = true;
-        HitLiquidFloor(player->map_object_);
+        if ((special->special_flags_ & kSectorFlagAirLess) && mouth_z >= floor_height && mouth_z <= ceiling_height)
+        {
+            player->airless_ = true;
+        }
+        if ((special->special_flags_ & kSectorFlagSwimming) && mouth_z >= floor_height && mouth_z <= ceiling_height)
+        {
+            player->swimming_ = true;
+            *swim_special     = special;
+        }
+        if ((special->special_flags_ & kSectorFlagSwimming) && player->map_object_->z >= floor_height &&
+            player->map_object_->z <= ceiling_height)
+        {
+            player->wet_feet_ = true;
+            HitLiquidFloor(player->map_object_);
+        }
     }
 
     factor = 1.0f;
@@ -1880,7 +1710,6 @@ static inline void PlayerInProperties(Player *player, float bz, float tz, float 
 //
 void PlayerInSpecialSector(Player *player, Sector *sec, bool should_choke)
 {
-    Extrafloor *S, *L, *C;
     float       floor_h;
     float       ceil_h;
 
@@ -1902,40 +1731,16 @@ void PlayerInSpecialSector(Player *player, Sector *sec, bool should_choke)
     floor_h = sec->floor_height;
     ceil_h  = sec->ceiling_height;
 
-    S = sec->bottom_extrafloor;
-    L = sec->bottom_liquid;
-
-    while (S || L)
-    {
-        if (!L || (S && S->bottom_height < L->bottom_height))
-        {
-            C = S;
-            S = S->higher;
-        }
-        else
-        {
-            C = L;
-            L = L->higher;
-        }
-
-        EPI_ASSERT(C);
-
-        // ignore "hidden" liquids
-        if (C->bottom_height < floor_h || C->bottom_height > sec->ceiling_height)
-            continue;
-
-        PlayerInProperties(player, bz, tz, floor_h, C->top_height, C->properties, &swim_special, should_choke);
-
-        floor_h = C->top_height;
-    }
-
     if (sec->floor_vertex_slope)
         floor_h = player->map_object_->floor_z_;
 
     if (sec->ceiling_vertex_slope)
         ceil_h = player->map_object_->ceiling_z_;
 
-    PlayerInProperties(player, bz, tz, floor_h, ceil_h, sec->active_properties, &swim_special, should_choke);
+    if (sec->has_deep_water && tz < sec->deep_water_height)
+        PlayerInProperties(player, bz, tz, floor_h, ceil_h, &sec->deep_water_properties, &swim_special, should_choke);
+    else
+        PlayerInProperties(player, bz, tz, floor_h, ceil_h, sec->active_properties, &swim_special, should_choke);
 
     // breathing support: handle gasping when leaving the water
     if ((was_underwater && !player->underwater_) || (was_airless && !player->airless_))
@@ -2498,44 +2303,6 @@ void SpawnMapSpecials1(void)
         }
 
         level_lines[i].count = special->count_;
-
-        // -AJA- 2007/12/29: Portal effects
-        if (special->portal_effect_ != kPortalEffectTypeNone)
-        {
-            P_PortalEffect(&level_lines[i]);
-        }
-
-        // Extrafloor creation
-        if (special->ef_.type_ != kExtraFloorTypeNone && level_lines[i].tag > 0)
-        {
-            Sector *ctrl = level_lines[i].front_sector;
-
-            for (Sector *tsec = FindSectorFromTag(level_lines[i].tag); tsec; tsec = tsec->tag_next)
-            {
-                // the OLD method of Boom deep water (the BOOMTEX flag)
-                if (special->ef_.type_ & kExtraFloorTypeBoomTex)
-                {
-                    if (ctrl->floor_height <= tsec->floor_height)
-                    {
-                        tsec->properties.colourmap = ctrl->properties.colourmap;
-                        continue;
-                    }
-                }
-
-                AddExtraFloor(tsec, &level_lines[i]);
-
-                // transfer any translucency
-                if (special->translucency_ <= 0.99f)
-                {
-                    P_EFTransferTrans(ctrl, tsec, &level_lines[i], &special->ef_, special->translucency_);
-                }
-
-                // update the line gaps & things:
-                RecomputeGapsAroundSector(tsec);
-
-                FloodExtraFloors(tsec);
-            }
-        }
 
         // Detail slopes
         if (special->slope_type_ & kSlopeTypeDetailFloor)

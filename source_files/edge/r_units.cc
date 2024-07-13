@@ -52,9 +52,6 @@ EDGE_DEFINE_CONSOLE_VARIABLE(renderer_dumb_clamp, "0", kConsoleVariableFlagNone)
 static constexpr uint16_t kMaximumLocalVertices = 65535;
 static constexpr uint16_t kMaximumLocalUnits    = 1024;
 
-extern ConsoleVariable draw_culling;
-extern ConsoleVariable cull_fog_color;
-
 std::unordered_map<GLuint, GLint> texture_clamp;
 
 // a single unit (polygon, quad, etc) to pass to the GL
@@ -91,8 +88,6 @@ static int current_render_vert;
 static int current_render_unit;
 
 static bool batch_sort;
-
-sg_color culling_fog_color;
 
 //
 // StartUnitBatch
@@ -294,39 +289,6 @@ void RenderCurrentUnits(void)
         std::sort(local_unit_map.begin(), local_unit_map.begin() + current_render_unit, Compare_Unit_pred());
     }
 
-    if (draw_culling.d_)
-    {
-        sg_color fogColor;
-        switch (cull_fog_color.d_)
-        {
-        case 0:
-            fogColor = culling_fog_color;
-            break;
-        case 1:
-            // Not pure white, but 1.0f felt like a little much - Dasho
-            fogColor = sg_silver;
-            break;
-        case 2:
-            fogColor = {0.25f, 0.25f, 0.25f, 1.0f};
-            break;
-        case 3:
-            fogColor = sg_black;
-            break;
-        default:
-            fogColor = culling_fog_color;
-            break;
-        }
-
-        state->ClearColor(fogColor.r, fogColor.g, fogColor.b, 1.0f);
-        state->FogMode(GL_LINEAR);
-        state->FogColor(fogColor.r, fogColor.g, fogColor.b, 1.0f);
-        state->FogStart(renderer_far_clip.f_ - 750.0f);
-        state->FogEnd(renderer_far_clip.f_ - 250.0f);
-        state->Enable(GL_FOG);
-    }
-    else
-        state->FogMode(GL_EXP); // if needed
-
     for (int j = 0; j < current_render_unit; j++)
     {
         ec_frame_stats.draw_render_units++;
@@ -337,7 +299,7 @@ void RenderCurrentUnits(void)
 
         // detect changes in texture/alpha/blending state
 
-        if (!draw_culling.d_ && unit->fog_color != kRGBANoValue)
+        if (unit->fog_color != kRGBANoValue)
         {
             if (unit->fog_color != active_fog_rgb)
             {
@@ -356,7 +318,7 @@ void RenderCurrentUnits(void)
             else
                 state->Disable(GL_FOG);
         }
-        else if (!draw_culling.d_)
+        else
             state->Disable(GL_FOG);
 
         if (active_pass != unit->pass)
@@ -432,14 +394,6 @@ void RenderCurrentUnits(void)
             if (active_tex[t] != unit->texture[t] || active_env[t] != unit->environment_mode[t])
             {
                 state->ActiveTexture(GL_TEXTURE0 + t);
-            }
-
-            if (draw_culling.d_)
-            {
-                if (unit->pass > 0)
-                    state->Disable(GL_FOG);
-                else
-                    state->Enable(GL_FOG);
             }
 
             if (active_tex[t] != unit->texture[t])

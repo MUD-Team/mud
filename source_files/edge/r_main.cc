@@ -30,15 +30,11 @@
 // implementation limits
 
 static int maximum_lights;
-static int maximum_clip_planes;
 static int maximum_texture_units;
 int        maximum_texture_size;
 
 EDGE_DEFINE_CONSOLE_VARIABLE(renderer_near_clip, "1", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(renderer_far_clip, "64000", kConsoleVariableFlagArchive)
-EDGE_DEFINE_CONSOLE_VARIABLE(draw_culling, "0", kConsoleVariableFlagArchive)
-EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(draw_culling_distance, "3000", kConsoleVariableFlagArchive, 1000.0f, 16000.0f)
-EDGE_DEFINE_CONSOLE_VARIABLE(cull_fog_color, "0", kConsoleVariableFlagArchive)
 
 //
 // SetupMatrices2D
@@ -188,22 +184,19 @@ void RendererInit(void)
     // read implementation limits
     {
         GLint max_lights;
-        GLint max_clip_planes;
         GLint max_tex_size;
         GLint max_tex_units;
 
         glGetIntegerv(GL_MAX_LIGHTS, &max_lights);
-        glGetIntegerv(GL_MAX_CLIP_PLANES, &max_clip_planes);
         glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max_tex_size);
         glGetIntegerv(GL_MAX_TEXTURE_UNITS, &max_tex_units);
 
         maximum_lights        = max_lights;
-        maximum_clip_planes   = max_clip_planes;
         maximum_texture_size  = max_tex_size;
         maximum_texture_units = max_tex_units;
     }
 
-    LogPrint("OpenGL: Lights: %d  Clips: %d  Tex: %d  Units: %d\n", maximum_lights, maximum_clip_planes,
+    LogPrint("OpenGL: Lights: %d  Clips: %d  Tex: %d  Units: %d\n", maximum_lights,
              maximum_texture_size, maximum_texture_units);
 
     RendererSoftInit();

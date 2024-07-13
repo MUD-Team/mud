@@ -365,8 +365,6 @@ static void TextWrite(void)
         }
         else
         {
-            if (title_scaling.d_) // Fill Border
-                HUDStretchImage(-320, -200, 960, 600, finale_text_background, 0, 0);
             HUDDrawImageTitleWS(finale_text_background);
         }
 
@@ -700,8 +698,6 @@ static void CastDrawer(void)
     else
     {
         image = ImageLookup("BOSSBACK");
-        if (title_scaling.d_) // Fill Border
-            HUDStretchImage(-320, -200, 960, 600, image, 0, 0);
         HUDDrawImageTitleWS(image);
     }
 
@@ -880,8 +876,6 @@ void FinaleDrawer(void)
     case kFinaleStagePicture: {
         const Image *image =
             ImageLookup(finale->pics_[HMM_MIN((size_t)picture_number, finale->pics_.size() - 1)].c_str());
-        if (title_scaling.d_) // Fill Border
-            HUDStretchImage(-320, -200, 960, 600, image, 0, 0);
         HUDDrawImageTitleWS(image);
         break;
     }

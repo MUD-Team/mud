@@ -222,7 +222,7 @@ void DestroyAllSliders(void)
 //    RES_Ok - the move was completely successful.
 //
 //    RES_Impossible - the move was not possible due to another solid
-//    surface (e.g. an extrafloor) getting in the way.  The plane will
+//    surface getting in the way.  The plane will
 //    remain at its current height.
 //
 //    RES_PastDest - the destination height has been reached.  The

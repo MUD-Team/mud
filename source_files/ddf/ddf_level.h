@@ -87,15 +87,6 @@ enum MapFlag
     kMapFlagTeamDamage   = (1 << 19),
 };
 
-enum SkyStretch
-{
-    kSkyStretchUnset   = -1,
-    kSkyStretchMirror  = 0,
-    kSkyStretchRepeat  = 1,
-    kSkyStretchStretch = 2,
-    kSkyStretchVanilla = 3,
-};
-
 enum IntermissionStyle
 {
     // standard Doom intermission stats
@@ -157,9 +148,6 @@ class MapDefinition
 
     // optional *MAPINFO field
     std::string author_;
-
-    // sky stretch override
-    SkyStretch forced_skystretch_;
 
     Colormap *indoor_fog_cmap_;
     RGBAColor indoor_fog_color_;

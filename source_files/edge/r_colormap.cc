@@ -162,7 +162,7 @@ class ColormapShader : public AbstractShader
 
   public:
     ColormapShader(const Colormap *CM)
-        : colormap_(CM), light_level_(255), fade_texture_(0), lighting_model_(kLightingModelDoom),
+        : colormap_(CM), light_level_(255), fade_texture_(0), lighting_model_(kLightingModelDoomish),
           fog_color_(kRGBANoValue), fog_density_(0), sector_(nullptr)
     {
     }

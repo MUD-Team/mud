@@ -189,25 +189,14 @@ static int PL_under_water(lua_State *L)
 //
 static int PL_on_ground(lua_State *L)
 {
-    // not a 3D floor?
-    if (ui_player_who->map_object_->subsector_->sector->extrafloor_used == 0)
-    {
-        // on the edge above water/lava/etc? Handles edge walker case
-        if (!AlmostEquals(ui_player_who->map_object_->floor_z_,
-                          ui_player_who->map_object_->subsector_->sector->floor_height) &&
-            !ui_player_who->map_object_->subsector_->sector->floor_vertex_slope)
-            lua_pushboolean(L, 0);
-        else
-        {
-            // touching the floor? Handles jumping or flying
-            if (ui_player_who->map_object_->z <= ui_player_who->map_object_->floor_z_)
-                lua_pushboolean(L, 1);
-            else
-                lua_pushboolean(L, 0);
-        }
-    }
+    // on the edge above water/lava/etc? Handles edge walker case
+    if (!AlmostEquals(ui_player_who->map_object_->floor_z_,
+                        ui_player_who->map_object_->subsector_->sector->floor_height) &&
+        !ui_player_who->map_object_->subsector_->sector->floor_vertex_slope)
+        lua_pushboolean(L, 0);
     else
     {
+        // touching the floor? Handles jumping or flying
         if (ui_player_who->map_object_->z <= ui_player_who->map_object_->floor_z_)
             lua_pushboolean(L, 1);
         else
@@ -995,29 +984,7 @@ static int PL_map_items(lua_State *L)
 // Lobo: November 2021
 static int PL_floor_flat(lua_State *L)
 {
-    // If no 3D floors, just return the flat
-    if (ui_player_who->map_object_->subsector_->sector->extrafloor_used == 0)
-    {
-        lua_pushstring(L, ui_player_who->map_object_->subsector_->sector->floor.image->name_.c_str());
-    }
-    else
-    {
-        // Start from the lowest exfloor and check if the player is standing on
-        // it, then return the control sector's flat
-        float       player_floor_height = ui_player_who->map_object_->floor_z_;
-        Extrafloor *floor_checker       = ui_player_who->map_object_->subsector_->sector->bottom_extrafloor;
-        for (Extrafloor *ef = floor_checker; ef; ef = ef->higher)
-        {
-            if (player_floor_height + 1 > ef->top_height)
-            {
-                lua_pushstring(L, ef->top->image->name_.c_str());
-                return 1;
-            }
-        }
-        // Fallback if nothing else satisfies these conditions
-        lua_pushstring(L, ui_player_who->map_object_->subsector_->sector->floor.image->name_.c_str());
-    }
-
+    lua_pushstring(L, ui_player_who->map_object_->subsector_->sector->floor.image->name_.c_str());
     return 1;
 }
 
@@ -1910,35 +1877,7 @@ static int PL_sector_light(lua_State *L)
 // Lobo: May 2023
 static int PL_sector_floor_height(lua_State *L)
 {
-    // If no 3D floors, just return the current sector floor height
-    if (ui_player_who->map_object_->subsector_->sector->extrafloor_used == 0)
-    {
-        lua_pushnumber(L, ui_player_who->map_object_->subsector_->sector->floor_height);
-    }
-    else
-    {
-        // Start from the lowest exfloor and check if the player is standing on
-        // it,
-        //  then return the control sector floor height
-        float       CurrentFloor        = 0;
-        float       player_floor_height = ui_player_who->map_object_->floor_z_;
-        Extrafloor *floor_checker       = ui_player_who->map_object_->subsector_->sector->bottom_extrafloor;
-        for (Extrafloor *ef = floor_checker; ef; ef = ef->higher)
-        {
-            if (CurrentFloor > ef->top_height)
-            {
-                lua_pushnumber(L, ef->top_height);
-                return 1;
-            }
-
-            if (player_floor_height + 1 > ef->top_height)
-            {
-                CurrentFloor = ef->top_height;
-            }
-        }
-        lua_pushnumber(L, CurrentFloor);
-    }
-
+    lua_pushnumber(L, ui_player_who->map_object_->subsector_->sector->floor_height);
     return 1;
 }
 
@@ -1946,35 +1885,7 @@ static int PL_sector_floor_height(lua_State *L)
 // Lobo: May 2023
 static int PL_sector_ceiling_height(lua_State *L)
 {
-    // If no 3D floors, just return the current sector ceiling height
-    if (ui_player_who->map_object_->subsector_->sector->extrafloor_used == 0)
-    {
-        lua_pushnumber(L, ui_player_who->map_object_->subsector_->sector->ceiling_height);
-    }
-    else
-    {
-        // Start from the lowest exfloor and check if the player is standing on
-        // it,
-        //   then return the control sector ceiling height
-        float       HighestCeiling      = 0;
-        float       player_floor_height = ui_player_who->map_object_->floor_z_;
-        Extrafloor *floor_checker       = ui_player_who->map_object_->subsector_->sector->bottom_extrafloor;
-        for (Extrafloor *ef = floor_checker; ef; ef = ef->higher)
-        {
-            if (player_floor_height + 1 > ef->top_height)
-            {
-                HighestCeiling = ef->top_height;
-            }
-            if (HighestCeiling < ef->top_height)
-            {
-                lua_pushnumber(L, ef->bottom_height);
-                return 1;
-            }
-        }
-        // Fallback if nothing else satisfies these conditions
-        lua_pushnumber(L, ui_player_who->map_object_->subsector_->sector->ceiling_height);
-    }
-
+    lua_pushnumber(L, ui_player_who->map_object_->subsector_->sector->ceiling_height);
     return 1;
 }
 
@@ -1982,8 +1893,6 @@ static int PL_sector_ceiling_height(lua_State *L)
 // Lobo: May 2023
 static int PL_is_outside(lua_State *L)
 {
-    // Doesn't account for extrafloors by design. Reasoning is that usually
-    //  extrafloors will be platforms, not roofs...
     if (ui_player_who->map_object_->subsector_->sector->ceiling.image != sky_flat_image) // is it outdoors?
         lua_pushboolean(L, 0);
     else
@@ -2120,29 +2029,6 @@ static int Sector_info(lua_State *L)
     // While we're here, grab the floor flat too
     temp_value = ui_player_who->map_object_->subsector_->sector->floor.image->name_;
 
-    // If we have 3D floors, search...
-    if (ui_player_who->map_object_->subsector_->sector->extrafloor_used != 0)
-    {
-        // Start from the lowest exfloor and check if the player is standing on
-        // it,
-        //  then return the control sector floor height
-        float       player_floor_height = ui_player_who->map_object_->floor_z_;
-        Extrafloor *floor_checker       = ui_player_who->map_object_->subsector_->sector->bottom_extrafloor;
-        for (Extrafloor *ef = floor_checker; ef; ef = ef->higher)
-        {
-            if (CurrentSurface > ef->top_height)
-            {
-                CurrentSurface = ef->top_height;
-                break;
-            }
-
-            if (player_floor_height + 1 > ef->top_height)
-            {
-                CurrentSurface = ef->top_height;
-                temp_value     = ef->top->image->name_;
-            }
-        }
-    }
     lua_pushinteger(L, (int)CurrentSurface);
     lua_setfield(L, -2, "floor_height"); // add to SECTOR Table
     //---------------
@@ -2160,36 +2046,12 @@ static int Sector_info(lua_State *L)
     // default is to just return the current sector ceiling height
     CurrentSurface = ui_player_who->map_object_->subsector_->sector->ceiling_height;
 
-    // If we have 3D floors, search...
-    if (ui_player_who->map_object_->subsector_->sector->extrafloor_used != 0)
-    {
-        // Start from the lowest exfloor and check if the player is standing on
-        // it,
-        //   then return the control sector ceiling height
-        float       HighestCeiling      = 0;
-        float       player_floor_height = ui_player_who->map_object_->floor_z_;
-        Extrafloor *floor_checker       = ui_player_who->map_object_->subsector_->sector->bottom_extrafloor;
-        for (Extrafloor *ef = floor_checker; ef; ef = ef->higher)
-        {
-            if (player_floor_height + 1 > ef->top_height)
-            {
-                HighestCeiling = ef->top_height;
-            }
-            if (HighestCeiling < ef->top_height)
-            {
-                CurrentSurface = ef->bottom_height;
-                break;
-            }
-        }
-    }
     lua_pushinteger(L, (int)CurrentSurface);
     lua_setfield(L, -2, "ceiling_height"); // add to SECTOR Table
     //---------------
 
     //---------------
     // SECTOR.is_outside
-    // Doesn't account for extrafloors by design. Reasoning is that usually
-    //  extrafloors will be platforms, not roofs...
     if (ui_player_who->map_object_->subsector_->sector->ceiling.image != sky_flat_image) // is it outdoors?
         lua_pushboolean(L, 0);
     else

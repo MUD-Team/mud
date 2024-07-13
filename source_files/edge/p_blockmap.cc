@@ -79,11 +79,6 @@ static int dynamic_light_blockmap_height;
 
 MapObject **dynamic_light_blockmap_things = nullptr;
 
-extern std::unordered_set<AbstractShader *> seen_dynamic_lights;
-extern ConsoleVariable                      draw_culling;
-
-EDGE_DEFINE_CONSOLE_VARIABLE(max_dynamic_lights, "0", kConsoleVariableFlagArchive)
-
 void CreateThingBlockmap(void)
 {
     blockmap_things = new MapObject *[blockmap_width * blockmap_height];
@@ -836,9 +831,6 @@ void DynamicLightIterator(float x1, float y1, float z1, float x2, float y2, floa
                 if (mo->state_->bright <= 0 || mo->dynamic_light_.r <= 0)
                     continue;
 
-                if (draw_culling.d_ && PointToDistance(view_x, view_y, mo->x, mo->y) > renderer_far_clip.f_)
-                    continue;
-
                 // check whether radius touches the given bbox
                 float r = mo->dynamic_light_.r;
 
@@ -849,18 +841,6 @@ void DynamicLightIterator(float x1, float y1, float z1, float x2, float y2, floa
                 // create shader if necessary
                 if (!mo->dynamic_light_.shader)
                     mo->dynamic_light_.shader = MakeDLightShader(mo);
-
-                if (max_dynamic_lights.d_ > 0 && seen_dynamic_lights.count(mo->dynamic_light_.shader) == 0)
-                {
-                    if ((int)seen_dynamic_lights.size() >= max_dynamic_lights.d_ * 20)
-                        continue;
-                    else
-                    {
-                        seen_dynamic_lights.insert(mo->dynamic_light_.shader);
-                    }
-                }
-
-                //			mo->dynamic_light_.shader->CheckReset();
 
                 func(mo, data);
             }
@@ -879,9 +859,6 @@ void SectorGlowIterator(Sector *sec, float x1, float y1, float z1, float x2, flo
 
         // skip "off" lights
         if (mo->state_->bright <= 0 || mo->dynamic_light_.r <= 0)
-            continue;
-
-        if (draw_culling.d_ && PointToDistance(view_x, view_y, mo->x, mo->y) > renderer_far_clip.f_)
             continue;
 
         // check whether radius touches the given bbox

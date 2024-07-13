@@ -303,7 +303,7 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
             data.colors[0].add_blue_  = epi::GetRGBABlue(mixme);
         }
 
-        if (use_dynamic_lights && render_view_extra_light < 250)
+        if (render_view_extra_light < 250)
         {
             data.light_position.X = player->map_object_->x + view_cosine * 24;
             data.light_position.Y = player->map_object_->y + view_sine * 24;
@@ -330,7 +330,7 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
 
     StartUnitBatch(false);
 
-    int num_pass = is_fuzzy ? 1 : (detail_level > 0 ? 4 : 3);
+    int num_pass = is_fuzzy ? 1 : 4;
 
     for (int pass = 0; pass < num_pass; pass++)
     {
@@ -680,14 +680,9 @@ static const Image *RendererGetThingSprite2(MapObject *mo, float mx, float my, b
     {
         BAMAngle ang = mo->angle_;
 
-        MirrorAngle(ang);
-
         BAMAngle from_view = PointToAngle(view_x, view_y, mx, my);
 
         ang = from_view - ang + kBAMAngle180;
-
-        if (MirrorReflective())
-            ang = (BAMAngle)0 - ang;
 
         if (frame->rotations_ == 16)
             rot = (ang + (kBAMAngle45 / 4)) >> (kBAMAngleBits - 4);
@@ -698,9 +693,6 @@ static const Image *RendererGetThingSprite2(MapObject *mo, float mx, float my, b
     EPI_ASSERT(0 <= rot && rot < 16);
 
     (*flip) = frame->flip_[rot] ? true : false;
-
-    if (MirrorReflective())
-        (*flip) = !(*flip);
 
     if (!frame->images_[rot])
     {
@@ -766,7 +758,7 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
     EPI_ASSERT(mo->state_);
 
     // ignore the camera itself
-    if (mo == view_camera_map_object && total_active_mirrors == 0)
+    if (mo == view_camera_map_object)
         return;
 
     // ignore invisible things
@@ -792,8 +784,6 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
         mz = mo->interpolation_from_.Z + (mz - mo->interpolation_from_.Z) * along;
     }
 
-    MirrorCoordinate(mx, my);
-
     float tr_x = mx - view_x;
     float tr_y = my - view_y;
 
@@ -815,7 +805,7 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
     float   sink_mult = 0;
     float   bob_mult  = 0;
     Sector *cur_sec   = mo->subsector_->sector;
-    if (!cur_sec->extrafloor_used && !cur_sec->height_sector && abs(mo->z - cur_sec->floor_height) < 1)
+    if (abs(mo->z - cur_sec->floor_height) < 1)
     {
         sink_mult = cur_sec->sink_depth;
         bob_mult  = cur_sec->bob_depth;
@@ -932,9 +922,6 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
     {
         if (gzb >= gzt)
             return;
-
-        MirrorHeight(gzb);
-        MirrorHeight(gzt);
     }
 
     // create new draw thing
@@ -967,12 +954,10 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
     dthing->top = dthing->original_top = gzt;
     dthing->bottom = dthing->original_bottom = gzb;
 
-    float mir_scale = MirrorXYScale();
-
-    dthing->left_delta_x  = pos1 * view_sine * mir_scale;
-    dthing->left_delta_y  = pos1 * -view_cosine * mir_scale;
-    dthing->right_delta_x = pos2 * view_sine * mir_scale;
-    dthing->right_delta_y = pos2 * -view_cosine * mir_scale;
+    dthing->left_delta_x  = pos1 * view_sine;
+    dthing->left_delta_y  = pos1 * -view_cosine;
+    dthing->right_delta_x = pos2 * view_sine;
+    dthing->right_delta_y = pos2 * -view_cosine;
 
     RendererClipSpriteVertically(dsub, dthing);
 }
@@ -995,12 +980,10 @@ static void RenderModel(DrawThing *dthing)
 
     float z = dthing->map_z;
 
-    MirrorHeight(z);
-
     float   sink_mult = 0;
     float   bob_mult  = 0;
     Sector *cur_sec   = mo->subsector_->sector;
-    if (!cur_sec->extrafloor_used && !cur_sec->height_sector && abs(mo->z - cur_sec->floor_height) < 1)
+    if (abs(mo->z - cur_sec->floor_height) < 1)
     {
         sink_mult = cur_sec->sink_depth;
         bob_mult  = cur_sec->bob_depth;
@@ -1108,30 +1091,27 @@ void RenderThing(DrawFloor *dfloor, DrawThing *dthing)
     z1t = z2t = dthing->top;
 
     // MLook: tilt sprites so they look better
-    if (MirrorXYScale() >= 0.99)
-    {
-        float _h    = dthing->original_top - dthing->original_bottom;
-        float skew2 = _h;
+    float _h    = dthing->original_top - dthing->original_bottom;
+    float skew2 = _h;
 
-        if (mo->radius_ >= 1.0f && h > mo->radius_)
-            skew2 = mo->radius_;
+    if (mo->radius_ >= 1.0f && h > mo->radius_)
+        skew2 = mo->radius_;
 
-        float _dx = view_cosine * sprite_skew * skew2;
-        float _dy = view_sine * sprite_skew * skew2;
+    float _dx = view_cosine * sprite_skew * skew2;
+    float _dy = view_sine * sprite_skew * skew2;
 
-        float top_q    = ((dthing->top - dthing->original_bottom) / _h) - 0.5f;
-        float bottom_q = ((dthing->original_top - dthing->bottom) / _h) - 0.5f;
+    float top_q    = ((dthing->top - dthing->original_bottom) / _h) - 0.5f;
+    float bottom_q = ((dthing->original_top - dthing->bottom) / _h) - 0.5f;
 
-        x1t += top_q * _dx;
-        y1t += top_q * _dy;
-        x2t += top_q * _dx;
-        y2t += top_q * _dy;
+    x1t += top_q * _dx;
+    y1t += top_q * _dy;
+    x2t += top_q * _dx;
+    y2t += top_q * _dy;
 
-        x1b -= bottom_q * _dx;
-        y1b -= bottom_q * _dy;
-        x2b -= bottom_q * _dx;
-        y2b -= bottom_q * _dy;
-    }
+    x1b -= bottom_q * _dx;
+    y1b -= bottom_q * _dy;
+    x2b -= bottom_q * _dx;
+    y2b -= bottom_q * _dy;
 
     float tex_x1 = 0.001f;
     float tex_x2 = right - 0.001f;
@@ -1139,7 +1119,7 @@ void RenderThing(DrawFloor *dfloor, DrawThing *dthing)
     float tex_y1 = dthing->bottom - dthing->original_bottom;
     float tex_y2 = tex_y1 + (z1t - z1b);
 
-    float yscale = mo->scale_ * MirrorZScale();
+    float yscale = mo->scale_;
 
     EPI_ASSERT(h > 0);
     tex_y1 = top * tex_y1 / (h * yscale);
@@ -1210,7 +1190,7 @@ void RenderThing(DrawFloor *dfloor, DrawThing *dthing)
             shader->Sample(data.colors + v, data.vertices[v].X, data.vertices[v].Y, data.vertices[v].Z);
         }
 
-        if (use_dynamic_lights && render_view_extra_light < 250)
+        if (render_view_extra_light < 250)
         {
             float r = mo->radius_ + 32;
 
@@ -1224,7 +1204,7 @@ void RenderThing(DrawFloor *dfloor, DrawThing *dthing)
 
     /* draw the sprite */
 
-    int num_pass = is_fuzzy ? 1 : (detail_level > 0 ? 4 : 3);
+    int num_pass = is_fuzzy ? 1 : 4;
 
     RGBAColor fc_to_use = dthing->map_object->subsector_->sector->properties.fog_color;
     float     fd_to_use = dthing->map_object->subsector_->sector->properties.fog_density;

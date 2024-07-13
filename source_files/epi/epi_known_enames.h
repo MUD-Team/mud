@@ -130,6 +130,10 @@ EPI_XX(Alphaceiling)
 EPI_XX(Rotationfloor)
 EPI_XX(Rotationceiling)
 EPI_XX(Gravity)
+EPI_XX(Liquidheight)
+EPI_XX(Liquidcolor)
+EPI_XX(Liquidtexture)
+EPI_XX(Liquidlight)
 
 // things
 EPI_XX(Height)

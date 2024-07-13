@@ -29,7 +29,6 @@
 
 static void DDFLevelGetSpecials(const char *info);
 static void DDFLevelGetPic(const char *info, void *storage);
-static void DDFLevelGetSkyStretch(const char *info, void *storage);
 static void DDFLevelGetWistyle(const char *info, void *storage);
 
 MapDefinitionContainer mapdefs;
@@ -67,7 +66,6 @@ static const DDFCommandList level_commands[] = {
     DDF_FIELD("AUTHOR", dummy_level, author_, DDFMainGetString),
     DDF_FIELD("NAME_GRAPHIC", dummy_level, namegraphic_, DDFMainGetLumpName),
     DDF_FIELD("SKY_TEXTURE", dummy_level, sky_, DDFMainGetLumpName),
-    DDF_FIELD("SKY_STRETCH", dummy_level, forced_skystretch_, DDFLevelGetSkyStretch),
     DDF_FIELD("MUSIC_ENTRY", dummy_level, music_, DDFMainGetNumeric),
     DDF_FIELD("SURROUND_FLAT", dummy_level, surround_, DDFMainGetLumpName),
     DDF_FIELD("NEXT_MAP", dummy_level, next_mapname_, DDFMainGetLumpName),
@@ -288,22 +286,6 @@ void DDFLevelGetSpecials(const char *info)
     }
 }
 
-void DDFLevelGetSkyStretch(const char *info, void *storage)
-{
-    SkyStretch *stretch = (SkyStretch *)storage;
-
-    if (epi::StringCaseCompareASCII(info, "MIRROR") == 0)
-        *stretch = kSkyStretchMirror;
-    else if (epi::StringCaseCompareASCII(info, "REPEAT") == 0)
-        *stretch = kSkyStretchRepeat;
-    else if (epi::StringCaseCompareASCII(info, "STRETCH") == 0)
-        *stretch = kSkyStretchStretch;
-    else if (epi::StringCaseCompareASCII(info, "VANILLA") == 0)
-        *stretch = kSkyStretchVanilla;
-    else // Unknown
-        *stretch = kSkyStretchUnset;
-}
-
 static DDFSpecialFlags wistyle_names[] = {
     {"DOOM", kIntermissionStyleDoom, 0}, {"NONE", kIntermissionStyleNone, 0}, {nullptr, 0, 0}};
 
@@ -424,8 +406,6 @@ void MapDefinition::CopyDetail(MapDefinition &src)
     f_pre_ = src.f_pre_;
     f_end_ = src.f_end_;
 
-    forced_skystretch_ = src.forced_skystretch_;
-
     indoor_fog_cmap_     = src.indoor_fog_cmap_;
     indoor_fog_color_    = src.indoor_fog_color_;
     indoor_fog_density_  = src.indoor_fog_density_;
@@ -463,8 +443,6 @@ void MapDefinition::Default()
 
     f_pre_.Default();
     f_end_.Default();
-
-    forced_skystretch_ = kSkyStretchUnset;
 
     indoor_fog_cmap_     = nullptr;
     indoor_fog_color_    = kRGBANoValue;

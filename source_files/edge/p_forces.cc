@@ -58,25 +58,19 @@ static void WindCurrentForce(Force *f, MapObject *mo)
 
     Sector *sec = f->sector;
 
-    // NOTE: assumes that BOOM's [242] linetype was used
-    Extrafloor *ef = sec->bottom_liquid ? sec->bottom_liquid : sec->bottom_extrafloor;
-
     float qty = 0.5f;
 
     if (f->is_wind)
     {
-        if (ef && z2 < ef->bottom_height)
-            return;
-
-        if (z1 > (ef ? ef->bottom_height : sec->floor_height) + 2.0f)
+        if (z1 > sec->floor_height + 2.0f)
             qty = 1.0f;
     }
     else // Current
     {
-        if (z1 > (ef ? ef->bottom_height : sec->floor_height) + 2.0f)
+        if (z1 > sec->floor_height + 2.0f)
             return;
 
-        if (z2 < (ef ? ef->bottom_height : sec->ceiling_height))
+        if (z2 < sec->ceiling_height)
             qty = 1.0f;
     }
 

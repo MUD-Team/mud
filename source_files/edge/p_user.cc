@@ -67,7 +67,7 @@ static void CalcHeight(Player *player, bool extra_tic)
     bool    onground  = player->map_object_->z <= player->map_object_->floor_z_;
     float   sink_mult = 1.0f;
     Sector *cur_sec   = player->map_object_->subsector_->sector;
-    if (!cur_sec->extrafloor_used && !cur_sec->height_sector && onground)
+    if (onground)
         sink_mult -= cur_sec->sink_depth;
 
     if (erraticism.d_ && level_time_elapsed > 0 && (!player->command_.forward_move && !player->command_.side_move) &&
@@ -725,7 +725,7 @@ bool PlayerThink(Player *player, bool extra_tic)
     {
         bool    sinking = false;
         Sector *cur_sec = player->map_object_->subsector_->sector;
-        if (!cur_sec->extrafloor_used && !cur_sec->height_sector && cur_sec->sink_depth > 0 &&
+        if (cur_sec->sink_depth > 0 &&
             player->map_object_->z <= player->map_object_->floor_z_)
             sinking = true;
         if (cmd->forward_move == 0 && cmd->side_move == 0 && !player->swimming_ && cmd->upward_move <= 0 &&
@@ -746,8 +746,8 @@ bool PlayerThink(Player *player, bool extra_tic)
         }
     }
 
-    if (player->map_object_->region_properties_->special ||
-        player->map_object_->subsector_->sector->extrafloor_used > 0 || player->underwater_ || player->swimming_ ||
+    if (player->map_object_->region_properties_->special || player->map_object_->subsector_->sector->has_deep_water ||
+        player->underwater_ || player->swimming_ ||
         player->airless_)
     {
         PlayerInSpecialSector(player, player->map_object_->subsector_->sector, should_think);

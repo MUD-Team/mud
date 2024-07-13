@@ -47,9 +47,6 @@ extern Sector *level_sectors;
 extern int        total_level_subsectors;
 extern Subsector *level_subsectors;
 
-extern int         total_level_extrafloors;
-extern Extrafloor *level_extrafloors;
-
 extern int      total_level_nodes;
 extern BspNode *level_nodes;
 
@@ -233,18 +230,6 @@ class RenderState
         clear_blue_  = blue;
         clear_alpha_ = alpha;
         glClearColor(clear_red_, clear_green_, clear_blue_, clear_alpha_);
-        ec_frame_stats.draw_state_change++;
-    }
-
-    void FogMode(GLint fogMode)
-    {
-        if (fog_mode_ == fogMode)
-        {
-            return;
-        }
-
-        fog_mode_ = fogMode;
-        glFogi(GL_FOG_MODE, fog_mode_);
         ec_frame_stats.draw_state_change++;
     }
 
@@ -458,7 +443,7 @@ class RenderState
         ec_frame_stats.draw_state_change++;
 
         fog_mode_ = GL_LINEAR;
-        glFogi(GL_FOG_MODE, fog_mode_);
+        glFogi(GL_FOG_MODE, GL_EXP);
         ec_frame_stats.draw_state_change++;
 
         fog_color_[0] = 0.0f;

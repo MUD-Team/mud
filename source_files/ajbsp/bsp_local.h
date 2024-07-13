@@ -121,9 +121,6 @@ struct Linedef
     // line is marked two-sided
     bool two_sided;
 
-    // prefer not to split
-    bool is_precious;
-
     // zero length (line should be totally ignored)
     bool zero_length;
 

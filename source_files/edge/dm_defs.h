@@ -279,7 +279,8 @@ enum LineFlag
 
     // ----- internal flags -----
 
-    kLineFlagMirror = (1 << 16),
+    // Unused now - Dasho
+    //kLineFlagMirror = (1 << 16),
 
     // -AJA- These two from XDoom.
     // Dasho - Moved to internal flag range to make room for MBF21 stuff

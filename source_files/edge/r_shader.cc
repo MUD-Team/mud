@@ -171,9 +171,6 @@ class dynlight_shader_c : public AbstractShader
         float my = mo->y;
         float mz = MapObjectMidZ(mo);
 
-        MirrorCoordinate(mx, my);
-        MirrorHeight(mz);
-
         float dx = lit_pos->X - mx;
         float dy = lit_pos->Y - my;
         float dz = lit_pos->Z - mz;
@@ -212,9 +209,9 @@ class dynlight_shader_c : public AbstractShader
     inline float WhatRadius(int DL)
     {
         if (DL == 0)
-            return mo->dynamic_light_.r * MirrorXYScale();
+            return mo->dynamic_light_.r;
 
-        return mo->info_->dlight_[1].radius_ * mo->dynamic_light_.r / mo->info_->dlight_[0].radius_ * MirrorXYScale();
+        return mo->info_->dlight_[1].radius_ * mo->dynamic_light_.r / mo->info_->dlight_[0].radius_;
     }
 
     inline RGBAColor WhatColor(int DL)
@@ -233,9 +230,6 @@ class dynlight_shader_c : public AbstractShader
         float mx = mo->x;
         float my = mo->y;
         float mz = MapObjectMidZ(mo);
-
-        MirrorCoordinate(mx, my);
-        MirrorHeight(mz);
 
         float dx = x - mx;
         float dy = y - my;
@@ -274,15 +268,9 @@ class dynlight_shader_c : public AbstractShader
             my += view_sine * 24;
         }
 
-        MirrorCoordinate(mx, my);
-        MirrorHeight(mz);
-
         float dx = mod_pos->x;
         float dy = mod_pos->y;
         float dz = MapObjectMidZ(mod_pos);
-
-        MirrorCoordinate(dx, dy);
-        MirrorHeight(dz);
 
         dx -= mx;
         dy -= my;
@@ -294,7 +282,7 @@ class dynlight_shader_c : public AbstractShader
         dy /= dist;
         dz /= dist;
 
-        dist = HMM_MAX(1.0, dist - mod_pos->radius_ * MirrorXYScale());
+        dist = HMM_MAX(1.0, dist - mod_pos->radius_);
 
         float L = 0.6 - 0.7 * (dx * nx + dy * ny + dz * nz);
 
@@ -415,9 +403,9 @@ class plane_glow_c : public AbstractShader
     inline float WhatRadius(int DL)
     {
         if (DL == 0)
-            return mo->dynamic_light_.r * MirrorXYScale();
+            return mo->dynamic_light_.r;
 
-        return mo->info_->dlight_[1].radius_ * mo->dynamic_light_.r / mo->info_->dlight_[0].radius_ * MirrorXYScale();
+        return mo->info_->dlight_[1].radius_ * mo->dynamic_light_.r / mo->info_->dlight_[0].radius_;
     }
 
     inline RGBAColor WhatColor(int DL)
@@ -586,9 +574,9 @@ class wall_glow_c : public AbstractShader
     inline float WhatRadius(int DL)
     {
         if (DL == 0)
-            return mo->dynamic_light_.r * MirrorXYScale();
+            return mo->dynamic_light_.r;
 
-        return mo->info_->dlight_[1].radius_ * mo->dynamic_light_.r / mo->info_->dlight_[0].radius_ * MirrorXYScale();
+        return mo->info_->dlight_[1].radius_ * mo->dynamic_light_.r / mo->info_->dlight_[0].radius_ ;
     }
 
     inline RGBAColor WhatColor(int DL)
