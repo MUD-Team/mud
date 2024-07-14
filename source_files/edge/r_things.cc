@@ -29,6 +29,7 @@
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "edge_profiling.h"
+#include "epi.h"
 #include "epi_color.h"
 #include "epi_str_util.h"
 #include "g_game.h" //current_map
@@ -48,7 +49,6 @@
 #include "r_shader.h"
 #include "r_texgl.h"
 #include "r_units.h"
-#include "script/compat/lua_compat.h"
 #include "sokol_color.h"
 #include "w_sprite.h"
 
@@ -194,11 +194,6 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
     float tx2 = tx1 + w;
 
     float ty1 = -psp->screen_y + image->ScaledOffsetY() - ((h - image->ScaledHeightActual()) * 0.5f);
-
-    // Lobo 2022: Apply sprite Y offset, mainly for Heretic weapons.
-    if ((state->flags & kStateFrameFlagWeapon) && (player->ready_weapon_ >= 0))
-        ty1 += LuaGetFloat(LuaGetGlobalVM(), "hud", "universal_y_adjust") +
-                player->weapons_[player->ready_weapon_].info->y_adjust_;
 
     float ty2 = ty1 + h;
 

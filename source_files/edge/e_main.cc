@@ -48,6 +48,7 @@
 #include "dm_state.h"
 #include "dstrings.h"
 #include "e_input.h"
+#include "epi.h"
 #include "edge_profiling.h"
 #include "epi_file.h"
 #include "epi_filesystem.h"
@@ -78,7 +79,6 @@
 #include "r_modes.h"
 #include "s_music.h"
 #include "s_sound.h"
-#include "script/compat/lua_compat.h"
 #include "sv_main.h"
 #include "version.h"
 #include "w_files.h"
@@ -521,8 +521,7 @@ void EdgeDisplay(void)
     switch (game_state)
     {
     case kGameStateLevel:
-        LuaRunHUD();
-
+        HUDRenderWorld(0, 0, 320, 200, players[console_player]->map_object_, 0);
         HUDDrawer();
         break;
 
@@ -1477,8 +1476,6 @@ static void EdgeStartup(void)
     InitializeSound();
     NetworkInitialize();
     CheatInitialize();
-    LuaInit();
-    LuaLoadScripts();
 }
 
 static void InitialState(void)

@@ -28,6 +28,7 @@
 #include "e_main.h"
 #include "e_player.h"
 #include "edge_profiling.h"
+#include "epi.h"
 #include "epi_endian.h"
 #include "epi_str_util.h"
 #include "epi_windows.h"
@@ -35,7 +36,6 @@
 #include "i_system.h"
 #include "m_argv.h"
 #include "m_random.h"
-#include "script/compat/lua_compat.h"
 
 // only true if packets are exchanged with a server
 bool network_game = false;
@@ -162,8 +162,6 @@ void GrabTicCommands(void)
         memcpy(&p->command_, p->input_commands_ + buf, sizeof(EventTicCommand));
     }
         
-    LuaSetFloat(LuaGetGlobalVM(), "sys", "gametic", game_tic / (double_framerate.d_ ? 2 : 1));
-
     game_tic++;
 }
 

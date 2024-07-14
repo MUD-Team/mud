@@ -82,14 +82,7 @@ set (EDGE_SOURCE_FILES
   w_files.cc
   w_flat.cc
   w_epk.cc
-  w_sprite.cc
-  script/lua_debugger.cc
-  script/compat/lua_vm.cc
-  script/compat/lua_compat.cc
-  script/compat/lua_core.cc
-  script/compat/lua_game.cc
-  script/compat/lua_player.cc
-  script/compat/lua_hud.cc)
+  w_sprite.cc)
 
 set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} i_main.cc)
 
@@ -102,8 +95,7 @@ set (EDGE_LINK_LIBRARIES
   edge_ddf
   edge_epi  
   fluidlite
-  miniz
-  lua
+  miniz  
   utf8proc
   sokol
   physfs-static
