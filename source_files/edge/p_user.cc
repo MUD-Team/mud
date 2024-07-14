@@ -30,6 +30,7 @@
 #include "ddf_colormap.h"
 #include "dm_state.h"
 #include "e_input.h"
+#include "epi.h"
 #include "g_game.h"
 #include "i_system.h"
 #include "m_random.h"
@@ -39,7 +40,6 @@
 #include "r_misc.h"
 #include "s_blit.h"
 #include "s_sound.h"
-#include "script/compat/lua_compat.h"
 
 extern ConsoleVariable double_framerate;
 
@@ -791,11 +791,6 @@ bool PlayerThink(Player *player, bool extra_tic)
 
     player->action_button_down_[0] = (cmd->extended_buttons & kExtendedButtonCodeAction1) ? true : false;
     player->action_button_down_[1] = (cmd->extended_buttons & kExtendedButtonCodeAction2) ? true : false;
-
-    LuaSetVector3(LuaGetGlobalVM(), "player", "inventory_event_handler",
-                    HMM_Vec3{{cmd->extended_buttons & kExtendedButtonCodeInventoryPrevious ? 1.0f : 0.0f,
-                            cmd->extended_buttons & kExtendedButtonCodeInventoryUse ? 1.0f : 0.0f,
-                            cmd->extended_buttons & kExtendedButtonCodeInventoryNext ? 1.0f : 0.0f}});
 
     // FIXME separate code more cleanly
     if (extra_tic && double_framerate.d_)

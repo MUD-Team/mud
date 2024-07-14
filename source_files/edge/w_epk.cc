@@ -32,7 +32,6 @@
 #include "epi_str_util.h"
 #include "miniz.h"
 #include "r_image.h"
-#include "script/compat/lua_compat.h"
 #include "snd_types.h"
 #include "w_files.h"
 
@@ -669,63 +668,6 @@ static void ProcessDDFInPack(PackFile *pack)
     }
 }
 
-static void ProcessLuaAPIInPack(PackFile *pack)
-{
-    DataFile *df = pack->parent_;
-
-    std::string bare_filename = epi::GetFilename(df->name_);
-    if (bare_filename.empty())
-        bare_filename = df->name_;
-
-    std::string source = bare_filename + " => " + "edge_api.lua";
-
-    for (size_t dir = 0; dir < pack->directories_.size(); dir++)
-    {
-        for (size_t entry = 0; entry < pack->directories_[dir].entries_.size(); entry++)
-        {
-            PackEntry &ent = pack->directories_[dir].entries_[entry];
-            if (epi::GetFilename(ent.name_) == "edge_api.lua")
-            {
-                int            length   = -1;
-                const uint8_t *raw_data = pack->LoadEntry(dir, entry, length);
-                std::string    data((const char *)raw_data);
-                delete[] raw_data;
-                LuaAddScript(data, source);
-                return; // Should only be present once
-            }
-        }
-    }
-    FatalError("edge_api.lua not found in edge_defs; unable to initialize LUA!\n");
-}
-
-static void ProcessLuaHUDInPack(PackFile *pack)
-{
-    DataFile *df = pack->parent_;
-
-    std::string bare_filename = epi::GetFilename(df->name_);
-    if (bare_filename.empty())
-        bare_filename = df->name_;
-
-    std::string source = bare_filename + " => " + "edge_hud.lua";
-
-    for (size_t dir = 0; dir < pack->directories_.size(); dir++)
-    {
-        for (size_t entry = 0; entry < pack->directories_[dir].entries_.size(); entry++)
-        {
-            PackEntry &ent = pack->directories_[dir].entries_[entry];
-            if (epi::StringCaseCompareASCII(epi::GetFilename(ent.name_), "edge_hud.lua") == 0)
-            {
-                int            length   = -1;
-                const uint8_t *raw_data = pack->LoadEntry(dir, entry, length);
-                std::string    data((const char *)raw_data);
-                delete[] raw_data;
-                LuaAddScript(data, source);
-                return; // Should only be present once
-            }
-        }
-    }
-}
-
 void ProcessPackSubstitutions(PackFile *pack, int pack_index)
 {
     int d = -1;
@@ -1087,13 +1029,6 @@ void ProcessAllInPack(DataFile *df, size_t file_index)
     // Only load some things here; the rest are deferred until
     // after all files loaded so that pack substitutions can work properly
     ProcessDDFInPack(df->pack_);
-
-    // LUA
-
-    // parse lua api  only from edge_defs folder or `edge_defs.epk`
-    if ((df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEEPK) && file_index == 0)
-        ProcessLuaAPIInPack(df->pack_);
-    ProcessLuaHUDInPack(df->pack_);
 }
 
 void BuildXGLNodes()

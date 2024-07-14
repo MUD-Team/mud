@@ -34,6 +34,7 @@
 #include "con_main.h"
 #include "dm_state.h"
 #include "dstrings.h"
+#include "epi.h"
 #include "e_input.h"
 #include "e_main.h"
 #include "epi_endian.h"
@@ -55,7 +56,6 @@
 #include "r_sky.h"
 #include "s_music.h"
 #include "s_sound.h"
-#include "script/compat/lua_compat.h"
 #include "sv_main.h"
 #include "version.h"
 #include "w_files.h"
@@ -273,8 +273,7 @@ void DoLoadLevel(void)
 
     LoadLevel_Bits();
 
-    SpawnInitialPlayers();
-    LuaBeginLevel();
+    SpawnInitialPlayers();    
 }
 
 //
@@ -823,9 +822,7 @@ static void DoNewGame(void)
     bool skip_pre = defer_params->level_skip_;
 
     delete defer_params;
-    defer_params = nullptr;
-
-    LuaNewGame();
+    defer_params = nullptr;    
 
     // -AJA- 2003/10/09: support for pre-level briefing screen on first map.
     //       FIXME: kludgy. All this game logic desperately needs rethinking.

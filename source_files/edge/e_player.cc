@@ -34,6 +34,7 @@
 #include "bot_think.h"
 #include "dm_defs.h"
 #include "dm_state.h"
+#include "epi.h"
 #include "epi_endian.h"
 #include "epi_str_util.h"
 #include "g_game.h"
@@ -42,7 +43,6 @@
 #include "m_argv.h"
 #include "m_random.h"
 #include "p_local.h"
-#include "script/compat/lua_compat.h"
 #include "sokol_color.h"
 
 //
@@ -142,9 +142,7 @@ void PlayerFinishLevel(Player *p, bool keep_cards)
 
     // Lobo 2023: uncomment if still getting
     //  "INTERNAL ERROR: player has a removed attacker"
-    p->attacker_ = nullptr;
-
-    LuaEndLevel();
+    p->attacker_ = nullptr;    
 }
 
 //
