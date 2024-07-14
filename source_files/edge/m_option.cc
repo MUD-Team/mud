@@ -92,7 +92,6 @@
 #include "hu_draw.h"
 #include "hu_stuff.h"
 #include "hu_style.h"
-#include "m_menu.h"
 #include "m_misc.h"
 #include "m_netgame.h"
 #include "n_network.h"
@@ -316,8 +315,7 @@ static OptionMenuItem mainoptions[] = {
     {kOptionMenuItemTypeFunction, "MenuVideo", nullptr, 0, nullptr, OptionMenuVideoOptions, "VideoOptions"},
     {kOptionMenuItemTypeFunction, "MenuResolution", nullptr, 0, nullptr, OptionMenuResolutionOptions, "ChangeRes"},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {kOptionMenuItemTypeFunction, "MenuLanguage", nullptr, 0, nullptr, OptionMenuChangeLanguage, nullptr},
-    {kOptionMenuItemTypeSwitch, "MenuMessages", YesNo, 2, &show_messages, nullptr, "Messages"},
+    {kOptionMenuItemTypeFunction, "MenuLanguage", nullptr, 0, nullptr, OptionMenuChangeLanguage, nullptr},    
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
     {kOptionMenuItemTypeFunction, "MenuStartBotmatch", nullptr, 0, nullptr, OptionMenuHostNetGame, nullptr},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
@@ -714,15 +712,9 @@ static OptionMenuDefinition inventory_optmenu = {inventory_keyconfig,
 //  KEY CONFIG : PROGRAM
 //
 static OptionMenuItem program_keyconfig1[] = {
-    {kOptionMenuItemTypeKeyConfig, "Screenshot", nullptr, 0, &key_screenshot, nullptr, nullptr},
     {kOptionMenuItemTypeKeyConfig, "Console", nullptr, 0, &key_console, nullptr, nullptr},
     {kOptionMenuItemTypeKeyConfig, "Pause", nullptr, 0, &key_pause, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Save Game", nullptr, 0, &key_save_game, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Load Game", nullptr, 0, &key_load_game, nullptr, nullptr},
-    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Sound Controls", nullptr, 0, &key_sound_controls, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Options", nullptr, 0, &key_options_menu, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Quicksave", nullptr, 0, &key_quick_save, nullptr, nullptr},
+    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr}
 };
 
 static OptionMenuDefinition program_optmenu1 = {program_keyconfig1,
@@ -738,12 +730,7 @@ static OptionMenuDefinition program_optmenu1 = {program_keyconfig1,
 //  KEY CONFIG : PROGRAM
 //
 static OptionMenuItem program_keyconfig2[] = {
-    {kOptionMenuItemTypeKeyConfig, "End Game", nullptr, 0, &key_end_game, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Toggle Messages", nullptr, 0, &key_message_toggle, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "OptQuickLoad", nullptr, 0, &key_quick_load, nullptr, nullptr},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Quit EDGE", nullptr, 0, &key_quit_edge, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Toggle Gamma", nullptr, 0, &key_gamma_toggle, nullptr, nullptr},
     {kOptionMenuItemTypeKeyConfig, "Show Players", nullptr, 0, &key_show_players, nullptr, nullptr},
 };
 
@@ -778,8 +765,7 @@ void OptionMenuCheckNetworkGame(void)
 {
     if (game_state >= kGameStateLevel)
     {
-        mainoptions[kOptionMenuNetworkHostPosition + 0].name = language["MainEndBotMatch"];
-        mainoptions[kOptionMenuNetworkHostPosition + 0].routine = &MenuEndGame;
+        mainoptions[kOptionMenuNetworkHostPosition + 0].name = language["MainEndBotMatch"];        
         mainoptions[kOptionMenuNetworkHostPosition + 0].help    = nullptr;
     }
     else
@@ -1054,9 +1040,6 @@ void OptionMenuDrawer()
         }
 
         case kOptionMenuItemTypeSlider: {
-            DrawMenuSlider(current_menu->menu_center + 15, curry, *(float *)current_menu->items[i].switch_variable,
-                           current_menu->items[i].increment, 2, current_menu->items[i].min, current_menu->items[i].max,
-                           current_menu->items[i].format_string);
 
             break;
         }
@@ -1156,8 +1139,6 @@ static void KeyMenu_Next()
     current_key_menu++;
 
     current_menu = all_key_menus[current_key_menu];
-
-    StartSoundEffect(sound_effect_pstop);
 }
 
 static void KeyMenu_Prev()
@@ -1168,8 +1149,6 @@ static void KeyMenu_Prev()
     current_key_menu--;
 
     current_menu = all_key_menus[current_key_menu];
-
-    StartSoundEffect(sound_effect_pstop);
 }
 
 //
@@ -1250,7 +1229,6 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
             current_item = current_menu->items + current_menu->pos;
         } while (current_item->type == 0);
 
-        StartSoundEffect(sound_effect_pstop);
         return true;
     }
 
@@ -1279,7 +1257,6 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
             current_item = current_menu->items + current_menu->pos;
         } while (current_item->type == 0);
 
-        StartSoundEffect(sound_effect_pstop);
         return true;
     }
 
@@ -1301,7 +1278,6 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
             current_item = current_menu->items + current_menu->pos;
         } while (current_item->type == 0);
 
-        StartSoundEffect(sound_effect_pstop);
         return true;
     }
 
@@ -1330,7 +1306,6 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
             current_item = current_menu->items + current_menu->pos;
         } while (current_item->type == 0);
 
-        StartSoundEffect(sound_effect_pstop);
         return true;
     }
 
@@ -1353,8 +1328,6 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
 
             *boolptr = !(*boolptr);
 
-            StartSoundEffect(sound_effect_pistol);
-
             if (current_item->routine != nullptr)
                 current_item->routine(ch, current_item->console_variable_to_change);
 
@@ -1369,8 +1342,6 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
             if (*val_ptr < 0)
                 *val_ptr = current_item->total_types - 1;
 
-            StartSoundEffect(sound_effect_pistol);
-
             if (current_item->routine != nullptr)
                 current_item->routine(ch, current_item->console_variable_to_change);
 
@@ -1381,7 +1352,6 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
             if (current_item->routine != nullptr)
                 current_item->routine(ch, current_item->console_variable_to_change);
 
-            StartSoundEffect(sound_effect_pistol);
             return true;
         }
 
@@ -1393,8 +1363,6 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
             if (*val_ptr > current_item->min)
             {
                 *val_ptr = *val_ptr - current_item->increment;
-
-                StartSoundEffect(sound_effect_stnmov);
             }
 
             if (current_item->routine != nullptr)
@@ -1431,8 +1399,6 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
 
             *boolptr = !(*boolptr);
 
-            StartSoundEffect(sound_effect_pistol);
-
             if (current_item->routine != nullptr)
                 current_item->routine(ch, current_item->console_variable_to_change);
 
@@ -1447,8 +1413,6 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
             if (*val_ptr >= current_item->total_types)
                 *val_ptr = 0;
 
-            StartSoundEffect(sound_effect_pistol);
-
             if (current_item->routine != nullptr)
                 current_item->routine(ch, current_item->console_variable_to_change);
 
@@ -1459,7 +1423,6 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
             if (current_item->routine != nullptr)
                 current_item->routine(ch, current_item->console_variable_to_change);
 
-            StartSoundEffect(sound_effect_pistol);
             return true;
         }
 
@@ -1471,8 +1434,6 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
             if (*val_ptr < current_item->max)
             {
                 *val_ptr = *val_ptr + current_item->increment;
-
-                StartSoundEffect(sound_effect_stnmov);
             }
 
             if (current_item->routine != nullptr)
@@ -1498,12 +1459,13 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
         if (current_menu == &f4sound_optmenu)
         {
             current_menu = &main_optmenu;
-            MenuClear();
         }
         else if (current_menu == &main_optmenu)
         {
             if (function_key_menu)
-                MenuClear();
+            {
+                //MenuClear();
+            }
             else
                 option_menu_on = 0;
         }
@@ -1512,7 +1474,6 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
             current_menu = &main_optmenu;
             current_item = current_menu->items + current_menu->pos;
         }
-        StartSoundEffect(sound_effect_swtchx);
         return true;
     }
     }
@@ -1913,7 +1874,7 @@ static void OptionMenuionSetResolution(int key_pressed, ConsoleVariable *console
         std::string msg(epi::StringFormat(language["ModeSelErr"], new_window_mode.width, new_window_mode.height,
                                           (new_window_mode.depth < 20) ? 16 : 32));
 
-        StartMenuMessage(msg.c_str(), nullptr, false);
+        FatalError(msg.c_str());        
     }
 }
 

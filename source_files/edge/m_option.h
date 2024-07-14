@@ -27,13 +27,5 @@
 
 #include "e_event.h"
 
-extern int option_menu_on;
-
-void OptionMenuInitialize(void);
-void OptionMenuDrawer(void);
-void OptionMenuTicker(void);
-bool OptionMenuResponder(InputEvent *ev, int ch);
-void OptionMenuCheckNetworkGame(void);
-
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

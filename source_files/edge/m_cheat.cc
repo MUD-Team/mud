@@ -44,7 +44,6 @@
 #include "epi.h"
 #include "g_game.h"
 #include "i_system.h"
-#include "m_menu.h"
 #include "p_local.h"
 #include "p_mobj.h"
 #include "s_music.h"
@@ -382,12 +381,12 @@ bool CheatResponder(InputEvent *ev)
     if (CheckCheatSequence(&cheat_change_level, key))
     {
         // 'clev' change-level cheat
-        StartMenuMessageInput(language["LevelQ"], M_ChangeLevelCheat);
+        // StartMenuMessageInput(language["LevelQ"], M_ChangeLevelCheat);
     }
     else if (CheckCheatSequence(&cheat_music, key))
     {
         // 'mus' cheat for changing music
-        StartMenuMessageInput(language["MusicQ"], M_ChangeMusicCheat);
+        // StartMenuMessageInput(language["MusicQ"], M_ChangeMusicCheat);
     }
     else if (CheckCheatSequence(&cheat_show_stats, key))
     {

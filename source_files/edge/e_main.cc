@@ -64,7 +64,6 @@
 #include "m_argv.h"
 #include "m_bbox.h"
 #include "m_cheat.h"
-#include "m_menu.h"
 #include "m_misc.h"
 #include "m_random.h"
 #include "n_network.h"
@@ -546,9 +545,6 @@ void EdgeDisplay(void)
     if (paused)
         DisplayPauseImage();
 
-    // menus go directly to the screen
-    MenuDrawer(); // menu is drawn even on top of everything (except console)
-
     // process mouse and keyboard events
     NetworkUpdate();
 
@@ -805,7 +801,6 @@ void AdvanceTitle(void)
 
         if (show_old_config_warning && startup_progress.IsEmpty())
         {
-            StartMenuMessage(language["OldConfig"], nullptr, false);
             show_old_config_warning = false;
         }
 
@@ -1475,7 +1470,6 @@ static void EdgeStartup(void)
     PrecacheSounds();
     InitializeSprites();
 
-    MenuInitialize();
     RendererStartup();
     PlayerStateInit();
     InitializeSwitchList();
@@ -1526,6 +1520,13 @@ static void InitialState(void)
     {
         warp     = true;
         warp_map = ps;
+    }
+
+    if (!warp || !warp_map.length())
+    {
+        warp = true;
+        warp_map = "1";
+        LogWarning("Warping to first map, as we don't currently have a main menu\n");
     }
 
     // -KM- 1999/01/29 Use correct skill: 1 is easiest, not 0
@@ -1669,8 +1670,7 @@ void EdgeTicker(void)
         GameTicker();
 
         // user interface stuff (skull anim, etc)
-        ConsoleTicker();
-        MenuTicker();
+        ConsoleTicker();        
         SoundTicker();
         MusicTicker();
 

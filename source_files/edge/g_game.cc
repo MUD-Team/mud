@@ -45,7 +45,6 @@
 #include "hu_stuff.h"
 #include "i_system.h"
 #include "m_cheat.h"
-#include "m_menu.h"
 #include "m_random.h"
 #include "n_network.h"
 #include "p_setup.h"
@@ -288,12 +287,7 @@ bool GameResponder(InputEvent *ev)
     // any other key pops up menu
     if (game_action == kGameActionNothing && (game_state == kGameStateTitleScreen))
     {
-        if (ev->type == kInputEventKeyDown)
-        {
-            StartControlPanel();
-            StartSoundEffect(sound_effect_swtchn, kCategoryUi);
-            return true;
-        }
+        FatalError("kGameStateTitleScreen not supported");
 
         return false;
     }
@@ -322,8 +316,6 @@ bool GameResponder(InputEvent *ev)
             ResumeSound();
         }
 
-        // explicit as probably killed the initial effect
-        StartSoundEffect(sound_effect_swtchn, kCategoryUi);
         return true;
     }
 
@@ -825,7 +817,6 @@ static void DoNewGame(void)
     EPI_ASSERT(defer_params);
 
     SaveClearSlot("current");
-    quicksave_slot = -1;
 
     InitNew(*defer_params);
 

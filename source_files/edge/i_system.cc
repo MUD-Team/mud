@@ -29,7 +29,6 @@
 #include "epi_windows.h"
 #include "g_game.h"
 #include "m_argv.h"
-#include "m_menu.h"
 #include "m_misc.h"
 #include "physfs.h"
 #include "s_sound.h"

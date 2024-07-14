@@ -36,7 +36,6 @@
 #include "hu_draw.h"
 #include "hu_style.h"
 #include "i_system.h"
-#include "m_menu.h"
 #include "n_network.h"
 #include "s_sound.h"
 
