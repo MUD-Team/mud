@@ -41,7 +41,6 @@
 #include "hu_style.h"
 #include "m_argv.h"
 #include "m_misc.h"
-#include "m_option.h"
 #include "m_random.h"
 #include "n_network.h"
 #include "p_setup.h"
