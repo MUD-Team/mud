@@ -1736,9 +1736,6 @@ static void RenderTrueBsp(void)
 
     Player *v_player = view_camera_map_object->player_;
 
-    // handle powerup effects and BOOM colormaps
-    RendererRainbowEffect(v_player);
-
     SetupMatrices3d();
 
     frame_texture_ids.clear();
@@ -1770,9 +1767,6 @@ static void RenderTrueBsp(void)
     if (v_player)
     {
         RenderWeaponSprites(v_player);
-
-        RendererColourmapEffect(v_player);
-        RendererPaletteEffect(v_player);
         SetupMatrices2D();
         RenderCrosshair(v_player);
     }

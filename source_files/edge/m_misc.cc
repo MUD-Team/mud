@@ -46,7 +46,6 @@
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
 #include "g_game.h"
-#include "hu_draw.h"
 #include "im_data.h"
 #include "im_funcs.h"
 #include "m_argv.h"

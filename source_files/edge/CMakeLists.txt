@@ -16,10 +16,6 @@ set (EDGE_SOURCE_FILES
   e_main.cc
   e_player.cc
   g_game.cc
-  hu_draw.cc
-  hu_font.cc
-  hu_stuff.cc
-  hu_style.cc
   i_system.cc
   im_data.cc
   im_funcs.cc
