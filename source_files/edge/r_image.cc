@@ -48,7 +48,6 @@
 #include "epi_filesystem.h"
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
-#include "hu_draw.h" // hud_tic
 #include "i_defs_gl.h"
 #include "i_system.h"
 #include "im_data.h"
@@ -140,7 +139,7 @@ static void do_Animate(std::list<Image *> &bucket)
 
         EPI_ASSERT(rim->animation_.count > 0);
 
-        rim->animation_.count -= (!double_framerate.d_ || !(hud_tic & 1)) ? 1 : 0;
+        rim->animation_.count -= (!double_framerate.d_) ? 1 : 0;
 
         if (rim->animation_.count == 0 && rim->animation_.current->animation_.next)
         {

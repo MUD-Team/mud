@@ -19,7 +19,6 @@
 //----------------------------------------------------------------------------
 
 #include "epi.h"
-#include "hu_draw.h"
 #include "i_defs_gl.h"
 #include "i_sound.h"
 #include "i_system.h"

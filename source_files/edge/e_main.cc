@@ -54,8 +54,6 @@
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
 #include "g_game.h"
-#include "hu_draw.h"
-#include "hu_stuff.h"
 #include "i_defs_gl.h"
 #include "i_movie.h"
 #include "i_system.h"
@@ -166,11 +164,6 @@ EDGE_DEFINE_CONSOLE_VARIABLE(ddf_quiet, "0", kConsoleVariableFlagArchive)
 
 EDGE_DEFINE_CONSOLE_VARIABLE(skip_intros, "0", kConsoleVariableFlagArchive)
 
-static const Image *loading_image = nullptr;
-const Image        *menu_backdrop = nullptr;
-
-static void TitleDrawer(void);
-
 class StartupProgress
 {
   private:
@@ -205,22 +198,7 @@ class StartupProgress
     void DrawIt()
     {
         StartFrame();
-        HUDFrameSetup();
-        if (loading_image)
-        {
-            HUDDrawImageTitleWS(loading_image);
-            HUDSolidBox(25, 25, 295, 175, SG_BLACK_RGBA32);
-        }
-        int y = 26;
-        for (int i = 0; i < (int)startup_messages_.size(); i++)
-        {
-            if (startup_messages_[i].size() > 32)
-                HUDDrawText(26, y, startup_messages_[i].substr(0, 29).append("...").c_str());
-            else
-                HUDDrawText(26, y, startup_messages_[i].c_str());
-            y += 10;
-        }
-
+/*
         if (gamma_correction.f_ < 0)
         {
             int col = (1.0f + gamma_correction.f_) * 255;
@@ -239,7 +217,7 @@ class StartupProgress
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glDisable(GL_BLEND);
         }
-
+*/
         FinishFrame();
     }
 };
@@ -478,24 +456,6 @@ static void DoSystemStartup(void)
     LogDebug("- System startup done.\n");
 }
 
-static void DisplayPauseImage(void)
-{
-    static const Image *pause_image = nullptr;
-
-    if (!pause_image)
-        pause_image = ImageLookup("M_PAUSE");
-
-    // make sure image is centered horizontally
-
-    float w = pause_image->ScaledWidthActual();
-    float h = pause_image->ScaledHeightActual();
-
-    float x = 160 - w / 2;
-    float y = 10;
-
-    HUDStretchImage(x, y, w, h, pause_image, 0.0, 0.0);
-}
-
 //
 // E_Display
 //
@@ -508,29 +468,24 @@ void EdgeDisplay(void)
     EDGE_ZoneScoped;
 
     // Start the frame - should we need to.
-    StartFrame();
-
-    HUDFrameSetup();
+    StartFrame();    
 
     switch (game_state)
     {
     case kGameStateLevel:
-        HUDRenderWorld(0, 0, 320, 200, players[console_player]->map_object_, 0);
-        HUDDrawer();
+        // Fudged for our in development 1360x768 resolution, the expand_w parameter to RenderView
+        // is based on a bunch of tweaking for 320x200 virtual resolution
+        RenderView(0, 0, 1360, 768, players[console_player]->map_object_, true, 1360.f/768.f * 0.85f);
         break;
 
     case kGameStateNothing:
         break;
     }
 
-    if (paused)
-        DisplayPauseImage();
-
     // process mouse and keyboard events
-    NetworkUpdate();
+    NetworkUpdate();    
 
-    ConsoleDrawer();
-
+    /*
     if (gamma_correction.f_ < 0)
     {
         int col = (1.0f + gamma_correction.f_) * 255;
@@ -549,6 +504,7 @@ void EdgeDisplay(void)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDisable(GL_BLEND);
     }
+    */
 
     if (m_screenshot_required)
     {
@@ -1146,7 +1102,6 @@ static void EdgeStartup(void)
 
     CreateUserImages();    
 
-    HUDInit();
     ConsoleStart();
     SpecialWadVerify();
     BuildXGLNodes();

@@ -38,7 +38,6 @@
 #include "epi_endian.h"
 #include "epi_str_util.h"
 #include "g_game.h"
-#include "hu_stuff.h"
 #include "i_system.h"
 #include "m_argv.h"
 #include "m_random.h"

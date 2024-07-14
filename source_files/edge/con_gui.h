@@ -28,11 +28,6 @@ void ConsoleTicker(void);
 
 bool ConsoleResponder(InputEvent *ev);
 
-void ConsoleDrawer(void);
-
-void ConsoleShowFPS(void);
-void ConsoleShowPosition(void);
-
 void ConsoleInit(void);
 
 //--- editor settings ---

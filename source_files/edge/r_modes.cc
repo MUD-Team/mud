@@ -31,7 +31,6 @@
 #include <vector>
 
 #include "epi.h"
-#include "hu_font.h" // current_font_size
 #include "i_defs_gl.h"
 #include "i_system.h"
 #include "r_colormap.h"
@@ -254,13 +253,6 @@ void SoftInitializeResolution(void)
 
     NewScreenSize(current_screen_width, current_screen_height, current_screen_depth);
 
-    if (current_screen_width < 720)
-        current_font_size = 0;
-    else if (current_screen_width < 1440)
-        current_font_size = 1;
-    else
-        current_font_size = 2;
-
     // re-initialise various bits of GL state
     RendererSoftInit();
 
@@ -282,13 +274,6 @@ static bool DoExecuteChangeResolution(DisplayMode *mode)
     current_screen_height = mode->height;
     current_screen_depth  = mode->depth;
     current_window_mode   = mode->window_mode;
-
-    if (current_screen_width < 720)
-        current_font_size = 0;
-    else if (current_screen_width < 1440)
-        current_font_size = 1;
-    else
-        current_font_size = 2;
 
     DeterminePixelAspect();
 

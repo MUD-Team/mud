@@ -59,7 +59,6 @@
 #include "dm_state.h"
 #include "epi.h"
 #include "g_game.h"
-#include "hu_stuff.h"
 #include "i_defs_gl.h"
 #include "i_system.h"
 #include "m_argv.h"

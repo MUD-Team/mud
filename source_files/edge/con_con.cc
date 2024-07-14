@@ -39,9 +39,6 @@
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
 #include "g_game.h"
-#include "hu_draw.h"
-#include "hu_stuff.h"
-#include "hu_style.h"
 #include "i_defs_gl.h"
 #include "i_system.h"
 #include "m_argv.h"
@@ -60,10 +57,6 @@ static ConsoleVisibility console_visible;
 // stores the console toggle effect
 static int   console_wipe_active   = 0;
 static int   console_wipe_position = 0;
-static Font *console_font;
-
-// the console's background
-static Style *console_style;
 
 static RGBAColor current_color;
 
@@ -280,9 +273,7 @@ void ConsoleMessage(const char *message, ...)
     // Print the message into a text string
     vsprintf(buffer, message, argptr);
 
-    va_end(argptr);
-
-    HUDStartMessage(buffer);
+    va_end(argptr);    
 
     strcat(buffer, "\n");
 
@@ -300,8 +291,6 @@ void ConsoleMessageLDF(const char *lookup, ...)
     vsprintf(buffer, lookup, argptr);
     va_end(argptr);
 
-    HUDStartMessage(buffer);
-
     strcat(buffer, "\n");
 
     SplitIntoLines(buffer);
@@ -318,8 +307,6 @@ void ImportantConsoleMessageLDF(const char *lookup, ...)
     vsprintf(buffer, lookup, argptr);
     va_end(argptr);
 
-    HUDStartImportantMessage(buffer);
-
     strcat(buffer, "\n");
 
     SplitIntoLines(buffer);
@@ -330,7 +317,7 @@ void ConsoleMessageColor(RGBAColor col)
     current_color = col;
 }
 
-static int   XMUL;
+static int   XMUL = 0;
 static int   FNSZ;
 static float FNSZ_ratio;
 
@@ -340,271 +327,8 @@ static void CalcSizes()
         FNSZ = 16;
     else
         FNSZ = 24;
-
-    FNSZ_ratio = FNSZ / console_font->definition_->default_size_;
-    if (console_font->definition_->type_ == kFontTypeImage)
-        XMUL = RoundToInteger((console_font->image_monospace_width_ + console_font->spacing_) *
-                              (FNSZ / console_font->image_character_height_));
 }
 
-static void SolidBox(int x, int y, int w, int h, RGBAColor col, float alpha)
-{
-    if (alpha < 0.99f)
-        glEnable(GL_BLEND);
-
-    sg_color sgcol = sg_make_color_1i(col);
-
-    glColor4f(sgcol.r, sgcol.g, sgcol.b, alpha);
-
-    glBegin(GL_QUADS);
-
-    glVertex2i(x, y);
-    glVertex2i(x, y + h);
-    glVertex2i(x + w, y + h);
-    glVertex2i(x + w, y);
-
-    glEnd();
-
-    glDisable(GL_BLEND);
-}
-
-static void HorizontalLine(int y, RGBAColor col)
-{
-    float alpha = 1.0f;
-
-    SolidBox(0, y, current_screen_width - 1, 1, col, alpha);
-}
-
-static void DrawChar(int x, int y, char ch, RGBAColor col)
-{
-    if (x + FNSZ < 0)
-        return;
-
-    sg_color sgcol = sg_make_color_1i(col);
-
-    glColor4f(sgcol.r, sgcol.g, sgcol.b, 1.0f);
-
-    if (console_font->definition_->type_ == kFontTypeTrueType)
-    {
-        float chwidth  = console_font->CharWidth(ch);
-        XMUL           = RoundToInteger(chwidth * FNSZ_ratio / pixel_aspect_ratio.f_);
-        float width    = (chwidth - console_font->spacing_) * FNSZ_ratio / pixel_aspect_ratio.f_;
-        float x_adjust = (XMUL - width) / 2;
-        float y_adjust = console_font->truetype_glyph_map_.at((uint8_t)ch).y_shift[current_font_size] * FNSZ_ratio;
-        float height   = console_font->truetype_glyph_map_.at((uint8_t)ch).height[current_font_size] * FNSZ_ratio;
-        stbtt_aligned_quad *q = console_font->truetype_glyph_map_.at((uint8_t)ch).character_quad[current_font_size];
-        glBegin(GL_POLYGON);
-        glTexCoord2f(q->s0, q->t0);
-        glVertex2f(x + x_adjust, y - y_adjust);
-        glTexCoord2f(q->s1, q->t0);
-        glVertex2f(x + x_adjust + width, y - y_adjust);
-        glTexCoord2f(q->s1, q->t1);
-        glVertex2f(x + x_adjust + width, y - y_adjust - height);
-        glTexCoord2f(q->s0, q->t1);
-        glVertex2f(x + x_adjust, y - y_adjust - height);
-        glEnd();
-        return;
-    }
-
-    uint8_t px = (uint8_t)ch % 16;
-    uint8_t py = 15 - (uint8_t)ch / 16;
-
-    float tx1 = (px)*console_font->font_image_->width_ratio_;
-    float tx2 = (px + 1) * console_font->font_image_->width_ratio_;
-    float ty1 = (py)*console_font->font_image_->height_ratio_;
-    float ty2 = (py + 1) * console_font->font_image_->height_ratio_;
-
-    glBegin(GL_POLYGON);
-
-    glTexCoord2f(tx1, ty1);
-    glVertex2i(x, y);
-
-    glTexCoord2f(tx1, ty2);
-    glVertex2i(x, y + FNSZ);
-
-    glTexCoord2f(tx2, ty2);
-    glVertex2i(x + FNSZ, y + FNSZ);
-
-    glTexCoord2f(tx2, ty1);
-    glVertex2i(x + FNSZ, y);
-
-    glEnd();
-}
-
-// writes the text on coords (x,y) of the console
-static void DrawText(int x, int y, const char *s, RGBAColor col)
-{
-    if (console_font->definition_->type_ == kFontTypeImage)
-    {
-        // Always whiten the font when used with console output
-        GLuint tex_id = ImageCache(console_font->font_image_, true, true);
-
-        glEnable(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, tex_id);
-
-        glEnable(GL_BLEND);
-        glEnable(GL_ALPHA_TEST);
-        glAlphaFunc(GL_GREATER, 0);
-    }
-    else if (console_font->definition_->type_ == kFontTypeTrueType)
-    {
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glEnable(GL_TEXTURE_2D);
-        if ((image_smoothing &&
-             console_font->definition_->truetype_smoothing_ == FontDefinition::kTrueTypeSmoothOnDemand) ||
-            console_font->definition_->truetype_smoothing_ == FontDefinition::kTrueTypeSmoothAlways)
-            glBindTexture(GL_TEXTURE_2D, console_font->truetype_smoothed_texture_id_[current_font_size]);
-        else
-            glBindTexture(GL_TEXTURE_2D, console_font->truetype_texture_id_[current_font_size]);
-    }
-
-    bool draw_cursor = false;
-
-    if (s == input_line)
-    {
-        if (console_cursor < 16)
-            draw_cursor = true;
-    }
-
-    int pos = 0;
-    for (; *s; s++, pos++)
-    {
-        DrawChar(x, y, *s, col);
-
-        if (console_font->definition_->type_ == kFontTypeTrueType)
-        {
-            if (*(s + 1))
-            {
-                x += (float)stbtt_GetGlyphKernAdvance(console_font->truetype_info_, console_font->GetGlyphIndex(*s),
-                                                      console_font->GetGlyphIndex(*(s + 1))) *
-                     console_font->truetype_kerning_scale_[current_font_size] * FNSZ_ratio / pixel_aspect_ratio.f_;
-            }
-        }
-
-        if (pos == input_position && draw_cursor)
-        {
-            DrawChar(x, y, 95, col);
-            draw_cursor = false;
-        }
-
-        x += XMUL;
-
-        if (x >= current_screen_width)
-            break;
-    }
-
-    if (draw_cursor)
-        DrawChar(x, y, 95, col);
-
-    glDisable(GL_TEXTURE_2D);
-    glDisable(GL_ALPHA_TEST);
-    glDisable(GL_BLEND);
-}
-
-void ConsoleSetupFont(void)
-{
-    if (!console_font)
-    {
-        FontDefinition *DEF = fontdefs.Lookup("CON_FONT_2");
-        if (!DEF)
-            FatalError("CON_FONT_2 definition missing from DDFFONT!\n");
-        console_font = hud_fonts.Lookup(DEF);
-        EPI_ASSERT(console_font);
-        console_font->Load();
-    }
-
-    if (!console_style)
-    {
-        StyleDefinition *def = styledefs.Lookup("CONSOLE");
-        if (!def)
-            def = default_style;
-        console_style = hud_styles.Lookup(def);
-    }
-
-    CalcSizes();
-}
-
-void ConsoleDrawer(void)
-{
-    ConsoleSetupFont();
-
-    if (console_visible == kConsoleVisibilityNotVisible && !console_wipe_active)
-        return;
-
-    // -- background --
-
-    int CON_GFX_HT = (current_screen_height * 3 / 5);
-
-    int y = current_screen_height;
-
-    if (console_wipe_active)
-        y = y - CON_GFX_HT * (console_wipe_position) / kConsoleWipeTics;
-    else
-        y = y - CON_GFX_HT;
-
-    if (console_style->background_image_ != nullptr)
-    {
-        const Image *img = console_style->background_image_;
-
-        HUDRawImage(0, y, current_screen_width, y + CON_GFX_HT, img, 0.0, 0.0, img->Right(), img->Top(),
-                    console_style->definition_->bg_.translucency_, kRGBANoValue, nullptr, 0, 0);
-    }
-    else
-    {
-        SolidBox(0, y, current_screen_width, current_screen_height - y,
-                 console_style->definition_->bg_.colour_ != kRGBANoValue ? console_style->definition_->bg_.colour_
-                                                                         : SG_BLACK_RGBA32,
-                 console_style->definition_->bg_.translucency_);
-    }
-
-    y += FNSZ / 4 + (console_font->definition_->type_ == kFontTypeTrueType ? FNSZ : 0);
-
-    // -- input line --
-
-    if (bottom_row == -1)
-    {
-        DrawText(0, y, ">", SG_MAGENTA_RGBA32);
-
-        if (command_history_position >= 0)
-        {
-            std::string text = cmd_history[command_history_position]->c_str();
-
-            if (console_cursor < 16)
-                text.append("_");
-
-            DrawText(XMUL, y, text.c_str(), SG_MAGENTA_RGBA32);
-        }
-        else
-        {
-            DrawText(XMUL, y, input_line, SG_MAGENTA_RGBA32);
-        }
-
-        y += FNSZ;
-    }
-
-    y += FNSZ / 2;
-
-    // -- text lines --
-
-    for (int i = HMM_MAX(0, bottom_row); i < kMaximumConsoleLines; i++)
-    {
-        ConsoleLine *CL = console_lines[i];
-
-        if (!CL)
-            break;
-
-        if (epi::StringPrefixCompare(CL->line_, "--------") == 0)
-            HorizontalLine(y + FNSZ / 2, CL->color_);
-        else
-            DrawText(0, y, CL->line_.c_str(), CL->color_);
-
-        y += FNSZ;
-
-        if (y >= current_screen_height)
-            break;
-    }
-}
 
 static void GotoEndOfLine(void)
 {
@@ -1203,7 +927,7 @@ bool ConsoleResponder(InputEvent *ev)
 void ConsoleTicker(void)
 {
     int add = 1;
-    if (double_framerate.d_ && !(hud_tic & 1))
+    if (double_framerate.d_)
         add = 0;
 
     console_cursor = (console_cursor + add) & 31;
@@ -1282,168 +1006,6 @@ void ConsoleStart(void)
     console_visible   = kConsoleVisibilityNotVisible;
     console_cursor    = 0;
     StartupProgressMessage("Starting console...");
-}
-
-void ConsoleShowFPS(void)
-{
-    if (debug_fps.d_ == 0)
-        return;
-
-    ConsoleSetupFont();
-
-    // -AJA- 2022: reworked for better accuracy, ability to show WORST time
-
-    // get difference since last call
-    static uint32_t last_time = 0;
-    uint32_t        time      = GetMicroseconds();
-    uint32_t        diff      = time - last_time;
-    last_time                 = time;
-
-    // last computed value, state to compute average
-    static float avg_shown   = 100.00;
-    static float worst_shown = 100.00;
-
-    static uint32_t frames = 0;
-    static uint32_t total  = 0;
-    static uint32_t worst  = 0;
-
-    // ignore a large diff or timer wrap-around
-    if (diff < 1000000)
-    {
-        frames += 1;
-        total += diff;
-        worst = HMM_MAX(worst, diff);
-
-        // update every second
-        if (total > 999999)
-        {
-            avg_shown   = (double)total / (double)(frames * 1000);
-            worst_shown = (double)worst / 1000.0;
-
-            frames = 0;
-            total  = 0;
-            worst  = 0;
-        }
-    }
-
-    int x = current_screen_width - XMUL * 16;
-    int y = current_screen_height - FNSZ * 2;
-
-    if (abs(debug_fps.d_) >= 2)
-        y -= FNSZ;
-
-    if (abs(debug_fps.d_) >= 3)
-        y -= (FNSZ * 4);
-
-    SolidBox(x, y, current_screen_width, current_screen_height, SG_BLACK_RGBA32, 0.5);
-
-    x += XMUL;
-    y = current_screen_height - FNSZ - FNSZ * (console_font->definition_->type_ == kFontTypeTrueType ? -0.5 : 0.5);
-
-    // show average...
-
-    char textbuf[128];
-
-    if (debug_fps.d_ < 0)
-        sprintf(textbuf, " %6.2f ms", avg_shown);
-    else
-        sprintf(textbuf, " %6.2f fps", 1000 / avg_shown);
-
-    DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
-
-    // show worst...
-
-    if (abs(debug_fps.d_) >= 2)
-    {
-        y -= FNSZ;
-
-        if (debug_fps.d_ < 0)
-            sprintf(textbuf, " %6.2f max", worst_shown);
-        else if (worst_shown > 0)
-            sprintf(textbuf, " %6.2f min", 1000 / worst_shown);
-
-        DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
-    }
-
-    // show frame metrics...
-
-    if (abs(debug_fps.d_) >= 3)
-    {
-        y -= FNSZ;
-        sprintf(textbuf, "%i runit", ec_frame_stats.draw_render_units);
-        DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
-        y -= FNSZ;
-        sprintf(textbuf, "%i wall", ec_frame_stats.draw_wall_parts);
-        DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
-        y -= FNSZ;
-        sprintf(textbuf, "%i plane", ec_frame_stats.draw_planes);
-        DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
-        y -= FNSZ;
-        sprintf(textbuf, "%i thing", ec_frame_stats.draw_things);
-        DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
-        y -= FNSZ;
-        sprintf(textbuf, "%i state", ec_frame_stats.draw_state_change);
-        DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
-        y -= FNSZ;
-        sprintf(textbuf, "%i texture", ec_frame_stats.draw_texture_change);
-        DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
-    }
-}
-
-void ConsoleShowPosition(void)
-{
-    if (debug_position.d_ <= 0)
-        return;
-
-    ConsoleSetupFont();
-
-    Player *p = players[display_player];
-    if (p == nullptr)
-        return;
-
-    char textbuf[128];
-
-    int x = current_screen_width - XMUL * 16;
-    int y = current_screen_height - FNSZ * 5;
-
-    SolidBox(x, y - FNSZ * 10, XMUL * 16, FNSZ * 10 + 2, SG_BLACK_RGBA32, 0.5);
-
-    x += XMUL;
-    y -= FNSZ * (console_font->definition_->type_ == kFontTypeTrueType ? 0.25 : 1.25);
-    sprintf(textbuf, "    x: %d", (int)p->map_object_->x);
-    DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
-
-    y -= FNSZ;
-    sprintf(textbuf, "    y: %d", (int)p->map_object_->y);
-    DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
-
-    y -= FNSZ;
-    sprintf(textbuf, "    z: %d", (int)p->map_object_->z);
-    DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
-
-    y -= FNSZ;
-    sprintf(textbuf, "angle: %d", (int)epi::DegreesFromBAM(p->map_object_->angle_));
-    DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
-
-    y -= FNSZ;
-    sprintf(textbuf, "x mom: %.4f", p->map_object_->momentum_.X);
-    DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
-
-    y -= FNSZ;
-    sprintf(textbuf, "y mom: %.4f", p->map_object_->momentum_.Y);
-    DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
-
-    y -= FNSZ;
-    sprintf(textbuf, "z mom: %.4f", p->map_object_->momentum_.Z);
-    DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
-
-    y -= FNSZ;
-    sprintf(textbuf, "  sec: %d", (int)(p->map_object_->subsector_->sector - level_sectors));
-    DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
-
-    y -= FNSZ;
-    sprintf(textbuf, "  sub: %d", (int)(p->map_object_->subsector_ - level_subsectors));
-    DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
 }
 
 void ClearConsoleLines()

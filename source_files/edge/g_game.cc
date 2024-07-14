@@ -40,7 +40,6 @@
 #include "epi_filesystem.h"
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
-#include "hu_stuff.h"
 #include "i_system.h"
 #include "m_cheat.h"
 #include "m_random.h"
@@ -236,8 +235,6 @@ void LoadLevel_Bits(void)
 //
 void DoLoadLevel(void)
 {
-    HUDStart();
-
     if (current_hub_tag == 0)
         SaveClearSlot("current");
 
@@ -421,8 +418,7 @@ void GameTicker(void)
         GrabTicCommands();
 
         MapObjectTicker(false);
-        HUDTicker();
-
+        
         // do player reborns if needed
         CheckPlayersReborn();
         break;

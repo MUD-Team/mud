@@ -35,9 +35,6 @@
 #include "epi.h"
 #include "epi_str_util.h"
 #include "g_game.h"
-#include "hu_draw.h"
-#include "hu_stuff.h"
-#include "hu_style.h"
 #include "m_argv.h"
 #include "m_misc.h"
 #include "m_random.h"
@@ -56,9 +53,6 @@ extern ConsoleVariable bot_skill;
 
 int network_game_menu_on;
 
-static Style *network_game_host_style;
-static Style *network_game_list_style;
-
 static NewGameParameters *network_game_parameters;
 
 static int host_position;
@@ -70,38 +64,6 @@ static constexpr uint8_t kTotalHostOptions = 11;
 static void ListAccept(void);
 
 EDGE_DEFINE_CONSOLE_VARIABLE(player_deathmatch_damage_resistance, "9", kConsoleVariableFlagArchive)
-
-static void DrawKeyword(int index, Style *style, int y, const char *keyword, const char *value)
-{
-    int x = 160;
-
-    bool is_selected = (index == host_position);
-
-    x = x - 10;
-    x = x - (style->fonts_[StyleDefinition::kTextSectionText]->StringWidth(keyword) *
-             style->definition_->text_[StyleDefinition::kTextSectionText].scale_);
-    HUDWriteText(style, (index < 0) ? 3 : is_selected ? 2 : 0, x, y, keyword);
-
-    x = 160;
-    HUDWriteText(style, StyleDefinition::kTextSectionAlternate, x + 10, y, value);
-
-    if (is_selected)
-    {
-        if (style->fonts_[StyleDefinition::kTextSectionAlternate]->definition_->type_ == kFontTypeImage)
-        {
-            int cursor = 16;
-            HUDWriteText(style, StyleDefinition::kTextSectionTitle,
-                         x - style->fonts_[StyleDefinition::kTextSectionTitle]->StringWidth((const char *)&cursor) / 2,
-                         y, (const char *)&cursor);
-        }
-        else if (style->fonts_[StyleDefinition::kTextSectionAlternate]->definition_->type_ == kFontTypeTrueType)
-            HUDWriteText(style, StyleDefinition::kTextSectionTitle,
-                         x - style->fonts_[StyleDefinition::kTextSectionTitle]->StringWidth("+") / 2, y, "+");
-        else
-            HUDWriteText(style, StyleDefinition::kTextSectionTitle,
-                         x - style->fonts_[StyleDefinition::kTextSectionTitle]->StringWidth("*") / 2, y, "*");
-    }
-}
 
 static const char *GetModeName(char mode)
 {
@@ -420,98 +382,6 @@ static void HostAccept(void)
 #endif
 }
 
-void OptionMenuDrawHostMenu(void)
-{
-    EPI_ASSERT(network_game_host_style);
-
-    network_game_host_style->DrawBackground();
-
-    int CenterX;
-    CenterX = 160;
-    CenterX -=
-        (network_game_host_style->fonts_[StyleDefinition::kTextSectionHeader]->StringWidth("Bot Match Settings") *
-         network_game_host_style->definition_->text_[StyleDefinition::kTextSectionHeader].scale_) /
-        2;
-
-    HUDWriteText(network_game_host_style, StyleDefinition::kTextSectionHeader, CenterX, 25, "Bot Match Settings");
-
-    int y      = 40;
-    int idx    = 0;
-    int deltay = 2 +
-                 (network_game_host_style->fonts_[StyleDefinition::kTextSectionText]->NominalHeight() *
-                  network_game_host_style->definition_->text_[StyleDefinition::kTextSectionText].scale_) +
-                 network_game_host_style->definition_->entry_spacing_;
-
-    if (!network_game_parameters->map_->episode_->description_.empty())
-        DrawKeyword(idx, network_game_host_style, y, "Episode",
-                    language[network_game_parameters->map_->episode_->description_.c_str()]);
-    else
-        DrawKeyword(idx, network_game_host_style, y, "Episode",
-                    language[network_game_parameters->map_->episode_name_.c_str()]);
-
-    y += deltay;
-    idx++;
-
-    DrawKeyword(idx, network_game_host_style, y, "Level", network_game_parameters->map_->name_.c_str());
-    y += deltay + (deltay / 2);
-    idx++;
-
-    DrawKeyword(idx, network_game_host_style, y, "Mode", GetModeName(network_game_parameters->deathmatch_));
-    y += deltay;
-    idx++;
-
-    DrawKeyword(idx, network_game_host_style, y, "Skill", GetSkillName(network_game_parameters->skill_));
-    y += deltay;
-    idx++;
-
-    DrawKeyword(idx, network_game_host_style, y, "Bots", epi::StringFormat("%d", host_want_bots).c_str());
-    y += deltay;
-    idx++;
-
-    int skill = HMM_Clamp(0, bot_skill.d_, 4);
-    DrawKeyword(idx, network_game_host_style, y, "Bot Skill", GetBotSkillName(skill));
-    y += deltay;
-    idx++;
-
-    int dm_damage_resistance = HMM_Clamp(0, player_deathmatch_damage_resistance.d_, 18);
-    DrawKeyword(idx, network_game_host_style, y, "Player Damage Resistance",
-                GetPlayerDamageResistanceNameName(dm_damage_resistance));
-    y += deltay;
-    idx++;
-
-    int x =
-        150 - (network_game_host_style->fonts_[StyleDefinition::kTextSectionText]->StringWidth("(Deathmatch Only)") *
-               network_game_host_style->definition_->text_[StyleDefinition::kTextSectionText].scale_);
-    HUDWriteText(network_game_host_style, idx - 1 == host_position ? 2 : 0, x, y, "(Deathmatch Only)");
-    y += deltay;
-
-    DrawKeyword(idx, network_game_host_style, y, "Monsters",
-                network_game_parameters->flags_->no_monsters     ? "OFF"
-                : network_game_parameters->flags_->fast_monsters ? "FAST"
-                                                                 : "ON");
-    y += deltay;
-    idx++;
-
-    DrawKeyword(idx, network_game_host_style, y, "Item Respawn",
-                network_game_parameters->flags_->items_respawn ? "ON" : "OFF");
-    y += deltay;
-    idx++;
-
-    DrawKeyword(idx, network_game_host_style, y, "Team Damage",
-                network_game_parameters->flags_->team_damage ? "ON" : "OFF");
-    y += (deltay * 2);
-    idx++;
-
-    CenterX = 160;
-    CenterX -= (network_game_host_style->fonts_[StyleDefinition::kTextSectionText]->StringWidth("Start") *
-                network_game_host_style->definition_->text_[StyleDefinition::kTextSectionText].scale_) /
-               2;
-
-    HUDWriteText(network_game_host_style,
-                 (host_position == idx) ? StyleDefinition::kTextSectionHelp : StyleDefinition::kTextSectionText,
-                 CenterX, y, "Start");
-}
-
 bool OptionMenuNetworkHostResponder(InputEvent *ev, int ch)
 {
     if (ch == kEnter || ch == kGamepadA || ch == kMouse1)
@@ -556,53 +426,6 @@ static void NetGameStartLevel(void)
     DeferredNewGame(*network_game_parameters);
 }
 
-void OptionMenuDrawPlayerList(void)
-{
-    HUDSetAlpha(0.64f);
-    HUDSolidBox(0, 0, 320, 200, SG_BLACK_RGBA32);
-    HUDSetAlpha();
-
-    HUDWriteText(network_game_list_style, 2, 80, 10, "PLAYER LIST");
-
-    int y = 30;
-    int i;
-
-    int humans = 0;
-
-    ///	for (i = 0; i < network_game_parameters->total_players; i++)
-    ///		if (! (network_game_parameters->players[i] & kPlayerFlagBot))
-    ///			humans++;
-
-    for (i = 0; i < network_game_parameters->total_players_; i++)
-    {
-        int flags = network_game_parameters->players_[i];
-
-        if (flags & kPlayerFlagBot)
-            continue;
-
-        humans++;
-
-        int bots_here = 0;
-
-        for (int j = 0; j < network_game_parameters->total_players_; j++)
-        {
-            if (network_game_parameters->players_[j] & kPlayerFlagBot)
-                bots_here++;
-        }
-
-        HUDWriteText(network_game_list_style, (flags & kPlayerFlagNetwork) ? 0 : 3, 20, y,
-                     epi::StringFormat("PLAYER %d", humans).c_str());
-
-        HUDWriteText(network_game_list_style, 1, 100, y, "Local");
-
-        HUDWriteText(network_game_list_style, (flags & kPlayerFlagNetwork) ? 0 : 3, 200, y,
-                     epi::StringFormat("%d BOTS", bots_here).c_str());
-        y += 10;
-    }
-
-    HUDWriteText(network_game_list_style, 2, 40, 140, "Press <ENTER> to Start Game");
-}
-
 static void ListAccept()
 {
     network_game_menu_on = 0;
@@ -632,36 +455,6 @@ void NetworkGameInitialize(void)
     network_game_menu_on = 0;
 
     host_position = 0;
-
-    // load styles
-    StyleDefinition *def;
-    Style           *ng_default;
-
-    def = styledefs.Lookup("OPTIONS");
-    if (!def)
-        def = default_style;
-    ng_default = hud_styles.Lookup(def);
-
-    def                     = styledefs.Lookup("HOST NETGAME");
-    network_game_host_style = def ? hud_styles.Lookup(def) : ng_default;
-
-    def                     = styledefs.Lookup("NET PLAYER LIST");
-    network_game_list_style = def ? hud_styles.Lookup(def) : ng_default;
-}
-
-void NetworkGameDrawer(void)
-{
-    switch (network_game_menu_on)
-    {
-    case 1:
-        OptionMenuDrawHostMenu();
-        return;
-    case 3:
-        OptionMenuDrawPlayerList();
-        return;
-    }
-
-    FatalError("INTERNAL ERROR: network_game_menu_on=%d\n", network_game_menu_on);
 }
 
 bool NetworkGameResponder(InputEvent *ev, int ch)
