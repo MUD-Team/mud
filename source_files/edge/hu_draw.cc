@@ -18,7 +18,6 @@
 
 #include "hu_draw.h"
 
-#include "am_map.h"
 #include "con_main.h"
 #include "ddf_font.h"
 #include "epi.h"
@@ -1133,8 +1132,6 @@ void HUDRenderAutomap(float x, float y, float w, float h, MapObject *player, int
             w = hud_x_right - x;
         }
     }
-
-    AutomapRender(x, y, w, h, player);
 
     HUDPopScissor();
 }

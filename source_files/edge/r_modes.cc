@@ -30,7 +30,6 @@
 #include <algorithm>
 #include <vector>
 
-#include "am_map.h"
 #include "epi.h"
 #include "hu_font.h" // current_font_size
 #include "i_defs_gl.h"

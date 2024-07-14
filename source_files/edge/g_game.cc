@@ -29,7 +29,6 @@
 #include <string.h>
 #include <time.h>
 
-#include "am_map.h"
 #include "bot_think.h"
 #include "con_main.h"
 #include "dm_state.h"
@@ -309,9 +308,6 @@ bool GameResponder(InputEvent *ev)
 
     if (game_state == kGameStateLevel)
     {
-        if (AutomapResponder(ev))
-            return true; // automap ate it
-
         if (CheatResponder(ev))
             return true; // cheat code at it
     }
@@ -425,7 +421,6 @@ void GameTicker(void)
         GrabTicCommands();
 
         MapObjectTicker(false);
-        AutomapTicker();
         HUDTicker();
 
         // do player reborns if needed
@@ -573,12 +568,7 @@ static void DoCompleted(void)
         PlayerFinishLevel(p, exit_hub_tag > 0);
     }
 
-    if (automap_active)
-        AutomapStop();
-
     BotEndLevel();
-
-    automap_active = false;
 
     // Hard coding whilst we figure out how map traversal will work
     exit_skip_all = true;
@@ -837,8 +827,6 @@ static void InitNew(NewGameParameters &params)
         params.skill_ = kSkillNightmare;
 
     RandomStateWrite(params.random_seed_);
-
-    automap_active = false;
 
     game_skill = params.skill_;
     deathmatch = params.deathmatch_;

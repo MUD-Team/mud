@@ -24,7 +24,6 @@
 //----------------------------------------------------------------------------
 
 #include "AlmostEquals.h"
-#include "am_map.h"
 #include "con_main.h"
 #include "dm_defs.h"
 #include "dm_state.h"
@@ -1114,10 +1113,6 @@ void KillMapObject(MapObject *source, MapObject *target, const DamageClass *damt
         target->player_->actual_speed_         = 0;
 
         DropWeapon(target->player_);
-
-        // don't die in auto map, switch view prior to dying
-        if (target->player_ == players[console_player] && automap_active)
-            AutomapStop();
 
         // don't immediately restart when USE key was pressed
         if (target->player_ == players[console_player])

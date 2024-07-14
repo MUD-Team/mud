@@ -7,7 +7,6 @@ set (EDGE_SOURCE_FILES
   i_ctrl.cc
   i_video.cc
   i_sound.cc
-  am_map.cc
   bot_nav.cc
   bot_think.cc
   con_con.cc

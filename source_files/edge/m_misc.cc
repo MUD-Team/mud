@@ -32,7 +32,6 @@
 
 #include <stdarg.h>
 
-#include "am_map.h"
 #include "con_main.h"
 #include "defaults.h"
 #include "dm_defs.h"
@@ -84,14 +83,11 @@ static ConfigurationDefault defaults[] = {
 
     // -ES- 1998/11/28 Save fade settings
     {kConfigInteger, "reduce_flash", &reduce_flash, 0},
-    {kConfigBoolean, "rotate_map", &rotate_map, EDGE_DEFAULT_ROTATEMAP},
     {kConfigBoolean, "respawnsetting", &global_flags.enemy_respawn_mode, EDGE_DEFAULT_RES_RESPAWN},
     {kConfigBoolean, "items_respawn", &global_flags.items_respawn, EDGE_DEFAULT_ITEMRESPAWN},
     {kConfigBoolean, "respawn", &global_flags.enemies_respawn, EDGE_DEFAULT_RESPAWN},
     {kConfigBoolean, "fast_monsters", &global_flags.fast_monsters, EDGE_DEFAULT_FASTPARM},
     {kConfigEnum, "autoaim", &global_flags.autoaim, EDGE_DEFAULT_AUTOAIM},
-
-    {kConfigBoolean, "automap_keydoor_blink", &automap_keydoor_blink, EDGE_DEFAULT_AM_KEYDOORBLINK},
 
     // -KM- 1998/07/21 Save the blood setting
     {kConfigBoolean, "blood", &global_flags.more_blood, EDGE_DEFAULT_MORE_BLOOD},
@@ -167,17 +163,6 @@ static ConfigurationDefault defaults[] = {
     {kConfigKey, "key_weapon8", &key_weapons[8], '8'},
     {kConfigKey, "key_weapon9", &key_weapons[9], '9'},
     {kConfigKey, "key_weapon0", &key_weapons[0], '0'},
-
-    {kConfigKey, "key_automap_up", &key_automap_up, kUpArrow},
-    {kConfigKey, "key_automap_down", &key_automap_down, kDownArrow},
-    {kConfigKey, "key_automap_left", &key_automap_left, kLeftArrow},
-    {kConfigKey, "key_automap_right", &key_automap_right, kRightArrow},
-    {kConfigKey, "key_automap_zoom_in", &key_automap_zoom_in, '='},
-    {kConfigKey, "key_automap_zoom_out", &key_automap_zoom_out, '-'},
-    {kConfigKey, "key_automap_follow", &key_automap_follow, 'f'},
-    {kConfigKey, "key_automap_grid", &key_automap_grid, 'g'},
-    {kConfigKey, "key_automap_mark", &key_automap_mark, 'm'},
-    {kConfigKey, "key_automap_clear", &key_automap_clear, 'c'},
 
     {kConfigKey, "key_inventory_previous", &key_inventory_previous, EDGE_DEFAULT_KEY_PREVINV},
     {kConfigKey, "key_inventory_use", &key_inventory_use, EDGE_DEFAULT_KEY_USEINV},

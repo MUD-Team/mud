@@ -40,7 +40,6 @@
 #include <algorithm>
 #include <vector>
 
-#include "am_map.h"
 #include "con_gui.h"
 #include "con_main.h"
 #include "con_var.h"
@@ -348,7 +347,6 @@ static void SetGlobalVariables(void)
     }
 
     // -AJA- 1999/10/18: Reworked these with CheckBooleanParameter
-    CheckBooleanParameter("rotate_map", &rotate_map, false);
     CheckBooleanParameter("sound", &no_sound, true);
     CheckBooleanParameter("music", &no_music, true);
     CheckBooleanParameter("items_respawn", &global_flags.items_respawn, false);
@@ -359,8 +357,6 @@ static void SetGlobalVariables(void)
     CheckBooleanParameter("blood", &global_flags.more_blood, false);
     CheckBooleanParameter("cheats", &global_flags.cheats, false);
     CheckBooleanParameter("weaponswitch", &global_flags.weapon_switch, false);
-
-    CheckBooleanParameter("automap_keydoor_blink", &automap_keydoor_blink, false);
 
     if (FindArgument("infight") > 0)
         force_infighting = 1;

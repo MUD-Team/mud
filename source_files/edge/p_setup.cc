@@ -29,7 +29,6 @@
 #include <unordered_map>
 
 #include "AlmostEquals.h"
-#include "am_map.h"
 #include "ddf_colormap.h"
 #include "ddf_main.h"
 #include "dm_defs.h"
@@ -2632,8 +2631,6 @@ void LevelSetup(void)
     CreateVertexSeclists();
 
     SpawnMapSpecials2(current_map->autotag_);
-
-    AutomapInitLevel();
 
     UpdateSkyboxTextures();
 
