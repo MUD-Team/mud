@@ -38,7 +38,6 @@
 #include "epi.h"
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
-#include "f_interm.h"
 #include "g_game.h"
 #include "m_argv.h"
 #include "m_random.h"
@@ -2350,9 +2349,6 @@ void SpawnMapSpecials2(int autotag)
 
         if (secSpecial->l_.type_ != kLightSpecialTypeNone)
             RunSectorLight(sector, &secSpecial->l_);
-
-        if (secSpecial->secret_)
-            intermission_stats.secrets++;
 
         if (secSpecial->use_colourmap_)
             sector->properties.colourmap = secSpecial->use_colourmap_;

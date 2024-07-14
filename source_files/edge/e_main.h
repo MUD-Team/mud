@@ -36,11 +36,6 @@ void EdgeTicker(void);
 void EdgeDisplay(void);
 void EdgeShutdown(void);
 
-void TitleTicker(void);
-void PickLoadingScreen(void);
-void AdvanceTitle(void);
-void StartTitle(void);
-
 void StartupProgressMessage(const char *message);
 
 std::string ParseEdgeGameFile(epi::Lexer &lex);

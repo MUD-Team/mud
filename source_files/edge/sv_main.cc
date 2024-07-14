@@ -28,7 +28,6 @@
 #include "epi.h"
 #include "epi_filesystem.h"
 #include "epi_str_util.h"
-#include "f_interm.h"
 #include "g_game.h"
 #include "m_math.h"
 #include "m_random.h"

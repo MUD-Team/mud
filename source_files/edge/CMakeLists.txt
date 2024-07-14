@@ -16,8 +16,6 @@ set (EDGE_SOURCE_FILES
   e_input.cc
   e_main.cc
   e_player.cc
-  f_finale.cc
-  f_interm.cc
   g_game.cc
   hu_draw.cc
   hu_font.cc

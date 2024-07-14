@@ -39,10 +39,9 @@ enum GameAction
     kGameActionNothing = 0,
     kGameActionNewGame,
     kGameActionLoadLevel,
+    kGameActionLevelCompleted,
     kGameActionLoadGame,
     kGameActionSaveGame,
-    kGameActionIntermission,
-    kGameActionFinale,
     kGameActionEndGame
 };
 

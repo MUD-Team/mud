@@ -47,7 +47,6 @@
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "epi.h"
-#include "f_interm.h" // intermission_stats
 #include "g_game.h"
 #include "i_system.h"
 #include "m_misc.h"
@@ -2231,10 +2230,6 @@ static void ObjectSpawning(MapObject *parent, BAMAngle angle)
     // Blocking line detected between object and spawnpoint?
     if (MapCheckBlockingLine(parent, child))
     {
-        if (child->flags_ & kMapObjectFlagCountKill)
-            intermission_stats.kills--;
-        if (child->flags_ & kMapObjectFlagCountItem)
-            intermission_stats.items--;
         // -KM- 1999/01/31 Explode objects over remove them.
         // -AJA- 2000/02/01: Remove now the default.
         if (attack->flags_ & kAttackFlagKillFailedSpawn)
@@ -2255,10 +2250,6 @@ static void ObjectSpawning(MapObject *parent, BAMAngle angle)
     // If the object cannot move from its position, remove it or kill it.
     if (!TryMove(child, child->x, child->y))
     {
-        if (child->flags_ & kMapObjectFlagCountKill)
-            intermission_stats.kills--;
-        if (child->flags_ & kMapObjectFlagCountItem)
-            intermission_stats.items--;
         if (attack->flags_ & kAttackFlagKillFailedSpawn)
         {
             KillMapObject(parent, child, nullptr);

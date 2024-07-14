@@ -41,8 +41,6 @@
 #include "epi_filesystem.h"
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
-#include "f_finale.h"
-#include "f_interm.h"
 #include "hu_stuff.h"
 #include "i_system.h"
 #include "m_cheat.h"
@@ -192,8 +190,7 @@ void LoadLevel_Bits(void)
     //
     // -ACB- 1998/08/09 New LevelSetup
     // -KM- 1998/11/25 LevelSetup accepts the autotag
-    //
-    intermission_stats.kills = intermission_stats.items = intermission_stats.secrets = 0;
+    //    
 
     for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
     {
@@ -283,14 +280,6 @@ void DoLoadLevel(void)
 //
 bool GameResponder(InputEvent *ev)
 {
-    // any other key pops up menu
-    if (game_action == kGameActionNothing && (game_state == kGameStateTitleScreen))
-    {
-        FatalError("kGameStateTitleScreen not supported");
-
-        return false;
-    }
-
     if (ev->type == kInputEventKeyDown && CheckKeyMatch(key_show_players, ev->value.key.sym))
     {
         if (game_state == kGameStateLevel) //!!!! && !InDeathmatch())
@@ -325,12 +314,6 @@ bool GameResponder(InputEvent *ev)
 
         if (CheatResponder(ev))
             return true; // cheat code at it
-    }
-
-    if (game_state == kGameStateFinale)
-    {
-        if (FinaleResponder(ev))
-            return true; // finale ate the event
     }
 
     return InputResponder(ev);
@@ -383,24 +366,16 @@ void DoBigGameStuff(void)
             DoLoadLevel();
             break;
 
+        case kGameActionLevelCompleted:
+            DoCompleted();
+            break;
+
         case kGameActionLoadGame:
             DoLoadGame();
             break;
 
         case kGameActionSaveGame:
             DoSaveGame();
-            break;
-
-        case kGameActionIntermission:
-            DoCompleted();
-            break;
-
-        case kGameActionFinale:
-            EPI_ASSERT(next_map);
-            current_map       = next_map;
-            current_hub_tag   = 0;
-            current_hub_first = nullptr;
-            FinaleStart(&current_map->f_pre_, kGameActionLoadLevel);
             break;
 
         case kGameActionEndGame:
@@ -430,10 +405,6 @@ void GameTicker(void)
             MapObjectTicker(true);
             break;
 
-        case kGameStateIntermission:
-        case kGameStateFinale:
-            GrabTicCommands();
-            break;
         default:
             break;
         }
@@ -448,9 +419,6 @@ void GameTicker(void)
     // do main actions
     switch (game_state)
     {
-    case kGameStateTitleScreen:
-        TitleTicker();
-        break;
 
     case kGameStateLevel:
         // get commands
@@ -462,16 +430,6 @@ void GameTicker(void)
 
         // do player reborns if needed
         CheckPlayersReborn();
-        break;
-
-    case kGameStateIntermission:
-        GrabTicCommands();
-        IntermissionTicker();
-        break;
-
-    case kGameStateFinale:
-        GrabTicCommands();
-        FinaleTicker();
         break;
 
     default:
@@ -622,6 +580,9 @@ static void DoCompleted(void)
 
     automap_active = false;
 
+    // Hard coding whilst we figure out how map traversal will work
+    exit_skip_all = true;
+
     // handle "no stat" levels
     if (current_map->wistyle_ == kIntermissionStyleNone || exit_skip_all)
     {
@@ -656,18 +617,14 @@ static void DoCompleted(void)
         }
         else
         {
-            FinaleStart(&current_map->f_end_, next_map ? kGameActionFinale : kGameActionNothing);
+            FatalError("DoCompleted: Transition to finale not supported");
         }
 
         return;
     }
 
-    intermission_stats.current_level = current_map;
-    intermission_stats.next_level    = next_map;
+    FatalError("DoCompleted: Transition to intermission not supported");
 
-    game_state = kGameStateIntermission;
-
-    IntermissionStart();
 }
 
 void DeferredLoadGame(int slot)
@@ -819,17 +776,10 @@ static void DoNewGame(void)
 
     InitNew(*defer_params);
 
-    bool skip_pre = defer_params->level_skip_;
-
     delete defer_params;
     defer_params = nullptr;    
 
-    // -AJA- 2003/10/09: support for pre-level briefing screen on first map.
-    //       FIXME: kludgy. All this game logic desperately needs rethinking.
-    if (skip_pre)
-        game_action = kGameActionLoadLevel;
-    else
-        FinaleStart(&current_map->f_pre_, kGameActionLoadLevel);
+    game_action = kGameActionLoadLevel;
 }
 
 //
@@ -913,7 +863,7 @@ static void InitNew(NewGameParameters &params)
 
 void DeferredEndGame(void)
 {
-    if (game_state == kGameStateLevel || game_state == kGameStateIntermission || game_state == kGameStateFinale)
+    if (game_state == kGameStateLevel)
     {
         game_action = kGameActionEndGame;
     }
@@ -939,10 +889,6 @@ static void DoEndGame(void)
     game_state = kGameStateNothing;
 
     StopMusic();
-
-    PickLoadingScreen();
-
-    StartTitle();
 }
 
 bool CheckWhenAppear(AppearsFlag appear)
