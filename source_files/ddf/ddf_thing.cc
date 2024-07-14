@@ -156,12 +156,6 @@ const DDFCommandList thing_commands[] = {
     DDF_FIELD("SPRITE_ASPECT", dummy_mobj, aspect_, DDFMainGetFloat),
     DDF_FIELD("SPRITE_YALIGN", dummy_mobj, yalign_,
               DDFMobjGetYAlign),  // -AJA- 2007/08/08
-    DDF_FIELD("MODEL_SKIN", dummy_mobj, model_skin_,
-              DDFMainGetNumeric), // -AJA- 2007/10/16
-    DDF_FIELD("MODEL_SCALE", dummy_mobj, model_scale_, DDFMainGetFloat),
-    DDF_FIELD("MODEL_ASPECT", dummy_mobj, model_aspect_, DDFMainGetFloat),
-    DDF_FIELD("MODEL_BIAS", dummy_mobj, model_bias_, DDFMainGetFloat),
-    DDF_FIELD("MODEL_ROTATE", dummy_mobj, model_rotate_, DDFMainGetNumeric),
     DDF_FIELD("BOUNCE_SPEED", dummy_mobj, bounce_speed_, DDFMainGetFloat),
     DDF_FIELD("BOUNCE_UP", dummy_mobj, bounce_up_, DDFMainGetFloat),
     DDF_FIELD("SIGHT_SLOPE", dummy_mobj, sight_slope_, DDFMainGetSlope),
@@ -196,15 +190,6 @@ const DDFCommandList thing_commands[] = {
 
     DDF_FIELD("MORPH_TIMEOUT", dummy_mobj, morphtimeout_,
               DDFMainGetTime),       // Lobo 2023
-
-    // DEHEXTRA
-    DDF_FIELD("GIB_HEALTH", dummy_mobj, gib_health_, DDFMainGetFloat),
-
-    DDF_FIELD("INFIGHTING_GROUP", dummy_mobj, infight_group_, DDFMainGetNumeric),
-    DDF_FIELD("PROJECTILE_GROUP", dummy_mobj, proj_group_, DDFMainGetNumeric),
-    DDF_FIELD("SPLASH_GROUP", dummy_mobj, splash_group_, DDFMainGetNumeric),
-    DDF_FIELD("FAST_SPEED", dummy_mobj, fast_speed_, DDFMainGetNumeric),
-    DDF_FIELD("MELEE_RANGE", dummy_mobj, melee_range_, DDFMainGetNumeric),
 
     // -AJA- backwards compatibility cruft...
     DDF_FIELD("EXPLOD_DAMAGE", dummy_mobj, explode_damage_.nominal_, DDFMainGetFloat),
@@ -310,7 +295,6 @@ const DDFActionCode thing_actions[] = {{"NOTHING", nullptr, nullptr},
                                        {"DLIGHT_FADE", A_DLightFade, DDFStateGetInteger},
                                        {"DLIGHT_RANDOM", A_DLightRandom, DDFStateGetIntPair},
                                        {"DLIGHT_COLOUR", A_DLightColour, DDFStateGetRGB},
-                                       {"SET_SKIN", A_SetSkin, DDFStateGetInteger},
 
                                        {"FACE", A_FaceDir, DDFStateGetAngle},
                                        {"TURN", A_TurnDir, DDFStateGetAngle},
@@ -324,7 +308,6 @@ const DDFActionCode thing_actions[] = {{"NOTHING", nullptr, nullptr},
 
                                        // Boom/MBF compatibility
                                        {"DIE", A_Die, nullptr},
-                                       {"KEEN_DIE", A_KeenDie, nullptr},
                                        {"MUSHROOM", A_Mushroom, nullptr},
                                        {"NOISE_ALERT", A_NoiseAlert, nullptr},
 
@@ -646,16 +629,6 @@ void ThingParseField(const char *field, const char *contents, int index, bool is
         return;
     }
 
-    // handle the "MODEL_ROTATE" command
-    if (DDFCompareName(field, "MODEL_ROTATE") == 0)
-    {
-        if (DDFMainParseField(thing_commands, field, contents, (uint8_t *)dynamic_mobj))
-        {
-            dynamic_mobj->model_rotate_ *= kBAMAngle1; // apply the rotation
-            return;
-        }
-    }
-
     if (DDFMainParseField(thing_commands, field, contents, (uint8_t *)dynamic_mobj))
         return;
 
@@ -720,9 +693,6 @@ static void ThingFinishEntry(void)
     {
         DDFWarnError("Bad CHOKE_DAMAGE.VAL value %f in DDF.\n", dynamic_mobj->choke_damage_.nominal_);
     }
-
-    if (dynamic_mobj->model_skin_ < 0 || dynamic_mobj->model_skin_ > 9)
-        DDFError("Bad MODEL_SKIN value %d in DDF (must be 0-9).\n", dynamic_mobj->model_skin_);
 
     if (dynamic_mobj->dlight_[0].radius_ > 512)
     {
@@ -1545,8 +1515,6 @@ static DDFSpecialFlags hyper_specials[] = {
     {"IMMOVABLE", kHyperFlagImmovable, 0},
     {nullptr, 0, 0}};
 
-static DDFSpecialFlags mbf21_specials[] = {{"LOGRAV", kMBF21FlagLowGravity, 0}, {nullptr, 0, 0}};
-
 //
 // DDFMobjGetSpecial
 //
@@ -1598,14 +1566,6 @@ void DDFMobjGetSpecial(const char *info)
         flag_ptr = &dynamic_mobj->hyper_flags_;
 
         res = DDFMainCheckSpecialFlag(info, hyper_specials, &flag_value, true, false);
-    }
-
-    if (res == kDDFCheckFlagUser || res == kDDFCheckFlagUnknown)
-    {
-        // Try the MBF21 specials...
-        flag_ptr = &dynamic_mobj->mbf21_flags_;
-
-        res = DDFMainCheckSpecialFlag(info, mbf21_specials, &flag_value, true, false);
     }
 
     switch (res)
@@ -1982,7 +1942,6 @@ void MapObjectDefinition::CopyDetail(MapObjectDefinition &src)
     flags_          = src.flags_;
     extended_flags_ = src.extended_flags_;
     hyper_flags_    = src.hyper_flags_;
-    mbf21_flags_    = src.mbf21_flags_;
 
     explode_damage_ = src.explode_damage_;
     explode_radius_ = src.explode_radius_;
@@ -2027,12 +1986,6 @@ void MapObjectDefinition::CopyDetail(MapObjectDefinition &src)
     scale_  = src.scale_;
     aspect_ = src.aspect_;
     yalign_ = src.yalign_;
-
-    model_skin_   = src.model_skin_;
-    model_scale_  = src.model_scale_;
-    model_aspect_ = src.model_aspect_;
-    model_bias_   = src.model_bias_;
-    model_rotate_ = src.model_rotate_;
 
     bounce_speed_  = src.bounce_speed_;
     bounce_up_     = src.bounce_up_;
@@ -2102,14 +2055,6 @@ void MapObjectDefinition::CopyDetail(MapObjectDefinition &src)
     hear_distance_  = src.hear_distance_;
 
     morphtimeout_ = src.morphtimeout_;
-
-    gib_health_ = src.gib_health_;
-
-    infight_group_ = src.infight_group_;
-    proj_group_    = src.proj_group_;
-    splash_group_  = src.splash_group_;
-    fast_speed_    = src.fast_speed_;
-    melee_range_   = src.melee_range_;
 }
 
 void MapObjectDefinition::Default()
@@ -2146,7 +2091,6 @@ void MapObjectDefinition::Default()
     flags_          = 0;
     extended_flags_ = 0;
     hyper_flags_    = 0;
-    mbf21_flags_    = 0;
 
     explode_damage_.Default(DamageClass::kDamageClassDefaultMobj);
     explode_radius_ = 0;
@@ -2175,12 +2119,6 @@ void MapObjectDefinition::Default()
     scale_        = 1.0f;
     aspect_       = 1.0f;
     yalign_       = SpriteYAlignmentBottomUp;
-
-    model_skin_   = 1;
-    model_scale_  = 1.0f;
-    model_aspect_ = 1.0f;
-    model_bias_   = 0.0f;
-    model_rotate_ = 0;
 
     bounce_speed_  = 0.5f;
     bounce_up_     = 0.5f;
@@ -2246,18 +2184,10 @@ void MapObjectDefinition::Default()
     spitspot_ = nullptr;
     spitspot_ref_.clear();
 
-    gib_health_ = 0;
-
     sight_distance_ = -1;
     hear_distance_  = -1;
 
     morphtimeout_ = 0;
-
-    infight_group_ = -2;
-    proj_group_    = -2;
-    splash_group_  = -2;
-    fast_speed_    = -1;
-    melee_range_   = -1;
 }
 
 void MapObjectDefinition::DLightCompatibility(void)

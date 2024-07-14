@@ -127,19 +127,6 @@ static GLuint R_ImageCache(const Image *image, bool anim = true, const Colormap 
     }
 }
 
-float Slope_GetHeight(SlopePlane *slope, float x, float y)
-{
-    // FIXME: precompute (store in slope_plane_t)
-    float dx = slope->x2 - slope->x1;
-    float dy = slope->y2 - slope->y1;
-
-    float d_len = dx * dx + dy * dy;
-
-    float along = ((x - slope->x1) * dx + (y - slope->y1) * dy) / d_len;
-
-    return slope->delta_z1 + along * (slope->delta_z2 - slope->delta_z1);
-}
-
 struct WallCoordinateData
 {
     int             v_count;
@@ -215,8 +202,6 @@ struct PlaneCoordinateData
 
     // multiplier for plane_z_bob
     float bob_amount = 0;
-
-    SlopePlane *slope;
 
     BAMAngle rotation = 0;
 };
@@ -296,9 +281,6 @@ static void DLIT_Plane(MapObject *mo, void *dataptr)
         !(mo->subsector_->sector->floor_vertex_slope || mo->subsector_->sector->ceiling_vertex_slope))
     {
         float z = data->vertices[0].Z;
-
-        if (data->slope)
-            z += Slope_GetHeight(data->slope, mo->x, mo->y);
 
         if ((MapObjectMidZ(mo) > z) != (data->normal.Z > 0))
             return;
@@ -828,12 +810,8 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum, float f_m
     other = sidenum ? ld->front_sector : ld->back_sector;
 
     float slope_fh = sec->floor_height;
-    if (sec->floor_slope)
-        slope_fh += HMM_MIN(sec->floor_slope->delta_z1, sec->floor_slope->delta_z2);
 
     float slope_ch = sec->ceiling_height;
-    if (sec->ceiling_slope)
-        slope_ch += HMM_MAX(sec->ceiling_slope->delta_z1, sec->ceiling_slope->delta_z2);
 
     RGBAColor sec_fc = sec->properties.fog_color;
     float     sec_fd = sec->properties.fog_density;
@@ -933,17 +911,6 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum, float f_m
         {
             lower_invis = true;
         }
-        else if (other->floor_slope)
-        {
-            float lz1 = slope_fh;
-            float rz1 = slope_fh;
-
-            float lz2 = other->floor_height + Slope_GetHeight(other->floor_slope, seg->vertex_1->X, seg->vertex_1->Y);
-            float rz2 = other->floor_height + Slope_GetHeight(other->floor_slope, seg->vertex_2->X, seg->vertex_2->Y);
-
-            AddWallTile2(seg, dfloor, &sd->bottom, lz1, lz2, rz1, rz2,
-                         (ld->flags & kLineFlagLowerUnpegged) ? sec->ceiling_height : other->floor_height, 0);
-        }
         else
         {
             AddWallTile(seg, dfloor, &sd->bottom, slope_fh, other->floor_height,
@@ -977,21 +944,6 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum, float f_m
         {
             upper_invis = true;
         }
-        else if (other->ceiling_slope)
-        {
-            float lz1 =
-                other->ceiling_height + Slope_GetHeight(other->ceiling_slope, seg->vertex_1->X, seg->vertex_1->Y);
-            float rz1 =
-                other->ceiling_height + Slope_GetHeight(other->ceiling_slope, seg->vertex_2->X, seg->vertex_2->Y);
-
-            float lz2 = slope_ch;
-            float rz2 = slope_ch;
-
-            AddWallTile2(seg, dfloor, &sd->top, lz1, lz2, rz1, rz2,
-                         (ld->flags & kLineFlagUpperUnpegged) ? sec->ceiling_height
-                                                              : other->ceiling_height + SafeImageHeight(sd->top.image),
-                         0);
-        }
         else
         {
             AddWallTile(seg, dfloor, &sd->top, other->ceiling_height, slope_ch,
@@ -1011,24 +963,8 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum, float f_m
         if (sd->middle.fog_wall)
         {
             float ofh = other->floor_height;
-            if (other->floor_slope)
-            {
-                float lz2 =
-                    other->floor_height + Slope_GetHeight(other->floor_slope, seg->vertex_1->X, seg->vertex_1->Y);
-                float rz2 =
-                    other->floor_height + Slope_GetHeight(other->floor_slope, seg->vertex_2->X, seg->vertex_2->Y);
-                ofh = HMM_MIN(ofh, HMM_MIN(lz2, rz2));
-            }
             f2 = f1   = HMM_MAX(HMM_MIN(sec->floor_height, slope_fh), ofh);
             float och = other->ceiling_height;
-            if (other->ceiling_slope)
-            {
-                float lz2 =
-                    other->ceiling_height + Slope_GetHeight(other->ceiling_slope, seg->vertex_1->X, seg->vertex_1->Y);
-                float rz2 =
-                    other->ceiling_height + Slope_GetHeight(other->ceiling_slope, seg->vertex_2->X, seg->vertex_2->Y);
-                och = HMM_MAX(och, HMM_MAX(lz2, rz2));
-            }
             c2 = c1 = HMM_MIN(HMM_MAX(sec->ceiling_height, slope_ch), och);
         }
         else if (ld->flags & kLineFlagLowerUnpegged)
@@ -1324,14 +1260,6 @@ static void RenderPlane(DrawFloor *dfloor, float h, MapSurface *surf, int face_d
     if (surf->override_properties)
         props = surf->override_properties;
 
-    SlopePlane *slope = nullptr;
-
-    if (face_dir > 0 && dfloor->is_lowest)
-        slope = current_subsector->sector->floor_slope;
-
-    if (face_dir < 0 && dfloor->is_highest)
-        slope = current_subsector->sector->ceiling_slope;
-
     float trans = surf->translucency;
 
     // ignore invisible planes
@@ -1339,11 +1267,11 @@ static void RenderPlane(DrawFloor *dfloor, float h, MapSurface *surf, int face_d
         return;
 
     // ignore non-facing planes
-    if ((view_z > h) != (face_dir > 0) && !slope && !current_subsector->sector->floor_vertex_slope)
+    if ((view_z > h) != (face_dir > 0) && !current_subsector->sector->floor_vertex_slope)
         return;
 
     // ignore dud regions (floor >= ceiling)
-    if (dfloor->floor_height > dfloor->ceiling_height && !slope && !current_subsector->sector->ceiling_vertex_slope)
+    if (dfloor->floor_height > dfloor->ceiling_height && !current_subsector->sector->ceiling_vertex_slope)
         return;
 
     // ignore empty subsectors
@@ -1404,9 +1332,6 @@ static void RenderPlane(DrawFloor *dfloor, float h, MapSurface *surf, int face_d
                     z = seg->vertex_1->W;
             }
 
-            if (slope)
-                z = orig_h + Slope_GetHeight(slope, x, y);
-
             vertices[v_count].X = x;
             vertices[v_count].Y = y;
             vertices[v_count].Z = z;
@@ -1443,7 +1368,6 @@ static void RenderPlane(DrawFloor *dfloor, float h, MapSurface *surf, int face_d
     data.pass     = 0;
     data.blending = blending;
     data.trans    = trans;
-    data.slope    = slope;
     data.rotation = surf->rotation;
 
     if (current_subsector->sector->properties.special)

@@ -89,27 +89,6 @@ static int AddSpriteName(const char *name)
     return last_sprite;
 }
 
-static int AddModelName(const char *name)
-{
-    if (epi::StringCaseCompareASCII(name, "NULL") == 0)
-        return 0;
-
-    if (last_model >= 0 && epi::StringCaseCompareASCII(ddf_model_names[last_model], name) == 0)
-        return last_model;
-
-    // look backwards, assuming a recent model is more likely
-    for (int i = (int)ddf_model_names.size() - 1; i > 0; i--)
-        if (epi::StringCaseCompareASCII(ddf_model_names[i], name) == 0)
-            return ((last_model = i));
-
-    last_model = (int)ddf_model_names.size();
-
-    // not found, so insert it
-    ddf_model_names.push_back(std::string(name));
-
-    return last_model;
-}
-
 void DDFStateInit(void)
 {
     // create states array with a single 'S_NULL' state
@@ -124,7 +103,6 @@ void DDFStateInit(void)
     // (Not strictly needed, but means we can access the arrays
     //  without subtracting 1)
     AddSpriteName("!nullptr!");
-    AddModelName("!nullptr!");
 }
 
 void DDFStateCleanUp(void)
@@ -411,37 +389,13 @@ void DDFStateReadState(const char *info, const char *label, std::vector<StateRan
     {
         cur->frame = j - (int)'A';
     }
-    else if (j == '@')
-    {
-        cur->frame = -1;
-
-        char first_ch = sprite_x[1];
-
-        if (epi::IsDigitASCII(first_ch))
-        {
-            cur->flags = kStateFrameFlagModel;
-            cur->frame = atol(sprite_x + 1) - 1;
-        }
-        else if (epi::IsAlphaASCII(first_ch) || (first_ch == '_'))
-        {
-            cur->flags       = kStateFrameFlagModel | kStateFrameFlagUnmapped;
-            cur->frame       = 0;
-            cur->model_frame = strdup(sprite_x + 1);
-        }
-
-        if (cur->frame < 0)
-            DDFError("DDFMainLoadStates: Illegal model frame: %s\n", sprite_x);
-    }
     else
         DDFError("DDFMainLoadStates: Illegal sprite frame: %s\n", sprite_x);
 
     if (is_weapon)
         cur->flags |= kStateFrameFlagWeapon;
 
-    if (cur->flags & kStateFrameFlagModel)
-        cur->sprite = AddModelName(stateinfo[0].c_str());
-    else
-        cur->sprite = AddSpriteName(stateinfo[0].c_str());
+    cur->sprite = AddSpriteName(stateinfo[0].c_str());
 
     //--------------------------------------------------
     //------------STATE TIC COUNT HANDLING--------------

@@ -60,9 +60,6 @@
 
 extern FlatDefinition *P_GetThingFlatDef(MapObject *thing);
 
-static constexpr float kLongMeleeRange    = 128.0f; // For kMBF21FlagLongMeleeRange
-static constexpr float kShortMissileRange = 896.0f; // For kMBF21FlagShortMissileRange
-
 static int AttackSfxCat(const MapObject *mo)
 {
     int category = GetSoundEffectCategory(mo);
@@ -217,15 +214,8 @@ static bool DecideMeleeAttack(MapObject *object, const AttackDefinition *attack)
     if (attack)
         meleedist = attack->range_;
     else
-    {
         meleedist = kMeleeRange;
-        if (object->mbf21_flags_ & kMBF21FlagLongMeleeRange)
-            meleedist = kLongMeleeRange;
-        // I guess a specific MBF21 Thing Melee range should override the above
-        // choices?
-        if (object->info_->melee_range_ > -1)
-            meleedist = object->info_->melee_range_;
-    }
+
     meleedist += target->radius_ - 20.0f; // Check the thing's actual radius
 
     if (distance >= meleedist)
@@ -290,10 +280,6 @@ static bool DecideRangeAttack(MapObject *object)
 
     // Object is too far away to attack?
     if (attack->range_ && distance >= attack->range_)
-        return false;
-
-    // MBF21 SHORTMRANGE flag
-    if ((object->mbf21_flags_ & kMBF21FlagShortMissileRange) && distance >= kShortMissileRange)
         return false;
 
     // Object is too close to target
@@ -637,21 +623,6 @@ void A_DLightColour(MapObject *mo)
     if (st && st->action_par)
     {
         mo->dynamic_light_.color = ((RGBAColor *)st->action_par)[0];
-    }
-}
-
-void A_SetSkin(MapObject *mo)
-{
-    const State *st = mo->state_;
-
-    if (st && st->action_par)
-    {
-        int skin = ((int *)st->action_par)[0];
-
-        if (skin < 0 || skin > 9)
-            FatalError("Thing [%s]: Bad skin number %d in SET_SKIN action.\n", mo->info_->name_.c_str(), skin);
-
-        mo->model_skin_ = skin;
     }
 }
 
@@ -1226,8 +1197,6 @@ static void LaunchSmartProjectile(MapObject *source, MapObject *target, const Ma
         float dy = source->y - target->y;
 
         float s = type->speed_;
-        if (level_flags.fast_monsters && type->fast_speed_ > -1)
-            s = type->fast_speed_;
 
         float a = mx * mx + my * my - s * s;
         float b = 2 * (dx * mx + dy * my);
@@ -1363,17 +1332,7 @@ int MissileContact(MapObject *object, MapObject *target)
 
         if (source->info_ == target->info_)
         {
-            if (!(target->extended_flags_ & kExtendedFlagDisloyalToOwnType) && (source->info_->proj_group_ != -1))
-                return 0;
-        }
-
-        // MBF21: If in same projectile group, attack does no damage
-        if (source->info_->proj_group_ >= 0 && target->info_->proj_group_ >= 0 &&
-            (source->info_->proj_group_ == target->info_->proj_group_))
-        {
-            if (object->extended_flags_ & kExtendedFlagTunnel)
-                return -1;
-            else
+            if (!(target->extended_flags_ & kExtendedFlagDisloyalToOwnType))
                 return 0;
         }
 
@@ -2924,14 +2883,6 @@ static bool CreateAggression(MapObject *mo)
             continue;
         }
 
-        // MBF21: If in same infighting group, never target each other even if
-        // hit with 'friendly fire'
-        if (mo->info_->infight_group_ >= 0 && other->info_->infight_group_ >= 0 &&
-            (mo->info_->infight_group_ == other->info_->infight_group_))
-        {
-            continue;
-        }
-
         // POTENTIAL TARGET
 
         // fairly low chance of trying it, in case this block
@@ -3312,28 +3263,6 @@ void A_Die(MapObject *mo)
     KillMapObject(nullptr, mo);
 }
 
-void A_KeenDie(MapObject *mo)
-{
-    A_MakeIntoCorpse(mo);
-
-    // see if all other Keens are dead
-    for (MapObject *cur = map_object_list_head; cur != nullptr; cur = cur->next_)
-    {
-        if (cur == mo)
-            continue;
-
-        if (cur->info_ != mo->info_)
-            continue;
-
-        if (cur->health_ > 0)
-            return; // other Keen not dead
-    }
-
-    LogDebug("A_KeenDie: ALL DEAD, activating...\n");
-
-    RemoteActivation(nullptr, 2 /* door type */, 666 /* tag */, 0, kLineTriggerAny);
-}
-
 void A_CheckMoving(MapObject *mo)
 {
     // -KM- 1999/01/31 Returns a player to spawnstate when not moving.
@@ -3552,10 +3481,7 @@ void A_Become(MapObject *mo)
         // Note: health is not changed
         mo->radius_ = mo->info_->radius_;
         mo->height_ = mo->info_->height_;
-        if (mo->info_->fast_speed_ > -1 && level_flags.fast_monsters)
-            mo->speed_ = mo->info_->fast_speed_;
-        else
-            mo->speed_ = mo->info_->speed_;
+        mo->speed_ = mo->info_->speed_;
 
         if (mo->flags_ & kMapObjectFlagAmbush) // preserve map editor AMBUSH flag
         {
@@ -3570,10 +3496,6 @@ void A_Become(MapObject *mo)
 
         mo->target_visibility_ = mo->info_->translucency_;
         mo->current_attack_    = nullptr;
-        mo->model_skin_        = mo->info_->model_skin_;
-        mo->model_last_frame_  = -1;
-        mo->model_scale_       = mo->info_->model_scale_;
-        mo->model_aspect_      = mo->info_->model_aspect_;
         mo->scale_             = mo->info_->scale_;
         mo->aspect_            = mo->info_->aspect_;
 
@@ -3630,10 +3552,7 @@ void A_UnBecome(MapObject *mo)
 
         mo->radius_ = mo->info_->radius_;
         mo->height_ = mo->info_->height_;
-        if (mo->info_->fast_speed_ > -1 && level_flags.fast_monsters)
-            mo->speed_ = mo->info_->fast_speed_;
-        else
-            mo->speed_ = mo->info_->speed_;
+        mo->speed_ = mo->info_->speed_;
 
         // Note: health is not changed
         if (mo->flags_ & kMapObjectFlagAmbush) // preserve map editor AMBUSH flag
@@ -3649,10 +3568,6 @@ void A_UnBecome(MapObject *mo)
 
         mo->target_visibility_ = mo->info_->translucency_;
         mo->current_attack_    = nullptr;
-        mo->model_skin_        = mo->info_->model_skin_;
-        mo->model_last_frame_  = -1;
-        mo->model_scale_       = mo->info_->model_scale_;
-        mo->model_aspect_      = mo->info_->model_aspect_;
         mo->scale_             = mo->info_->scale_;
         mo->aspect_            = mo->info_->aspect_;
 
@@ -3714,10 +3629,7 @@ void A_Morph(MapObject *mo)
 
         mo->radius_ = mo->info_->radius_;
         mo->height_ = mo->info_->height_;
-        if (mo->info_->fast_speed_ > -1 && level_flags.fast_monsters)
-            mo->speed_ = mo->info_->fast_speed_;
-        else
-            mo->speed_ = mo->info_->speed_;
+        mo->speed_ = mo->info_->speed_;
 
         if (mo->flags_ & kMapObjectFlagAmbush) // preserve map editor AMBUSH flag
         {
@@ -3732,10 +3644,6 @@ void A_Morph(MapObject *mo)
 
         mo->target_visibility_ = mo->info_->translucency_;
         mo->current_attack_    = nullptr;
-        mo->model_skin_        = mo->info_->model_skin_;
-        mo->model_last_frame_  = -1;
-        mo->model_scale_       = mo->info_->model_scale_;
-        mo->model_aspect_      = mo->info_->model_aspect_;
         mo->scale_             = mo->info_->scale_;
         mo->aspect_            = mo->info_->aspect_;
 
@@ -3795,10 +3703,7 @@ void A_UnMorph(MapObject *mo)
 
         mo->radius_ = mo->info_->radius_;
         mo->height_ = mo->info_->height_;
-        if (mo->info_->fast_speed_ > -1 && level_flags.fast_monsters)
-            mo->speed_ = mo->info_->fast_speed_;
-        else
-            mo->speed_ = mo->info_->speed_;
+        mo->speed_ = mo->info_->speed_;
 
         // Note: health is not changed
 
@@ -3815,10 +3720,6 @@ void A_UnMorph(MapObject *mo)
 
         mo->target_visibility_ = mo->info_->translucency_;
         mo->current_attack_    = nullptr;
-        mo->model_skin_        = mo->info_->model_skin_;
-        mo->model_last_frame_  = -1;
-        mo->model_scale_       = mo->info_->model_scale_;
-        mo->model_aspect_      = mo->info_->model_aspect_;
         mo->scale_             = mo->info_->scale_;
         mo->aspect_            = mo->info_->aspect_;
 

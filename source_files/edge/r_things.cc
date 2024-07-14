@@ -130,9 +130,6 @@ static int GetMulticolMaxRGB(ColorMixer *cols, int num, bool additive)
 static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionProperties *props,
                                 const State *state)
 {
-    if (state->flags & kStateFrameFlagModel)
-        return;
-
     // determine sprite patch
     bool         flip;
     const Image *image = GetOtherSprite(state->sprite, state->frame, &flip);
@@ -686,8 +683,6 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
     if (mo->teleport_tic_-- > 0)
         return;
 
-    bool is_model = (mo->state_->flags & kStateFrameFlagModel) ? true : false;
-
     // transform the origin point
     float mx = mo->x, my = mo->y, mz = mo->z;
 
@@ -707,7 +702,7 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
     float tz = tr_x * view_cosine + tr_y * view_sine;
 
     // thing is behind view plane?
-    if (clip_scope != kBAMAngle180 && tz <= 0) // && !is_model)
+    if (clip_scope != kBAMAngle180 && tz <= 0)
         return;
 
     float tx = tr_x * view_sine - tr_y * view_cosine;
@@ -743,61 +738,58 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
     float gzt = 0, gzb = 0;
     float pos1 = 0, pos2 = 0;
 
-    if (!is_model)
+    image = RendererGetThingSprite2(mo, mx, my, &spr_flip);
+
+    if (!image)
+        return;
+
+    // calculate edges of the shape
+    float sprite_width  = image->ScaledWidthActual();
+    float sprite_height = image->ScaledHeightActual();
+    float side_offset   = image->ScaledOffsetX();
+    float top_offset    = image->ScaledOffsetY();
+
+    if (spr_flip)
+        side_offset = -side_offset;
+
+    float xscale = mo->scale_ * mo->aspect_;
+
+    pos1 = (sprite_width / -2.0f - side_offset) * xscale;
+    pos2 = (sprite_width / +2.0f - side_offset) * xscale;
+
+    switch (mo->info_->yalign_)
     {
-        image = RendererGetThingSprite2(mo, mx, my, &spr_flip);
+    case SpriteYAlignmentTopDown:
+        gzt = mo->z + mo->height_ + top_offset * mo->scale_;
+        gzb = gzt - sprite_height * mo->scale_;
+        break;
 
-        if (!image)
-            return;
+    case SpriteYAlignmentMiddle: {
+        float _mz = mo->z + mo->height_ * 0.5 + top_offset * mo->scale_;
+        float dz  = sprite_height * 0.5 * mo->scale_;
 
-        // calculate edges of the shape
-        float sprite_width  = image->ScaledWidthActual();
-        float sprite_height = image->ScaledHeightActual();
-        float side_offset   = image->ScaledOffsetX();
-        float top_offset    = image->ScaledOffsetY();
+        gzt = _mz + dz;
+        gzb = _mz - dz;
+        break;
+    }
 
-        if (spr_flip)
-            side_offset = -side_offset;
+    case SpriteYAlignmentBottomUp:
+    default:
+        gzb = mo->z + top_offset * mo->scale_;
+        gzt = gzb + sprite_height * mo->scale_;
+        break;
+    }
 
-        float xscale = mo->scale_ * mo->aspect_;
-
-        pos1 = (sprite_width / -2.0f - side_offset) * xscale;
-        pos2 = (sprite_width / +2.0f - side_offset) * xscale;
-
-        switch (mo->info_->yalign_)
-        {
-        case SpriteYAlignmentTopDown:
-            gzt = mo->z + mo->height_ + top_offset * mo->scale_;
-            gzb = gzt - sprite_height * mo->scale_;
-            break;
-
-        case SpriteYAlignmentMiddle: {
-            float _mz = mo->z + mo->height_ * 0.5 + top_offset * mo->scale_;
-            float dz  = sprite_height * 0.5 * mo->scale_;
-
-            gzt = _mz + dz;
-            gzb = _mz - dz;
-            break;
-        }
-
-        case SpriteYAlignmentBottomUp:
-        default:
-            gzb = mo->z + top_offset * mo->scale_;
-            gzt = gzb + sprite_height * mo->scale_;
-            break;
-        }
-
-        if (mo->hyper_flags_ & kHyperFlagHover || (sink_mult > 0 || bob_mult > 0))
-        {
-            gzt += hover_dz;
-            gzb += hover_dz;
-        }
-    } // if (! is_model)
+    if (mo->hyper_flags_ & kHyperFlagHover || (sink_mult > 0 || bob_mult > 0))
+    {
+        gzt += hover_dz;
+        gzb += hover_dz;
+    }
 
     // fix for sprites that sit wrongly into the floor/ceiling
     int y_clipping = kVerticalClipSoft;
 
-    if (is_model || (mo->flags_ & kMapObjectFlagFuzzy) ||
+    if ((mo->flags_ & kMapObjectFlagFuzzy) ||
         ((mo->hyper_flags_ & kHyperFlagHover) && AlmostEquals(sink_mult, 0.0f)))
     {
         y_clipping = kVerticalClipNever;
@@ -835,11 +827,8 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
         }
     }
 
-    if (!is_model)
-    {
-        if (gzb >= gzt)
-            return;
-    }
+    if (gzb >= gzt)
+        return;
 
     // create new draw thing
 
@@ -861,7 +850,6 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
 
     dthing->properties = dsub->floors[0]->properties;
     dthing->y_clipping = y_clipping;
-    dthing->is_model   = is_model;
 
     dthing->image = image;
     dthing->flip  = spr_flip;
@@ -912,12 +900,6 @@ void RenderThing(DrawFloor *dfloor, DrawThing *dthing)
     EDGE_ZoneScoped;
 
     ec_frame_stats.draw_things++;
-
-    if (dthing->is_model)
-    {
-        FatalError("Models not supported");
-        return;
-    }
 
     MapObject *mo = dthing->map_object;
 

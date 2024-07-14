@@ -30,8 +30,7 @@
 enum StateFrameFlag
 {
     kStateFrameFlagWeapon   = (1 << 0),
-    kStateFrameFlagModel    = (1 << 1),
-    kStateFrameFlagUnmapped = (1 << 2), // model_frame not yet looked up
+    kStateFrameFlagUnmapped = (1 << 1)
 };
 
 struct State

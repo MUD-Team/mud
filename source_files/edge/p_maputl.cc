@@ -543,13 +543,6 @@ void ComputeGaps(Line *ld)
     if (back->ceiling_height <= front->floor_height || front->ceiling_height <= back->floor_height)
     {
         // closed door.
-
-        // -AJA- MUNDO HACK for slopes!!!!
-        if (front->floor_slope || back->floor_slope || front->ceiling_slope || back->ceiling_slope)
-        {
-            ld->blocked = false;
-        }
-
         return;
     }
 

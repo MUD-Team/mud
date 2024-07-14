@@ -86,15 +86,7 @@ static void SetPlayerSprite(Player *p, int position, int stnum, WeaponDefinition
 
     State *st = &states[stnum];
 
-    // model interpolation stuff
-    if (psp->state && (st->flags & kStateFrameFlagModel) && (psp->state->flags & kStateFrameFlagModel) &&
-        (st->sprite == psp->state->sprite) && st->tics > 1)
-    {
-        p->weapon_last_frame_ = psp->state->frame;
-    }
-    else
-        p->weapon_last_frame_ = -1;
-
+    p->weapon_last_frame_ = -1;
     psp->state      = st;
     psp->tics       = st->tics;
     psp->next_state = (st->nextstate == 0) ? nullptr : (states + st->nextstate);
@@ -1788,27 +1780,6 @@ void A_WeaponTransFade(MapObject *mo)
     }
 
     psp->target_visibility = value;
-}
-
-void A_WeaponSetSkin(MapObject *mo)
-{
-    Player       *p   = mo->player_;
-    PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
-
-    EPI_ASSERT(p->ready_weapon_ >= 0);
-    WeaponDefinition *info = p->weapons_[p->ready_weapon_].info;
-
-    const State *st = psp->state;
-
-    if (st && st->action_par)
-    {
-        int skin = ((int *)st->action_par)[0];
-
-        if (skin < 0 || skin > 9)
-            FatalError("Weapon [%s]: Bad skin number %d in SET_SKIN action.\n", info->name_.c_str(), skin);
-
-        p->weapons_[p->ready_weapon_].model_skin = skin;
-    }
 }
 
 void A_WeaponUnzoom(MapObject *mo)

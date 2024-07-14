@@ -215,23 +215,6 @@ class ColormapShader : public AbstractShader
         // FIXME: for foggy maps, need to adjust add_red_/G/B too
     }
 
-    virtual void Corner(ColorMixer *col, float nx, float ny, float nz, MapObject *mod_pos, bool is_weapon)
-    {
-        // TODO: improve this (normal-ise a little bit)
-
-        float mx = mod_pos->x;
-        float my = mod_pos->y;
-        float mz = mod_pos->z + mod_pos->height_ / 2;
-
-        if (is_weapon)
-        {
-            mx += view_cosine * 110;
-            my += view_sine * 110;
-        }
-
-        Sample(col, mx, my, mz);
-    }
-
     virtual void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha, int *pass_var, int blending, bool masked,
                           void *data, ShaderCoordinateFunction func)
     {

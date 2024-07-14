@@ -240,12 +240,6 @@ class MapObject : public Position
     int flags_          = 0;
     int extended_flags_ = 0;
     int hyper_flags_    = 0;
-    int mbf21_flags_    = 0;
-
-    int   model_skin_       = 0;
-    int   model_last_frame_ = 0;
-    float model_scale_      = 1.0f;
-    float model_aspect_     = 1.0f;
 
     // tag ID (for special operations)
     int         tag_                  = 0;
@@ -363,8 +357,6 @@ class MapObject : public Position
 
     // Player number last heard.
     int last_heard_ = 0;
-
-    bool is_voodoo_ = false;
 
     bool slope_sight_hit_ = false;
 

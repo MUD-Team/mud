@@ -257,19 +257,11 @@ static MapObject *SpawnMapThing(const MapObjectDefinition *info, float x, float 
             return nullptr;
         }
 
-        // -AJA- 2004/12/30: for duplicate players, the LAST one must
-        //       be used (so levels with Voodoo dolls work properly).
         SpawnPoint *prev = FindCoopPlayer(info->playernum_);
 
         if (!prev)
             AddCoopStart(point);
-        else
-        {
-            AddVoodooDoll(*prev);
 
-            // overwrite one in the Coop list with new location
-            memcpy(prev, &point, sizeof(point));
-        }
         return nullptr;
     }
 
@@ -1654,12 +1646,6 @@ static void LoadUDMFLineDefs()
                  ld->special->line_effect_ == kLineEffectTypeTaggedOffsetScroll))
                 ld->flags |= kLineFlagBoomPassThrough;
 
-            if (ld->special && ld->special->slope_type_ & kSlopeTypeDetailFloor)
-                ld->flags |= kLineFlagBoomPassThrough;
-
-            if (ld->special && ld->special->slope_type_ & kSlopeTypeDetailCeiling)
-                ld->flags |= kLineFlagBoomPassThrough;
-
             if (ld->special && ld->special == linetypes.Lookup(0)) // Add passthru to unknown/templated
                 ld->flags |= kLineFlagBoomPassThrough;
 
@@ -1863,7 +1849,7 @@ static void LoadUDMFThings()
                 // try to juggle both
                 if (!AlmostEquals(scale, 0.0f))
                 {
-                    udmf_thing->scale_ = udmf_thing->model_scale_ = scale;
+                    udmf_thing->scale_ = scale;
                     udmf_thing->height_ *= scale;
                     udmf_thing->radius_ *= scale;
                 }
@@ -1871,8 +1857,8 @@ static void LoadUDMFThings()
                 {
                     float sx           = AlmostEquals(scalex, 0.0f) ? 1.0f : scalex;
                     float sy           = AlmostEquals(scaley, 0.0f) ? 1.0f : scaley;
-                    udmf_thing->scale_ = udmf_thing->model_scale_ = sy;
-                    udmf_thing->aspect_ = udmf_thing->model_aspect_ = (sx / sy);
+                    udmf_thing->scale_ = sy;
+                    udmf_thing->aspect_ = (sx / sy);
                     udmf_thing->height_ *= sy;
                     udmf_thing->radius_ *= sx;
                 }
@@ -2503,25 +2489,10 @@ void ShutdownLevel(void)
     level_sides = nullptr;
     delete[] level_lines;
     level_lines = nullptr;
-    for (int i = 0; i < total_level_sectors; i++)
-    {
-        Sector *sec = &level_sectors[i];
-        if (sec->floor_slope)
-        {
-            delete sec->floor_slope;
-            sec->floor_slope = nullptr;
-        }
-        if (sec->ceiling_slope)
-        {
-            delete sec->ceiling_slope;
-            sec->ceiling_slope = nullptr;
-        }
-    }
     delete[] level_sectors;
     level_sectors = nullptr;
     delete[] level_subsectors;
     level_subsectors = nullptr;
-
     delete[] level_gl_vertexes;
     level_gl_vertexes = nullptr;
     delete[] level_vertical_gaps;

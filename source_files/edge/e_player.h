@@ -318,7 +318,6 @@ void ClearBodyQueue(void);
 void DeathMatchSpawnPlayer(Player *p);
 void CoopSpawnPlayer(Player *p);
 void GameHubSpawnPlayer(Player *p, int tag);
-void SpawnVoodooDolls(Player *p);
 void SpawnHelper(int pnum);
 
 void SetConsolePlayer(int pnum);
@@ -336,7 +335,6 @@ void ClearPlayerStarts(void);
 void AddDeathmatchStart(const SpawnPoint &point);
 void AddCoopStart(const SpawnPoint &point);
 void AddHubStart(const SpawnPoint &point);
-void AddVoodooDoll(const SpawnPoint &point);
 
 SpawnPoint *FindCoopPlayer(int pnum);
 

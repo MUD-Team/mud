@@ -237,16 +237,6 @@ enum HyperFlag
     //kHyperFlagMusicChanger = (1 << 23),
 };
 
-// MBF21 flags not already covered by extended/hyper flags
-enum MBF21Flag
-{
-    // Gravity affects this thing as if it were 1/8 of the normal value
-    kMBF21FlagLowGravity        = (1 << 0),
-    kMBF21FlagShortMissileRange = (1 << 1),
-    kMBF21FlagForceRadiusDamage = (1 << 4),
-    kMBF21FlagLongMeleeRange    = (1 << 8),
-};
-
 constexpr uint8_t kTotalEffectsSlots = 30;
 
 // ------------------------------------------------------------------
@@ -735,7 +725,6 @@ class MapObjectDefinition
     int flags_;
     int extended_flags_;
     int hyper_flags_;
-    int mbf21_flags_;
 
     DamageClass explode_damage_;
     float       explode_radius_; // normally zero (radius == damage)
@@ -813,12 +802,6 @@ class MapObjectDefinition
     int    playernum_;
     int    yalign_;    // -AJA- 2007/08/08: sprite Y alignment in bbox
 
-    int   model_skin_; // -AJA- 2007/10/16: MD2 model support
-    float model_scale_;
-    float model_aspect_;
-    float model_bias_;
-    int   model_rotate_;
-
     // breathing support: lung_capacity is how many tics we can last
     // underwater.  gasp_start is how long underwater before we gasp
     // when leaving it.  Damage and choking interval is in choke_damage.
@@ -871,16 +854,6 @@ class MapObjectDefinition
     float hear_distance_;  // lobo 2022: How far this thing can hear
 
     int morphtimeout_;     // lobo 2023: Go to MORPH states when times up
-
-    // DEHEXTRA
-    float gib_health_;
-
-    // MBF 21
-    int infight_group_;
-    int proj_group_;
-    int splash_group_;
-    int fast_speed_;
-    int melee_range_;
 
   public:
     MapObjectDefinition();

@@ -102,12 +102,6 @@ static const DDFCommandList weapon_commands[] = {
     DDF_FIELD("SWAYING", dummy_weapon, swaying_, DDFMainGetPercent),
     DDF_FIELD("IDLE_WAIT", dummy_weapon, idle_wait_, DDFMainGetTime),
     DDF_FIELD("IDLE_CHANCE", dummy_weapon, idle_chance_, DDFMainGetPercent),
-    DDF_FIELD("MODEL_SKIN", dummy_weapon, model_skin_, DDFMainGetNumeric),
-    DDF_FIELD("MODEL_ASPECT", dummy_weapon, model_aspect_, DDFMainGetFloat),
-    DDF_FIELD("MODEL_BIAS", dummy_weapon, model_bias_, DDFMainGetFloat),
-    DDF_FIELD("MODEL_ROTATE", dummy_weapon, model_rotate_, DDFMainGetNumeric),
-    DDF_FIELD("MODEL_FORWARD", dummy_weapon, model_forward_, DDFMainGetFloat),
-    DDF_FIELD("MODEL_SIDE", dummy_weapon, model_side_, DDFMainGetFloat),
 
     // -AJA- backwards compatibility cruft...
     DDF_FIELD("SECOND_ATTACK", dummy_weapon, attack_[1], DDFMainRefAttack),
@@ -178,7 +172,6 @@ static const DDFActionCode weapon_actions[] = {{"NOTHING", nullptr, nullptr},
                                                {"CHECKRELOAD", A_CheckReload, nullptr},
                                                {"PLAYSOUND", A_WeaponPlaySound, DDFStateGetSound},
                                                {"KILLSOUND", A_WeaponKillSound, nullptr},
-                                               {"SET_SKIN", A_WeaponSetSkin, DDFStateGetInteger},
                                                {"JUMP", A_WeaponJump, DDFStateGetJump},
                                                {"UNZOOM", A_WeaponUnzoom, nullptr},
 
@@ -518,9 +511,6 @@ static void WeaponFinishEntry(void)
         }
     }
 
-    if (dynamic_weapon->model_skin_ < 0 || dynamic_weapon->model_skin_ > 9)
-        DDFError("Bad MODEL_SKIN value %d in DDF (must be 0-9).\n", dynamic_weapon->model_skin_);
-
     // backwards compatibility
     if (dynamic_weapon->priority_ < 0)
     {
@@ -532,8 +522,6 @@ static void WeaponFinishEntry(void)
 
     if (dynamic_weapon->zoom_factor_ > 0.0)
         dynamic_weapon->zoom_fov_ = RoundToInteger(90 / dynamic_weapon->zoom_factor_);
-
-    dynamic_weapon->model_rotate_ *= kBAMAngle1;
 
     // Check MBF21 weapon flags that don't correlate to DDFWEAP flags
     for (std::string &flag : flag_tests)
@@ -779,13 +767,6 @@ void WeaponDefinition::CopyDetail(WeaponDefinition &src)
     idle_wait_   = src.idle_wait_;
     idle_chance_ = src.idle_chance_;
 
-    model_skin_    = src.model_skin_;
-    model_aspect_  = src.model_aspect_;
-    model_bias_    = src.model_bias_;
-    model_rotate_  = src.model_rotate_;
-    model_forward_ = src.model_forward_;
-    model_side_    = src.model_side_;
-
     render_invert_            = src.render_invert_;
     y_adjust_                 = src.y_adjust_;
     ignore_crosshair_scaling_ = src.ignore_crosshair_scaling_;
@@ -859,13 +840,6 @@ void WeaponDefinition::Default(void)
     swaying_     = 1.0f;
     idle_wait_   = 15 * kTicRate;
     idle_chance_ = 0.12f;
-
-    model_skin_    = 1;
-    model_aspect_  = 1.0f;
-    model_bias_    = 0.0f;
-    model_rotate_  = 0;
-    model_forward_ = 0.0f;
-    model_side_    = 0.0f;
 
     render_invert_            = false;
     y_adjust_                 = 0.0f;

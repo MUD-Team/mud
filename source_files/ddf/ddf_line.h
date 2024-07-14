@@ -144,7 +144,6 @@ class PlaneMoverDefinition
     {
         kPlaneMoverDefaultCeilingLine,
         kPlaneMoverDefaultCeilingSect,
-        kPlaneMoverDefaultDonutFloor,
         kPlaneMoverDefaultFloorLine,
         kPlaneMoverDefaultFloorSect,
         kTotalPlaneMoverDefaultTypes
@@ -255,39 +254,6 @@ class SlidingDoor
     struct SoundEffect *sfx_open_;
     struct SoundEffect *sfx_close_;
     struct SoundEffect *sfx_stop_;
-};
-
-class DonutDefinition
-{
-  public:
-    DonutDefinition();
-    DonutDefinition(DonutDefinition &rhs);
-    ~DonutDefinition();
-
-  private:
-    void Copy(DonutDefinition &src);
-
-  public:
-    void             Default(void);
-    DonutDefinition &operator=(DonutDefinition &rhs);
-
-    // Do Donut?
-
-    //
-    // FIXME! Make the objects that use this require
-    //        a pointer/ref. This becomes an
-    //        therefore becomes an unnecessary entry
-    //
-    bool dodonut_;
-
-    // FIXME! Strip out the d_ since we're not trying to
-    // to differentiate them now?
-
-    // SFX for inner donut parts
-    struct SoundEffect *d_sfxin_, *d_sfxinstop_;
-
-    // SFX for outer donut parts
-    struct SoundEffect *d_sfxout_, *d_sfxoutstop_;
 };
 
 // -AJA- 1999/07/12: teleporter special flags.
@@ -475,14 +441,6 @@ enum SectorEffectType
     // kSectorEffectTypeBoomHeights = (1 << 16)
 };
 
-// -AJA- 2008/03/08: slope types
-enum SlopeType
-{
-    kSlopeTypeNONE          = 0,
-    kSlopeTypeDetailFloor   = (1 << 0),
-    kSlopeTypeDetailCeiling = (1 << 1),
-};
-
 // -AJA- 1999/10/12: Generalised scrolling parts of walls.
 enum ScrollingPart
 {
@@ -558,9 +516,6 @@ class LineType
 
     // Ceiling
     PlaneMoverDefinition c_;
-
-    // Donut
-    DonutDefinition d_;
 
     // Slider
     SlidingDoor s_;
@@ -641,8 +596,6 @@ class LineType
     BoomScrollerType scroll_type_;
 
     SectorEffectType sector_effect_;
-
-    SlopeType slope_type_;
 
   private:
     // disable copy construct and assignment operator

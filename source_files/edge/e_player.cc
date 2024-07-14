@@ -71,7 +71,6 @@ static int        body_queue_size = 0;
 // Maintain single and multi player starting spots.
 static std::vector<SpawnPoint> deathmatch_starts;
 static std::vector<SpawnPoint> coop_starts;
-static std::vector<SpawnPoint> voodoo_dolls;
 static std::vector<SpawnPoint> hub_starts;
 
 static void P_SpawnPlayer(Player *p, const SpawnPoint *point, bool is_hub);
@@ -80,7 +79,6 @@ void ClearPlayerStarts(void)
 {
     deathmatch_starts.clear();
     coop_starts.clear();
-    voodoo_dolls.clear();
     hub_starts.clear();
 }
 
@@ -391,17 +389,6 @@ static void P_SpawnPlayer(Player *p, const SpawnPoint *point, bool is_hub)
     if (InCooperativeMatch())
         mobj->side_ = ~0;
 
-    // Don't get stuck spawned in things: telefrag them.
-
-    /* Dasho 2023.10.09 - Ran into a map where having the player stuck inside
-    a thing next to it with a sufficiently large radius was an intentional
-    mechanic (The All-Ghosts Forest). Telefragging in this scenario seems
-    to diverge from reasonably 'correct' behavior compared to ports with good
-    vanilla/Boom compat, so I'm commenting this out. I had to do this previously
-    for voodoo dolls because it would break certain maps. */
-
-    // TeleportMove(mobj, mobj->x, mobj->y, mobj->z);
-
     if (InCooperativeMatch() && !level_flags.team_damage)
         mobj->hyper_flags_ |= kHyperFlagFriendlyFireImmune;
 
@@ -412,28 +399,6 @@ static void P_SpawnPlayer(Player *p, const SpawnPoint *point, bool is_hub)
 
         bot->Respawn();
     }
-}
-
-static void P_SpawnVoodooDoll(Player *p, const SpawnPoint *point)
-{
-    const MapObjectDefinition *info = point->info;
-
-    EPI_ASSERT(info);
-    EPI_ASSERT(info->playernum_ > 0);
-
-    LogDebug("* P_SpawnVoodooDoll %d @ %1.0f,%1.0f\n", p->player_number_ + 1, point->x, point->y);
-
-    MapObject *mobj = CreateMapObject(point->x, point->y, point->z, info);
-
-    mobj->angle_          = point->angle;
-    mobj->vertical_angle_ = point->vertical_angle;
-    mobj->player_         = p;
-    mobj->health_         = p->health_;
-
-    mobj->is_voodoo_ = true;
-
-    if (InCooperativeMatch())
-        mobj->side_ = ~0;
 }
 
 //
@@ -538,19 +503,6 @@ void GameHubSpawnPlayer(Player *p, int tag)
 
     // assume player will fit (too bad otherwise)
     P_SpawnPlayer(p, point, true);
-}
-
-void SpawnVoodooDolls(Player *p)
-{
-    for (int i = 0; i < (int)voodoo_dolls.size(); i++)
-    {
-        SpawnPoint *point = &voodoo_dolls[i];
-
-        if (point->info->playernum_ != p->player_number_ + 1)
-            continue;
-
-        P_SpawnVoodooDoll(p, point);
-    }
 }
 
 // number of wanted dogs (1-3)
@@ -835,11 +787,6 @@ void AddHubStart(const SpawnPoint &point)
 void AddCoopStart(const SpawnPoint &point)
 {
     coop_starts.push_back(point);
-}
-
-void AddVoodooDoll(const SpawnPoint &point)
-{
-    voodoo_dolls.push_back(point);
 }
 
 SpawnPoint *FindCoopPlayer(int player_number_)

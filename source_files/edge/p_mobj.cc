@@ -449,7 +449,6 @@ static void ResurrectRespawn(MapObject *mobj)
     mobj->flags_          = info->flags_;
     mobj->extended_flags_ = info->extended_flags_;
     mobj->hyper_flags_    = info->hyper_flags_;
-    mobj->mbf21_flags_    = info->mbf21_flags_;
     mobj->health_         = mobj->spawn_health_;
 
     mobj->visibility_ = info->translucency_;
@@ -489,15 +488,6 @@ bool MapObjectSetState(MapObject *mobj, int state)
     }
 
     State *st = &states[state];
-
-    // model interpolation stuff
-    if ((st->flags & kStateFrameFlagModel) && (mobj->state_->flags & kStateFrameFlagModel) &&
-        (st->sprite == mobj->state_->sprite) && st->tics > 1)
-    {
-        mobj->model_last_frame_ = mobj->state_->frame;
-    }
-    else
-        mobj->model_last_frame_ = -1;
 
     mobj->state_      = st;
     mobj->tics_       = st->tics;
@@ -1034,13 +1024,8 @@ static void P_XYMovement(MapObject *mo, const RegionProperties *props, bool extr
         friction = sqrt(friction);
     }
 
-    // when we are confident that a mikoportal is being used, do not apply
-    // friction or drag to the voodoo doll
-    if (!mo->is_voodoo_ || !AlmostEquals(mo->floor_z_, -32768.0f) || AlmostEquals(mo->momentum_.Z, 0.0f))
-    {
-        mo->momentum_.X *= friction;
-        mo->momentum_.Y *= friction;
-    }
+    mo->momentum_.X *= friction;
+    mo->momentum_.Y *= friction;
 
     if (mo->player_)
     {
@@ -1121,14 +1106,6 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props, bool extra
 
     if (mo->z <= mo->floor_z_)
     {
-        // Test for mikoportal
-        if (mo->is_voodoo_ && AlmostEquals(mo->floor_z_, -32768.0f))
-        {
-            mo->z = mo->ceiling_z_ - mo->height_;
-            TryMove(mo, mo->x, mo->y);
-            return;
-        }
-
         if (mo->flags_ & kMapObjectFlagSkullFly)
             mo->momentum_.Z = -mo->momentum_.Z;
 
@@ -1170,7 +1147,7 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props, bool extra
                 // don't bounce forever on the floor
                 if (!(mo->flags_ & kMapObjectFlagNoGravity) &&
                     fabs(mo->momentum_.Z) <
-                        kStopSpeed + fabs(gravity / (mo->mbf21_flags_ & kMBF21FlagLowGravity ? 8 : 1)))
+                        kStopSpeed + fabs(gravity))
                 {
                     mo->momentum_.X = mo->momentum_.Y = mo->momentum_.Z = 0;
                 }
@@ -1227,7 +1204,7 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props, bool extra
         {
             // 70 Hz: apply gravity only on real tics
             if (!extra_tic || !double_framerate.d_)
-                mo->momentum_.Z -= gravity / (mo->mbf21_flags_ & kMBF21FlagLowGravity ? 8 : 1);
+                mo->momentum_.Z -= gravity;
         }
     }
 
@@ -1265,7 +1242,7 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props, bool extra
                 // don't bounce forever on the ceiling
                 if (!(mo->flags_ & kMapObjectFlagNoGravity) &&
                     fabs(mo->momentum_.Z) <
-                        kStopSpeed + fabs(gravity / (mo->mbf21_flags_ & kMBF21FlagLowGravity ? 8 : 1)))
+                        kStopSpeed + fabs(gravity))
                 {
                     mo->momentum_.X = mo->momentum_.Y = mo->momentum_.Z = 0;
                 }
@@ -1311,7 +1288,7 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props, bool extra
         {
             // 70 Hz: apply gravity only on real tics
             if (!extra_tic || !double_framerate.d_)
-                mo->momentum_.Z += -gravity / (mo->mbf21_flags_ & kMBF21FlagLowGravity ? 8 : 1);
+                mo->momentum_.Z += -gravity;
         }
     }
 
@@ -1443,12 +1420,6 @@ static void P_MobjThinker(MapObject *mobj, bool extra_tic)
         }
 
         props = mobj->region_properties_;
-
-        // Only damage grounded monsters (not players)
-        if (props->special && props->special->damage_.grounded_monsters_ && mobj->z <= mobj->floor_z_ + 1.0f)
-        {
-            DamageMapObject(mobj, nullptr, nullptr, 5.0, &props->special->damage_, false);
-        }
     }
 
     // momentum movement
@@ -2166,23 +2137,15 @@ MapObject *CreateMapObject(float x, float y, float z, const MapObjectDefinition 
     mobj->speed_            = info->speed_;
     mobj->fuse_             = info->fuse_;
     mobj->side_             = info->side_;
-    mobj->model_skin_       = info->model_skin_;
-    mobj->model_last_frame_ = -1;
-    mobj->model_aspect_     = info->model_aspect_;
-    mobj->model_scale_      = info->model_scale_;
     mobj->wait_until_dead_tags_.clear();
 
     mobj->pain_chance_ = info->pain_chance_;
 
     mobj->morph_timeout_ = info->morphtimeout_;
 
-    if (level_flags.fast_monsters && info->fast_speed_ > -1)
-        mobj->speed_ = info->fast_speed_;
-
     // -ACB- 1998/06/25 new mobj Stuff (1998/07/11 - invisibility added)
     mobj->extended_flags_    = info->extended_flags_;
     mobj->hyper_flags_       = info->hyper_flags_;
-    mobj->mbf21_flags_       = info->mbf21_flags_;
     mobj->target_visibility_ = mobj->visibility_ = info->translucency_;
 
     mobj->current_attack_ = nullptr;

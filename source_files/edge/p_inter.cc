@@ -834,11 +834,6 @@ void TouchSpecialThing(MapObject *special, MapObject *toucher)
     if (toucher->health_ <= 0)
         return;
 
-    // VOODOO DOLLS: Do not pick up the item if completely still
-    if (toucher->is_voodoo_ && AlmostEquals(toucher->momentum_.X, 0.0f) && AlmostEquals(toucher->momentum_.Y, 0.0f) &&
-        AlmostEquals(toucher->momentum_.Z, 0.0f))
-        return;
-
     // -KM- 1998/09/27 Sounds.ddf
     SoundEffect *sound = special->info_->activesound_;
 
@@ -1029,13 +1024,6 @@ void ObituaryMessage(MapObject *victim, MapObject *killer, const DamageClass *da
 //
 void KillMapObject(MapObject *source, MapObject *target, const DamageClass *damtype, bool weak_spot)
 {
-    // -AJA- 2006/09/10: Voodoo doll handling for coop
-    if (target->player_ && target->player_->map_object_ != target)
-    {
-        KillMapObject(source, target->player_->map_object_, damtype, weak_spot);
-        target->player_ = nullptr;
-    }
-
     bool nofog = (target->flags_ & kMapObjectFlagSpecial);
 
     target->flags_ &= ~(kMapObjectFlagSpecial | kMapObjectFlagShootable | kMapObjectFlagFloat | kMapObjectFlagSkullFly |
@@ -1046,7 +1034,7 @@ void KillMapObject(MapObject *source, MapObject *target, const DamageClass *damt
         target->flags_ &= ~kMapObjectFlagNoGravity;
 
     target->flags_ |= kMapObjectFlagCorpse | kMapObjectFlagDropOff;
-    target->height_ /= (4 / (target->mbf21_flags_ & kMBF21FlagLowGravity ? 8 : 1));
+    target->height_ *= 0.25f;
 
     if (source && source->player_)
     {
@@ -1122,9 +1110,7 @@ void KillMapObject(MapObject *source, MapObject *target, const DamageClass *damt
     int  state    = 0;
     bool overkill = false;
 
-    if (target->info_->gib_health_ < 0 && target->health_ < target->info_->gib_health_)
-        overkill = true;
-    else if (target->health_ < -target->spawn_health_)
+    if (target->health_ < -target->spawn_health_)
         overkill = true;
 
     if (weak_spot)
@@ -1384,11 +1370,6 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
     {
         int i;
 
-        // Don't damage player if sector type should only affect grounded
-        // monsters Note: flesh this out be be more versatile - Dasho
-        if (damtype && damtype->grounded_monsters_)
-            return;
-
         // ignore damage in GOD mode, or with INVUL powerup
         if ((player->cheats_ & kCheatingGodMode) || player->powers_[kPowerTypeInvulnerable] > 0)
         {
@@ -1566,16 +1547,7 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
     target->health_ -= damage;
 
     if (player)
-    {
-        // mirror mobj health here for Dave
-        // player->health_ = HMM_MAX(0, target->health);
-
-        // Dasho 2023.09.05: The above behavior caused inconsistencies when
-        // multiple voodoo dolls were present in a level (i.e., heavily damaging
-        // one and then lightly damaging another one that was previously at full
-        // health would "heal" the player)
         player->health_ = HMM_MAX(0, player->health_ - damage);
-    }
 
     // Lobo 2023: Handle attack flagged with the "PLAYER_ATTACK" special.
     //  This attack will always be treated as originating from the player, even

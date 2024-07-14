@@ -256,55 +256,6 @@ class dynlight_shader_c : public AbstractShader
         }
     }
 
-    virtual void Corner(ColorMixer *col, float nx, float ny, float nz, MapObject *mod_pos, bool is_weapon)
-    {
-        float mx = mo->x;
-        float my = mo->y;
-        float mz = MapObjectMidZ(mo);
-
-        if (is_weapon)
-        {
-            mx += view_cosine * 24;
-            my += view_sine * 24;
-        }
-
-        float dx = mod_pos->x;
-        float dy = mod_pos->y;
-        float dz = MapObjectMidZ(mod_pos);
-
-        dx -= mx;
-        dy -= my;
-        dz -= mz;
-
-        float dist = sqrt(dx * dx + dy * dy + dz * dz);
-
-        dx /= dist;
-        dy /= dist;
-        dz /= dist;
-
-        dist = HMM_MAX(1.0, dist - mod_pos->radius_);
-
-        float L = 0.6 - 0.7 * (dx * nx + dy * ny + dz * nz);
-
-        L *= mo->state_->bright / 255.0;
-
-        for (int DL = 0; DL < 2; DL++)
-        {
-            if (WhatType(DL) == kDynamicLightTypeNone)
-                break;
-
-            RGBAColor new_col = lim[DL]->CurvePoint(dist / WhatRadius(DL), WhatColor(DL));
-
-            if (new_col != SG_BLACK_RGBA32 && L > 1 / 256.0)
-            {
-                if (WhatType(DL) == kDynamicLightTypeAdd)
-                    col->add_green_ive(new_col, L);
-                else
-                    col->modulate_green_ive(new_col, L);
-            }
-        }
-    }
-
     virtual void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha, int *pass_var, int blending, bool masked,
                           void *data, ShaderCoordinateFunction func)
     {
@@ -444,50 +395,6 @@ class plane_glow_c : public AbstractShader
         }
     }
 
-    virtual void Corner(ColorMixer *col, float nx, float ny, float nz, MapObject *mod_pos, bool is_weapon)
-    {
-        const Sector *sec = mo->subsector_->sector;
-
-        float dz = (mo->info_->glow_type_ == kSectorGlowTypeFloor) ? +1 : -1;
-        float dist;
-
-        if (is_weapon)
-        {
-            float weapon_z = mod_pos->z + mod_pos->height_ * mod_pos->info_->shotheight_;
-
-            if (mo->info_->glow_type_ == kSectorGlowTypeFloor)
-                dist = weapon_z - sec->floor_height;
-            else
-                dist = sec->ceiling_height - weapon_z;
-        }
-        else if (mo->info_->glow_type_ == kSectorGlowTypeFloor)
-            dist = mod_pos->z - sec->floor_height;
-        else
-            dist = sec->ceiling_height - (mod_pos->z + mod_pos->height_);
-
-        dist = HMM_MAX(1.0, fabs(dist));
-
-        float L = 0.6 - 0.7 * (dz * nz);
-
-        L *= mo->state_->bright / 255.0;
-
-        for (int DL = 0; DL < 2; DL++)
-        {
-            if (WhatType(DL) == kDynamicLightTypeNone)
-                break;
-
-            RGBAColor new_col = lim[DL]->CurvePoint(dist / WhatRadius(DL), WhatColor(DL));
-
-            if (new_col != SG_BLACK_RGBA32 && L > 1 / 256.0)
-            {
-                if (WhatType(DL) == kDynamicLightTypeAdd)
-                    col->add_green_ive(new_col, L);
-                else
-                    col->modulate_green_ive(new_col, L);
-            }
-        }
-    }
-
     virtual void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha, int *pass_var, int blending, bool masked,
                           void *data, ShaderCoordinateFunction func)
     {
@@ -608,31 +515,6 @@ class wall_glow_c : public AbstractShader
     virtual void Sample(ColorMixer *col, float x, float y, float z)
     {
         float dist = Dist(x, y);
-
-        float L = std::log1p(dist);
-
-        L *= mo->state_->bright / 255.0;
-
-        for (int DL = 0; DL < 2; DL++)
-        {
-            if (WhatType(DL) == kDynamicLightTypeNone)
-                break;
-
-            RGBAColor new_col = lim[DL]->CurvePoint(dist / WhatRadius(DL), WhatColor(DL));
-
-            if (new_col != SG_BLACK_RGBA32 && L > 1 / 256.0)
-            {
-                if (WhatType(DL) == kDynamicLightTypeAdd)
-                    col->add_green_ive(new_col, L);
-                else
-                    col->modulate_green_ive(new_col, L);
-            }
-        }
-    }
-
-    virtual void Corner(ColorMixer *col, float nx, float ny, float nz, MapObject *mod_pos, bool is_weapon = false)
-    {
-        float dist = Dist(mod_pos->x, mod_pos->y);
 
         float L = std::log1p(dist);
 

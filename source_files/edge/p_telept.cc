@@ -130,8 +130,6 @@ bool TeleportMapObject(Line *line, int tag, MapObject *thing, const TeleportDefi
     bool flipped = (def->special_ & kTeleportSpecialFlipped) ? true : false;
 
     Player *player = thing->player_;
-    if (player && player->map_object_ != thing) // exclude voodoo dolls
-        player = nullptr;
 
     if (def->special_ & kTeleportSpecialLine)
     {
