@@ -461,9 +461,6 @@ static void SpawnInitialPlayers(void)
         }
 
         RespawnPlayer(p);
-
-        if (!InDeathmatch())
-            SpawnVoodooDolls(p);
     }
 
     // check for missing player start.

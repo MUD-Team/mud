@@ -257,19 +257,11 @@ static MapObject *SpawnMapThing(const MapObjectDefinition *info, float x, float 
             return nullptr;
         }
 
-        // -AJA- 2004/12/30: for duplicate players, the LAST one must
-        //       be used (so levels with Voodoo dolls work properly).
         SpawnPoint *prev = FindCoopPlayer(info->playernum_);
 
         if (!prev)
             AddCoopStart(point);
-        else
-        {
-            AddVoodooDoll(*prev);
 
-            // overwrite one in the Coop list with new location
-            memcpy(prev, &point, sizeof(point));
-        }
         return nullptr;
     }
 

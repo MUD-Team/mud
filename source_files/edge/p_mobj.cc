@@ -1034,13 +1034,8 @@ static void P_XYMovement(MapObject *mo, const RegionProperties *props, bool extr
         friction = sqrt(friction);
     }
 
-    // when we are confident that a mikoportal is being used, do not apply
-    // friction or drag to the voodoo doll
-    if (!mo->is_voodoo_ || !AlmostEquals(mo->floor_z_, -32768.0f) || AlmostEquals(mo->momentum_.Z, 0.0f))
-    {
-        mo->momentum_.X *= friction;
-        mo->momentum_.Y *= friction;
-    }
+    mo->momentum_.X *= friction;
+    mo->momentum_.Y *= friction;
 
     if (mo->player_)
     {
@@ -1121,14 +1116,6 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props, bool extra
 
     if (mo->z <= mo->floor_z_)
     {
-        // Test for mikoportal
-        if (mo->is_voodoo_ && AlmostEquals(mo->floor_z_, -32768.0f))
-        {
-            mo->z = mo->ceiling_z_ - mo->height_;
-            TryMove(mo, mo->x, mo->y);
-            return;
-        }
-
         if (mo->flags_ & kMapObjectFlagSkullFly)
             mo->momentum_.Z = -mo->momentum_.Z;
 

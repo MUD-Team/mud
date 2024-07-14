@@ -364,8 +364,6 @@ class MapObject : public Position
     // Player number last heard.
     int last_heard_ = 0;
 
-    bool is_voodoo_ = false;
-
     bool slope_sight_hit_ = false;
 
     int teleport_tic_ = 0;
