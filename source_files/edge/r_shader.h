@@ -101,9 +101,6 @@ class AbstractShader
     // used for arbitrary points in the world (sprites)
     virtual void Sample(ColorMixer *col, float x, float y, float z) = 0;
 
-    // used for normal-based lighting (MD2 models)
-    virtual void Corner(ColorMixer *col, float nx, float ny, float nz, MapObject *mod_pos, bool is_weapon = false) = 0;
-
     // used to render overlay textures (world polygons)
     virtual void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha, int *pass_var, int blending, bool masked,
                           void *data, ShaderCoordinateFunction func) = 0;

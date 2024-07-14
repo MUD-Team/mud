@@ -134,12 +134,6 @@ static const DDFCommandList linedef_commands[] = {
     DDF_FIELD("FAILED_SFX", dummy_line, failed_sfx_, DDFMainLookupSound),
     DDF_FIELD("COUNT", dummy_line, count_, DDFMainGetNumeric),
 
-    DDF_FIELD("DONUT", dummy_line, d_.dodonut_, DDFMainGetBoolean),
-    DDF_FIELD("DONUT_IN_SFX", dummy_line, d_.d_sfxin_, DDFMainLookupSound),
-    DDF_FIELD("DONUT_IN_SFXSTOP", dummy_line, d_.d_sfxinstop_, DDFMainLookupSound),
-    DDF_FIELD("DONUT_OUT_SFX", dummy_line, d_.d_sfxout_, DDFMainLookupSound),
-    DDF_FIELD("DONUT_OUT_SFXSTOP", dummy_line, d_.d_sfxoutstop_, DDFMainLookupSound),
-
     DDF_FIELD("TELEPORT", dummy_line, t_.teleport_, DDFMainGetBoolean),
     DDF_FIELD("TELEPORT_DELAY", dummy_line, t_.delay_, DDFMainGetTime),
     DDF_FIELD("TELEIN_EFFECTOBJ", dummy_line, t_.inspawnobj_ref_, DDFMainGetString),
@@ -176,7 +170,6 @@ static const DDFCommandList linedef_commands[] = {
     DDF_FIELD("SCROLL_TYPE", dummy_line, scroll_type_, DDFLineGetScrollType),
     DDF_FIELD("LINE_PARTS", dummy_line, line_parts_, DDFLineGetScrollPart),
     DDF_FIELD("SECTOR_EFFECT", dummy_line, sector_effect_, DDFLineGetSectorEffect),
-    DDF_FIELD("SLOPE_TYPE", dummy_line, slope_type_, DDFLineGetSlopeType),
 
     // Lobo: 2022
     DDF_FIELD("EFFECT_OBJECT", dummy_line, effectobject_ref_, DDFMainGetString),
@@ -812,108 +805,10 @@ static void DDFLineGetSectorEffect(const char *info, void *storage)
     }
 }
 
-static DDFSpecialFlags slope_type_names[] = {{"FAKE_FLOOR", kSlopeTypeDetailFloor, 0},
-                                             {"FAKE_CEILING", kSlopeTypeDetailCeiling, 0},
-
-                                             {nullptr, 0, 0}};
-
-static void DDFLineGetSlopeType(const char *info, void *storage)
-{
-    SlopeType *var = (SlopeType *)storage;
-
-    int flag_value;
-
-    if (DDFCompareName(info, "NONE") == 0)
-    {
-        *var = kSlopeTypeNONE;
-        return;
-    }
-
-    switch (DDFMainCheckSpecialFlag(info, slope_type_names, &flag_value, true, false))
-    {
-    case kDDFCheckFlagPositive:
-        *var = (SlopeType)(*var | flag_value);
-        break;
-
-    case kDDFCheckFlagNegative:
-        *var = (SlopeType)(*var & ~flag_value);
-        break;
-
-    case kDDFCheckFlagUser:
-    case kDDFCheckFlagUnknown:
-        DDFWarnError("Unknown slope type: %s", info);
-        break;
-    }
-}
-
 static void DDFLineMakeCrush(const char *info)
 {
     dynamic_line->f_.crush_damage_ = 10;
     dynamic_line->c_.crush_damage_ = 10;
-}
-
-//----------------------------------------------------------------------------
-
-// --> Donut definition class
-
-//
-// donutdef_c Constructor
-//
-DonutDefinition::DonutDefinition()
-{
-}
-
-//
-// donutdef_c Copy constructor
-//
-DonutDefinition::DonutDefinition(DonutDefinition &rhs)
-{
-    Copy(rhs);
-}
-
-//
-// donutdef_c Destructor
-//
-DonutDefinition::~DonutDefinition()
-{
-}
-
-//
-// donutdef_c::Copy()
-//
-void DonutDefinition::Copy(DonutDefinition &src)
-{
-    dodonut_ = src.dodonut_;
-
-    // FIXME! Strip out the d_ since we're not trying to
-    // to differentiate them now?
-    d_sfxin_      = src.d_sfxin_;
-    d_sfxinstop_  = src.d_sfxinstop_;
-    d_sfxout_     = src.d_sfxout_;
-    d_sfxoutstop_ = src.d_sfxoutstop_;
-}
-
-//
-// donutdef_c::Default()
-//
-void DonutDefinition::Default()
-{
-    dodonut_      = false;
-    d_sfxin_      = nullptr;
-    d_sfxinstop_  = nullptr;
-    d_sfxout_     = nullptr;
-    d_sfxoutstop_ = nullptr;
-}
-
-//
-// donutdef_c assignment operator
-//
-DonutDefinition &DonutDefinition::operator=(DonutDefinition &rhs)
-{
-    if (&rhs != this)
-        Copy(rhs);
-
-    return *this;
 }
 
 // --> Ladder definition class
@@ -1101,12 +996,6 @@ void PlaneMoverDefinition::Default(PlaneMoverDefinition::PlaneMoverDefault def)
         break;
     }
 
-    case kPlaneMoverDefaultDonutFloor: {
-        speed_up_   = kFloorSpeedDefault / 2;
-        speed_down_ = kFloorSpeedDefault / 2;
-        break;
-    }
-
     default: {
         speed_up_   = 0;
         speed_down_ = 0;
@@ -1116,8 +1005,7 @@ void PlaneMoverDefinition::Default(PlaneMoverDefinition::PlaneMoverDefault def)
 
     destref_ = kTriggerHeightReferenceAbsolute;
 
-    // FIXME!!! Why are we using INT_MAX with a fp number?
-    dest_ = (def != kPlaneMoverDefaultDonutFloor) ? 0.0f : (float)INT_MAX;
+    dest_ = 0.0f;
 
     switch (def)
     {
@@ -1138,8 +1026,7 @@ void PlaneMoverDefinition::Default(PlaneMoverDefinition::PlaneMoverDefault def)
     }
     }
 
-    // FIXME!!! Why are we using INT_MAX with a fp number?
-    other_ = (def != kPlaneMoverDefaultDonutFloor) ? 0.0f : (float)INT_MAX;
+    other_ = 0.0f;
 
     crush_damage_ = 0;
 
@@ -1333,7 +1220,6 @@ void LineType::CopyDetail(LineType &src)
 
     f_ = src.f_;
     c_ = src.c_;
-    d_ = src.d_;
     s_ = src.s_;
     t_ = src.t_;
     l_ = src.l_;
@@ -1366,7 +1252,6 @@ void LineType::CopyDetail(LineType &src)
     line_parts_     = src.line_parts_;
     scroll_type_    = src.scroll_type_;
     sector_effect_  = src.sector_effect_;
-    slope_type_     = src.slope_type_;
 
     // lobo 2022
     effectobject_     = src.effectobject_;
@@ -1386,7 +1271,6 @@ void LineType::Default(void)
     f_.Default(PlaneMoverDefinition::kPlaneMoverDefaultFloorLine);
     c_.Default(PlaneMoverDefinition::kPlaneMoverDefaultCeilingLine);
 
-    d_.Default();      // Donut
     s_.Default();      // Sliding Door
 
     t_.Default();      // Teleport
@@ -1421,7 +1305,6 @@ void LineType::Default(void)
     line_parts_     = kScrollingPartNone;
     scroll_type_    = BoomScrollerTypeNone;
     sector_effect_  = kSectorEffectTypeNone;
-    slope_type_     = kSlopeTypeNONE;
 
     // lobo 2022
     effectobject_ = nullptr;

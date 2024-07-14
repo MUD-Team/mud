@@ -242,11 +242,6 @@ class MapObject : public Position
     int hyper_flags_    = 0;
     int mbf21_flags_    = 0;
 
-    int   model_skin_       = 0;
-    int   model_last_frame_ = 0;
-    float model_scale_      = 1.0f;
-    float model_aspect_     = 1.0f;
-
     // tag ID (for special operations)
     int         tag_                  = 0;
     std::string wait_until_dead_tags_ = "";

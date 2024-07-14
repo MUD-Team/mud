@@ -490,15 +490,6 @@ bool MapObjectSetState(MapObject *mobj, int state)
 
     State *st = &states[state];
 
-    // model interpolation stuff
-    if ((st->flags & kStateFrameFlagModel) && (mobj->state_->flags & kStateFrameFlagModel) &&
-        (st->sprite == mobj->state_->sprite) && st->tics > 1)
-    {
-        mobj->model_last_frame_ = mobj->state_->frame;
-    }
-    else
-        mobj->model_last_frame_ = -1;
-
     mobj->state_      = st;
     mobj->tics_       = st->tics;
     mobj->next_state_ = (st->nextstate == 0) ? nullptr : (states + st->nextstate);
@@ -2153,10 +2144,6 @@ MapObject *CreateMapObject(float x, float y, float z, const MapObjectDefinition 
     mobj->speed_            = info->speed_;
     mobj->fuse_             = info->fuse_;
     mobj->side_             = info->side_;
-    mobj->model_skin_       = info->model_skin_;
-    mobj->model_last_frame_ = -1;
-    mobj->model_aspect_     = info->model_aspect_;
-    mobj->model_scale_      = info->model_scale_;
     mobj->wait_until_dead_tags_.clear();
 
     mobj->pain_chance_ = info->pain_chance_;

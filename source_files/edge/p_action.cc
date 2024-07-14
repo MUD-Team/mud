@@ -640,21 +640,6 @@ void A_DLightColour(MapObject *mo)
     }
 }
 
-void A_SetSkin(MapObject *mo)
-{
-    const State *st = mo->state_;
-
-    if (st && st->action_par)
-    {
-        int skin = ((int *)st->action_par)[0];
-
-        if (skin < 0 || skin > 9)
-            FatalError("Thing [%s]: Bad skin number %d in SET_SKIN action.\n", mo->info_->name_.c_str(), skin);
-
-        mo->model_skin_ = skin;
-    }
-}
-
 //-------------------------------------------------------------------
 //------------------- MOVEMENT ROUTINES -----------------------------
 //-------------------------------------------------------------------
@@ -3312,28 +3297,6 @@ void A_Die(MapObject *mo)
     KillMapObject(nullptr, mo);
 }
 
-void A_KeenDie(MapObject *mo)
-{
-    A_MakeIntoCorpse(mo);
-
-    // see if all other Keens are dead
-    for (MapObject *cur = map_object_list_head; cur != nullptr; cur = cur->next_)
-    {
-        if (cur == mo)
-            continue;
-
-        if (cur->info_ != mo->info_)
-            continue;
-
-        if (cur->health_ > 0)
-            return; // other Keen not dead
-    }
-
-    LogDebug("A_KeenDie: ALL DEAD, activating...\n");
-
-    RemoteActivation(nullptr, 2 /* door type */, 666 /* tag */, 0, kLineTriggerAny);
-}
-
 void A_CheckMoving(MapObject *mo)
 {
     // -KM- 1999/01/31 Returns a player to spawnstate when not moving.
@@ -3570,10 +3533,6 @@ void A_Become(MapObject *mo)
 
         mo->target_visibility_ = mo->info_->translucency_;
         mo->current_attack_    = nullptr;
-        mo->model_skin_        = mo->info_->model_skin_;
-        mo->model_last_frame_  = -1;
-        mo->model_scale_       = mo->info_->model_scale_;
-        mo->model_aspect_      = mo->info_->model_aspect_;
         mo->scale_             = mo->info_->scale_;
         mo->aspect_            = mo->info_->aspect_;
 
@@ -3649,10 +3608,6 @@ void A_UnBecome(MapObject *mo)
 
         mo->target_visibility_ = mo->info_->translucency_;
         mo->current_attack_    = nullptr;
-        mo->model_skin_        = mo->info_->model_skin_;
-        mo->model_last_frame_  = -1;
-        mo->model_scale_       = mo->info_->model_scale_;
-        mo->model_aspect_      = mo->info_->model_aspect_;
         mo->scale_             = mo->info_->scale_;
         mo->aspect_            = mo->info_->aspect_;
 
@@ -3732,10 +3687,6 @@ void A_Morph(MapObject *mo)
 
         mo->target_visibility_ = mo->info_->translucency_;
         mo->current_attack_    = nullptr;
-        mo->model_skin_        = mo->info_->model_skin_;
-        mo->model_last_frame_  = -1;
-        mo->model_scale_       = mo->info_->model_scale_;
-        mo->model_aspect_      = mo->info_->model_aspect_;
         mo->scale_             = mo->info_->scale_;
         mo->aspect_            = mo->info_->aspect_;
 
@@ -3815,10 +3766,6 @@ void A_UnMorph(MapObject *mo)
 
         mo->target_visibility_ = mo->info_->translucency_;
         mo->current_attack_    = nullptr;
-        mo->model_skin_        = mo->info_->model_skin_;
-        mo->model_last_frame_  = -1;
-        mo->model_scale_       = mo->info_->model_scale_;
-        mo->model_aspect_      = mo->info_->model_aspect_;
         mo->scale_             = mo->info_->scale_;
         mo->aspect_            = mo->info_->aspect_;
 

@@ -813,12 +813,6 @@ class MapObjectDefinition
     int    playernum_;
     int    yalign_;    // -AJA- 2007/08/08: sprite Y alignment in bbox
 
-    int   model_skin_; // -AJA- 2007/10/16: MD2 model support
-    float model_scale_;
-    float model_aspect_;
-    float model_bias_;
-    int   model_rotate_;
-
     // breathing support: lung_capacity is how many tics we can last
     // underwater.  gasp_start is how long underwater before we gasp
     // when leaving it.  Damage and choking interval is in choke_damage.

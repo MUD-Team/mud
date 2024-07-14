@@ -164,13 +164,6 @@ struct VerticalGap
     float ceiling;
 };
 
-struct SlopePlane
-{
-    // Note: z coords are relative to the floor/ceiling height
-    float x1, y1, delta_z1;
-    float x2, y2, delta_z2;
-};
-
 //
 // The SECTORS record, at runtime.
 //
@@ -188,10 +181,6 @@ struct Sector
     // This may be different than the sector's actual properties (the
     // "props" field) due to flooders.
     RegionProperties *active_properties;
-
-    // slope information, normally nullptr
-    SlopePlane *floor_slope;
-    SlopePlane *ceiling_slope;
 
     // UDMF vertex slope stuff
     bool                  floor_vertex_slope;

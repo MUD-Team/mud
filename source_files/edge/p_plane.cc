@@ -52,9 +52,6 @@ std::vector<SlidingDoorMover *> active_sliders;
 extern std::vector<SectorAnimation> sector_animations;
 extern std::vector<LineAnimation>   line_animations;
 
-LineType   donut[2];
-static int donut_setup = 0;
-
 extern ConsoleVariable double_framerate;
 
 static bool P_ActivateInStasis(int tag);
@@ -1108,97 +1105,6 @@ bool SectorIsLowering(Sector *sec)
         return false;
 
     return sec->floor_move->direction < 0;
-}
-
-// -AJA- 1999/12/07: cleaned up this donut stuff
-
-//
-// Special Stuff that can not be categorized
-// Mmmmmmm....  Donuts....
-//
-bool RunDonutSpecial(Sector *s1, SoundEffect *sfx[4])
-{
-    Sector     *s2;
-    Sector     *s3;
-    bool        result = false;
-    int         i;
-    PlaneMover *sec;
-
-    if (!donut_setup)
-    {
-        donut[0].Default();
-        donut[0].count_ = 1;
-        donut[0].f_.Default(PlaneMoverDefinition::kPlaneMoverDefaultDonutFloor);
-        donut[0].f_.tex_ = "-";
-
-        donut[1].Default();
-        donut[1].count_ = 1;
-        donut[1].f_.Default(PlaneMoverDefinition::kPlaneMoverDefaultDonutFloor);
-        donut[1].f_.dest_ = -32000.0f;
-
-        donut_setup++;
-    }
-
-    // ALREADY MOVING?  IF SO, KEEP GOING...
-    if (s1->floor_move)
-        return false;
-
-    s2 = GetLineSectorAdjacent(s1->lines[0], s1);
-
-    for (i = 0; i < s2->line_count; i++)
-    {
-        if (!(s2->lines[i]->flags & kLineFlagTwoSided) || (s2->lines[i]->back_sector == s1))
-            continue;
-
-        s3 = s2->lines[i]->back_sector;
-
-        result = true;
-
-        // Spawn rising slime
-        donut[0].f_.sfxup_   = sfx[0];
-        donut[0].f_.sfxstop_ = sfx[1];
-
-        sec = P_SetupSectorAction(s2, &donut[0].f_, s3);
-
-        if (sec)
-        {
-            sec->destination_height = s3->floor_height;
-            s2->floor.image = sec->new_image = s3->floor.image;
-
-            if (s2->floor.image)
-            {
-                FlatDefinition *current_flatdef = flatdefs.Find(s2->floor.image->name_.c_str());
-                if (current_flatdef)
-                {
-                    s2->bob_depth  = current_flatdef->bob_depth_;
-                    s2->sink_depth = current_flatdef->sink_depth_;
-                }
-                else
-                    s2->bob_depth = 0;
-                s2->sink_depth = 0;
-            }
-            else
-            {
-                s2->bob_depth  = 0;
-                s2->sink_depth = 0;
-            }
-
-            /// s2->properties.special = s3->properties.special;
-            SectorChangeSpecial(s2, s3->properties.type);
-        }
-
-        // Spawn lowering donut-hole
-        donut[1].f_.sfxup_   = sfx[2];
-        donut[1].f_.sfxstop_ = sfx[3];
-
-        sec = P_SetupSectorAction(s1, &donut[1].f_, s1);
-
-        if (sec)
-            sec->destination_height = s3->floor_height;
-        break;
-    }
-
-    return result;
 }
 
 static inline bool SliderCanClose(Line *line)

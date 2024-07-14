@@ -154,8 +154,6 @@ struct Force
 extern bool level_timer;
 extern int  level_time_count;
 
-extern LineType donut[2];
-
 // at map load
 void SpawnMapSpecials1(void);
 void SpawnMapSpecials2(int autotag);
@@ -202,7 +200,6 @@ LightSpecial *NewLight(void);
 void          DestroyAllLights(void);
 
 void RunLineTagLights(int tag, int bright);
-bool RunDonutSpecial(Sector *s1, struct SoundEffect *sfx[4]);
 bool TeleportMapObject(Line *line, int tag, MapObject *thing, const TeleportDefinition *def);
 bool RunManualPlaneMover(Line *line, MapObject *thing, const PlaneMoverDefinition *type);
 

@@ -76,11 +76,6 @@ static bool DoLightsWrapper(Sector *s, const void *p1, void *p2)
     return RunSectorLight(s, (const LightSpecialDefinition *)p1);
 }
 
-static bool DoDonutWrapper(Sector *s, const void *p1, void *p2)
-{
-    return RunDonutSpecial(s, (SoundEffect **)p2);
-}
-
 //
 // UTILITIES
 //
@@ -910,132 +905,6 @@ static void SectorEffect(Sector *target, Line *source, const LineType *special)
     }
 }
 
-static SlopePlane *DetailSlope_BoundIt(Line *ld, Sector *sec, float dz1, float dz2)
-{
-    // determine slope's 2D coordinates
-    float d_close = 0;
-    float d_far   = 0;
-
-    float nx = ld->delta_y / ld->length;
-    float ny = -ld->delta_x / ld->length;
-
-    if (sec == ld->back_sector)
-    {
-        nx = -nx;
-        ny = -ny;
-    }
-
-    for (int k = 0; k < sec->line_count; k++)
-    {
-        for (int vert = 0; vert < 2; vert++)
-        {
-            Vertex *V = (vert == 0) ? sec->lines[k]->vertex_1 : sec->lines[k]->vertex_2;
-
-            float dist = nx * (V->X - ld->vertex_1->X) + ny * (V->Y - ld->vertex_1->Y);
-
-            d_close = HMM_MIN(d_close, dist);
-            d_far   = HMM_MAX(d_far, dist);
-        }
-    }
-
-    // LogDebug("DETAIL SLOPE in #%d: dists %1.3f -> %1.3f\n", (int)(sec -
-    // level_sectors), d_close, d_far);
-
-    if (d_far - d_close < 0.5)
-    {
-        LogWarning("Detail slope in sector #%d disabled: no area?!?\n", (int)(sec - level_sectors));
-        return nullptr;
-    }
-
-    SlopePlane *result = new SlopePlane;
-
-    result->x1       = ld->vertex_1->X + nx * d_close;
-    result->y1       = ld->vertex_1->Y + ny * d_close;
-    result->delta_z1 = dz1;
-
-    result->x2       = ld->vertex_1->X + nx * d_far;
-    result->y2       = ld->vertex_1->Y + ny * d_far;
-    result->delta_z2 = dz2;
-
-    return result;
-}
-
-static void DetailSlope_Floor(Line *ld)
-{
-    if (!ld->side[1])
-    {
-        LogWarning("Detail slope on line #%d disabled: Not two-sided!\n", (int)(ld - level_lines));
-        return;
-    }
-
-    Sector *sec = ld->front_sector;
-
-    float z1 = ld->back_sector->floor_height;
-    float z2 = ld->front_sector->floor_height;
-
-    if (fabs(z1 - z2) < 0.5)
-    {
-        LogWarning("Detail slope on line #%d disabled: floors are same height\n", (int)(ld - level_lines));
-        return;
-    }
-
-    if (z1 > z2)
-    {
-        sec = ld->back_sector;
-
-        z1 = ld->front_sector->floor_height;
-        z2 = ld->back_sector->floor_height;
-    }
-
-    if (sec->floor_slope)
-    {
-        LogWarning("Detail slope in sector #%d disabled: floor already sloped!\n", (int)(sec - level_sectors));
-        return;
-    }
-
-    ld->blocked = false;
-
-    // limit height difference to no more than player step
-    z1 = HMM_MAX(z1, z2 - 24.0);
-
-    sec->floor_slope = DetailSlope_BoundIt(ld, sec, z1 - sec->floor_height, z2 - sec->floor_height);
-}
-
-static void DetailSlope_Ceiling(Line *ld)
-{
-    if (!ld->side[1])
-        return;
-
-    Sector *sec = ld->front_sector;
-
-    float z1 = ld->front_sector->ceiling_height;
-    float z2 = ld->back_sector->ceiling_height;
-
-    if (fabs(z1 - z2) < 0.5)
-    {
-        LogWarning("Detail slope on line #%d disabled: ceilings are same height\n", (int)(ld - level_lines));
-        return;
-    }
-
-    if (z1 > z2)
-    {
-        sec = ld->back_sector;
-
-        z1 = ld->back_sector->ceiling_height;
-        z2 = ld->front_sector->ceiling_height;
-    }
-
-    if (sec->ceiling_slope)
-    {
-        LogWarning("Detail slope in sector #%d disabled: ceiling already sloped!\n", (int)(sec - level_sectors));
-        return;
-    }
-
-    ld->blocked = false;
-
-    sec->ceiling_slope = DetailSlope_BoundIt(ld, sec, z2 - sec->ceiling_height, z1 - sec->ceiling_height);
-}
-
 //
 // EVENTS
 //
@@ -1281,17 +1150,6 @@ static bool P_ActivateSpecialLine(Line *line, const LineType *special, int tag, 
     {
         ExitToHub(special->hub_exit_, line ? line->tag : tag);
         texSwitch = true;
-    }
-
-    if (special->d_.dodonut_)
-    {
-        // Proper ANSI C++ Init
-        sfx[0] = special->d_.d_sfxout_;
-        sfx[1] = special->d_.d_sfxoutstop_;
-        sfx[2] = special->d_.d_sfxin_;
-        sfx[3] = special->d_.d_sfxinstop_;
-
-        texSwitch = DoSectorsFromTag(tag, nullptr, sfx, DoDonutWrapper);
     }
 
     //
@@ -2302,16 +2160,6 @@ void SpawnMapSpecials1(void)
         }
 
         level_lines[i].count = special->count_;
-
-        // Detail slopes
-        if (special->slope_type_ & kSlopeTypeDetailFloor)
-        {
-            DetailSlope_Floor(&level_lines[i]);
-        }
-        if (special->slope_type_ & kSlopeTypeDetailCeiling)
-        {
-            DetailSlope_Ceiling(&level_lines[i]);
-        }
 
         // Handle our Glass line type now
         if (special->glass_)

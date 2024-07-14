@@ -564,13 +564,6 @@ class WeaponDefinition
     int   idle_wait_;
     float idle_chance_;
 
-    int   model_skin_; // -AJA- 2007/10/16: MD2 model support
-    float model_aspect_;
-    float model_bias_;
-    float model_forward_;
-    float model_side_;
-    int   model_rotate_;
-
     // Lobo 2022: render order is Crosshair, Flash, Weapon
     //  instead of Weapon, Flash, CrossHair
     bool render_invert_;
