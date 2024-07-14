@@ -89,7 +89,6 @@ set (EDGE_LINK_LIBRARIES
   edge_epi  
   fluidlite
   miniz  
-  utf8proc
   sokol
   physfs-static
 )
