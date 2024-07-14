@@ -51,9 +51,6 @@ const DDFCommandList damage_commands[] = {
     DDF_FIELD("INSTAKILL", dummy_damage, instakill_, DDFMainGetBoolean),
     DDF_FIELD("DAMAGE_UNLESS_BENEFIT", dummy_damage, damage_unless_, DDFMobjGetBenefit),
     DDF_FIELD("DAMAGE_IF_BENEFIT", dummy_damage, damage_if_, DDFMobjGetBenefit),
-    DDF_FIELD("ALL_PLAYERS", dummy_damage, all_players_,
-              DDFMainGetBoolean), // Doesn't do anything (yet)
-    DDF_FIELD("GROUNDED_MONSTERS_ONLY", dummy_damage, grounded_monsters_, DDFMainGetBoolean),
     DDF_FIELD("FLASH_COLOUR", dummy_damage, damage_flash_colour_, DDFMainGetRGB),
 
     DDF_FIELD("OBITUARY", dummy_damage, obituary_, DDFMainGetString),

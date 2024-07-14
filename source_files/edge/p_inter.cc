@@ -1034,7 +1034,7 @@ void KillMapObject(MapObject *source, MapObject *target, const DamageClass *damt
         target->flags_ &= ~kMapObjectFlagNoGravity;
 
     target->flags_ |= kMapObjectFlagCorpse | kMapObjectFlagDropOff;
-    target->height_ /= (4 / (target->mbf21_flags_ & kMBF21FlagLowGravity ? 8 : 1));
+    target->height_ *= 0.25f;
 
     if (source && source->player_)
     {
@@ -1110,9 +1110,7 @@ void KillMapObject(MapObject *source, MapObject *target, const DamageClass *damt
     int  state    = 0;
     bool overkill = false;
 
-    if (target->info_->gib_health_ < 0 && target->health_ < target->info_->gib_health_)
-        overkill = true;
-    else if (target->health_ < -target->spawn_health_)
+    if (target->health_ < -target->spawn_health_)
         overkill = true;
 
     if (weak_spot)
@@ -1371,11 +1369,6 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
     if (player)
     {
         int i;
-
-        // Don't damage player if sector type should only affect grounded
-        // monsters Note: flesh this out be be more versatile - Dasho
-        if (damtype && damtype->grounded_monsters_)
-            return;
 
         // ignore damage in GOD mode, or with INVUL powerup
         if ((player->cheats_ & kCheatingGodMode) || player->powers_[kPowerTypeInvulnerable] > 0)

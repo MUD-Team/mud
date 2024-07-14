@@ -204,14 +204,15 @@ class DamageClass
     bool bypass_all_;
     // Damage is always health+1 with no resistances applied
     bool instakill_;
-    // Apply to all players
-    bool all_players_;
     // Apply damage unless one of these benefits is in effect
     Benefit *damage_unless_;
     // Apply damage if one of these benefits is in effect
     Benefit *damage_if_;
-    // Apply to (grounded) monsters instead (MBF21)
-    bool grounded_monsters_;
+    
+    // Dasho: Maybe expand the above two to be an even more generic
+    // ConditionCheck so that we can add specific requirements like
+    // grounded monsters, etc, that were piecemeal added for MBF21
+    // but now removed
 };
 
 enum AttackStyle
@@ -448,6 +449,7 @@ enum WeaponFlag
     WeaponFlagManualReload       = (1 << 10), // enables the manual reload key
     WeaponFlagPartialReload      = (1 << 11), // manual reload: allow partial refill
     // MBF21 flags:
+    // Dasho: This might be useful outside of the MBF21 context, keep for now
     WeaponFlagNoAutoFire = (1 << 12), // Do not fire if switched to while trigger is held
 };
 

@@ -178,7 +178,6 @@ void DDFBoomMakeGeneralizedSector(SectorType *sec, int number)
 
         case 2: // Kill all players and exit map (normal)
             sec->damage_.delay_       = 0;
-            sec->damage_.all_players_ = true;
             sec->damage_.instakill_   = true;
             sec->damage_.bypass_all_  = true;
             sec->e_exit_              = kExitTypeNormal;
@@ -186,7 +185,6 @@ void DDFBoomMakeGeneralizedSector(SectorType *sec, int number)
 
         case 3: // Kill all players and exit map (secret)
             sec->damage_.delay_       = 0;
-            sec->damage_.all_players_ = true;
             sec->damage_.instakill_   = true;
             sec->damage_.bypass_all_  = true;
             sec->e_exit_              = kExitTypeSecret;
@@ -200,7 +198,6 @@ void DDFBoomMakeGeneralizedSector(SectorType *sec, int number)
     {
         sec->damage_.delay_             = 0;
         sec->damage_.instakill_         = true;
-        sec->damage_.grounded_monsters_ = true;
     }
 }
 

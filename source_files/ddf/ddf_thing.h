@@ -237,16 +237,6 @@ enum HyperFlag
     //kHyperFlagMusicChanger = (1 << 23),
 };
 
-// MBF21 flags not already covered by extended/hyper flags
-enum MBF21Flag
-{
-    // Gravity affects this thing as if it were 1/8 of the normal value
-    kMBF21FlagLowGravity        = (1 << 0),
-    kMBF21FlagShortMissileRange = (1 << 1),
-    kMBF21FlagForceRadiusDamage = (1 << 4),
-    kMBF21FlagLongMeleeRange    = (1 << 8),
-};
-
 constexpr uint8_t kTotalEffectsSlots = 30;
 
 // ------------------------------------------------------------------
@@ -735,7 +725,6 @@ class MapObjectDefinition
     int flags_;
     int extended_flags_;
     int hyper_flags_;
-    int mbf21_flags_;
 
     DamageClass explode_damage_;
     float       explode_radius_; // normally zero (radius == damage)
@@ -865,16 +854,6 @@ class MapObjectDefinition
     float hear_distance_;  // lobo 2022: How far this thing can hear
 
     int morphtimeout_;     // lobo 2023: Go to MORPH states when times up
-
-    // DEHEXTRA
-    float gib_health_;
-
-    // MBF 21
-    int infight_group_;
-    int proj_group_;
-    int splash_group_;
-    int fast_speed_;
-    int melee_range_;
 
   public:
     MapObjectDefinition();

@@ -1782,8 +1782,6 @@ void DamageClass::Copy(DamageClass &src)
         damage_if_  = new Benefit;
         *damage_if_ = *src.damage_if_;
     }
-    grounded_monsters_ = src.grounded_monsters_;
-    all_players_       = src.all_players_;
 }
 
 //
@@ -1806,9 +1804,7 @@ void DamageClass::Default(DamageClassDefault def)
         instakill_           = false;
         damage_unless_       = nullptr;
         damage_if_           = nullptr;
-        grounded_monsters_   = false;
         damage_flash_colour_ = kRGBANoValue;
-        all_players_         = false;
         break;
     }
 
@@ -1822,9 +1818,7 @@ void DamageClass::Default(DamageClassDefault def)
         instakill_           = false;
         damage_unless_       = nullptr;
         damage_if_           = nullptr;
-        grounded_monsters_   = false;
         damage_flash_colour_ = kRGBANoValue;
-        all_players_         = false;
         break;
     }
 
@@ -1840,9 +1834,7 @@ void DamageClass::Default(DamageClassDefault def)
         instakill_           = false;
         damage_unless_       = nullptr;
         damage_if_           = nullptr;
-        grounded_monsters_   = false;
         damage_flash_colour_ = kRGBANoValue;
-        all_players_         = false;
         break;
     }
     }

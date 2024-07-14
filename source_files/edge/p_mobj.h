@@ -240,7 +240,6 @@ class MapObject : public Position
     int flags_          = 0;
     int extended_flags_ = 0;
     int hyper_flags_    = 0;
-    int mbf21_flags_    = 0;
 
     // tag ID (for special operations)
     int         tag_                  = 0;

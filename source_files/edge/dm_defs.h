@@ -266,12 +266,13 @@ enum LineFlag
 
     // Clear extended line flags (BOOM or later spec); needed to repair
     // mapping/editor errors with historical maps (i.e., E2M7)
-    kLineFlagClearBoomFlags = 0x0800,
+    // Unused now - Dasho
+    //kLineFlagClearBoomFlags = 0x0800,
 
-    // MBF21
+    // Was from MBF21, but seems generic enough to be useful - Dasho
     kLineFlagBlockGroundedMonsters = 0x1000,
 
-    // MBF21
+    // Was from MBF21, but seems generic enough to be useful - Dasho
     kLineFlagBlockPlayers = 0x2000,
 
     // ----- internal flags -----
