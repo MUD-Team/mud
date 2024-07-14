@@ -54,7 +54,6 @@ extern int deathmatch;
 // Depending on view size - no status bar?
 // Note that there is no way to disable the
 //  status bar explicitely.
-extern bool menu_active; // Menu overlayed?
 extern bool paused;      // Game Pause?
 
 // Timer, for scores.
@@ -100,8 +99,6 @@ extern bool precache;
 
 // if true, enable HOM detection (hall of mirrors effect)
 extern ConsoleVariable debug_hall_of_mirrors;
-
-extern int save_page;
 
 extern int quicksave_slot;
 

@@ -40,7 +40,6 @@
 #include "hu_stuff.h"
 #include "hu_style.h"
 #include "m_argv.h"
-#include "m_menu.h"
 #include "m_misc.h"
 #include "m_option.h"
 #include "m_random.h"
@@ -522,7 +521,6 @@ bool OptionMenuNetworkHostResponder(InputEvent *ev, int ch)
         if (host_position == (kTotalHostOptions - 1))
         {
             HostAccept();
-            StartSoundEffect(sound_effect_pistol);
             return true;
         }
     }
@@ -530,13 +528,11 @@ bool OptionMenuNetworkHostResponder(InputEvent *ev, int ch)
     if (ch == kDownArrow || ch == kMouseWheelDown || ch == kGamepadDown)
     {
         host_position = (host_position + 1) % kTotalHostOptions;
-        StartSoundEffect(sound_effect_pstop);
         return true;
     }
     else if (ch == kUpArrow || ch == kMouseWheelUp || ch == kGamepadUp)
     {
         host_position = (host_position + kTotalHostOptions - 1) % kTotalHostOptions;
-        StartSoundEffect(sound_effect_pstop);
         return true;
     }
 
@@ -544,7 +540,6 @@ bool OptionMenuNetworkHostResponder(InputEvent *ev, int ch)
         ch == kGamepadA || ch == kMouse1)
     {
         HostChangeOption(host_position, ch);
-        StartSoundEffect(sound_effect_stnmov);
         return true;
     }
 
@@ -615,11 +610,7 @@ void OptionMenuDrawPlayerList(void)
 
 static void ListAccept()
 {
-    StartSoundEffect(sound_effect_pistol);
-
     network_game_menu_on = 0;
-    MenuClear();
-
     NetGameStartLevel();
 }
 
@@ -687,9 +678,6 @@ bool NetworkGameResponder(InputEvent *ev, int ch)
     case kEscape:
     case kGamepadB: {
         network_game_menu_on = 0;
-        MenuClear();
-
-        StartSoundEffect(sound_effect_pistol);
         return true;
     }
     }

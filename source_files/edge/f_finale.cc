@@ -44,7 +44,6 @@
 #include "hu_style.h"
 #include "i_defs_gl.h"
 #include "i_movie.h"
-#include "m_menu.h"
 #include "m_random.h"
 #include "p_action.h"
 #include "r_colormap.h"
@@ -829,7 +828,6 @@ static void BunnyScroll(void)
 
     if (stage > laststage)
     {
-        StartSoundEffect(sound_effect_pistol);
         laststage = stage;
     }
 

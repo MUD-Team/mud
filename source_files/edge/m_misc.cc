@@ -48,11 +48,9 @@
 #include "epi_str_util.h"
 #include "g_game.h"
 #include "hu_draw.h"
-#include "hu_stuff.h" // only for show_messages
 #include "im_data.h"
 #include "im_funcs.h"
 #include "m_argv.h"
-#include "m_menu.h"
 #include "m_option.h"
 #include "n_network.h"
 #include "p_spec.h"
@@ -72,6 +70,7 @@ bool show_old_config_warning = false;
 extern ConsoleVariable midi_soundfont;
 int                    var_sound_stereo      = 0;
 int                    sound_mixing_channels = 0;
+int                    screen_hud            = 0;
 
 static bool done_first_init = false;
 
@@ -83,8 +82,6 @@ static ConfigurationDefault defaults[] = {
 
     {kConfigInteger, "sound_stereo", &var_sound_stereo, EDGE_DEFAULT_SOUND_STEREO},
     {kConfigInteger, "mix_channels", &sound_mixing_channels, EDGE_DEFAULT_MIX_CHANNELS},
-
-    {kConfigInteger, "show_messages", &show_messages, EDGE_DEFAULT_SHOWMESSAGES},
 
     // -ES- 1998/11/28 Save fade settings
     {kConfigInteger, "reduce_flash", &reduce_flash, 0},
@@ -114,7 +111,6 @@ static ConfigurationDefault defaults[] = {
     {kConfigInteger, "joystick_axis4", &joystick_axis[3], 4},
 
     {kConfigInteger, "screen_hud", &screen_hud, EDGE_DEFAULT_SCREEN_HUD},
-    {kConfigInteger, "save_page", &save_page, 0},
 
     // -------------------- VARS --------------------
 
@@ -188,17 +184,6 @@ static ConfigurationDefault defaults[] = {
     {kConfigKey, "key_inventory_use", &key_inventory_use, EDGE_DEFAULT_KEY_USEINV},
     {kConfigKey, "key_inventory_next", &key_inventory_next, EDGE_DEFAULT_KEY_NEXTINV},
 
-    {kConfigKey, "key_screenshot", &key_screenshot, kFunction1},
-    {kConfigKey, "key_save_game", &key_save_game, kFunction2},
-    {kConfigKey, "key_load_game", &key_load_game, kFunction3},
-    {kConfigKey, "key_sound_controls", &key_sound_controls, kFunction4},
-    {kConfigKey, "key_options_menu", &key_options_menu, kFunction5},
-    {kConfigKey, "key_quick_save", &key_quick_save, kFunction6},
-    {kConfigKey, "key_end_game", &key_end_game, kFunction7},
-    {kConfigKey, "key_message_toggle", &key_message_toggle, kFunction8},
-    {kConfigKey, "key_quick_load", &key_quick_load, kFunction9},
-    {kConfigKey, "key_quit_edge", &key_quit_edge, kFunction10},
-    {kConfigKey, "key_gamma_toggle", &key_gamma_toggle, kFunction11},
     {kConfigKey, "key_show_players", &key_show_players, kFunction12},
 };
 
@@ -243,7 +228,6 @@ void SaveDefaults(void)
             break;
         }
     }
-
 
     fclose(f);
 }

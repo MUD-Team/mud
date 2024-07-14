@@ -43,7 +43,6 @@
 #include "r_misc.h"
 
 extern bool ConsoleResponder(InputEvent *ev);
-extern bool MenuResponder(InputEvent *ev);
 extern bool GameResponder(InputEvent *ev);
 
 extern int JoystickGetAxis(int n);
@@ -668,9 +667,6 @@ void ProcessInputEvents(void)
 
         if (ConsoleResponder(ev))
             continue;      // Console ate the event
-
-        if (MenuResponder(ev))
-            continue;      // menu ate the event
 
         GameResponder(ev); // let game eat it, nobody else wanted it
     }

@@ -31,7 +31,6 @@
 #include "epi_str_util.h"
 #include "g_game.h"
 #include "i_system.h"
-#include "m_menu.h"
 #include "m_misc.h"
 #include "s_sound.h"
 #include "version.h"
@@ -299,12 +298,7 @@ int ConsoleCommandScreenShot(char **argv, int argc)
 
 int ConsoleCommandQuitEDGE(char **argv, int argc)
 {
-    if (argc >= 2 && epi::StringCaseCompareASCII(argv[1], "now") == 0)
-        // this never returns
-        ImmediateQuit();
-    else
-        QuitEdge(0);
-
+    sapp_quit();
     return 0;
 }
 

@@ -55,13 +55,6 @@ void MapObjectTicker(bool extra_tic)
     if (paused)
         return;
 
-    // pause if in menu and at least one tic has been run
-    if (!network_game && menu_active &&
-        !AlmostEquals(players[console_player]->view_z_, kFloatUnused))
-    {
-        return;
-    }
-
     erraticism_active = false;
 
     if (erraticism.d_)
