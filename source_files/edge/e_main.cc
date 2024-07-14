@@ -83,7 +83,6 @@
 #include "sv_main.h"
 #include "version.h"
 #include "w_files.h"
-#include "w_model.h"
 #include "w_sprite.h"
 
 extern ConsoleVariable double_framerate;
@@ -1475,7 +1474,6 @@ static void EdgeStartup(void)
 
     PrecacheSounds();
     InitializeSprites();
-    InitializeModels();
 
     MenuInitialize();
     RendererStartup();

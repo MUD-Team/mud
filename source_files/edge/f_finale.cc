@@ -50,14 +50,11 @@
 #include "r_colormap.h"
 #include "r_draw.h"
 #include "r_gldefs.h"
-#include "r_md2.h"
-#include "r_mdl.h"
 #include "r_modes.h"
 #include "r_state.h"
 #include "s_music.h"
 #include "s_sound.h"
 #include "sokol_color.h"
-#include "w_model.h"
 
 enum FinaleStage
 {
@@ -741,22 +738,7 @@ static void CastDrawer(void)
 
     if (cast_state->flags & kStateFrameFlagModel)
     {
-        ModelDefinition *md = GetModel(cast_state->sprite);
-
-        const Image *skin_img = md->skins_[cast_order->model_skin_];
-
-        if (!skin_img)
-            skin_img = ImageForDummySkin();
-
-        glClear(GL_DEPTH_BUFFER_BIT);
-        glEnable(GL_DEPTH_TEST);
-
-        if (md->md2_model_)
-            MD2RenderModel2D(md->md2_model_, skin_img, cast_state->frame, pos_x, pos_y, scale_x, scale_y, cast_order);
-        else if (md->mdl_model_)
-            MDLRenderModel2D(md->mdl_model_, skin_img, cast_state->frame, pos_x, pos_y, scale_x, scale_y, cast_order);
-
-        glDisable(GL_DEPTH_TEST);
+        FatalError("Models not supported");
         return;
     }
 
