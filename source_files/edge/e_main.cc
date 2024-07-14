@@ -54,8 +54,6 @@
 #include "epi_filesystem.h"
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
-#include "f_finale.h"
-#include "f_interm.h"
 #include "g_game.h"
 #include "hu_draw.h"
 #include "hu_stuff.h"
@@ -525,18 +523,6 @@ void EdgeDisplay(void)
         HUDDrawer();
         break;
 
-    case kGameStateIntermission:
-        IntermissionDrawer();
-        break;
-
-    case kGameStateFinale:
-        FinaleDrawer();
-        break;
-
-    case kGameStateTitleScreen:
-        TitleDrawer();
-        break;
-
     case kGameStateNothing:
         break;
     }
@@ -582,300 +568,6 @@ void EdgeDisplay(void)
     }
 
     FinishFrame(); // page flip or blit buffer
-}
-
-//
-//  TITLE LOOP
-//
-static int title_game;
-static int title_pic;
-static int title_countdown;
-
-static const Image *title_image = nullptr;
-
-static void TitleDrawer(void)
-{
-    if (title_image)
-    {
-        HUDDrawImageTitleWS(title_image);
-    }
-    else
-    {
-        HUDSolidBox(0, 0, 320, 200, SG_BLACK_RGBA32);
-    }
-}
-
-//
-// This cycles through the title sequences.
-// -KM- 1998/12/16 Fixed for DDF.
-//
-void PickLoadingScreen(void)
-{
-    // force pic overflow -> first available titlepic
-    title_game = gamedefs.size() - 1;
-    title_pic  = 29999;
-
-    // prevent an infinite loop
-    for (int loop = 0; loop < 100; loop++)
-    {
-        GameDefinition *g = gamedefs[title_game];
-        EPI_ASSERT(g);
-
-        if (title_pic >= (int)g->titlepics_.size())
-        {
-            title_game = (title_game + 1) % (int)gamedefs.size();
-            title_pic  = 0;
-            continue;
-        }
-
-        // ignore non-existing episodes.  Doesn't include title-only ones
-        // like [EDGE].
-        if (title_pic == 0 && g->firstmap_ != "")
-        {
-            MapDefinition *ddf_map_name_check = mapdefs.Lookup(g->firstmap_.c_str());
-            if (ddf_map_name_check)
-            {
-                if (!IsFileAnywhere(ddf_map_name_check->name_.c_str()))
-                {
-                    title_game = (title_game + 1) % gamedefs.size();
-                    title_pic  = 0;
-                    continue;
-                }
-            }
-            else if (!IsFileAnywhere(g->firstmap_.c_str()))
-            {
-                title_game = (title_game + 1) % gamedefs.size();
-                title_pic  = 0;
-                continue;
-            }
-        }
-
-        // ignore non-existing images
-        loading_image = ImageLookup(g->titlepics_[title_pic].c_str(), kImageNamespaceGraphic, kImageLookupNull);
-
-        if (!loading_image)
-        {
-            title_pic++;
-            continue;
-        }
-
-        // found one !!
-        title_game = gamedefs.size() - 1;
-        title_pic  = 29999;
-        return;
-    }
-
-    // not found
-    title_game    = gamedefs.size() - 1;
-    title_pic     = 29999;
-    loading_image = nullptr;
-}
-
-//
-// Find and create a desaturated version of the first
-// titlepic corresponding to a gamedef with actual maps.
-// This is used as the menu backdrop
-//
-static void PickMenuBackdrop(void)
-{
-    // force pic overflow -> first available titlepic
-    title_game = gamedefs.size() - 1;
-    title_pic  = 29999;
-
-    // prevent an infinite loop
-    for (int loop = 0; loop < 100; loop++)
-    {
-        GameDefinition *g = gamedefs[title_game];
-        EPI_ASSERT(g);
-
-        if (title_pic >= (int)g->titlepics_.size())
-        {
-            title_game = (title_game + 1) % (int)gamedefs.size();
-            title_pic  = 0;
-            continue;
-        }
-
-        // ignore non-existing episodes.
-        if (title_pic == 0 && (g->firstmap_ == "" || !IsFileAnywhere(g->firstmap_.c_str())))
-        {
-            title_game = (title_game + 1) % gamedefs.size();
-            title_pic  = 0;
-            continue;
-        }
-
-        // ignore non-existing images
-        const Image *menu_image =
-            ImageLookup(g->titlepics_[title_pic].c_str(), kImageNamespaceGraphic, kImageLookupNull);
-
-        if (!menu_image)
-        {
-            title_pic++;
-            continue;
-        }
-
-        // found one !!
-        title_game                       = gamedefs.size() - 1;
-        title_pic                        = 29999;
-        Image *new_backdrop              = new Image;
-        new_backdrop->name_              = menu_image->name_;
-        new_backdrop->actual_height_     = menu_image->actual_height_;
-        new_backdrop->actual_width_      = menu_image->actual_width_;
-        new_backdrop->cache_             = menu_image->cache_;
-        new_backdrop->is_empty_          = menu_image->is_empty_;
-        new_backdrop->is_font_           = menu_image->is_font_;
-        new_backdrop->offset_x_          = menu_image->offset_x_;
-        new_backdrop->offset_y_          = menu_image->offset_y_;
-        new_backdrop->opacity_           = menu_image->opacity_;
-        new_backdrop->height_ratio_      = menu_image->height_ratio_;
-        new_backdrop->width_ratio_       = menu_image->width_ratio_;
-        new_backdrop->scale_x_           = menu_image->scale_x_;
-        new_backdrop->scale_y_           = menu_image->scale_y_;
-        new_backdrop->source_            = menu_image->source_;
-        new_backdrop->source_type_       = menu_image->source_type_;
-        new_backdrop->total_height_      = menu_image->total_height_;
-        new_backdrop->total_width_       = menu_image->total_width_;
-        new_backdrop->animation_.current = new_backdrop;
-        new_backdrop->grayscale_         = true;
-        menu_backdrop                    = new_backdrop;
-        return;
-    }
-
-    // if we get here just use the loading image if it exists
-    title_game = gamedefs.size() - 1;
-    title_pic  = 29999;
-    if (loading_image)
-    {
-        Image *new_backdrop              = new Image;
-        new_backdrop->name_              = loading_image->name_;
-        new_backdrop->actual_height_     = loading_image->actual_height_;
-        new_backdrop->actual_width_      = loading_image->actual_width_;
-        new_backdrop->cache_             = loading_image->cache_;
-        new_backdrop->is_empty_          = loading_image->is_empty_;
-        new_backdrop->is_font_           = loading_image->is_font_;
-        new_backdrop->offset_x_          = loading_image->offset_x_;
-        new_backdrop->offset_y_          = loading_image->offset_y_;
-        new_backdrop->opacity_           = loading_image->opacity_;
-        new_backdrop->height_ratio_      = loading_image->height_ratio_;
-        new_backdrop->width_ratio_       = loading_image->width_ratio_;
-        new_backdrop->scale_x_           = loading_image->scale_x_;
-        new_backdrop->scale_y_           = loading_image->scale_y_;
-        new_backdrop->source_            = loading_image->source_;
-        new_backdrop->source_type_       = loading_image->source_type_;
-        new_backdrop->total_height_      = loading_image->total_height_;
-        new_backdrop->total_width_       = loading_image->total_width_;
-        new_backdrop->animation_.current = new_backdrop;
-        new_backdrop->grayscale_         = true;
-        menu_backdrop                    = new_backdrop;
-    }
-    else
-        menu_backdrop = nullptr;
-}
-
-//
-// This cycles through the title sequences.
-// -KM- 1998/12/16 Fixed for DDF.
-//
-void AdvanceTitle(void)
-{
-    title_pic++;
-
-    // prevent an infinite loop
-    for (int loop = 0; loop < 100; loop++)
-    {
-        GameDefinition *g = gamedefs[title_game];
-        EPI_ASSERT(g);
-
-        // Only play title movies once
-        if (!g->titlemovie_.empty() && !g->movie_played_)
-        {
-            if (skip_intros.d_)
-                g->movie_played_ = true;
-            else
-            {
-                PlayMovie(g->titlemovie_);
-                g->movie_played_ = true;
-            }
-            continue;
-        }
-
-        if (show_old_config_warning && startup_progress.IsEmpty())
-        {
-            show_old_config_warning = false;
-        }
-
-        if (title_pic >= (int)g->titlepics_.size())
-        {
-            title_game = (title_game + 1) % (int)gamedefs.size();
-            title_pic  = 0;
-            continue;
-        }
-
-        // ignore non-existing episodes.  Doesn't include title-only ones
-        // like [EDGE].
-        if (title_pic == 0 && g->firstmap_ != "")
-        {
-            MapDefinition *ddf_map_name_check = mapdefs.Lookup(g->firstmap_.c_str());
-            if (ddf_map_name_check)
-            {
-                if (!IsFileAnywhere(ddf_map_name_check->name_.c_str()))
-                {
-                    title_game = (title_game + 1) % gamedefs.size();
-                    title_pic  = 0;
-                    continue;
-                }
-            }
-            else if (!IsFileAnywhere(g->firstmap_.c_str()))
-            {
-                title_game = (title_game + 1) % gamedefs.size();
-                title_pic  = 0;
-                continue;
-            }
-        }
-
-        // ignore non-existing images
-        title_image = ImageLookup(g->titlepics_[title_pic].c_str(), kImageNamespaceGraphic, kImageLookupNull);
-
-        if (!title_image)
-        {
-            title_pic++;
-            continue;
-        }
-
-        // found one !!
-        if (title_pic == 0 && g->titlemusic_ > 0)
-            ChangeMusic(g->titlemusic_, false);
-
-        title_countdown = g->titletics_ * (double_framerate.d_ ? 2 : 1);
-        return;
-    }
-
-    // not found
-
-    title_image     = nullptr;
-    title_countdown = kTicRate * (double_framerate.d_ ? 2 : 1);
-}
-
-void StartTitle(void)
-{
-    game_action = kGameActionNothing;
-    game_state  = kGameStateTitleScreen;
-
-    paused = false;
-
-    title_countdown = 1;
-
-    AdvanceTitle();
-}
-
-void TitleTicker(void)
-{
-    if (title_countdown > 0)
-    {
-        title_countdown--;
-
-        if (title_countdown == 0)
-            AdvanceTitle();
-    }
 }
 
 static std::string GetPrefDirectory()
@@ -1456,9 +1148,7 @@ static void EdgeStartup(void)
     DDFCleanUp();
     SetLanguage();
 
-    CreateUserImages();
-    PickLoadingScreen();
-    PickMenuBackdrop();
+    CreateUserImages();    
 
     HUDInit();
     ConsoleStart();
@@ -1555,8 +1245,7 @@ static void InitialState(void)
     // start the appropriate game based on parms
     if (!warp)
     {
-        LogDebug("- Startup: showing title screen.\n");
-        StartTitle();
+        LogDebug("- Startup: showing title screen.\n");        
         startup_progress.Clear();
         return;
     }

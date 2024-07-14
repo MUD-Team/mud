@@ -34,7 +34,6 @@
 #include "e_main.h"
 #include "epi.h"
 #include "epi_str_util.h"
-#include "f_interm.h"
 #include "g_game.h"
 #include "hu_draw.h"
 #include "hu_stuff.h"
@@ -554,9 +553,6 @@ void OptionMenuNetworkHostTicker(void)
 
 static void NetGameStartLevel(void)
 {
-    // -KM- 1998/12/17 Clear the intermission.
-    IntermissionClear();
-
     DeferredNewGame(*network_game_parameters);
 }
 

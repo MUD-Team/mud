@@ -58,7 +58,6 @@
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "epi.h"
-#include "f_interm.h"
 #include "g_game.h"
 #include "hu_stuff.h"
 #include "i_defs_gl.h"
@@ -2268,18 +2267,6 @@ MapObject *CreateMapObject(float x, float y, float z, const MapObjectDefinition 
 
     // Find the real players height (TELEPORT WEAPONS).
     mobj->original_height_ = z;
-
-    // update totals for countable items.  Doing it here means that
-    // things spawned dynamically can be counted as well.  Whilst this
-    // has its dangers, at least it is consistent (more than can be said
-    // when RTS comes into play -- trying to second guess which
-    // spawnthings should not be counted just doesn't work).
-
-    if (mobj->flags_ & kMapObjectFlagCountKill)
-        intermission_stats.kills++;
-
-    if (mobj->flags_ & kMapObjectFlagCountItem)
-        intermission_stats.items++;
 
     mobj->last_heard_ = -1; // For now, the last player we heard
     //

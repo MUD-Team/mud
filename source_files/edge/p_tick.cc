@@ -103,8 +103,8 @@ void MapObjectTicker(bool extra_tic)
     level_time_elapsed++;
 
     if (level_time_elapsed >= exit_time && game_action == kGameActionNothing)
-    {
-        game_action = kGameActionIntermission;
+    {        
+        game_action = kGameActionLevelCompleted;
     }
 }
 

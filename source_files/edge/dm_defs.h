@@ -37,10 +37,7 @@
 enum GameState
 {
     kGameStateNothing = 0,
-    kGameStateTitleScreen,
-    kGameStateLevel,
-    kGameStateIntermission,
-    kGameStateFinale,
+    kGameStateLevel
 };
 
 //
