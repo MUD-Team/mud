@@ -31,7 +31,6 @@ set (EDGE_SOURCE_FILES
   m_cheat.cc
   m_math.cc
   m_misc.cc
-  m_option.cc
   m_netgame.cc
   m_random.cc
   n_network.cc

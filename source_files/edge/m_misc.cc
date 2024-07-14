@@ -51,7 +51,6 @@
 #include "im_data.h"
 #include "im_funcs.h"
 #include "m_argv.h"
-#include "m_option.h"
 #include "n_network.h"
 #include "p_spec.h"
 #include "r_colormap.h"
