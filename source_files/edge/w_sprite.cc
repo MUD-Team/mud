@@ -211,7 +211,7 @@ static int WhatRot(SpriteFrame *frame, const char *name, int pos)
     }
 }
 
-static void InstallSpritePack(SpriteDefinition *def, PackFile *pack, std::string spritebase, std::string packname,
+static void InstallSpritePack(SpriteDefinition *def, std::string spritebase, std::string packname,
                               int pos, uint8_t flip)
 {
     SpriteFrame *frame = WhatFrame(def, spritebase.c_str(), pos);
@@ -231,7 +231,7 @@ static void InstallSpritePack(SpriteDefinition *def, PackFile *pack, std::string
     if (frame->images_[rot])
         return;
 
-    frame->images_[rot] = CreatePackSprite(packname, pack, frame->is_weapon_);
+    frame->images_[rot] = CreatePackSprite(packname, frame->is_weapon_);
     frame->flip_[rot] = flip;
 
     if (rot == 0 && frame->rotations_ == 1)
@@ -265,50 +265,47 @@ static void InstallSpriteImage(SpriteDefinition *def, const Image *img, const ch
 //
 // FillSpriteFrames
 //
-static void FillSpriteFrames(int file)
+static void FillSpriteFrames()
 {
-    if (data_files[file]->pack_)
+    std::vector<std::string> packsprites = GetPackSpriteList();
+    if (!packsprites.empty())
     {
-        std::vector<std::string> packsprites = GetPackSpriteList(data_files[file]->pack_);
-        if (!packsprites.empty())
+        std::sort(packsprites.begin(), packsprites.end());
+
+        size_t S = 0, L = 0;
+
+        for (; S < (size_t)sprite_map_length; S++)
         {
-            std::sort(packsprites.begin(), packsprites.end());
-
-            size_t S = 0, L = 0;
-
-            for (; S < (size_t)sprite_map_length; S++)
+            std::string sprname = sprite_map[S]->name_;
+            size_t      spr_len = sprname.size();
+            for (; L < packsprites.size(); L++)
             {
-                std::string sprname = sprite_map[S]->name_;
-                size_t      spr_len = sprname.size();
-                for (; L < packsprites.size(); L++)
+                std::string spritebase;
+                epi::TextureNameFromFilename(spritebase, epi::GetStem(packsprites[L]));
+
+                if (spritebase.size() != spr_len + 2 && spritebase.size() != spr_len + 4)
                 {
-                    std::string spritebase;
-                    epi::TextureNameFromFilename(spritebase, epi::GetStem(packsprites[L]));
-
-                    if (spritebase.size() != spr_len + 2 && spritebase.size() != spr_len + 4)
-                    {
-                        continue;
-                    }
-
-                    // ignore model skins
-                    if (spritebase.size() == spr_len + 4 && spritebase[spr_len] == 'S' &&
-                        spritebase[spr_len + 1] == 'K' && spritebase[spr_len + 2] == 'N')
-                    {
-                        continue;
-                    }
-
-                    if (epi::StringCompareMax(sprname, spritebase, spr_len) != 0)
-                        continue;
-
-                    // we have a match
-                    InstallSpritePack(sprite_map[S], data_files[file]->pack_, spritebase, packsprites[L], spr_len, 0);
-
-                    if (spritebase.size() == spr_len + 4)
-                        InstallSpritePack(sprite_map[S], data_files[file]->pack_, spritebase, packsprites[L],
-                                          spr_len + 2, 1);
+                    continue;
                 }
-                L = 0;
+
+                // ignore model skins
+                if (spritebase.size() == spr_len + 4 && spritebase[spr_len] == 'S' &&
+                    spritebase[spr_len + 1] == 'K' && spritebase[spr_len + 2] == 'N')
+                {
+                    continue;
+                }
+
+                if (epi::StringCompareMax(sprname, spritebase, spr_len) != 0)
+                    continue;
+
+                // we have a match
+                InstallSpritePack(sprite_map[S], spritebase, packsprites[L], spr_len, 0);
+
+                if (spritebase.size() == spr_len + 4)
+                    InstallSpritePack(sprite_map[S], spritebase, packsprites[L],
+                                        spr_len + 2, 1);
             }
+            L = 0;
         }
     }
 }
@@ -539,14 +536,9 @@ void InitializeSprites(void)
     //
     // NOTE WELL: override granularity is single frames.
 
-    int numfiles = GetTotalFiles();
-
     FillSpriteFramesUser();
 
-    for (int file = numfiles - 1; file >= 0; file--)
-    {
-        FillSpriteFrames(file);
-    }
+    FillSpriteFrames();
 
     MarkCompletedFrames();
 

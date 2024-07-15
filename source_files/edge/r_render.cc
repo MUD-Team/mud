@@ -1242,8 +1242,6 @@ static void RenderPlane(DrawFloor *dfloor, float h, MapSurface *surf, int face_d
 {
     EDGE_ZoneScoped;
 
-    float orig_h = h;
-
     int num_vert, i;
 
     if (!surf->image)

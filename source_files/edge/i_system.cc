@@ -26,6 +26,8 @@
 #include "dm_defs.h"
 #include "e_main.h"
 #include "epi.h"
+#include "epi_filesystem.h"
+#include "epi_str_util.h"
 #include "epi_windows.h"
 #include "g_game.h"
 #include "m_argv.h"
@@ -35,8 +37,7 @@
 #include "sokol_time.h"
 #include "version.h"
 
-extern FILE *debug_file;
-extern FILE *log_file;
+extern epi::File *log_file;
 
 #if !defined(__MINGW32__) && (defined(WIN32) || defined(_WIN32) || defined(_WIN64))
 extern HANDLE windows_timer;
@@ -79,14 +80,7 @@ void FatalError(const char *error, ...)
 
     if (log_file)
     {
-        fprintf(log_file, "ERROR: %s\n", message_buffer);
-        fflush(log_file);
-    }
-
-    if (debug_file)
-    {
-        fprintf(debug_file, "ERROR: %s\n", message_buffer);
-        fflush(debug_file);
+        log_file->WriteString(epi::StringFormat("ERROR: %s\n", message_buffer));
     }
 
     SystemShutdown();
@@ -111,12 +105,8 @@ void LogPrint(const char *message, ...)
 
     if (log_file)
     {
-        fprintf(log_file, "%s", printbuf);
-        fflush(log_file);
+        log_file->WriteString(printbuf);
     }
-
-    // If debuging enabled, print to the debug_file
-    LogDebug("%s", printbuf);
 
     // Send the message to the console.
     ConsolePrint("%s", printbuf);
@@ -187,15 +177,8 @@ void SystemShutdown(void)
 
     if (log_file)
     {
-        fclose(log_file);
+        delete log_file;
         log_file = nullptr;
-    }
-
-    // -KM- 1999/01/31 Close the debug_file
-    if (debug_file != nullptr)
-    {
-        fclose(debug_file);
-        debug_file = nullptr;
     }
 
     PHYSFS_deinit();

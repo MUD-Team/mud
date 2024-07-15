@@ -71,12 +71,6 @@ sapp_desc sokol_main(int argc, char *argv[])
 
     executable_path = PHYSFS_getBaseDir();
 
-#ifdef _WIN32
-    // -AJA- change current dir to match executable
-    if (!epi::CurrentDirectorySet(executable_path))
-        FatalError("Couldn't set program directory to %s!!\n", executable_path.c_str());
-#endif
-
     sapp_desc desc = {0};
 
     desc.init_cb              = InitCallback;

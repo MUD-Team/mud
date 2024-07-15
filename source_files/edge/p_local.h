@@ -38,8 +38,8 @@ constexpr float kUseRange        = 64.0f;
 constexpr float kUseZRange       = 32.0f;
 constexpr float kMeleeRange      = 64.0f;
 constexpr float kMissileRange    = 2000.0f;
-constexpr float kOnFloorZ        = (float)INT_MIN;
-constexpr float kOnCeilingZ      = (float)INT_MAX;
+constexpr float kOnFloorZ        = -40000.0f;
+constexpr float kOnCeilingZ      = 40000.0f;
 
 // -ACB- 2004/07/22 Moved here since its playsim related
 #define EDGE_DAMAGE_COMPUTE(var, dam)                                                                                  \

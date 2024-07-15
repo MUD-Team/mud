@@ -167,8 +167,6 @@ void A_NoiseAlert(MapObject *actor)
 //
 bool DoMove(MapObject *actor, bool path)
 {
-    HMM_Vec3 orig_pos{{actor->x, actor->y, actor->z}};
-
     float tryx;
     float tryy;
 

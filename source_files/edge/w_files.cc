@@ -41,224 +41,45 @@
 #include "dm_state.h"
 #include "dstrings.h"
 #include "epi.h"
-#include "epi_file.h"
 #include "epi_filesystem.h"
 #include "i_system.h"
 #include "w_epk.h"
 
 
-std::vector<DataFile *> data_files;
-
-DataFile::DataFile(std::string name, FileKind kind)
-    : name_(name), kind_(kind), file_(nullptr), pack_(nullptr)
-{
-}
-
-DataFile::~DataFile()
-{
-}
+std::vector<std::string> data_files;
 
 int GetTotalFiles()
 {
     return (int)data_files.size();
 }
 
-size_t AddDataFile(std::string file, FileKind kind)
+size_t AddDataFile(const std::string &file)
 {
     LogDebug("Added filename: %s\n", file.c_str());
 
     size_t index = data_files.size();
 
-    DataFile *df = new DataFile(file, kind);
-    data_files.push_back(df);
+    data_files.push_back(file);
 
     return index;
 }
 
 //----------------------------------------------------------------------------
 
-std::vector<DataFile *> pending_files;
-
-size_t AddPendingFile(std::string file, FileKind kind)
+void ProcessFile(const std::string &df)
 {
-    size_t index = pending_files.size();
+    LogPrint("  Processing: %s\n", df.c_str());
 
-    DataFile *df = new DataFile(file, kind);
-    pending_files.push_back(df);
-
-    return index;
-}
-
-static void W_ExternalDDF(DataFile *df)
-{
-    DDFType type = DDFFilenameToType(df->name_);
-
-    std::string bare_name = epi::GetFilename(df->name_);
-
-    if (type == kDDFTypeUnknown)
-        FatalError("Unknown DDF filename: %s\n", bare_name.c_str());
-
-    LogPrint("Reading DDF file: %s\n", df->name_.c_str());
-
-    epi::File *F = epi::FileOpen(df->name_, epi::kFileAccessRead);
-    if (F == nullptr)
-        FatalError("Couldn't open file: %s\n", df->name_.c_str());
-
-    // WISH: load directly into a std::string
-
-    char *raw_data = (char *)F->LoadIntoMemory();
-    if (raw_data == nullptr)
-        FatalError("Couldn't read file: %s\n", df->name_.c_str());
-
-    std::string data(raw_data);
-    delete[] raw_data;
-
-    DDFAddFile(type, data, df->name_);
-}
-
-void ProcessFile(DataFile *df)
-{
-    size_t file_index = data_files.size();
-    data_files.push_back(df);
-
-    // open a WAD/PK3 file and add contents to directory
-    std::string filename = df->name_;
-
-    LogPrint("  Processing: %s\n", filename.c_str());
-
-    if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEPK ||
-             df->kind_ == kFileKindEEPK || df->kind_ == kFileKindIPK || df->kind_ == kFileKindIFolder)
-    {
-        ProcessAllInPack(df, file_index);
-    }
-    else if (df->kind_ == kFileKindDDF)
-    {
-        // handle external ddf files (from `-file` option)
-        W_ExternalDDF(df);
-    }
+    ProcessAllInPack(df);
 }
 
 void ProcessMultipleFiles()
 {
-    // open all the files, add all the lumps.
-    // NOTE: we rebuild the list, since new files can get added as we go along,
-    //       and they should appear *after* the one which produced it.
-
-    std::vector<DataFile *> copied_files(data_files);
-    data_files.clear();
-
-    for (size_t i = 0; i < copied_files.size(); i++)
-    {
-        ProcessFile(copied_files[i]);
-
-        for (size_t k = 0; k < pending_files.size(); k++)
-        {
-            ProcessFile(pending_files[k]);
-        }
-
-        pending_files.clear();
-    }
-}
-
-//----------------------------------------------------------------------------
-int CheckPackFilesForName(const std::string &name)
-{
-    // search from newest file to oldest
-    for (int i = (int)data_files.size() - 1; i >= 0; i--)
-    {
-        DataFile *df = data_files[i];
-        if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEPK ||
-            df->kind_ == kFileKindEEPK || df->kind_ == kFileKindIFolder || df->kind_ == kFileKindIPK)
-        {
-            if (FindPackFile(df->pack_, name))
-                return i;
-        }
-    }
-    return -1;
-}
-
-//----------------------------------------------------------------------------
-
-epi::File *OpenFileFromPack(const std::string &name)
-{
-    // search from newest file to oldest
-    for (int i = (int)data_files.size() - 1; i >= 0; i--)
-    {
-        DataFile *df = data_files[i];
-        if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEPK ||
-            df->kind_ == kFileKindEEPK || df->kind_ == kFileKindIFolder || df->kind_ == kFileKindIPK)
-        {
-            epi::File *F = OpenPackFile(df->pack_, name);
-            if (F != nullptr)
-                return F;
-        }
-    }
-
-    // not found
-    return nullptr;
-}
-
-//----------------------------------------------------------------------------
-
-uint8_t *OpenMatchingPackFileInMemory(const std::string &name, const std::vector<std::string> &extensions, int *length)
-{
-    for (int i = (int)data_files.size() - 1; i >= 0; i--)
-    {
-        DataFile *df = data_files[i];
-        if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEPK ||
-            df->kind_ == kFileKindEEPK || df->kind_ == kFileKindIFolder || df->kind_ == kFileKindIPK)
-        {
-            epi::File *F = OpenPackMatch(df->pack_, name, extensions);
-            if (F != nullptr)
-            {
-                uint8_t *raw_packfile = F->LoadIntoMemory();
-                if (length)
-                    *length               = F->GetLength();
-                delete F;
-                return raw_packfile;
-            }
-        }
-    }
-
-    // not found
-    return nullptr;
-}
-
-//----------------------------------------------------------------------------
-
-void DoPackSubstitutions()
-{
     for (size_t i = 0; i < data_files.size(); i++)
-    {
-        if (data_files[i]->pack_)
-            ProcessPackSubstitutions(data_files[i]->pack_, i);
-    }
+        ProcessFile(data_files[i]);
 }
 
 //----------------------------------------------------------------------------
-
-static const char *FileKindString(FileKind kind)
-{
-    switch (kind)
-    {
-    case kFileKindEEPK:
-        return "edge";
-    case kFileKindFolder:
-        return "dir  ";
-    case kFileKindEFolder:
-        return "edge";
-    case kFileKindIFolder:
-        return "dir  ";
-    case kFileKindEPK:
-        return "epk  ";
-    case kFileKindIPK:
-        return "epk  ";
-    case kFileKindDDF:
-        return "ddf  ";
-    default:
-        return "??? ";
-    }
-}
 
 void ShowLoadedFiles()
 {
@@ -266,64 +87,8 @@ void ShowLoadedFiles()
 
     for (int i = 0; i < (int)data_files.size(); i++)
     {
-        DataFile *df = data_files[i];
-
-        LogPrint(" %2d:  %-4s  \"%s\"\n", i + 1, FileKindString(df->kind_), epi::SanitizePath(df->name_).c_str());
+        LogPrint(" %2d:  \"%s\"\n", i + 1, epi::SanitizePath(data_files[i]).c_str());
     }
-}
-
-// IsFileInAddon
-//
-// check if a file is in a file that
-// was loaded after the main game file
-// in our load order
-//
-// Returns true if found
-bool IsFileInAddon(const char *name)
-{
-    if (!name)
-        return false;
-
-    // if we're here then check EPKs/folders
-    bool in_addon = false;
-
-    // search from newest file to oldest
-    for (int i = (int)data_files.size() - 1; i >= 2; i--) // ignore edge_defs and the game file itself
-    {
-        DataFile *df = data_files[i];
-        if (df->pack_ && FindStemInPack(df->pack_, name))
-        {
-            in_addon = true;
-            break;
-        }
-    }
-
-    return in_addon;
-}
-
-// IsFileAnywhere
-//
-// check if a file is in any folder/epk at all
-//
-// Returns true if found
-bool IsFileAnywhere(const char *name)
-{
-    if (!name)
-        return false;
-
-    bool in_any_file = false;
-
-    // search from oldest to newest
-    for (const DataFile *df : data_files)
-    {
-        if (df->pack_ && FindStemInPack(df->pack_, name))
-        {
-            in_any_file = true;
-            break;
-        }
-    }
-
-    return in_any_file;
 }
 
 //--- editor settings ---

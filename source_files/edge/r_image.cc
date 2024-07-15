@@ -44,7 +44,6 @@
 #include "e_search.h"
 #include "epi.h"
 #include "epi_endian.h"
-#include "epi_file.h"
 #include "epi_filesystem.h"
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
@@ -225,11 +224,11 @@ static Image *CreateDummyImage(const char *name, RGBAColor fg, RGBAColor bg)
     return rim;
 }
 
-Image *AddPackImageSmart(const char *name, ImageSource type, const char *packfile_name, std::list<Image *> &container,
+Image *AddPackImageSmart(std::string_view name, ImageSource type, const std::string &packfile_name, std::list<Image *> &container,
                          const Image *replaces)
 {
     /* used for Graphics, Sprites and TX/HI stuff */
-    epi::File *f = OpenFileFromPack(packfile_name);
+    epi::File *f = OpenPackFile(packfile_name, "");
     EPI_ASSERT(f);
     int packfile_len = f->GetLength();
 
@@ -238,7 +237,7 @@ Image *AddPackImageSmart(const char *name, ImageSource type, const char *packfil
     memset(header, 255, sizeof(header));
 
     f->Read(header, sizeof(header));
-    f->Seek(0, epi::File::kSeekpointStart);
+    f->Seek(0);
 
     int width = 0, height = 0, bpp = 0;
     int offset_x = 0, offset_y = 0;
@@ -253,21 +252,21 @@ Image *AddPackImageSmart(const char *name, ImageSource type, const char *packfil
         // close it
         delete f;
 
-        LogWarning("Graphic '%s' does not seem to be a graphic.\n", name);
+        LogWarning("Graphic '%s' does not seem to be a graphic.\n", std::string(name).c_str());
         return nullptr;
     }
     else // PNG
     {
         if (!GetImageInfo(f, &width, &height, &bpp) || width <= 0 || height <= 0)
         {
-            LogWarning("Error scanning image in '%s'\n", packfile_name);
+            LogWarning("Error scanning image in '%s'\n", packfile_name.c_str());
             return nullptr;
         }
 
         solid = (bpp == 3);      
 
         // grAb chunk check (may go away in the future, but should work with SLADE lmp->png conversions for now - Dasho)
-        f->Seek(0, epi::File::kSeekpointStart);
+        f->Seek(0);
         uint8_t *raw_image = f->LoadIntoMemory();
 
         for (uint32_t i = 0; i < packfile_len; i++)
@@ -302,7 +301,7 @@ Image *AddPackImageSmart(const char *name, ImageSource type, const char *packfil
     rim->name_ = name;
 
     rim->source_type_                  = type;
-    int pn_len                         = strlen(packfile_name);
+    int pn_len                         = packfile_name.size();
     rim->source_.graphic.packfile_name = (char *)calloc(pn_len + 1, 1);
     if (container == real_flats)
         rim->source_.graphic.belong = kImageNamespaceFlat;
@@ -312,7 +311,7 @@ Image *AddPackImageSmart(const char *name, ImageSource type, const char *packfil
         rim->source_.graphic.belong = kImageNamespaceSprite;
     else
         rim->source_.graphic.belong = kImageNamespaceGraphic;
-    epi::CStringCopyMax(rim->source_.graphic.packfile_name, packfile_name, pn_len);
+    epi::CStringCopyMax(rim->source_.graphic.packfile_name, packfile_name.data(), pn_len);
 
     if (replaces)
     {
@@ -345,7 +344,6 @@ static Image *AddImageUser(ImageDefinition *def)
         solid  = true;
         break;
 
-    case kImageDataFile:
     case kImageDataPackage: {
         const char *filename = def->info_.c_str();
 
@@ -438,11 +436,9 @@ static Image *AddImageUser(ImageDefinition *def)
     return rim;
 }
 
-const Image *CreatePackSprite(std::string packname, PackFile *pack, bool is_weapon)
+const Image *CreatePackSprite(std::string packname, bool is_weapon)
 {
-    EPI_ASSERT(pack);
-
-    Image *rim = AddPackImageSmart(epi::GetStem(packname).c_str(), kImageSourceSprite, packname.c_str(), real_sprites);
+    Image *rim = AddPackImageSmart(epi::GetStem(packname), kImageSourceSprite, packname, real_sprites);
     if (!rim)
         return nullptr;
 

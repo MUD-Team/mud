@@ -942,7 +942,6 @@ static bool P_ActivateSpecialLine(Line *line, const LineType *special, int tag, 
     bool texSwitch   = false;
     bool playedSound = false;
 
-    SoundEffect *sfx[4];
     Sector      *tsec;
 
     int i;

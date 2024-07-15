@@ -38,7 +38,6 @@
 #include "e_search.h"
 #include "epi.h"
 #include "epi_endian.h"
-#include "epi_file.h"
 #include "epi_filesystem.h"
 #include "i_defs_gl.h"
 #include "im_data.h"
@@ -92,7 +91,7 @@ static ImageData *ReadPatchAsEpiBlock(Image *rim)
     epi::File *f = nullptr;
 
     if (packfile_name)
-        f = OpenFileFromPack(packfile_name);
+        f = OpenPackFile(packfile_name, "");
     else
         FatalError("No pack file name given for image: %s\n", rim->name_.c_str());
 
@@ -178,14 +177,8 @@ epi::File *OpenUserFileOrLump(ImageDefinition *def)
 {
     switch (def->type_)
     {
-    case kImageDataFile: {
-        // -AJA- 2005/01/15: filenames in DDF relative to APPDIR
-        std::string data_file = epi::PathAppendIfNotAbsolute(game_directory.c_str(), def->info_.c_str());
-        return epi::FileOpen(data_file, epi::kFileAccessRead | epi::kFileAccessBinary);
-    }
-
     case kImageDataPackage:
-        return OpenFileFromPack(def->info_);
+        return OpenPackFile(def->info_, "");
 
     default:
         return nullptr;
@@ -246,7 +239,6 @@ static ImageData *ReadUserAsEpiBlock(Image *rim)
     case kImageDataColor:
         return CreateUserColourImage(rim, def);
 
-    case kImageDataFile:
     case kImageDataPackage:
         return CreateUserFileImage(rim, def);
 

@@ -21,7 +21,9 @@
 #include <stdarg.h>
 
 #include "epi.h"
-#include "superfasthash.h"
+#define XXH_STATIC_LINKING_ONLY
+#define XXH_IMPLEMENTATION
+#include "xxhash.h"
 
 namespace epi
 {
@@ -458,14 +460,14 @@ std::vector<std::string> SeparatedStringVector(std::string_view str, char separa
     return vec;
 }
 
-uint32_t StringHash32(std::string_view str_to_hash)
+uint64_t StringHash64(std::string_view str_to_hash)
 {
     if (str_to_hash.empty())
     {
         return 0;
     }
 
-    return SFH_MakeKey(str_to_hash.data(), str_to_hash.length());
+    return XXH3_64bits(str_to_hash.data(), str_to_hash.length());
 }
 
 // Copies up to max characters of src into dest, and then applies a

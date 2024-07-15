@@ -26,6 +26,7 @@
 #pragma once
 
 #include <list>
+#include <string>
 #include <vector>
 
 #include "ddf_image.h"
@@ -216,7 +217,7 @@ bool InitializeImages(void);
 void AnimationTicker(void);
 void DeleteAllImages(void);
 
-const Image *CreatePackSprite(std::string packname, PackFile *pack, bool is_weapon);
+const Image *CreatePackSprite(std::string packname, bool is_weapon);
 void         CreateUserImages(void);
 void         AnimateImageSet(const Image **images, int number, int speed);
 
@@ -252,7 +253,7 @@ extern std::list<Image *> real_textures;
 extern std::list<Image *> real_flats;
 extern std::list<Image *> real_sprites;
 
-Image *AddPackImageSmart(const char *name, ImageSource type, const char *packfile_name, std::list<Image *> &container,
+Image *AddPackImageSmart(std::string_view name, ImageSource type, const std::string &packfile_name, std::list<Image *> &container,
                          const Image *replaces = nullptr);
 
 //--- editor settings ---

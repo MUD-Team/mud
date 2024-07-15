@@ -66,7 +66,6 @@ static std::string stateinfo[kMaximumStateSplits + 1];
 // a little caching makes a big difference here
 // (because DDF entries are usually limited to a single sprite)
 static int last_sprite = -1;
-static int last_model  = -1;
 
 static int AddSpriteName(const char *name)
 {

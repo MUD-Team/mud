@@ -25,7 +25,6 @@
 // clang-format on
 #include "epi.h"
 #include "epi_endian.h"
-#include "epi_file.h"
 #include "epi_filesystem.h"
 #include "s_blit.h"
 #include "s_cache.h"

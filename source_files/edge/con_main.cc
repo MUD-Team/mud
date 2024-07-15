@@ -55,86 +55,6 @@ extern const ConsoleCommand builtin_commands[];
 extern void M_ChangeLevelCheat(const char *string);
 extern void I_ShowGamepads(void);
 
-int ConsoleCommandExec(char **argv, int argc)
-{
-    if (argc != 2)
-    {
-        ConsolePrint("Usage: exec <filename>\n");
-        return 1;
-    }
-
-    if (epi::IsPathAbsolute(argv[1]))
-    {
-        LogPrint("Absolute path %s not allowed!\n", argv[1]);
-        return 1;
-    }
-
-    if (strstr(argv[1], "..") != NULL)
-    {
-        LogPrint("Path traversal with .. is not allowed!\n");
-        return 1;
-    }
-
-    std::string path = epi::PathAppend(working_directory, argv[1]);
-
-    FILE *script = epi::FileOpenRaw(path, epi::kFileAccessRead | epi::kFileAccessBinary);
-    if (!script)
-    {
-        ConsolePrint("Unable to open file: %s\n", argv[1]);
-        return 1;
-    }
-
-    char buffer[200];
-
-    while (fgets(buffer, sizeof(buffer) - 1, script))
-    {
-        TryConsoleCommand(buffer);
-    }
-
-    fclose(script);
-    return 0;
-}
-
-int ConsoleCommandType(char **argv, int argc)
-{
-    FILE *script;
-    char  buffer[200];
-
-    if (argc != 2)
-    {
-        ConsolePrint("Usage: %s <filename>\n", argv[0]);
-        return 2;
-    }
-
-    if (epi::IsPathAbsolute(argv[1]))
-    {
-        LogPrint("Absolute path %s not allowed!\n", argv[1]);
-        return 1;
-    }
-
-    if (strstr(argv[1], "..") != NULL)
-    {
-        LogPrint("Path traversal with .. is not allowed!\n");
-        return 1;
-    }
-
-    std::string path = epi::PathAppend(working_directory, argv[1]);
-
-    script = epi::FileOpenRaw(path, epi::kFileAccessRead);
-    if (!script)
-    {
-        ConsolePrint("Unable to open \'%s\'!\n", argv[1]);
-        return 3;
-    }
-    while (fgets(buffer, sizeof(buffer) - 1, script))
-    {
-        ConsolePrint("%s", buffer);
-    }
-    fclose(script);
-
-    return 0;
-}
-
 int ConsoleCommandReadme(char **argv, int argc)
 {
     epi::File *readme_file = nullptr;
@@ -142,148 +62,25 @@ int ConsoleCommandReadme(char **argv, int argc)
     // Check well known readme filenames
     for (const std::string &name : readme_names)
     {
-        readme_file = OpenFileFromPack(name);
+        readme_file = epi::FileOpen(name, epi::kFileAccessRead);
         if (readme_file)
             break;
     }
 
     if (!readme_file)
     {
-        // Check for the existence of a .txt file whose name matches a WAD or
-        // pack in the load order
-        for (int i = data_files.size() - 1; i > 0; i--)
-        {
-            std::string readme_check = data_files[i]->name_;
-            epi::ReplaceExtension(readme_check, ".txt");
-            readme_file = OpenFileFromPack(readme_check);
-            if (readme_file)
-                break;
-        }
-    }
-
-    if (!readme_file)
-    {
-        ConsolePrint("No readme files found in current load order!\n");
+        ConsolePrint("No readme files found!\n");
         return 1;
     }
     else
     {
-        std::string readme = readme_file->ReadText();
+        std::string readme = readme_file->ReadAsString();
         delete readme_file;
         std::vector<std::string> readme_strings = epi::SeparatedStringVector(readme, '\n');
         for (std::string &line : readme_strings)
         {
             ConsolePrint("%s\n", line.c_str());
         }
-    }
-
-    return 0;
-}
-
-int ConsoleCommandChangeDir(char **argv, int argc)
-{
-    if (argc == 1 || argc > 2)
-    {
-        LogPrint("Usage: %s <home or game>\n", argv[0]);
-        return 1;
-    }
-
-    if (home_directory == game_directory)
-    {
-        LogPrint("Home and game directory are both %s!\nRemaining in current directory.\n", epi::SanitizePath(working_directory).c_str());
-        return 1;
-    }
-    else if (epi::StringCaseCompareASCII(argv[1], "game") == 0)
-    {
-        working_directory = game_directory;
-        LogPrint("Switched to game directory %s\n", epi::SanitizePath(working_directory).c_str());
-    }
-    else if (epi::StringCaseCompareASCII(argv[1], "home") == 0)
-    {
-        working_directory = home_directory;
-        LogPrint("Switched to home directory %s\n", epi::SanitizePath(working_directory).c_str());
-    }
-    else
-    {
-        LogPrint("Unknown cd target %s (must be \"home\" or \"game\")\n", argv[1]);
-        return 1;
-    }
-
-    return 0;
-}
-
-int ConsoleCommandPrintWorkingDir(char **argv, int argc)
-{
-    if (argc > 1)
-    {
-        LogPrint("Usage: %s\n", argv[0]);
-        return 1;
-    }
-
-    if (home_directory != game_directory)
-    {
-        if (working_directory == game_directory)
-            LogPrint("Using game directory %s\n", epi::SanitizePath(working_directory).c_str());
-        else
-            LogPrint("Using home directory %s\n", epi::SanitizePath(working_directory).c_str());
-    }
-    else
-        LogPrint("Using directory %s\n", epi::SanitizePath(working_directory).c_str());
-
-    return 0;
-}
-
-int ConsoleCommandDir(char **argv, int argc)
-{
-    std::string path = ".";
-    std::string mask = "*.*";
-
-    if (argc >= 2)
-    {
-        // Assume a leading * is the beginning of a mask for the current dir
-        if (argv[1][0] == '*')
-            mask = argv[1];
-        else
-            path = argv[1];
-    }
-
-    if (argc >= 3)
-        mask = argv[2];
-
-    if (epi::IsPathAbsolute(path))
-    {
-        LogPrint("Absolute path %s not allowed!\n", path.c_str());
-        return 1;
-    }
-
-    if (path.find("..") != std::string::npos)
-    {
-        LogPrint("Path traversal with .. is not allowed!\n");
-        return 1;
-    }
-
-    path = epi::PathAppend(working_directory, path);
-
-    std::vector<epi::DirectoryEntry> fsd;
-
-    if (!ReadDirectory(fsd, path, mask.c_str()))
-    {
-        LogPrint("Failed to read dir: %s\n", path.c_str());
-        return 1;
-    }
-
-    if (fsd.empty())
-    {
-        LogPrint("No files found in provided path %s\n", path.c_str());
-        return 0;
-    }
-
-    LogPrint("Directory contents for %s matching %s\n", epi::SanitizePath(epi::GetDirectory(path)).c_str(), mask.c_str());
-
-    for (size_t i = 0; i < fsd.size(); i++)
-    {
-        LogPrint("%4d:  %-4s  \"%s\"\n", (int)i + 1, fsd[i].is_dir ? "dir  " : "file",
-                 epi::GetFilename(fsd[i].name).c_str());
     }
 
     return 0;
@@ -298,6 +95,8 @@ int ConsoleCommandScreenShot(char **argv, int argc)
 
 int ConsoleCommandQuitEDGE(char **argv, int argc)
 {
+    // config writing here temporarily - Dasho
+    SaveDefaults();
     sapp_quit();
     return 0;
 }
@@ -335,12 +134,6 @@ int ConsoleCommandResetVars(char **argv, int argc)
 int ConsoleCommandShowFiles(char **argv, int argc)
 {
     ShowLoadedFiles();
-    return 0;
-}
-
-int ConsoleCommandBrowse(char **argv, int argc)
-{
-    epi::OpenDirectory(working_directory);
     return 0;
 }
 
@@ -465,17 +258,6 @@ int ConsoleCommandClear(char **argv, int argc)
 
 //----------------------------------------------------------------------------
 
-// oh lordy....
-static char *StrDup(const char *start, int len)
-{
-    char *buf = new char[len + 2];
-
-    memcpy(buf, start, len);
-    buf[len] = 0;
-
-    return buf;
-}
-
 static int GetArgs(const char *line, char **argv, int max_argc)
 {
     int argc = 0;
@@ -511,7 +293,7 @@ static int GetArgs(const char *line, char **argv, int max_argc)
         // ignore empty strings at beginning of the line
         if (!(argc == 0 && start == line))
         {
-            argv[argc++] = StrDup(start, line - start);
+            argv[argc++] = epi::CStringDuplicate(start, line - start);
         }
 
         if (*line)
@@ -530,21 +312,13 @@ static void KillArgs(char **argv, int argc)
 //
 // Current console commands:
 //
-const ConsoleCommand builtin_commands[] = {{"cat", ConsoleCommandType},
-                                           {"cd", ConsoleCommandChangeDir},
-                                           {"chdir", ConsoleCommandChangeDir},
-                                           {"cls", ConsoleCommandClear},
+const ConsoleCommand builtin_commands[] = {{"cls", ConsoleCommandClear},
                                            {"clear", ConsoleCommandClear},
-                                           {"dir", ConsoleCommandDir},
-                                           {"ls", ConsoleCommandDir},
-                                           {"exec", ConsoleCommandExec},
                                            {"help", ConsoleCommandHelp},
                                            {"map", ConsoleCommandMap},
                                            {"warp", ConsoleCommandMap}, // compatibility
                                            {"playsound", ConsoleCommandPlaySound},
                                            {"readme", ConsoleCommandReadme},
-                                           {"browse", ConsoleCommandBrowse},
-                                           {"pwd", ConsoleCommandPrintWorkingDir},
                                            {"resetvars", ConsoleCommandResetVars},
                                            {"showfiles", ConsoleCommandShowFiles},
                                            {"showgamepads", ConsoleCommandShowGamepads},
@@ -552,7 +326,6 @@ const ConsoleCommand builtin_commands[] = {{"cat", ConsoleCommandType},
                                            {"showmaps", ConsoleCommandShowMaps},
                                            {"showvars", ConsoleCommandShowVars},
                                            {"screenshot", ConsoleCommandScreenShot},
-                                           {"type", ConsoleCommandType},
                                            {"version", ConsoleCommandVersion},
                                            {"quit", ConsoleCommandQuitEDGE},
                                            {"exit", ConsoleCommandQuitEDGE},

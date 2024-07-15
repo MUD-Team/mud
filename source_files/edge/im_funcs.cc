@@ -233,11 +233,11 @@ static void STBImageEPIFileWrite(void *context, void *data, int size)
     dest->Write(data, size);
 }
 
-bool SavePNG(std::string filename, ImageData *image)
+bool SavePNG(const std::string &filename, ImageData *image)
 {
     EPI_ASSERT(image->depth_ >= 3);
 
-    epi::File *dest = epi::FileOpen(filename, epi::kFileAccessBinary | epi::kFileAccessWrite);
+    epi::File *dest = epi::FileOpen(filename, epi::kFileAccessWrite);
 
     if (!dest)
         return false;

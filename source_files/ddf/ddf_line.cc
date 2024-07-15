@@ -65,7 +65,6 @@ static void DDFLineGetSlideType(const char *info, void *storage);
 static void DDFLineGetLineEffect(const char *info, void *storage);
 static void DDFLineGetScrollType(const char *info, void *storage);
 static void DDFLineGetSectorEffect(const char *info, void *storage);
-static void DDFLineGetSlopeType(const char *info, void *storage);
 
 static void DDFLineMakeCrush(const char *info);
 

@@ -34,14 +34,6 @@ enum DDFMusicType
     kTotalDDFMusicTypes
 };
 
-enum DDFMusicDataType
-{
-    kDDFMusicDataUnknown    = 0,
-    kDDFMusicDataFile,
-    kDDFMusicDataPackage,
-    kTotalDDFMusicDataTypes
-};
-
 class PlaylistEntry
 {
   public:
@@ -56,7 +48,6 @@ class PlaylistEntry
     int number_;
 
     DDFMusicType     type_;
-    DDFMusicDataType infotype_;
 
     std::string info_;
 

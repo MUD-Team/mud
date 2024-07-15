@@ -32,7 +32,6 @@ static ImageDefinition *dynamic_image;
 static void DDFImageGetType(const char *info, void *storage);
 static void DDFImageGetSpecial(const char *info, void *storage);
 static void DDFImageGetFixTrans(const char *info, void *storage);
-static void DDFImageGetPatches(const char *info, void *storage);
 
 // -ACB- 1998/08/10 Use DDFMainGetLumpName for getting the..lump name.
 // -KM- 1998/09/27 Use DDFMainGetTime for getting tics
@@ -224,11 +223,6 @@ static void DDFImageGetType(const char *info, void *storage)
         // accepted for backwards compat. only
         dynamic_image->type_   = kImageDataColor;
         dynamic_image->colour_ = 0;
-    }
-    else if (DDFCompareName(keyword, "FILE") == 0)
-    {
-        dynamic_image->type_ = kImageDataFile;
-        ImageParseInfo(colon + 1);
     }
     else if (DDFCompareName(keyword, "PACK") == 0)
     {

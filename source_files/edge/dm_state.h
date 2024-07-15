@@ -87,12 +87,8 @@ constexpr uint8_t kMaximumArmor  = 200;
 //
 
 // File handling stuff.
-extern std::string configuration_file;
-extern std::string cache_directory;
 extern std::string game_directory;
 extern std::string home_directory;
-extern std::string save_directory;
-extern std::string screenshot_directory;
 
 // if true, load all graphics at level load
 extern bool precache;

@@ -196,7 +196,7 @@ void RendererInit(void)
         maximum_texture_units = max_tex_units;
     }
 
-    LogPrint("OpenGL: Lights: %d  Clips: %d  Tex: %d  Units: %d\n", maximum_lights,
+    LogPrint("OpenGL: Lights: %d  Tex: %d  Units: %d\n", maximum_lights,
              maximum_texture_size, maximum_texture_units);
 
     RendererSoftInit();

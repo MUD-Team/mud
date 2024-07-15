@@ -34,7 +34,6 @@ enum ImageNamespace
 enum ImageDataType
 {
     kImageDataColor = 0, // solid colour
-    kImageDataFile,      // load from an image file
     kImageDataPackage    // load from an EPK package
 };
 
@@ -75,7 +74,7 @@ class ImageDefinition
 
     RGBAColor colour_;                                // kImageDataColor
 
-    std::string     info_;                            // kImageDataPackage, kImageDataFile
+    std::string     info_;                            // kImageDataPackage
 
     ImageSpecial special_;
 

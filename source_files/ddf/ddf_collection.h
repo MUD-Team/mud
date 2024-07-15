@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include <stdint.h>
+
 #include <string>
 
 enum DDFType
@@ -47,8 +49,8 @@ enum DDFType
 struct DDFFile
 {
     DDFType     type;
-    std::string source;
     std::string data;
+    uint64_t    data_hash;
 };
 
 //--- editor settings ---

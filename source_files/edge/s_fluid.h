@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include "epi_filesystem.h"
 #include "s_music.h"
 
 extern bool fluid_disabled;
@@ -26,7 +27,7 @@ bool StartupFluid(void);
 
 void RestartFluid(void);
 
-AbstractMusicPlayer *PlayFluidMusic(uint8_t *data, int length, bool loop);
+AbstractMusicPlayer *PlayFluidMusic(epi::File *song, bool loop);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

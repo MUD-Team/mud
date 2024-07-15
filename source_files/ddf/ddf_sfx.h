@@ -47,7 +47,6 @@ class SoundEffectDefinition
     std::string name_;
 
     // full sound lump name (or file name)
-    std::string file_name_;
     std::string pack_name_;
 
     // sfxinfo ID number
