@@ -40,8 +40,6 @@ void CheckBooleanParameter(const std::string &parameter, bool *boolean_value, bo
 
 void CheckBooleanConsoleVariable(const std::string &parameter, ConsoleVariable *variable, bool reverse);
 
-void ApplyResponseFile(std::string_view name);
-
 void DumpArguments(void);
 
 bool ArgumentIsOption(int index);

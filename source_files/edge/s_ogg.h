@@ -21,10 +21,11 @@
 
 #pragma once
 
+#include "epi_filesystem.h"
 #include "s_music.h"
 #include "snd_data.h"
 
-AbstractMusicPlayer *PlayOGGMusic(uint8_t *data, int length, bool looping);
+AbstractMusicPlayer *PlayOGGMusic(epi::File *song, bool looping);
 
 bool LoadOGGSound(SoundData *buf, const uint8_t *data, int length);
 

@@ -24,6 +24,7 @@
 
 #include "epi.h"
 #include "epi_filesystem.h"
+#include "epi_lexer.h"
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
 #include "epi_windows.h"
@@ -33,15 +34,6 @@
 #endif
 
 std::vector<std::string> program_argument_list;
-
-// this one is here to avoid infinite recursion of param files.
-struct AddedParameter
-{
-    std::string            name;
-    struct AddedParameter *next;
-};
-
-static AddedParameter *added_parameters;
 
 //
 // ArgvInit
@@ -87,8 +79,7 @@ void ParseArguments(const int argc, const char *const *argv)
         }
 
         if (argv_block[i][0] == '@')
-        { // add it as a response file
-            ApplyResponseFile(&argv_block[i][1]);
+        { // ignore response files
             continue;
         }
 
@@ -118,8 +109,7 @@ void ParseArguments(const int argc, const char *const *argv)
         }
 
         if (argv[i][0] == '@')
-        { // add it as a response file
-            ApplyResponseFile(&argv[i][1]);
+        { // ignore response files
             continue;
         }
 
@@ -209,81 +199,6 @@ void CheckBooleanConsoleVariable(const std::string &parameter, ConsoleVariable *
         *variable = (reverse ? 1 : 0);
         return;
     }
-}
-
-static int ParseOneFilename(FILE *fp, char *buf)
-{
-    // -AJA- 2004/08/30: added this routine, in order to handle
-    // filenames with spaces (which must be double-quoted).
-
-    int ch;
-
-    // skip whitespace
-    do
-    {
-        ch = fgetc(fp);
-
-        if (ch == EOF)
-            return EOF;
-    } while (epi::IsSpaceASCII(ch));
-
-    bool quoting = false;
-
-    for (;;)
-    {
-        if (ch == '"')
-        {
-            quoting = !quoting;
-            ch      = fgetc(fp);
-            continue;
-        }
-
-        if (ch == EOF || (epi::IsSpaceASCII(ch) && !quoting))
-            break;
-
-        *buf++ = ch;
-
-        ch = fgetc(fp);
-    }
-
-    *buf++ = 0;
-
-    return 0;
-}
-
-//
-// Adds a response file
-//
-void ApplyResponseFile(std::string_view name)
-{
-    char            buf[1024];
-    FILE           *f;
-    AddedParameter  this_parm;
-    AddedParameter *p;
-
-    // check if the file has already been added
-    for (p = added_parameters; p; p = p->next)
-    {
-        if (epi::StringCompare(p->name, name) == 0)
-            return;
-    }
-
-    // mark that this file has been added
-    this_parm.name = name;
-    p = this_parm.next = added_parameters;
-
-    // add arguments from the given file
-    f = epi::FileOpenRaw(name, epi::kFileAccessRead | epi::kFileAccessBinary);
-    if (!f)
-        FatalError("Couldn't open \"%s\" for reading!", this_parm.name.c_str());
-
-    for (; EOF != ParseOneFilename(f, buf);)
-        program_argument_list.push_back(strdup(buf));
-
-    // unlink from list
-    added_parameters = p;
-
-    fclose(f);
 }
 
 void DumpArguments(void)

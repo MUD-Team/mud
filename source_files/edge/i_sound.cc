@@ -19,7 +19,6 @@
 #include "i_sound.h"
 
 #include "epi.h"
-#include "epi_file.h"
 #include "epi_filesystem.h"
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
@@ -162,61 +161,38 @@ void UnlockAudio(void)
 
 void StartupMusic(void)
 {
-    // Check for soundfonts and instrument banks
-    std::vector<epi::DirectoryEntry> sfd;
-    std::string                      soundfont_dir = epi::PathAppend(game_directory, "soundfont");
-
     // Set default SF2 location in CVAR if needed
     if (midi_soundfont.s_.empty())
-        midi_soundfont = epi::SanitizePath(epi::PathAppend(soundfont_dir, "Default.sf2"));
+        midi_soundfont = "Default.sf2";
 
-    if (!ReadDirectory(sfd, soundfont_dir, "*.*"))
+    char **got_names = PHYSFS_enumerateFiles("soundfont");
+
+    // seems this only happens on out-of-memory error
+    if (!got_names)
     {
-        LogWarning("StartupMusic: Failed to read '%s' directory!\n", soundfont_dir.c_str());
-    }
-    else
-    {
-        for (size_t i = 0; i < sfd.size(); i++)
-        {
-            if (!sfd[i].is_dir)
-            {
-                std::string ext = epi::GetExtension(sfd[i].name);
-                epi::StringLowerASCII(ext);
-                if (ext == ".sf2")
-                    available_soundfonts.push_back(epi::SanitizePath(sfd[i].name));
-            }
-        }
+        LogPrint("StartupMusic: Error reading soundfont directory; MIDI playback will be disabled.\n");
+        fluid_disabled = true;
+        return;
     }
 
-    if (home_directory != game_directory)
-    {
-        // Check home_directory soundfont folder as well; create it if it
-        // doesn't exist (home_directory only)
-        sfd.clear();
-        soundfont_dir = epi::PathAppend(home_directory, "soundfont");
-        if (!epi::IsDirectory(soundfont_dir))
-            epi::MakeDirectory(soundfont_dir);
+    char **p;
+    PHYSFS_Stat statter;
 
-        if (!ReadDirectory(sfd, soundfont_dir, "*.*"))
+    for (p = got_names; *p; p++)
+    {
+        if (PHYSFS_stat(epi::PathAppend("soundfont", *p).c_str(), &statter) == 0)
         {
-            LogWarning("StartupMusic: Failed to read '%s' directory!\n", soundfont_dir.c_str());
+            LogPrint("Could not stat %s: %s\n", *p, PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+            continue;
         }
-        else
-        {
-            for (size_t i = 0; i < sfd.size(); i++)
-            {
-                if (!sfd[i].is_dir)
-                {
-                    std::string ext = epi::GetExtension(sfd[i].name);
-                    epi::StringLowerASCII(ext);
-                    if (ext == ".sf2")
-                        available_soundfonts.push_back(epi::SanitizePath(sfd[i].name));
-                }
-            }
-        }
+
+        if (statter.filetype == PHYSFS_FILETYPE_REGULAR && epi::GetExtension(*p) == ".sf2")
+            available_soundfonts.push_back(*p);
     }
 
-    if (!StartupFluid())
+    PHYSFS_freeList(got_names);
+
+    if (available_soundfonts.empty() || !StartupFluid())
         fluid_disabled = true;
 
     return;

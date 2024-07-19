@@ -25,7 +25,7 @@
 
 #include "ddf_collection.h"
 #include "ddf_types.h"
-#include "epi_file.h"
+#include "epi_filesystem.h"
 
 // Forward declarations
 class MapObject;
@@ -129,7 +129,6 @@ void        DDFMainGetWhenAppear(const char *info, void *storage);
 void        DDFMainGetRGB(const char *info, void *storage);
 bool        DDFMainDecodeBrackets(const char *info, char *outer, char *inner, int buf_len);
 const char *DDFMainDecodeList(const char *info, char divider, bool simple);
-void        DDFGetLumpNameForFile(const char *filename, char *lumpname);
 
 int DDFCompareName(const char *A, const char *B);
 
@@ -146,11 +145,9 @@ void        DDFBoomClearGeneralizedTypes(void);
 LineType   *DDFBoomGetGeneralizedLine(int number);
 SectorType *DDFBoomGetGeneralizedSector(int number);
 
-DDFType DDFLumpToType(const std::string &name);
-DDFType DDFFilenameToType(const std::string &path);
+DDFType DDFFilenameToType(std::string_view path);
 
-void DDFAddFile(DDFType type, std::string &data, const std::string &source);
-void DDFAddCollection(std::vector<DDFFile> &col, const std::string &source);
+void DDFAddFile(DDFType type, std::string &data);
 void DDFParseEverything();
 
 void DDFDumpFile(const std::string &data);

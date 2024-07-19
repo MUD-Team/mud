@@ -64,12 +64,12 @@ std::string SaveFilename(const char *slot_name, const char *map_name)
 {
     std::string temp(epi::StringFormat("%s/%s.%s", slot_name, map_name, kSaveGameExtension));
 
-    return epi::PathAppend(save_directory, temp);
+    return epi::PathAppend("savegame", temp);
 }
 
 std::string SV_DirName(const char *slot_name)
 {
-    return epi::PathAppend(save_directory, slot_name);
+    return epi::PathAppend("savegame", slot_name);
 }
 
 void SaveClearSlot(const char *slot_name)
@@ -80,7 +80,7 @@ void SaveClearSlot(const char *slot_name)
     std::string full_dir = SV_DirName(slot_name);
 
     // make sure the directory exists
-    epi::MakeDirectory(full_dir);
+    //epi::MakeDirectory(full_dir);
 
     std::vector<epi::DirectoryEntry> fsd;
 
@@ -99,7 +99,7 @@ void SaveClearSlot(const char *slot_name)
         std::string cur_file = epi::PathAppend(full_dir, epi::GetFilename(fsd[i].name));
         LogDebug("  Deleting %s\n", cur_file.c_str());
 
-        epi::FileDelete(cur_file);
+        //epi::FileDelete(cur_file);
     }*/
 }
 

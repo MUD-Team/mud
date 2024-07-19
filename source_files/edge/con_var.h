@@ -21,6 +21,8 @@
 #include <string>
 #include <vector>
 
+#include "epi_filesystem.h"
+
 #define EDGE_DEFINE_CONSOLE_VARIABLE(name, value, flags) ConsoleVariable name(#name, value, flags);
 #define EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(name, value, flags, min, max)                                             \
     ConsoleVariable name(#name, value, flags, nullptr, min, max);
@@ -131,7 +133,7 @@ void HandleProgramArguments(void);
 int PrintConsoleVariables(const char *match, bool show_default);
 
 // write all cvars to the config file.
-void WriteConsoleVariables(FILE *f);
+void WriteConsoleVariables(epi::File *f);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

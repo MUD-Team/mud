@@ -26,7 +26,6 @@
 #include "p_setup.h"
 
 #include <map>
-#include <unordered_map>
 
 #include "AlmostEquals.h"
 #include "ddf_colormap.h"
@@ -34,12 +33,10 @@
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "e_main.h"
-#include "epi_crc.h"
 #include "epi_ename.h"
 #include "epi_endian.h"
 #include "epi_filesystem.h"
 #include "epi_lexer.h"
-#include "epi_md5.h"
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
 #include "g_game.h"
@@ -99,10 +96,6 @@ static Line **level_line_buffer = nullptr;
 
 // bbox used
 static float dummy_bounding_box[4];
-
-epi::CRC32 map_sectors_crc;
-epi::CRC32 map_lines_crc;
-epi::CRC32 map_things_crc;
 
 int total_map_things;
 
@@ -505,7 +498,7 @@ static void LoadXGL3Nodes()
 
     LogDebug("LoadXGL3Nodes:\n");
 
-    epi::File *xgl_file = epi::FileOpen(node_file, epi::kFileAccessRead | epi::kFileAccessBinary);
+    epi::File *xgl_file = epi::FileOpen(node_file, epi::kFileAccessRead);
 
     if (!xgl_file)
         FatalError("LoadXGL3Nodes: Couldn't load lump\n");
@@ -2524,29 +2517,23 @@ void LevelSetup(void)
     udmf_string.clear();
     node_file.clear();
 
-    epi::File *udmf_file = OpenFileFromPack(epi::StringFormat("maps/%s.txt", current_map->name_.c_str()));
+    epi::File *udmf_file = OpenPackFile(epi::StringFormat("%s.txt", current_map->name_.c_str()), "maps");
     if (!udmf_file)
         FatalError("No such level: maps/%s.txt\n", current_map->name_.c_str());
-    udmf_string = udmf_file->ReadText();
+    udmf_string = udmf_file->ReadAsString();
     delete udmf_file;
 
     if (udmf_string.empty())
         FatalError("Internal error: can't load UDMF lump.\n");
 
     // This needs to be cached somewhere, but it will work here while developing - Dasho
-    epi::MD5Hash udmf_hash;
-    udmf_hash.Compute((const uint8_t *)udmf_string.data(), udmf_string.size());
-    node_file = epi::PathAppend(cache_directory, epi::StringFormat("%s-%s.zgl", current_map->name_.c_str(), udmf_hash.ToString().c_str()));
+    uint64_t udmf_hash = epi::StringHash64(udmf_string);
+    node_file = epi::PathAppend("cache", epi::StringFormat("%s-%lu.zgl", current_map->name_.c_str(), udmf_hash));
 
     // get lump for XGL3 nodes from an XWA file
     // shouldn't happen (as during startup we checked for or built these)
     if (!epi::FileExists(node_file))
         FatalError("Internal error: Missing node file %s.\n", node_file.c_str());
-
-    // clear CRC values
-    map_sectors_crc.Reset();
-    map_lines_crc.Reset();
-    map_things_crc.Reset();
 
     // note: most of this ordering is important
     // 23-6-98 KM, eg, Sectors must be loaded before sidedefs,
@@ -2593,11 +2580,6 @@ void LevelSetup(void)
     unknown_thing_map.clear();
 
     LoadUDMFThings();
-
-        // OK, CRC values have now been computed
-#ifdef DEVELOPERS
-    LogDebug("MAP CRCS: S=%08x L=%08x T=%08x\n", map_sectors_crc.crc, map_lines_crc.crc, map_things_crc.crc);
-#endif
 
     CreateVertexSeclists();
 

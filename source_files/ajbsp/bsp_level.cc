@@ -75,11 +75,11 @@ static std::string current_map_name;
 
 //----------------------------------------------------------------------
 
-static FILE    *zout_file = nullptr;
-static z_stream zout_stream;
-static Bytef    zout_buffer[1024];
+static epi::File *zout_file = nullptr;
+static z_stream   zout_stream;
+static Bytef      zout_buffer[1024];
 
-static void ZLibBeginLump(FILE *out_file)
+static void ZLibBeginLump(epi::File *out_file)
 {
     zout_file = out_file;
 
@@ -108,7 +108,7 @@ static void ZLibAppendLump(const void *data, int length)
 
         if (zout_stream.avail_out == 0)
         {
-            fwrite(zout_buffer, sizeof(zout_buffer), 1, zout_file);
+            zout_file->Write(zout_buffer, sizeof(zout_buffer));
             zout_stream.next_out  = zout_buffer;
             zout_stream.avail_out = sizeof(zout_buffer);
         }
@@ -134,7 +134,7 @@ static void ZLibFinishLump(void)
 
         if (zout_stream.avail_out == 0)
         {
-            fwrite(zout_buffer, sizeof(zout_buffer), 1, zout_file);
+            zout_file->Write(zout_buffer, sizeof(zout_buffer));
             zout_stream.next_out  = zout_buffer;
             zout_stream.avail_out = sizeof(zout_buffer);
         }
@@ -143,7 +143,7 @@ static void ZLibFinishLump(void)
     left_over = sizeof(zout_buffer) - zout_stream.avail_out;
 
     if (left_over > 0)
-        fwrite(zout_buffer, left_over, 1, zout_file);
+        zout_file->Write(zout_buffer, left_over);
 
     deflateEnd(&zout_stream);
 
@@ -643,7 +643,6 @@ void SortSegs()
 
 /* ----- ZDoom format writing --------------------------- */
 
-static const uint8_t *level_XGL3_magic = (uint8_t *)"XGL3";
 static const uint8_t *level_ZGL3_magic = (uint8_t *)"ZGL3";
 
 void PutZVertices()
@@ -840,9 +839,9 @@ void PutZNodes(Node *root)
         FatalError("AJBSP: PutZNodes miscounted (%d != %d)\n", node_cur_index, level_nodes.size());
 }
 
-void SaveXGL3Format(FILE *lump, Node *root_node)
+void SaveXGL3Format(epi::File *lump, Node *root_node)
 {
-    fwrite(level_ZGL3_magic, 4, 1, lump);
+    lump->Write(level_ZGL3_magic, 4);
 
     ZLibBeginLump(lump);
 
@@ -888,9 +887,9 @@ void FreeLevel()
     FreeIntersections();
 }
 
-BuildResult SaveXWA(std::string_view filename, Node *root_node)
+BuildResult SaveXWA(const std::string &filename, Node *root_node)
 {
-    FILE *nodes_out = epi::FileOpenRaw(filename, epi::kFileAccessBinary | epi::kFileAccessWrite);
+    epi::File *nodes_out = epi::FileOpen(filename, epi::kFileAccessWrite);
 
     if (!nodes_out)
         FatalError("AJBSP: Failed to open %s for writing!\n", std::string(filename).c_str());
@@ -903,7 +902,7 @@ BuildResult SaveXWA(std::string_view filename, Node *root_node)
         SaveXGL3Format(nodes_out, root_node);
     }
 
-    fclose(nodes_out);
+    delete nodes_out;
 
     return kBuildOK;
 }
@@ -922,7 +921,7 @@ void ResetInfo()
 
 /* ----- build nodes for a single UDMF level ----- */
 
-BuildResult BuildLevel(std::string_view mapname, std::string_view filename, const std::string &textmap)
+BuildResult BuildLevel(std::string_view mapname, const std::string &filename, const std::string &textmap)
 {
     Node      *root_node = nullptr;
     Subsector *root_sub  = nullptr;

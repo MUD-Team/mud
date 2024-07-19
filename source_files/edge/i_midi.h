@@ -885,21 +885,12 @@ class MidiSequencer
     bool PositionAtEnd();
 
     /**
-     * @brief Load MIDI file from a memory block
-     * @param data Pointer to memory block with MIDI data
-     * @param size Size of source memory block
-     * @param rate For IMF formats, the proper playback rate in Hz
-     * @return true if file successfully opened, false on any error
-     */
-    bool LoadMidi(const uint8_t *data, size_t size, uint16_t rate = 0);
-
-    /**
      * @brief Load MIDI file by using FileAndMemReader interface
      * @param mfr mem_file_c with opened source file
      * @param rate For IMF formats, the proper playback rate in Hz
      * @return true if file successfully opened, false on any error
      */
-    bool LoadMidi(epi::MemFile *mfr, uint16_t rate);
+    bool LoadMidi(epi::File *mfr);
 
     /**
      * @brief Periodic tick handler.
@@ -967,7 +958,7 @@ class MidiSequencer
      * @param mfr mem_file_c with opened source file
      * @return true on successful load
      */
-    bool ParseSMF(epi::MemFile *mfr);
+    bool ParseSMF(epi::File *mfr);
 };
 
 /**
@@ -2762,12 +2753,6 @@ void MidiSequencer::SetTempo(double tempo)
     midi_tempo_multiplier_ = tempo;
 }
 
-bool MidiSequencer::LoadMidi(const uint8_t *data, size_t size, uint16_t rate)
-{
-    epi::MemFile *mfr = new epi::MemFile(data, size);
-    return LoadMidi(mfr, rate);
-}
-
 template <class T> class BufferGuard
 {
     T *m_ptr;
@@ -2790,7 +2775,7 @@ template <class T> class BufferGuard
     }
 };
 
-bool MidiSequencer::LoadMidi(epi::MemFile *mfr, uint16_t rate)
+bool MidiSequencer::LoadMidi(epi::File *mfr)
 {
     size_t fsize = 0;
     (void)(fsize);
@@ -2813,22 +2798,20 @@ bool MidiSequencer::LoadMidi(epi::MemFile *mfr, uint16_t rate)
     if (fsize < headerSize)
     {
         midi_error_string_ = "Unexpected end of file at header!\n";
-        delete mfr;
         return false;
     }
 
     if (memcmp(headerBuf, "MThd\0\0\0\6", 8) == 0)
     {
-        mfr->Seek(0, epi::File::kSeekpointStart);
+        mfr->Seek(0);
         return ParseSMF(mfr);
     }
 
     midi_error_string_ = "Unknown or unsupported file format";
-    delete mfr;
     return false;
 }
 
-bool MidiSequencer::ParseSMF(epi::MemFile *mfr)
+bool MidiSequencer::ParseSMF(epi::File *mfr)
 {
     const size_t                      headerSize            = 14; // 4 + 4 + 2 + 2 + 2
     char                              headerBuf[headerSize] = "";
@@ -2841,14 +2824,12 @@ bool MidiSequencer::ParseSMF(epi::MemFile *mfr)
     if (fsize < headerSize)
     {
         midi_error_string_ = "Unexpected end of file at header!\n";
-        delete mfr;
         return false;
     }
 
     if (memcmp(headerBuf, "MThd\0\0\0\6", 8) != 0)
     {
         midi_error_string_ = "MIDI Loader: Invalid format, MThd signature is not found!\n";
-        delete mfr;
         return false;
     }
 
@@ -2875,7 +2856,6 @@ bool MidiSequencer::ParseSMF(epi::MemFile *mfr)
         if ((fsize < 8) || (memcmp(headerBuf, "MTrk", 4) != 0))
         {
             midi_error_string_ = "MIDI Loader: Invalid format, MTrk signature is not found!\n";
-            delete mfr;
             return false;
         }
         trackLength = (size_t)ReadIntBigEndian(headerBuf + 4, 4);
@@ -2887,7 +2867,6 @@ bool MidiSequencer::ParseSMF(epi::MemFile *mfr)
         {
             midi_error_string_ = "MIDI Loader: Unexpected file ending while getting raw track "
                                  "data!\n";
-            delete mfr;
             return false;
         }
 
@@ -2900,7 +2879,6 @@ bool MidiSequencer::ParseSMF(epi::MemFile *mfr)
     if (totalGotten == 0)
     {
         midi_error_string_ = "MIDI Loader: Empty track data";
-        delete mfr;
         return false;
     }
 
@@ -2908,14 +2886,11 @@ bool MidiSequencer::ParseSMF(epi::MemFile *mfr)
     if (!BuildSMFTrackData(rawTrackData))
     {
         midi_error_string_ = "MIDI Loader: MIDI data parsing error has occouped!\n" + midi_parsing_errors_string_;
-        delete mfr;
         return false;
     }
 
     midi_smf_format_        = smfFormat;
     midi_loop_.stack_level_ = -1;
-
-    delete mfr;
 
     return true;
 }

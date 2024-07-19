@@ -32,7 +32,6 @@ static SoundEffectDefinition dummy_sfx;
 
 static const DDFCommandList sfx_commands[] = {
     DDF_FIELD("PACK_NAME", dummy_sfx, pack_name_, DDFMainGetString),
-    DDF_FIELD("FILE_NAME", dummy_sfx, file_name_, DDFMainGetString),
     DDF_FIELD("SINGULAR", dummy_sfx, singularity_, DDFMainGetNumeric),
     DDF_FIELD("PRIORITY", dummy_sfx, priority_, DDFMainGetNumeric),
     DDF_FIELD("VOLUME", dummy_sfx, volume_, DDFMainGetPercent),
@@ -106,9 +105,9 @@ static void SoundParseField(const char *field, const char *contents, int index, 
 
 static void SoundFinishEntry(void)
 {
-    if (dynamic_sfx->file_name_.empty() && dynamic_sfx->pack_name_.empty())
+    if (dynamic_sfx->pack_name_.empty())
     {
-        DDFError("Missing FILE_NAME or PACK_NAME for sound.\n");
+        DDFError("Missing PACK_NAME for sound.\n");
     }
 }
 
@@ -188,7 +187,6 @@ SoundEffectDefinition::~SoundEffectDefinition()
 //
 void SoundEffectDefinition::CopyDetail(SoundEffectDefinition &src)
 {
-    file_name_        = src.file_name_;
     pack_name_        = src.pack_name_;
 
     // clear the internal SoundEffect (ID would be wrong)
@@ -208,7 +206,6 @@ void SoundEffectDefinition::CopyDetail(SoundEffectDefinition &src)
 //
 void SoundEffectDefinition::Default()
 {
-    file_name_.clear();
     pack_name_.clear();
 
     normal_.sounds[0] = 0;

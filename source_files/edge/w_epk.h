@@ -18,35 +18,26 @@
 
 #pragma once
 
-class DataFile;
+// Open a file from the search order if present, otherwise return nullptr.
+// Can either be an explicit path, in which case it will try to be opened
+// directly, or a bare filename. open_dirs should be a comma-separated list
+// of directory names and, if it is populated, only those directories
+// will be searched for a matching bare filename. If it is empty, the bare filename
+// will be opened no matter where it resides.
+epi::File *OpenPackFile(const std::string &name, std::string_view open_dirs);
 
-class PackFile;
+// Same as above, but only checks for the existence of a file, does not attempt to open
+// or derive any information about it
+bool CheckPackFile(const std::string &name, std::string_view check_dirs);
 
-epi::File *OpenPackFile(PackFile *pack, const std::string &name);
-
-epi::File *OpenPackMatch(PackFile *pack, const std::string &name, const std::vector<std::string> &extensions);
-
-// Equivalent to IsLumpInPwad....doesn't care or check filetype itself
-int FindStemInPack(PackFile *pack, const std::string &name);
-
-// Checks if exact filename is found in a pack; used to help load order
-// determination
-bool FindPackFile(PackFile *pack, const std::string &name);
-
-// Check images/sound/etc that may override WAD-oriented lumps or definitions
-void ProcessPackSubstitutions(PackFile *pack, int pack_index);
+void ProcessPackContents();
 
 // Check /sprites directory for sprites to automatically add during
 // InitializeSprites
-std::vector<std::string> GetPackSpriteList(PackFile *pack);
-
-// Only populate the pack directory; used for ad-hoc folder/EPK checks
-void PopulatePackOnly(DataFile *df);
+std::vector<std::string> GetPackSpriteList();
 
 // Populate pack directory and process appropriate files (Lua, DDF, etc)
-void ProcessAllInPack(DataFile *df, size_t file_index);
-
-void BuildXGLNodes();
+void ProcessAllInPack(const std::string &df);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

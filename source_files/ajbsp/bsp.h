@@ -61,7 +61,7 @@ void ResetInfo();
 // BUILD_Cancelled result and the wad is unchanged.  otherwise the wad
 // is updated to store the new lumps and returns either kBuildOK or
 // kBuildError
-BuildResult BuildLevel(std::string_view mapname, std::string_view filename, const std::string &textmap);
+BuildResult BuildLevel(std::string_view mapname, const std::string &filename, const std::string &textmap);
 
 } // namespace ajbsp
 

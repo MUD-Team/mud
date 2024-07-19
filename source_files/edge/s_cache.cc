@@ -31,7 +31,6 @@
 #include "ddf_sfx.h"
 #include "dm_state.h" // game_directory
 #include "epi.h"
-#include "epi_file.h"
 #include "epi_filesystem.h"
 #include "epi_str_util.h"
 #include "i_system.h"
@@ -45,6 +44,7 @@
 #include "s_wav.h"
 #include "snd_data.h"
 #include "snd_types.h"
+#include "w_epk.h"
 #include "w_files.h"
 
 extern bool sound_device_stereo;
@@ -90,25 +90,13 @@ static bool DoCacheLoad(SoundEffectDefinition *def, SoundData *buf)
 
     if (def->pack_name_ != "")
     {
-        F = OpenFileFromPack(def->pack_name_);
+        F = OpenPackFile(def->pack_name_, "");
         if (!F)
         {
             DebugOrError("SFX Loader: Missing sound in EPK: '%s'\n", def->pack_name_.c_str());
             return false;
         }
         fmt = SoundFilenameToFormat(def->pack_name_);
-    }
-    else if (def->file_name_ != "")
-    {
-        // Why is this composed with the app dir? - Dasho
-        std::string fn = epi::PathAppendIfNotAbsolute(game_directory, def->file_name_);
-        F              = epi::FileOpen(fn, epi::kFileAccessRead | epi::kFileAccessBinary);
-        if (!F)
-        {
-            DebugOrError("SFX Loader: Can't Find file '%s'\n", fn.c_str());
-            return false;
-        }
-        fmt = SoundFilenameToFormat(def->file_name_);
     }
     else
     {
@@ -136,7 +124,7 @@ static bool DoCacheLoad(SoundEffectDefinition *def, SoundData *buf)
         return false;
     }
 
-    if (def->pack_name_ == "" && def->file_name_ == "")
+    if (def->pack_name_.empty())
     {
         // for lumps, we must detect the format from the lump contents
         fmt = DetectSoundFormat(data, length);

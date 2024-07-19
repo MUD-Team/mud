@@ -25,6 +25,7 @@
 #include "ddf_local.h"
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
+#include "w_epk.h"
 #include "w_files.h"
 
 static void DDFLevelGetSpecials(const char *info);
@@ -497,7 +498,7 @@ MapDefinition *MapDefinitionContainer::Lookup(const char *refname)
     //  levels.ddf entry.
 
     // 1. check if the actual map lump exists
-    if (IsFileAnywhere(refname))
+    if (CheckPackFile(epi::StringFormat("%s.txt", refname), "maps"))
     {
         // 2. make a levels.ddf entry
         MapDefinition *temp_level;

@@ -40,7 +40,6 @@
 #include "e_player.h"
 #include "epi.h"
 #include "epi_endian.h"
-#include "epi_file.h"
 #include "epi_filesystem.h"
 #include "epi_lexer.h"
 #include "epi_str_compare.h"
@@ -59,9 +58,10 @@
 #include "s_blit.h"
 #include "s_sound.h"
 #include "version.h"
-//
-// DEFAULTS
-//
+
+extern ConsoleVariable config_filename;
+extern epi::File *log_file;
+
 bool show_old_config_warning = false;
 
 extern ConsoleVariable midi_soundfont;
@@ -174,18 +174,15 @@ static int total_defaults = sizeof(defaults) / sizeof(defaults[0]);
 
 void SaveDefaults(void)
 {
-    // -ACB- 1999/09/24 idiot proof checking as required by MSVC
-    EPI_ASSERT(!configuration_file.empty());
-
-    FILE *f = epi::FileOpenRaw(configuration_file, epi::kFileAccessWrite | epi::kFileAccessBinary);
+    epi::File *f = epi::FileOpen(config_filename.s_, epi::kFileAccessWrite);
 
     if (!f)
     {
-        LogWarning("Couldn't open config file %s for writing.", configuration_file.c_str());
+        LogWarning("Couldn't open config file %s for writing.", config_filename.c_str());
         return; // can't write the file, but don't complain
     }
 
-    fprintf(f, "#VERSION %d\n", kInternalConfigVersion);
+    f->WriteString(epi::StringFormat("#VERSION %d\n", kInternalConfigVersion));
 
     // console variables
     WriteConsoleVariables(f);
@@ -198,21 +195,21 @@ void SaveDefaults(void)
         switch (defaults[i].type)
         {
         case kConfigInteger:
-            fprintf(f, "%s\t\t%i\n", defaults[i].name, *(int *)defaults[i].location);
+            f->WriteString(epi::StringFormat("%s\t\t%i\n", defaults[i].name, *(int *)defaults[i].location));
             break;
 
         case kConfigBoolean:
-            fprintf(f, "%s\t\t%i\n", defaults[i].name, *(bool *)defaults[i].location ? 1 : 0);
+            f->WriteString(epi::StringFormat("%s\t\t%i\n", defaults[i].name, *(bool *)defaults[i].location ? 1 : 0));
             break;
 
         case kConfigKey:
             v = *(int *)defaults[i].location;
-            fprintf(f, "%s\t\t0x%X\n", defaults[i].name, v);
+            f->WriteString(epi::StringFormat("%s\t\t0x%X\n", defaults[i].name, v));
             break;
         }
     }
 
-    fclose(f);
+    delete f;
 }
 
 static void SetToBaseValue(ConfigurationDefault *def)
@@ -360,18 +357,18 @@ void LoadDefaults(void)
     // set everything to base values
     ResetDefaults(0);
 
-    LogPrint("LoadDefaults from %s\n", configuration_file.c_str());
+    LogPrint("LoadDefaults from %s\n", config_filename.c_str());
 
-    epi::File *file = epi::FileOpen(configuration_file, epi::kFileAccessRead);
+    epi::File *file = epi::FileOpen(config_filename.s_, epi::kFileAccessRead);
 
     if (!file)
     {
-        LogWarning("Couldn't open config file %s for reading.\n", configuration_file.c_str());
+        LogWarning("Couldn't open config file %s for reading.\n", config_filename.c_str());
         LogWarning("Resetting config to RECOMMENDED values...\n");
         return;
     }
     // load the file into this string
-    std::string data = file->ReadText();
+    std::string data = file->ReadAsString();
 
     delete file;
 
@@ -391,11 +388,11 @@ void TakeScreenshot(bool show_msg)
     {
         std::string base(epi::StringFormat("shot%02d.%s", i, extension));
 
-        fn = epi::PathAppend(screenshot_directory, base);
+        fn = epi::PathAppend("screenshot", base);
 
-        if (!epi::TestFileAccess(fn))
+        if (!epi::FileExists(fn))
         {
-            break; // file doesn't exist
+            break; // should be able to use this name
         }
     }
 
@@ -469,16 +466,13 @@ void DebugOrError(const char *error, ...)
         LogDebug("%s", message_buf);
 }
 
-extern FILE *debug_file; // FIXME
-
 void LogDebug(const char *message, ...)
 {
-    // Write into the debug file.
     //
     // -ACB- 1999/09/22: From #define to Procedure
     // -AJA- 2001/02/07: Moved here from platform codes.
     //
-    if (!debug_file)
+    if (!log_file)
         return;
 
     char message_buf[4096];
@@ -495,11 +489,8 @@ void LogDebug(const char *message, ...)
     // I hope nobody is printing strings longer than 4096 chars...
     EPI_ASSERT(message_buf[4095] == 0);
 
-    fprintf(debug_file, "%s", message_buf);
-    fflush(debug_file);
+    log_file->WriteString(message_buf);
 }
-
-extern FILE *log_file; // FIXME: make file_c and unify with debug_file
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

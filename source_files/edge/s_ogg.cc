@@ -20,7 +20,6 @@
 
 #include "epi.h"
 #include "epi_endian.h"
-#include "epi_file.h"
 #include "epi_filesystem.h"
 #include "ddf_playlist.h"
 #include "s_blit.h"
@@ -120,6 +119,28 @@ bool OGGPlayer::OpenMemory(uint8_t *data, int length)
     if (status_ != kNotLoaded)
         Close();
 
+    int ogg_error = 0;
+    ogg_decoder_ = stb_vorbis_open_memory(data, length, &ogg_error, nullptr);
+
+    if (ogg_error || !ogg_decoder_)
+    {
+        LogWarning("OGGPlayer: unable to load file\n");
+        if (ogg_decoder_)
+        {
+            stb_vorbis_close(ogg_decoder_);
+            ogg_decoder_ = nullptr;
+        }
+        return false;
+    }
+
+    if (ogg_decoder_->channels > 2 || ogg_decoder_->channels < 1)
+    {
+        LogWarning("OGGPlayer: unsupported number of channels: %d\n", ogg_decoder_->channels);
+        stb_vorbis_close(ogg_decoder_);
+        ogg_decoder_ = nullptr;
+        return false;
+    }
+
     PostOpen();
     return true;
 }
@@ -131,6 +152,12 @@ void OGGPlayer::Close()
 
     // Stop playback
     Stop();
+
+    if (ogg_decoder_)
+    {
+        stb_vorbis_close(ogg_decoder_);
+        ogg_decoder_ = nullptr;
+    }
 
     // Reset player gain
     music_player_gain = 1.0f;
@@ -204,16 +231,35 @@ void OGGPlayer::Ticker()
 
 //----------------------------------------------------------------------------
 
-AbstractMusicPlayer *PlayOGGMusic(uint8_t *data, int length, bool looping)
+AbstractMusicPlayer *PlayOGGMusic(epi::File *song, bool looping)
 {
     OGGPlayer *player = new OGGPlayer();
+
+    if (!player)
+    {
+        delete song;
+        return nullptr;
+    }
+
+    uint8_t *data = song->LoadIntoMemory();
+    uint64_t length = song->GetLength();
+
+    if (!data)
+    {
+        delete song;
+        return nullptr;
+    }
 
     if (!player->OpenMemory(data, length))
     {
         delete[] data;
+        delete song;
         delete player;
         return nullptr;
     }
+
+    // 
+    delete song;
 
     player->Play(looping);
 

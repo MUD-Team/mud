@@ -245,7 +245,7 @@ void DoLoadLevel(void)
 
         std::string fn(SaveFilename("current", mapname));
 
-        if (epi::TestFileAccess(fn))
+        if (epi::FileExists(fn))
         {
             LogPrint("Loading HUB...\n");
 
@@ -744,7 +744,7 @@ void DeferredNewGame(NewGameParameters &params)
 
 bool MapExists(const MapDefinition *map)
 {
-    return IsFileAnywhere(map->name_.c_str());
+    return CheckPackFile(epi::StringFormat("%s.txt", map->name_.c_str()), "maps");
 }
 
 //

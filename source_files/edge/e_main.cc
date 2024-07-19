@@ -49,7 +49,6 @@
 #include "e_input.h"
 #include "epi.h"
 #include "edge_profiling.h"
-#include "epi_file.h"
 #include "epi_filesystem.h"
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
@@ -102,8 +101,7 @@ bool custom_MenuMain       = false;
 bool custom_MenuEpisode    = false;
 bool custom_MenuDifficulty = false;
 
-FILE *log_file   = nullptr;
-FILE *debug_file = nullptr;
+epi::File *log_file   = nullptr;
 
 GameFlags default_game_flags = {
     false,      // nomonsters
@@ -135,21 +133,16 @@ GameFlags global_flags;
 
 bool mus_pause_stop = false;
 
-std::string configuration_file;
 std::string epkfile;
 
-std::string cache_directory;
 std::string game_directory;
 std::string home_directory;
-std::string save_directory;
-std::string screenshot_directory;
 
 // not using EDGE_DEFINE_CONSOLE_VARIABLE here since var name != cvar name
 ConsoleVariable m_language("language", "ENGLISH", kConsoleVariableFlagArchive);
 
 EDGE_DEFINE_CONSOLE_VARIABLE(log_filename, "edge-classic.log", kConsoleVariableFlagNoReset)
 EDGE_DEFINE_CONSOLE_VARIABLE(config_filename, "edge-classic.cfg", kConsoleVariableFlagNoReset)
-EDGE_DEFINE_CONSOLE_VARIABLE(debug_filename, "debug.txt", kConsoleVariableFlagNoReset)
 EDGE_DEFINE_CONSOLE_VARIABLE(game_name, "EDGE-Classic", kConsoleVariableFlagNoReset)
 EDGE_DEFINE_CONSOLE_VARIABLE(edge_version, "1.38", kConsoleVariableFlagNoReset)
 EDGE_DEFINE_CONSOLE_VARIABLE(team_name, "EDGE Team", kConsoleVariableFlagNoReset)
@@ -389,14 +382,14 @@ static void SpecialWadVerify(void)
 {
     StartupProgressMessage("Verifying EDGE_DEFS version...");
 
-    epi::File *data = OpenFileFromPack("/version.txt");
+    epi::File *data = OpenPackFile("/version.txt", "");
 
     if (!data)
         FatalError("Version file not found. Get edge_defs.epk at "
                    "https://github.com/edge-classic/EDGE-classic");
 
     // parse version number
-    std::string verstring = data->ReadText();
+    std::string verstring = data->ReadAsString();
     const char *s         = verstring.data();
     int         epk_ver   = atoi(s) * 100;
 
@@ -534,73 +527,40 @@ static std::string GetPrefDirectory()
 //
 static void InitializeDirectories(void)
 {
-    // Get the App Directory from parameter.
-
     // Note: This might need adjusting for Apple
     std::string s = PHYSFS_getBaseDir();
 
     game_directory = s;
 
-    // config file - check for portable config
-    s = ArgumentValue("config");
-    if (!s.empty())
-    {
-        configuration_file = s;
-    }
-    else
-    {
-        configuration_file = epi::PathAppend(game_directory, config_filename.s_);
-        if (epi::TestFileAccess(configuration_file) || FindArgument("portable") > 0)
-            home_directory = game_directory;
-        else
-            configuration_file.clear();
-    }
+    if (PHYSFS_mount(game_directory.c_str(), "/", 0) == 0)
+        FatalError("PHYSFS: Failed to mount install directory %s: %s\n", game_directory.c_str(), PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
 
-    if (home_directory.empty())
-    {
-        s = ArgumentValue("home");
-        if (!s.empty())
-            home_directory = s;
-    }
+    if (FindArgument("portable") > 0)
+            home_directory = game_directory;
 
     if (home_directory.empty())
         home_directory = GetPrefDirectory();
 
-    if (!epi::IsDirectory(home_directory))
-    {
-        if (!epi::MakeDirectory(home_directory))
-            FatalError("InitializeDirectories: Could not create directory at %s!\n", home_directory.c_str());
-    }
+    if (game_directory != home_directory && PHYSFS_mount(home_directory.c_str(), "/", 0) == 0)
+        FatalError("PHYSFS: Failed to mount user directory %s: %s\n", home_directory.c_str(), PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
 
-    if (configuration_file.empty())
-        configuration_file = epi::PathAppend(home_directory, config_filename.s_);
+    if (PHYSFS_setWriteDir(home_directory.c_str()) == 0)
+        FatalError("PHYSFS: Failed to set write directory %s: %s\n", home_directory.c_str(), PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
 
     // edge_defs.epk file
-    s = epi::PathAppend(game_directory, "edge_defs");
-    if (epi::IsDirectory(s))
-        epkfile = s;
+    if (PHYSFS_isDirectory("edge_defs"))
+        epkfile = "edge_defs";
     else
-        epkfile.append(".epk");
+        epkfile = "edge_defs.epk";
 
-    // cache directory
-    cache_directory = epi::PathAppend(home_directory, kCacheDirectory);
-
-    if (!epi::IsDirectory(cache_directory))
-        epi::MakeDirectory(cache_directory);
-
-    // savegame directory
-    save_directory = epi::PathAppend(home_directory, kSaveGameDirectory);
-
-    if (!epi::IsDirectory(save_directory))
-        epi::MakeDirectory(save_directory);
+    // These will make folders in the pref path if they don't already exist
+    // "Failure" for already existing is acceptable in this case
+    epi::MakeDirectory("cache");
+    epi::MakeDirectory("savegame");
+    epi::MakeDirectory("screenshot");
+    epi::MakeDirectory("soundfont");
 
     SaveClearSlot("current");
-
-    // screenshot directory
-    screenshot_directory = epi::PathAppend(home_directory, kScreenshotDirectory);
-
-    if (!epi::IsDirectory(screenshot_directory))
-        epi::MakeDirectory(screenshot_directory);
 }
 
 std::string ParseEdgeGameFile(epi::Lexer &lex)
@@ -647,29 +607,27 @@ std::string ParseEdgeGameFile(epi::Lexer &lex)
 }
 
 // If a valid EDGEGAME is found, parse and return the game name
-static std::string CheckPackForGameFiles(std::string check_pack, FileKind check_kind)
+static std::string CheckPackForGameFiles(std::string check_pack)
 {
-    DataFile *check_pack_df = new DataFile(check_pack, check_kind);
-    EPI_ASSERT(check_pack_df);
-    PopulatePackOnly(check_pack_df);
     std::string title;
-    if (FindStemInPack(check_pack_df->pack_, "EDGEGAME"))
+    if (PHYSFS_mount(check_pack.c_str(), "temp", 0) == 0)
+        return title;
+    if (!epi::FileExists("temp/EDGEGAME.txt"))
     {
-        epi::File *eg_file = OpenPackMatch(check_pack_df->pack_, "EDGEGAME", {".txt", ".cfg"});
-        if (!eg_file)
-        {
-            delete check_pack_df;
-            return title;
-        }
-        std::string edge_game;
-        edge_game.resize(eg_file->GetLength());
-        eg_file->Read(edge_game.data(), eg_file->GetLength());
-        delete eg_file;
-        delete check_pack_df;
-        epi::Lexer lex(edge_game);
-        title = ParseEdgeGameFile(lex);
+        PHYSFS_unmount(check_pack.c_str());
         return title;
     }
+    epi::File *eg_file = epi::FileOpen("temp/EDGEGAME.txt", epi::kFileAccessRead);
+    if (!eg_file)
+    {
+        PHYSFS_unmount(check_pack.c_str());
+        return title;
+    }
+    std::string edge_game = eg_file->ReadAsString();
+    delete eg_file;
+    PHYSFS_unmount(check_pack.c_str());
+    epi::Lexer lex(edge_game);
+    title = ParseEdgeGameFile(lex);
     return title;
 }
 
@@ -678,13 +636,13 @@ static std::string CheckPackForGameFiles(std::string check_pack, FileKind check_
 //
 static void IdentifyVersion(void)
 {
-    if (epi::IsDirectory(epkfile))
-        AddDataFile(epkfile, kFileKindEFolder);
+    if (PHYSFS_isDirectory(epkfile.c_str()))
+        AddDataFile(epi::PathAppend(game_directory, epkfile));
     else
     {
-        if (!epi::TestFileAccess(epkfile))
+        if (!epi::FileExists(epkfile))
             FatalError("IdentifyVersion: Could not find required %s.%s!\n", kRequiredEPK, "epk");
-        AddDataFile(epkfile, kFileKindEEPK);
+        AddDataFile(epi::PathAppend(game_directory, epkfile));
     }
 
     LogDebug("- Identify Version\n");
@@ -704,9 +662,9 @@ static void IdentifyVersion(void)
     if (!iwad_par.empty())
     {
         std::string game_check;
-        if (epi::IsDirectory(iwad_par))
+        if (epi::GetExtension(iwad_par).empty())
         {
-            game_check = CheckPackForGameFiles(iwad_par, kFileKindIFolder);
+            game_check = CheckPackForGameFiles(iwad_par);
             if (game_check.empty())
                 FatalError("Folder %s passed via -game parameter, but no "
                            "EDGEGAME file detected!\n",
@@ -714,14 +672,14 @@ static void IdentifyVersion(void)
             else
             {
                 game_name = game_check;
-                AddDataFile(iwad_par, kFileKindIFolder);
+                AddDataFile(iwad_par);
                 LogDebug("LOADED GAME = [ %s ]\n", game_name.c_str());
                 return;
             }
         }
         else if (epi::StringCaseCompareASCII(epi::GetExtension(iwad_par), ".epk") == 0)
         {
-            game_check = CheckPackForGameFiles(iwad_par, kFileKindIPK);
+            game_check = CheckPackForGameFiles(iwad_par);
             if (game_check.empty())
                 FatalError("EPK %s passed via -game parameter, but no "
                            "EDGEGAME file detected!\n",
@@ -729,7 +687,7 @@ static void IdentifyVersion(void)
             else
             {
                 game_name = game_check;
-                AddDataFile(iwad_par, kFileKindIPK);
+                AddDataFile(iwad_par);
                 LogDebug("LOADED GAME = [ %s ]\n", game_name.c_str());
                 return;
             }
@@ -737,95 +695,6 @@ static void IdentifyVersion(void)
         else
             FatalError("%s is not a valid extension for a game file! (%s)\n", epi::GetExtension(iwad_par).c_str(),
                        iwad_par.c_str());
-    }
-    else
-    {
-        // In the absence of the -game or -iwad parameter, check files/dirs added via
-        // drag-and-drop for valid games and remove them from the arg list if they
-        // are valid to avoid them potentially being added as PWADs.
-        // This will use the first valid file/folder found, if any.
-        for (size_t p = 1; p < program_argument_list.size() && !ArgumentIsOption(p); p++)
-        {
-            std::string dnd = program_argument_list[p];
-            std::string game_check;
-            if (epi::IsDirectory(dnd))
-            {
-                game_check = CheckPackForGameFiles(dnd, kFileKindIFolder);
-                if (!game_check.empty())
-                {
-                    game_name = game_check;
-                    AddDataFile(dnd, kFileKindIFolder);
-                    program_argument_list.erase(program_argument_list.begin() + p--);
-                    LogDebug("LOADED GAME = [ %s ]\n", game_name.c_str());
-                    return;
-                }
-            }
-            else if (epi::StringCaseCompareASCII(epi::GetExtension(dnd), ".epk") == 0)
-            {
-                game_check = CheckPackForGameFiles(dnd, kFileKindIPK);
-                if (!game_check.empty())
-                {
-                    game_name = game_check;
-                    AddDataFile(dnd, kFileKindIPK);
-                    program_argument_list.erase(program_argument_list.begin() + p--);
-                    LogDebug("LOADED GAME = [ %s ]\n", game_name.c_str());
-                    return;
-                }
-            }
-        }
-    }
-
-    // If we have made it here, attempt to autodetect a valid game in the user's
-    // home and game directories
-    std::string location;
-    int         max = 1;
-
-    if (epi::StringCompare(game_directory, home_directory) != 0)
-        max++;
-
-    for (int i = 0; i < max; i++)
-    {
-        location = (i == 0 ? game_directory : home_directory);
-
-        std::vector<epi::DirectoryEntry> fsd;
-
-        std::string game_check;
-
-        if (ReadDirectory(fsd, location, "*.epk"))
-        {
-            for (size_t j = 0; j < fsd.size(); j++)
-            {
-                if (!fsd[j].is_dir)
-                {
-                    game_check = CheckPackForGameFiles(fsd[j].name, kFileKindIPK);
-                    if (!game_check.empty())
-                    {
-                        game_name = game_check;
-                        AddDataFile(fsd[j].name, kFileKindIPK);
-                        LogDebug("LOADED GAME = [ %s ]\n", game_name.c_str());
-                        return;
-                    }
-                }
-            }
-        }
-        // Check directories (only at top level of home/game directory)
-        if (ReadDirectory(fsd, location, "*.*"))
-        {
-            for (size_t j = 0; j < fsd.size(); j++)
-            {
-                if (fsd[j].is_dir)
-                {
-                    game_check = CheckPackForGameFiles(fsd[j].name, kFileKindIFolder);
-                    if (!game_check.empty())
-                    {
-                        game_name = game_check;
-                        AddDataFile(fsd[j].name, kFileKindIFolder);
-                        LogDebug("LOADED GAME = [ %s ]\n", game_name.c_str());
-                        return;
-                    }
-                }
-            }
-        }
     }
 
     // If we have made it here, we could not locate a valid game anywhere
@@ -865,7 +734,6 @@ static void ShowDateAndVersion(void)
     strftime(timebuf, 99, "%I:%M %p on %d/%b/%Y", localtime(&cur_time));
 
     LogDebug("[Log file created at %s]\n\n", timebuf);
-    LogDebug("[Debug file created at %s]\n\n", timebuf);
 
     LogPrint("%s v%s compiled on " __DATE__ " at " __TIME__ "\n", application_name.c_str(), edge_version.c_str());
     LogPrint("%s homepage is at %s\n", application_name.c_str(), homepage.c_str());
@@ -875,51 +743,28 @@ static void ShowDateAndVersion(void)
     DumpArguments();
 }
 
-static void SetupLogAndDebugFiles(void)
+static void SetupLogFile(void)
 {
     // -AJA- 2003/11/08 The log file gets all ConsolePrints, LogPrints,
     //                  LogWarnings and FatalErrors.
 
-    std::string log_fn   = epi::PathAppend(home_directory, log_filename.s_);
-    std::string debug_fn = epi::PathAppend(home_directory, debug_filename.s_);
-
     log_file   = nullptr;
-    debug_file = nullptr;
 
     if (FindArgument("nolog") < 0)
     {
-        log_file = epi::FileOpenRaw(log_fn, epi::kFileAccessWrite);
+        log_file = epi::FileOpen(log_filename.s_, epi::kFileAccessWrite);
 
         if (!log_file)
             FatalError("[EdgeStartup] Unable to create log file\n");
     }
-
-    //
-    // -ACB- 1998/09/06 Only used for debugging.
-    //                  Moved here to setup debug file for DDF Parsing...
-    //
-    // -ES- 1999/08/01 Debugfiles can now be used without -DDEVELOPERS, and
-    //                 then logs all the ConsolePrints, LogPrints and
-    //                 FatalErrors.
-    //
-    // -ACB- 1999/10/02 Don't print to console, since we don't have a console
-    // yet.
-
-    /// int p = FindArgument("debug");
-    if (true)
-    {
-        debug_file = epi::FileOpenRaw(debug_fn, epi::kFileAccessWrite);
-
-        if (!debug_file)
-            FatalError("[EdgeStartup] Unable to create debug_file");
-    }
 }
 
-static void AddSingleCommandLineFile(std::string name, bool ignore_unknown)
+static void AddSingleCommandLineFile(std::string name)
 {
-    if (epi::IsDirectory(name))
+    // Bit of an assumption, but still
+    if (epi::GetExtension(name).empty())
     {
-        AddDataFile(name, kFileKindFolder);
+        AddDataFile(name);
         return;
     }
 
@@ -927,26 +772,16 @@ static void AddSingleCommandLineFile(std::string name, bool ignore_unknown)
 
     epi::StringLowerASCII(ext);
 
-    if (ext == ".edm")
-        FatalError("Demos are not supported\n");
-    else if (ext == ".rts")
-        FatalError("Radius Trigger Scripts are not supported\n");
-
-    FileKind kind;
+    if (ext == ".rts" || ext == ".ddf" || ext == ".ldf")
+        FatalError("Loose script files are not supported\n");
 
     if (ext == ".pk3" || ext == ".epk" || ext == ".zip")
-        kind = kFileKindEPK;
-    else if (ext == ".ddf" || ext == ".ldf")
-        kind = kFileKindDDF;
+        AddDataFile(name);
     else
     {
-        if (!ignore_unknown)
-            FatalError("unknown file type: %s\n", name.c_str());
+        LogDebug("unknown file type: %s\n", name.c_str());
         return;
     }
-
-    std::string filename = epi::PathAppendIfNotAbsolute(game_directory, name);
-    AddDataFile(filename, kind);
 }
 
 static void AddCommandLineFiles(void)
@@ -957,7 +792,7 @@ static void AddCommandLineFiles(void)
 
     for (p = 1; p < int(program_argument_list.size()) && !ArgumentIsOption(p); p++)
     {
-        AddSingleCommandLineFile(program_argument_list[p], false);
+        AddSingleCommandLineFile(program_argument_list[p]);
     }
 
     // next handle the -file option (we allow multiple uses)
@@ -970,76 +805,9 @@ static void AddCommandLineFiles(void)
         // the parms after p are wadfile/lump names,
         // go until end of parms or another '-' preceded parm
         if (!ArgumentIsOption(p))
-            AddSingleCommandLineFile(program_argument_list[p], false);
+            AddSingleCommandLineFile(program_argument_list[p]);
 
         p++;
-    }
-
-    // directories....
-
-    p = FindArgument("dir");
-
-    while (p > 0 && p < int(program_argument_list.size()) &&
-           (!ArgumentIsOption(p) || epi::StringCompare(program_argument_list[p], "-dir") == 0))
-    {
-        // the parms after p are directory names,
-        // go until end of parms or another '-' preceded parm
-        if (!ArgumentIsOption(p))
-        {
-            std::string dirname = epi::PathAppendIfNotAbsolute(game_directory, program_argument_list[p]);
-            AddDataFile(dirname, kFileKindFolder);
-        }
-
-        p++;
-    }
-
-    // handle -ddf option (backwards compatibility)
-
-    std::string ps = ArgumentValue("ddf");
-
-    if (!ps.empty())
-    {
-        std::string filename = epi::PathAppendIfNotAbsolute(game_directory, ps);
-        AddDataFile(filename, kFileKindFolder);
-    }
-}
-
-static void AddAutoload(void)
-{
-    std::vector<epi::DirectoryEntry> fsd;
-    std::string                      folder = epi::PathAppend(game_directory, "autoload");
-
-    if (!ReadDirectory(fsd, folder, "*.*"))
-    {
-        LogWarning("Failed to read %s directory!\n", folder.c_str());
-    }
-    else
-    {
-        for (size_t i = 0; i < fsd.size(); i++)
-        {
-            if (!fsd[i].is_dir)
-                AddSingleCommandLineFile(fsd[i].name, true);
-        }
-    }
-    fsd.clear();
-
-    // Check if autoload folder stuff is in home_directory as well, make the
-    // folder/subfolder if they don't exist (in home_directory only)
-    folder = epi::PathAppend(home_directory, "autoload");
-    if (!epi::IsDirectory(folder))
-        epi::MakeDirectory(folder);
-
-    if (!ReadDirectory(fsd, folder, "*.*"))
-    {
-        LogWarning("Failed to read %s directory!\n", folder.c_str());
-    }
-    else
-    {
-        for (size_t i = 0; i < fsd.size(); i++)
-        {
-            if (!fsd[i].is_dir)
-                AddSingleCommandLineFile(fsd[i].name, true);
-        }
     }
 }
 
@@ -1073,7 +841,7 @@ static void EdgeStartup(void)
         FatalError("\n%s version is %s\n", application_name.c_str(), edge_version.c_str());
     }
 
-    SetupLogAndDebugFiles();
+    SetupLogFile();
 
     ShowDateAndVersion();
 
@@ -1086,15 +854,12 @@ static void EdgeStartup(void)
 
     InitializeDDF();
     IdentifyVersion();
-    AddAutoload();
     AddCommandLineFiles();
     CheckTurbo();
 
     ProcessMultipleFiles();
     DDFParseEverything();
-    // Must be done after WAD and DDF loading to check for potential
-    // overrides of lump-specific image/sound/DDF defines
-    DoPackSubstitutions();
+    ProcessPackContents();
     StartupMusic();
 
     DDFCleanUp();
@@ -1104,7 +869,6 @@ static void EdgeStartup(void)
 
     ConsoleStart();
     SpecialWadVerify();
-    BuildXGLNodes();
     ShowNotice();
 
     PrecacheSounds();

@@ -18,10 +18,12 @@
 
 #pragma once
 
+#include <stdint.h>
+
+#include <string>
 #include <vector>
 
-#include "epi_str_util.h"
-
+#include "../../libraries/physfs/physfs.h" 
 namespace epi
 {
 
@@ -30,19 +32,34 @@ enum Access
 {
     kFileAccessRead   = 0x1,
     kFileAccessWrite  = 0x2,
-    kFileAccessAppend = 0x4,
-    kFileAccessBinary = 0x8
+    kFileAccessAppend = 0x4
 };
 
-// Forward declarations
-class File;
-
-// A Filesystem directory entry
-struct DirectoryEntry
+class File
 {
-    std::string name;
-    size_t      size   = 0;
-    bool        is_dir = false;
+  private:
+    PHYSFS_File *fp_;
+
+  public:
+    File(PHYSFS_File *filep);
+    ~File();
+
+    uint64_t GetLength();
+    int64_t GetPosition();
+
+    int64_t Read(void *dest, uint64_t size);
+    int64_t Write(const void *src, uint64_t size);
+
+    std::string ReadAsString();
+    int64_t WriteString(std::string_view str);
+
+    bool Seek(uint64_t offset);
+
+    // load the file into memory, reading from the current
+    // position.  An extra NUL byte is appended
+    // to the result buffer.  Returns nullptr on failure.
+    // The returned buffer must be freed with delete[].
+    uint8_t *LoadIntoMemory();
 };
 
 // Path and Filename Functions
@@ -50,31 +67,16 @@ std::string GetFilename(std::string_view path);
 std::string GetStem(std::string_view path);
 std::string GetDirectory(std::string_view path);
 std::string GetExtension(std::string_view path);
-std::string MakePathRelative(std::string_view parent, std::string_view child);
 std::string PathAppend(std::string_view parent, std::string_view child);
-std::string PathAppendIfNotAbsolute(std::string_view parent, std::string_view child);
 std::string SanitizePath(std::string_view path);
-bool        IsPathAbsolute(std::string_view path);
-void        ReplaceExtension(std::string &path, std::string_view ext);
 
 // Directory Functions
-bool CurrentDirectorySet(std::string_view dir);
-bool IsDirectory(std::string_view dir);
-bool MakeDirectory(std::string_view dir);
-bool ReadDirectory(std::vector<DirectoryEntry> &fsd, std::string &dir, const char *mask);
-bool WalkDirectory(std::vector<DirectoryEntry> &fsd, std::string &dir);
-bool OpenDirectory(const std::string &src); // Opens a directory in explorer, finder, etc
+bool MakeDirectory(const std::string &name);
 
 // File Functions
-bool  FileExists(std::string_view name);
-bool  TestFileAccess(std::string_view name);
-File *FileOpen(std::string_view name, unsigned int flags);
-FILE *FileOpenRaw(std::string_view name, unsigned int flags);
-// NOTE: there's no CloseFile function, just delete the object.
-bool FileCopy(std::string_view src, std::string_view dest);
-bool FileDelete(std::string_view name);
-
-// General Filesystem Functions
+File *FileOpen(const std::string &name, unsigned int flags);
+bool  FileDelete(const std::string &name);
+bool  FileExists(const std::string &name);
 
 } // namespace epi
 

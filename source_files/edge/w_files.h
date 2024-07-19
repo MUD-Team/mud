@@ -28,63 +28,14 @@
 #include <string>
 #include <vector>
 
-#include "dm_defs.h"
-#include "epi_file.h"
+extern std::vector<std::string> data_files;
 
-enum FileKind
-{
-    kFileKindFolder = 0,   // a folder somewhere
-    kFileKindEFolder,      // edge folder, priority loading
-    kFileKindEPK,          // edge package (.epk)
-    kFileKindEEPK,         // edge epks, priority loading (same extension as epk)
-    kFileKindIPK,          // standalone game EPK (same extension as epk)
-    kFileKindIFolder,      // standalone game folder
-    kFileKindDDF           // .ddf or .ldf file
-};
-
-class PackFile;
-
-class DataFile
-{
-  public:
-    // full name of file
-    std::string name_;
-
-    // type of file (kFileKindXXX)
-    FileKind kind_;
-
-    // file object   [ TODO review when active ]
-    epi::File *file_;
-
-    // for kFileKindEPK
-    PackFile *pack_;
-
-  public:
-    DataFile(std::string name, FileKind kind);
-    ~DataFile();
-};
-
-extern std::vector<DataFile *> data_files;
-
-size_t AddDataFile(std::string file, FileKind kind);
+size_t AddDataFile(const std::string &file);
 int    GetTotalFiles();
 void   ShowLoadedFiles();
 
 void   ProcessMultipleFiles();
-size_t AddPendingFile(std::string file, FileKind kind);
-void   ProcessFile(DataFile *df);
-
-epi::File *OpenFileFromPack(const std::string &name);
-
-void DoPackSubstitutions(void);
-
-uint8_t *OpenMatchingPackFileInMemory(const std::string &name, const std::vector<std::string> &extensions, int *length);
-
-int CheckPackFilesForName(const std::string &name);
-
-bool IsFileInAddon(const char *name);
-
-bool IsFileAnywhere(const char *name);
+void   ProcessFile(const std::string &df);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

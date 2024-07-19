@@ -23,7 +23,6 @@
 #include "HandmadeMath.h"
 #include "dm_state.h"
 #include "epi.h"
-#include "epi_file.h"
 #include "epi_filesystem.h"
 #include "fluidlite.h"
 #include "i_midi.h"
@@ -35,6 +34,8 @@
 #include "s_music.h"
 
 static constexpr uint16_t kFluidBuffer = kMusicBuffer * 8;
+static constexpr uint8_t kFluidOk = 0;
+static constexpr int8_t kFluidFailed = -1;
 
 extern bool sound_device_stereo;
 extern int  sound_device_frequency;
@@ -61,10 +62,70 @@ static void FluidError(int level, char *message, void *data)
 
 static void *edge_fluid_fopen(fluid_fileapi_t *fileapi, const char *filename)
 {
-    FILE *fp = epi::FileOpenRaw(filename, epi::kFileAccessRead | epi::kFileAccessBinary);
+    epi::File *fp = epi::FileOpen(filename, epi::kFileAccessRead);
     if (!fp)
         return nullptr;
     return fp;
+}
+
+static int edge_fluid_fread(void *buf, int count, void* handle)
+{
+    epi::File *fp = (epi::File *)handle;
+    if (fp->Read(buf, count) == count)
+        return kFluidOk;
+    else
+        return kFluidFailed;
+}
+
+static int edge_fluid_fclose(void *handle)
+{
+    epi::File *fp = (epi::File *)handle;
+    delete fp;
+    fp = nullptr;
+    return kFluidOk;
+}
+
+static long edge_fluid_ftell(void *handle)
+{
+    epi::File *fp = (epi::File *)handle;
+    long ret = fp->GetPosition();
+    if (ret == -1)
+        return kFluidFailed;
+    return ret;
+}
+
+static int edge_fluid_free(fluid_fileapi_t* fileapi)
+{
+    if (fileapi)
+    {
+        delete fileapi;
+        fileapi = nullptr;
+    }
+    return kFluidOk;
+}
+
+static int edge_fluid_fseek(void *handle, long offset, int origin)
+{
+    epi::File *fp = (epi::File *)handle;
+    bool did_seek = false;
+    switch (origin)
+    {
+        case SEEK_SET:
+            did_seek = fp->Seek(offset);
+            break;
+        case SEEK_CUR:
+            did_seek = fp->Seek(fp->GetPosition() + offset);
+            break;
+        case SEEK_END:
+            did_seek = fp->Seek(fp->GetLength() - offset);
+            break;
+        default:
+            break;
+    }
+    if (did_seek)
+        return kFluidOk;
+    else
+        return kFluidFailed;
 }
 
 static void ConvertToMono(float *dest, const float *src, int len)
@@ -98,8 +159,8 @@ bool StartupFluid(void)
         LogWarning("Cannot find previously used soundfont %s, falling back to "
                    "default!\n",
                    midi_soundfont.c_str());
-        midi_soundfont = epi::SanitizePath(epi::PathAppend(game_directory, "soundfont/Default.sf2"));
-        if (!epi::FileExists(midi_soundfont.s_))
+        midi_soundfont = "Default.sf2";
+        if (!epi::FileExists(epi::PathAppend("soundfont", midi_soundfont.s_)))
             FatalError("Fluidlite: Cannot locate default soundfont (Default.sf2)! "
                        "Please check the /soundfont directory "
                        "of your EDGE-Classic install!\n");
@@ -119,14 +180,19 @@ bool StartupFluid(void)
     edge_fluid = new_fluid_synth(edge_fluid_settings);
 
     // Register loader that uses our custom function to provide
-    // a FILE pointer
+    // an epi::File pointer
     edge_fluid_sf2_loader          = new_fluid_defsfloader();
     edge_fluid_sf2_loader->fileapi = new fluid_fileapi_t;
     fluid_init_default_fileapi(edge_fluid_sf2_loader->fileapi);
     edge_fluid_sf2_loader->fileapi->fopen = edge_fluid_fopen;
+    edge_fluid_sf2_loader->fileapi->fread = edge_fluid_fread;
+    edge_fluid_sf2_loader->fileapi->fclose = edge_fluid_fclose;
+    edge_fluid_sf2_loader->fileapi->ftell = edge_fluid_ftell;
+    edge_fluid_sf2_loader->fileapi->fseek = edge_fluid_fseek;
+    edge_fluid_sf2_loader->fileapi->free = edge_fluid_free;
     fluid_synth_add_sfloader(edge_fluid, edge_fluid_sf2_loader);
 
-    if (fluid_synth_sfload(edge_fluid, midi_soundfont.c_str(), 1) == -1)
+    if (fluid_synth_sfload(edge_fluid, epi::PathAppend("soundfont", midi_soundfont.s_).c_str(), 1) == -1)
     {
         LogWarning("FluidLite: Initialization failure.\n");
         delete_fluid_synth(edge_fluid);
@@ -188,7 +254,7 @@ class FluidPlayer : public AbstractMusicPlayer
     float *mono_buffer_;
 
   public:
-    FluidPlayer(uint8_t *data, int _length, bool looping) : status_(kNotLoaded), looping_(looping)
+    FluidPlayer(bool looping) : status_(kNotLoaded), looping_(looping)
     {
         mono_buffer_ = new float[kFluidBuffer * 2];
         SequencerInit();
@@ -293,9 +359,9 @@ class FluidPlayer : public AbstractMusicPlayer
         fluid_sequencer_->SetInterface(fluid_interface_);
     }
 
-    bool LoadTrack(const uint8_t *data, int length)
+    bool LoadTrack(epi::File *song)
     {
-        return fluid_sequencer_->LoadMidi(data, length);
+        return fluid_sequencer_->LoadMidi(song);
     }
 
     void Close(void)
@@ -428,33 +494,32 @@ class FluidPlayer : public AbstractMusicPlayer
     }
 };
 
-AbstractMusicPlayer *PlayFluidMusic(uint8_t *data, int length, bool loop)
+AbstractMusicPlayer *PlayFluidMusic(epi::File *song, bool loop)
 {
     if (fluid_disabled)
     {
-        delete[] data;
+        delete song;
         return nullptr;
     }
 
-    FluidPlayer *player = new FluidPlayer(data, length, loop);
+    FluidPlayer *player = new FluidPlayer(loop);
 
     if (!player)
     {
         LogDebug("FluidLite player: error initializing!\n");
-        delete[] data;
+        delete song;
         return nullptr;
     }
 
-    if (!player->LoadTrack(data,
-                           length)) // Lobo: quietly log it instead of completely exiting EDGE
+    if (!player->LoadTrack(song)) // Lobo: quietly log it instead of completely exiting EDGE
     {
         LogDebug("FluidLite player: failed to load MIDI file!\n");
-        delete[] data;
+        delete song;
         delete player;
         return nullptr;
     }
 
-    delete[] data;
+    delete song;
 
     player->Play(loop);
 

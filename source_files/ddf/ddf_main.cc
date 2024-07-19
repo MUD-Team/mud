@@ -309,93 +309,6 @@ void DDFCleanUp()
     DDFMovieCleanUp();
 }
 
-static const char *tag_conversion_table[] = {
-    "ANIMATIONS", "DDFANIM",  "ATTACKS", "DDFATK",  "COLOURMAPS", "DDFCOLM",  "FLATS",     "DDFFLAT",
-    "FONTS",   "DDFFONT", "GAMES",      "DDFGAME",  "IMAGES",    "DDFIMAGE",
-    "LANGUAGES",  "DDFLANG",  "LEVELS",  "DDFLEVL", "LINES",      "DDFLINE",  "PLAYLISTS", "DDFPLAY",
-    "SECTORS",    "DDFSECT",  "SOUNDS",  "DDFSFX",  "STYLES",     "DDFSTYLE", "SWITCHES",  "DDFSWTH",
-    "THINGS",     "DDFTHING", "WEAPONS", "DDFWEAP", "MOVIES",     "DDFMOVIE",
-
-    nullptr,      nullptr};
-
-void DDFGetLumpNameForFile(const char *filename, char *lumpname)
-{
-    FILE *fp = fopen(filename, "r");
-
-    if (!fp)
-        FatalError("Couldn't open DDF file: %s\n", filename);
-
-    bool in_comment = false;
-
-    for (;;)
-    {
-        int ch = fgetc(fp);
-
-        if (ch == EOF || ferror(fp))
-            break;
-
-        if (ch == '/' || ch == '#') // skip directives too
-        {
-            in_comment = true;
-            continue;
-        }
-
-        if (in_comment)
-        {
-            if (ch == '\n' || ch == '\r')
-                in_comment = false;
-            continue;
-        }
-
-        if (ch == '[')
-            break;
-
-        if (ch != '<')
-            continue;
-
-        // found start of <XYZ> tag, read it in
-
-        char tag_buf[40];
-        int  len = 0;
-
-        for (;;)
-        {
-            ch = fgetc(fp);
-
-            if (ch == EOF || ferror(fp) || ch == '>')
-                break;
-
-            tag_buf[len++] = epi::ToUpperASCII(ch);
-
-            if (len + 2 >= (int)sizeof(tag_buf))
-                break;
-        }
-
-        tag_buf[len] = 0;
-
-        if (len > 0)
-        {
-            for (int i = 0; tag_conversion_table[i]; i += 2)
-            {
-                if (strcmp(tag_buf, tag_conversion_table[i]) == 0)
-                {
-                    strcpy(lumpname, tag_conversion_table[i + 1]);
-                    fclose(fp);
-
-                    return; // SUCCESS!
-                }
-            }
-
-            fclose(fp);
-            FatalError("Unknown marker <%s> in DDF file: %s\n", tag_buf, filename);
-        }
-        break;
-    }
-
-    fclose(fp);
-    FatalError("Missing <..> marker in DDF file: %s\n", filename);
-}
-
 //
 // Description of the DDF Parser:
 //
@@ -2037,19 +1950,7 @@ static ddf_reader_t ddf_readers[kTotalDDFTypes] = {
     {kDDFTypeFlat, "DDFFLAT", "flats.ddf", "Flats", DDFReadFlat},
     {kDDFTypeMovie, "DDFMOVIE", "movies.ddf", "Movies", DDFReadMovies}};
 
-DDFType DDFLumpToType(const std::string &name)
-{
-    std::string up_name(name);
-    epi::StringUpperASCII(up_name);
-
-    for (size_t i = 0; i < kTotalDDFTypes; i++)
-        if (up_name == ddf_readers[i].lump_name)
-            return ddf_readers[i].type;
-
-    return kDDFTypeUnknown;
-}
-
-DDFType DDFFilenameToType(const std::string &path)
+DDFType DDFFilenameToType(std::string_view path)
 {
     std::string check = epi::GetExtension(path);
 
@@ -2065,18 +1966,19 @@ DDFType DDFFilenameToType(const std::string &path)
     return kDDFTypeUnknown;
 }
 
-void DDFAddFile(DDFType type, std::string &data, const std::string &source)
+void DDFAddFile(DDFType type, std::string &data)
 {
-    unread_ddf.push_back({type, source, ""});
+    uint64_t hash = epi::StringHash64(data);
 
+    for (const DDFFile &ddf : unread_ddf)
+    {
+        if (ddf.data_hash == hash)
+            return;
+    }
+
+    unread_ddf.push_back({type, data, hash});
     // transfer the caller's data
     unread_ddf.back().data.swap(data);
-}
-
-void DDFAddCollection(std::vector<DDFFile> &col, const std::string &source)
-{
-    for (DDFFile &it : col)
-        DDFAddFile(it.type, it.data, source);
 }
 
 void DDFDumpFile(const std::string &data)
@@ -2116,7 +2018,7 @@ static void DDFParseUnreadFile(size_t d)
     {
         if (it.type == ddf_readers[d].type)
         {
-            LogPrint("Parsing %s from: %s\n", ddf_readers[d].lump_name, it.source.c_str());
+            LogPrint("Parsing %s\n", ddf_readers[d].lump_name);
 
             (*ddf_readers[d].func)(it.data);
 

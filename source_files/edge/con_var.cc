@@ -328,7 +328,7 @@ int PrintConsoleVariables(const char *match, bool show_default)
     return total;
 }
 
-void WriteConsoleVariables(FILE *f)
+void WriteConsoleVariables(epi::File *f)
 {
     for (ConsoleVariable *var = all_console_variables; var != nullptr; var = var->next_)
     {
@@ -339,7 +339,7 @@ void WriteConsoleVariables(FILE *f)
                 line = epi::SanitizePath(epi::StringFormat("/%s\t\"%s\"\n", var->name_, var->c_str()));
             else
                 line = epi::StringFormat("/%s\t\"%s\"\n", var->name_, var->c_str());
-            fwrite(line.data(), line.size(), 1, f);
+            f->WriteString(line);
         }
     }
 }

@@ -32,7 +32,6 @@ PlaylistEntryContainer playlist;
 static void DDFMusicParseInfo(const char *info)
 {
     static const char *const musstrtype[] = {"UNKNOWN", "MIDI", "OGG", nullptr};
-    static const char *const musinftype[] = {"UNKNOWN", "FILE", "PACK", nullptr};
 
     char charbuff[256];
     int  pos, i;
@@ -64,51 +63,14 @@ static void DDFMusicParseInfo(const char *info)
 
     if (i == kTotalDDFMusicTypes)
     {
-        i = kDDFMusicDataUnknown;
-        while (musinftype[i] != nullptr && epi::StringCaseCompareASCII(charbuff, musinftype[i]) != 0)
-            i++;
-        if (i == kTotalDDFMusicDataTypes)
-            DDFWarning("DDFMusicParseInfo: Unknown music type: '%s'\n", charbuff);
-        else
-        {
-            dynamic_plentry->infotype_ = (DDFMusicDataType)i;
-            // Remained is the string reference: filename
-            pos++;
-            dynamic_plentry->info_ = &info[pos];
-            return;
-        }
+        DDFWarning("DDFMusicParseInfo: Unknown music type: '%s'\n", charbuff);
+        return;
     }
     else
         dynamic_plentry->type_ = (DDFMusicType)i;
 
-    // Data Type
-    i = 0;
-    pos++;
-    while (info[pos] != ':' && i < 255)
-    {
-        if (info[pos] == '\0')
-            DDFError("DDFMusicParseInfo: Premature end of music info\n");
-
-        charbuff[i] = info[pos];
-
-        pos++;
-        i++;
-    }
-
-    if (i == 255)
-        DDFError("DDFMusicParseInfo: Music info too big\n");
-
     // -AJA- terminate charbuff with trailing \0.
     charbuff[i] = 0;
-
-    i = kDDFMusicDataUnknown;
-    while (musinftype[i] != nullptr && epi::StringCaseCompareASCII(charbuff, musinftype[i]) != 0)
-        i++;
-
-    if (i == kTotalDDFMusicDataTypes)
-        DDFWarning("DDFMusicParseInfo: Unknown music info: '%s'\n", charbuff);
-    else
-        dynamic_plentry->infotype_ = (DDFMusicDataType)i; // technically speaking this is proper
 
     // Remained is the string reference: filename/lumpname
     pos++;
@@ -235,7 +197,6 @@ PlaylistEntry::~PlaylistEntry()
 void PlaylistEntry::CopyDetail(PlaylistEntry &src)
 {
     type_     = src.type_;
-    infotype_ = src.infotype_;
     info_     = src.info_;
 }
 
@@ -245,7 +206,6 @@ void PlaylistEntry::CopyDetail(PlaylistEntry &src)
 void PlaylistEntry::Default()
 {
     type_     = kDDFMusicUnknown;
-    infotype_ = kDDFMusicDataUnknown;
     info_.clear();
 }
 

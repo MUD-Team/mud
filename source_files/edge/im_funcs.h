@@ -20,7 +20,7 @@
 
 #include <unordered_map>
 
-#include "epi_file.h"
+#include "epi_filesystem.h"
 #include "im_data.h"
 
 enum ImageFormat
@@ -90,7 +90,7 @@ bool GetImageInfo(epi::File *file, int *width, int *height, int *depth);
 // saves the image (in PNG format) to the given file.
 // Returns false if failed to save (e.g. file already exists).
 // The image _MUST_ be RGB or RGBA.
-bool SavePNG(std::string filename, ImageData *image);
+bool SavePNG(const std::string &filename, ImageData *image);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -25,7 +25,6 @@
 
 #include "ddf_main.h"
 #include "dm_state.h"
-#include "epi_file.h"
 #include "epi_filesystem.h"
 #include "epi_str_util.h"
 #include "i_system.h"
@@ -34,6 +33,7 @@
 #include "s_ogg.h"
 #include "s_sound.h"
 #include "snd_types.h"
+#include "w_epk.h"
 #include "w_files.h"
 
 
@@ -78,51 +78,10 @@ void ChangeMusic(int entry_number, bool loop)
     }
 
     // open the file or lump, and read it into memory
-    epi::File *F;
-
-    switch (play->infotype_)
+    epi::File *F = OpenPackFile(play->info_, "");
+    if (!F)
     {
-    case kDDFMusicDataFile: {
-        std::string fn = epi::PathAppendIfNotAbsolute(game_directory, play->info_);
-
-        F = epi::FileOpen(fn, epi::kFileAccessRead | epi::kFileAccessBinary);
-        if (!F)
-        {
-            LogWarning("ChangeMusic: Can't find file '%s'\n", fn.c_str());
-            return;
-        }
-        break;
-    }
-
-    case kDDFMusicDataPackage: {
-        F = OpenFileFromPack(play->info_);
-        if (!F)
-        {
-            LogWarning("ChangeMusic: pack entry '%s' not found.\n", play->info_.c_str());
-            return;
-        }
-        break;
-    }
-
-    default:
-        LogPrint("ChangeMusic: invalid type %d for music\n", play->infotype_);
-        return;
-    }
-
-    int      length = F->GetLength();
-    uint8_t *data   = F->LoadIntoMemory();
-
-    if (!data)
-    {
-        delete F;
-        LogWarning("ChangeMusic: Error loading data.\n");
-        return;
-    }
-    if (length < 4)
-    {
-        delete F;
-        delete data;
-        LogPrint("ChangeMusic: ignored short data (%d bytes)\n", length);
+        LogWarning("ChangeMusic: pack entry '%s' not found.\n", play->info_.c_str());
         return;
     }
 
@@ -131,23 +90,19 @@ void ChangeMusic(int entry_number, bool loop)
     // for FILE and PACK, use the file extension
     fmt = SoundFilenameToFormat(play->info_);
 
-    // NOTE: players are responsible for freeing 'data'
-
+    // NOTE: players are responsible for deleting 'F'
     switch (fmt)
     {
     case kSoundOGG:
-        delete F;
-        music_player = PlayOGGMusic(data, length, loop);
+        music_player = PlayOGGMusic(F, loop);
         break;
 
     case kSoundMIDI:
-        delete F;
-        music_player = PlayFluidMusic(data, length, loop);
+        music_player = PlayFluidMusic(F, loop);
         break;
 
     default:
         delete F;
-        delete data;
         LogPrint("ChangeMusic: unknown format\n");
         break;
     }
