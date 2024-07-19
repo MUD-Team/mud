@@ -46,7 +46,6 @@
 #include "m_math.h"
 #include "m_misc.h"
 #include "m_random.h"
-#include "miniz.h" // ZGL3 nodes
 #include "p_local.h"
 #include "r_gldefs.h"
 #include "r_image.h"
@@ -487,13 +486,12 @@ static void AssignSubsectorsToSectors()
     AssignSubsectorsPass(2);
 }
 
-// Adapted from EDGE 2.X's ZNode loading routine; only handles XGL3/ZGL3 as that
+// Adapted from EDGE 2.X's ZNode loading routine; only handles XGL3 as that
 // is all our built-in AJBSP produces now
 static void LoadXGL3Nodes()
 {
     int                  i, xglen = 0;
     uint8_t             *xgldata = nullptr;
-    std::vector<uint8_t> zgldata;
     uint8_t             *td = nullptr;
 
     LogDebug("LoadXGL3Nodes:\n");
@@ -516,38 +514,6 @@ static void LoadXGL3Nodes()
 
     if (!memcmp(xgldata, "XGL3", 4))
         LogDebug(" AJBSP uncompressed GL nodes v3\n");
-    else if (!memcmp(xgldata, "ZGL3", 4))
-    {
-        LogDebug(" AJBSP compressed GL nodes v3\n");
-        zgldata.resize(xglen);
-        z_stream zgl_stream;
-        memset(&zgl_stream, 0, sizeof(z_stream));
-        zgl_stream.next_in   = &xgldata[4];
-        zgl_stream.avail_in  = xglen - 4;
-        zgl_stream.next_out  = zgldata.data();
-        zgl_stream.avail_out = zgldata.size();
-        inflateInit2(&zgl_stream, MZ_DEFAULT_WINDOW_BITS);
-        int inflate_status;
-        for (;;)
-        {
-            inflate_status = inflate(&zgl_stream, Z_NO_FLUSH);
-            if (inflate_status == MZ_OK || inflate_status == MZ_BUF_ERROR) // Need to resize output buffer
-            {
-                zgldata.resize(zgldata.size() * 2);
-                zgl_stream.next_out  = &zgldata[zgl_stream.total_out];
-                zgl_stream.avail_out = zgldata.size() - zgl_stream.total_out;
-            }
-            else if (inflate_status == Z_STREAM_END)
-            {
-                inflateEnd(&zgl_stream);
-                zgldata.resize(zgl_stream.total_out);
-                zgldata.shrink_to_fit();
-                break;
-            }
-            else
-                FatalError("LoadXGL3Nodes: Failed to decompress ZGL3 nodes!\n");
-        }
-    }
     else
     {
         static char xgltemp[6];
@@ -556,10 +522,7 @@ static void LoadXGL3Nodes()
         FatalError("LoadXGL3Nodes: Unrecognized node type %s\n", xgltemp);
     }
 
-    if (!zgldata.empty())
-        td = zgldata.data();
-    else
-        td = &xgldata[4];
+    td = &xgldata[4];
 
     // after signature, 1st u32 is number of original vertexes - should be <=
     // total_level_vertexes
@@ -775,7 +738,6 @@ static void LoadXGL3Nodes()
 
     LogDebug("LoadXGL3Nodes: Finished\n");
     delete[] xgldata;
-    zgldata.clear();
 }
 
 static void LoadUDMFVertexes()
@@ -2528,7 +2490,7 @@ void LevelSetup(void)
 
     // This needs to be cached somewhere, but it will work here while developing - Dasho
     uint64_t udmf_hash = epi::StringHash64(udmf_string);
-    node_file = epi::PathAppend("cache", epi::StringFormat("%s-%lu.zgl", current_map->name_.c_str(), udmf_hash));
+    node_file = epi::PathAppend("cache", epi::StringFormat("%s-%lu.xgl", current_map->name_.c_str(), udmf_hash));
 
     // get lump for XGL3 nodes from an XWA file
     // shouldn't happen (as during startup we checked for or built these)
