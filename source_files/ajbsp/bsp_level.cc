@@ -27,7 +27,6 @@
 #include "epi_filesystem.h"
 #include "epi_lexer.h"
 #include "epi_str_util.h"
-#include "miniz.h"
 
 #define AJBSP_DEBUG_BLOCKMAP 0
 #define AJBSP_DEBUG_REJECT   0
@@ -75,79 +74,21 @@ static std::string current_map_name;
 
 //----------------------------------------------------------------------
 
-static epi::File *zout_file = nullptr;
-static z_stream   zout_stream;
-static Bytef      zout_buffer[1024];
+static epi::File *xgl_out = nullptr;
 
-static void ZLibBeginLump(epi::File *out_file)
+static void XGL3BeginLump(epi::File *out_file)
 {
-    zout_file = out_file;
-
-    zout_stream.zalloc = (alloc_func)0;
-    zout_stream.zfree  = (free_func)0;
-    zout_stream.opaque = (voidpf)0;
-
-    if (Z_OK != deflateInit(&zout_stream, Z_DEFAULT_COMPRESSION))
-        FatalError("AJBSP: Trouble setting up zlib compression\n");
-
-    zout_stream.next_out  = zout_buffer;
-    zout_stream.avail_out = sizeof(zout_buffer);
+    xgl_out = out_file;
 }
 
-static void ZLibAppendLump(const void *data, int length)
+static void XGL3AppendLump(const void *data, int length)
 {
-    zout_stream.next_in  = (Bytef *)data; // const override
-    zout_stream.avail_in = length;
-
-    while (zout_stream.avail_in > 0)
-    {
-        int err = deflate(&zout_stream, Z_NO_FLUSH);
-
-        if (err != Z_OK)
-            FatalError("AJBSP: Trouble compressing %d bytes (zlib)\n", length);
-
-        if (zout_stream.avail_out == 0)
-        {
-            zout_file->Write(zout_buffer, sizeof(zout_buffer));
-            zout_stream.next_out  = zout_buffer;
-            zout_stream.avail_out = sizeof(zout_buffer);
-        }
-    }
+    xgl_out->Write(data, length);
 }
 
-static void ZLibFinishLump(void)
+static void XGL3FinishLump(void)
 {
-    int left_over;
-
-    zout_stream.next_in  = Z_NULL;
-    zout_stream.avail_in = 0;
-
-    for (;;)
-    {
-        int err = deflate(&zout_stream, Z_FINISH);
-
-        if (err == Z_STREAM_END)
-            break;
-
-        if (err != Z_OK)
-            FatalError("AJBSP: Trouble finishing compression (zlib)\n");
-
-        if (zout_stream.avail_out == 0)
-        {
-            zout_file->Write(zout_buffer, sizeof(zout_buffer));
-            zout_stream.next_out  = zout_buffer;
-            zout_stream.avail_out = sizeof(zout_buffer);
-        }
-    }
-
-    left_over = sizeof(zout_buffer) - zout_stream.avail_out;
-
-    if (left_over > 0)
-        zout_file->Write(zout_buffer, left_over);
-
-    deflateEnd(&zout_stream);
-
-    zout_file = nullptr;
+    xgl_out = nullptr;
 }
 
 
@@ -643,7 +584,7 @@ void SortSegs()
 
 /* ----- ZDoom format writing --------------------------- */
 
-static const uint8_t *level_ZGL3_magic = (uint8_t *)"ZGL3";
+static const uint8_t *level_XGL3_magic = (uint8_t *)"XGL3";
 
 void PutZVertices()
 {
@@ -652,8 +593,8 @@ void PutZVertices()
     uint32_t orgverts = AlignedLittleEndianU32(num_old_vert);
     uint32_t newverts = AlignedLittleEndianU32(num_new_vert);
 
-    ZLibAppendLump(&orgverts, 4);
-    ZLibAppendLump(&newverts, 4);
+    XGL3AppendLump(&orgverts, 4);
+    XGL3AppendLump(&newverts, 4);
 
     for (i = 0, count = 0; i < level_vertices.size(); i++)
     {
@@ -667,7 +608,7 @@ void PutZVertices()
         raw.x = AlignedLittleEndianS32(RoundToInteger(vert->x_ * 65536.0));
         raw.y = AlignedLittleEndianS32(RoundToInteger(vert->y_ * 65536.0));
 
-        ZLibAppendLump(&raw, sizeof(raw));
+        XGL3AppendLump(&raw, sizeof(raw));
 
         count++;
     }
@@ -679,7 +620,7 @@ void PutZVertices()
 void PutZSubsecs()
 {
     uint32_t Rawnum = AlignedLittleEndianU32(level_subsecs.size());
-    ZLibAppendLump(&Rawnum, 4);
+    XGL3AppendLump(&Rawnum, 4);
 
     int cur_seg_index = 0;
 
@@ -688,7 +629,7 @@ void PutZSubsecs()
         const Subsector *sub = level_subsecs[i];
 
         Rawnum = AlignedLittleEndianU32(sub->seg_count_);
-        ZLibAppendLump(&Rawnum, 4);
+        XGL3AppendLump(&Rawnum, 4);
 
         // sanity check the seg index values
         int count = 0;
@@ -713,7 +654,7 @@ void PutZSubsecs()
 void PutZSegs()
 {
     uint32_t Rawnum = AlignedLittleEndianU32(level_segs.size());
-    ZLibAppendLump(&Rawnum, 4);
+    XGL3AppendLump(&Rawnum, 4);
 
     for (int i = 0; i < level_segs.size(); i++)
     {
@@ -728,17 +669,17 @@ void PutZSegs()
         uint16_t line = AlignedLittleEndianU16(seg->linedef_->index);
         uint8_t  side = (uint8_t)seg->side_;
 
-        ZLibAppendLump(&v1, 4);
-        ZLibAppendLump(&v2, 4);
-        ZLibAppendLump(&line, 2);
-        ZLibAppendLump(&side, 1);
+        XGL3AppendLump(&v1, 4);
+        XGL3AppendLump(&v2, 4);
+        XGL3AppendLump(&line, 2);
+        XGL3AppendLump(&side, 1);
     }
 }
 
 void PutXGL3Segs()
 {
     uint32_t Rawnum = AlignedLittleEndianU32(level_segs.size());
-    ZLibAppendLump(&Rawnum, 4);
+    XGL3AppendLump(&Rawnum, 4);
 
     for (int i = 0; i < level_segs.size(); i++)
     {
@@ -752,10 +693,10 @@ void PutXGL3Segs()
         uint32_t line    = AlignedLittleEndianU32(seg->linedef_ ? seg->linedef_->index : -1);
         uint8_t  side    = (uint8_t)seg->side_;
 
-        ZLibAppendLump(&v1, 4);
-        ZLibAppendLump(&partner, 4);
-        ZLibAppendLump(&line, 4);
-        ZLibAppendLump(&side, 1);
+        XGL3AppendLump(&v1, 4);
+        XGL3AppendLump(&partner, 4);
+        XGL3AppendLump(&line, 4);
+        XGL3AppendLump(&side, 1);
 
 #if AJBSP_DEBUG_BSP
         fprintf(stderr, "SEG[%d] v1=%d partner=%d line=%d side=%d\n", i, v1, partner, line, side);
@@ -782,10 +723,10 @@ static void PutOneZNode(Node *node)
     uint32_t dx = AlignedLittleEndianS32(RoundToInteger(node->dx_ * 65536.0));
     uint32_t dy = AlignedLittleEndianS32(RoundToInteger(node->dy_ * 65536.0));
 
-    ZLibAppendLump(&x, 4);
-    ZLibAppendLump(&y, 4);
-    ZLibAppendLump(&dx, 4);
-    ZLibAppendLump(&dy, 4);
+    XGL3AppendLump(&x, 4);
+    XGL3AppendLump(&y, 4);
+    XGL3AppendLump(&dx, 4);
+    XGL3AppendLump(&dy, 4);
 
     raw.bounding_box_1.minimum_x = AlignedLittleEndianS16(node->r_.bounds.minimum_x);
     raw.bounding_box_1.minimum_y = AlignedLittleEndianS16(node->r_.bounds.minimum_y);
@@ -797,8 +738,8 @@ static void PutOneZNode(Node *node)
     raw.bounding_box_2.maximum_x = AlignedLittleEndianS16(node->l_.bounds.maximum_x);
     raw.bounding_box_2.maximum_y = AlignedLittleEndianS16(node->l_.bounds.maximum_y);
 
-    ZLibAppendLump(&raw.bounding_box_1, sizeof(raw.bounding_box_1));
-    ZLibAppendLump(&raw.bounding_box_2, sizeof(raw.bounding_box_2));
+    XGL3AppendLump(&raw.bounding_box_1, sizeof(raw.bounding_box_1));
+    XGL3AppendLump(&raw.bounding_box_2, sizeof(raw.bounding_box_2));
 
     if (node->r_.node)
         raw.right = AlignedLittleEndianU32(node->r_.node->index_);
@@ -814,8 +755,8 @@ static void PutOneZNode(Node *node)
     else
         FatalError("AJBSP: Bad left child in V5 node %d\n", node->index_);
 
-    ZLibAppendLump(&raw.right, 4);
-    ZLibAppendLump(&raw.left, 4);
+    XGL3AppendLump(&raw.right, 4);
+    XGL3AppendLump(&raw.left, 4);
 
 #if AJBSP_DEBUG_BSP
     LogDebug("PUT Z NODE %08X  Left %08X  Right %08X  "
@@ -828,7 +769,7 @@ static void PutOneZNode(Node *node)
 void PutZNodes(Node *root)
 {
     uint32_t Rawnum = AlignedLittleEndianU32(level_nodes.size());
-    ZLibAppendLump(&Rawnum, 4);
+    XGL3AppendLump(&Rawnum, 4);
 
     node_cur_index = 0;
 
@@ -839,18 +780,18 @@ void PutZNodes(Node *root)
         FatalError("AJBSP: PutZNodes miscounted (%d != %d)\n", node_cur_index, level_nodes.size());
 }
 
-void SaveXGL3Format(epi::File *lump, Node *root_node)
+void SaveXGL3Format(epi::File *nodes_out, Node *root_node)
 {
-    lump->Write(level_ZGL3_magic, 4);
+    nodes_out->Write(level_XGL3_magic, 4);
 
-    ZLibBeginLump(lump);
+    XGL3BeginLump(nodes_out);
 
     PutZVertices();
     PutZSubsecs();
     PutXGL3Segs();
     PutZNodes(root_node);
 
-    ZLibFinishLump();
+    XGL3FinishLump();
 }
 
 /* ----- whole-level routines --------------------------- */
