@@ -216,8 +216,17 @@ Subsector *PointInSubsector(float x, float y)
 
 RegionProperties *GetPointProperties(Subsector *sub, float z)
 {
-    // Review if vert slopes matter here - Dasho   
+    // Review if vert slopes matter here - Dasho
     return sub->sector->active_properties;
+}
+
+RegionProperties *GetViewPointProperties(Subsector *sub, float z)
+{
+    // Review if vert slopes matter here - Dasho
+    if (sub->sector->has_deep_water && z < sub->sector->deep_water_height)
+        return &sub->sector->deep_water_properties;
+    else
+        return sub->sector->active_properties;
 }
 
 //----------------------------------------------------------------------------

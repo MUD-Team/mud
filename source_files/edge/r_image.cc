@@ -138,7 +138,7 @@ static void do_Animate(std::list<Image *> &bucket)
 
         EPI_ASSERT(rim->animation_.count > 0);
 
-        rim->animation_.count -= (!double_framerate.d_) ? 1 : 0;
+        rim->animation_.count--;
 
         if (rim->animation_.count == 0 && rim->animation_.current->animation_.next)
         {

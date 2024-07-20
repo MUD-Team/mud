@@ -401,8 +401,6 @@ void GameTicker(void)
         default:
             break;
         }
-        // ANIMATE FLATS AND TEXTURES GLOBALLY
-        AnimationTicker();
         return;
     }
 
