@@ -134,6 +134,7 @@ EPI_XX(Liquidheight)
 EPI_XX(Liquidcolor)
 EPI_XX(Liquidtexture)
 EPI_XX(Liquidlight)
+EPI_XX(Liquidtrans)
 
 // things
 EPI_XX(Height)

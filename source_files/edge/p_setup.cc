@@ -889,6 +889,7 @@ static void LoadUDMFSectors()
             float     rf = 0.0f, rc = 0.0f;
             float     gravfactor = 1.0f;
             int       light = 160, liquid_light = 144, type = 0, tag = 0;
+            float     liquid_trans = 0.5f;
             RGBAColor fog_color   = SG_BLACK_RGBA32;
             RGBAColor light_color = SG_WHITE_RGBA32;
             RGBAColor liquid_color = SG_STEEL_BLUE_RGBA32;
@@ -1009,6 +1010,9 @@ static void LoadUDMFSectors()
                     break;
                 case epi::kENameLiquidlight:
                     liquid_light = epi::LexInteger(value);
+                    break;
+                case epi::kENameLiquidtrans:
+                    liquid_trans = epi::LexDouble(value);
                     break;
                 default:
                     break;
@@ -1167,7 +1171,7 @@ static void LoadUDMFSectors()
                     colormaps.push_back(ad_hoc);
                 }
                 ss->deep_water_properties.light_level = liquid_light;
-                ss->deep_water_surface.translucency = 1.0f;
+                ss->deep_water_surface.translucency = liquid_trans;
                 ss->deep_water_properties.friction = 0.9f;
                 ss->deep_water_properties.viscosity = 0.7f;
                 ss->deep_water_properties.gravity = 0.1f;

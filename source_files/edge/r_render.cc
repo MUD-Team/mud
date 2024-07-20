@@ -1499,21 +1499,11 @@ static void RendererWalkSubsector(int num)
     // deep water FX
     if (sector->has_deep_water)
     {
-        if (view_z < sector->deep_water_height && view_camera_map_object->player_ 
-            && view_camera_map_object->subsector_->sector == sector)
-        {
-            ceil_h  = sector->deep_water_height;
-            ceil_s  = &sector->deep_water_surface;
-            props   = &sector->deep_water_properties;
-        }
-        else
-        {
-            floor_h = sector->deep_water_height;
-            floor_s = &sector->deep_water_surface;
-        }
+        AddNewDrawFloor(K, floor_h, sector->deep_water_height, sector->deep_water_height, floor_s, &sector->deep_water_surface, &sector->deep_water_properties);
+        AddNewDrawFloor(K, sector->deep_water_height, ceil_h, ceil_h, &sector->deep_water_surface, ceil_s, props);
     }
-
-    AddNewDrawFloor(K, floor_h, ceil_h, ceil_h, floor_s, ceil_s, props);
+    else
+        AddNewDrawFloor(K, floor_h, ceil_h, ceil_h, floor_s, ceil_s, props);
 
     K->floors[0]->is_lowest                     = true;
     K->floors[K->floors.size() - 1]->is_highest = true;
@@ -1749,7 +1739,7 @@ static void InitializeCamera(MapObject *mo, bool full_height, float expand_w)
 
     view_subsector      = mo->subsector_;
     view_vertical_angle = mo->vertical_angle_;
-    view_properties     = GetPointProperties(view_subsector, view_z);
+    view_properties     = GetViewPointProperties(view_subsector, view_z);
 
     if (mo->player_)
     {

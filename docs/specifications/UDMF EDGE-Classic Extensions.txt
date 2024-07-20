@@ -134,6 +134,7 @@ Note: All <bool> fields default to false unless mentioned otherwise.
       liquidtexture = <string>;     // Flat to use for liquid surface. No valid default.
       liquidcolor = <integer>;      // Fog color for this sector, in 0xRRGGBB format. Default is X11's Steel Blue color (0x4682B4).
       liquidlightlevel = <integer>; // Light level when view height is under the liquid surface. Default is 144. (darker than default sector light levels)
+      liquidtrans = <float>;        // Translucency of liquid surface, from 0.0 (full) to 1.0 (none). Default is 0.5.
    }
 
    thing
