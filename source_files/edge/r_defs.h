@@ -112,8 +112,8 @@ struct RegionProperties
     HMM_Vec3 old_push = {{0, 0, 0}};
 
     // sector fog
-    RGBAColor fog_color   = kRGBANoValue;
-    float     fog_density = 0;
+    //RGBAColor fog_color   = kRGBANoValue;
+    //float     fog_density = 0;
 };
 
 //
@@ -150,9 +150,6 @@ struct MapSurface
 
     // lighting override (as in BOOM).  Usually nullptr.
     RegionProperties *override_properties;
-
-    // used for fog boundaries if needed
-    bool fog_wall = false;
 };
 
 // Vertical gap between a floor & a ceiling.

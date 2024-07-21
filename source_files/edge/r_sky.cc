@@ -379,7 +379,7 @@ static void RenderSkyCylinder(void)
     solid_sky_h = sky_h_ratio * 0.75f;
     float cap_z = dist * sky_h_ratio;
 
-    RGBAColor fc_to_use = current_map->outdoor_fog_color_;
+    /*RGBAColor fc_to_use = current_map->outdoor_fog_color_;
     float     fd_to_use = 0.01f * current_map->outdoor_fog_density_;
     // check for sector fog
     if (fc_to_use == kRGBANoValue)
@@ -395,7 +395,7 @@ static void RenderSkyCylinder(void)
         glFogfv(GL_FOG_COLOR, &fc.r);
         glFogf(GL_FOG_DENSITY, std::log1p(fd_to_use * 0.005f));
         glEnable(GL_FOG);
-    }
+    }*/
 
     // Render top cap
     glColor4f(sky_cap_color.r, sky_cap_color.g, sky_cap_color.b, 1.0f);
@@ -452,7 +452,7 @@ static void RenderSkyCylinder(void)
 
     glDisable(GL_BLEND);
     glDisable(GL_ALPHA_TEST);
-    glDisable(GL_FOG);
+    //glDisable(GL_FOG);
 
     RendererRevertSkyMatrices();
 }
@@ -489,7 +489,7 @@ static void RenderSkybox(void)
 
     glColor4fv(col);
 
-    RGBAColor fc_to_use = current_map->outdoor_fog_color_;
+    /*RGBAColor fc_to_use = current_map->outdoor_fog_color_;
     float     fd_to_use = 0.01f * current_map->outdoor_fog_density_;
     // check for sector fog
     if (fc_to_use == kRGBANoValue)
@@ -505,7 +505,7 @@ static void RenderSkybox(void)
         glFogfv(GL_FOG_COLOR, &fc.r);
         glFogf(GL_FOG_DENSITY, std::log1p(fd_to_use * 0.01f));
         glEnable(GL_FOG);
-    }
+    }*/
 
     // top
     glBindTexture(GL_TEXTURE_2D, fake_box[SK].texture[kSkyboxTop]);
@@ -616,7 +616,7 @@ static void RenderSkybox(void)
     glEnd();
 
     glDisable(GL_TEXTURE_2D);
-    glDisable(GL_FOG);
+    //glDisable(GL_FOG);
 
     RendererRevertSkyMatrices();
 }

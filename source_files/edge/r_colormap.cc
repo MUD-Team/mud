@@ -218,7 +218,7 @@ class ColormapShader : public AbstractShader
     virtual void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha, int *pass_var, int blending, bool masked,
                           void *data, ShaderCoordinateFunction func)
     {
-        RGBAColor fc_to_use = fog_color_;
+        /*RGBAColor fc_to_use = fog_color_;
         float     fd_to_use = fog_density_;
         // check for DDFLEVL fog
         if (fc_to_use == kRGBANoValue)
@@ -233,7 +233,10 @@ class ColormapShader : public AbstractShader
                 fc_to_use = current_map->indoor_fog_color_;
                 fd_to_use = 0.01f * current_map->indoor_fog_density_;
             }
-        }
+        }*/
+
+       RGBAColor fc_to_use = kRGBANoValue;
+       float fd_to_use = 0;
 
         RendererVertex *glvert = BeginRenderUnit(shape, num_vert, GL_MODULATE, tex, GL_MODULATE, fade_texture_,
                                                    *pass_var, blending, fc_to_use, fd_to_use);
@@ -359,11 +362,11 @@ class ColormapShader : public AbstractShader
         light_level_ = level;
     }
 
-    void SetFog(RGBAColor fog_color, float fog_density)
+    /*void SetFog(RGBAColor fog_color, float fog_density)
     {
         fog_color_   = fog_color;
         fog_density_ = fog_density;
-    }
+    }*/
 
     void SetSector(Sector *sec)
     {
@@ -409,7 +412,7 @@ AbstractShader *GetColormapShader(const struct RegionProperties *props, int ligh
 
     shader->SetLight(lit_Nom);
 
-    shader->SetFog(props->fog_color, props->fog_density);
+    //shader->SetFog(props->fog_color, props->fog_density);
 
     shader->SetSector(sec);
 

@@ -890,10 +890,10 @@ static void LoadUDMFSectors()
             float     gravfactor = 1.0f;
             int       light = 160, liquid_light = 144, type = 0, tag = 0;
             float     liquid_trans = 0.5f;
-            RGBAColor fog_color   = SG_BLACK_RGBA32;
+            //RGBAColor fog_color   = SG_BLACK_RGBA32;
             RGBAColor light_color = SG_WHITE_RGBA32;
             RGBAColor liquid_color = SG_STEEL_BLUE_RGBA32;
-            int       fog_density = 0;
+            //int       fog_density = 0;
             char      floor_tex[10];
             char      ceil_tex[10];
             char      liquid_tex[10];
@@ -954,12 +954,12 @@ static void LoadUDMFSectors()
                 case epi::kENameLightcolor:
                     light_color = ((uint32_t)epi::LexInteger(value) << 8 | 0xFF);
                     break;
-                case epi::kENameFadecolor:
+                /*case epi::kENameFadecolor:
                     fog_color = ((uint32_t)epi::LexInteger(value) << 8 | 0xFF);
                     break;
                 case epi::kENameFogdensity:
                     fog_density = HMM_Clamp(0, epi::LexInteger(value), 1020);
-                    break;
+                    break;*/
                 case epi::kENameXpanningfloor:
                     fx = epi::LexDouble(value);
                     break;
@@ -1094,7 +1094,7 @@ static void LoadUDMFSectors()
             ss->properties.drag      = kDragDefault;
 
             // Allow UDMF sector light/fog information to override DDFSECT types
-            if (fog_color != SG_BLACK_RGBA32) // All black is the established
+            /*if (fog_color != SG_BLACK_RGBA32) // All black is the established
                                               // UDMF "no fog" color
             {
                 // Prevent UDMF-specified fog color from having our internal 'no
@@ -1118,7 +1118,7 @@ static void LoadUDMFSectors()
             {
                 ss->properties.fog_color   = kRGBANoValue;
                 ss->properties.fog_density = 0;
-            }
+            }*/
             if (light_color != SG_WHITE_RGBA32)
             {
                 if (light_color == kRGBANoValue)

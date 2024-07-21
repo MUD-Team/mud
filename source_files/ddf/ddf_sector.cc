@@ -74,8 +74,8 @@ static const DDFCommandList sect_commands[] = {
     DDF_FIELD("FLOOR_BOB", dummy_sector, floor_bob_, DDFMainGetFloat),
     DDF_FIELD("CEILING_BOB", dummy_sector, ceiling_bob_, DDFMainGetFloat),
 
-    DDF_FIELD("FOG_COLOR", dummy_sector, fog_cmap_, DDFMainGetColourmap),
-    DDF_FIELD("FOG_DENSITY", dummy_sector, fog_density_, DDFMainGetPercent),
+    //DDF_FIELD("FOG_COLOR", dummy_sector, fog_cmap_, DDFMainGetColourmap),
+    //DDF_FIELD("FOG_DENSITY", dummy_sector, fog_density_, DDFMainGetPercent),
 
     {nullptr, nullptr, 0, nullptr}};
 
@@ -163,8 +163,8 @@ static void SectorParseField(const char *field, const char *contents, int index,
 //
 static void SectorFinishEntry(void)
 {
-    if (dynamic_sector->fog_cmap_)
-        dynamic_sector->fog_color_ = dynamic_sector->fog_cmap_->gl_color_;
+    //if (dynamic_sector->fog_cmap_)
+        //dynamic_sector->fog_color_ = dynamic_sector->fog_cmap_->gl_color_;
 }
 
 //
@@ -478,9 +478,9 @@ void SectorType::CopyDetail(SectorType &src)
     floor_bob_   = src.floor_bob_;
     ceiling_bob_ = src.ceiling_bob_;
 
-    fog_cmap_    = src.fog_cmap_;
+    /*fog_cmap_    = src.fog_cmap_;
     fog_color_   = src.fog_color_;
-    fog_density_ = src.fog_density_;
+    fog_density_ = src.fog_density_;*/
 }
 
 void SectorType::Default()
@@ -516,9 +516,9 @@ void SectorType::Default()
     floor_bob_   = 0.0f;
     ceiling_bob_ = 0.0f;
 
-    fog_cmap_    = nullptr;
+    /*fog_cmap_    = nullptr;
     fog_color_   = kRGBANoValue;
-    fog_density_ = 0;
+    fog_density_ = 0;*/
 }
 
 SectorTypeContainer::SectorTypeContainer()

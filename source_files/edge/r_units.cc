@@ -278,8 +278,8 @@ void RenderCurrentUnits(void)
     int active_pass     = 0;
     int active_blending = 0;
 
-    RGBAColor active_fog_rgb     = kRGBANoValue;
-    float     active_fog_density = 0;
+    //RGBAColor active_fog_rgb     = kRGBANoValue;
+    //float     active_fog_density = 0;
 
     for (int i = 0; i < current_render_unit; i++)
         local_unit_map[i] = &local_units[i];
@@ -299,7 +299,7 @@ void RenderCurrentUnits(void)
 
         // detect changes in texture/alpha/blending state
 
-        if (unit->fog_color != kRGBANoValue)
+        /*if (unit->fog_color != kRGBANoValue)
         {
             if (unit->fog_color != active_fog_rgb)
             {
@@ -319,7 +319,7 @@ void RenderCurrentUnits(void)
                 state->Disable(GL_FOG);
         }
         else
-            state->Disable(GL_FOG);
+            state->Disable(GL_FOG);*/
 
         if (active_pass != unit->pass)
         {

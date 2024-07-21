@@ -280,8 +280,8 @@ class dynlight_shader_c : public AbstractShader
                                   : is_additive           ? (GLuint)kTextureEnvironmentDisable
                                                           : GL_MODULATE,
                                   (is_additive && !masked) ? 0 : tex, GL_MODULATE, lim[DL]->TextureId(), *pass_var,
-                                  blending, *pass_var > 0 ? kRGBANoValue : mo->subsector_->sector->properties.fog_color,
-                                  mo->subsector_->sector->properties.fog_density);
+                                  blending, kRGBANoValue, 0/**pass_var > 0 ? kRGBANoValue : mo->subsector_->sector->properties.fog_color,
+                                  mo->subsector_->sector->properties.fog_density*/);
 
             for (int v_idx = 0; v_idx < num_vert; v_idx++)
             {
@@ -421,8 +421,8 @@ class plane_glow_c : public AbstractShader
                                   : is_additive           ? (GLuint)kTextureEnvironmentDisable
                                                           : GL_MODULATE,
                                   (is_additive && !masked) ? 0 : tex, GL_MODULATE, lim[DL]->TextureId(), *pass_var,
-                                  blending, *pass_var > 0 ? kRGBANoValue : mo->subsector_->sector->properties.fog_color,
-                                  mo->subsector_->sector->properties.fog_density);
+                                  blending, kRGBANoValue, 0/**pass_var > 0 ? kRGBANoValue : mo->subsector_->sector->properties.fog_color,
+                                  mo->subsector_->sector->properties.fog_density*/);
 
             for (int v_idx = 0; v_idx < num_vert; v_idx++)
             {
@@ -563,8 +563,8 @@ class wall_glow_c : public AbstractShader
                                   : is_additive           ? (GLuint)kTextureEnvironmentDisable
                                                           : GL_MODULATE,
                                   (is_additive && !masked) ? 0 : tex, GL_MODULATE, lim[DL]->TextureId(), *pass_var,
-                                  blending, *pass_var > 0 ? kRGBANoValue : mo->subsector_->sector->properties.fog_color,
-                                  mo->subsector_->sector->properties.fog_density);
+                                  blending, kRGBANoValue, 0/**pass_var > 0 ? kRGBANoValue : mo->subsector_->sector->properties.fog_color,
+                                  mo->subsector_->sector->properties.fog_density*/);
 
             for (int v_idx = 0; v_idx < num_vert; v_idx++)
             {

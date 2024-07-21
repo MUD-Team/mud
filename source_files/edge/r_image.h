@@ -205,7 +205,6 @@ const Image *ImageLookup(const char *name, ImageNamespace = kImageNamespaceGraph
 const Image *ImageForDummySprite(void);
 const Image *ImageForDummySkin(void);
 const Image *ImageForHomDetect(void);
-const Image *ImageForFogWall(RGBAColor fog_color);
 
 //
 //  IMAGE USAGE
