@@ -94,11 +94,11 @@ class RenderState
                 return;
             enable_texture_2d_[active_texture_ - GL_TEXTURE0] = enabled;
             break;
-        case GL_FOG:
+        /*case GL_FOG:
             if (enable_fog_ == enabled)
                 return;
             enable_fog_ = enabled;
-            break;
+            break;*/
         case GL_ALPHA_TEST:
             if (enable_alpha_test_ == enabled)
                 return;
@@ -233,7 +233,7 @@ class RenderState
         ec_frame_stats.draw_state_change++;
     }
 
-    void FogColor(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha)
+    /*void FogColor(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha)
     {
         if (AlmostEquals(red, fog_color_[0]) && AlmostEquals(green, fog_color_[1]) &&
             AlmostEquals(blue, fog_color_[2]) && AlmostEquals(alpha, fog_color_[3]))
@@ -284,7 +284,7 @@ class RenderState
         fog_density_ = density;
         glFogf(GL_FOG_DENSITY, fog_density_);
         ec_frame_stats.draw_state_change++;
-    }
+    }*/
 
     void BlendFunction(GLenum sfactor, GLenum dfactor)
     {
@@ -367,7 +367,7 @@ class RenderState
         CullFace(GL_BACK);
         Disable(GL_CULL_FACE);
 
-        Disable(GL_FOG);
+        //Disable(GL_FOG);
 
         PolygonOffset(0, 0);
 
@@ -442,7 +442,7 @@ class RenderState
         glClearColor(clear_red_, clear_green_, clear_blue_, clear_alpha_);
         ec_frame_stats.draw_state_change++;
 
-        fog_mode_ = GL_LINEAR;
+        /*fog_mode_ = GL_LINEAR;
         glFogi(GL_FOG_MODE, GL_EXP);
         ec_frame_stats.draw_state_change++;
 
@@ -465,7 +465,7 @@ class RenderState
 
         fog_density_ = 0.0f;
         glFogf(GL_FOG_DENSITY, fog_density_);
-        ec_frame_stats.draw_state_change++;
+        ec_frame_stats.draw_state_change++;*/
 
         polygon_offset_factor_ = 0;
         polygon_offset_units_  = 0;
@@ -514,12 +514,12 @@ class RenderState
     GLenum  alpha_function_;
     GLfloat alpha_function_reference_;
 
-    bool    enable_fog_;
+    /*bool    enable_fog_;
     GLint   fog_mode_;
     GLfloat fog_start_;
     GLfloat fog_end_;
     GLfloat fog_density_;
-    GLfloat fog_color_[4];
+    GLfloat fog_color_[4];*/
 };
 
 RenderState *GetRenderState();

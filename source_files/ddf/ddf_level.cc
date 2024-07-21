@@ -77,10 +77,10 @@ static const DDFCommandList level_commands[] = {
     DDF_FIELD("STATS", dummy_level, wistyle_, DDFLevelGetWistyle),
     DDF_FIELD("LEAVING_BACKGROUND", dummy_level, leavingbggraphic_, DDFMainGetLumpName),
     DDF_FIELD("ENTERING_BACKGROUND", dummy_level, enteringbggraphic_, DDFMainGetLumpName),
-    DDF_FIELD("INDOOR_FOG_COLOR", dummy_level, indoor_fog_cmap_, DDFMainGetColourmap),
-    DDF_FIELD("INDOOR_FOG_DENSITY", dummy_level, indoor_fog_density_, DDFMainGetPercent),
-    DDF_FIELD("OUTDOOR_FOG_COLOR", dummy_level, outdoor_fog_cmap_, DDFMainGetColourmap),
-    DDF_FIELD("OUTDOOR_FOG_DENSITY", dummy_level, outdoor_fog_density_, DDFMainGetPercent),
+    //DDF_FIELD("INDOOR_FOG_COLOR", dummy_level, indoor_fog_cmap_, DDFMainGetColourmap),
+    //DDF_FIELD("INDOOR_FOG_DENSITY", dummy_level, indoor_fog_density_, DDFMainGetPercent),
+    //DDF_FIELD("OUTDOOR_FOG_COLOR", dummy_level, outdoor_fog_cmap_, DDFMainGetColourmap),
+    //DDF_FIELD("OUTDOOR_FOG_DENSITY", dummy_level, outdoor_fog_density_, DDFMainGetPercent),
 
     {nullptr, nullptr, 0, nullptr}};
 
@@ -182,11 +182,11 @@ static void LevelFinishEntry(void)
     if (dynamic_level->episode_name_.empty())
         DDFError("Level entry must have an EPISODE name!\n");
 
-    if (dynamic_level->indoor_fog_cmap_)
+    /*if (dynamic_level->indoor_fog_cmap_)
         dynamic_level->indoor_fog_color_ = dynamic_level->indoor_fog_cmap_->gl_color_;
 
     if (dynamic_level->outdoor_fog_cmap_)
-        dynamic_level->outdoor_fog_color_ = dynamic_level->outdoor_fog_cmap_->gl_color_;
+        dynamic_level->outdoor_fog_color_ = dynamic_level->outdoor_fog_cmap_->gl_color_;*/
 }
 
 static void LevelClearAll(void)
@@ -407,12 +407,12 @@ void MapDefinition::CopyDetail(MapDefinition &src)
     f_pre_ = src.f_pre_;
     f_end_ = src.f_end_;
 
-    indoor_fog_cmap_     = src.indoor_fog_cmap_;
+    /*indoor_fog_cmap_     = src.indoor_fog_cmap_;
     indoor_fog_color_    = src.indoor_fog_color_;
     indoor_fog_density_  = src.indoor_fog_density_;
     outdoor_fog_cmap_    = src.outdoor_fog_cmap_;
     outdoor_fog_color_   = src.outdoor_fog_color_;
-    outdoor_fog_density_ = src.outdoor_fog_density_;
+    outdoor_fog_density_ = src.outdoor_fog_density_;*/
 }
 
 void MapDefinition::Default()
@@ -445,12 +445,12 @@ void MapDefinition::Default()
     f_pre_.Default();
     f_end_.Default();
 
-    indoor_fog_cmap_     = nullptr;
+    /*indoor_fog_cmap_     = nullptr;
     indoor_fog_color_    = kRGBANoValue;
     indoor_fog_density_  = 0;
     outdoor_fog_cmap_    = nullptr;
     outdoor_fog_color_   = kRGBANoValue;
-    outdoor_fog_density_ = 0;
+    outdoor_fog_density_ = 0;*/
 }
 
 //

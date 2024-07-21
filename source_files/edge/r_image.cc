@@ -835,21 +835,6 @@ const Image *ImageForHomDetect(void)
     return dummy_hom[(render_frame_count & 0x10) ? 1 : 0];
 }
 
-const Image *ImageForFogWall(RGBAColor fog_color)
-{
-    std::string fogname = epi::StringFormat("FOGWALL_%d", fog_color);
-    Image      *fogwall = (Image *)ImageLookup(fogname.c_str(), kImageNamespaceGraphic, kImageLookupNull);
-    if (fogwall)
-        return fogwall;
-    ImageDefinition *fogdef = new ImageDefinition;
-    fogdef->colour_         = fog_color;
-    fogdef->name_           = fogname;
-    fogdef->type_           = kImageDataColor;
-    fogdef->belong_         = kImageNamespaceGraphic;
-    fogwall                 = AddImageUser(fogdef);
-    return fogwall;
-}
-
 //----------------------------------------------------------------------------
 //
 //  IMAGE USAGE

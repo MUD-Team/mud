@@ -813,7 +813,7 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum, float f_m
 
     float slope_ch = sec->ceiling_height;
 
-    RGBAColor sec_fc = sec->properties.fog_color;
+    /*RGBAColor sec_fc = sec->properties.fog_color;
     float     sec_fd = sec->properties.fog_density;
     // check for DDFLEVL fog
     if (sec_fc == kRGBANoValue)
@@ -846,27 +846,12 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum, float f_m
                 other_fd = 0.01f * current_map->indoor_fog_density_;
             }
         }
-    }
+    }*/
 
-    if (!sd->middle.image)
-    {
-        if (sec_fc == kRGBANoValue && other_fc != kRGBANoValue)
-        {
-            Image *fw               = (Image *)ImageForFogWall(other_fc);
-            fw->opacity_            = kOpacityComplex;
-            sd->middle.image        = fw;
-            sd->middle.translucency = other_fd * 100;
-            sd->middle.fog_wall     = true;
-        }
-        else if (sec_fc != kRGBANoValue && other_fc != sec_fc)
-        {
-            Image *fw               = (Image *)ImageForFogWall(sec_fc);
-            fw->opacity_            = kOpacityComplex;
-            sd->middle.image        = fw;
-            sd->middle.translucency = sec_fd * 100;
-            sd->middle.fog_wall     = true;
-        }
-    }
+    RGBAColor sec_fc = kRGBANoValue;
+    float     sec_fd = 0;
+    RGBAColor other_fc = kRGBANoValue;
+    float     other_fd = 0;
 
     if (!other)
     {
@@ -960,14 +945,7 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum, float f_m
 
         float f2, c2;
 
-        if (sd->middle.fog_wall)
-        {
-            float ofh = other->floor_height;
-            f2 = f1   = HMM_MAX(HMM_MIN(sec->floor_height, slope_fh), ofh);
-            float och = other->ceiling_height;
-            c2 = c1 = HMM_MIN(HMM_MAX(sec->ceiling_height, slope_ch), och);
-        }
-        else if (ld->flags & kLineFlagLowerUnpegged)
+        if (ld->flags & kLineFlagLowerUnpegged)
         {
             f2 = f1 + sd->middle_mask_offset;
             c2 = f2 + (sd->middle.image->ScaledHeightActual() / sd->middle.y_matrix.Y);

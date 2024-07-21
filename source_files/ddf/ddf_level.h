@@ -149,12 +149,12 @@ class MapDefinition
     // optional *MAPINFO field
     std::string author_;
 
-    Colormap *indoor_fog_cmap_;
-    RGBAColor indoor_fog_color_;
-    float     indoor_fog_density_;
-    Colormap *outdoor_fog_cmap_;
-    RGBAColor outdoor_fog_color_;
-    float     outdoor_fog_density_;
+    //Colormap *indoor_fog_cmap_;
+    //RGBAColor indoor_fog_color_;
+    //float     indoor_fog_density_;
+    //Colormap *outdoor_fog_cmap_;
+    //RGBAColor outdoor_fog_color_;
+    //float     outdoor_fog_density_;
 
   private:
     // disable copy construct and assignment operator

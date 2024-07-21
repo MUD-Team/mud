@@ -252,7 +252,7 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
         trans    = 1.0f;
     }
 
-    RGBAColor fc_to_use = player->map_object_->subsector_->sector->properties.fog_color;
+    /*RGBAColor fc_to_use = player->map_object_->subsector_->sector->properties.fog_color;
     float     fd_to_use = player->map_object_->subsector_->sector->properties.fog_density;
     // check for DDFLEVL fog
     if (fc_to_use == kRGBANoValue)
@@ -267,7 +267,10 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
             fc_to_use = current_map->indoor_fog_color_;
             fd_to_use = 0.01f * current_map->indoor_fog_density_;
         }
-    }
+    }*/
+
+   RGBAColor fc_to_use = kRGBANoValue;
+   float fd_to_use = 0;
 
     if (!is_fuzzy)
     {
@@ -1048,7 +1051,7 @@ void RenderThing(DrawFloor *dfloor, DrawThing *dthing)
 
     int num_pass = is_fuzzy ? 1 : 4;
 
-    RGBAColor fc_to_use = dthing->map_object->subsector_->sector->properties.fog_color;
+    /*RGBAColor fc_to_use = dthing->map_object->subsector_->sector->properties.fog_color;
     float     fd_to_use = dthing->map_object->subsector_->sector->properties.fog_density;
     // check for DDFLEVL fog
     if (fc_to_use == kRGBANoValue)
@@ -1063,7 +1066,10 @@ void RenderThing(DrawFloor *dfloor, DrawThing *dthing)
             fc_to_use = current_map->indoor_fog_color_;
             fd_to_use = 0.01f * current_map->indoor_fog_density_;
         }
-    }
+    }*/
+
+    RGBAColor fc_to_use = kRGBANoValue;
+    float fd_to_use = 0;
 
     for (int pass = 0; pass < num_pass; pass++)
     {

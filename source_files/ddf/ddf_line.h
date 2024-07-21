@@ -720,9 +720,9 @@ class SectorType
     float floor_bob_;
     float ceiling_bob_;
 
-    Colormap *fog_cmap_;
+    /*Colormap *fog_cmap_;
     RGBAColor fog_color_;
-    float     fog_density_;
+    float     fog_density_;*/
 
   private:
     // disable copy construct and assignment operator

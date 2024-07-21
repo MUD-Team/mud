@@ -168,7 +168,7 @@ void RendererSoftInit(void)
     glCullFace(GL_BACK);
     glDisable(GL_CULL_FACE);
 
-    glHint(GL_FOG_HINT, GL_NICEST);
+    //glHint(GL_FOG_HINT, GL_NICEST);
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 }
 
