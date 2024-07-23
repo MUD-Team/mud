@@ -99,7 +99,6 @@ int key_fly_down;
 
 int key_weapons[10];
 
-// Dasho, December 2021: Inventory keys
 int key_inventory_previous;
 int key_inventory_use;
 int key_inventory_next;

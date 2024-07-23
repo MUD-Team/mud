@@ -35,7 +35,7 @@
 class MapObjectDefinition;
 class WeaponDefinition;
 
-constexpr uint8_t kLookupCacheSize = 211; // Why this number? - Dasho
+constexpr uint8_t kLookupCacheSize = 211;
 
 class MobjStringReference
 {
@@ -231,9 +231,9 @@ enum AttackStyle
     kAttackStyleSkullFly,
     kAttackStyleSmartProjectile,
     kAttackStyleSpray,
-    kAttackStyleDualAttack, // Dasho 2023: Execute two independent atkdefs with
+    kAttackStyleDualAttack, // Execute two independent atkdefs with
                             // one command
-    kAttackStylePsychic,    // Dasho 2023: Beta Lost Soul attack
+    kAttackStylePsychic,    // Beta Lost Soul attack
     kTotalAttackStyles
 };
 
@@ -449,7 +449,7 @@ enum WeaponFlag
     WeaponFlagManualReload       = (1 << 10), // enables the manual reload key
     WeaponFlagPartialReload      = (1 << 11), // manual reload: allow partial refill
     // MBF21 flags:
-    // Dasho: This might be useful outside of the MBF21 context, keep for now
+    // This might be useful outside of the MBF21 context, keep for now
     WeaponFlagNoAutoFire = (1 << 12), // Do not fire if switched to while trigger is held
 };
 
@@ -541,12 +541,9 @@ class WeaponDefinition
     // -AJA- 2000/01/12: weapon special flags
     WeaponFlag specials_[4];
 
-    // -AJA- 2000/03/18: when > 0, this weapon can zoom
+    // This is not directly editable by the modder; rather calculated and stored 
+    // by providing "ZOOM_FACTOR"
     int zoom_fov_;
-
-    // Dasho - When > 0, this weapon can zoom and will use this value instead of
-    // zoom_fov
-    float zoom_factor_;
 
     // -AJA- 2000/05/23: weapon loses accuracy when refired.
     bool refire_inacc_;

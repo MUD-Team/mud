@@ -265,7 +265,7 @@ Image *AddPackImageSmart(std::string_view name, ImageSource type, const std::str
 
         solid = (bpp == 3);      
 
-        // grAb chunk check (may go away in the future, but should work with SLADE lmp->png conversions for now - Dasho)
+        // grAb chunk check (will go away in the future, but should work with SLADE lmp->png conversions for now - Dasho)
         f->Seek(0);
         uint8_t *raw_image = f->LoadIntoMemory();
 

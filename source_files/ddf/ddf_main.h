@@ -139,12 +139,6 @@ void        DDFMainFreeDefines();
 
 bool DDFWeaponIsUpgrade(WeaponDefinition *weap, WeaponDefinition *old);
 
-bool        DDFIsBoomLineType(int num);
-bool        DDFIsBoomSectorType(int num);
-void        DDFBoomClearGeneralizedTypes(void);
-LineType   *DDFBoomGetGeneralizedLine(int number);
-SectorType *DDFBoomGetGeneralizedSector(int number);
-
 DDFType DDFFilenameToType(std::string_view path);
 
 void DDFAddFile(DDFType type, std::string &data);

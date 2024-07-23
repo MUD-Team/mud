@@ -437,7 +437,7 @@ enum SectorEffectType
     kSectorEffectTypeCurrentForce = (1 << 14),
     kSectorEffectTypePointForce   = (1 << 15)
     // BOOM's linetype 242 -- deep water effect (etc)
-    // No longer needed - put relevant details directly in UDMF sector structure - Dasho
+    // No longer needed - put relevant details directly in UDMF sector structure
     // kSectorEffectTypeBoomHeights = (1 << 16)
 };
 

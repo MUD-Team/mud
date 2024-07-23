@@ -263,11 +263,6 @@ static MapObject *SpawnMapThing(const MapObjectDefinition *info, float x, float 
     if (InSinglePlayerMatch() && (options & kThingNotSinglePlayer))
         return nullptr;
 
-    // Disable deathmatch weapons for vanilla coop...should probably be in the
-    // Gameplay Options menu - Dasho
-    if (InCooperativeMatch() && (options & kThingNotSinglePlayer))
-        return nullptr;
-
     // -AJA- 1999/09/22: Boom compatibility flags.
     if (InCooperativeMatch() && (options & kThingNotCooperative))
         return nullptr;
@@ -2436,8 +2431,6 @@ void ShutdownLevel(void)
     DestroyAllSliders();
     DestroyAllAmbientSounds();
 
-    DDFBoomClearGeneralizedTypes();
-
     delete[] level_segs;
     level_segs = nullptr;
     delete[] level_nodes;
@@ -2586,9 +2579,6 @@ LineType *LookupLineType(int num)
     if (def)
         return def;
 
-    if (DDFIsBoomLineType(num))
-        return DDFBoomGetGeneralizedLine(num);
-
     LogWarning("P_LookupLineType(): Unknown linedef type %d\n", num);
 
     return linetypes.Lookup(0); // template line
@@ -2604,9 +2594,6 @@ SectorType *LookupSectorType(int num)
     // DDF types always override
     if (def)
         return def;
-
-    if (DDFIsBoomSectorType(num))
-        return DDFBoomGetGeneralizedSector(num);
 
     LogWarning("P_LookupSectorType(): Unknown sector type %d\n", num);
 

@@ -740,7 +740,7 @@ int UpdateSkyboxTextures(void)
     info->face[kSkyboxNorth] =
         ImageLookup(UserSkyFaceName(sky_image->name_.c_str(), kSkyboxNorth), kImageNamespaceTexture, kImageLookupNull);
 
-    // Set colors for faux skybox caps - Dasho
+    // Set colors for faux skybox caps
     ImageData *tmp_img_data = ReadAsEpiBlock((Image *)sky_image);
     sky_cap_color = sg_make_color_1i(tmp_img_data->AverageColor(
         0, sky_image->actual_width_, sky_image->actual_height_ * 3 / 4, sky_image->actual_height_));

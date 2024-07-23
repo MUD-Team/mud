@@ -634,7 +634,6 @@ void CycleWeapon(Player *p, int dir)
 //
 void SelectNewWeapon(Player *p, int priority, AmmunitionType ammo)
 {
-    // int key = -1; - Seems to be unused - Dasho
     WeaponDefinition *info;
 
     for (int i = 0; i < kMaximumWeapons; i++)

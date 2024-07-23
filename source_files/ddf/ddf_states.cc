@@ -677,7 +677,7 @@ void DDFStateGetJump(const char *arg, State *cur_state)
     // JUMP(label)
     // JUMP(label,chance)
 
-    // Dasho 2023.10.16 - Changed to allow negative percentages to use for
+    // 2023.10.16 - Changed to allow negative percentages to use for
     // special values (A_RefireTo ammo check, etc)
 
     if (!arg || !arg[0])

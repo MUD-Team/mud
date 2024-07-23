@@ -480,7 +480,7 @@ static void DrawWallPart(DrawFloor *dfloor, float x1, float y1, float lz1, float
     // -AJA- 2006-06-22: fix for midmask wrapping bug
     if (mid_masked &&
         (!current_seg->linedef->special || AlmostEquals(current_seg->linedef->special->s_yspeed_,
-                                                        0.0f))) // Allow vertical scroller midmasks - Dasho
+                                                        0.0f))) // Allow vertical scroller midmasks
         blending |= kBlendingClampY;
 
     WallCoordinateData data;

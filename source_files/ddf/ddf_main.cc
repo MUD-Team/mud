@@ -1071,11 +1071,6 @@ void DDFMainGetLumpName(const char *info, void *storage)
 
     std::string *LN = (std::string *)storage;
 
-    if (strlen(info) > 8)
-        DDFDebug("Name %s too long for a lump; this is acceptable if referring to a "
-                  "pack file or other special value.\n",
-                  info);
-
     (*LN) = info;
 }
 

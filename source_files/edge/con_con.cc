@@ -797,7 +797,7 @@ void ConsoleHandleKey(int key, bool shift, bool ctrl)
         SetConsoleVisible(kConsoleVisibilityNotVisible);
         break;
 
-    // Allow screenshotting of console too - Dasho
+    // Allow screenshotting of console too
     case kFunction1:
     case kPrintScreen:
         DeferredScreenShot();

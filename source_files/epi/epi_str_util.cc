@@ -32,7 +32,7 @@ namespace epi
 static constexpr uint32_t kBadUnicodeValue = 0xFFFFFFFF;
 
 // The following two functions are adapted from PHYSFS' internal Unicode stuff,
-// but tweaked to account for string_views which are not null terminated - Dasho
+// but tweaked to account for string_views which are not null terminated
 
 static int GetNextUTF8Codepoint(const char *_str, size_t length, uint32_t *u32c)
 {

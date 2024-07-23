@@ -34,7 +34,6 @@ void LogPrint(const char *message, ...);
 void LogDebug(const char *message, ...);
 #endif
 
-// Move these to dedicated EPI math file - Dasho
 inline int RoundToInteger(float x)
 {
     return (int)roundf(x);

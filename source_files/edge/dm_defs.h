@@ -191,7 +191,7 @@ constexpr uint16_t kGamepadTouchpad      = (0x110 + 17);
 constexpr uint16_t kGamepadTriggerLeft   = (0x110 + 18);
 constexpr uint16_t kGamepadTriggerRight  = (0x110 + 19);
 
-// Pseudo-keycodes for program functions - Dasho;
+// Pseudo-keycodes for program functions
 constexpr uint16_t kScreenshot    = (0x110 + 29);
 constexpr uint16_t kSaveGame      = (0x110 + 30);
 constexpr uint16_t kLoadGame      = (0x110 + 31);
@@ -262,26 +262,21 @@ enum LineFlag
     //       be pushed simultaneously.
     kLineFlagBoomPassThrough = 0x0200,
 
-    // 0x0400 is Eternity's 3DMidTex flag - Dasho
+    // 0x0400 is Eternity's 3DMidTex flag
 
-    // Clear extended line flags (BOOM or later spec); needed to repair
-    // mapping/editor errors with historical maps (i.e., E2M7)
-    // Unused now - Dasho
+    // Unused now
     //kLineFlagClearBoomFlags = 0x0800,
 
-    // Was from MBF21, but seems generic enough to be useful - Dasho
     kLineFlagBlockGroundedMonsters = 0x1000,
 
-    // Was from MBF21, but seems generic enough to be useful - Dasho
     kLineFlagBlockPlayers = 0x2000,
 
     // ----- internal flags -----
 
-    // Unused now - Dasho
+    // Unused now
     //kLineFlagMirror = (1 << 16),
 
     // -AJA- These two from XDoom.
-    // Dasho - Moved to internal flag range to make room for MBF21 stuff
     kLineFlagShootBlock = (1 << 17),
 
     kLineFlagSightBlock = (1 << 18),

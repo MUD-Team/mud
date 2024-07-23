@@ -264,7 +264,7 @@ File *FileOpen(const std::string &name, unsigned int flags)
 {
     EPI_ASSERT(!name.empty());
     PHYSFS_File *fp = nullptr;
-    switch (flags) // should only be one - Dasho
+    switch (flags) // should only be one
     {
         case kFileAccessRead:
             fp = PHYSFS_openRead(name.c_str());
