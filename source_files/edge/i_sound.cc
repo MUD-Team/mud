@@ -33,6 +33,7 @@
 #define SOKOL_AUDIO_IMPL
 #define SOKOL_ASSERT(c) EPI_ASSERT(c)
 #include "sokol_audio.h"
+#include "sokol_log.h"
 
 static saudio_desc sound_device_check;
 static bool sound_initialized;
@@ -61,7 +62,7 @@ void SoundFillCallback(float* buffer, int num_frames, int num_channels)
 
 static bool TryOpenSound(int want_freq, bool want_stereo)
 {
-    sound_device_check.logger.func = nullptr; // Point to slog_func later - Dasho
+    sound_device_check.logger.func = slog_func;
     sound_device_check.stream_cb = SoundFillCallback;
     sound_device_check.num_channels = want_stereo ? 2 : 1;
     sound_device_check.sample_rate = want_freq;
@@ -110,7 +111,7 @@ void StartupAudio(void)
         LogPrint("StartupSound: %d Hz sound not available.\n", want_freq);
     }
 
-    sound_device_bytes_per_sample   = sizeof(float); // keep this line in case we ever change audio backends or this size becomes variable - Dasho
+    sound_device_bytes_per_sample   = sizeof(float); // keep this line in case we ever change audio backends or this size becomes variable
     sound_device_samples_per_buffer = sound_device_check.buffer_frames;
 
     EPI_ASSERT(sound_device_bytes_per_sample > 0);

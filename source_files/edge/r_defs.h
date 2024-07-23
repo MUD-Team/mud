@@ -38,10 +38,12 @@ class Image;
 //
 
 //
-// Your plain vanilla vertex.
-// Note: transformed values not buffered locally, like some
-// DOOM-alikes ("wt", "WebView") did.
-// Dasho: Changed to HMM_Vec4
+// Vertex
+// This is the vanilla X/Y coordinates, with
+// the addition of two extra values representing
+// the floor and ceiling heights at this vertex
+// (if part of a vertex slope)
+// 
 typedef HMM_Vec4 Vertex;
 
 // Forward of LineDefs, for Sectors.
@@ -189,7 +191,7 @@ struct Sector
     HMM_Vec2              floor_vertex_slope_high_low;
     HMM_Vec2              ceiling_vertex_slope_high_low;
 
-    // Dasho - Directly store our deep water - a simplified
+    // Directly store our deep water - a simplified
     // version of Boom heights - in the sector info via UDMF
     bool has_deep_water;
     MapSurface deep_water_surface;

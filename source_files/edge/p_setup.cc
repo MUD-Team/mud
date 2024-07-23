@@ -263,11 +263,6 @@ static MapObject *SpawnMapThing(const MapObjectDefinition *info, float x, float 
     if (InSinglePlayerMatch() && (options & kThingNotSinglePlayer))
         return nullptr;
 
-    // Disable deathmatch weapons for vanilla coop...should probably be in the
-    // Gameplay Options menu - Dasho
-    if (InCooperativeMatch() && (options & kThingNotSinglePlayer))
-        return nullptr;
-
     // -AJA- 1999/09/22: Boom compatibility flags.
     if (InCooperativeMatch() && (options & kThingNotCooperative))
         return nullptr;

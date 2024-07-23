@@ -207,9 +207,7 @@ static bool DecideMeleeAttack(MapObject *object, const AttackDefinition *attack)
     if (!target)
         return false;
 
-    distance = ApproximateDistance(target->x - object->x, target->y - object->y);
-    // Can these be consolidated into one 3-dimensional check? - Dasho
-    distance = ApproximateDistance(target->z - object->z, distance);
+    distance = ApproximateDistance(target->x - object->x, target->y - object->y, target->z - object->z);
 
     if (attack)
         meleedist = attack->range_;

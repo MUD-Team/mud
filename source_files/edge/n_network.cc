@@ -43,7 +43,7 @@ bool network_game = false;
 // 70Hz
 EDGE_DEFINE_CONSOLE_VARIABLE(double_framerate, "1", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(busy_wait, "1",
-                             kConsoleVariableFlagReadOnly) // Not sure what to rename this yet - Dasho
+                             kConsoleVariableFlagReadOnly)
 
 #if !defined(__MINGW32__) && (defined(WIN32) || defined(_WIN32) || defined(_WIN64))
 HANDLE windows_timer = nullptr;

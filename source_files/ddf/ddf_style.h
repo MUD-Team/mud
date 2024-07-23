@@ -81,8 +81,6 @@ class CursorStyle
     float translucency_;
 
     std::string alt_cursor_;
-    std::string pos_string_; // Here for user convenience, is translated to a
-                             // value for position
     std::string cursor_string_;
 
     bool force_offsets_;
@@ -165,7 +163,6 @@ class StyleDefinition
 
     int         entry_alignment_;
     int         entry_spacing_;
-    std::string entry_align_string_; // User convenience
 
   private:
     // disable copy construct and assignment operator

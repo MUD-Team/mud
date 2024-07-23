@@ -81,7 +81,7 @@ class FlatDefinitionContainer : public std::vector<FlatDefinition *>
     FlatDefinition *Find(const char *name);
 };
 
-extern FlatDefinitionContainer flatdefs; // -DASHO- 2022 Implemented
+extern FlatDefinitionContainer flatdefs;
 
 void DDFReadFlat(const std::string &data);
 

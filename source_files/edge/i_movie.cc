@@ -51,8 +51,7 @@ static bool MovieSetupAudioStream(int rate)
     plm_set_audio_lead_time(decoder, (double)1024 / ((double)rate));
     movie_sample_rate = rate;
     PauseMusic();
-    // Need to flush Queue to keep movie audio/video from desyncing initially (I
-    // think) - Dasho
+    // Need to flush Queue to keep movie audio/video from desyncing initially
     SoundQueueStop();
     SoundQueueInitialize();
 

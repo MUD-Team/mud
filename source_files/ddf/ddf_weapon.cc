@@ -40,6 +40,7 @@ WeaponDefinitionContainer weapondefs;
 static void DDFWGetAmmo(const char *info, void *storage);
 static void DDFWGetUpgrade(const char *info, void *storage);
 static void DDFWGetSpecialFlags(const char *info, void *storage);
+static void DDFWGetZoomFactor(const char *info, void *storage);
 
 static WeaponDefinition dummy_weapon;
 
@@ -93,8 +94,7 @@ static const DDFCommandList weapon_commands[] = {
     DDF_FIELD("NOTHRUST", dummy_weapon, nothrust_, DDFMainGetBoolean),
     DDF_FIELD("FEEDBACK", dummy_weapon, feedback_, DDFMainGetBoolean),
     DDF_FIELD("KICK", dummy_weapon, kick_, DDFMainGetFloat),
-    DDF_FIELD("ZOOM_FOV", dummy_weapon, zoom_fov_, DDFMainGetNumeric),
-    DDF_FIELD("ZOOM_FACTOR", dummy_weapon, zoom_factor_, DDFMainGetFloat),
+    DDF_FIELD("ZOOM_FACTOR", dummy_weapon, zoom_fov_, DDFWGetZoomFactor),
     DDF_FIELD("REFIRE_INACCURATE", dummy_weapon, refire_inacc_, DDFMainGetBoolean),
     DDF_FIELD("SHOW_CLIP", dummy_weapon, show_clip_, DDFMainGetBoolean),
     DDF_FIELD("SHARED_CLIP", dummy_weapon, shared_clip_, DDFMainGetBoolean),
@@ -520,9 +520,6 @@ static void WeaponFinishEntry(void)
         dynamic_weapon->priority_  = 10;
     }
 
-    if (dynamic_weapon->zoom_factor_ > 0.0)
-        dynamic_weapon->zoom_fov_ = RoundToInteger(90 / dynamic_weapon->zoom_factor_);
-
     // Check MBF21 weapon flags that don't correlate to DDFWEAP flags
     for (std::string &flag : flag_tests)
     {
@@ -613,6 +610,16 @@ static void DDFWGetUpgrade(const char *info, void *storage)
 
     if (*dest == nullptr)
         DDFWarning("Unknown weapon: %s\n", info);
+}
+
+static void DDFWGetZoomFactor(const char *info, void *storage)
+{
+    int *factor = (int *)storage;
+    float mag = 0;
+    DDFMainGetFloat(info, &mag);
+    if (mag > 0)
+        dynamic_weapon->zoom_fov_ = RoundToInteger(90 / mag);
+    
 }
 
 static DDFSpecialFlags weapon_specials[] = {{"SILENT_TO_MONSTERS", WeaponFlagSilentToMonsters, 0},
@@ -757,7 +764,6 @@ void WeaponDefinition::CopyDetail(WeaponDefinition &src)
     bind_key_ = src.bind_key_;
 
     zoom_fov_     = src.zoom_fov_;
-    zoom_factor_  = src.zoom_factor_;
     refire_inacc_ = src.refire_inacc_;
     show_clip_    = src.show_clip_;
     shared_clip_  = src.shared_clip_;
@@ -831,7 +837,6 @@ void WeaponDefinition::Default(void)
     nothrust_     = false;
     bind_key_     = -1;
     zoom_fov_     = kBAMAngle360;
-    zoom_factor_  = 0.0;
     refire_inacc_ = false;
     show_clip_    = false;
     shared_clip_  = false;

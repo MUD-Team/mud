@@ -109,7 +109,6 @@ extern int key_action2; // -AJA- 2009/09/07
 // -AJA- 2010/06/13: weapon and automap stuff
 extern int key_weapons[10];
 
-// Dasho: Inventory handling
 extern int key_inventory_previous;
 extern int key_inventory_use;
 extern int key_inventory_next;

@@ -543,7 +543,7 @@ static bool CheckRelativeLineCallback(Line *ld, void *data)
 
     // Only basic vertex slope checks will work here (simple rectangular slope
     // sides), but more detailed movement checks are made later on so it
-    // shouldn't allow anything crazy - Dasho
+    // shouldn't allow anything crazy
     if (ld->front_sector->floor_vertex_slope || ld->back_sector->floor_vertex_slope)
     {
         DividingLine divver;
@@ -2630,7 +2630,6 @@ static bool RadiusAttackCallback(MapObject *thing, void *data)
 
     // dist is the distance to the *edge* of the thing
     dist = HMM_MAX(dx, dy) - thing->radius_;
-    // Can we consolidate these? - Dasho
     dist = HMM_MAX(dist, dz - thing->height_ / 2);
 
     if (dist < 0)
@@ -2805,14 +2804,17 @@ bool CheckSolidSectorMove(Sector *sec, bool is_ceiling, float dh)
     if (AlmostEquals(dh, 0.0f))
         return true;
 
-    // Test fix for Doom 1 E3M4 crusher bug - Dasho
     if (is_ceiling && dh < 0 && AlmostEquals(sec->ceiling_height, sec->floor_height))
     {
         if (sec->ceiling_move)
-            sec->ceiling_move->destination_height = sec->floor_height - dh;
+            sec->ceiling_move->destination_height = sec->floor_height;
     }
 
-    // May need more checks here - Dasho
+    if (!is_ceiling && dh > 0 && AlmostEquals(sec->ceiling_height, sec->floor_height))
+    {
+        if (sec->floor_move)
+            sec->floor_move->destination_height = sec->ceiling_height;
+    }
 
     return true;
 }

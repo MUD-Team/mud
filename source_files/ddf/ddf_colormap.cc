@@ -101,7 +101,7 @@ static void ColmapFinishEntry(void)
         DDFWarnError("Colourmap entry missing GL_COLOUR.\n");
         // We are now assuming that the intent is to remove all
         // colmaps with this name (i.e., "null" it), as the only way to get here
-        // is to create an empty entry or use gl_color_= NONE; - Dasho
+        // is to create an empty entry or use gl_color_= NONE;
         std::string doomed_name = dynamic_colmap->name_;
         for (std::vector<Colormap *>::iterator iter = colormaps.begin(); iter != colormaps.end(); iter++)
         {

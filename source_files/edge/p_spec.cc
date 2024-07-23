@@ -1025,8 +1025,6 @@ static bool P_ActivateSpecialLine(Line *line, const LineType *special, int tag, 
 
     // Don't let monsters activate crossable special lines that they
     // wouldn't otherwise cross (for now, the edge of a high dropoff)
-    // Note: I believe this assumes no 3D floors, but I think it's a
-    // very particular situation anyway - Dasho
     if (trig == kLineTriggerWalkable && line->back_sector && thing &&
         (thing->info_->extended_flags_ & kExtendedFlagMonster) &&
         !(thing->flags_ & (kMapObjectFlagTeleport | kMapObjectFlagDropOff | kMapObjectFlagFloat)))

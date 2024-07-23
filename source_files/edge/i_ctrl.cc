@@ -319,7 +319,7 @@ static void HandleGamepadButtonEvent(SDL_Event *ev)
     else
         return;
 
-    if (ev->cbutton.button >= SDL_CONTROLLER_BUTTON_MAX) // How would this happen? - Dasho
+    if (ev->cbutton.button >= SDL_CONTROLLER_BUTTON_MAX)
         return;
 
     event.value.key.sym = kGamepadA + ev->cbutton.button;
@@ -594,7 +594,7 @@ void ActiveEventProcess(sapp_event *ev)
     //     HandleGamepadButtonEvent(ev);
     //     break;
 
-    // Analog triggers should be the only thing handled here -Dasho
+    // Analog triggers should be the only thing handled here
     // case SDL_CONTROLLERAXISMOTION:
     //    HandleGamepadTriggerEvent(ev);
     //    break;

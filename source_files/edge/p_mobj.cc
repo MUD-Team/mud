@@ -674,8 +674,7 @@ static inline void AddRegionProperties(const MapObject *mo, float bz, float tz, 
                 }
             }
         }
-        // Average it out a la ZDoom so we aren't getting sent to the shadow
-        // realm in certain Boom maps. Don't think it is necessary for z
+        // Average out the scrolling forces. Don't think it is necessary for z
         // push at this time - Dasho
         if (countx)
             new_p->push.X += (cumulative.X / countx);
@@ -1959,7 +1958,6 @@ void SpawnBlood(float x, float y, float z, float damage, BAMAngle angle, const M
 
 FlatDefinition *P_GetThingFlatDef(MapObject *thing)
 {
-    // Needs to be an EName - Dasho
     return flatdefs.Find(thing->subsector_->sector->floor.image->name_.c_str());
 }
 
@@ -1970,7 +1968,7 @@ FlatDefinition *P_GetThingFlatDef(MapObject *thing)
 //---------------------------------------------------------------------------
 
 // For now, this will mean any floor with an "impact object" that exists when something
-// hits it; this is usually a splash but can be any debris - Dasho
+// hits it; this is usually a splash but can be any debris
 
 bool HitLiquidFloor(MapObject *thing)
 {

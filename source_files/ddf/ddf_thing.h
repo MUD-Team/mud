@@ -162,7 +162,7 @@ enum ExtendedFlag
     // Thing is never affected by friction
     kExtendedFlagNoFriction = (1 << 20),
     // Thing is optional, won't exist when -noextra is used.
-    // kExtendedFlagExtra = (1 << 21), // Legacy, no longer used - Dasho
+    // kExtendedFlagExtra = (1 << 21), // Legacy, no longer used
     // Just bounced, won't enter bounce states until BOUNCE_REARM.
     kExtendedFlagJustBounced = (1 << 22),
     // Thing can be "used" (like linedefs) with the spacebar.  Thing
@@ -201,7 +201,7 @@ enum HyperFlag
     // -AJA- 2006/08/17: used by MT_PUSH and MT_PULL objects
     kHyperFlagPointForce = (1 << 7),
     // -AJA- 2006/10/19: scenery items don't block missiles
-    //kHyperFlagMissilesPassThrough = (1 << 8), // Legacy, no longer used - Dasho
+    //kHyperFlagMissilesPassThrough = (1 << 8), // Legacy, no longer used
     // -AJA- 2007/11/03: invulnerable flag
     kHyperFlagInvulnerable = (1 << 9),
     // -AJA- 2007/11/06: gain health when causing damage
@@ -226,14 +226,11 @@ enum HyperFlag
     kHyperFlagShoveable = (1 << 19),
     // -Lobo- 2022/07/07: this thing doesn't cause splashes
     kHyperFlagNoSplash = (1 << 20),
-    // No longer used - Dasho
+    // No longer used
     //kHyperFlagDehackedCompatibility = (1 << 21),
     // -Lobo- 2023/10/19: this thing will not be affected by thrust forces
     kHyperFlagImmovable = (1 << 22),
-    // Dasho 2023/12/05: this thing is a MUSINFO Music Changer thing
-    // This flag is present because we cannot assume a thing is a
-    // music changer just because it has an ID of 14100-14164
-    // No longer used - Dasho
+    // No longer used
     //kHyperFlagMusicChanger = (1 << 23),
 };
 

@@ -1946,9 +1946,6 @@ void MapObjectDefinition::CopyDetail(MapObjectDefinition &src)
     explode_damage_ = src.explode_damage_;
     explode_radius_ = src.explode_radius_;
 
-    // pickup_message_ = src.pickup_message_;
-    // lose_benefits_ = src.lose_benefits_;
-    // pickup_benefits_ = src.pickup_benefits_;
     if (src.pickup_message_ != "")
     {
         pickup_message_ = src.pickup_message_;
@@ -1956,14 +1953,7 @@ void MapObjectDefinition::CopyDetail(MapObjectDefinition &src)
 
     lose_benefits_   = nullptr;
     pickup_benefits_ = nullptr;
-    kill_benefits_   = nullptr; // I think? - Dasho
-    /*
-    if(src.pickup_benefits_)
-    {
-        LogDebug("%s: Benefits info not inherited from '%s', ",name,
-    src.name_.c_str()); LogDebug("You should define it explicitly.\n");
-    }
-    */
+    kill_benefits_   = nullptr;
 
     pickup_effects_   = src.pickup_effects_;
     initial_benefits_ = src.initial_benefits_;

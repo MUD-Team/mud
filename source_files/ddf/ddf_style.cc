@@ -28,6 +28,8 @@
 StyleDefinition *default_style;
 
 static void DDFStyleGetSpecials(const char *info, void *storage);
+static void DDFStyleGetCursorPosition(const char *info, void *storage);
+static void DDFStyleGetEntryAlignment(const char *info, void *storage);
 
 StyleDefinitionContainer styledefs;
 
@@ -58,7 +60,7 @@ static const DDFCommandList text_commands[] = {
 static CursorStyle dummy_cursorstyle;
 
 static const DDFCommandList cursor_commands[] = {
-    DDF_FIELD("POSITION", dummy_cursorstyle, pos_string_, DDFMainGetString),
+    DDF_FIELD("POSITION", dummy_cursorstyle, position_, DDFStyleGetCursorPosition),
     DDF_FIELD("TRANSLUCENCY", dummy_cursorstyle, translucency_, DDFMainGetPercent),
     DDF_FIELD("IMAGE", dummy_cursorstyle, alt_cursor_, DDFMainGetString),
     DDF_FIELD("STRING", dummy_cursorstyle, cursor_string_, DDFMainGetString),
@@ -97,7 +99,7 @@ static const DDFCommandList style_commands[] = {
     DDF_SUB_LIST("SOUND", dummy_style, sounds_, sound_commands),
     DDF_FIELD("X_OFFSET", dummy_style, x_offset_, DDFMainGetNumeric),
     DDF_FIELD("Y_OFFSET", dummy_style, y_offset_, DDFMainGetNumeric),
-    DDF_FIELD("ENTRY_ALIGNMENT", dummy_style, entry_align_string_, DDFMainGetString),
+    DDF_FIELD("ENTRY_ALIGNMENT", dummy_style, entry_alignment_, DDFStyleGetEntryAlignment),
     DDF_FIELD("ENTRY_SPACING", dummy_style, entry_spacing_, DDFMainGetNumeric),
 
     DDF_FIELD("SPECIAL", dummy_style, special_, DDFStyleGetSpecials),
@@ -153,31 +155,7 @@ static void StyleParseField(const char *field, const char *contents, int index, 
 
 static void StyleFinishEntry(void)
 {
-    if (dynamic_style->cursor_.pos_string_ != "")
-    {
-        const char *pos_str = dynamic_style->cursor_.pos_string_.c_str();
 
-        if (epi::StringCaseCompareASCII(pos_str, "LEFT") == 0)
-            dynamic_style->cursor_.position_ = StyleDefinition::kAlignmentLeft;
-        else if (epi::StringCaseCompareASCII(pos_str, "CENTER") == 0)
-            dynamic_style->cursor_.position_ = StyleDefinition::kAlignmentCenter;
-        else if (epi::StringCaseCompareASCII(pos_str, "RIGHT") == 0)
-            dynamic_style->cursor_.position_ = StyleDefinition::kAlignmentRight;
-        else if (epi::StringCaseCompareASCII(pos_str, "BOTH") == 0)
-            dynamic_style->cursor_.position_ = StyleDefinition::kAlignmentBoth;
-    }
-
-    if (dynamic_style->entry_align_string_ != "")
-    {
-        const char *align_str = dynamic_style->entry_align_string_.c_str();
-
-        if (epi::StringCaseCompareASCII(align_str, "LEFT") == 0)
-            dynamic_style->entry_alignment_ = StyleDefinition::kAlignmentLeft;
-        else if (epi::StringCaseCompareASCII(align_str, "CENTER") == 0)
-            dynamic_style->entry_alignment_ = StyleDefinition::kAlignmentCenter;
-        else if (epi::StringCaseCompareASCII(align_str, "RIGHT") == 0)
-            dynamic_style->entry_alignment_ = StyleDefinition::kAlignmentRight;
-    }
 }
 
 static void StyleClearAll(void)
@@ -251,6 +229,32 @@ void DDFStyleGetSpecials(const char *info, void *storage)
         DDFWarnError("Unknown style special: %s", info);
         break;
     }
+}
+
+static void DDFStyleGetCursorPosition(const char *info, void *storage)
+{
+    int *position = (int *)storage;
+
+    if (epi::StringCaseCompareASCII(info, "LEFT") == 0)
+        *position = StyleDefinition::kAlignmentLeft;
+    else if (epi::StringCaseCompareASCII(info, "CENTER") == 0)
+        *position = StyleDefinition::kAlignmentCenter;
+    else if (epi::StringCaseCompareASCII(info, "RIGHT") == 0)
+        *position = StyleDefinition::kAlignmentRight;
+    else if (epi::StringCaseCompareASCII(info, "BOTH") == 0)
+        *position = StyleDefinition::kAlignmentBoth;
+}
+
+static void DDFStyleGetEntryAlignment(const char *info, void *storage)
+{
+    int *alignment = (int *)storage;
+
+    if (epi::StringCaseCompareASCII(info, "LEFT") == 0)
+        *alignment = StyleDefinition::kAlignmentLeft;
+    else if (epi::StringCaseCompareASCII(info, "CENTER") == 0)
+        *alignment = StyleDefinition::kAlignmentCenter;
+    else if (epi::StringCaseCompareASCII(info, "RIGHT") == 0)
+        *alignment = StyleDefinition::kAlignmentRight;
 }
 
 // --> BackgroundStyle definition class
@@ -403,7 +407,6 @@ void CursorStyle::Default()
 {
     position_      = 0;
     translucency_  = 1.0f;
-    pos_string_    = "";
     alt_cursor_    = "";
     cursor_string_ = "";
     border_        = false;
@@ -420,7 +423,6 @@ CursorStyle &CursorStyle::operator=(const CursorStyle &rhs)
     {
         position_      = rhs.position_;
         translucency_  = rhs.translucency_;
-        pos_string_    = rhs.pos_string_;
         alt_cursor_    = rhs.alt_cursor_;
         cursor_string_ = rhs.cursor_string_;
         border_        = rhs.border_;
@@ -523,7 +525,6 @@ void StyleDefinition::CopyDetail(const StyleDefinition &src)
 
     special_ = src.special_;
 
-    entry_align_string_ = src.entry_align_string_;
     entry_alignment_    = src.entry_alignment_;
     entry_spacing_      = src.entry_spacing_;
 }
@@ -543,12 +544,8 @@ void StyleDefinition::Default()
     x_offset_ = 0;
     y_offset_ = 0;
 
-    special_ = kStyleSpecialNone; //(StyleSpecial)
-                                  // kStyleSpecialStretchFullScreen; // I
-                                  // think this might be better for backwards
-                                  // compat, revert to 0 if needed - Dasho
+    special_ = kStyleSpecialNone;
 
-    entry_align_string_ = "";
     entry_alignment_    = 0;
     entry_spacing_      = 0;
 }

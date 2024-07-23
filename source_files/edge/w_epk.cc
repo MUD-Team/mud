@@ -227,7 +227,7 @@ static void ProcessScripts()
 // are considered directories for our purposes. Everything else is an 
 // entry within said directories, including subfolders and their contents.
 // This makes it easier to reason about things like the "graphics", "sounds",
-// "music" directories - Dasho
+// "music" directories, etc
 static void BuildDirectoryList()
 {
     // Just in case, but we don't do live restarts (yet?)
@@ -414,7 +414,6 @@ void ProcessPackContents()
     }
 
     // Build nodes if not already present for any text files in the /maps directory
-    // Maybe cache the textmaps so we don't have to re-read them on level load? - Dasho
     d = FindDirectory("maps");
     if (d > 0)
     {

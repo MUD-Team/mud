@@ -24,7 +24,6 @@ enum MovieDataType
 {
     kMovieDataNone,    // Default/dummy value
     kMovieDataPackage, // load from an EPK
-    //kMovieDataFile // Do we need loose files? - Dasho
 };
 
 enum MovieScaling

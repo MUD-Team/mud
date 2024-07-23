@@ -28,8 +28,7 @@
 class MapObject;
 
 // Function names in this file deviate from the style guide in order to reflect
-// historical code pointer names and make the Dehacked->DDF->EDGE pipeline
-// easier to track - Dasho
+// historical code pointer names
 
 // Weapon Action Routine pointers
 void A_Light0(MapObject *mo);
@@ -91,7 +90,7 @@ void A_GunFlashFA(MapObject *mo);
 void A_WeaponZoom(MapObject *mo);
 
 // These are weapon actions; the WA_ prefix
-// is to avoid collision with the A_ variants - Dasho
+// is to avoid collision with the A_ variants
 void WA_MoveFwd(MapObject *mo);
 void WA_MoveRight(MapObject *mo);
 void WA_MoveUp(MapObject *mo);

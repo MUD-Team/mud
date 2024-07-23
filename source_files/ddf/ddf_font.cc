@@ -31,6 +31,7 @@ static FontDefinition *dynamic_font;
 
 static void DDFFontGetType(const char *info, void *storage);
 static void DDFFontGetPatch(const char *info, void *storage);
+static void DDFFontGetSmoothing(const char *info, void *storage);
 
 static FontDefinition dummy_font;
 
@@ -40,7 +41,7 @@ static const DDFCommandList font_commands[] = {
     DDF_FIELD("IMAGE", dummy_font, image_name_, DDFMainGetString),
     DDF_FIELD("TTF", dummy_font, truetype_name_, DDFMainGetString),
     DDF_FIELD("DEFAULT_SIZE", dummy_font, default_size_, DDFMainGetFloat),
-    DDF_FIELD("TTF_SMOOTHING", dummy_font, truetype_smoothing_string_, DDFMainGetString),
+    DDF_FIELD("TTF_SMOOTHING", dummy_font, truetype_smoothing_, DDFFontGetSmoothing),
     DDF_FIELD("MISSING_PATCH", dummy_font, missing_patch_, DDFMainGetString),
     DDF_FIELD("SPACING", dummy_font, spacing_, DDFMainGetFloat),
 
@@ -109,16 +110,6 @@ static void FontFinishEntry(void)
 
     if (dynamic_font->type_ == kFontTypeTrueType && dynamic_font->truetype_name_.empty())
         DDFError("Missing font TTF/OTF file name.\n");
-
-    if (dynamic_font->type_ == kFontTypeTrueType && !dynamic_font->truetype_smoothing_string_.empty())
-    {
-        if (epi::StringCaseCompareASCII(dynamic_font->truetype_smoothing_string_, "NEVER") == 0)
-            dynamic_font->truetype_smoothing_ = dynamic_font->kTrueTypeSmoothNever;
-        else if (epi::StringCaseCompareASCII(dynamic_font->truetype_smoothing_string_, "ALWAYS") == 0)
-            dynamic_font->truetype_smoothing_ = dynamic_font->kTrueTypeSmoothAlways;
-        else if (epi::StringCaseCompareASCII(dynamic_font->truetype_smoothing_string_, "ON_DEMAND") == 0)
-            dynamic_font->truetype_smoothing_ = dynamic_font->kTrueTypeSmoothOnDemand;
-    }
 }
 
 static void FontClearAll(void)
@@ -186,6 +177,18 @@ static int FontParseCharacter(const char *buf)
     return buf[0];
 }
 
+static void DDFFontGetSmoothing(const char *info, void *storage)
+{
+    int *smoothing = (int *)storage;
+
+    if (epi::StringCaseCompareASCII(info, "NEVER") == 0)
+        *smoothing = FontDefinition::kTrueTypeSmoothNever;
+    else if (epi::StringCaseCompareASCII(info, "ALWAYS") == 0)
+        *smoothing = FontDefinition::kTrueTypeSmoothAlways;
+    else if (epi::StringCaseCompareASCII(info, "ON_DEMAND") == 0)
+        *smoothing = FontDefinition::kTrueTypeSmoothOnDemand;
+}
+
 //
 // DDFFontGetPatch
 //
@@ -250,7 +253,6 @@ void FontDefinition::CopyDetail(const FontDefinition &src)
     truetype_name_             = src.truetype_name_;
     default_size_              = src.default_size_;
     truetype_smoothing_        = src.truetype_smoothing_;
-    truetype_smoothing_string_ = src.truetype_smoothing_string_;
 }
 
 //
@@ -263,7 +265,6 @@ void FontDefinition::Default()
     default_size_       = 0.0;
     spacing_            = 0.0;
     truetype_smoothing_ = kTrueTypeSmoothOnDemand;
-    truetype_smoothing_string_.clear();
     image_name_.clear();
     missing_patch_.clear();
     truetype_name_.clear();

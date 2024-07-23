@@ -43,7 +43,7 @@
 #include "p_local.h"
 #include "r_state.h"
 
-constexpr float kPushFactor = 64.0f; // should be 128 ?? (why? - Dasho)
+constexpr float kPushFactor = 64.0f;
 
 extern ConsoleVariable double_framerate;
 

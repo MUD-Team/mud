@@ -26,8 +26,6 @@
 namespace epi
 {
 #ifdef _WIN32
-// Technically these are to and from UTF-16, but since these are only for
-// Windows "wide" APIs I think we'll be ok - Dasho
 std::string  WStringToUTF8(std::wstring_view instring);
 std::wstring UTF8ToWString(std::string_view instring);
 #endif

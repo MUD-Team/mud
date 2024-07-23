@@ -51,7 +51,7 @@ bool LoadWAVSound(SoundData *buf, uint8_t *data, int length)
     }
 
     if (wav.totalPCMFrameCount <= 0) // I think the initial loading would fail if this were the case, but
-                                     // just as a sanity check - Dasho
+                                     // just as a sanity check
     {
         LogWarning("WAV SFX Loader: no samples!\n");
         drwav_uninit(&wav);
