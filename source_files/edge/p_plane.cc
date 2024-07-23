@@ -677,25 +677,8 @@ static PlaneMover *P_SetupSectorAction(Sector *sector, const PlaneMoverDefinitio
             model = GetLineSectorSurrounding(sector, plane->destination_height, def->is_ceiling_);
             if (model)
             {
-                if (def->tex_.size() == 1) // Only '-'; do both (default)
-                {
-                    plane->new_image   = SECPIC(model, def->is_ceiling_, nullptr);
-                    plane->new_special = model->properties.special ? model->properties.special->number_ : 0;
-                }
-                else if (epi::StringCaseCompareASCII(def->tex_.substr(1), "changezero") == 0)
-                {
-                    plane->new_image   = SECPIC(model, def->is_ceiling_, nullptr);
-                    plane->new_special = 0;
-                }
-                else if (epi::StringCaseCompareASCII(def->tex_.substr(1), "changetexonly") == 0)
-                {
-                    plane->new_image = SECPIC(model, def->is_ceiling_, nullptr);
-                }
-                else // Unknown directive after '-'; just do default
-                {
-                    plane->new_image   = SECPIC(model, def->is_ceiling_, nullptr);
-                    plane->new_special = model->properties.special ? model->properties.special->number_ : 0;
-                }
+                plane->new_image   = SECPIC(model, def->is_ceiling_, nullptr);
+                plane->new_special = model->properties.special ? model->properties.special->number_ : 0;
                 SECPIC(sector, def->is_ceiling_, plane->new_image);
                 if (plane->new_special != -1)
                 {
@@ -715,25 +698,8 @@ static PlaneMover *P_SetupSectorAction(Sector *sector, const PlaneMoverDefinitio
 
             if (model)
             {
-                if (def->tex_.size() == 1) // Only '+'; do both (default)
-                {
-                    plane->new_image   = SECPIC(model, def->is_ceiling_, nullptr);
-                    plane->new_special = model->properties.special ? model->properties.special->number_ : 0;
-                }
-                else if (epi::StringCaseCompareASCII(def->tex_.substr(1), "changezero") == 0)
-                {
-                    plane->new_image   = SECPIC(model, def->is_ceiling_, nullptr);
-                    plane->new_special = 0;
-                }
-                else if (epi::StringCaseCompareASCII(def->tex_.substr(1), "changetexonly") == 0)
-                {
-                    plane->new_image = SECPIC(model, def->is_ceiling_, nullptr);
-                }
-                else // Unknown directive after '+'; just do default
-                {
-                    plane->new_image   = SECPIC(model, def->is_ceiling_, nullptr);
-                    plane->new_special = model->properties.special ? model->properties.special->number_ : 0;
-                }
+                plane->new_image   = SECPIC(model, def->is_ceiling_, nullptr);
+                plane->new_special = model->properties.special ? model->properties.special->number_ : 0;
 
                 SECPIC(sector, def->is_ceiling_, plane->new_image);
 
@@ -781,25 +747,8 @@ static PlaneMover *P_SetupSectorAction(Sector *sector, const PlaneMoverDefinitio
         model = GetLineSectorSurrounding(sector, plane->destination_height, def->is_ceiling_);
         if (model)
         {
-            if (def->tex_.size() == 1) // Only '-'; do both (default)
-            {
-                plane->new_image   = SECPIC(model, def->is_ceiling_, nullptr);
-                plane->new_special = model->properties.special ? model->properties.special->number_ : 0;
-            }
-            else if (epi::StringCaseCompareASCII(def->tex_.substr(1), "changezero") == 0)
-            {
-                plane->new_image   = SECPIC(model, def->is_ceiling_, nullptr);
-                plane->new_special = 0;
-            }
-            else if (epi::StringCaseCompareASCII(def->tex_.substr(1), "changetexonly") == 0)
-            {
-                plane->new_image = SECPIC(model, def->is_ceiling_, nullptr);
-            }
-            else // Unknown directive after '-'; just do default
-            {
-                plane->new_image   = SECPIC(model, def->is_ceiling_, nullptr);
-                plane->new_special = model->properties.special ? model->properties.special->number_ : 0;
-            }
+            plane->new_image   = SECPIC(model, def->is_ceiling_, nullptr);
+            plane->new_special = model->properties.special ? model->properties.special->number_ : 0;
         }
 
         if (model && plane->direction == (def->is_ceiling_ ? kPlaneDirectionDown : kPlaneDirectionUp))
@@ -823,25 +772,8 @@ static PlaneMover *P_SetupSectorAction(Sector *sector, const PlaneMoverDefinitio
 
         if (model)
         {
-            if (def->tex_.size() == 1) // Only '+'; do both (default)
-            {
-                plane->new_image   = SECPIC(model, def->is_ceiling_, nullptr);
-                plane->new_special = model->properties.special ? model->properties.special->number_ : 0;
-            }
-            else if (epi::StringCaseCompareASCII(def->tex_.substr(1), "changezero") == 0)
-            {
-                plane->new_image   = SECPIC(model, def->is_ceiling_, nullptr);
-                plane->new_special = 0;
-            }
-            else if (epi::StringCaseCompareASCII(def->tex_.substr(1), "changetexonly") == 0)
-            {
-                plane->new_image = SECPIC(model, def->is_ceiling_, nullptr);
-            }
-            else // Unknown directive after '+'; just do default
-            {
-                plane->new_image   = SECPIC(model, def->is_ceiling_, nullptr);
-                plane->new_special = model->properties.special ? model->properties.special->number_ : 0;
-            }
+            plane->new_image   = SECPIC(model, def->is_ceiling_, nullptr);
+            plane->new_special = model->properties.special ? model->properties.special->number_ : 0;
 
             if (plane->direction == (def->is_ceiling_ ? kPlaneDirectionDown : kPlaneDirectionUp))
             {

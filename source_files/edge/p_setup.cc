@@ -2436,8 +2436,6 @@ void ShutdownLevel(void)
     DestroyAllSliders();
     DestroyAllAmbientSounds();
 
-    DDFBoomClearGeneralizedTypes();
-
     delete[] level_segs;
     level_segs = nullptr;
     delete[] level_nodes;
@@ -2586,9 +2584,6 @@ LineType *LookupLineType(int num)
     if (def)
         return def;
 
-    if (DDFIsBoomLineType(num))
-        return DDFBoomGetGeneralizedLine(num);
-
     LogWarning("P_LookupLineType(): Unknown linedef type %d\n", num);
 
     return linetypes.Lookup(0); // template line
@@ -2604,9 +2599,6 @@ SectorType *LookupSectorType(int num)
     // DDF types always override
     if (def)
         return def;
-
-    if (DDFIsBoomSectorType(num))
-        return DDFBoomGetGeneralizedSector(num);
 
     LogWarning("P_LookupSectorType(): Unknown sector type %d\n", num);
 

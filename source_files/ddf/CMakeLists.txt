@@ -6,7 +6,6 @@ add_library(
   edge_ddf
   ddf_anim.cc
   ddf_attack.cc
-  ddf_boom.cc
   ddf_colormap.cc
   ddf_flat.cc
   ddf_font.cc
