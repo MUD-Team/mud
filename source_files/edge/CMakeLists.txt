@@ -86,7 +86,8 @@ endif()
 set (EDGE_LINK_LIBRARIES
   edge_ajbsp  
   edge_ddf
-  edge_epi  
+  edge_epi
+  cglm  
   fluidlite
   sokol
   physfs-static
@@ -124,7 +125,6 @@ target_include_directories(edge-classic PRIVATE ../ddf)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/dr_libs)
 target_include_directories(edge-classic PRIVATE ../epi)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/fluidlite/include)
-target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/cglm/include)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/pl_mpeg)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/stb)
 

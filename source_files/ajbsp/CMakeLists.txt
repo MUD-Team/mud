@@ -13,8 +13,9 @@ add_library(edge_ajbsp
 	bsp_utility.cc
 )
 
+target_link_libraries(edge_ajbsp PRIVATE cglm)
+
 target_include_directories(edge_ajbsp PRIVATE ${EDGE_LIBRARY_DIR}/almostequals)
-target_include_directories(edge_ajbsp PRIVATE ${EDGE_LIBRARY_DIR}/cglm/include)
 target_include_directories(edge_ajbsp PRIVATE ../epi)
 target_include_directories(edge_ajbsp PRIVATE ${EDGE_LIBRARY_DIR}/miniz)
 
