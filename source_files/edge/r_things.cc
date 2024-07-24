@@ -96,9 +96,9 @@ static float GetHoverDeltaZ(MapObject *mo, float bob_mult = 0)
 
 struct PlayerSpriteCoordinateData
 {
-    HMM_Vec3 vertices[4];
-    HMM_Vec2 texture_coordinates[4];
-    HMM_Vec3 light_position;
+    vec3s vertices[4];
+    vec2s texture_coordinates[4];
+    vec3s light_position;
 
     ColorMixer colors[4];
 };
@@ -109,8 +109,8 @@ static void DLIT_PSprite(MapObject *mo, void *dataptr)
 
     EPI_ASSERT(mo->dynamic_light_.shader);
 
-    mo->dynamic_light_.shader->Sample(data->colors + 0, data->light_position.X, data->light_position.Y,
-                                      data->light_position.Z);
+    mo->dynamic_light_.shader->Sample(data->colors + 0, data->light_position.x, data->light_position.y,
+                                      data->light_position.z);
 }
 
 static int GetMulticolMaxRGB(ColorMixer *cols, int num, bool additive)
@@ -121,7 +121,7 @@ static int GetMulticolMaxRGB(ColorMixer *cols, int num, bool additive)
     {
         int mx = additive ? cols->add_MAX() : cols->mod_MAX();
 
-        result = HMM_MAX(result, mx);
+        result = GLM_MAX(result, mx);
     }
 
     return result;
@@ -231,9 +231,9 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
 
     float away = 120.0;
 
-    data.light_position.X = player->map_object_->x + view_cosine * away;
-    data.light_position.Y = player->map_object_->y + view_sine * away;
-    data.light_position.Z =
+    data.light_position.x = player->map_object_->x + view_cosine * away;
+    data.light_position.y = player->map_object_->y + view_sine * away;
+    data.light_position.z =
         player->map_object_->z + player->map_object_->height_ * player->map_object_->info_->shotheight_;
 
     data.colors[0].Clear();
@@ -276,7 +276,7 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
     {
         AbstractShader *shader = GetColormapShader(props, state->bright, player->map_object_->subsector_->sector);
 
-        shader->Sample(data.colors + 0, data.light_position.X, data.light_position.Y, data.light_position.Z);
+        shader->Sample(data.colors + 0, data.light_position.x, data.light_position.y, data.light_position.z);
 
         if (fc_to_use != kRGBANoValue)
         {
@@ -297,18 +297,18 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
 
         if (render_view_extra_light < 250)
         {
-            data.light_position.X = player->map_object_->x + view_cosine * 24;
-            data.light_position.Y = player->map_object_->y + view_sine * 24;
+            data.light_position.x = player->map_object_->x + view_cosine * 24;
+            data.light_position.y = player->map_object_->y + view_sine * 24;
 
             float r = 96;
 
-            DynamicLightIterator(data.light_position.X - r, data.light_position.Y - r, player->map_object_->z,
-                                 data.light_position.X + r, data.light_position.Y + r,
+            DynamicLightIterator(data.light_position.x - r, data.light_position.y - r, player->map_object_->z,
+                                 data.light_position.x + r, data.light_position.y + r,
                                  player->map_object_->z + player->map_object_->height_, DLIT_PSprite, &data);
 
-            SectorGlowIterator(player->map_object_->subsector_->sector, data.light_position.X - r,
-                               data.light_position.Y - r, player->map_object_->z, data.light_position.X + r,
-                               data.light_position.Y + r, player->map_object_->z + player->map_object_->height_,
+            SectorGlowIterator(player->map_object_->subsector_->sector, data.light_position.x - r,
+                               data.light_position.y - r, player->map_object_->z, data.light_position.x + r,
+                               data.light_position.y + r, player->map_object_->z + player->map_object_->height_,
                                DLIT_PSprite, &data);
         }
     }
@@ -363,8 +363,8 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
 
             if (is_fuzzy)
             {
-                dest->texture_coordinates[1].X = dest->position.X / (float)current_screen_width;
-                dest->texture_coordinates[1].Y = dest->position.Y / (float)current_screen_height;
+                dest->texture_coordinates[1].x = dest->position.x / (float)current_screen_width;
+                dest->texture_coordinates[1].y = dest->position.y / (float)current_screen_height;
 
                 FuzzAdjust(&dest->texture_coordinates[1], player->map_object_);
 
@@ -694,9 +694,9 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
     {
         float along = mo->interpolation_position_ / (float)mo->interpolation_number_;
 
-        mx = mo->interpolation_from_.X + (mx - mo->interpolation_from_.X) * along;
-        my = mo->interpolation_from_.Y + (my - mo->interpolation_from_.Y) * along;
-        mz = mo->interpolation_from_.Z + (mz - mo->interpolation_from_.Z) * along;
+        mx = mo->interpolation_from_.x + (mx - mo->interpolation_from_.x) * along;
+        my = mo->interpolation_from_.y + (my - mo->interpolation_from_.y) * along;
+        mz = mo->interpolation_from_.z + (mz - mo->interpolation_from_.z) * along;
     }
 
     float tr_x = mx - view_x;
@@ -874,9 +874,9 @@ struct ThingCoordinateData
 {
     MapObject *mo;
 
-    HMM_Vec3 vertices[4];
-    HMM_Vec2 texture_coordinates[4];
-    HMM_Vec3 normal;
+    vec3s vertices[4];
+    vec2s texture_coordinates[4];
+    vec3s normal;
 
     ColorMixer colors[4];
 };
@@ -893,8 +893,8 @@ static void DLIT_Thing(MapObject *mo, void *dataptr)
 
     for (int v = 0; v < 4; v++)
     {
-        mo->dynamic_light_.shader->Sample(data->colors + v, data->vertices[v].X, data->vertices[v].Y,
-                                          data->vertices[v].Z);
+        mo->dynamic_light_.shader->Sample(data->colors + v, data->vertices[v].x, data->vertices[v].y,
+                                          data->vertices[v].z);
     }
 }
 
@@ -1010,7 +1010,7 @@ void RenderThing(DrawFloor *dfloor, DrawThing *dthing)
         blending |= kBlendingNoZBuffer;
 
     float    fuzz_mul = 0;
-    HMM_Vec2 fuzz_add;
+    vec2s fuzz_add;
 
     fuzz_add = {{0, 0}};
 
@@ -1021,7 +1021,7 @@ void RenderThing(DrawFloor *dfloor, DrawThing *dthing)
 
         float dist = ApproximateDistance(mo->x - view_x, mo->y - view_y, mo->z - view_z);
 
-        fuzz_mul = 0.8 / HMM_Clamp(20, dist, 700);
+        fuzz_mul = 0.8 / glm_clamp(20, dist, 700);
 
         FuzzAdjust(&fuzz_add, mo);
     }
@@ -1032,7 +1032,7 @@ void RenderThing(DrawFloor *dfloor, DrawThing *dthing)
 
         for (int v = 0; v < 4; v++)
         {
-            shader->Sample(data.colors + v, data.vertices[v].X, data.vertices[v].Y, data.vertices[v].Z);
+            shader->Sample(data.colors + v, data.vertices[v].x, data.vertices[v].y, data.vertices[v].z);
         }
 
         if (render_view_extra_light < 250)
@@ -1112,8 +1112,8 @@ void RenderThing(DrawFloor *dfloor, DrawThing *dthing)
                 float ftx = (v_idx >= 2) ? (mo->radius_ * 2) : 0;
                 float fty = (v_idx == 1 || v_idx == 2) ? (mo->height_) : 0;
 
-                dest->texture_coordinates[1].X = ftx * fuzz_mul + fuzz_add.X;
-                dest->texture_coordinates[1].Y = fty * fuzz_mul + fuzz_add.Y;
+                dest->texture_coordinates[1].x = ftx * fuzz_mul + fuzz_add.x;
+                dest->texture_coordinates[1].y = fty * fuzz_mul + fuzz_add.y;
                 ;
 
                 dest->rgba_color[0] = dest->rgba_color[1] = dest->rgba_color[2] = 0;

@@ -65,7 +65,7 @@ extern ConsoleVariable renderer_near_clip;
 
 inline float FastApproximateDistance(float delta_x, float delta_y)
 {
-    return ((delta_x) + (delta_y)-0.5f * HMM_MIN((delta_x), (delta_y)));
+    return ((delta_x) + (delta_y)-0.5f * GLM_MIN((delta_x), (delta_y)));
 }
 
 //----------------------------------------------------------------------------

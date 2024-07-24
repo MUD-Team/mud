@@ -20,6 +20,7 @@
 #include <stdarg.h>
 #include <string.h>
 
+#include "cglm/struct.h"
 #include "ddf_anim.h"
 #include "ddf_colormap.h"
 #include "ddf_font.h"
@@ -27,15 +28,12 @@
 #include "ddf_local.h"
 #include "ddf_style.h"
 #include "ddf_switch.h"
-// EPI
 #include "epi.h"
 #include "epi_filesystem.h"
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
-#include "sokol_color.h"
-
-// EDGE
 #include "p_action.h"
+#include "sokol_color.h"
 
 enum DDFReadStatus
 {
@@ -1097,7 +1095,7 @@ int DDFMainLookupDirector(const MapObjectDefinition *info, const char *ref)
     std::string director(ref, len);
 
     int state  = DDFStateFindLabel(info->state_grp_, director.c_str());
-    int offset = p ? HMM_MAX(0, atoi(p + 1) - 1) : 0;
+    int offset = p ? GLM_MAX(0, atoi(p + 1) - 1) : 0;
 
     // FIXME: check for overflow
     return state + offset;
@@ -1150,7 +1148,7 @@ void DDFMainGetSlope(const char *info, void *storage)
     if (val < -89.5f)
         val = -89.5f;
 
-    *dest = tan(val * HMM_PI / 180.0);
+    *dest = tanf(val * GLM_PIf / 180.0f);
 }
 
 static void DoGetFloat(const char *info, void *storage)
@@ -1187,7 +1185,7 @@ void DDFMainGetPercent(const char *info, void *storage)
         DDFWarnError("Bad percent value '%s': Should be a number followed by %%\n", info);
         // -AJA- 2001/01/27: backwards compatibility
         DoGetFloat(s, &f);
-        *dest = HMM_MAX(0, HMM_MIN(1, f));
+        *dest = GLM_MAX(0, GLM_MIN(1, f));
         return;
     }
 

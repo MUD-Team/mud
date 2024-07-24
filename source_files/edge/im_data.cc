@@ -22,7 +22,7 @@
 
 #include <unordered_map>
 
-#include "HandmadeMath.h"
+#include "cglm/struct.h"
 #include "epi.h"
 #include "epi_color.h"
 #include "sokol_color.h"
@@ -57,7 +57,7 @@ void ImageData::Whiten()
         {
             uint8_t *src = PixelAt(x, y);
 
-            int ity = HMM_MAX(src[0], HMM_MAX(src[1], src[2]));
+            int ity = GLM_MAX(src[0], GLM_MAX(src[1], src[2]));
 
             // soften the above equation, take average into account
             ity = (ity * 196 + src[0] * 20 + src[1] * 20 + src[2] * 20) >> 8;
@@ -151,8 +151,8 @@ void ImageData::Shrink(uint16_t new_w, uint16_t new_h)
             }
     }
 
-    used_width_  = HMM_MAX(1, used_width_ * new_w / width_);
-    used_height_ = HMM_MAX(1, used_height_ * new_h / height_);
+    used_width_  = GLM_MAX(1, used_width_ * new_w / width_);
+    used_height_ = GLM_MAX(1, used_height_ * new_h / height_);
 
     width_  = new_w;
     height_ = new_h;
@@ -213,8 +213,8 @@ void ImageData::ShrinkMasked(uint16_t new_w, uint16_t new_h)
             }
         }
 
-    used_width_  = HMM_MAX(1, used_width_ * new_w / width_);
-    used_height_ = HMM_MAX(1, used_height_ * new_h / height_);
+    used_width_  = GLM_MAX(1, used_width_ * new_w / width_);
+    used_height_ = GLM_MAX(1, used_height_ * new_h / height_);
 
     width_  = new_w;
     height_ = new_h;
@@ -418,7 +418,7 @@ uint16_t ImageData::ImageCharacterWidth(uint16_t x1, uint16_t y1, uint16_t x2, u
         if (found_last && last <= x2 && last > last_last)
             last_last = last;
     }
-    return HMM_MAX(last_last - first_first, 0) + 3; // Some padding on each side of the letter
+    return GLM_MAX(last_last - first_first, 0) + 3; // Some padding on each side of the letter
 }
 
 void ImageData::AverageHue(uint8_t *hue, uint8_t *ity, int from_x, int to_x, int from_y, int to_y)
@@ -434,10 +434,10 @@ void ImageData::AverageHue(uint8_t *hue, uint8_t *ity, int from_x, int to_x, int
     int weight = 0;
 
     // Sanity checking; at a minimum sample a 1x1 portion of the image
-    from_x = HMM_Clamp(0, from_x, used_width_ - 1);
-    to_x   = HMM_Clamp(1, to_x, used_height_);
-    from_y = HMM_Clamp(0, from_y, used_height_ - 1);
-    to_y   = HMM_Clamp(1, to_y, used_height_);
+    from_x = glm_clamp(0, from_x, used_width_ - 1);
+    to_x   = glm_clamp(1, to_x, used_height_);
+    from_y = glm_clamp(0, from_y, used_height_ - 1);
+    to_y   = glm_clamp(1, to_y, used_height_);
 
     for (int y = from_y; y < to_y; y++)
     {
@@ -450,7 +450,7 @@ void ImageData::AverageHue(uint8_t *hue, uint8_t *ity, int from_x, int to_x, int
             int b = src[2];
             int a = (depth_ == 4) ? src[3] : 255;
 
-            int v = HMM_MAX(r, HMM_MAX(g, b));
+            int v = GLM_MAX(r, GLM_MAX(g, b));
 
             i_sum += (v * (1 + a)) >> 9;
 
@@ -467,7 +467,7 @@ void ImageData::AverageHue(uint8_t *hue, uint8_t *ity, int from_x, int to_x, int
             // compute weighting (based on saturation)
             if (v > 0)
             {
-                int m = HMM_MIN(r, HMM_MIN(g, b));
+                int m = GLM_MIN(r, GLM_MIN(g, b));
 
                 v = 4 + 12 * (v - m) / v;
             }
@@ -514,10 +514,10 @@ RGBAColor ImageData::AverageColor(int from_x, int to_x, int from_y, int to_y)
     std::unordered_map<RGBAColor, unsigned int> seen_colors;
 
     // Sanity checking; at a minimum sample a 1x1 portion of the image
-    from_x = HMM_Clamp(0, from_x, used_width_ - 1);
-    to_x   = HMM_Clamp(1, to_x, used_height_);
-    from_y = HMM_Clamp(0, from_y, used_height_ - 1);
-    to_y   = HMM_Clamp(1, to_y, used_height_);
+    from_x = glm_clamp(0, from_x, used_width_ - 1);
+    to_x   = glm_clamp(1, to_x, used_height_);
+    from_y = glm_clamp(0, from_y, used_height_ - 1);
+    to_y   = glm_clamp(1, to_y, used_height_);
 
     for (int y = from_y; y < to_y; y++)
     {
@@ -566,10 +566,10 @@ RGBAColor ImageData::LightestColor(int from_x, int to_x, int from_y, int to_y)
     int lightest_b     = 0;
 
     // Sanity checking; at a minimum sample a 1x1 portion of the image
-    from_x = HMM_Clamp(0, from_x, used_width_ - 1);
-    to_x   = HMM_Clamp(1, to_x, used_height_);
-    from_y = HMM_Clamp(0, from_y, used_height_ - 1);
-    to_y   = HMM_Clamp(1, to_y, used_height_);
+    from_x = glm_clamp(0, from_x, used_width_ - 1);
+    to_x   = glm_clamp(1, to_x, used_height_);
+    from_y = glm_clamp(0, from_y, used_height_ - 1);
+    to_y   = glm_clamp(1, to_y, used_height_);
 
     for (int y = from_y; y < to_y; y++)
     {
@@ -604,10 +604,10 @@ RGBAColor ImageData::DarkestColor(int from_x, int to_x, int from_y, int to_y)
     int darkest_b     = 0;
 
     // Sanity checking; at a minimum sample a 1x1 portion of the image
-    from_x = HMM_Clamp(0, from_x, used_width_ - 1);
-    to_x   = HMM_Clamp(1, to_x, used_height_);
-    from_y = HMM_Clamp(0, from_y, used_height_ - 1);
-    to_y   = HMM_Clamp(1, to_y, used_height_);
+    from_x = glm_clamp(0, from_x, used_width_ - 1);
+    to_x   = glm_clamp(1, to_x, used_height_);
+    from_y = glm_clamp(0, from_y, used_height_ - 1);
+    to_y   = glm_clamp(1, to_y, used_height_);
 
     for (int y = from_y; y < to_y; y++)
     {
@@ -660,8 +660,8 @@ void ImageData::SetHsv(int rotation, int saturation, int value)
 {
     EPI_ASSERT(depth_ >= 3);
 
-    rotation   = HMM_Clamp(-1800, rotation, 1800);
-    saturation = HMM_Clamp(-1, saturation, 255);
+    rotation   = glm_clamp(-1800, rotation, 1800);
+    saturation = glm_clamp(-1, saturation, 255);
 
     for (int y = 0; y < height_; y++)
         for (int x = 0; x < width_; x++)
@@ -679,7 +679,7 @@ void ImageData::SetHsv(int rotation, int saturation, int value)
                 hue.SetSaturation(saturation);
 
             if (value)
-                hue.SetValue(HMM_Clamp(0, hue.v_ + value, 255));
+                hue.SetValue(glm_clamp(0, hue.v_ + value, 255));
 
             col = hue.ToRGBA();
 

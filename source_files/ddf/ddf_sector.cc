@@ -22,6 +22,7 @@
 
 #include <string.h>
 
+#include "cglm/struct.h"
 #include "ddf_colormap.h"
 #include "ddf_line.h"
 #include "ddf_local.h"
@@ -88,7 +89,7 @@ static const DDFCommandList sect_commands[] = {
 //
 static void SectorStartEntry(const char *name, bool extend)
 {
-    int number = HMM_MAX(0, atoi(name));
+    int number = GLM_MAX(0, atoi(name));
 
     if (number == 0)
         DDFError("Bad sectortype number in sectors.ddf: %s\n", name);
@@ -118,7 +119,7 @@ static void SectorStartEntry(const char *name, bool extend)
 
 static void SectorDoTemplate(const char *contents)
 {
-    int number = HMM_MAX(0, atoi(contents));
+    int number = GLM_MAX(0, atoi(contents));
     if (number == 0)
         DDFError("Bad sectortype number for template: %s\n", contents);
 

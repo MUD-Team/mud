@@ -34,7 +34,7 @@
 extern const Image *fuzz_image;
 
 void FuzzUpdate(void);
-void FuzzAdjust(HMM_Vec2 *tc, MapObject *mo);
+void FuzzAdjust(vec2s *tc, MapObject *mo);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

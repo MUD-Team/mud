@@ -165,25 +165,25 @@ class dynlight_shader_c : public AbstractShader
     }
 
   private:
-    inline float TexCoord(HMM_Vec2 *texc, float r, const HMM_Vec3 *lit_pos, const HMM_Vec3 *normal)
+    inline float TexCoord(vec2s *texc, float r, const vec3s *lit_pos, const vec3s *normal)
     {
         float mx = mo->x;
         float my = mo->y;
         float mz = MapObjectMidZ(mo);
 
-        float dx = lit_pos->X - mx;
-        float dy = lit_pos->Y - my;
-        float dz = lit_pos->Z - mz;
+        float dx = lit_pos->x - mx;
+        float dy = lit_pos->y - my;
+        float dz = lit_pos->z - mz;
 
-        float nx = normal->X;
-        float ny = normal->Y;
-        float nz = normal->Z;
+        float nx = normal->x;
+        float ny = normal->y;
+        float nz = normal->z;
 
         if (fabs(nz) > 50 * (fabs(nx) + fabs(ny)))
         {
             /* horizontal plane */
-            texc->X = (1 + dx / r) / 2.0;
-            texc->Y = (1 + dy / r) / 2.0;
+            texc->x = (1 + dx / r) / 2.0;
+            texc->y = (1 + dy / r) / 2.0;
 
             return fabs(dz) / r;
         }
@@ -199,8 +199,8 @@ class dynlight_shader_c : public AbstractShader
 
             r /= sqrt(nx * nx + ny * ny); // correct ??
 
-            texc->Y = (1 + dz / r) / 2.0;
-            texc->X = (1 + dxy / r) / 2.0;
+            texc->y = (1 + dz / r) / 2.0;
+            texc->x = (1 + dxy / r) / 2.0;
 
             return fabs(nx * dx + ny * dy + nz * dz) / r;
         }
@@ -287,7 +287,7 @@ class dynlight_shader_c : public AbstractShader
             {
                 RendererVertex *dest = glvert + v_idx;
 
-                HMM_Vec3 lit_pos;
+                vec3s lit_pos;
 
                 (*func)(data, v_idx, &dest->position, dest->rgba_color, &dest->texture_coordinates[0], &dest->normal,
                         &lit_pos);
@@ -345,10 +345,10 @@ class plane_glow_c : public AbstractShader
             return fabs(sec->ceiling_height - z); // kSectorGlowTypeCeiling
     }
 
-    inline void TexCoord(HMM_Vec2 *texc, float r, const Sector *sec, const HMM_Vec3 *lit_pos, const HMM_Vec3 *normal)
+    inline void TexCoord(vec2s *texc, float r, const Sector *sec, const vec3s *lit_pos, const vec3s *normal)
     {
-        texc->X = 0.5;
-        texc->Y = 0.5 + Dist(sec, lit_pos->Z) / r / 2.0;
+        texc->x = 0.5;
+        texc->y = 0.5 + Dist(sec, lit_pos->z) / r / 2.0;
     }
 
     inline float WhatRadius(int DL)
@@ -428,7 +428,7 @@ class plane_glow_c : public AbstractShader
             {
                 RendererVertex *dest = glvert + v_idx;
 
-                HMM_Vec3 lit_pos;
+                vec3s lit_pos;
 
                 (*func)(data, v_idx, &dest->position, dest->rgba_color, &dest->texture_coordinates[0], &dest->normal,
                         &lit_pos);
@@ -469,13 +469,13 @@ class wall_glow_c : public AbstractShader
 
     inline float Dist(float x, float y)
     {
-        return (ld->vertex_1->X - x) * norm_x + (ld->vertex_1->Y - y) * norm_y;
+        return (ld->vertex_1->x - x) * norm_x + (ld->vertex_1->y - y) * norm_y;
     }
 
-    inline void TexCoord(HMM_Vec2 *texc, float r, const Sector *sec, const HMM_Vec3 *lit_pos, const HMM_Vec3 *normal)
+    inline void TexCoord(vec2s *texc, float r, const Sector *sec, const vec3s *lit_pos, const vec3s *normal)
     {
-        texc->X = 0.5;
-        texc->Y = 0.5 + Dist(lit_pos->X, lit_pos->Y) / r / 2.0;
+        texc->x = 0.5;
+        texc->y = 0.5 + Dist(lit_pos->x, lit_pos->y) / r / 2.0;
     }
 
     inline float WhatRadius(int DL)
@@ -501,8 +501,8 @@ class wall_glow_c : public AbstractShader
     {
         EPI_ASSERT(mo->dynamic_light_.glow_wall);
         ld     = mo->dynamic_light_.glow_wall;
-        norm_x = (ld->vertex_1->Y - ld->vertex_2->Y) / ld->length;
-        norm_y = (ld->vertex_2->X - ld->vertex_1->X) / ld->length;
+        norm_x = (ld->vertex_1->y - ld->vertex_2->y) / ld->length;
+        norm_y = (ld->vertex_2->x - ld->vertex_1->x) / ld->length;
         // Note: these are shared, we must not delete them
         lim[0] = GetLightImage(mo->info_, 0);
         lim[1] = GetLightImage(mo->info_, 1);
@@ -570,7 +570,7 @@ class wall_glow_c : public AbstractShader
             {
                 RendererVertex *dest = glvert + v_idx;
 
-                HMM_Vec3 lit_pos;
+                vec3s lit_pos;
 
                 (*func)(data, v_idx, &dest->position, dest->rgba_color, &dest->texture_coordinates[0], &dest->normal,
                         &lit_pos);

@@ -23,6 +23,7 @@
 
 #include <string.h>
 
+#include "cglm/struct.h"
 #include "ddf_local.h"
 #include "epi_bitset.h"
 #include "epi_str_util.h"
@@ -457,7 +458,7 @@ static void DDFAtkGetLabel(const char *info, void *storage)
         DDFError("Bad State `%s'.\n", info);
 
     lab->label_  = std::string(info, i);
-    lab->offset_ = div ? HMM_MAX(0, atoi(div + 1) - 1) : 0;
+    lab->offset_ = div ? GLM_MAX(0, atoi(div + 1) - 1) : 0;
 }
 
 // Attack definition class

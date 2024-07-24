@@ -329,13 +329,13 @@ static void HostChangeOption(int opt, int key)
 
     case 5: // Bot Skill
         bot_skill = bot_skill.d_ + dir;
-        bot_skill = HMM_Clamp(0, bot_skill.d_, 4);
+        bot_skill = glm_clamp(0, bot_skill.d_, 4);
 
         break;
 
     case 6:
         player_deathmatch_damage_resistance = player_deathmatch_damage_resistance.d_ + dir;
-        player_deathmatch_damage_resistance = HMM_Clamp(0, player_deathmatch_damage_resistance.d_, 18);
+        player_deathmatch_damage_resistance = glm_clamp(0, player_deathmatch_damage_resistance.d_, 18);
 
         break;
 

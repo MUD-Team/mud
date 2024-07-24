@@ -138,7 +138,7 @@ GLuint UploadTexture(ImageData *img, int flags, int max_pix)
     // but we must also disable Trilinear Mipmapping because it will
     // produce partial alpha values when interpolating between mips.
     if (flags & kUploadThresh)
-        mip_level = HMM_Clamp(0, mip_level, 1);
+        mip_level = glm_clamp(0, mip_level, 1);
 
     static GLuint minif_modes[2 * 3] = {GL_NEAREST, GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST_MIPMAP_LINEAR,
 
@@ -163,8 +163,8 @@ GLuint UploadTexture(ImageData *img, int flags, int max_pix)
         if (nomip || (new_w == 1 && new_h == 1))
             break;
 
-        new_w = HMM_MAX(1, new_w / 2);
-        new_h = HMM_MAX(1, new_h / 2);
+        new_w = GLM_MAX(1, new_w / 2);
+        new_h = GLM_MAX(1, new_h / 2);
 
         // -AJA- 2003/12/05: workaround for Radeon 7500 driver bug, which
         //       incorrectly draws the 1x1 mip texture as black.

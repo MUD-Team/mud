@@ -26,6 +26,8 @@ add_library(
   ddf_weapon.cc
 )
 
+target_link_libraries(edge_ddf PRIVATE cglm)
+
 target_include_directories(edge_ddf PRIVATE ${EDGE_LIBRARY_DIR}/almostequals)
 target_include_directories(edge_ddf PRIVATE ../edge)
 target_include_directories(edge_ddf PRIVATE ../epi)

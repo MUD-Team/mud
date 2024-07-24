@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------
-//  DDF Commaon/Shared Types
+//  DDF Common/Shared Types
 //----------------------------------------------------------------------------
 //
 //  Copyright (c) 1999-2024 The EDGE Team.
@@ -28,6 +28,7 @@
 #include <string>
 #include <vector>
 
+#include "cglm/struct.h"
 #include "epi_bam.h"
 #include "epi_bitset.h"
 #include "epi_color.h"
@@ -577,8 +578,8 @@ class WeaponDefinition
   public:
     inline int KeyPri(int idx) const // next/prev order value
     {
-        int key = 1 + HMM_MAX(-1, HMM_MIN(10, bind_key_));
-        int pri = 1 + HMM_MAX(-1, HMM_MIN(900, priority_));
+        int key = 1 + GLM_MAX(-1, GLM_MIN(10, bind_key_));
+        int pri = 1 + GLM_MAX(-1, GLM_MIN(900, priority_));
 
         return (pri * 20 + key) * 100 + idx;
     }

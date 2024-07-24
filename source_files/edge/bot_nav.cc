@@ -242,8 +242,8 @@ void nav_area_c::compute_middle(const Subsector &sub)
 
     for (const Seg *seg = sub.segs; seg != nullptr; seg = seg->subsector_next, total += 1)
     {
-        sum_x += seg->vertex_1->X;
-        sum_y += seg->vertex_1->Y;
+        sum_x += seg->vertex_1->x;
+        sum_y += seg->vertex_1->y;
     }
 
     if (total == 0)
@@ -468,8 +468,8 @@ static float BotTraverseLinkCost(int cur, const nav_link_c &link, bool allow_doo
         else
         {
             // enough vertical space?
-            float high_f = HMM_MAX(s1->floor_height, s2->floor_height);
-            float low_c  = HMM_MIN(s1->ceiling_height, s2->ceiling_height);
+            float high_f = GLM_MAX(s1->floor_height, s2->floor_height);
+            float low_c  = GLM_MIN(s1->ceiling_height, s2->ceiling_height);
 
             if (low_c - high_f < 56.0f)
                 return -1;
@@ -547,8 +547,8 @@ static void BotStoreSegMiddle(BotPath *path, int flags, const Seg *seg)
     // calc middle of the adjoining seg
     Position pos;
 
-    pos.x = (seg->vertex_1->X + seg->vertex_2->X) * 0.5f;
-    pos.y = (seg->vertex_1->Y + seg->vertex_2->Y) * 0.5f;
+    pos.x = (seg->vertex_1->x + seg->vertex_2->x) * 0.5f;
+    pos.y = (seg->vertex_1->y + seg->vertex_2->y) * 0.5f;
     pos.z = seg->front_subsector->sector->floor_height;
 
     path->nodes_.push_back(BotPathNode{pos, flags, seg});

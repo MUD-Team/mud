@@ -20,8 +20,6 @@ ZDoom FName implementation - Copyright (c) 2005-2007 Randy Heit
 CC 1.0 Universal License
 ===========================================================================================
 
-HandmadeMath.h - Ben Visness
-
 "ProtoSquare!" soundfont - Yingchun Soul
 
 ===========================================================================================
@@ -59,6 +57,8 @@ MIT License
 base64.lua - Copyright (c) 2018 Ilya Kolbin 
 
 BW_Midi_Sequencer library - Copyright (c) 2015-2022 Vitaly Novichkov
+
+cglm library - Copyright (c) 2015 Recep Aslantas
 
 debugger.lua -Copyright (c) 2023 Scott Lembcke and Howling Moon Software
 

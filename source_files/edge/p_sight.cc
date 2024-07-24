@@ -59,7 +59,7 @@ struct LineOfSight
     Subsector   *source_subsector;
 
     // dest position
-    HMM_Vec2   destination;
+    vec2s   destination;
     float      destination_z;
     Subsector *destination_subsector;
 
@@ -157,8 +157,8 @@ static bool CrossSubsector(Subsector *sub)
             continue;
 
         // does linedef cross LOS ?
-        s1 = PointOnDividingLineSide(ld->vertex_1->X, ld->vertex_1->Y, &sight_check.source);
-        s2 = PointOnDividingLineSide(ld->vertex_2->X, ld->vertex_2->Y, &sight_check.source);
+        s1 = PointOnDividingLineSide(ld->vertex_1->x, ld->vertex_1->y, &sight_check.source);
+        s2 = PointOnDividingLineSide(ld->vertex_2->x, ld->vertex_2->y, &sight_check.source);
 
         if (s1 == s2)
             continue;
@@ -166,13 +166,13 @@ static bool CrossSubsector(Subsector *sub)
         // linedef crosses LOS (extended to infinity), now check if the
         // cross point lies within the finite LOS range.
         //
-        divl.x       = ld->vertex_1->X;
-        divl.y       = ld->vertex_1->Y;
+        divl.x       = ld->vertex_1->x;
+        divl.y       = ld->vertex_1->y;
         divl.delta_x = ld->delta_x;
         divl.delta_y = ld->delta_y;
 
         s1 = PointOnDividingLineSide(sight_check.source.x, sight_check.source.y, &divl);
-        s2 = PointOnDividingLineSide(sight_check.destination.X, sight_check.destination.Y, &divl);
+        s2 = PointOnDividingLineSide(sight_check.destination.x, sight_check.destination.y, &divl);
 
         if (s1 == s2)
             continue;
@@ -220,7 +220,7 @@ static bool CrossSubsector(Subsector *sub)
 
         if (!AlmostEquals(front->floor_height, back->floor_height))
         {
-            float openbottom = HMM_MAX(ld->front_sector->floor_height, ld->back_sector->floor_height);
+            float openbottom = GLM_MAX(ld->front_sector->floor_height, ld->back_sector->floor_height);
             slope            = (openbottom - sight_check.source_z) / frac;
             if (slope > sight_check.bottom_slope)
                 sight_check.bottom_slope = slope;
@@ -228,7 +228,7 @@ static bool CrossSubsector(Subsector *sub)
 
         if (!AlmostEquals(front->ceiling_height, back->ceiling_height))
         {
-            float opentop = HMM_MIN(ld->front_sector->ceiling_height, ld->back_sector->ceiling_height);
+            float opentop = GLM_MIN(ld->front_sector->ceiling_height, ld->back_sector->ceiling_height);
             slope         = (opentop - sight_check.source_z) / frac;
             if (slope < sight_check.top_slope)
                 sight_check.top_slope = slope;
@@ -266,7 +266,7 @@ static bool CheckSightBSP(unsigned int bspnum)
 
         // decide which side the src and dest points are on
         s1 = PointOnDividingLineSide(sight_check.source.x, sight_check.source.y, &node->divider);
-        s2 = PointOnDividingLineSide(sight_check.destination.X, sight_check.destination.Y, &node->divider);
+        s2 = PointOnDividingLineSide(sight_check.destination.x, sight_check.destination.y, &node->divider);
 
 #if (EDGE_DEBUG_SIGHT >= 2)
         LogDebug("  Sides: %d %d\n", s1, s2);
@@ -441,8 +441,8 @@ bool CheckSight(MapObject *src, MapObject *dest)
     sight_check.source.delta_y   = dest->y - src->y;
     sight_check.source_subsector = src->subsector_;
 
-    sight_check.destination.X         = dest->x;
-    sight_check.destination.Y         = dest->y;
+    sight_check.destination.x         = dest->x;
+    sight_check.destination.y         = dest->y;
     sight_check.destination_subsector = dest->subsector_;
 
     sight_check.bottom_slope = dest->z - sight_check.source_z;
@@ -481,13 +481,13 @@ bool CheckSight(MapObject *src, MapObject *dest)
         return CheckSightSameSubsector(src, dest);
     }
 
-    sight_check.angle = PointToAngle(sight_check.source.x, sight_check.source.y, sight_check.destination.X,
-                                             sight_check.destination.Y);
+    sight_check.angle = PointToAngle(sight_check.source.x, sight_check.source.y, sight_check.destination.x,
+                                             sight_check.destination.y);
 
-    sight_check.bounding_box[kBoundingBoxLeft]   = HMM_MIN(sight_check.source.x, sight_check.destination.X);
-    sight_check.bounding_box[kBoundingBoxRight]  = HMM_MAX(sight_check.source.x, sight_check.destination.X);
-    sight_check.bounding_box[kBoundingBoxBottom] = HMM_MIN(sight_check.source.y, sight_check.destination.Y);
-    sight_check.bounding_box[kBoundingBoxTop]    = HMM_MAX(sight_check.source.y, sight_check.destination.Y);
+    sight_check.bounding_box[kBoundingBoxLeft]   = GLM_MIN(sight_check.source.x, sight_check.destination.x);
+    sight_check.bounding_box[kBoundingBoxRight]  = GLM_MAX(sight_check.source.x, sight_check.destination.x);
+    sight_check.bounding_box[kBoundingBoxBottom] = GLM_MIN(sight_check.source.y, sight_check.destination.y);
+    sight_check.bounding_box[kBoundingBoxTop]    = GLM_MAX(sight_check.source.y, sight_check.destination.y);
 
     wall_intercepts.clear(); // FIXME
 
@@ -579,21 +579,21 @@ bool CheckSightToPoint(MapObject *src, float x, float y, float z)
     sight_check.source.delta_y   = y - src->y;
     sight_check.source_subsector = src->subsector_;
 
-    sight_check.destination.X         = x;
-    sight_check.destination.Y         = y;
+    sight_check.destination.x         = x;
+    sight_check.destination.y         = y;
     sight_check.destination_z         = z;
     sight_check.destination_subsector = dest_sub;
 
     sight_check.bottom_slope = z - 1.0f - sight_check.source_z;
     sight_check.top_slope    = z + 1.0f - sight_check.source_z;
 
-    sight_check.angle = PointToAngle(sight_check.source.x, sight_check.source.y, sight_check.destination.X,
-                                             sight_check.destination.Y);
+    sight_check.angle = PointToAngle(sight_check.source.x, sight_check.source.y, sight_check.destination.x,
+                                             sight_check.destination.y);
 
-    sight_check.bounding_box[kBoundingBoxLeft]   = HMM_MIN(sight_check.source.x, sight_check.destination.X);
-    sight_check.bounding_box[kBoundingBoxRight]  = HMM_MAX(sight_check.source.x, sight_check.destination.X);
-    sight_check.bounding_box[kBoundingBoxBottom] = HMM_MIN(sight_check.source.y, sight_check.destination.Y);
-    sight_check.bounding_box[kBoundingBoxTop]    = HMM_MAX(sight_check.source.y, sight_check.destination.Y);
+    sight_check.bounding_box[kBoundingBoxLeft]   = GLM_MIN(sight_check.source.x, sight_check.destination.x);
+    sight_check.bounding_box[kBoundingBoxRight]  = GLM_MAX(sight_check.source.x, sight_check.destination.x);
+    sight_check.bounding_box[kBoundingBoxBottom] = GLM_MIN(sight_check.source.y, sight_check.destination.y);
+    sight_check.bounding_box[kBoundingBoxTop]    = GLM_MAX(sight_check.source.y, sight_check.destination.y);
 
     wall_intercepts.clear();
 

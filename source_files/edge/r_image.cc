@@ -244,7 +244,7 @@ Image *AddPackImageSmart(std::string_view name, ImageSource type, const std::str
 
     bool solid    = false;
 
-    int  header_len = HMM_MIN((int)sizeof(header), packfile_len);
+    int  header_len = GLM_MIN((int)sizeof(header), packfile_len);
     auto fmt        = DetectImageFormat(header, header_len, packfile_len);
 
     if (fmt == kImageUnknown)

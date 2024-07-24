@@ -946,7 +946,7 @@ static void InitialState(void)
         warp_deathmatch = 1;
 
         if (pp + 1 < int(program_argument_list.size()) && !ArgumentIsOption(pp + 1))
-            warp_deathmatch = HMM_MAX(1, atoi(program_argument_list[pp + 1].c_str()));
+            warp_deathmatch = GLM_MAX(1, atoi(program_argument_list[pp + 1].c_str()));
 
         warp = true;
     }

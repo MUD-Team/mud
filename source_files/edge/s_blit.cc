@@ -110,7 +110,7 @@ void SoundChannel::ComputeVolume()
         if (!boss_)
         {
             dist = ApproximateDistance(listen_x - position_->x, listen_y - position_->y, listen_z - position_->z);
-            dist = HMM_MAX(1.25f, dist / 100.0f);
+            dist = GLM_MAX(1.25f, dist / 100.0f);
         }
     }
 
@@ -153,7 +153,7 @@ static void BlitToF32(const float *src, float *dest, int length)
     {
         float val = *src++;
         
-        HMM_Clamp(kSoundClipMinimum, val, kSoundClipMaximum);
+        glm_clamp(kSoundClipMinimum, val, kSoundClipMaximum);
 
         *dest++ = val;
     }

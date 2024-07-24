@@ -1,3 +1,4 @@
+add_subdirectory(cglm)
 add_subdirectory(sokol)
 add_subdirectory(glad)
 add_subdirectory(fluidlite)

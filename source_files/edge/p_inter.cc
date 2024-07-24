@@ -1097,7 +1097,7 @@ void KillMapObject(MapObject *source, MapObject *target, const DamageClass *damt
 
         target->flags_ &= ~kMapObjectFlagSolid;
         target->player_->player_state_         = kPlayerDead;
-        target->player_->standard_view_height_ = HMM_MIN(kDeathViewHeight, target->height_ / 3);
+        target->player_->standard_view_height_ = GLM_MIN(kDeathViewHeight, target->height_ / 3);
         target->player_->actual_speed_         = 0;
 
         DropWeapon(target->player_);
@@ -1217,13 +1217,13 @@ void ThrustMapObject(MapObject *target, MapObject *inflictor, float thrust)
     if (push > 40.0f)
         push = 40.0f;
 
-    target->momentum_.X += push * epi::BAMCos(angle);
-    target->momentum_.Y += push * epi::BAMSin(angle);
+    target->momentum_.x += push * epi::BAMCos(angle);
+    target->momentum_.y += push * epi::BAMSin(angle);
 
     float dz    = MapObjectMidZ(target) - MapObjectMidZ(inflictor);
     float slope = ApproximateSlope(dx, dy, dz);
 
-    target->momentum_.Z += push * slope / 2;
+    target->momentum_.z += push * slope / 2;
 }
 
 //
@@ -1268,13 +1268,13 @@ void PushMapObject(MapObject *target, MapObject *inflictor, float thrust)
     if (push > 40.0f)
         push = 40.0f;
 
-    target->momentum_.X += push * epi::BAMCos(angle);
-    target->momentum_.Y += push * epi::BAMSin(angle);
+    target->momentum_.x += push * epi::BAMCos(angle);
+    target->momentum_.y += push * epi::BAMSin(angle);
 
     float dz    = MapObjectMidZ(target) - MapObjectMidZ(inflictor);
     float slope = ApproximateSlope(dx, dy, dz);
 
-    target->momentum_.Z += push * slope / 2;
+    target->momentum_.z += push * slope / 2;
 }
 
 //
@@ -1332,7 +1332,7 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
     if (!weak_spot && damage >= 0.1f && inflictor && inflictor->current_attack_ &&
         0 == (inflictor->current_attack_->attack_class_ & ~target->info_->resistance_))
     {
-        damage = HMM_MAX(0.1f, damage * target->info_->resist_multiply_);
+        damage = GLM_MAX(0.1f, damage * target->info_->resist_multiply_);
     }
 
     // -ACB- 1998/07/12 Use Visibility Enum
@@ -1342,7 +1342,7 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
 
     if (target->flags_ & kMapObjectFlagSkullFly)
     {
-        target->momentum_.X = target->momentum_.Y = target->momentum_.Z = 0;
+        target->momentum_.x = target->momentum_.y = target->momentum_.z = 0;
         target->flags_ &= ~kMapObjectFlagSkullFly;
     }
 
@@ -1419,7 +1419,7 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
 
             if (damage > 0.1f && 0 == (inflictor->current_attack_->attack_class_ & ~arm_info->resistance_))
             {
-                damage = HMM_MAX(0.1f, damage * arm_info->resist_multiply_);
+                damage = GLM_MAX(0.1f, damage * arm_info->resist_multiply_);
             }
         }
 
@@ -1434,7 +1434,7 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
             else if (player_deathmatch_damage_resistance.d_ > 9)
             {
                 float mul = 0.10f + ((18 - player_deathmatch_damage_resistance.d_) * 0.10f);
-                damage    = HMM_MAX(0.1f, damage * mul);
+                damage    = GLM_MAX(0.1f, damage * mul);
             }
         }
 
@@ -1528,7 +1528,7 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
                     player->last_damage_colour_ = current_map->episode_->default_damage_flash_;
             }
 
-            player->damage_count_ += (int)HMM_MAX(damage, kDamageAddMinimum);
+            player->damage_count_ += (int)GLM_MAX(damage, kDamageAddMinimum);
             player->damage_pain_ += damage;
         }
 
@@ -1547,7 +1547,7 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
     target->health_ -= damage;
 
     if (player)
-        player->health_ = HMM_MAX(0, player->health_ - damage);
+        player->health_ = GLM_MAX(0, player->health_ - damage);
 
     // Lobo 2023: Handle attack flagged with the "PLAYER_ATTACK" special.
     //  This attack will always be treated as originating from the player, even
@@ -1571,10 +1571,10 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
     {
         float qty = (target->player_ ? 0.5 : 0.25) * damage;
 
-        source->health_ = HMM_MIN(source->health_ + qty, source->spawn_health_);
+        source->health_ = GLM_MIN(source->health_ + qty, source->spawn_health_);
 
         if (source->player_)
-            source->player_->health_ = HMM_MIN(source->player_->health_ + qty, source->spawn_health_);
+            source->player_->health_ = GLM_MIN(source->player_->health_ + qty, source->spawn_health_);
     }
 
     if (target->health_ <= 0)
@@ -1658,7 +1658,7 @@ void TelefragMapObject(MapObject *target, MapObject *inflictor, const DamageClas
 
     if (target->flags_ & kMapObjectFlagSkullFly)
     {
-        target->momentum_.X = target->momentum_.Y = target->momentum_.Z = 0;
+        target->momentum_.x = target->momentum_.y = target->momentum_.z = 0;
         target->flags_ &= ~kMapObjectFlagSkullFly;
     }
 

@@ -140,12 +140,12 @@ struct Force
     bool is_point;
     bool is_wind;
 
-    HMM_Vec3 point;
+    vec3s point;
 
     float radius;
     float magnitude;
 
-    HMM_Vec2 direction; // wind/current
+    vec2s direction; // wind/current
 
     Sector *sector;     // the affected sector
 };

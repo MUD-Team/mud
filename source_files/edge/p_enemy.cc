@@ -524,9 +524,9 @@ static void SpawnDeathMissile(MapObject *source, float x, float y, float z)
 
     th->SetRealSource(source);
 
-    th->momentum_.X = (x - source->x) / 50.0f;
-    th->momentum_.Y = -0.25f;
-    th->momentum_.Z = (z - source->z) / 50.0f;
+    th->momentum_.x = (x - source->x) / 50.0f;
+    th->momentum_.y = -0.25f;
+    th->momentum_.z = (z - source->z) / 50.0f;
 
     th->tics_ -= RandomByte() & 7;
 

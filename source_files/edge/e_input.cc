@@ -358,7 +358,7 @@ void BuildEventTicCommand(EventTicCommand *cmd)
         // -ACB- 1998/09/06 Forward Move Speed Control
         forward += forward_move[speed] * ball_deltas[kAxisForward] / 64.0;
 
-        forward = HMM_Clamp(-forward_move[1], forward, forward_move[1]);
+        forward = glm_clamp(-forward_move[1], forward, forward_move[1]);
 
         cmd->forward_move = RoundToInteger(forward);
     }
@@ -378,7 +378,7 @@ void BuildEventTicCommand(EventTicCommand *cmd)
         if (strafe)
             side += side_move[speed] * ball_deltas[kAxisTurn] / 64.0;
 
-        side = HMM_Clamp(-forward_move[1], side, forward_move[1]);
+        side = glm_clamp(-forward_move[1], side, forward_move[1]);
 
         cmd->side_move = RoundToInteger(side);
     }
@@ -391,7 +391,7 @@ void BuildEventTicCommand(EventTicCommand *cmd)
 
         upward += upward_move[speed] * ball_deltas[kAxisFly] / 64.0;
 
-        upward = HMM_Clamp(-forward_move[1], upward, forward_move[1]);
+        upward = glm_clamp(-forward_move[1], upward, forward_move[1]);
 
         cmd->upward_move = RoundToInteger(upward);
     }

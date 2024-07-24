@@ -155,8 +155,8 @@ static ImageData *ReadDummyAsEpiBlock(Image *rim)
 
 static ImageData *CreateUserColourImage(Image *rim, ImageDefinition *def)
 {
-    int tw = HMM_MAX(rim->total_width_, 1);
-    int th = HMM_MAX(rim->total_height_, 1);
+    int tw = GLM_MAX(rim->total_width_, 1);
+    int th = GLM_MAX(rim->total_height_, 1);
 
     ImageData *img = new ImageData(tw, th, 3);
 

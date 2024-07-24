@@ -429,7 +429,7 @@ static char KeyToCharacter(int key, bool shift, bool ctrl)
 static void ListCompletions(std::vector<const char *> &list, int word_len, int max_row, RGBAColor color)
 {
     int max_col = current_screen_width / XMUL - 4;
-    max_col     = HMM_Clamp(24, max_col, 78);
+    max_col     = glm_clamp(24, max_col, 78);
 
     char buffer[200];
     int  buf_len = 0;
@@ -634,7 +634,7 @@ void ConsoleHandleKey(int key, bool shift, bool ctrl)
     case kPageUp:
         if (shift)
             // Move to top of console buffer
-            bottom_row = HMM_MAX(-1, console_used_lines - 10);
+            bottom_row = GLM_MAX(-1, console_used_lines - 10);
         else
             // Start scrolling console buffer up
             scroll_direction = +1;
@@ -651,8 +651,8 @@ void ConsoleHandleKey(int key, bool shift, bool ctrl)
 
     case kMouseWheelUp:
         bottom_row += 4;
-        if (bottom_row > HMM_MAX(-1, console_used_lines - 10))
-            bottom_row = HMM_MAX(-1, console_used_lines - 10);
+        if (bottom_row > GLM_MAX(-1, console_used_lines - 10))
+            bottom_row = GLM_MAX(-1, console_used_lines - 10);
         break;
 
     case kMouseWheelDown:

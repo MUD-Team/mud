@@ -133,12 +133,12 @@ static int DoomLightingEquation(int L, float dist)
 {
     /* L in the range 0 to 63 */
 
-    int min_L = HMM_Clamp(0, 36 - L, 31);
+    int min_L = glm_clamp(0, 36 - L, 31);
 
-    int index = (59 - L) - int(1280 / HMM_MAX(1, dist));
+    int index = (59 - L) - int(1280 / GLM_MAX(1, dist));
 
     /* result is colormap index (0 bright .. 31 dark) */
-    return HMM_Clamp(min_L, index, 31);
+    return glm_clamp(min_L, index, 31);
 }
 
 class ColormapShader : public AbstractShader
@@ -175,21 +175,21 @@ class ColormapShader : public AbstractShader
   private:
     inline float DistanceFromViewPlane(float x, float y, float z)
     {
-        float dx = (x - view_x) * view_forward.X;
-        float dy = (y - view_y) * view_forward.Y;
-        float dz = (z - view_z) * view_forward.Z;
+        float dx = (x - view_x) * view_forward.x;
+        float dy = (y - view_y) * view_forward.y;
+        float dz = (z - view_z) * view_forward.z;
 
         return dx + dy + dz;
     }
 
-    inline void TextureCoordinates(RendererVertex *v, int t, const HMM_Vec3 *lit_pos)
+    inline void TextureCoordinates(RendererVertex *v, int t, const vec3s *lit_pos)
     {
-        float dist = DistanceFromViewPlane(lit_pos->X, lit_pos->Y, lit_pos->Z);
+        float dist = DistanceFromViewPlane(lit_pos->x, lit_pos->y, lit_pos->z);
 
         int L = light_level_ / 4; // need integer range 0-63
 
-        v->texture_coordinates[t].X = dist / 1600.0;
-        v->texture_coordinates[t].Y = (L + 0.5) / 64.0;
+        v->texture_coordinates[t].x = dist / 1600.0;
+        v->texture_coordinates[t].y = (L + 0.5) / 64.0;
     }
 
   public:
@@ -202,7 +202,7 @@ class ColormapShader : public AbstractShader
         int cmap_idx;
 
         if (lighting_model_ >= kLightingModelFlat)
-            cmap_idx = HMM_Clamp(0, 42 - light_level_ / 6, 31);
+            cmap_idx = glm_clamp(0, 42 - light_level_ / 6, 31);
         else
             cmap_idx = DoomLightingEquation(light_level_ / 4, dist);
 
@@ -247,7 +247,7 @@ class ColormapShader : public AbstractShader
 
             dest->rgba_color[3] = alpha;
 
-            HMM_Vec3 lit_pos;
+            vec3s lit_pos;
 
             (*func)(data, v_idx, &dest->position, dest->rgba_color, &dest->texture_coordinates[0], &dest->normal,
                     &lit_pos);
@@ -299,7 +299,7 @@ class ColormapShader : public AbstractShader
                 if (lighting_model_ >= kLightingModelFlat)
                 {
                     // FLAT lighting
-                    index = HMM_Clamp(0, 42 - (L * 2 / 3), 31);
+                    index = glm_clamp(0, 42 - (L * 2 / 3), 31);
                 }
                 else
                 {
@@ -408,7 +408,7 @@ AbstractShader *GetColormapShader(const struct RegionProperties *props, int ligh
         lit_Nom += render_view_extra_light;
     }
 
-    lit_Nom = HMM_Clamp(0, lit_Nom, 255);
+    lit_Nom = glm_clamp(0, lit_Nom, 255);
 
     shader->SetLight(lit_Nom);
 

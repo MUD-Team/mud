@@ -18,7 +18,7 @@
 
 #include "epi_color.h"
 
-#include "HandmadeMath.h"
+#include "cglm/struct.h"
 #include "epi.h"
 namespace epi
 {
@@ -29,9 +29,9 @@ HSVColor::HSVColor(const RGBAColor &col)
     uint8_t g = GetRGBAGreen(col);
     uint8_t b = GetRGBABlue(col);
 
-    int m = HMM_MIN(r, HMM_MIN(b, g));
+    int m = GLM_MIN(r, GLM_MIN(b, g));
 
-    v_ = HMM_MAX(r, HMM_MAX(b, g));
+    v_ = GLM_MAX(r, GLM_MAX(b, g));
 
     s_ = (v_ == 0) ? 0 : (v_ - m) * 255 / v_;
 

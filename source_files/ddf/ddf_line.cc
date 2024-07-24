@@ -35,6 +35,7 @@
 #include <string.h>
 
 #include "AlmostEquals.h"
+#include "cglm/struct.h"
 #include "ddf_local.h"
 #include "epi_str_util.h"
 #include "sokol_color.h"
@@ -240,7 +241,7 @@ s_keys[] = {{"NONE", kDoorKeyNone},
 
 static void LinedefStartEntry(const char *name, bool extend)
 {
-    int number = HMM_MAX(0, atoi(name));
+    int number = GLM_MAX(0, atoi(name));
 
     if (number == 0)
         DDFError("Bad linetype number in lines.ddf: %s\n", name);
@@ -273,7 +274,7 @@ static void LinedefStartEntry(const char *name, bool extend)
 
 static void LinedefDoTemplate(const char *contents)
 {
-    int number = HMM_MAX(0, atoi(contents));
+    int number = GLM_MAX(0, atoi(contents));
     if (number == 0)
         DDFError("Bad linetype number for template: %s\n", contents);
 

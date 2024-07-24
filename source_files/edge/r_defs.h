@@ -44,7 +44,7 @@ class Image;
 // the floor and ceiling heights at this vertex
 // (if part of a vertex slope)
 // 
-typedef HMM_Vec4 Vertex;
+typedef vec4s Vertex;
 
 // Forward of LineDefs, for Sectors.
 struct Line;
@@ -107,11 +107,11 @@ struct RegionProperties
     float drag;
 
     // pushing sector information (normally all zero)
-    HMM_Vec3 push;
+    vec3s push;
 
-    HMM_Vec3 net_push = {{0, 0, 0}};
+    vec3s net_push = {{0, 0, 0}};
 
-    HMM_Vec3 old_push = {{0, 0, 0}};
+    vec3s old_push = {{0, 0, 0}};
 
     // sector fog
     //RGBAColor fog_color   = kRGBANoValue;
@@ -139,16 +139,16 @@ struct MapSurface
     float translucency;
 
     // texturing matrix (usually identity)
-    HMM_Vec2 x_matrix;
-    HMM_Vec2 y_matrix;
+    vec2s x_matrix;
+    vec2s y_matrix;
     BAMAngle rotation = 0;
 
     // current offset and scrolling deltas (world coords)
-    HMM_Vec2 offset;
-    HMM_Vec2 scroll;
+    vec2s offset;
+    vec2s scroll;
 
-    HMM_Vec2 net_scroll = {{0, 0}};
-    HMM_Vec2 old_scroll = {{0, 0}};
+    vec2s net_scroll = {{0, 0}};
+    vec2s old_scroll = {{0, 0}};
 
     // lighting override (as in BOOM).  Usually nullptr.
     RegionProperties *override_properties;
@@ -184,12 +184,12 @@ struct Sector
     // UDMF vertex slope stuff
     bool                  floor_vertex_slope;
     bool                  ceiling_vertex_slope;
-    std::vector<HMM_Vec3> floor_z_vertices;
-    std::vector<HMM_Vec3> ceiling_z_vertices;
-    HMM_Vec3              floor_vertex_slope_normal;
-    HMM_Vec3              ceiling_vertex_slope_normal;
-    HMM_Vec2              floor_vertex_slope_high_low;
-    HMM_Vec2              ceiling_vertex_slope_high_low;
+    std::vector<vec3s> floor_z_vertices;
+    std::vector<vec3s> ceiling_z_vertices;
+    vec3s              floor_vertex_slope_normal;
+    vec3s              ceiling_vertex_slope_normal;
+    vec2s              floor_vertex_slope_high_low;
+    vec2s              ceiling_vertex_slope_high_low;
 
     // Directly store our deep water - a simplified
     // version of Boom heights - in the sector info via UDMF
@@ -461,9 +461,9 @@ struct SectorAnimation
     struct Sector  *scroll_sector_reference  = nullptr;
     const LineType *scroll_special_reference = nullptr;
     Line           *scroll_line_reference    = nullptr;
-    HMM_Vec2        floor_scroll             = {{0, 0}};
-    HMM_Vec2        ceil_scroll              = {{0, 0}};
-    HMM_Vec3        push                     = {{0, 0, 0}};
+    vec2s        floor_scroll             = {{0, 0}};
+    vec2s        ceil_scroll              = {{0, 0}};
+    vec3s        push                     = {{0, 0, 0}};
     bool            permanent                = false;
     float           last_height              = 0.0f;
 };

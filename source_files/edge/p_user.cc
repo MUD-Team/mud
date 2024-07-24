@@ -85,7 +85,7 @@ static void CalcHeight(Player *player, bool extra_tic)
     player->standard_view_height_ = player->map_object_->height_ * player->map_object_->info_->viewheight_;
 
     if (sink_mult < 1.0f)
-        player->delta_view_height_ = HMM_MAX(player->delta_view_height_ - 1.0f, -1.0f);
+        player->delta_view_height_ = GLM_MAX(player->delta_view_height_ - 1.0f, -1.0f);
 
     // calculate the walking / running height adjustment.
 
@@ -99,8 +99,8 @@ static void CalcHeight(Player *player, bool extra_tic)
     if (erraticism.d_)
         player->bob_factor_ = 12.0f;
     else
-        player->bob_factor_ = (player->map_object_->momentum_.X * player->map_object_->momentum_.X +
-                               player->map_object_->momentum_.Y * player->map_object_->momentum_.Y) /
+        player->bob_factor_ = (player->map_object_->momentum_.x * player->map_object_->momentum_.x +
+                               player->map_object_->momentum_.y * player->map_object_->momentum_.y) /
                               8;
 
     if (player->bob_factor_ > kMaximumBob)
@@ -135,7 +135,7 @@ static void CalcHeight(Player *player, bool extra_tic)
         {
             float thresh = player->standard_view_height_ / 2;
             if (sink_mult < 1.0f)
-                thresh = HMM_MIN(thresh, player->standard_view_height_ * sink_mult);
+                thresh = GLM_MIN(thresh, player->standard_view_height_ * sink_mult);
             if (player->view_height_ < thresh)
             {
                 player->view_height_ = thresh;
@@ -153,7 +153,7 @@ static void CalcHeight(Player *player, bool extra_tic)
         }
     }
 
-    if ((player->map_object_->momentum_.Z <= -35.0) && (player->map_object_->momentum_.Z >= -36.0))
+    if ((player->map_object_->momentum_.z <= -35.0) && (player->map_object_->momentum_.z >= -36.0))
         if (player->map_object_->info_->falling_sound_)
         {
             int sfx_cat;
@@ -190,7 +190,7 @@ static void CalcHeight(Player *player, bool extra_tic)
 
 void PlayerJump(Player *pl, float dz, int wait)
 {
-    pl->map_object_->momentum_.Z += dz;
+    pl->map_object_->momentum_.z += dz;
 
     if (pl->jump_wait_ < wait)
         pl->jump_wait_ = wait;
@@ -315,15 +315,15 @@ static void MovePlayer(Player *player, bool extra_tic)
     U_vec[1] = -ev * dy * base_xy_speed;
     U_vec[2] = eh * base_z_speed;
 
-    player->map_object_->momentum_.X +=
+    player->map_object_->momentum_.x +=
         F_vec[0] * cmd->forward_move + S_vec[0] * cmd->side_move + U_vec[0] * cmd->upward_move;
 
-    player->map_object_->momentum_.Y +=
+    player->map_object_->momentum_.y +=
         F_vec[1] * cmd->forward_move + S_vec[1] * cmd->side_move + U_vec[1] * cmd->upward_move;
 
     if (flying || swimming || !onground || onladder)
     {
-        player->map_object_->momentum_.Z +=
+        player->map_object_->momentum_.z +=
             F_vec[2] * cmd->forward_move + S_vec[2] * cmd->side_move + U_vec[2] * cmd->upward_move;
     }
 
@@ -387,7 +387,7 @@ static void MovePlayer(Player *player, bool extra_tic)
     {
         if (mo->height_ > mo->info_->crouchheight_)
         {
-            mo->height_ = HMM_MAX(mo->height_ - 2.0f / (double_framerate.d_ ? 2.0 : 1.0), mo->info_->crouchheight_);
+            mo->height_ = GLM_MAX(mo->height_ - 2.0f / (double_framerate.d_ ? 2.0 : 1.0), mo->info_->crouchheight_);
             mo->player_->delta_view_height_ = -1.0f;
         }
     }
@@ -395,7 +395,7 @@ static void MovePlayer(Player *player, bool extra_tic)
     {
         if (mo->height_ < mo->info_->height_)
         {
-            float new_height = HMM_MIN(mo->height_ + 2 / (double_framerate.d_ ? 2 : 1), mo->info_->height_);
+            float new_height = GLM_MIN(mo->height_ + 2 / (double_framerate.d_ ? 2 : 1), mo->info_->height_);
 
             // prevent standing up inside a solid area
             if ((mo->flags_ & kMapObjectFlagNoClip) || mo->z + new_height <= mo->ceiling_z_)
@@ -467,7 +467,7 @@ static void DeathThink(Player *player, bool extra_tic)
         delta = angle - player->map_object_->angle_;
 
         slope   = ApproximateSlope(dx, dy, dz);
-        slope   = HMM_MIN(1.7f, HMM_MAX(-1.7f, slope));
+        slope   = GLM_MIN(1.7f, GLM_MAX(-1.7f, slope));
         delta_s = epi::BAMFromATan(slope) - player->map_object_->vertical_angle_;
 
         if ((delta <= kBAMAngle1 / 2 || delta >= (BAMAngle)(0 - kBAMAngle1 / 2)) &&
@@ -573,27 +573,27 @@ static void UpdatePowerups(Player *player)
         float s = player->powers_[kPowerTypeInvulnerable];
 
         player->effect_colourmap_ = colormaps.Lookup("INVULNERABILITY");
-        player->effect_left_      = (s <= 0) ? 0 : HMM_MIN(int(s), kMaximumEffectTime);
+        player->effect_left_      = (s <= 0) ? 0 : GLM_MIN(int(s), kMaximumEffectTime);
     }
     else if (player->powers_[kPowerTypeInfrared] > 0)
     {
         float s = player->powers_[kPowerTypeInfrared];
 
-        player->effect_left_ = (s <= 0) ? 0 : HMM_MIN(int(s), kMaximumEffectTime);
+        player->effect_left_ = (s <= 0) ? 0 : GLM_MIN(int(s), kMaximumEffectTime);
     }
     else if (player->powers_[kPowerTypeNightVision] > 0) // -ACB- 1998/07/15 NightVision Code
     {
         float s = player->powers_[kPowerTypeNightVision];
 
         player->effect_colourmap_ = colormaps.Lookup("INFRAVISION");
-        player->effect_left_      = (s <= 0) ? 0 : HMM_MIN(int(s), kMaximumEffectTime);
+        player->effect_left_      = (s <= 0) ? 0 : GLM_MIN(int(s), kMaximumEffectTime);
     }
     else if (player->powers_[kPowerTypeBerserk] > 0) // Lobo 2021: Un-Hardcode Berserk colour tint
     {
         float s = player->powers_[kPowerTypeBerserk];
 
         player->effect_colourmap_ = colormaps.Lookup("BERSERK");
-        player->effect_left_      = (s <= 0) ? 0 : HMM_MIN(int(s), kMaximumEffectTime);
+        player->effect_left_      = (s <= 0) ? 0 : GLM_MIN(int(s), kMaximumEffectTime);
     }
 }
 
@@ -738,10 +738,10 @@ bool PlayerThink(Player *player, bool extra_tic)
              (AlmostEquals(player->delta_view_height_, 0.0f) || sinking)))
         {
             should_think = false;
-            if (!player->map_object_->momentum_.Z)
+            if (!player->map_object_->momentum_.z)
             {
-                player->map_object_->momentum_.X = 0;
-                player->map_object_->momentum_.Y = 0;
+                player->map_object_->momentum_.x = 0;
+                player->map_object_->momentum_.y = 0;
             }
         }
     }
