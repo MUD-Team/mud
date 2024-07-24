@@ -13,6 +13,7 @@ add_library(
 )
 
 target_include_directories(edge_epi PRIVATE ${EDGE_LIBRARY_DIR}/almostequals)
+target_include_directories(edge_epi PRIVATE ${EDGE_LIBRARY_DIR}/cglm/include)
 target_include_directories(edge_epi PRIVATE ${EDGE_LIBRARY_DIR}/physfs)
 target_include_directories(edge_epi PRIVATE ${EDGE_LIBRARY_DIR}/xxHash)
 

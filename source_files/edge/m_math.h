@@ -25,16 +25,15 @@
 
 #pragma once
 
-#include "HandmadeMath.h"
+#include "cglm/struct.h"
 #include "epi_bam.h"
 
-float    PointToSegDistance(HMM_Vec2 seg_a, HMM_Vec2 seg_b, HMM_Vec2 point);
-HMM_Vec3 TripleCrossProduct(HMM_Vec3 v1, HMM_Vec3 v2, HMM_Vec3 v3);
-HMM_Vec3 LinePlaneIntersection(HMM_Vec3 line_a, HMM_Vec3 line_b, HMM_Vec3 plane_c, HMM_Vec3 plane_normal);
-HMM_Vec3 LinePlaneIntersection(HMM_Vec3 line_a, HMM_Vec3 line_b, HMM_Vec3 plane_a, HMM_Vec3 plane_b,
-                                   HMM_Vec3 plane_c);
-void     BAMAngleToMatrix(BAMAngle ang, HMM_Vec2 *x, HMM_Vec2 *y);
-int      PointInTriangle(HMM_Vec2 v1, HMM_Vec2 v2, HMM_Vec2 v3, HMM_Vec2 test);
+vec3s TripleCrossProduct(vec3s v1, vec3s v2, vec3s v3);
+vec3s LinePlaneIntersection(vec3s line_a, vec3s line_b, vec3s plane_c, vec3s plane_normal);
+vec3s LinePlaneIntersection(vec3s line_a, vec3s line_b, vec3s plane_a, vec3s plane_b,
+                                   vec3s plane_c);
+void     BAMAngleToMatrix(BAMAngle ang, vec2s *x, vec2s *y);
+int      PointInTriangle(vec2s v1, vec2s v2, vec2s v3, vec2s test);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

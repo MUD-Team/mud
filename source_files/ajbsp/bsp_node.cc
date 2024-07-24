@@ -20,9 +20,9 @@
 
 #include <limits.h>
 
-#include "HandmadeMath.h"
 #include "bsp_local.h"
 #include "bsp_utility.h"
+#include "cglm/struct.h"
 
 #define AJBSP_DEBUG_PICKNODE 0
 #define AJBSP_DEBUG_SPLIT    0
@@ -386,9 +386,9 @@ bool EvalPartitionWorker(QuadTree *tree, Seg *part, double best_cost, EvalInfo *
             //       the cost.
 
             if (a <= kEpsilon || b <= kEpsilon)
-                qnty = kIffySegLength / HMM_MAX(a, b);
+                qnty = kIffySegLength / GLM_MAX(a, b);
             else
-                qnty = kIffySegLength / HMM_MIN(a, b);
+                qnty = kIffySegLength / GLM_MIN(a, b);
 
             info->cost += 70.0 * split_cost * (qnty * qnty - 1.0);
             continue;
@@ -410,9 +410,9 @@ bool EvalPartitionWorker(QuadTree *tree, Seg *part, double best_cost, EvalInfo *
 
             // the closer the miss, the higher the cost (see note above)
             if (a >= -kEpsilon || b >= -kEpsilon)
-                qnty = kIffySegLength / -HMM_MIN(a, b);
+                qnty = kIffySegLength / -GLM_MIN(a, b);
             else
-                qnty = kIffySegLength / -HMM_MAX(a, b);
+                qnty = kIffySegLength / -GLM_MAX(a, b);
 
             info->cost += 70.0 * split_cost * (qnty * qnty - 1.0);
             continue;
@@ -435,7 +435,7 @@ bool EvalPartitionWorker(QuadTree *tree, Seg *part, double best_cost, EvalInfo *
             info->iffy++;
 
             // the closer to the end, the higher the cost
-            qnty = kIffySegLength / HMM_MIN(fa, fb);
+            qnty = kIffySegLength / GLM_MIN(fa, fb);
             info->cost += 140.0 * split_cost * (qnty * qnty - 1.0);
         }
     }
@@ -809,10 +809,10 @@ static void FindLimits2(Seg *list, BoundingBox *bbox)
         double x2 = list->end_->x_;
         double y2 = list->end_->y_;
 
-        int lx = (int)floor(HMM_MIN(x1, x2) - 0.2);
-        int ly = (int)floor(HMM_MIN(y1, y2) - 0.2);
-        int hx = (int)ceil(HMM_MAX(x1, x2) + 0.2);
-        int hy = (int)ceil(HMM_MAX(y1, y2) + 0.2);
+        int lx = (int)floor(GLM_MIN(x1, x2) - 0.2);
+        int ly = (int)floor(GLM_MIN(y1, y2) - 0.2);
+        int hx = (int)ceil(GLM_MAX(x1, x2) + 0.2);
+        int hy = (int)ceil(GLM_MAX(y1, y2) + 0.2);
 
         if (lx < bbox->minimum_x)
             bbox->minimum_x = lx;
@@ -1013,11 +1013,11 @@ void QuadTree::AddSeg(Seg *seg)
 
     if (subs_[0] != nullptr)
     {
-        double x_min = HMM_MIN(seg->start_->x_, seg->end_->x_);
-        double y_min = HMM_MIN(seg->start_->y_, seg->end_->y_);
+        double x_min = GLM_MIN(seg->start_->x_, seg->end_->x_);
+        double y_min = GLM_MIN(seg->start_->y_, seg->end_->y_);
 
-        double x_max = HMM_MAX(seg->start_->x_, seg->end_->x_);
-        double y_max = HMM_MAX(seg->start_->y_, seg->end_->y_);
+        double x_max = GLM_MAX(seg->start_->x_, seg->end_->x_);
+        double y_max = GLM_MAX(seg->start_->y_, seg->end_->y_);
 
         if ((x2_ - x1_) >= (y2_ - y1_))
         {
@@ -1471,7 +1471,7 @@ int ComputeBSPHeight(const Node *node)
     int right = ComputeBSPHeight(node->r_.node);
     int left  = ComputeBSPHeight(node->l_.node);
 
-    return HMM_MAX(left, right) + 1;
+    return GLM_MAX(left, right) + 1;
 }
 
 #if AJBSP_DEBUG_BUILDER

@@ -383,7 +383,7 @@ void PlayMovie(const std::string &name)
         glDisable(GL_TEXTURE_2D);
 
         // Fade-out
-        glColor4f(0, 0, 0, HMM_MAX(0.0f, 1.0f - ((0.25f - fadeout) / 0.25f)));
+        glColor4f(0, 0, 0, GLM_MAX(0.0f, 1.0f - ((0.25f - fadeout) / 0.25f)));
         glEnable(GL_BLEND);
 
         glBegin(GL_QUADS);

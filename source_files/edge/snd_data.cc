@@ -20,7 +20,6 @@
 
 #include <vector>
 
-#include "HandmadeMath.h"
 #include "epi.h"
 
 SoundData::SoundData()

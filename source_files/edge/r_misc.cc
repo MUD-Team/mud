@@ -59,9 +59,9 @@ int view_window_height;
 BAMAngle view_angle          = 0;
 BAMAngle view_vertical_angle = 0;
 
-HMM_Vec3 view_forward;
-HMM_Vec3 view_up;
-HMM_Vec3 view_right;
+vec3s view_forward;
+vec3s view_up;
+vec3s view_right;
 
 BAMAngle normal_field_of_view, zoomed_field_of_view;
 bool     view_is_zoomed = false;
@@ -109,9 +109,7 @@ static float ApproximateAtan2(float y, float x)
 {
     // http://pubs.opengroup.org/onlinepubs/009695399/functions/atan2.html
     // Volkan SALMA
-
-    const float ONEQTR_PI = HMM_PI / 4.0;
-    const float THRQTR_PI = 3.0 * HMM_PI / 4.0;
+    const float THRQTR_PI = 3.0 * GLM_PI_4f;
     float       r, angle;
     float       abs_y = fabs(y) + 1e-10f; // kludge to prevent 0/0 condition
     if (x < 0.0f)
@@ -122,7 +120,7 @@ static float ApproximateAtan2(float y, float x)
     else
     {
         r     = (x - abs_y) / (x + abs_y);
-        angle = ONEQTR_PI;
+        angle = GLM_PI_4f;
     }
     angle += (0.1963f * r * r - 0.9817f) * r;
     if (y < 0.0f)
@@ -136,7 +134,7 @@ BAMAngle PointToAngle(float x1, float y1, float x, float y)
     x -= x1;
     y -= y1;
 
-    return epi::BAMFromDegrees(ApproximateAtan2(y, x) * (180 / HMM_PI));
+    return epi::BAMFromDegrees(ApproximateAtan2(y, x) * (180.0f / GLM_PIf));
 }
 
 float PointToDistance(float x1, float y1, float x2, float y2)
@@ -182,7 +180,9 @@ void RendererStartup(void)
 
     for (int i = 0; i < kSineTableSize; i++)
     {
-        sine_table[i] = HMM_SINF(HMM_AngleDeg(i * 360.0f / ((float)(kSineTableMask))));
+        float deg = i * 360.0f / ((float)(kSineTableMask));
+        glm_make_rad(&deg);
+        sine_table[i] = sinf(deg);
     }
 
     render_frame_count = 0;

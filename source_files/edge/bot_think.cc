@@ -632,7 +632,7 @@ void DeathBot::RetreatFrom(const MapObject *enemy)
 {
     float dx   = pl_->map_object_->x - enemy->x;
     float dy   = pl_->map_object_->y - enemy->y;
-    float dlen = HMM_MAX(hypotf(dx, dy), 1.0f);
+    float dlen = GLM_MAX(hypotf(dx, dy), 1.0f);
 
     Position pos{pl_->map_object_->x, pl_->map_object_->y, pl_->map_object_->z};
 
@@ -736,7 +736,7 @@ void DeathBot::ShootTarget()
 
     // the further away we are, the more accurate our shot must be.
     // e.g. at point-blank range, even 45 degrees away can hit.
-    float acc_dist = HMM_MAX(enemy_dist_, 32.0f);
+    float acc_dist = GLM_MAX(enemy_dist_, 32.0f);
     float adjust   = acc_dist / 32.0f;
 
     if (delta > (BAMAngle)(kBAMAngle90 / adjust / (11 - (2.5 * bot_skill.d_))))
@@ -802,14 +802,14 @@ void DeathBot::ThinkFight()
     // handle slope, equation is: `slope = dz / dist`
     float dz = fabs(pl_->map_object_->z - enemy->z);
 
-    float min_dist = HMM_MIN(dz * 2.0f, 480.0f);
+    float min_dist = GLM_MIN(dz * 2.0f, 480.0f);
     float max_dist = 640.0f;
 
     // handle dangerous weapons
     const WeaponDefinition *weapon = pl_->weapons_[pl_->ready_weapon_].info;
 
     if (weapon->dangerous_)
-        min_dist = HMM_MAX(min_dist, 224.0f);
+        min_dist = GLM_MAX(min_dist, 224.0f);
 
     // approach if too far away
     if (enemy_dist_ > max_dist)
@@ -836,7 +836,7 @@ void DeathBot::WeaveNearLeader(const MapObject *leader)
     float dx = pl_->map_object_->x - leader->x;
     float dy = pl_->map_object_->y - leader->y;
 
-    float dlen = HMM_MAX(1.0f, hypotf(dx, dy));
+    float dlen = GLM_MAX(1.0f, hypotf(dx, dy));
 
     dx = dx * 96.0f / dlen;
     dy = dy * 96.0f / dlen;

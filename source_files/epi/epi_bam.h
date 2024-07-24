@@ -20,7 +20,7 @@
 
 #include <stdint.h>
 
-#include "HandmadeMath.h"
+#include "cglm/struct.h"
 
 constexpr uint8_t kBAMAngleBits = 32;
 
@@ -62,7 +62,7 @@ inline BAMAngle BAMFromDegrees(double deg)
 inline BAMAngle BAMFromRadians(double rad)
 {
     if (rad < 0)
-        rad += HMM_PI * 2.0;
+        rad += GLM_PI * 2.0;
 
     return (BAMAngle)(rad * 683565275.42);
 }
@@ -84,17 +84,17 @@ inline BAMAngle BAMFromATan(float slope)
 
 inline float BAMSin(BAMAngle bam)
 {
-    return HMM_SINF(RadiansFromBAM(bam));
+    return sinf(RadiansFromBAM(bam));
 }
 
 inline float BAMCos(BAMAngle bam)
 {
-    return HMM_COSF(RadiansFromBAM(bam));
+    return cosf(RadiansFromBAM(bam));
 }
 
 inline float BAMTan(BAMAngle bam)
 {
-    return HMM_TANF(RadiansFromBAM(bam));
+    return tanf(RadiansFromBAM(bam));
 }
 
 } // namespace epi

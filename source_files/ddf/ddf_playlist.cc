@@ -18,8 +18,10 @@
 
 #include "ddf_playlist.h"
 
+#include "cglm/struct.h"
 #include "ddf_local.h"
 #include "epi_str_compare.h"
+
 static PlaylistEntry *dynamic_plentry;
 
 PlaylistEntryContainer playlist;
@@ -85,7 +87,7 @@ static void DDFMusicParseInfo(const char *info)
 
 static void PlaylistStartEntry(const char *name, bool extend)
 {
-    int number = HMM_MAX(0, atoi(name));
+    int number = GLM_MAX(0, atoi(name));
 
     if (number == 0)
         DDFError("Bad music number in playlist.ddf: %s\n", name);

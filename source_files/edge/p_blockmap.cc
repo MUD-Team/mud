@@ -257,10 +257,10 @@ static void SetPositionBSP(BspThingPosition *info, int nodenum)
         if (seg->miniseg)
             continue;
 
-        div.x       = seg->vertex_1->X;
-        div.y       = seg->vertex_1->Y;
-        div.delta_x = seg->vertex_2->X - div.x;
-        div.delta_y = seg->vertex_2->Y - div.y;
+        div.x       = seg->vertex_1->x;
+        div.y       = seg->vertex_1->y;
+        div.delta_x = seg->vertex_2->x - div.x;
+        div.delta_y = seg->vertex_2->y - div.y;
 
         if (BoxOnDividingLineSide(info->bbox, &div) == 1)
             return;
@@ -728,10 +728,10 @@ bool BlockmapLineIterator(float x1, float y1, float x2, float y2, bool (*func)(L
     int hx = BlockmapGetX(x2);
     int hy = BlockmapGetY(y2);
 
-    lx = HMM_MAX(0, lx);
-    hx = HMM_MIN(blockmap_width - 1, hx);
-    ly = HMM_MAX(0, ly);
-    hy = HMM_MIN(blockmap_height - 1, hy);
+    lx = GLM_MAX(0, lx);
+    hx = GLM_MIN(blockmap_width - 1, hx);
+    ly = GLM_MAX(0, ly);
+    hy = GLM_MIN(blockmap_height - 1, hy);
 
     for (int by = ly; by <= hy; by++)
         for (int bx = lx; bx <= hx; bx++)
@@ -779,10 +779,10 @@ bool BlockmapThingIterator(float x1, float y1, float x2, float y2, bool (*func)(
     int hx = BlockmapGetX(x2) + 1;
     int hy = BlockmapGetY(y2) + 1;
 
-    lx = HMM_MAX(0, lx);
-    hx = HMM_MIN(blockmap_width - 1, hx);
-    ly = HMM_MAX(0, ly);
-    hy = HMM_MIN(blockmap_height - 1, hy);
+    lx = GLM_MAX(0, lx);
+    hx = GLM_MIN(blockmap_width - 1, hx);
+    ly = GLM_MAX(0, ly);
+    hy = GLM_MIN(blockmap_height - 1, hy);
 
     for (int by = ly; by <= hy; by++)
         for (int bx = lx; bx <= hx; bx++)
@@ -814,10 +814,10 @@ void DynamicLightIterator(float x1, float y1, float z1, float x2, float y2, floa
     int hx = LightmapGetX(x2) + 1;
     int hy = LightmapGetY(y2) + 1;
 
-    lx = HMM_MAX(0, lx);
-    hx = HMM_MIN(dynamic_light_blockmap_width - 1, hx);
-    ly = HMM_MAX(0, ly);
-    hy = HMM_MIN(dynamic_light_blockmap_height - 1, hy);
+    lx = GLM_MAX(0, lx);
+    hx = GLM_MIN(dynamic_light_blockmap_width - 1, hx);
+    ly = GLM_MAX(0, ly);
+    hy = GLM_MIN(dynamic_light_blockmap_height - 1, hy);
 
     for (int by = ly; by <= hy; by++)
         for (int bx = lx; bx <= hx; bx++)
@@ -957,16 +957,16 @@ static inline void PIT_AddLineIntercept(Line *ld)
     float        along;
     DividingLine div;
 
-    div.x       = ld->vertex_1->X;
-    div.y       = ld->vertex_1->Y;
+    div.x       = ld->vertex_1->x;
+    div.y       = ld->vertex_1->y;
     div.delta_x = ld->delta_x;
     div.delta_y = ld->delta_y;
 
     // avoid precision problems with two routines
     if (trace.delta_x > 16 || trace.delta_y > 16 || trace.delta_x < -16 || trace.delta_y < -16)
     {
-        s1 = PointOnDividingLineSide(ld->vertex_1->X, ld->vertex_1->Y, &trace);
-        s2 = PointOnDividingLineSide(ld->vertex_2->X, ld->vertex_2->Y, &trace);
+        s1 = PointOnDividingLineSide(ld->vertex_1->x, ld->vertex_1->y, &trace);
+        s2 = PointOnDividingLineSide(ld->vertex_2->x, ld->vertex_2->y, &trace);
     }
     else
     {
@@ -1260,10 +1260,10 @@ void BlockmapAddLine(Line *ld)
 
     float slope;
 
-    x0 = (int)(ld->vertex_1->X - blockmap_origin_x);
-    y0 = (int)(ld->vertex_1->Y - blockmap_origin_y);
-    x1 = (int)(ld->vertex_2->X - blockmap_origin_x);
-    y1 = (int)(ld->vertex_2->Y - blockmap_origin_y);
+    x0 = (int)(ld->vertex_1->x - blockmap_origin_x);
+    y0 = (int)(ld->vertex_1->y - blockmap_origin_y);
+    x1 = (int)(ld->vertex_2->x - blockmap_origin_x);
+    y1 = (int)(ld->vertex_2->y - blockmap_origin_y);
 
     // swap endpoints if horizontally backward
     if (x1 < x0)
@@ -1285,8 +1285,8 @@ void BlockmapAddLine(Line *ld)
 
     // check if this line spans multiple blocks.
 
-    x_dist = HMM_ABS((x1 / kBlockmapUnitSize) - (x0 / kBlockmapUnitSize));
-    y_dist = HMM_ABS((y1 / kBlockmapUnitSize) - (y0 / kBlockmapUnitSize));
+    x_dist = abs((x1 / kBlockmapUnitSize) - (x0 / kBlockmapUnitSize));
+    y_dist = abs((y1 / kBlockmapUnitSize) - (y0 / kBlockmapUnitSize));
 
     y_sign = (y1 >= y0) ? 1 : -1;
 
@@ -1328,7 +1328,7 @@ void BlockmapAddLine(Line *ld)
 
         EPI_ASSERT(sx <= ex);
 
-        y_dist = HMM_ABS((ey / 128) - (sy / 128));
+        y_dist = abs((ey / 128) - (sy / 128));
 
         for (j = 0; j <= y_dist; j++)
         {

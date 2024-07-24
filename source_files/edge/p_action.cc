@@ -292,7 +292,7 @@ static bool DecideRangeAttack(MapObject *object)
     // we inverse the result (since its one in 255) to get the chance that
     // the attack will not happen.
     chance = 1.0f - object->info_->minatkchance_;
-    chance = HMM_MIN(distance / 255.0f, chance);
+    chance = GLM_MIN(distance / 255.0f, chance);
 
     // now after modifing distance where applicable, we get the random number
     // and check if it is less than distance, if so no attack is made.
@@ -466,7 +466,7 @@ void A_TransSet(MapObject *mo)
     if (st && st->action_par)
     {
         value = ((float *)st->action_par)[0];
-        value = HMM_MAX(0.0f, HMM_MIN(1.0f, value));
+        value = GLM_MAX(0.0f, GLM_MIN(1.0f, value));
     }
 
     mo->visibility_ = mo->target_visibility_ = value;
@@ -481,7 +481,7 @@ void A_TransFade(MapObject *mo)
     if (st && st->action_par)
     {
         value = ((float *)st->action_par)[0];
-        value = HMM_MAX(0.0f, HMM_MIN(1.0f, value));
+        value = GLM_MAX(0.0f, GLM_MIN(1.0f, value));
     }
 
     mo->target_visibility_ = value;
@@ -496,7 +496,7 @@ void A_TransLess(MapObject *mo)
     if (st && st->action_par)
     {
         value = ((float *)st->action_par)[0];
-        value = HMM_MAX(0.0f, HMM_MIN(1.0f, value));
+        value = GLM_MAX(0.0f, GLM_MIN(1.0f, value));
     }
 
     mo->target_visibility_ -= value;
@@ -514,7 +514,7 @@ void A_TransMore(MapObject *mo)
     if (st && st->action_par)
     {
         value = ((float *)st->action_par)[0];
-        value = HMM_MAX(0.0f, HMM_MIN(1.0f, value));
+        value = GLM_MAX(0.0f, GLM_MIN(1.0f, value));
     }
 
     mo->target_visibility_ += value;
@@ -543,7 +543,7 @@ void A_TransAlternate(MapObject *object)
     if (st && st->action_par)
     {
         value = ((float *)st->action_par)[0];
-        value = HMM_MAX(0.0f, HMM_MIN(1.0f, value));
+        value = GLM_MAX(0.0f, GLM_MIN(1.0f, value));
     }
 
     if (object->extended_flags_ & kExtendedFlagLessVisible)
@@ -572,7 +572,7 @@ void A_DLightSet(MapObject *mo)
 
     if (st && st->action_par)
     {
-        mo->dynamic_light_.r = HMM_MAX(0.0f, ((int *)st->action_par)[0]);
+        mo->dynamic_light_.r = GLM_MAX(0.0f, ((int *)st->action_par)[0]);
 
         if (mo->info_->hyper_flags_ & kHyperFlagQuadraticDynamicLight)
             mo->dynamic_light_.r = DynamicLightCompatibilityRadius(mo->dynamic_light_.r);
@@ -587,7 +587,7 @@ void A_DLightFade(MapObject *mo)
 
     if (st && st->action_par)
     {
-        mo->dynamic_light_.target = HMM_MAX(0.0f, ((int *)st->action_par)[0]);
+        mo->dynamic_light_.target = GLM_MAX(0.0f, ((int *)st->action_par)[0]);
 
         if (mo->info_->hyper_flags_ & kHyperFlagQuadraticDynamicLight)
             mo->dynamic_light_.target = DynamicLightCompatibilityRadius(mo->dynamic_light_.target);
@@ -609,7 +609,7 @@ void A_DLightRandom(MapObject *mo)
         if (mo->info_->hyper_flags_ & kHyperFlagQuadraticDynamicLight)
             qty = DynamicLightCompatibilityRadius(qty);
 
-        mo->dynamic_light_.r      = HMM_MAX(0.0f, qty);
+        mo->dynamic_light_.r      = GLM_MAX(0.0f, qty);
         mo->dynamic_light_.target = mo->dynamic_light_.r;
     }
 }
@@ -697,8 +697,8 @@ void A_MoveFwd(MapObject *mo)
         float dx = epi::BAMCos(mo->angle_);
         float dy = epi::BAMSin(mo->angle_);
 
-        mo->momentum_.X += dx * amount;
-        mo->momentum_.Y += dy * amount;
+        mo->momentum_.x += dx * amount;
+        mo->momentum_.y += dy * amount;
     }
 }
 
@@ -713,8 +713,8 @@ void A_MoveRight(MapObject *mo)
         float dx = epi::BAMCos(mo->angle_ - kBAMAngle90);
         float dy = epi::BAMSin(mo->angle_ - kBAMAngle90);
 
-        mo->momentum_.X += dx * amount;
-        mo->momentum_.Y += dy * amount;
+        mo->momentum_.x += dx * amount;
+        mo->momentum_.y += dy * amount;
     }
 }
 
@@ -723,12 +723,12 @@ void A_MoveUp(MapObject *mo)
     const State *st = mo->state_;
 
     if (st && st->action_par)
-        mo->momentum_.Z += *(float *)st->action_par;
+        mo->momentum_.z += *(float *)st->action_par;
 }
 
 void A_StopMoving(MapObject *mo)
 {
-    mo->momentum_.X = mo->momentum_.Y = mo->momentum_.Z = 0;
+    mo->momentum_.x = mo->momentum_.y = mo->momentum_.z = 0;
 }
 
 //-------------------------------------------------------------------
@@ -990,9 +990,9 @@ static void CheckMissileSpawn(MapObject *projectile)
     if (projectile->tics_ < 1)
         projectile->tics_ = 1;
 
-    projectile->z += projectile->momentum_.Z / 2;
+    projectile->z += projectile->momentum_.z / 2;
 
-    if (!TryMove(projectile, projectile->x + projectile->momentum_.X / 2, projectile->y + projectile->momentum_.Y / 2))
+    if (!TryMove(projectile, projectile->x + projectile->momentum_.x / 2, projectile->y + projectile->momentum_.y / 2))
     {
         ExplodeMissile(projectile);
     }
@@ -1148,9 +1148,9 @@ static MapObject *DoLaunchProjectile(MapObject *source, float tx, float ty, floa
     MapObjectSetDirectionAndSpeed(projectile, angle, slope, projectile->speed_);
     if (projectile->flags_ & kMapObjectFlagPreserveMomentum)
     {
-        projectile->momentum_.X += source->momentum_.X;
-        projectile->momentum_.Y += source->momentum_.Y;
-        projectile->momentum_.Z += source->momentum_.Z;
+        projectile->momentum_.x += source->momentum_.x;
+        projectile->momentum_.y += source->momentum_.y;
+        projectile->momentum_.z += source->momentum_.z;
     }
     CheckMissileSpawn(projectile);
 
@@ -1188,8 +1188,8 @@ static void LaunchSmartProjectile(MapObject *source, MapObject *target, const Ma
 
     if (target)
     {
-        mx = target->momentum_.X;
-        my = target->momentum_.Y;
+        mx = target->momentum_.x;
+        my = target->momentum_.y;
 
         float dx = source->x - target->x;
         float dy = source->y - target->y;
@@ -1268,7 +1268,7 @@ static inline bool Weakness_CheckHit(MapObject *target, const AttackDefinition *
     // which hits the target on the head (coming sharply down) will
     // still register as a head-shot.
     z = (z - target->z) / target->height_;
-    z = HMM_Clamp(0.01f, z, 0.99f);
+    z = glm_clamp(0.01f, z, 0.99f);
 
     // LogDebug("HEIGHT CHECK: %1.2f < %1.2f < %1.2f\n",
     //		  weak->height[0], z, weak->height[1]);
@@ -1525,10 +1525,10 @@ void A_CreateSmokeTrail(MapObject *projectile)
     }
 
     // spawn a puff of smoke behind the rocket
-    MapObject *smoke = CreateMapObject(projectile->x - projectile->momentum_.X / 2.0f,
-                                       projectile->y - projectile->momentum_.Y / 2.0f, projectile->z, attack->puff_);
+    MapObject *smoke = CreateMapObject(projectile->x - projectile->momentum_.x / 2.0f,
+                                       projectile->y - projectile->momentum_.y / 2.0f, projectile->z, attack->puff_);
 
-    smoke->momentum_.Z = smoke->info_->float_speed_;
+    smoke->momentum_.z = smoke->info_->float_speed_;
     smoke->tics_ -= RandomByte() & 3;
 
     if (smoke->tics_ < 1)
@@ -1609,8 +1609,8 @@ void A_HomingProjectile(MapObject *projectile)
         }
     }
 
-    projectile->momentum_.X = projectile->speed_ * epi::BAMCos(projectile->angle_);
-    projectile->momentum_.Y = projectile->speed_ * epi::BAMSin(projectile->angle_);
+    projectile->momentum_.x = projectile->speed_ * epi::BAMCos(projectile->angle_);
+    projectile->momentum_.y = projectile->speed_ * epi::BAMSin(projectile->angle_);
 
     // change slope
     float slope = ApproximateSlope(destination->x - projectile->x, destination->y - projectile->y,
@@ -1618,10 +1618,10 @@ void A_HomingProjectile(MapObject *projectile)
 
     slope *= projectile->speed_;
 
-    if (slope < projectile->momentum_.Z)
-        projectile->momentum_.Z -= 0.125f;
+    if (slope < projectile->momentum_.z)
+        projectile->momentum_.z -= 0.125f;
     else
-        projectile->momentum_.Z += 0.125f;
+        projectile->momentum_.z += 0.125f;
 }
 
 //
@@ -1709,8 +1709,8 @@ static void LaunchOrderedSpread(MapObject *mo)
 
         projectile->angle_ += spreadorder[count];
 
-        projectile->momentum_.X = projectile->speed_ * epi::BAMCos(projectile->angle_);
-        projectile->momentum_.Y = projectile->speed_ * epi::BAMSin(projectile->angle_);
+        projectile->momentum_.x = projectile->speed_ * epi::BAMCos(projectile->angle_);
+        projectile->momentum_.y = projectile->speed_ * epi::BAMSin(projectile->angle_);
     }
 
     mo->spread_count_ += 2;
@@ -1749,8 +1749,8 @@ static void LaunchRandomSpread(MapObject *mo)
         projectile->angle_ += spreadangle;
     }
 
-    projectile->momentum_.X = projectile->speed_ * epi::BAMCos(projectile->angle_);
-    projectile->momentum_.Y = projectile->speed_ * epi::BAMSin(projectile->angle_);
+    projectile->momentum_.x = projectile->speed_ * epi::BAMCos(projectile->angle_);
+    projectile->momentum_.y = projectile->speed_ * epi::BAMSin(projectile->angle_);
 }
 
 //-------------------------------------------------------------------
@@ -2028,9 +2028,9 @@ void A_EffectTracker(MapObject *object)
 
     // -ACB- 2000/03/11 Check for zero mass
     if (target->info_->mass_)
-        target->momentum_.Z = 1000 / target->info_->mass_;
+        target->momentum_.z = 1000 / target->info_->mass_;
     else
-        target->momentum_.Z = 2000;
+        target->momentum_.z = 2000;
 
     if (!tracker)
         return;
@@ -2353,7 +2353,7 @@ void SlammedIntoObject(MapObject *object, MapObject *target)
     }
 
     object->flags_ &= ~kMapObjectFlagSkullFly;
-    object->momentum_.X = object->momentum_.Y = object->momentum_.Z = 0;
+    object->momentum_.x = object->momentum_.y = object->momentum_.z = 0;
 
     MapObjectSetStateDeferred(object, object->info_->idle_state_, 0);
 }
@@ -2369,8 +2369,8 @@ bool UseThing(MapObject *user, MapObject *thing, float open_bottom, float open_t
         return false;
 
     // can be reached ?
-    open_top    = HMM_MIN(open_top, thing->z + thing->height_);
-    open_bottom = HMM_MAX(open_bottom, thing->z);
+    open_top    = GLM_MIN(open_top, thing->z + thing->height_);
+    open_bottom = GLM_MAX(open_bottom, thing->z);
 
     if (user->z >= open_top || (user->z + user->height_ + kUseZRange < open_bottom))
         return false;
@@ -3281,9 +3281,9 @@ void A_CheckMoving(MapObject *mo)
         return;
     }
 
-    if (fabs(mo->momentum_.X) < kStopSpeed && fabs(mo->momentum_.Y) < kStopSpeed)
+    if (fabs(mo->momentum_.x) < kStopSpeed && fabs(mo->momentum_.y) < kStopSpeed)
     {
-        mo->momentum_.X = mo->momentum_.Y = 0;
+        mo->momentum_.x = mo->momentum_.y = 0;
         MapObjectSetStateDeferred(mo, mo->info_->idle_state_, 0);
     }
 }
@@ -3899,7 +3899,7 @@ void A_PainChanceSet(MapObject *mo)
     if (st && st->action_par)
     {
         value = ((float *)st->action_par)[0];
-        value = HMM_MAX(0.0f, HMM_MIN(1.0f, value));
+        value = GLM_MAX(0.0f, GLM_MIN(1.0f, value));
     }
     mo->pain_chance_ = value;
 }

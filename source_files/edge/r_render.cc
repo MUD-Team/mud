@@ -130,7 +130,7 @@ static GLuint R_ImageCache(const Image *image, bool anim = true, const Colormap 
 struct WallCoordinateData
 {
     int             v_count;
-    const HMM_Vec3 *vertices;
+    const vec3s *vertices;
 
     GLuint tex_id;
 
@@ -145,13 +145,13 @@ struct WallCoordinateData
     float tx0, ty0;
     float tx_mul, ty_mul;
 
-    HMM_Vec3 normal;
+    vec3s normal;
 
     bool mid_masked;
 };
 
-static void WallCoordFunc(void *d, int v_idx, HMM_Vec3 *pos, float *rgb, HMM_Vec2 *texc, HMM_Vec3 *normal,
-                          HMM_Vec3 *lit_pos)
+static void WallCoordFunc(void *d, int v_idx, vec3s *pos, float *rgb, vec2s *texc, vec3s *normal,
+                          vec3s *lit_pos)
 {
     const WallCoordinateData *data = (WallCoordinateData *)d;
 
@@ -166,15 +166,15 @@ static void WallCoordFunc(void *d, int v_idx, HMM_Vec3 *pos, float *rgb, HMM_Vec
 
     if (fabs(data->div.delta_x) > fabs(data->div.delta_y))
     {
-        along = (pos->X - data->div.x) / data->div.delta_x;
+        along = (pos->x - data->div.x) / data->div.delta_x;
     }
     else
     {
-        along = (pos->Y - data->div.y) / data->div.delta_y;
+        along = (pos->y - data->div.y) / data->div.delta_y;
     }
 
-    texc->X = data->tx0 + along * data->tx_mul;
-    texc->Y = data->ty0 + pos->Z * data->ty_mul;
+    texc->x = data->tx0 + along * data->tx_mul;
+    texc->y = data->ty0 + pos->z * data->ty_mul;
 
     *lit_pos = *pos;
 }
@@ -182,7 +182,7 @@ static void WallCoordFunc(void *d, int v_idx, HMM_Vec3 *pos, float *rgb, HMM_Vec
 struct PlaneCoordinateData
 {
     int             v_count;
-    const HMM_Vec3 *vertices;
+    const vec3s *vertices;
 
     GLuint tex_id;
 
@@ -195,10 +195,10 @@ struct PlaneCoordinateData
     float tx0, ty0;
     float image_w, image_h;
 
-    HMM_Vec2 x_mat;
-    HMM_Vec2 y_mat;
+    vec2s x_mat;
+    vec2s y_mat;
 
-    HMM_Vec3 normal;
+    vec3s normal;
 
     // multiplier for plane_z_bob
     float bob_amount = 0;
@@ -206,8 +206,8 @@ struct PlaneCoordinateData
     BAMAngle rotation = 0;
 };
 
-static void PlaneCoordFunc(void *d, int v_idx, HMM_Vec3 *pos, float *rgb, HMM_Vec2 *texc, HMM_Vec3 *normal,
-                           HMM_Vec3 *lit_pos)
+static void PlaneCoordFunc(void *d, int v_idx, vec3s *pos, float *rgb, vec2s *texc, vec3s *normal,
+                           vec3s *lit_pos)
 {
     PlaneCoordinateData *data = (PlaneCoordinateData *)d;
 
@@ -218,19 +218,19 @@ static void PlaneCoordFunc(void *d, int v_idx, HMM_Vec3 *pos, float *rgb, HMM_Ve
     rgb[1] = data->G;
     rgb[2] = data->B;
 
-    HMM_Vec2 rxy = {{(data->tx0 + pos->X), (data->ty0 + pos->Y)}};
+    vec2s rxy = {{(data->tx0 + pos->x), (data->ty0 + pos->y)}};
 
     if (data->rotation)
-        rxy = HMM_RotateV2(rxy, epi::RadiansFromBAM(data->rotation));
+        rxy = glms_vec2_rotate(rxy, epi::RadiansFromBAM(data->rotation));
 
-    rxy.X /= data->image_w;
-    rxy.Y /= data->image_h;
+    rxy.x /= data->image_w;
+    rxy.y /= data->image_h;
 
-    texc->X = rxy.X * data->x_mat.X + rxy.Y * data->x_mat.Y;
-    texc->Y = rxy.X * data->y_mat.X + rxy.Y * data->y_mat.Y;
+    texc->x = rxy.x * data->x_mat.x + rxy.y * data->x_mat.y;
+    texc->y = rxy.x * data->y_mat.x + rxy.y * data->y_mat.y;
 
     if (data->bob_amount > 0)
-        pos->Z += (plane_z_bob * data->bob_amount);
+        pos->z += (plane_z_bob * data->bob_amount);
 
     *lit_pos = *pos;
 }
@@ -280,9 +280,9 @@ static void DLIT_Plane(MapObject *mo, void *dataptr)
     if (!mo->info_->dlight_[0].leaky_ &&
         !(mo->subsector_->sector->floor_vertex_slope || mo->subsector_->sector->ceiling_vertex_slope))
     {
-        float z = data->vertices[0].Z;
+        float z = data->vertices[0].z;
 
-        if ((MapObjectMidZ(mo) > z) != (data->normal.Z > 0))
+        if ((MapObjectMidZ(mo) > z) != (data->normal.z > 0))
             return;
     }
 
@@ -410,13 +410,13 @@ static void DrawWallPart(DrawFloor *dfloor, float x1, float y1, float lz1, float
     float total_h = image->ScaledHeightTotal();
 
     /* convert tex_x1 and tex_x2 from world coords to texture coords */
-    tex_x1 = (tex_x1 * surf->x_matrix.X) / total_w;
-    tex_x2 = (tex_x2 * surf->x_matrix.X) / total_w;
+    tex_x1 = (tex_x1 * surf->x_matrix.x) / total_w;
+    tex_x2 = (tex_x2 * surf->x_matrix.x) / total_w;
 
     float tx0    = tex_x1;
     float tx_mul = tex_x2 - tex_x1;
 
-    float ty_mul = surf->y_matrix.Y / total_h;
+    float ty_mul = surf->y_matrix.y / total_h;
     float ty0    = image->Top() - tex_top_h * ty_mul;
 
 #if (DEBUG >= 3)
@@ -443,24 +443,24 @@ static void DrawWallPart(DrawFloor *dfloor, float x1, float y1, float lz1, float
         GreetNeighbourSector(right_h, right_num, current_seg->vertex_sectors[1]);
     }
 
-    HMM_Vec3 vertices[kMaximumEdgeVertices * 2];
+    vec3s vertices[kMaximumEdgeVertices * 2];
 
     int v_count = 0;
 
     for (int LI = 0; LI < left_num; LI++)
     {
-        vertices[v_count].X = x1;
-        vertices[v_count].Y = y1;
-        vertices[v_count].Z = left_h[LI];
+        vertices[v_count].x = x1;
+        vertices[v_count].y = y1;
+        vertices[v_count].z = left_h[LI];
 
         v_count++;
     }
 
     for (int RI = right_num - 1; RI >= 0; RI--)
     {
-        vertices[v_count].X = x2;
-        vertices[v_count].Y = y2;
-        vertices[v_count].Z = right_h[RI];
+        vertices[v_count].x = x2;
+        vertices[v_count].y = y2;
+        vertices[v_count].z = right_h[RI];
 
         v_count++;
     }
@@ -516,8 +516,8 @@ static void DrawWallPart(DrawFloor *dfloor, float x1, float y1, float lz1, float
 
     if (render_view_extra_light < 250)
     {
-        float bottom = HMM_MIN(lz1, rz1);
-        float top    = HMM_MAX(lz2, rz2);
+        float bottom = GLM_MIN(lz1, rz1);
+        float top    = GLM_MAX(lz2, rz2);
 
         DynamicLightIterator(v_bbox[kBoundingBoxLeft], v_bbox[kBoundingBoxBottom], bottom, v_bbox[kBoundingBoxRight],
                              v_bbox[kBoundingBoxTop], top, DLIT_Wall, &data);
@@ -620,11 +620,11 @@ static void DrawSlidingDoor(DrawFloor *dfloor, float c, float f, float tex_top_h
         if (s_along >= e_along)
             continue;
 
-        float x1 = ld->vertex_1->X + ld->delta_x * s_along / ld->length;
-        float y1 = ld->vertex_1->Y + ld->delta_y * s_along / ld->length;
+        float x1 = ld->vertex_1->x + ld->delta_x * s_along / ld->length;
+        float y1 = ld->vertex_1->y + ld->delta_y * s_along / ld->length;
 
-        float x2 = ld->vertex_1->X + ld->delta_x * e_along / ld->length;
-        float y2 = ld->vertex_1->Y + ld->delta_y * e_along / ld->length;
+        float x2 = ld->vertex_1->x + ld->delta_x * e_along / ld->length;
+        float y2 = ld->vertex_1->y + ld->delta_y * e_along / ld->length;
 
         s_tex += x_offset;
         e_tex += x_offset;
@@ -677,11 +677,11 @@ static void DrawGlass(DrawFloor *dfloor, float c, float f, float tex_top_h, MapS
 
     if (s_along < e_along)
     {
-        float x1 = ld->vertex_1->X + ld->delta_x * s_along / ld->length;
-        float y1 = ld->vertex_1->Y + ld->delta_y * s_along / ld->length;
+        float x1 = ld->vertex_1->x + ld->delta_x * s_along / ld->length;
+        float y1 = ld->vertex_1->y + ld->delta_y * s_along / ld->length;
 
-        float x2 = ld->vertex_1->X + ld->delta_x * e_along / ld->length;
-        float y2 = ld->vertex_1->Y + ld->delta_y * e_along / ld->length;
+        float x2 = ld->vertex_1->x + ld->delta_x * e_along / ld->length;
+        float y2 = ld->vertex_1->y + ld->delta_y * e_along / ld->length;
 
         s_tex += x_offset;
         e_tex += x_offset;
@@ -702,17 +702,17 @@ static void DrawTile(Seg *seg, DrawFloor *dfloor, float lz1, float lz2, float rz
     if (!image)
         image = ImageForHomDetect();
 
-    float tex_top_h = tex_z + surf->offset.Y;
-    float x_offset  = surf->offset.X;
+    float tex_top_h = tex_z + surf->offset.y;
+    float x_offset  = surf->offset.x;
 
     if (flags & kWallTileExtraX)
     {
-        x_offset += seg->sidedef->middle.offset.X;
+        x_offset += seg->sidedef->middle.offset.x;
     }
     if (flags & kWallTileExtraY)
     {
         // needed separate Y flag to maintain compatibility
-        tex_top_h += seg->sidedef->middle.offset.Y;
+        tex_top_h += seg->sidedef->middle.offset.y;
     }
 
     bool opaque = (!seg->back_sector) || (surf->translucency >= 0.99f && image->opacity_ == kOpacitySolid);
@@ -736,10 +736,10 @@ static void DrawTile(Seg *seg, DrawFloor *dfloor, float lz1, float lz2, float rz
         }
     }
 
-    float x1 = seg->vertex_1->X;
-    float y1 = seg->vertex_1->Y;
-    float x2 = seg->vertex_2->X;
-    float y2 = seg->vertex_2->Y;
+    float x1 = seg->vertex_1->x;
+    float y1 = seg->vertex_1->y;
+    float x2 = seg->vertex_2->x;
+    float y2 = seg->vertex_2->y;
 
     float tex_x1 = seg->offset;
     float tex_x2 = tex_x1 + seg->length;
@@ -767,8 +767,8 @@ static void DrawTile(Seg *seg, DrawFloor *dfloor, float lz1, float lz2, float rz
 static inline void AddWallTile(Seg *seg, DrawFloor *dfloor, MapSurface *surf, float z1, float z2, float tex_z,
                                int flags, float f_min, float c_max)
 {
-    z1 = HMM_MAX(f_min, z1);
-    z2 = HMM_MIN(c_max, z2);
+    z1 = GLM_MAX(f_min, z1);
+    z2 = GLM_MIN(c_max, z2);
 
     if (z1 >= z2 - 0.01)
         return;
@@ -860,7 +860,7 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum, float f_m
 
         AddWallTile(seg, dfloor, &sd->middle, slope_fh, slope_ch,
                     (ld->flags & kLineFlagLowerUnpegged)
-                        ? sec->floor_height + (SafeImageHeight(sd->middle.image) / sd->middle.y_matrix.Y)
+                        ? sec->floor_height + (SafeImageHeight(sd->middle.image) / sd->middle.y_matrix.y)
                         : sec->ceiling_height,
                     0, f_min, c_max);
         return;
@@ -872,24 +872,24 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum, float f_m
     {
         if (!sec->floor_vertex_slope && other->floor_vertex_slope)
         {
-            float zv1 = seg->vertex_1->Z;
-            float zv2 = seg->vertex_2->Z;
+            float zv1 = seg->vertex_1->z;
+            float zv2 = seg->vertex_2->z;
             AddWallTile2(seg, dfloor, sd->bottom.image ? &sd->bottom : &other->floor, sec->floor_height,
                          (zv1 < 32767.0f && zv1 > -32768.0f) ? zv1 : sec->floor_height, sec->floor_height,
                          (zv2 < 32767.0f && zv2 > -32768.0f) ? zv2 : sec->floor_height,
                          (ld->flags & kLineFlagLowerUnpegged) ? sec->ceiling_height
-                                                              : HMM_MAX(sec->floor_height, HMM_MAX(zv1, zv2)),
+                                                              : GLM_MAX(sec->floor_height, GLM_MAX(zv1, zv2)),
                          0);
         }
         else if (sec->floor_vertex_slope && !other->floor_vertex_slope)
         {
-            float zv1 = seg->vertex_1->Z;
-            float zv2 = seg->vertex_2->Z;
+            float zv1 = seg->vertex_1->z;
+            float zv2 = seg->vertex_2->z;
             AddWallTile2(seg, dfloor, sd->bottom.image ? &sd->bottom : &sec->floor,
                          (zv1 < 32767.0f && zv1 > -32768.0f) ? zv1 : other->floor_height, other->floor_height,
                          (zv2 < 32767.0f && zv2 > -32768.0f) ? zv2 : other->floor_height, other->floor_height,
                          (ld->flags & kLineFlagLowerUnpegged) ? other->ceiling_height
-                                                              : HMM_MAX(other->floor_height, HMM_MAX(zv1, zv2)),
+                                                              : GLM_MAX(other->floor_height, GLM_MAX(zv1, zv2)),
                          0);
         }
         else if (!sd->bottom.image && !debug_hall_of_mirrors.d_)
@@ -909,21 +909,21 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum, float f_m
     {
         if (!sec->ceiling_vertex_slope && other->ceiling_vertex_slope)
         {
-            float zv1 = seg->vertex_1->W;
-            float zv2 = seg->vertex_2->W;
+            float zv1 = seg->vertex_1->w;
+            float zv2 = seg->vertex_2->w;
             AddWallTile2(seg, dfloor, sd->top.image ? &sd->top : &other->ceiling, sec->ceiling_height,
                          (zv1 < 32767.0f && zv1 > -32768.0f) ? zv1 : sec->ceiling_height, sec->ceiling_height,
                          (zv2 < 32767.0f && zv2 > -32768.0f) ? zv2 : sec->ceiling_height,
-                         (ld->flags & kLineFlagUpperUnpegged) ? sec->floor_height : HMM_MIN(zv1, zv2), 0);
+                         (ld->flags & kLineFlagUpperUnpegged) ? sec->floor_height : GLM_MIN(zv1, zv2), 0);
         }
         else if (sec->ceiling_vertex_slope && !other->ceiling_vertex_slope)
         {
-            float zv1 = seg->vertex_1->W;
-            float zv2 = seg->vertex_2->W;
+            float zv1 = seg->vertex_1->w;
+            float zv2 = seg->vertex_2->w;
             AddWallTile2(seg, dfloor, sd->top.image ? &sd->top : &sec->ceiling, other->ceiling_height,
                          (zv1 < 32767.0f && zv1 > -32768.0f) ? zv1 : other->ceiling_height, other->ceiling_height,
                          (zv2 < 32767.0f && zv2 > -32768.0f) ? zv2 : other->ceiling_height,
-                         (ld->flags & kLineFlagUpperUnpegged) ? other->floor_height : HMM_MIN(zv1, zv2), 0);
+                         (ld->flags & kLineFlagUpperUnpegged) ? other->floor_height : GLM_MIN(zv1, zv2), 0);
         }
         else if (!sd->top.image && !debug_hall_of_mirrors.d_)
         {
@@ -940,20 +940,20 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum, float f_m
 
     if (sd->middle.image)
     {
-        float f1 = HMM_MAX(sec->floor_height, other->floor_height);
-        float c1 = HMM_MIN(sec->ceiling_height, other->ceiling_height);
+        float f1 = GLM_MAX(sec->floor_height, other->floor_height);
+        float c1 = GLM_MIN(sec->ceiling_height, other->ceiling_height);
 
         float f2, c2;
 
         if (ld->flags & kLineFlagLowerUnpegged)
         {
             f2 = f1 + sd->middle_mask_offset;
-            c2 = f2 + (sd->middle.image->ScaledHeightActual() / sd->middle.y_matrix.Y);
+            c2 = f2 + (sd->middle.image->ScaledHeightActual() / sd->middle.y_matrix.y);
         }
         else
         {
             c2 = c1 + sd->middle_mask_offset;
-            f2 = c2 - (sd->middle.image->ScaledHeightActual() / sd->middle.y_matrix.Y);
+            f2 = c2 - (sd->middle.image->ScaledHeightActual() / sd->middle.y_matrix.y);
         }
 
         tex_z = c2;
@@ -969,8 +969,8 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum, float f_m
         // hack for "see-through" lines (same sector on both sides)
         if (sec != other)
         {
-            f2 = HMM_MAX(f2, f1);
-            c2 = HMM_MIN(c2, c1);
+            f2 = GLM_MAX(f2, f1);
+            c2 = GLM_MIN(c2, c1);
         }
 
         if (c2 > f2)
@@ -1021,11 +1021,11 @@ static void RendererWalkSeg(DrawSubsector *dsub, Seg *seg)
 {
     EDGE_ZoneScoped;
 
-    float sx1 = seg->vertex_1->X;
-    float sy1 = seg->vertex_1->Y;
+    float sx1 = seg->vertex_1->x;
+    float sy1 = seg->vertex_1->y;
 
-    float sx2 = seg->vertex_2->X;
-    float sy2 = seg->vertex_2->Y;
+    float sx2 = seg->vertex_2->x;
+    float sy2 = seg->vertex_2->y;
 
     BAMAngle angle_L = PointToAngle(view_x, view_y, sx1, sy1);
     BAMAngle angle_R = PointToAngle(view_x, view_y, sx2, sy2);
@@ -1116,7 +1116,7 @@ static void RendererWalkSeg(DrawSubsector *dsub, Seg *seg)
         }
         else if (bsector && EDGE_IMAGE_IS_SKY(bsector->ceiling))
         {
-            float max_f = HMM_MAX(fsector->floor_height, bsector->floor_height);
+            float max_f = GLM_MAX(fsector->floor_height, bsector->floor_height);
 
             if (bsector->ceiling_height <= max_f && max_f < fsector->sky_height)
             {
@@ -1276,7 +1276,7 @@ static void RenderPlane(DrawFloor *dfloor, float h, MapSurface *surf, int face_d
     if (num_vert > kMaximumPolygonVertices)
         num_vert = kMaximumPolygonVertices;
 
-    HMM_Vec3 vertices[kMaximumPolygonVertices];
+    vec3s vertices[kMaximumPolygonVertices];
 
     float v_bbox[4];
 
@@ -1288,8 +1288,8 @@ static void RenderPlane(DrawFloor *dfloor, float h, MapSurface *surf, int face_d
     {
         if (v_count < kMaximumPolygonVertices)
         {
-            float x = seg->vertex_1->X;
-            float y = seg->vertex_1->Y;
+            float x = seg->vertex_1->x;
+            float y = seg->vertex_1->y;
             float z = h;
 
             BoundingBoxAddPoint(v_bbox, x, y);
@@ -1297,20 +1297,20 @@ static void RenderPlane(DrawFloor *dfloor, float h, MapSurface *surf, int face_d
             if (current_subsector->sector->floor_vertex_slope && face_dir > 0)
             {
                 // floor - check vertex heights
-                if (seg->vertex_1->Z < 32767.0f && seg->vertex_1->Z > -32768.0f)
-                    z = seg->vertex_1->Z;
+                if (seg->vertex_1->z < 32767.0f && seg->vertex_1->z > -32768.0f)
+                    z = seg->vertex_1->z;
             }
 
             if (current_subsector->sector->ceiling_vertex_slope && face_dir < 0)
             {
                 // ceiling - check vertex heights
-                if (seg->vertex_1->W < 32767.0f && seg->vertex_1->W > -32768.0f)
-                    z = seg->vertex_1->W;
+                if (seg->vertex_1->w < 32767.0f && seg->vertex_1->w > -32768.0f)
+                    z = seg->vertex_1->w;
             }
 
-            vertices[v_count].X = x;
-            vertices[v_count].Y = y;
-            vertices[v_count].Z = z;
+            vertices[v_count].x = x;
+            vertices[v_count].y = y;
+            vertices[v_count].z = z;
 
             v_count++;
         }
@@ -1333,8 +1333,8 @@ static void RenderPlane(DrawFloor *dfloor, float h, MapSurface *surf, int face_d
     data.v_count  = v_count;
     data.vertices = vertices;
     data.R = data.G = data.B = 1.0f;
-    data.tx0                 = surf->offset.X;
-    data.ty0                 = surf->offset.Y;
+    data.tx0                 = surf->offset.x;
+    data.ty0                 = surf->offset.y;
     data.image_w             = surf->image->ScaledWidthActual();
     data.image_h             = surf->image->ScaledHeightActual();
     data.x_mat               = surf->x_matrix;
@@ -1668,12 +1668,12 @@ static void RenderTrueBsp(void)
 
 static void InitializeCamera(MapObject *mo, bool full_height, float expand_w)
 {
-    float fov = HMM_Clamp(5, field_of_view.f_, 175);
+    float fov = glm_clamp(5, field_of_view.f_, 175);
 
     wave_now    = level_time_elapsed / 100.0f;
     plane_z_bob = sine_table[(int)((kWavetableIncrement + wave_now) * kSineTableSize) & (kSineTableMask)];
 
-    view_x_slope = tan(90.0f * HMM_PI / 360.0);
+    view_x_slope = tanf(90.0f * GLM_PIf / 360.0f);
 
     if (full_height)
         view_y_slope = kDoomYSlopeFull;
@@ -1682,7 +1682,7 @@ static void InitializeCamera(MapObject *mo, bool full_height, float expand_w)
 
     if (!AlmostEquals(fov, 90.0f))
     {
-        float new_slope = tan(fov * HMM_PI / 360.0);
+        float new_slope = tanf(fov * GLM_PIf / 360.0f);
 
         view_y_slope *= new_slope / view_x_slope;
         view_x_slope = new_slope;
@@ -1694,7 +1694,7 @@ static void InitializeCamera(MapObject *mo, bool full_height, float expand_w)
     {
         view_is_zoomed = true;
 
-        float new_slope = tan(mo->player_->zoom_field_of_view_ * HMM_PI / 360.0);
+        float new_slope = tanf(mo->player_->zoom_field_of_view_ * GLM_PIf / 360.0f);
 
         view_y_slope *= new_slope / view_x_slope;
         view_x_slope = new_slope;
@@ -1739,18 +1739,18 @@ static void InitializeCamera(MapObject *mo, bool full_height, float expand_w)
     float lk_sin = epi::BAMSin(view_vertical_angle);
     float lk_cos = epi::BAMCos(view_vertical_angle);
 
-    view_forward.X = lk_cos * view_cosine;
-    view_forward.Y = lk_cos * view_sine;
-    view_forward.Z = lk_sin;
+    view_forward.x = lk_cos * view_cosine;
+    view_forward.y = lk_cos * view_sine;
+    view_forward.z = lk_sin;
 
-    view_up.X = -lk_sin * view_cosine;
-    view_up.Y = -lk_sin * view_sine;
-    view_up.Z = lk_cos;
+    view_up.x = -lk_sin * view_cosine;
+    view_up.y = -lk_sin * view_sine;
+    view_up.z = lk_cos;
 
     // cross product
-    view_right.X = view_forward.Y * view_up.Z - view_up.Y * view_forward.Z;
-    view_right.Y = view_forward.Z * view_up.X - view_up.Z * view_forward.X;
-    view_right.Z = view_forward.X * view_up.Y - view_up.X * view_forward.Y;
+    view_right.x = view_forward.y * view_up.z - view_up.y * view_forward.z;
+    view_right.y = view_forward.z * view_up.x - view_up.z * view_forward.x;
+    view_right.z = view_forward.x * view_up.y - view_up.x * view_forward.y;
 
     // compute the 1D projection of the view angle
     BAMAngle oned_side_angle;
@@ -1761,9 +1761,9 @@ static void InitializeCamera(MapObject *mo, bool full_height, float expand_w)
         k = epi::DegreesFromBAM(view_vertical_angle);
         if (k > 180.0)
             k -= 360.0;
-        k = k * HMM_PI / 180.0f;
+        k = k * GLM_PIf / 180.0f;
 
-        sprite_skew = tan((-k) / 2.0);
+        sprite_skew = tanf((-k) / 2.0);
 
         k = fabs(k);
 

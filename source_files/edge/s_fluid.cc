@@ -20,7 +20,6 @@
 
 #include <stdint.h>
 
-#include "HandmadeMath.h"
 #include "dm_state.h"
 #include "epi.h"
 #include "epi_filesystem.h"
@@ -433,7 +432,7 @@ class FluidPlayer : public AbstractMusicPlayer
     {
         if (fluid_player_gain.CheckModified())
         {
-            fluid_player_gain.f_ = HMM_Clamp(0.0, fluid_player_gain.f_, 2.0f);
+            fluid_player_gain.f_ = glm_clamp(0.0, fluid_player_gain.f_, 2.0f);
             fluid_player_gain    = fluid_player_gain.f_;
             fluid_synth_set_gain(edge_fluid, fluid_player_gain.f_);
         }

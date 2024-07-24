@@ -27,6 +27,7 @@ add_library(
 )
 
 target_include_directories(edge_ddf PRIVATE ${EDGE_LIBRARY_DIR}/almostequals)
+target_include_directories(edge_ddf PRIVATE ${EDGE_LIBRARY_DIR}/cglm/include)
 target_include_directories(edge_ddf PRIVATE ../edge)
 target_include_directories(edge_ddf PRIVATE ../epi)
 

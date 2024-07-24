@@ -29,6 +29,7 @@
 
 #include <string.h>
 
+#include "cglm/struct.h"
 #include "ddf_local.h"
 #include "ddf_types.h"
 #include "epi_str_compare.h"
@@ -541,7 +542,7 @@ static void ThingStartEntry(const char *buffer, bool extend)
     {
         name = std::string(buffer, pos - buffer);
 
-        number = HMM_MAX(0, atoi(pos + 1));
+        number = GLM_MAX(0, atoi(pos + 1));
 
         if (name.empty())
         {
@@ -2234,7 +2235,7 @@ MapObjectDefinitionContainer::~MapObjectDefinitionContainer()
 
 int MapObjectDefinitionContainer::FindFirst(const char *name, int startpos)
 {
-    startpos = HMM_MAX(startpos, 0);
+    startpos = GLM_MAX(startpos, 0);
 
     for (; startpos < size(); startpos++)
     {
@@ -2248,7 +2249,7 @@ int MapObjectDefinitionContainer::FindFirst(const char *name, int startpos)
 
 int MapObjectDefinitionContainer::FindLast(const char *name, int startpos)
 {
-    startpos = HMM_MIN(startpos, size() - 1);
+    startpos = GLM_MIN(startpos, size() - 1);
 
     for (; startpos >= 0; startpos--)
     {

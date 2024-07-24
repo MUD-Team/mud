@@ -55,12 +55,12 @@ class ColorMixer
 
     int mod_MAX() const
     {
-        return HMM_MAX(modulate_red_, HMM_MAX(modulate_green_, modulate_blue_));
+        return GLM_MAX(modulate_red_, GLM_MAX(modulate_green_, modulate_blue_));
     }
 
     int add_MAX() const
     {
-        return HMM_MAX(add_red_, HMM_MAX(add_green_, add_blue_));
+        return GLM_MAX(add_red_, GLM_MAX(add_green_, add_blue_));
     }
 
     void modulate_green_ive(RGBAColor rgb, float qty)
@@ -84,8 +84,8 @@ class ColorMixer
     }
 };
 
-typedef void (*ShaderCoordinateFunction)(void *data, int v_idx, HMM_Vec3 *pos, float *rgb, HMM_Vec2 *texc,
-                                         HMM_Vec3 *normal, HMM_Vec3 *lit_pos);
+typedef void (*ShaderCoordinateFunction)(void *data, int v_idx, vec3s *pos, float *rgb, vec2s *texc,
+                                         vec3s *normal, vec3s *lit_pos);
 
 /* abstract base class */
 class AbstractShader

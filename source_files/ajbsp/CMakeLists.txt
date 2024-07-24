@@ -14,6 +14,7 @@ add_library(edge_ajbsp
 )
 
 target_include_directories(edge_ajbsp PRIVATE ${EDGE_LIBRARY_DIR}/almostequals)
+target_include_directories(edge_ajbsp PRIVATE ${EDGE_LIBRARY_DIR}/cglm/include)
 target_include_directories(edge_ajbsp PRIVATE ../epi)
 target_include_directories(edge_ajbsp PRIVATE ${EDGE_LIBRARY_DIR}/miniz)
 

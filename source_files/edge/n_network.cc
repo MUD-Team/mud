@@ -252,7 +252,7 @@ int TryRunTicCommands()
     if (tics > real_tics + 1)
         tics = real_tics + 1;
     else
-        tics = HMM_MAX(HMM_MIN(tics, real_tics), 1);
+        tics = GLM_MAX(GLM_MIN(tics, real_tics), 1);
 
 #ifdef EDGE_DEBUG_TICS
     LogDebug("=== make_tic %d game_tic %d | real %d using %d\n", make_tic, game_tic, real_tics, tics);

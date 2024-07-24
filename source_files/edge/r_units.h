@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "HandmadeMath.h"
+#include "cglm/struct.h"
 #include "epi_color.h"
 #include "i_defs_gl.h"
 #include "sokol_color.h"
@@ -36,9 +36,9 @@ constexpr uint16_t kDummyClamp = 789;
 struct RendererVertex
 {
     GLfloat  rgba_color[4];
-    HMM_Vec3 position;
-    HMM_Vec2 texture_coordinates[2];
-    HMM_Vec3 normal;
+    vec3s position;
+    vec2s texture_coordinates[2];
+    vec3s normal;
 };
 
 void StartUnitBatch(bool sort_em);

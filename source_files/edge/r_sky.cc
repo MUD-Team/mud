@@ -290,15 +290,15 @@ void BeginSky(void)
 // (https://github.com/sirjuddington/SLADE/blob/master/src/MapEditor/Renderer/MapRenderer3D.cpp)
 // with additional modes and other tweaks
 
-static HMM_Vec2 sky_circle[32];
+static vec2s sky_circle[32];
 
 static void BuildSkyCircle()
 {
     float rot = 0;
     for (auto &pos : sky_circle)
     {
-        pos = {{HMM_SINF(rot), -HMM_COSF(rot)}};
-        rot -= (HMM_PI32 * 2) / 32.0;
+        pos = {{sinf(rot), -cosf(rot)}};
+        rot -= (GLM_PIf * 2) / 32.0f;
     }
 }
 
@@ -326,16 +326,16 @@ static void RenderSkySlice(float top, float bottom, float atop, float abottom, f
         // Top
         glColor4f(1.0f, 1.0f, 1.0f, atop);
         glTexCoord2f(tc_x + tx, tc_y1);
-        glVertex3f((sky_circle[a + 1].X * dist), -(sky_circle[a + 1].Y * dist), (top * dist));
+        glVertex3f((sky_circle[a + 1].x * dist), -(sky_circle[a + 1].y * dist), (top * dist));
         glTexCoord2f(tc_x, tc_y1);
-        glVertex3f((sky_circle[a].X * dist), -(sky_circle[a].Y * dist), (top * dist));
+        glVertex3f((sky_circle[a].x * dist), -(sky_circle[a].y * dist), (top * dist));
 
         // Bottom
         glColor4f(1.0f, 1.0f, 1.0f, abottom);
         glTexCoord2f(tc_x, tc_y2);
-        glVertex3f((sky_circle[a].X * dist), -(sky_circle[a].Y * dist), (bottom * dist));
+        glVertex3f((sky_circle[a].x * dist), -(sky_circle[a].y * dist), (bottom * dist));
         glTexCoord2f(tc_x + tx, tc_y2);
-        glVertex3f((sky_circle[a + 1].X * dist), -(sky_circle[a + 1].Y * dist), (bottom * dist));
+        glVertex3f((sky_circle[a + 1].x * dist), -(sky_circle[a + 1].y * dist), (bottom * dist));
 
         tc_x += tx;
     }
@@ -344,16 +344,16 @@ static void RenderSkySlice(float top, float bottom, float atop, float abottom, f
     // Top
     glColor4f(1.0f, 1.0f, 1.0f, atop);
     glTexCoord2f(tc_x + tx, tc_y1);
-    glVertex3f((sky_circle[0].X * dist), -(sky_circle[0].Y * dist), (top * dist));
+    glVertex3f((sky_circle[0].x * dist), -(sky_circle[0].y * dist), (top * dist));
     glTexCoord2f(tc_x, tc_y1);
-    glVertex3f((sky_circle[31].X * dist), -(sky_circle[31].Y * dist), (top * dist));
+    glVertex3f((sky_circle[31].x * dist), -(sky_circle[31].y * dist), (top * dist));
 
     // Bottom
     glColor4f(1.0f, 1.0f, 1.0f, abottom);
     glTexCoord2f(tc_x, tc_y2);
-    glVertex3f((sky_circle[31].X * dist), -(sky_circle[31].Y * dist), (bottom * dist));
+    glVertex3f((sky_circle[31].x * dist), -(sky_circle[31].y * dist), (bottom * dist));
     glTexCoord2f(tc_x + tx, tc_y2);
-    glVertex3f((sky_circle[0].X * dist), -(sky_circle[0].Y * dist), (bottom * dist));
+    glVertex3f((sky_circle[0].x * dist), -(sky_circle[0].y * dist), (bottom * dist));
 
     glEnd();
 }
@@ -661,22 +661,22 @@ void RenderSkyPlane(Subsector *sub, float h)
     if (!seg)
         return;
 
-    float x0 = seg->vertex_1->X;
-    float y0 = seg->vertex_1->Y;
+    float x0 = seg->vertex_1->x;
+    float y0 = seg->vertex_1->y;
     seg = seg->subsector_next;
     if (!seg)
         return;
 
-    float x1 = seg->vertex_1->X;
-    float y1 = seg->vertex_1->Y;
+    float x1 = seg->vertex_1->x;
+    float y1 = seg->vertex_1->y;
     seg = seg->subsector_next;
     if (!seg)
         return;
 
     while (seg)
     {
-        float x2 = seg->vertex_1->X;
-        float y2 = seg->vertex_1->Y;
+        float x2 = seg->vertex_1->x;
+        float y2 = seg->vertex_1->y;
 
         glVertex3f(x0, y0, h);
         glVertex3f(x1, y1, h);
@@ -695,10 +695,10 @@ void RenderSkyWall(Seg *seg, float h1, float h2)
     if (renderer_dumb_sky.d_)
         return;
 
-    float x1 = seg->vertex_1->X;
-    float y1 = seg->vertex_1->Y;
-    float x2 = seg->vertex_2->X;
-    float y2 = seg->vertex_2->Y;
+    float x1 = seg->vertex_1->x;
+    float y1 = seg->vertex_1->y;
+    float x2 = seg->vertex_2->x;
+    float y2 = seg->vertex_2->y;
 
     glNormal3f(y2 - y1, x1 - x2, 0);
 
