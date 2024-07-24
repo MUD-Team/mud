@@ -13,11 +13,9 @@ add_library(edge_ajbsp
 	bsp_utility.cc
 )
 
-target_link_libraries(edge_ajbsp PRIVATE cglm)
+target_link_libraries(edge_ajbsp PRIVATE almostequals cglm edge_epi)
 
-target_include_directories(edge_ajbsp PRIVATE ${EDGE_LIBRARY_DIR}/almostequals)
-target_include_directories(edge_ajbsp PRIVATE ../epi)
-target_include_directories(edge_ajbsp PRIVATE ${EDGE_LIBRARY_DIR}/miniz)
+target_include_directories(edge_ajbsp PUBLIC ./)
 
 target_compile_options(edge_ajbsp PRIVATE
   $<$<CXX_COMPILER_ID:MSVC>:${EDGE_WARNINGS}>

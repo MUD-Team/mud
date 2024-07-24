@@ -30,8 +30,6 @@
 #include "s_cache.h"
 #include "s_fluid.h"
 #include "s_sound.h"
-#define SOKOL_AUDIO_IMPL
-#define SOKOL_ASSERT(c) EPI_ASSERT(c)
 #include "sokol_audio.h"
 #include "sokol_log.h"
 

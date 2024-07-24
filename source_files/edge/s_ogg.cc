@@ -26,9 +26,6 @@
 #include "s_cache.h"
 #include "s_music.h"
 #include "snd_gather.h"
-#define STB_VORBIS_NO_INTEGER_CONVERSION
-#define STB_VORBIS_NO_PUSHDATA_API
-#define STB_VORBIS_NO_STDIO
 #include "stb_vorbis.h"
 
 extern bool sound_device_stereo; // FIXME: encapsulation

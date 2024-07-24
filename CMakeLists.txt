@@ -10,6 +10,8 @@ project(
   VERSION 0.1.0
 )
 
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED True)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
@@ -46,6 +48,8 @@ if (MSVC)
   add_definitions("/wd4244 /wd4267")
   # Unreferenced formal parameter, and there are many of these
   add_definitions("/wd4100")
+  # Nameless struct/union extension; prevalent in cglm
+  add_definitions("/wd4201")
 
   # warning level for edge specific source files 
   set (EDGE_WARNINGS "/W4")
@@ -125,10 +129,6 @@ if (EDGE_PROFILING)
   option (TRACY_CALLSTACK "" ON)
   FetchContent_MakeAvailable (tracy)  
 endif()
-
-include_directories(libraries/hmm)
-include_directories(libraries/sokol)
-include_directories(libraries/tracy)
 
 add_subdirectory(libraries)
 add_subdirectory(source_files)

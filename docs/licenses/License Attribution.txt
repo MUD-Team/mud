@@ -85,4 +85,4 @@ Fraction.hpp - Bisqwit
 
 "sf_GMbank" soundfont (renamed to Default.sf2) - The Csound Developers
 
-stb_image, stb_image_write, stb_rect_pack, stb_truetype, and stb_vorbis libraries - Sean Barrett
+stb_image, stb_image_write, stb_rect_pack and stb_vorbis libraries - Sean Barrett

@@ -87,10 +87,15 @@ set (EDGE_LINK_LIBRARIES
   edge_ajbsp  
   edge_ddf
   edge_epi
-  cglm  
+  edge_tracy
+  almostequals
+  cglm
+  dr_wav  
   fluidlite
-  sokol
+  pl_mpeg
   physfs-static
+  sokol
+  stb
 )
 
 if (APPLE)
@@ -114,19 +119,10 @@ else()
   target_compile_definitions(edge-classic PRIVATE UNIX)
 endif()
 
-target_include_directories(edge-classic PRIVATE ./)
+target_include_directories(edge-classic PUBLIC ./)
 
 target_include_directories(edge-classic PRIVATE ${EDGE_LIBRARY_DIR}/glad/include/glad)
 set(EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} glad ${OPENGL_LIBRARIES})
-
-target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/almostequals)
-target_include_directories(edge-classic PRIVATE ../ajbsp)
-target_include_directories(edge-classic PRIVATE ../ddf)
-target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/dr_libs)
-target_include_directories(edge-classic PRIVATE ../epi)
-target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/fluidlite/include)
-target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/pl_mpeg)
-target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/stb)
 
 target_link_libraries(edge-classic PRIVATE ${EDGE_LINK_LIBRARIES})
 

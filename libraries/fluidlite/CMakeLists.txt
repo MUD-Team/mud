@@ -21,4 +21,4 @@ add_library(fluidlite
 )
 
 target_include_directories(fluidlite PRIVATE src)
-target_include_directories(fluidlite PRIVATE include)
+target_include_directories(fluidlite PUBLIC include)

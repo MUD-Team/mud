@@ -22,16 +22,14 @@
 #include "i_defs_gl.h"
 #include "i_sound.h"
 #include "i_system.h"
+#include "pl_mpeg.h"
 #include "r_gldefs.h"
 #include "r_modes.h"
 #include "s_blit.h"
 #include "s_music.h"
 #include "s_sound.h"
-#include "w_files.h"
-
-#define PL_MPEG_IMPLEMENTATION
-#include "pl_mpeg.h"
 #include "sokol_color.h"
+#include "w_files.h"
 
 extern bool sound_device_stereo;
 extern int  sound_device_frequency;

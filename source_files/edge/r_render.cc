@@ -31,6 +31,7 @@
 #include "AlmostEquals.h"
 #include "dm_defs.h"
 #include "dm_state.h"
+#include "edge_profiling.h"
 #include "epi.h"
 #include "g_game.h"
 #include "i_defs_gl.h"
@@ -49,10 +50,6 @@
 #include "r_sky.h"
 #include "r_things.h"
 #include "r_units.h"
-
-#define SOKOL_COLOR_IMPL // this will likely be somewhere else when sokol_gfx
-                         // gets folded in
-#include "edge_profiling.h"
 #include "sokol_color.h"
 
 static constexpr float kDoomYSlope     = 0.525f;
