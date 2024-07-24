@@ -28,12 +28,12 @@
 #include "cglm/struct.h"
 #include "epi_bam.h"
 
-vec3s TripleCrossProduct(vec3s v1, vec3s v2, vec3s v3);
-vec3s LinePlaneIntersection(vec3s line_a, vec3s line_b, vec3s plane_c, vec3s plane_normal);
-vec3s LinePlaneIntersection(vec3s line_a, vec3s line_b, vec3s plane_a, vec3s plane_b,
-                                   vec3s plane_c);
+vec3s TripleCrossProduct(const vec3s &v1, const vec3s &v2, const vec3s &v3);
+vec3s LinePlaneIntersection(const vec3s &line_a, const vec3s &line_b, const vec3s &plane_c, const vec3s &plane_normal);
+vec3s LinePlaneIntersection(const vec3s &line_a, const vec3s &line_b, const vec3s &plane_a, const vec3s &plane_b,
+                                   const vec3s &plane_c);
 void     BAMAngleToMatrix(BAMAngle ang, vec2s *x, vec2s *y);
-int      PointInTriangle(vec2s v1, vec2s v2, vec2s v3, vec2s test);
+int      PointInTriangle(const vec2s &v1, const vec2s &v2, const vec2s &v3, const vec2s &test);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

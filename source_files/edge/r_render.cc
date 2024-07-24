@@ -848,11 +848,6 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum, float f_m
         }
     }*/
 
-    RGBAColor sec_fc = kRGBANoValue;
-    float     sec_fd = 0;
-    RGBAColor other_fc = kRGBANoValue;
-    float     other_fd = 0;
-
     if (!other)
     {
         if (!sd->middle.image && !debug_hall_of_mirrors.d_)

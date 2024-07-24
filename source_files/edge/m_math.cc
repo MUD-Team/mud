@@ -65,13 +65,13 @@ void BAMAngleToMatrix(BAMAngle ang, vec2s *x, vec2s *y)
     y->y = x->x;
 }
 
-vec3s TripleCrossProduct(vec3s v1, vec3s v2, vec3s v3)
+vec3s TripleCrossProduct(const vec3s &v1, const vec3s &v2, const vec3s &v3)
 {
     return glms_vec3_cross(glms_vec3_sub(v2, v1), glms_vec3_sub(v3, v1));
 }
 
 // If the plane normal is precalculated; otherwise use the other version
-vec3s LinePlaneIntersection(vec3s line_a, vec3s line_b, vec3s plane_c, vec3s plane_normal)
+vec3s LinePlaneIntersection(const vec3s &line_a, const vec3s &line_b, const vec3s &plane_c, const vec3s &plane_normal)
 {
     float    n             = glms_vec3_dot(plane_normal, glms_vec3_sub(plane_c, line_a));
     vec3s line_subtract = glms_vec3_sub(line_b, line_a);
@@ -79,8 +79,8 @@ vec3s LinePlaneIntersection(vec3s line_a, vec3s line_b, vec3s plane_c, vec3s pla
     return glms_vec3_add(line_a, glms_vec3_scale(line_subtract, n / d));
 }
 
-vec3s LinePlaneIntersection(vec3s line_a, vec3s line_b, vec3s plane_a, vec3s plane_b,
-                                   vec3s plane_c)
+vec3s LinePlaneIntersection(const vec3s &line_a, const vec3s &line_b, const vec3s &plane_a, const vec3s &plane_b,
+                                   const vec3s &plane_c)
 {
     vec3s plane_normal  = TripleCrossProduct(plane_a, plane_b, plane_c);
     float    n             = glms_vec3_dot(plane_normal, glms_vec3_sub(plane_c, line_a));
@@ -89,7 +89,7 @@ vec3s LinePlaneIntersection(vec3s line_a, vec3s line_b, vec3s plane_a, vec3s pla
     return glms_vec3_add(line_a, glms_vec3_scale(line_subtract, n / d));
 }
 
-int PointInTriangle(vec2s v1, vec2s v2, vec2s v3, vec2s test)
+int PointInTriangle(const vec2s &v1, const vec2s &v2, const vec2s &v3, const vec2s &test)
 {
     std::vector<vec2s> tri_vec = {v1, v2, v3};
     int                   i       = 0;
