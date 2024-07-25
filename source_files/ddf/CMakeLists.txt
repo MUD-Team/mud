@@ -28,6 +28,8 @@ add_library(
 
 target_link_libraries(edge_ddf PRIVATE almostequals cglm edge_epi sokol)
 
+target_include_directories(edge_ddf PRIVATE ../edge)
+
 target_include_directories(edge_ddf PUBLIC ./)
 
 target_compile_options(edge_ddf PRIVATE

@@ -26,7 +26,12 @@
 #include "s_cache.h"
 #include "s_music.h"
 #include "snd_gather.h"
+// clang-format off
+#define STB_VORBIS_NO_INTEGER_CONVERSION
+#define STB_VORBIS_NO_PUSHDATA_API
+#define STB_VORBIS_NO_STDIO
 #include "stb_vorbis.h"
+// clang-format on
 
 extern bool sound_device_stereo; // FIXME: encapsulation
 

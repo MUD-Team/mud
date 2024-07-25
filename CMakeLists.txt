@@ -15,8 +15,6 @@ set(CMAKE_C_STANDARD_REQUIRED True)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-add_compile_definitions("SOKOL_GLCORE")
-
 option(EDGE_SANITIZE "Enable code sanitizing" OFF)
 option(EDGE_PROFILING "Enable Profiling" OFF)
 
@@ -113,22 +111,6 @@ if(${CMAKE_SYSTEM} MATCHES "BSD")
 endif()
 
 find_package(OpenGL REQUIRED)
-
-# Profiling
-if (EDGE_PROFILING)
-  add_definitions("-DEDGE_PROFILING" "-DTRACY_ENABLE")
-  include(FetchContent)
-  FetchContent_Declare (
-    tracy
-    GIT_REPOSITORY https://github.com/wolfpld/tracy.git
-    GIT_TAG master
-    GIT_SHALLOW TRUE
-    GIT_PROGRESS TRUE
-  )
-  option (TRACY_ON_DEMAND "" OFF)
-  option (TRACY_CALLSTACK "" ON)
-  FetchContent_MakeAvailable (tracy)  
-endif()
 
 add_subdirectory(libraries)
 add_subdirectory(source_files)

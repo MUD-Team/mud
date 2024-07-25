@@ -119,8 +119,6 @@ else()
   target_compile_definitions(edge-classic PRIVATE UNIX)
 endif()
 
-target_include_directories(edge-classic PUBLIC ./)
-
 target_include_directories(edge-classic PRIVATE ${EDGE_LIBRARY_DIR}/glad/include/glad)
 set(EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} glad ${OPENGL_LIBRARIES})
 

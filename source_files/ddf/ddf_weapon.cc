@@ -618,7 +618,7 @@ static void DDFWGetZoomFactor(const char *info, void *storage)
     float mag = 0;
     DDFMainGetFloat(info, &mag);
     if (mag > 0)
-        dynamic_weapon->zoom_fov_ = RoundToInteger(90 / mag);
+        *factor = RoundToInteger(90 / mag);
     
 }
 
