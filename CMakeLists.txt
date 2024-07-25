@@ -10,10 +10,10 @@ project(
   VERSION 0.1.0
 )
 
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED True)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-
-add_compile_definitions("SOKOL_GLCORE")
 
 option(EDGE_SANITIZE "Enable code sanitizing" OFF)
 option(EDGE_PROFILING "Enable Profiling" OFF)
@@ -46,6 +46,8 @@ if (MSVC)
   add_definitions("/wd4244 /wd4267")
   # Unreferenced formal parameter, and there are many of these
   add_definitions("/wd4100")
+  # Nameless struct/union extension; prevalent in cglm
+  add_definitions("/wd4201")
 
   # warning level for edge specific source files 
   set (EDGE_WARNINGS "/W4")
@@ -109,26 +111,6 @@ if(${CMAKE_SYSTEM} MATCHES "BSD")
 endif()
 
 find_package(OpenGL REQUIRED)
-
-# Profiling
-if (EDGE_PROFILING)
-  add_definitions("-DEDGE_PROFILING" "-DTRACY_ENABLE")
-  include(FetchContent)
-  FetchContent_Declare (
-    tracy
-    GIT_REPOSITORY https://github.com/wolfpld/tracy.git
-    GIT_TAG master
-    GIT_SHALLOW TRUE
-    GIT_PROGRESS TRUE
-  )
-  option (TRACY_ON_DEMAND "" OFF)
-  option (TRACY_CALLSTACK "" ON)
-  FetchContent_MakeAvailable (tracy)  
-endif()
-
-include_directories(libraries/hmm)
-include_directories(libraries/sokol)
-include_directories(libraries/tracy)
 
 add_subdirectory(libraries)
 add_subdirectory(source_files)
