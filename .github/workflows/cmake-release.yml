@@ -17,47 +17,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Configure CMake MSVC
-        run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G"Visual Studio 16 2019"
+        run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
       - name: Build MSVC
         run: |
           cmake --build build --target GenerateEPKS
           cmake --build build --config ${{env.BUILD_TYPE}}
       - uses: actions/upload-artifact@v4
         with:
-          name: edge-classic-msvc
+          name: edge-classic
           path: |
             autoload
             docs
-            edge_base/*.epk
             soundfont
             edge-classic.exe
             *.epk
             CHANGELOG.md
           retention-days: ${{env.RETENTION_DAYS}} 
-  build-mingw:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Download w64devkit
-        run: invoke-webrequest https://github.com/skeeto/w64devkit/releases/download/v1.23.0/w64devkit-i686-1.23.0.zip -outfile ${{github.workspace}}\w64devkit.zip
-      - name: Extract w64devkit
-        run: expand-archive -path ${{github.workspace}}\w64devkit.zip -destinationpath ${{github.workspace}}
-      - name: Set environment variables and build
-        run: |
-          $env:Path = "${{github.workspace}}\w64devkit\bin;" + $env:Path
-          cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_FLAGS="-isystem ${{github.workspace}}\w64devkit\include" -G "MinGW Makefiles"
-          cmake --build build --target GenerateEPKS
-          cmake --build build --config ${{env.BUILD_TYPE}}
-          strip ${{github.workspace}}\edge-classic.exe
-      - uses: actions/upload-artifact@v4
-        with:
-          name: edge-classic-mingw
-          path: |
-            autoload
-            docs
-            edge_base/*.epk
-            soundfont
-            edge-classic.exe
-            *.epk
-            CHANGELOG.md
-          retention-days: ${{env.RETENTION_DAYS}}     
