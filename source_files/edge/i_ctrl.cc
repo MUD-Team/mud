@@ -24,6 +24,7 @@
 #include "edge_profiling.h"
 #include "epi.h"
 #include "epi_str_util.h"
+#include "gamepad/Gamepad.h"
 #include "i_system.h"
 #include "i_video.h"
 #include "m_argv.h"
@@ -678,7 +679,6 @@ void I_ShowGamepads(void)
 #endif
 }
 
-#ifdef SOKOL_DISABLED
 void StartupJoystick(void)
 {
     current_joystick = 0;
@@ -691,16 +691,9 @@ void StartupJoystick(void)
         return;
     }
 
-    if (SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER) < 0)
-    {
-        LogPrint("StartupControl: Couldn't init SDL GAMEPAD!\n");
-        no_joystick = true;
-        return;
-    }
+    Gamepad_init();
 
-    SDL_GameControllerEventState(SDL_ENABLE);
-
-    total_joysticks = SDL_NumJoysticks();
+    total_joysticks = Gamepad_numDevices();
 
     LogPrint("StartupControl: %d gamepads found.\n", total_joysticks);
 
@@ -709,11 +702,9 @@ void StartupJoystick(void)
     else
     {
         joystick_device = 1; // Automatically set to first detected gamepad
-        I_OpenJoystick(joystick_device);
+        //I_OpenJoystick(joystick_device);
     }
 }
-
-#endif
 
 /****** Input Event Generation ******/
 
@@ -721,7 +712,7 @@ void StartupControl(void)
 {
     s_control_events.reserve(4096);
 
-    // StartupJoystick();
+    StartupJoystick();
 }
 
 void ControlPostEvent(const sapp_event &event)
@@ -752,18 +743,7 @@ void ControlGetEvents(void)
 
 void ShutdownControl(void)
 {
-#ifdef SOKOL_DISABLED
-    if (gamepad_info)
-    {
-        SDL_GameControllerClose(gamepad_info);
-        gamepad_info = nullptr;
-    }
-    if (joystick_info)
-    {
-        SDL_JoystickClose(joystick_info);
-        joystick_info = nullptr;
-    }
-#endif
+    Gamepad_shutdown();
 }
 
 int GetTime(void)

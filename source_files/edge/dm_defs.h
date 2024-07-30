@@ -167,6 +167,8 @@ constexpr uint16_t kMouse6         = (0x105);
 constexpr uint16_t kMouseWheelUp   = (0x10e);
 constexpr uint16_t kMouseWheelDown = (0x10f);
 
+// "default,Standard Gamepad,a:b0,b:b1,back:b8,dpdown:b13,dpleft:b14,dpright:b15,dpup:b12,guide:b16,leftshoulder:b4,leftstick:b10,lefttrigger:b6,leftx:a0,lefty:a1,rightshoulder:b5,rightstick:b11,righttrigger:b7,rightx:a2,righty:a3,start:b9,x:b2,y:b3,"
+
 constexpr uint16_t kGamepadA             = (0x110 + 1);
 constexpr uint16_t kGamepadB             = (0x110 + 2);
 constexpr uint16_t kGamepadX             = (0x110 + 3);
