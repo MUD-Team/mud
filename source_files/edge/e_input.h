@@ -53,6 +53,7 @@ extern ConsoleVariable mouse_x_sensitivity;
 extern ConsoleVariable mouse_y_sensitivity;
 
 extern int    joystick_axis[4];
+extern float  joy_raw[4];
 extern float *joystick_deadzones[6];
 //
 // -ACB- 1998/09/06 Analogue binding:

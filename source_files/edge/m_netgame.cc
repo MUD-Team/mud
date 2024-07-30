@@ -384,7 +384,7 @@ static void HostAccept(void)
 
 bool OptionMenuNetworkHostResponder(InputEvent *ev, int ch)
 {
-    if (ch == kEnter || ch == kGamepadA || ch == kMouse1)
+    if (ch == kEnter || ch == kGamepadSouth || ch == kMouse1)
     {
         if (host_position == (kTotalHostOptions - 1))
         {
@@ -405,7 +405,7 @@ bool OptionMenuNetworkHostResponder(InputEvent *ev, int ch)
     }
 
     if (ch == kLeftArrow || ch == kRightArrow || ch == kGamepadLeft || ch == kGamepadRight || ch == kEnter ||
-        ch == kGamepadA || ch == kMouse1)
+        ch == kGamepadSouth || ch == kMouse1)
     {
         HostChangeOption(host_position, ch);
         return true;
@@ -434,7 +434,7 @@ static void ListAccept()
 
 bool OptionMenuNetListResponder(InputEvent *ev, int ch)
 {
-    if (ch == kEnter || ch == kGamepadA)
+    if (ch == kEnter || ch == kGamepadSouth)
     {
         ListAccept();
         return true;
@@ -464,7 +464,7 @@ bool NetworkGameResponder(InputEvent *ev, int ch)
     case kMouse2:
     case kMouse3:
     case kEscape:
-    case kGamepadB: {
+    case kGamepadEast: {
         network_game_menu_on = 0;
         return true;
     }
