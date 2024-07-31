@@ -137,9 +137,7 @@ int mouse_y_axis;
 
 int joystick_axis[4] = {0, 0, 0, 0};
 
-static constexpr float kJoystickAxisPeak = 32767.0f / 32768.0f;
-
-static int joy_last_raw[4];
+static float joy_last_raw[4];
 
 // The last one is ignored (kAxisDisable)
 static float ball_deltas[6] = {0, 0, 0, 0, 0, 0};
@@ -172,35 +170,21 @@ EDGE_DEFINE_CONSOLE_VARIABLE(forward_speed, "1.0", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(side_speed, "1.0", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(fly_speed, "1.0", kConsoleVariableFlagArchive)
 
-static float JoystickAxisFromRaw(int raw, float dead)
-{
-    EPI_ASSERT(abs(raw) <= 32768);
-
-    float v = raw / 32768.0f;
-
-    if (fabs(v) < dead)
-        return 0;
-
-    if (fabs(v) >= kJoystickAxisPeak)
-        return (v < 0) ? -1.0f : +1.0f;
-
-    return v;
-}
-
 static void UpdateJoystickAxis(int n)
 {
     if (joystick_axis[n] == kAxisDisable)
         return;
 
-    int raw = JoystickGetAxis(n);
-    int old = joy_last_raw[n];
+    float raw = JoystickGetAxis(n);
+    float old = joy_last_raw[n];
 
     joy_last_raw[n] = raw;
 
     // cooked value = average of last two raw samples
-    int cooked = (raw + old) >> 1;
+    float force = (raw + old) * 0.5f;
 
-    float force = JoystickAxisFromRaw(cooked, *joystick_deadzones[n]);
+    if (fabs(force) < *joystick_deadzones[n])
+        force = 0;
 
     // perform inversion
     if ((joystick_axis[n] + 1) & 1)
