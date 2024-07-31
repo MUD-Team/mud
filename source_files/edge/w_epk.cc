@@ -429,7 +429,7 @@ void ProcessPackContents()
                 std::string udmf_string = udmf_file->ReadAsString();
                 delete udmf_file;
                 udmf_hash = epi::StringHash64(udmf_string);
-                std::string node_file = epi::PathAppend("cache", epi::StringFormat("%s-%u.xgl",epi::GetStem(entry.pack_path_).c_str(), udmf_hash));
+                std::string node_file = epi::PathAppend("cache", epi::StringFormat("%s-%lu.xgl",epi::GetStem(entry.pack_path_).c_str(), udmf_hash));
                 if (!epi::FileExists(node_file))
                     ajbsp::BuildLevel(epi::GetStem(entry.pack_path_), node_file, udmf_string);
             }
