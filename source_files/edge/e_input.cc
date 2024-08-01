@@ -135,7 +135,15 @@ static int mouselook_held; // for accelerative mlooking
 int mouse_x_axis;
 int mouse_y_axis;
 
-int joystick_axis[4] = {0, 0, 0, 0};
+/*
+static constexpr char JoystickAxis[] = "Off/Turn/Turn (Reversed)/Look (Inverted)/Look/Walk "
+                                       "(Reversed)/Walk/Strafe/Strafe "
+                                       "(Reversed)/Fly (Inverted)/Fly/Left Trigger/Right Trigger";
+*/
+
+// For now, these assume that axis 0 is Left X, 1 is Left Y, 2 is Right X, and 3 is Right Y
+// These are the SDL2 GameController defaults, but we need actual detection - Dasho
+int joystick_axis[4] = {7, 6, 1, 4};
 
 static float joy_last_raw[4];
 
@@ -742,7 +750,7 @@ static EventSpecialKey special_keys[] = {{kRightArrow, "Right Arrow"},
                                          {kGamepadX, "X Button"},
                                          {kGamepadY, "Y Button"},
                                          {kGamepadBack, "Back Button"},
-                                         {kGamepadGuide, "Guide Button"}, // ???
+                                         {kGamepadGuide, "Guide Button"},
                                          {kGamepadStart, "Start Button"},
                                          {kGamepadLeftStick, "Left Stick"},
                                          {kGamepadRightStick, "Right Stick"},
@@ -752,12 +760,6 @@ static EventSpecialKey special_keys[] = {{kRightArrow, "Right Arrow"},
                                          {kGamepadDown, "DPad Down"},
                                          {kGamepadLeft, "DPad Left"},
                                          {kGamepadRight, "DPad Right"},
-                                         {kGamepadMisc1, "Misc1 Button"}, // ???
-                                         {kGamepadPaddle1, "Paddle 1"},
-                                         {kGamepadPaddle2, "Paddle 2"},
-                                         {kGamepadPaddle3, "Paddle 3"},
-                                         {kGamepadPaddle4, "Paddle 4"},
-                                         {kGamepadTouchpad, "Touchpad"},
                                          {kGamepadTriggerLeft, "Left Trigger"},
                                          {kGamepadTriggerRight, "Right Trigger"},
 

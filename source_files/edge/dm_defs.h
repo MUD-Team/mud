@@ -167,31 +167,25 @@ constexpr uint16_t kMouse6         = (0x105);
 constexpr uint16_t kMouseWheelUp   = (0x10e);
 constexpr uint16_t kMouseWheelDown = (0x10f);
 
+// From SDL2 GameController:
 // "default,Standard Gamepad,a:b0,b:b1,back:b8,dpdown:b13,dpleft:b14,dpright:b15,dpup:b12,guide:b16,leftshoulder:b4,leftstick:b10,lefttrigger:b6,leftx:a0,lefty:a1,rightshoulder:b5,rightstick:b11,righttrigger:b7,rightx:a2,righty:a3,start:b9,x:b2,y:b3,"
-
-constexpr uint16_t kGamepadA             = (0x110 + 1);
-constexpr uint16_t kGamepadB             = (0x110 + 2);
-constexpr uint16_t kGamepadX             = (0x110 + 3);
-constexpr uint16_t kGamepadY             = (0x110 + 4);
-constexpr uint16_t kGamepadBack          = (0x110 + 5);
-constexpr uint16_t kGamepadGuide         = (0x110 + 6);
-constexpr uint16_t kGamepadStart         = (0x110 + 7);
-constexpr uint16_t kGamepadLeftStick     = (0x110 + 8);
-constexpr uint16_t kGamepadRightStick    = (0x110 + 9);
-constexpr uint16_t kGamepadLeftShoulder  = (0x110 + 10);
-constexpr uint16_t kGamepadRightShoulder = (0x110 + 11);
+constexpr uint16_t kGamepadA             = (0x110 + 0);
+constexpr uint16_t kGamepadB             = (0x110 + 1);
+constexpr uint16_t kGamepadX             = (0x110 + 2);
+constexpr uint16_t kGamepadY             = (0x110 + 3);
+constexpr uint16_t kGamepadBack          = (0x110 + 8);
+constexpr uint16_t kGamepadGuide         = (0x110 + 16);
+constexpr uint16_t kGamepadStart         = (0x110 + 9);
+constexpr uint16_t kGamepadLeftStick     = (0x110 + 10);
+constexpr uint16_t kGamepadRightStick    = (0x110 + 11);
+constexpr uint16_t kGamepadLeftShoulder  = (0x110 + 4);
+constexpr uint16_t kGamepadRightShoulder = (0x110 + 5);
 constexpr uint16_t kGamepadUp            = (0x110 + 12);
 constexpr uint16_t kGamepadDown          = (0x110 + 13);
 constexpr uint16_t kGamepadLeft          = (0x110 + 14);
 constexpr uint16_t kGamepadRight         = (0x110 + 15);
-constexpr uint16_t kGamepadMisc1         = (0x110 + 12);
-constexpr uint16_t kGamepadPaddle1       = (0x110 + 13);
-constexpr uint16_t kGamepadPaddle2       = (0x110 + 14);
-constexpr uint16_t kGamepadPaddle3       = (0x110 + 15);
-constexpr uint16_t kGamepadPaddle4       = (0x110 + 16);
-constexpr uint16_t kGamepadTouchpad      = (0x110 + 17);
-constexpr uint16_t kGamepadTriggerLeft   = (0x110 + 18);
-constexpr uint16_t kGamepadTriggerRight  = (0x110 + 19);
+constexpr uint16_t kGamepadTriggerLeft   = (0x110 + 6);
+constexpr uint16_t kGamepadTriggerRight  = (0x110 + 7);
 
 // Pseudo-keycodes for program functions
 constexpr uint16_t kScreenshot    = (0x110 + 29);

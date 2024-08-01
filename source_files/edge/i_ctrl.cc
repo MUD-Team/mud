@@ -309,6 +309,8 @@ static void HandleGamepadButtonRelease(Gamepad_device *device, unsigned int butt
     event.type = kInputEventKeyUp;
     event.value.key.sym = kGamepadA + buttonID;
 
+    LogPrint("Released button %d\n", buttonID);
+
     PostEvent(&event);
 }
 
@@ -326,7 +328,15 @@ static void HandleGamepadButtonPress(Gamepad_device *device, unsigned int button
     event.type = kInputEventKeyDown;
     event.value.key.sym = kGamepadA + buttonID;
 
+    LogPrint("Pressed button %d\n", buttonID);
+
     PostEvent(&event);
+}
+
+static void HandleGamepadAxisMove(Gamepad_device * device, unsigned int axisID, float value, float lastValue, double timestamp, void * context)
+{
+    (void)device;
+    LogPrint("Moved axis %d\n", axisID);
 }
 
 #ifdef SOKOL_DISABLED
@@ -430,7 +440,8 @@ static void I_OpenJoystick(Gamepad_device *joystick)
     int gp_num_triggers         = 0;
 
     // Until something smarter is sorted out, assume that any gamepad is either going to have
-    // one thumbstick, two thumbsticks, or two thumbstick + 2 analog triggers - Dasho
+    // one thumbstick, two thumbsticks, or two thumbstick + 2 analog triggers
+    // TODO: Do dpads/"hats" count as axes? - Dasho
     if (gamepad_info->numAxes == 2)
         gp_total_joysticksticks = 1;
     else if (gamepad_info->numAxes == 4 || gamepad_info->numAxes == 6)
@@ -440,7 +451,7 @@ static void I_OpenJoystick(Gamepad_device *joystick)
     
     int gp_num_buttons = gamepad_info->numButtons;
 
-    LogPrint("Opened gamepad: %s\n", name);
+    LogPrint("Using gamepad: %s\n", name);
     LogPrint("Sticks:%d Triggers: %d Buttons: %d\n", gp_total_joysticksticks, gp_num_triggers,
              gp_num_buttons);
 }
@@ -449,6 +460,7 @@ static void JoystickPlugCallback(Gamepad_device *device, void *context)
 {
     (void)context;
     EPI_ASSERT(device);
+    LogPrint("Connected gamepad: %s\n", device->description);
     gamepad_info = nullptr;
     I_OpenJoystick(Gamepad_deviceAtIndex(0));
 }
@@ -456,7 +468,6 @@ static void JoystickPlugCallback(Gamepad_device *device, void *context)
 static void JoystickUnplugCallback(Gamepad_device *device, void *context)
 {
     (void)context;
-    EPI_ASSERT(device);
     gamepad_info = nullptr;
     if (Gamepad_numDevices() > 0)
         I_OpenJoystick(Gamepad_deviceAtIndex(0));
@@ -589,6 +600,7 @@ void StartupJoystick(void)
     Gamepad_deviceRemoveFunc(JoystickUnplugCallback, nullptr);
     Gamepad_buttonDownFunc(HandleGamepadButtonPress, nullptr);
     Gamepad_buttonUpFunc(HandleGamepadButtonRelease, nullptr);
+    Gamepad_axisMoveFunc(HandleGamepadAxisMove, nullptr);
 
     if (total_joysticks == 0)
         return;
@@ -614,9 +626,8 @@ void ControlGetEvents(void)
 {
     EDGE_ZoneScoped;
 
-
-// Check for plugs/unplugs; not sure if being before or after
-// processEvents matters - Dasho
+    // Check for plugs/unplugs; not sure if being before or after
+    // processEvents matters
     Gamepad_detectDevices();
 
     Gamepad_processEvents();

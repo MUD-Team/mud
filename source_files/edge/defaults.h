@@ -61,9 +61,6 @@
 #define EDGE_DEFAULT_MOUSE_XAXIS (2 * kAxisTurn - 1)
 #define EDGE_DEFAULT_MOUSE_YAXIS (2 * kAxisMouselook - 1)
 
-#define EDGE_DEFAULT_JOY_XAXIS (2 * kAxisTurn - 1)
-#define EDGE_DEFAULT_JOY_YAXIS (2 * kAxisForward)
-
 // Misc
 #define EDGE_DEFAULT_MENULANGUAGE (0)
 #define EDGE_DEFAULT_SHOWMESSAGES (1)
