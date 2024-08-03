@@ -44,7 +44,7 @@
 extern bool ConsoleResponder(InputEvent *ev);
 extern bool GameResponder(InputEvent *ev);
 
-extern int JoystickGetAxis(int n);
+extern float JoystickGetAxis(int n);
 
 extern ConsoleVariable double_framerate;
 
@@ -135,15 +135,7 @@ static int mouselook_held; // for accelerative mlooking
 int mouse_x_axis;
 int mouse_y_axis;
 
-/*
-static constexpr char JoystickAxis[] = "Off/Turn/Turn (Reversed)/Look (Inverted)/Look/Walk "
-                                       "(Reversed)/Walk/Strafe/Strafe "
-                                       "(Reversed)/Fly (Inverted)/Fly/Left Trigger/Right Trigger";
-*/
-
-// For now, these assume that axis 0 is Left X, 1 is Left Y, 2 is Right X, and 3 is Right Y
-// These are the SDL2 GameController defaults, but we need actual detection - Dasho
-int joystick_axis[4] = {7, 6, 1, 4};
+int joystick_axis[4] = {0, 0, 0, 0};
 
 static float joy_last_raw[4];
 

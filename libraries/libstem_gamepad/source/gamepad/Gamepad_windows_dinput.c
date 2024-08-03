@@ -778,6 +778,34 @@ const DIDATAFORMAT c_dfDIJoystick2 = {
 };
 #endif
 
+static int sortAxisFunction(const void *a, const void *b)
+{
+    const struct diAxisInfo *inputA = (const struct diAxisInfo *)a;
+    const struct diAxisInfo *inputB = (const struct diAxisInfo *)b;
+
+    if (inputA->offset < inputB->offset) {
+        return -1;
+    }
+    if (inputA->offset > inputB->offset) {
+        return 1;
+    }
+    return 0;
+}
+
+static int sortButtonFunction(const void *a, const void *b)
+{
+    const DWORD *inputA = (const DWORD *)a;
+    const DWORD *inputB = (const DWORD *)b;
+
+    if (*inputA < *inputB) {
+        return -1;
+    }
+    if (*inputA > *inputB) {
+        return 1;
+    }
+    return 0;
+}
+
 static BOOL CALLBACK enumDevicesCallback(const DIDEVICEINSTANCE * instance, LPVOID context) {
 	struct Gamepad_device * deviceRecord;
 	struct Gamepad_devicePrivate * deviceRecordPrivate;
@@ -855,6 +883,11 @@ static BOOL CALLBACK enumDevicesCallback(const DIDEVICEINSTANCE * instance, LPVO
 	IDirectInputDevice_EnumObjects(di8Device, enumAxesCallback, deviceRecord, DIDFT_AXIS | DIDFT_POV);
 	deviceRecord->numButtons = 0;
 	IDirectInputDevice_EnumObjects(di8Device, enumButtonsCallback, deviceRecord, DIDFT_BUTTON);
+	// Need to ensure axis and button ordering matches SDL mapping expectations if not an XInput device
+	if (!deviceRecordPrivate->isXInput) {
+		qsort(deviceRecordPrivate->axisInfo, deviceRecord->numAxes, sizeof(struct diAxisInfo), sortAxisFunction);
+		qsort(deviceRecordPrivate->buttonOffsets, deviceRecord->numButtons, sizeof(DWORD), sortButtonFunction);
+	}
 	devices = realloc(devices, sizeof(struct Gamepad_device *) * (numDevices + 1));
 	devices[numDevices++] = deviceRecord;
 	
@@ -1054,9 +1087,9 @@ void Gamepad_processEvents() {
 				updateButtonValue(device, 13, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_Y), currentTime());
 				updateButtonValue(device, 14, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_GUIDE), currentTime());
 				updateAxisValue(device, 0, state.Gamepad.sThumbLX, currentTime());
-				updateAxisValue(device, 1, state.Gamepad.sThumbLY, currentTime());
+				updateAxisValue(device, 1, -state.Gamepad.sThumbLY, currentTime());
 				updateAxisValue(device, 2, state.Gamepad.sThumbRX, currentTime());
-				updateAxisValue(device, 3, state.Gamepad.sThumbRY, currentTime());
+				updateAxisValue(device, 3, -state.Gamepad.sThumbRY, currentTime());
 				updateAxisValueFloat(device, 4, state.Gamepad.bLeftTrigger / 127.5f - 1.0f, currentTime());
 				updateAxisValueFloat(device, 5, state.Gamepad.bRightTrigger / 127.5f - 1.0f, currentTime());
 				

@@ -16,6 +16,8 @@
 //
 //----------------------------------------------------------------------------
 
+#include <math.h>
+
 #include <vector>
 
 #include "dm_defs.h"
@@ -335,8 +337,14 @@ static void HandleGamepadButtonPress(Gamepad_device *device, unsigned int button
 
 static void HandleGamepadAxisMove(Gamepad_device * device, unsigned int axisID, float value, float lastValue, double timestamp, void * context)
 {
-    (void)device;
-    LogPrint("Moved axis %d\n", axisID);
+    (void)context;
+    EPI_ASSERT(device);
+
+    if (device != gamepad_info)
+        return;
+
+    if (fabs(value) > 0.30f) // Arbitrary deadzone to filter out resting jitter
+        LogPrint("Moved axis %d\n", axisID);
 }
 
 #ifdef SOKOL_DISABLED
@@ -417,7 +425,7 @@ void HandleMouseMotionEvent(sapp_event *ev)
     }
 }
 
-int JoystickGetAxis(int n)
+float JoystickGetAxis(int n)
 {
     if (no_joystick || !gamepad_info)
         return 0;
@@ -436,24 +444,24 @@ static void I_OpenJoystick(Gamepad_device *joystick)
     if (!name)
         name = "(UNKNOWN)";
 
-    int gp_total_joysticksticks = 0;
-    int gp_num_triggers         = 0;
+    // At the moment, we can only collect the total number of axes and
+    // buttons. Until POV/dpads/hats/analog triggers are correctly
+    // sorted, this is as good as it gets - Dasho
 
-    // Until something smarter is sorted out, assume that any gamepad is either going to have
-    // one thumbstick, two thumbsticks, or two thumbstick + 2 analog triggers
-    // TODO: Do dpads/"hats" count as axes? - Dasho
-    if (gamepad_info->numAxes == 2)
-        gp_total_joysticksticks = 1;
-    else if (gamepad_info->numAxes == 4 || gamepad_info->numAxes == 6)
-        gp_total_joysticksticks = 2;
-    if (gamepad_info->numAxes == 6)
-        gp_num_triggers = 2;
-    
+    int gp_total_joysticksticks = gamepad_info->numAxes;
     int gp_num_buttons = gamepad_info->numButtons;
-
+   
     LogPrint("Using gamepad: %s\n", name);
-    LogPrint("Sticks:%d Triggers: %d Buttons: %d\n", gp_total_joysticksticks, gp_num_triggers,
-             gp_num_buttons);
+
+    // Test for SDL-compatible GUID string building. Will need to see what other components may be important
+    // (i.e., different prefixes based on platform, etc) - Dasho
+    uint16_t vend = gamepad_info->vendorID;
+    uint16_t prod = gamepad_info->productID;
+    std::string guid_string = epi::StringFormat("%02x%02x0000%02x%02x0000", (uint8_t) vend, (uint8_t) (vend >> 8),
+                (uint8_t) prod, (uint8_t) (prod >> 8));
+
+    LogPrint("GUID: %s\n", guid_string.c_str());
+    LogPrint("Axes: %d Buttons: %d\n", gp_total_joysticksticks, gp_num_buttons);
 }
 
 static void JoystickPlugCallback(Gamepad_device *device, void *context)
@@ -462,15 +470,16 @@ static void JoystickPlugCallback(Gamepad_device *device, void *context)
     EPI_ASSERT(device);
     LogPrint("Connected gamepad: %s\n", device->description);
     gamepad_info = nullptr;
-    I_OpenJoystick(Gamepad_deviceAtIndex(0));
+    I_OpenJoystick(device);
 }
 
 static void JoystickUnplugCallback(Gamepad_device *device, void *context)
 {
     (void)context;
     gamepad_info = nullptr;
-    if (Gamepad_numDevices() > 0)
-        I_OpenJoystick(Gamepad_deviceAtIndex(0));
+    uint8_t index = Gamepad_numDevices() - 1;
+    if (index >= 0 && Gamepad_deviceAtIndex(index) != device)
+        I_OpenJoystick(Gamepad_deviceAtIndex(index));
 }
 
 //
@@ -626,10 +635,6 @@ void ControlGetEvents(void)
 {
     EDGE_ZoneScoped;
 
-    // Check for plugs/unplugs; not sure if being before or after
-    // processEvents matters
-    Gamepad_detectDevices();
-
     Gamepad_processEvents();
 
     for (size_t i = 0; i < s_control_events.size(); i++)
@@ -647,6 +652,8 @@ void ControlGetEvents(void)
     }
 
     s_control_events.clear();
+
+    Gamepad_detectDevices();
 }
 
 void ShutdownControl(void)
