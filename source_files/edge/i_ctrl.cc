@@ -344,7 +344,7 @@ static void HandleGamepadAxisMove(Gamepad_device * device, unsigned int axisID, 
         return;
 
     if (fabs(value) > 0.30f) // Arbitrary deadzone to filter out resting jitter
-        LogPrint("Moved axis %d\n", axisID);
+        LogPrint("Moved axis %d. Value: %f\n", axisID, value);
 }
 
 #ifdef SOKOL_DISABLED
