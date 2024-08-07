@@ -31,6 +31,7 @@
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
 #include "gamepad/Gamepad.h"
+#include "i_gamepad_db.h"
 #include "i_system.h"
 #include "i_video.h"
 #include "m_argv.h"
@@ -48,8 +49,6 @@ Gamepad_device     *gamepad_info    = nullptr;
 // Track trigger state to avoid pushing multiple unnecessary trigger events
 bool right_trigger_pulled = false;
 bool left_trigger_pulled  = false;
-
-static constexpr const char *xinput_test_mapping = "xinput,*,a:b0,b:b1,back:b6,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,guide:b10,leftshoulder:b4,leftstick:b8,lefttrigger:a2,leftx:a0,lefty:a1,rightshoulder:b5,rightstick:b9,righttrigger:a5,rightx:a3,righty:a4,start:b7,x:b2,y:b3,";
 
 static std::unordered_map<std::string, uint16_t, epi::ContainerStringHash> mapping_string_to_keycode = 
 {
@@ -78,54 +77,62 @@ static std::unordered_map<std::string, uint16_t, epi::ContainerStringHash> mappi
 
 static std::unordered_map<std::string, std::pair<std::unordered_map<uint8_t, uint16_t>, std::unordered_map<uint8_t, uint16_t>>, epi::ContainerStringHash> gamepad_mappings;
 
-static void BuildGamepadMapFromString(const char *string)
+static void BuildGamepadMappings()
 {
-    std::vector<std::string> values = epi::SeparatedStringVector(string, ',');
-    std::string guid;
-    std::unordered_map<uint8_t, uint16_t> button_map;
-    std::unordered_map<uint8_t, uint16_t> axis_map;
-    for (size_t i = 0, i_end = values.size(); i < i_end; i++)
+    int i = 0;
+    const char *current_map_string = nullptr;
+
+    current_map_string = known_gamepad_mapping_strings[i];
+
+    while (current_map_string)
     {
-        const std::string &val = values[i];
-        if (i == 0)
+        std::vector<std::string> values = epi::SeparatedStringVector(current_map_string, ',');
+        std::string guid;
+        std::unordered_map<uint8_t, uint16_t> button_map;
+        std::unordered_map<uint8_t, uint16_t> axis_map;
+        for (size_t j = 0, j_end = values.size(); j < j_end; j++)
         {
-            if (val == "xinput")
-                guid = val;
-            else if (val.size() != 32)
-                continue;
-            else
-                guid = val.substr(8, 24);
+            const std::string &val = values[j];
+            if (j == 0)
+            {
+                if (val == "xinput")
+                    guid = val;
+                else if (val.size() != 32)
+                    continue;
+                else
+                    guid = val.substr(8, 16);
+            }
+            else if (j > 1 && !val.empty()) // Skip the second field (name) for now - Dasho
+            {
+                std::string::size_type colon = val.find(':');
+                if (colon == std::string::npos)
+                    continue;
+                std::string map = val.substr(0, colon);
+                std::string raw = val.substr(colon+1);
+                if (map == "hint")
+                    continue;
+                // Not sure what to do with hats yet - Dasho
+                if (raw[0] == 'h')
+                    continue;
+                if (raw[0] == 'a')
+                {
+                    uint16_t axis_code = mapping_string_to_keycode[map];
+                    if (axis_code == kGamepadLeftTrigger)
+                        axis_code = kGamepadLeftAnalogTrigger;
+                    else if (axis_code == kGamepadRightTrigger)
+                        axis_code = kGamepadRightAnalogTrigger;
+                    axis_map.try_emplace((uint8_t)atoi(raw.substr(1).c_str()), axis_code);
+                }
+                else if (raw[0] == 'b')
+                    button_map.try_emplace((uint8_t)atoi(raw.substr(1).c_str()), mapping_string_to_keycode[map]);
+            }
         }
-        else if (i > 1 && !val.empty()) // Skip the second field (name) for now - Dasho
+        if (!guid.empty() && !axis_map.empty() && !button_map.empty())
         {
-            std::string::size_type colon = val.find(':');
-            if (colon == std::string::npos)
-                continue;
-            std::string map = val.substr(0, colon);
-            std::string raw = val.substr(colon+1);
-            if (map == "hint")
-                continue;
-            // Not sure what to do with hats yet - Dasho
-            if (raw[0] == 'h')
-                continue;
-            if (raw[0] == 'a')
-            {
-                uint16_t axis_code = mapping_string_to_keycode[map];
-                if (axis_code == kGamepadLeftTrigger)
-                    axis_code = kGamepadLeftAnalogTrigger;
-                else if (axis_code == kGamepadRightTrigger)
-                    axis_code = kGamepadRightAnalogTrigger;
-                axis_map.try_emplace((uint8_t)atoi(raw.substr(1).c_str()), axis_code);
-            }
-            else if (raw[0] == 'b')
-            {
-                button_map.try_emplace((uint8_t)atoi(raw.substr(1).c_str()), mapping_string_to_keycode[map]);
-            }
+            gamepad_mappings.try_emplace(guid, std::pair<std::unordered_map<uint8_t, uint16_t>, std::unordered_map<uint8_t, uint16_t>>(axis_map, button_map));
         }
-    }
-    if (!guid.empty() && !axis_map.empty() && !button_map.empty())
-    {
-        gamepad_mappings.try_emplace(guid, std::pair<std::unordered_map<uint8_t, uint16_t>, std::unordered_map<uint8_t, uint16_t>>(axis_map, button_map));
+        i++;
+        current_map_string = known_gamepad_mapping_strings[i];
     }
 }
 
@@ -760,16 +767,14 @@ void I_ShowGamepads(void)
 
 void StartupJoystick(void)
 {
-    // This will become a function to iterate through the entire
-    // list that we provide
-    BuildGamepadMapFromString(xinput_test_mapping);
-
     if (FindArgument("no_joystick") > 0)
     {
         LogPrint("StartupControl: Gamepad system disabled.\n");
         no_joystick = true;
         return;
     }
+
+    BuildGamepadMappings();
 
     Gamepad_init();
 
