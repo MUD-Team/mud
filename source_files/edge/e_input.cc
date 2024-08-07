@@ -44,8 +44,6 @@
 extern bool ConsoleResponder(InputEvent *ev);
 extern bool GameResponder(InputEvent *ev);
 
-extern float JoystickGetAxis(int n);
-
 extern ConsoleVariable double_framerate;
 
 //
@@ -137,6 +135,7 @@ int mouse_y_axis;
 
 int joystick_axis[4] = {0, 0, 0, 0};
 
+float joy_raw[4];
 static float joy_last_raw[4];
 
 // The last one is ignored (kAxisDisable)
@@ -175,7 +174,7 @@ static void UpdateJoystickAxis(int n)
     if (joystick_axis[n] == kAxisDisable)
         return;
 
-    float raw = JoystickGetAxis(n);
+    float raw = joy_raw[n];
     float old = joy_last_raw[n];
 
     joy_last_raw[n] = raw;
@@ -191,7 +190,7 @@ static void UpdateJoystickAxis(int n)
         force = -force;
 
     if (debug_joyaxis.d_ == n + 1)
-        LogPrint("Axis%d : raw %+05d --> %+7.3f\n", n + 1, raw, force);
+        LogPrint("Axis%d : %+7.3f\n", n + 1, force);
 
     int axis = (joystick_axis[n] + 1) >> 1;
 
@@ -752,8 +751,8 @@ static EventSpecialKey special_keys[] = {{kRightArrow, "Right Arrow"},
                                          {kGamepadDown, "DPad Down"},
                                          {kGamepadLeft, "DPad Left"},
                                          {kGamepadRight, "DPad Right"},
-                                         {kGamepadTriggerLeft, "Left Trigger"},
-                                         {kGamepadTriggerRight, "Right Trigger"},
+                                         {kGamepadLeftTrigger, "Left Trigger"},
+                                         {kGamepadRightTrigger, "Right Trigger"},
 
                                          // THE END
                                          {-1, nullptr}};

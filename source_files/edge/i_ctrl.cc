@@ -19,6 +19,7 @@
 #include <math.h>
 
 #include <vector>
+#include <unordered_map>
 
 #include "dm_defs.h"
 #include "dm_state.h"
@@ -27,6 +28,7 @@
 #include "e_main.h"
 #include "edge_profiling.h"
 #include "epi.h"
+#include "epi_str_compare.h"
 #include "epi_str_util.h"
 #include "gamepad/Gamepad.h"
 #include "i_system.h"
@@ -46,6 +48,89 @@ Gamepad_device     *gamepad_info    = nullptr;
 // Track trigger state to avoid pushing multiple unnecessary trigger events
 bool right_trigger_pulled = false;
 bool left_trigger_pulled  = false;
+
+static constexpr const char *xinput_test_mapping = "xinput,*,a:b0,b:b1,back:b6,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,guide:b10,leftshoulder:b4,leftstick:b8,lefttrigger:a2,leftx:a0,lefty:a1,rightshoulder:b5,rightstick:b9,righttrigger:a5,rightx:a3,righty:a4,start:b7,x:b2,y:b3,";
+
+static std::unordered_map<std::string, uint16_t, epi::ContainerStringHash> mapping_string_to_keycode = 
+{
+    {"a", kGamepadA},
+    {"b", kGamepadB},
+    {"x", kGamepadX},
+    {"y", kGamepadY},
+    {"dpup", kGamepadUp},
+    {"dpdown", kGamepadDown},
+    {"dpleft", kGamepadLeft},
+    {"dpright", kGamepadRight},
+    {"leftshoulder", kGamepadLeftShoulder},
+    {"rightshoulder", kGamepadRightShoulder},
+    {"leftstick", kGamepadLeftStick},
+    {"rightstick", kGamepadRightStick},
+    {"lefttrigger", kGamepadLeftTrigger},
+    {"righttrigger", kGamepadRightTrigger},
+    {"guide", kGamepadGuide},
+    {"back", kGamepadBack},
+    {"start", kGamepadStart},
+    {"leftx", kGamepadLeftX},
+    {"lefty", kGamepadLeftY},
+    {"rightx", kGamepadRightX},
+    {"righty", kGamepadRightY},
+};
+
+static std::unordered_map<std::string, std::pair<std::unordered_map<uint8_t, uint16_t>, std::unordered_map<uint8_t, uint16_t>>, epi::ContainerStringHash> gamepad_mappings;
+
+static void BuildGamepadMapFromString(const char *string)
+{
+    std::vector<std::string> values = epi::SeparatedStringVector(string, ',');
+    std::string guid;
+    std::unordered_map<uint8_t, uint16_t> button_map;
+    std::unordered_map<uint8_t, uint16_t> axis_map;
+    for (size_t i = 0, i_end = values.size(); i < i_end; i++)
+    {
+        const std::string &val = values[i];
+        if (i == 0)
+        {
+            if (val == "xinput")
+                guid = val;
+            else if (val.size() != 32)
+                continue;
+            else
+                guid = val.substr(8, 24);
+        }
+        else if (i > 1 && !val.empty()) // Skip the second field (name) for now - Dasho
+        {
+            std::string::size_type colon = val.find(':');
+            if (colon == std::string::npos)
+                continue;
+            std::string map = val.substr(0, colon);
+            std::string raw = val.substr(colon+1);
+            if (map == "hint")
+                continue;
+            // Not sure what to do with hats yet - Dasho
+            if (raw[0] == 'h')
+                continue;
+            if (raw[0] == 'a')
+            {
+                uint16_t axis_code = mapping_string_to_keycode[map];
+                if (axis_code == kGamepadLeftTrigger)
+                    axis_code = kGamepadLeftAnalogTrigger;
+                else if (axis_code == kGamepadRightTrigger)
+                    axis_code = kGamepadRightAnalogTrigger;
+                axis_map.try_emplace((uint8_t)atoi(raw.substr(1).c_str()), axis_code);
+            }
+            else if (raw[0] == 'b')
+            {
+                button_map.try_emplace((uint8_t)atoi(raw.substr(1).c_str()), mapping_string_to_keycode[map]);
+            }
+        }
+    }
+    if (!guid.empty() && !axis_map.empty() && !button_map.empty())
+    {
+        gamepad_mappings.try_emplace(guid, std::pair<std::unordered_map<uint8_t, uint16_t>, std::unordered_map<uint8_t, uint16_t>>(axis_map, button_map));
+    }
+}
+
+static std::unordered_map<uint8_t, uint16_t> current_button_map;
+static std::unordered_map<uint8_t, uint16_t> current_axis_map;
 
 //
 // Translates a key from Sokol -> EDGE
@@ -300,6 +385,7 @@ void HandleMouseWheelEvent(sapp_event *ev)
 static void HandleGamepadButtonRelease(Gamepad_device *device, unsigned int buttonID, double timestamp, void * context)
 {
     (void)context;
+    (void)timestamp;
     EPI_ASSERT(device);
 
     // ignore other gamepads;
@@ -309,9 +395,7 @@ static void HandleGamepadButtonRelease(Gamepad_device *device, unsigned int butt
     InputEvent event;
 
     event.type = kInputEventKeyUp;
-    event.value.key.sym = kGamepadA + buttonID;
-
-    LogPrint("Released button %d\n", buttonID);
+    event.value.key.sym = current_button_map[buttonID];
 
     PostEvent(&event);
 }
@@ -319,6 +403,7 @@ static void HandleGamepadButtonRelease(Gamepad_device *device, unsigned int butt
 static void HandleGamepadButtonPress(Gamepad_device *device, unsigned int buttonID, double timestamp, void * context)
 {
     (void)context;
+    (void)timestamp;
     EPI_ASSERT(device);
 
     // ignore other gamepads;
@@ -328,9 +413,7 @@ static void HandleGamepadButtonPress(Gamepad_device *device, unsigned int button
     InputEvent event;
 
     event.type = kInputEventKeyDown;
-    event.value.key.sym = kGamepadA + buttonID;
-
-    LogPrint("Pressed button %d\n", buttonID);
+    event.value.key.sym = current_button_map[buttonID];
 
     PostEvent(&event);
 }
@@ -338,73 +421,149 @@ static void HandleGamepadButtonPress(Gamepad_device *device, unsigned int button
 static void HandleGamepadAxisMove(Gamepad_device * device, unsigned int axisID, float value, float lastValue, double timestamp, void * context)
 {
     (void)context;
+    (void)timestamp;
     EPI_ASSERT(device);
 
     if (device != gamepad_info)
         return;
 
-    if (fabs(value) > 0.30f) // Arbitrary deadzone to filter out resting jitter
-        LogPrint("Moved axis %d. Value: %f\n", axisID, value);
-}
-
-#ifdef SOKOL_DISABLED
-static void HandleGamepadTriggerEvent(SDL_Event *ev)
-{
-    // ignore other gamepads
-    if (ev->caxis.which != current_gamepad)
-        return;
-
-    Uint8 current_axis = ev->caxis.axis;
-
-    // ignore non-trigger axes
-    if (current_axis != SDL_CONTROLLER_AXIS_TRIGGERLEFT && current_axis != SDL_CONTROLLER_AXIS_TRIGGERRIGHT)
-        return;
-
-    InputEvent event;
-
-    int thresh = RoundToInteger(*joystick_deadzones[current_axis] * 32767.0f);
-    int input  = ev->caxis.value;
-
-    if (current_axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT)
+    switch (current_axis_map[axisID])
     {
-        event.value.key.sym = kGamepadTriggerLeft;
-        if (input < thresh)
+        case kGamepadLeftX:
+            joy_raw[0] = value;
+            break;
+        case kGamepadLeftY:
+            joy_raw[1] = value;
+            break;
+        case kGamepadRightX:
+            joy_raw[2] = value;
+            break;
+        case kGamepadRightY:
+            joy_raw[3] = value;
+            break;  
+        case kGamepadHatX:
         {
-            if (!left_trigger_pulled)
-                return;
-            event.type          = kInputEventKeyUp;
-            left_trigger_pulled = false;
+            if (value > 0)
+            {
+                InputEvent event;
+                event.type = kInputEventKeyDown;
+                event.value.key.sym = kGamepadRight;
+                PostEvent(&event);
+            }
+            else if (value < 0)
+            {
+                InputEvent event;
+                event.type = kInputEventKeyDown;
+                event.value.key.sym = kGamepadLeft;
+                PostEvent(&event);
+            }
+            else
+            {
+                if (lastValue > 0)
+                {
+                    InputEvent event;
+                    event.type = kInputEventKeyUp;
+                    event.value.key.sym = kGamepadRight;
+                    PostEvent(&event);
+                }
+                else if (lastValue < 0)
+                {
+                    InputEvent event;
+                    event.type = kInputEventKeyUp;
+                    event.value.key.sym = kGamepadLeft;
+                    PostEvent(&event);
+                }
+            }
+            break;
         }
-        else
+        case kGamepadHatY:
         {
-            if (left_trigger_pulled)
-                return;
-            event.type          = kInputEventKeyDown;
-            left_trigger_pulled = true;
+            if (value > 0)
+            {
+                InputEvent event;
+                event.type = kInputEventKeyDown;
+                event.value.key.sym = kGamepadDown;
+                PostEvent(&event);
+            }
+            else if (value < 0)
+            {
+                InputEvent event;
+                event.type = kInputEventKeyDown;
+                event.value.key.sym = kGamepadUp;
+                PostEvent(&event);
+            }
+            else
+            {
+                if (lastValue > 0)
+                {
+                    InputEvent event;
+                    event.type = kInputEventKeyUp;
+                    event.value.key.sym = kGamepadDown;
+                    PostEvent(&event);
+                }
+                else if (lastValue < 0)
+                {
+                    InputEvent event;
+                    event.type = kInputEventKeyUp;
+                    event.value.key.sym = kGamepadUp;
+                    PostEvent(&event);
+                }
+            }
+            break;
         }
-    }
-    else
-    {
-        event.value.key.sym = kGamepadTriggerRight;
-        if (input < thresh)
+        case kGamepadLeftAnalogTrigger:
         {
-            if (!right_trigger_pulled)
-                return;
-            event.type           = kInputEventKeyUp;
-            right_trigger_pulled = false;
+            if (value < 0)
+            {
+                if (!left_trigger_pulled)
+                    return;
+                InputEvent event;
+                event.type          = kInputEventKeyUp;
+                event.value.key.sym = kGamepadLeftTrigger;
+                left_trigger_pulled = false;
+                PostEvent(&event);
+            }
+            else if (value > 0)
+            {
+                if (left_trigger_pulled)
+                    return;
+                InputEvent event;
+                event.type          = kInputEventKeyDown;
+                event.value.key.sym = kGamepadLeftTrigger;
+                left_trigger_pulled = true;
+                PostEvent(&event);
+            }
+            break;
         }
-        else
+        case kGamepadRightAnalogTrigger:
         {
-            if (right_trigger_pulled)
-                return;
-            event.type           = kInputEventKeyDown;
-            right_trigger_pulled = true;
+            if (value < 0)
+            {
+                if (!right_trigger_pulled)
+                    return;
+                InputEvent event;
+                event.type          = kInputEventKeyUp;
+                event.value.key.sym = kGamepadRightTrigger;
+                right_trigger_pulled = false;
+                PostEvent(&event);
+            }
+            else if (value > 0)
+            {
+                if (right_trigger_pulled)
+                    return;
+                InputEvent event;
+                event.type          = kInputEventKeyDown;
+                event.value.key.sym = kGamepadRightTrigger;
+                right_trigger_pulled = true;
+                PostEvent(&event);
+            }
+            break;
         }
-    }
-
-    PostEvent(&event);
+        default:
+            LogPrint("Axis Index %d Value %f\n", axisID, value);
+            break;
+    };
 }
-#endif
 
 void HandleMouseMotionEvent(sapp_event *ev)
 {
@@ -425,17 +584,6 @@ void HandleMouseMotionEvent(sapp_event *ev)
     }
 }
 
-float JoystickGetAxis(int n)
-{
-    if (no_joystick || !gamepad_info)
-        return 0;
-
-    if (n < gamepad_info->numAxes)
-        return gamepad_info->axisStates[n];
-    else
-        return 0;
-}
-
 static void I_OpenJoystick(Gamepad_device *joystick)
 {
     gamepad_info = joystick;
@@ -453,15 +601,35 @@ static void I_OpenJoystick(Gamepad_device *joystick)
    
     LogPrint("Using gamepad: %s\n", name);
 
-    // Test for SDL-compatible GUID string building. Will need to see what other components may be important
-    // (i.e., different prefixes based on platform, etc) - Dasho
-    uint16_t vend = gamepad_info->vendorID;
-    uint16_t prod = gamepad_info->productID;
-    std::string guid_string = epi::StringFormat("%02x%02x0000%02x%02x0000", (uint8_t) vend, (uint8_t) (vend >> 8),
-                (uint8_t) prod, (uint8_t) (prod >> 8));
+    std::string guid_string;
+
+    if (epi::StringPrefixCaseCompareASCII(name, "xinput") == 0)
+        guid_string = "xinput";
+    else
+    {
+        // Test for SDL-compatible GUID string building. Will need to see what other components may be important
+        // (i.e., different prefixes based on platform, etc) - Dasho
+        uint16_t vend = gamepad_info->vendorID;
+        uint16_t prod = gamepad_info->productID;
+        guid_string = epi::StringFormat("%02x%02x0000%02x%02x0000", (uint8_t) vend, (uint8_t) (vend >> 8),
+                    (uint8_t) prod, (uint8_t) (prod >> 8));
+    }
 
     LogPrint("GUID: %s\n", guid_string.c_str());
     LogPrint("Axes: %d Buttons: %d\n", gp_total_joysticksticks, gp_num_buttons);
+
+    if (gamepad_mappings.count(guid_string))
+    {
+        current_axis_map = gamepad_mappings[guid_string].first;
+        current_button_map = gamepad_mappings[guid_string].second;
+    }
+    else
+    {
+        // For now, print the error. Will need to generate some kind of default/"best guess"
+        // based on platform - Dasho
+        LogPrint("No mappings found for %s\n", name);
+        gamepad_info = nullptr;
+    }
 }
 
 static void JoystickPlugCallback(Gamepad_device *device, void *context)
@@ -592,6 +760,10 @@ void I_ShowGamepads(void)
 
 void StartupJoystick(void)
 {
+    // This will become a function to iterate through the entire
+    // list that we provide
+    BuildGamepadMapFromString(xinput_test_mapping);
+
     if (FindArgument("no_joystick") > 0)
     {
         LogPrint("StartupControl: Gamepad system disabled.\n");

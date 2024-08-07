@@ -948,7 +948,7 @@ void Gamepad_detectDevices() {
 				deviceRecord->vendorID = 0x45E;
 				deviceRecord->productID = 0x28E;
 				deviceRecord->numAxes = 6;
-				deviceRecord->numButtons = 17;
+				deviceRecord->numButtons = 15;
 				deviceRecord->axisStates = calloc(sizeof(float), deviceRecord->numAxes);
 				deviceRecord->buttonStates = calloc(sizeof(bool), deviceRecord->numButtons);
 				devices = realloc(devices, sizeof(struct Gamepad_device *) * (numDevices + 1));
@@ -1071,31 +1071,27 @@ void Gamepad_processEvents() {
 				xResult = XInputGetState_proc(devicePrivate->playerIndex, &state);
 			}
 			if (xResult == ERROR_SUCCESS) {
-				updateButtonValue(device, 12, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP), currentTime());
-				updateButtonValue(device, 13, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN), currentTime());
-				updateButtonValue(device, 14, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT), currentTime());
-				updateButtonValue(device, 15, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT), currentTime());
-				updateButtonValue(device, 9, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_START), currentTime());
-				updateButtonValue(device, 8, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_BACK), currentTime());
-				updateButtonValue(device, 10, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB), currentTime());
-				updateButtonValue(device, 11, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB), currentTime());
+				updateButtonValue(device, 11, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP), currentTime());
+				updateButtonValue(device, 12, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN), currentTime());
+				updateButtonValue(device, 13, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT), currentTime());
+				updateButtonValue(device, 14, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT), currentTime());
+				updateButtonValue(device, 7, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_START), currentTime());
+				updateButtonValue(device, 6, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_BACK), currentTime());
+				updateButtonValue(device, 8, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB), currentTime());
+				updateButtonValue(device, 9, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB), currentTime());
 				updateButtonValue(device, 4, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER), currentTime());
 				updateButtonValue(device, 5, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER), currentTime());
 				updateButtonValue(device, 0, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_A), currentTime());
 				updateButtonValue(device, 1, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_B), currentTime());
 				updateButtonValue(device, 2, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_X), currentTime());
 				updateButtonValue(device, 3, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_Y), currentTime());
-				updateButtonValue(device, 16, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_GUIDE), currentTime());
+				updateButtonValue(device, 10, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_GUIDE), currentTime());
 				updateAxisValue(device, 0, state.Gamepad.sThumbLX, currentTime());
 				updateAxisValue(device, 1, -state.Gamepad.sThumbLY, currentTime());
-				updateAxisValue(device, 2, state.Gamepad.sThumbRX, currentTime());
-				updateAxisValue(device, 3, -state.Gamepad.sThumbRY, currentTime());
-				updateAxisValueFloat(device, 4, state.Gamepad.bLeftTrigger / 127.5f - 1.0f, currentTime());
+				updateAxisValue(device, 3, state.Gamepad.sThumbRX, currentTime());
+				updateAxisValue(device, 4, -state.Gamepad.sThumbRY, currentTime());
+				updateAxisValueFloat(device, 2, state.Gamepad.bLeftTrigger / 127.5f - 1.0f, currentTime());
 				updateAxisValueFloat(device, 5, state.Gamepad.bRightTrigger / 127.5f - 1.0f, currentTime());
-				// These two values match the left and right trigger button indices for the SDL default Emscripten
-				// controller mapping, which is roughly our target
-				updateButtonValue(device, 6, (state.Gamepad.bLeftTrigger / 127.5f - 1.0f) > 0, currentTime());
-				updateButtonValue(device, 7, (state.Gamepad.bRightTrigger / 127.5f - 1.0f) > 0, currentTime());
 			} else {
 				registeredXInputDevices[devicePrivate->playerIndex] = NULL;
 				removeDevice(deviceIndex);
