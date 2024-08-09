@@ -42,7 +42,7 @@ struct Gamepad_buttonEvent {
 	unsigned int buttonID;
 	
 	// True if button is down
-	bool down;
+	gamepad_bool down;
 };
 
 struct Gamepad_axisEvent {

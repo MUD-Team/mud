@@ -26,13 +26,9 @@
 extern "C" {
 #endif
 
-#if defined(_MSC_VER) && (_MSC_VER <= 1600)
-#define bool int
-#define true 1
-#define false 0
-#else
-#include <stdbool.h>
-#endif
+#define gamepad_bool char
+#define gamepad_true 1
+#define gamepad_false 0
 
 struct Gamepad_device {
 	// Unique device identifier for application session, starting at 0 for the first device attached and
@@ -57,7 +53,7 @@ struct Gamepad_device {
 	float * axisStates;
 	
 	// Array[numButtons] of values representing the current state of each button
-	bool * buttonStates;
+	gamepad_bool * buttonStates;
 	
 	// Platform-specific device data storage. Don't touch unless you know what you're doing and don't
 	// mind your code breaking in future versions of this library.

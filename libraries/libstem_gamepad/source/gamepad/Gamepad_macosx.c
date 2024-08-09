@@ -33,9 +33,9 @@ struct HIDGamepadAxis {
 	IOHIDElementCookie cookie;
 	CFIndex logicalMin;
 	CFIndex logicalMax;
-	bool hasNullState;
-	bool isHatSwitch;
-	bool isHatSwitchSecondAxis;
+	gamepad_bool hasNullState;
+	gamepad_bool isHatSwitch;
+	gamepad_bool isHatSwitchSecondAxis;
 };
 
 struct HIDGamepadButton {
@@ -121,7 +121,7 @@ static void queueAxisEvent(struct Gamepad_device * device, double timestamp, uns
 	queueInputEvent(device->deviceID, GAMEPAD_EVENT_AXIS_MOVED, axisEvent);
 }
 
-static void queueButtonEvent(struct Gamepad_device * device, double timestamp, unsigned int buttonID, bool down) {
+static void queueButtonEvent(struct Gamepad_device * device, double timestamp, unsigned int buttonID, gamepad_bool down) {
 	struct Gamepad_buttonEvent * buttonEvent;
 	
 	buttonEvent = malloc(sizeof(struct Gamepad_buttonEvent));
@@ -221,7 +221,7 @@ static void onDeviceValueChanged(void * context, IOReturn result, void * sender,
 	
 	for (buttonIndex = 0; buttonIndex < deviceRecord->numButtons; buttonIndex++) {
 		if (hidDeviceRecord->buttonElements[buttonIndex].cookie == cookie) {
-			bool down;
+			gamepad_bool down;
 			
 			down = IOHIDValueGetIntegerValue(value);
 			queueButtonEvent(deviceRecord,
@@ -291,9 +291,9 @@ static void onDeviceMatched(void * context, IOReturn result, void * sender, IOHI
 	} else {
 		CFIndex length;
 		
-		CFStringGetBytes(cfProductName, CFRangeMake(0, CFStringGetLength(cfProductName)), kCFStringEncodingUTF8, '?', false, NULL, 100, &length);
+		CFStringGetBytes(cfProductName, CFRangeMake(0, CFStringGetLength(cfProductName)), kCFStringEncodingUTF8, '?', gamepad_false, NULL, 100, &length);
 		description = malloc(length + 1);
-		CFStringGetBytes(cfProductName, CFRangeMake(0, CFStringGetLength(cfProductName)), kCFStringEncodingUTF8, '?', false, (UInt8 *) description, length + 1, NULL);
+		CFStringGetBytes(cfProductName, CFRangeMake(0, CFStringGetLength(cfProductName)), kCFStringEncodingUTF8, '?', gamepad_false, (UInt8 *) description, length + 1, NULL);
 		description[length] = '\x00';
 	}
 	deviceRecord->description = description;
@@ -313,12 +313,12 @@ static void onDeviceMatched(void * context, IOReturn result, void * sender, IOHI
 			hidDeviceRecord->axisElements[deviceRecord->numAxes].logicalMax = IOHIDElementGetLogicalMax(element);
 			hidDeviceRecord->axisElements[deviceRecord->numAxes].hasNullState = !!IOHIDElementHasNullState(element);
 			hidDeviceRecord->axisElements[deviceRecord->numAxes].isHatSwitch = IOHIDElementGetUsage(element) == kHIDUsage_GD_Hatswitch;
-			hidDeviceRecord->axisElements[deviceRecord->numAxes].isHatSwitchSecondAxis = false;
+			hidDeviceRecord->axisElements[deviceRecord->numAxes].isHatSwitchSecondAxis = gamepad_false;
 			deviceRecord->numAxes++;
 			
 			if (hidDeviceRecord->axisElements[deviceRecord->numAxes - 1].isHatSwitch) {
 				hidDeviceRecord->axisElements = realloc(hidDeviceRecord->axisElements, sizeof(struct HIDGamepadAxis) * (deviceRecord->numAxes + 1));
-				hidDeviceRecord->axisElements[deviceRecord->numAxes].isHatSwitchSecondAxis = true;
+				hidDeviceRecord->axisElements[deviceRecord->numAxes].isHatSwitchSecondAxis = gamepad_true;
 				deviceRecord->numAxes++;
 			}
 			
@@ -331,7 +331,7 @@ static void onDeviceMatched(void * context, IOReturn result, void * sender, IOHI
 	CFRelease(elements);
 	
 	deviceRecord->axisStates = calloc(sizeof(float), deviceRecord->numAxes);
-	deviceRecord->buttonStates = calloc(sizeof(bool), deviceRecord->numButtons);
+	deviceRecord->buttonStates = calloc(sizeof(gamepad_bool), deviceRecord->numButtons);
 	
 	IOHIDDeviceRegisterInputValueCallback(device, onDeviceValueChanged, deviceRecord);
 	
@@ -458,7 +458,7 @@ void Gamepad_init() {
 		// Force gamepads to be recognized immediately. The normal run loop mode takes a few frames,
 		// but we can run one iteration with a custom mode to do it without a delay.
 		IOHIDManagerScheduleWithRunLoop(hidManager, CFRunLoopGetCurrent(), GAMEPAD_RUN_LOOP_MODE);
-		CFRunLoopRunInMode(GAMEPAD_RUN_LOOP_MODE, 0, true);
+		CFRunLoopRunInMode(GAMEPAD_RUN_LOOP_MODE, 0, gamepad_true);
 	}
 }
 
@@ -536,7 +536,7 @@ void Gamepad_detectDevices() {
 		return;
 	}
 	
-	CFRunLoopRunInMode(GAMEPAD_RUN_LOOP_MODE, 0, true);
+	CFRunLoopRunInMode(GAMEPAD_RUN_LOOP_MODE, 0, gamepad_true);
 	for (eventIndex = 0; eventIndex < deviceEventCount; eventIndex++) {
 		processQueuedEvent(deviceEventQueue[eventIndex]);
 	}
@@ -545,18 +545,18 @@ void Gamepad_detectDevices() {
 
 void Gamepad_processEvents() {
 	unsigned int eventIndex;
-	static bool inProcessEvents;
+	static gamepad_bool inProcessEvents;
 	
 	if (hidManager == NULL || inProcessEvents) {
 		return;
 	}
 	
-	inProcessEvents = true;
-	CFRunLoopRunInMode(GAMEPAD_RUN_LOOP_MODE, 0, true);
+	inProcessEvents = gamepad_true;
+	CFRunLoopRunInMode(GAMEPAD_RUN_LOOP_MODE, 0, gamepad_true);
 	for (eventIndex = 0; eventIndex < inputEventCount; eventIndex++) {
 		processQueuedEvent(inputEventQueue[eventIndex]);
 		free(inputEventQueue[eventIndex].eventData);
 	}
 	inputEventCount = 0;
-	inProcessEvents = false;
+	inProcessEvents = gamepad_false;
 }

@@ -47,7 +47,7 @@
 
 // The following code is from SDL2
 // detects gamepad device remove/attach events without having to poll multiple times per second
-static bool s_bWindowsDeviceChanged = false;
+static gamepad_bool s_bWindowsDeviceChanged = gamepad_false;
 
 static LRESULT CALLBACK PrivateJoystickDetectProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -57,12 +57,12 @@ static LRESULT CALLBACK PrivateJoystickDetectProc(HWND hwnd, UINT message, WPARA
 		switch (wParam) {
 		case DBT_DEVICEARRIVAL:
 			if (((DEV_BROADCAST_HDR*)lParam)->dbch_devicetype == DBT_DEVTYP_DEVICEINTERFACE) {
-				s_bWindowsDeviceChanged = true;
+				s_bWindowsDeviceChanged = gamepad_true;
 			}
 			break;
 		case DBT_DEVICEREMOVECOMPLETE:
 			if (((DEV_BROADCAST_HDR*)lParam)->dbch_devicetype == DBT_DEVTYP_DEVICEINTERFACE) {
-				s_bWindowsDeviceChanged = true;
+				s_bWindowsDeviceChanged = gamepad_true;
 			}
 			break;
 		}
@@ -186,17 +186,17 @@ typedef struct {
 
 struct diAxisInfo {
 	DWORD offset;
-	bool isPOV;
-	bool isPOVSecondAxis;
+	gamepad_bool isPOV;
+	gamepad_bool isPOVSecondAxis;
 };
 
 struct Gamepad_devicePrivate {
-	bool isXInput;
+	gamepad_bool isXInput;
 	
 	// DInput only
 	GUID guidInstance;
 	IDirectInputDevice8 * deviceInterface;
-	bool buffered;
+	gamepad_bool buffered;
 	unsigned int sliderCount;
 	unsigned int povCount;
 	struct diAxisInfo * axisInfo;
@@ -210,20 +210,20 @@ static DeviceNotificationData notificationData;
 static struct Gamepad_device ** devices = NULL;
 static unsigned int numDevices = 0;
 static unsigned int nextDeviceID = 0;
-static struct Gamepad_device * registeredXInputDevices[4];
+static struct Gamepad_device * registeredXInputDevices[4] = { NULL, NULL, NULL, NULL };
 static const char * xInputDeviceNames[4] = {
 	"XInput Controller 1",
 	"XInput Controller 2",
 	"XInput Controller 3",
 	"XInput Controller 4"
 };
-static DWORD (WINAPI * XInputGetStateEx_proc)(DWORD dwUserIndex, XINPUT_STATE_EX * pState);
-static DWORD (WINAPI * XInputGetState_proc)(DWORD dwUserIndex, XINPUT_STATE * pState);
-static DWORD (WINAPI * XInputGetCapabilities_proc)(DWORD dwUserIndex, DWORD dwFlags, XINPUT_CAPABILITIES * pCapabilities);
+static DWORD (WINAPI * XInputGetStateEx_proc)(DWORD dwUserIndex, XINPUT_STATE_EX * pState) = NULL;
+static DWORD (WINAPI * XInputGetState_proc)(DWORD dwUserIndex, XINPUT_STATE * pState) = NULL;
+static DWORD (WINAPI * XInputGetCapabilities_proc)(DWORD dwUserIndex, DWORD dwFlags, XINPUT_CAPABILITIES * pCapabilities) = NULL;
 
 static LPDIRECTINPUT directInputInterface;
-static bool inited = false;
-static bool xInputAvailable;
+static gamepad_bool inited = gamepad_false;
+static gamepad_bool xInputAvailable = gamepad_false;
 
 void Gamepad_init() {
 	if (!inited) {
@@ -240,9 +240,9 @@ void Gamepad_init() {
 		}
 		if (module == NULL) {
 			fprintf(stderr, "Gamepad_init couldn't load XInput1_4.dll or XInput1_3.dll; proceeding with DInput only\n");
-			xInputAvailable = false;
+			xInputAvailable = gamepad_false;
 		} else {
-			xInputAvailable = true;
+			xInputAvailable = gamepad_true;
 			XInputGetStateEx_proc = (DWORD (WINAPI *)(DWORD, XINPUT_STATE_EX *)) GetProcAddress(module, (LPCSTR) 100);
 			XInputGetState_proc = (DWORD (WINAPI *)(DWORD, XINPUT_STATE *)) GetProcAddress(module, "XInputGetState");
 			XInputGetCapabilities_proc = (DWORD (WINAPI *)(DWORD, DWORD, XINPUT_CAPABILITIES *)) GetProcAddress(module, "XInputGetCapabilities");
@@ -263,8 +263,8 @@ void Gamepad_init() {
 			fprintf(stderr, "Warning: DirectInput8Create returned 0x%X\n", (unsigned int) result);
 		}
 		
-		inited = true;
-		s_bWindowsDeviceChanged = true;
+		inited = gamepad_true;
+		s_bWindowsDeviceChanged = gamepad_true;
 		Gamepad_detectDevices();
 		CreateDeviceNotification(&notificationData);
 	}
@@ -297,7 +297,10 @@ void Gamepad_shutdown() {
 		free(devices);
 		devices = NULL;
 		numDevices = 0;
-		inited = false;
+		for (unsigned int playerIndex = 0; playerIndex < 4; playerIndex++) {
+      registeredXInputDevices[playerIndex] = NULL;
+		}
+		inited = gamepad_false;
 		CleanupDeviceNotification(&notificationData);
 	}
 }
@@ -325,121 +328,6 @@ static double currentTime() {
 	return (double) currentTime.QuadPart / frequency.QuadPart;
 }
 
-#if 0
-// This code from http://msdn.microsoft.com/en-us/library/windows/desktop/ee417014(v=vs.85).aspx is really really really slow
-static bool isXInputDevice(const GUID * pGuidProductFromDirectInput) {
-	IWbemLocator * pIWbemLocator = NULL;
-	IEnumWbemClassObject * pEnumDevices = NULL;
-	IWbemClassObject * pDevices[20] = {0};
-	IWbemServices * pIWbemServices = NULL;
-	BSTR bstrNamespace = NULL;
-	BSTR bstrDeviceID = NULL;
-	BSTR bstrClassName = NULL;
-	DWORD uReturned = 0;
-	bool bIsXinputDevice = false;
-	UINT iDevice = 0;
-	VARIANT var;
-	HRESULT hr;
-	
-	hr = CoInitialize(NULL);
-	bool bCleanupCOM = SUCCEEDED(hr);
-	
-	hr = CoCreateInstance(&CLSID_WbemLocator,
-	                      NULL,
-	                      CLSCTX_INPROC_SERVER,
-	                      &IID_IWbemLocator,
-	                      (LPVOID *) &pIWbemLocator);
-	if (FAILED(hr) || pIWbemLocator == NULL) {
-		goto LCleanup;
-	}
-	
-	bstrNamespace = SysAllocString(L"\\\\.\\root\\cimv2"); if (bstrNamespace == NULL) {goto LCleanup;}
-	bstrClassName = SysAllocString(L"Win32_PNPEntity");    if (bstrClassName == NULL) {goto LCleanup;}
-	bstrDeviceID  = SysAllocString(L"DeviceID");           if (bstrDeviceID == NULL)  {goto LCleanup;}
-	
-	hr = IWbemLocator_ConnectServer(pIWbemLocator, bstrNamespace, NULL, NULL, 0L,
-	                                0L, NULL, NULL, &pIWbemServices);
-	if (FAILED(hr) || pIWbemServices == NULL) {
-		goto LCleanup;
-	}
-	
-	CoSetProxyBlanket((IUnknown *) pIWbemServices, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, NULL,
-	                  RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE);
-	
-	hr = IWbemServices_CreateInstanceEnum(pIWbemServices, bstrClassName, 0, NULL, &pEnumDevices);
-	if (FAILED(hr) || pEnumDevices == NULL) {
-		goto LCleanup;
-	}
-	
-	for (;;) {
-		hr = IEnumWbemClassObject_Next(pEnumDevices, 10000, 20, pDevices, &uReturned);
-		if (FAILED(hr)) {
-			goto LCleanup;
-		}
-		if (uReturned == 0) {
-			break;
-		}
-		for (iDevice = 0; iDevice < uReturned; iDevice++) {
-			hr = IWbemClassObject_Get(pDevices[iDevice], bstrDeviceID, 0L, &var, NULL, NULL);
-			if (SUCCEEDED(hr) && var.vt == VT_BSTR && var.bstrVal != NULL) {
-				if (wcsstr(var.bstrVal, L"IG_")) {
-					DWORD dwPid = 0, dwVid = 0;
-					WCHAR * strVid = wcsstr(var.bstrVal, L"VID_");
-					if (strVid && swscanf(strVid, L"VID_%4X", &dwVid) != 1) {
-						dwVid = 0;
-					}
-					WCHAR * strPid = wcsstr(var.bstrVal, L"PID_");
-					if (strPid != NULL && swscanf(strPid, L"PID_%4X", &dwPid) != 1) {
-						dwPid = 0;
-					}
-					DWORD dwVidPid = MAKELONG(dwVid, dwPid);
-					if (dwVidPid == pGuidProductFromDirectInput->Data1) {
-						bIsXinputDevice = true;
-						goto LCleanup;
-					}
-				}
-			}
-			if (pDevices[iDevice] != NULL) {
-				IWbemClassObject_Release(pDevices[iDevice]);
-				pDevices[iDevice] = NULL;
-			}
-		}
-	}
-	
-LCleanup:
-	if (bstrNamespace != NULL) {
-		SysFreeString(bstrNamespace);
-	}
-	if (bstrDeviceID != NULL) {
-		SysFreeString(bstrDeviceID);
-	}
-	if (bstrClassName != NULL) {
-		SysFreeString(bstrClassName);
-	}
-	for (iDevice = 0; iDevice < uReturned; iDevice++) {
-		if (pDevices[iDevice] != NULL) {
-			IWbemClassObject_Release(pDevices[iDevice]);
-		}
-	}
-	if (pEnumDevices != NULL) {
-		IEnumWbemClassObject_Release(pEnumDevices);
-	}
-	if (pIWbemLocator != NULL) {
-		IWbemLocator_Release(pIWbemLocator);
-	}
-	if (pIWbemServices != NULL) {
-		IWbemServices_Release(pIWbemServices);
-	}
-	
-	if (bCleanupCOM) {
-		CoUninitialize();
-	}
-	
-	return bIsXinputDevice;
-}
-#else
-// This code from SDL2 is much faster
-
 DEFINE_GUID(IID_ValveStreamingGamepad, MAKELONG(0x28DE, 0x11FF),0x0000,0x0000,0x00,0x00,0x50,0x49,0x44,0x56,0x49,0x44);
 DEFINE_GUID(IID_X360WiredGamepad, MAKELONG(0x045E, 0x02A1),0x0000,0x0000,0x00,0x00,0x50,0x49,0x44,0x56,0x49,0x44);
 DEFINE_GUID(IID_X360WirelessGamepad, MAKELONG(0x045E, 0x028E),0x0000,0x0000,0x00,0x00,0x50,0x49,0x44,0x56,0x49,0x44);
@@ -447,7 +335,17 @@ DEFINE_GUID(IID_X360WirelessGamepad, MAKELONG(0x045E, 0x028E),0x0000,0x0000,0x00
 static PRAWINPUTDEVICELIST rawDevList = NULL;
 static UINT rawDevListCount = 0;
 
-static bool isXInputDevice(const GUID * pGuidProductFromDirectInput) {
+static void clearRawDevList()
+{
+	if (rawDevList)
+	{
+		free(rawDevList);
+		rawDevList = NULL;
+		rawDevListCount = 0;
+	}
+}
+
+static gamepad_bool isXInputDevice(const GUID * pGuidProductFromDirectInput) {
 	static const GUID * s_XInputProductGUID[] = {
 		&IID_ValveStreamingGamepad,
 		&IID_X360WiredGamepad,   // Microsoft's wired X360 controller for Windows
@@ -461,7 +359,7 @@ static bool isXInputDevice(const GUID * pGuidProductFromDirectInput) {
 	// This lets us skip RAWINPUT for popular devices. Also, we need to do this for the Valve Streaming Gamepad because it's virtualized and doesn't show up in the device list.
 	for (iDevice = 0; iDevice < sizeof(s_XInputProductGUID) / sizeof(s_XInputProductGUID[0]); ++iDevice) {
 		if (!memcmp(pGuidProductFromDirectInput, s_XInputProductGUID[iDevice], sizeof(GUID))) {
-			return true;
+			return gamepad_true;
 		}
 	}
 	
@@ -469,7 +367,7 @@ static bool isXInputDevice(const GUID * pGuidProductFromDirectInput) {
 	// Cache this if we end up using it.
 	if (rawDevList == NULL) {
 		if ((GetRawInputDeviceList(NULL, &rawDevListCount, sizeof(RAWINPUTDEVICELIST)) == (UINT) -1) || rawDevListCount == 0) {
-			return false;
+			return gamepad_false;
 		}
 		
 		rawDevList = malloc(sizeof(RAWINPUTDEVICELIST) * rawDevListCount);
@@ -477,7 +375,7 @@ static bool isXInputDevice(const GUID * pGuidProductFromDirectInput) {
 		if (GetRawInputDeviceList(rawDevList, &rawDevListCount, sizeof(RAWINPUTDEVICELIST)) == (UINT) -1) {
 			free(rawDevList);
 			rawDevList = NULL;
-			return false;
+			return gamepad_false;
 		}
 	}
 	
@@ -493,13 +391,12 @@ static bool isXInputDevice(const GUID * pGuidProductFromDirectInput) {
 		    MAKELONG(rdi.hid.dwVendorId, rdi.hid.dwProductId) == (LONG) pGuidProductFromDirectInput->Data1 &&
 		    GetRawInputDeviceInfoA(rawDevList[i].hDevice, RIDI_DEVICENAME, devName, &nameSize) != (UINT) -1 &&
 		    strstr(devName, "IG_") != NULL) {
-			return true;
+			return gamepad_true;
 		}
 	}
 	
-	return false;
+	return gamepad_false;
 }
-#endif
 
 static BOOL CALLBACK countAxesCallback(LPCDIDEVICEOBJECTINSTANCE instance, LPVOID context) {
 	struct Gamepad_device * deviceRecord = context;
@@ -530,10 +427,10 @@ static BOOL CALLBACK enumAxesCallback(LPCDIDEVICEOBJECTINSTANCE instance, LPVOID
 	if (instance->dwType & DIDFT_POV) {
 		offset = DIJOFS_POV(deviceRecordPrivate->povCount);
 		deviceRecordPrivate->axisInfo[deviceRecord->numAxes - 1].offset = offset;
-		deviceRecordPrivate->axisInfo[deviceRecord->numAxes - 1].isPOV = true;
+		deviceRecordPrivate->axisInfo[deviceRecord->numAxes - 1].isPOV = gamepad_true;
 		deviceRecord->numAxes++;
 		deviceRecordPrivate->axisInfo[deviceRecord->numAxes - 1].offset = offset;
-		deviceRecordPrivate->axisInfo[deviceRecord->numAxes - 1].isPOV = true;
+		deviceRecordPrivate->axisInfo[deviceRecord->numAxes - 1].isPOV = gamepad_true;
 		deviceRecordPrivate->povCount++;
 		
 	} else {
@@ -559,7 +456,7 @@ static BOOL CALLBACK enumAxesCallback(LPCDIDEVICEOBJECTINSTANCE instance, LPVOID
 			offset = -1;
 		}
 		deviceRecordPrivate->axisInfo[deviceRecord->numAxes - 1].offset = offset;
-		deviceRecordPrivate->axisInfo[deviceRecord->numAxes - 1].isPOV = false;
+		deviceRecordPrivate->axisInfo[deviceRecord->numAxes - 1].isPOV = gamepad_false;
 		
 		range.diph.dwSize = sizeof(range);
 		range.diph.dwHeaderSize = sizeof(range.diph);
@@ -778,34 +675,6 @@ const DIDATAFORMAT c_dfDIJoystick2 = {
 };
 #endif
 
-static int sortAxisFunction(const void *a, const void *b)
-{
-    const struct diAxisInfo *inputA = (const struct diAxisInfo *)a;
-    const struct diAxisInfo *inputB = (const struct diAxisInfo *)b;
-
-    if (inputA->offset < inputB->offset) {
-        return -1;
-    }
-    if (inputA->offset > inputB->offset) {
-        return 1;
-    }
-    return 0;
-}
-
-static int sortButtonFunction(const void *a, const void *b)
-{
-    const DWORD *inputA = (const DWORD *)a;
-    const DWORD *inputB = (const DWORD *)b;
-
-    if (*inputA < *inputB) {
-        return -1;
-    }
-    if (*inputA > *inputB) {
-        return 1;
-    }
-    return 0;
-}
-
 static BOOL CALLBACK enumDevicesCallback(const DIDEVICEINSTANCE * instance, LPVOID context) {
 	struct Gamepad_device * deviceRecord;
 	struct Gamepad_devicePrivate * deviceRecordPrivate;
@@ -814,7 +683,7 @@ static BOOL CALLBACK enumDevicesCallback(const DIDEVICEINSTANCE * instance, LPVO
 	IDirectInputDevice8 * di8Device;
 	HRESULT result;
 	DIPROPDWORD bufferSizeProp;
-	bool buffered = true;
+	gamepad_bool buffered = gamepad_true;
 	
 	if (xInputAvailable && isXInputDevice(&instance->guidProduct)) {
 		return DIENUM_CONTINUE;
@@ -853,7 +722,7 @@ static BOOL CALLBACK enumDevicesCallback(const DIDEVICEINSTANCE * instance, LPVO
 	bufferSizeProp.dwData = INPUT_QUEUE_SIZE;
 	result = IDirectInputDevice8_SetProperty(di8Device, DIPROP_BUFFERSIZE, &bufferSizeProp.diph);
 	if (result == DI_POLLEDDEVICE) {
-		buffered = false;
+		buffered = gamepad_false;
 	} else if (result != DI_OK) {
 		fprintf(stderr, "Warning: IDirectInputDevice8_SetProperty returned 0x%X\n", (unsigned int) result);
 	}
@@ -861,7 +730,7 @@ static BOOL CALLBACK enumDevicesCallback(const DIDEVICEINSTANCE * instance, LPVO
 	deviceRecord = malloc(sizeof(struct Gamepad_device));
 	deviceRecordPrivate = malloc(sizeof(struct Gamepad_devicePrivate));
 	deviceRecordPrivate->guidInstance = instance->guidInstance;
-	deviceRecordPrivate->isXInput = false;
+	deviceRecordPrivate->isXInput = gamepad_false;
 	deviceRecordPrivate->deviceInterface = di8Device;
 	deviceRecordPrivate->buffered = buffered;
 	deviceRecordPrivate->sliderCount = 0;
@@ -876,18 +745,13 @@ static BOOL CALLBACK enumDevicesCallback(const DIDEVICEINSTANCE * instance, LPVO
 	deviceRecord->numButtons = 0;
 	IDirectInputDevice_EnumObjects(di8Device, countButtonsCallback, deviceRecord, DIDFT_BUTTON);
 	deviceRecord->axisStates = calloc(sizeof(float), deviceRecord->numAxes);
-	deviceRecord->buttonStates = calloc(sizeof(bool), deviceRecord->numButtons);
+	deviceRecord->buttonStates = calloc(sizeof(gamepad_bool), deviceRecord->numButtons);
 	deviceRecordPrivate->axisInfo = calloc(sizeof(struct diAxisInfo), deviceRecord->numAxes);
 	deviceRecordPrivate->buttonOffsets = calloc(sizeof(DWORD), deviceRecord->numButtons);
 	deviceRecord->numAxes = 0;
 	IDirectInputDevice_EnumObjects(di8Device, enumAxesCallback, deviceRecord, DIDFT_AXIS | DIDFT_POV);
 	deviceRecord->numButtons = 0;
 	IDirectInputDevice_EnumObjects(di8Device, enumButtonsCallback, deviceRecord, DIDFT_BUTTON);
-	// Need to ensure axis and button ordering matches SDL mapping expectations if not an XInput device
-	if (!deviceRecordPrivate->isXInput) {
-		qsort(deviceRecordPrivate->axisInfo, deviceRecord->numAxes, sizeof(struct diAxisInfo), sortAxisFunction);
-		qsort(deviceRecordPrivate->buttonOffsets, deviceRecord->numButtons, sizeof(DWORD), sortButtonFunction);
-	}
 	devices = realloc(devices, sizeof(struct Gamepad_device *) * (numDevices + 1));
 	devices[numDevices++] = deviceRecord;
 	
@@ -908,6 +772,8 @@ static void removeDevice(unsigned int deviceIndex) {
 	for (; deviceIndex < numDevices; deviceIndex++) {
 		devices[deviceIndex] = devices[deviceIndex + 1];
 	}
+
+	clearRawDevList();
 }
 
 void Gamepad_detectDevices() {
@@ -926,7 +792,7 @@ void Gamepad_detectDevices() {
 		if (result != DI_OK) {
 			fprintf(stderr, "Warning: IDirectInput_EnumDevices returned 0x%X\n", (unsigned int) result);
 		}
-		s_bWindowsDeviceChanged = false;
+		s_bWindowsDeviceChanged = gamepad_false;
 	}
 	
 	if (xInputAvailable) {
@@ -938,7 +804,7 @@ void Gamepad_detectDevices() {
 				
 				deviceRecord = malloc(sizeof(struct Gamepad_device));
 				deviceRecordPrivate = malloc(sizeof(struct Gamepad_devicePrivate));
-				deviceRecordPrivate->isXInput = true;
+				deviceRecordPrivate->isXInput = gamepad_true;
 				deviceRecordPrivate->playerIndex = playerIndex;
 				deviceRecord->privateData = deviceRecordPrivate;
 				deviceRecord->deviceID = nextDeviceID++;
@@ -950,7 +816,7 @@ void Gamepad_detectDevices() {
 				deviceRecord->numAxes = 6;
 				deviceRecord->numButtons = 15;
 				deviceRecord->axisStates = calloc(sizeof(float), deviceRecord->numAxes);
-				deviceRecord->buttonStates = calloc(sizeof(bool), deviceRecord->numButtons);
+				deviceRecord->buttonStates = calloc(sizeof(gamepad_bool), deviceRecord->numButtons);
 				devices = realloc(devices, sizeof(struct Gamepad_device *) * (numDevices + 1));
 				devices[numDevices++] = deviceRecord;
 				registeredXInputDevices[playerIndex] = deviceRecord;
@@ -971,7 +837,7 @@ void Gamepad_detectDevices() {
 	}
 }
 
-static void updateButtonValue(struct Gamepad_device * device, unsigned int buttonIndex, bool down, double timestamp) {
+static void updateButtonValue(struct Gamepad_device * device, unsigned int buttonIndex, gamepad_bool down, double timestamp) {
 	if (down != device->buttonStates[buttonIndex]) {
 		device->buttonStates[buttonIndex] = down;
 		if (down && Gamepad_buttonDownCallback != NULL) {
@@ -1037,7 +903,7 @@ static void updatePOVAxisValues(struct Gamepad_device * device, unsigned int axi
 }
 
 void Gamepad_processEvents() {
-	static bool inProcessEvents;
+	static gamepad_bool inProcessEvents;
 	unsigned int deviceIndex, buttonIndex, axisIndex;
 	struct Gamepad_device * device;
 	struct Gamepad_devicePrivate * devicePrivate;
@@ -1047,7 +913,7 @@ void Gamepad_processEvents() {
 		return;
 	}
 	
-	inProcessEvents = true;
+	inProcessEvents = gamepad_true;
 	for (deviceIndex = 0; deviceIndex < numDevices; deviceIndex++) {
 		device = devices[deviceIndex];
 		devicePrivate = device->privateData;
@@ -1071,27 +937,28 @@ void Gamepad_processEvents() {
 				xResult = XInputGetState_proc(devicePrivate->playerIndex, &state);
 			}
 			if (xResult == ERROR_SUCCESS) {
-				updateButtonValue(device, 11, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP), currentTime());
-				updateButtonValue(device, 12, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN), currentTime());
-				updateButtonValue(device, 13, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT), currentTime());
-				updateButtonValue(device, 14, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT), currentTime());
-				updateButtonValue(device, 7, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_START), currentTime());
-				updateButtonValue(device, 6, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_BACK), currentTime());
-				updateButtonValue(device, 8, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB), currentTime());
-				updateButtonValue(device, 9, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB), currentTime());
-				updateButtonValue(device, 4, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER), currentTime());
-				updateButtonValue(device, 5, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER), currentTime());
-				updateButtonValue(device, 0, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_A), currentTime());
-				updateButtonValue(device, 1, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_B), currentTime());
-				updateButtonValue(device, 2, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_X), currentTime());
-				updateButtonValue(device, 3, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_Y), currentTime());
-				updateButtonValue(device, 10, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_GUIDE), currentTime());
+				updateButtonValue(device, 0, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP), currentTime());
+				updateButtonValue(device, 1, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN), currentTime());
+				updateButtonValue(device, 2, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT), currentTime());
+				updateButtonValue(device, 3, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT), currentTime());
+				updateButtonValue(device, 4, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_START), currentTime());
+				updateButtonValue(device, 5, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_BACK), currentTime());
+				updateButtonValue(device, 6, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB), currentTime());
+				updateButtonValue(device, 7, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB), currentTime());
+				updateButtonValue(device, 8, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER), currentTime());
+				updateButtonValue(device, 9, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER), currentTime());
+				updateButtonValue(device, 10, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_A), currentTime());
+				updateButtonValue(device, 11, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_B), currentTime());
+				updateButtonValue(device, 12, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_X), currentTime());
+				updateButtonValue(device, 13, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_Y), currentTime());
+				updateButtonValue(device, 14, !!(state.Gamepad.wButtons & XINPUT_GAMEPAD_GUIDE), currentTime());
 				updateAxisValue(device, 0, state.Gamepad.sThumbLX, currentTime());
-				updateAxisValue(device, 1, -state.Gamepad.sThumbLY, currentTime());
-				updateAxisValue(device, 3, state.Gamepad.sThumbRX, currentTime());
-				updateAxisValue(device, 4, -state.Gamepad.sThumbRY, currentTime());
-				updateAxisValueFloat(device, 2, state.Gamepad.bLeftTrigger / 127.5f - 1.0f, currentTime());
+				updateAxisValue(device, 1, state.Gamepad.sThumbLY, currentTime());
+				updateAxisValue(device, 2, state.Gamepad.sThumbRX, currentTime());
+				updateAxisValue(device, 3, state.Gamepad.sThumbRY, currentTime());
+				updateAxisValueFloat(device, 4, state.Gamepad.bLeftTrigger / 127.5f - 1.0f, currentTime());
 				updateAxisValueFloat(device, 5, state.Gamepad.bRightTrigger / 127.5f - 1.0f, currentTime());
+				
 			} else {
 				registeredXInputDevices[devicePrivate->playerIndex] = NULL;
 				removeDevice(deviceIndex);
@@ -1149,7 +1016,7 @@ void Gamepad_processEvents() {
 					result = IDirectInputDevice8_GetDeviceState(devicePrivate->deviceInterface, sizeof(DIJOYSTATE2), &state);
 				}
 				
-				if (result != DI_OK) {
+				if (!SUCCEEDED(result)) {
 					removeDevice(deviceIndex);
 					deviceIndex--;
 					continue;
@@ -1206,6 +1073,6 @@ void Gamepad_processEvents() {
 			}
 		}
 	}
-	inProcessEvents = false;
+	inProcessEvents = gamepad_false;
 }
 

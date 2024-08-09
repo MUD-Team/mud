@@ -62,7 +62,7 @@ static size_t eventQueueSize = 0;
 static size_t eventCount = 0;
 static pthread_mutex_t eventQueueMutex;
 
-static bool inited = false;
+static gamepad_bool inited = gamepad_false;
 
 #define test_bit(bitIndex, array) \
 	((array[(bitIndex) / (sizeof(int) * 8)] >> ((bitIndex) % (sizeof(int) * 8))) & 0x1)
@@ -74,7 +74,7 @@ void Gamepad_init() {
 		pthread_mutexattr_settype(&recursiveLock, PTHREAD_MUTEX_RECURSIVE);
 		pthread_mutex_init(&devicesMutex, &recursiveLock);
 		pthread_mutex_init(&eventQueueMutex, &recursiveLock);
-		inited = true;
+		inited = gamepad_true;
 		Gamepad_detectDevices();
 	}
 }
@@ -137,7 +137,7 @@ void Gamepad_shutdown() {
 		free(eventQueue);
 		eventQueue = NULL;
 		
-		inited = false;
+		inited = gamepad_false;
 	}
 }
 
@@ -193,7 +193,7 @@ static void queueAxisEvent(struct Gamepad_device * device, double timestamp, uns
 	queueEvent(device->deviceID, GAMEPAD_EVENT_AXIS_MOVED, axisEvent);
 }
 
-static void queueButtonEvent(struct Gamepad_device * device, double timestamp, unsigned int buttonID, bool down) {
+static void queueButtonEvent(struct Gamepad_device * device, double timestamp, unsigned int buttonID, gamepad_bool down) {
 	struct Gamepad_buttonEvent * buttonEvent;
 	
 	buttonEvent = malloc(sizeof(struct Gamepad_buttonEvent));
@@ -275,7 +275,7 @@ void Gamepad_detectDevices() {
 	int evKeyBits[(KEY_CNT - 1) / sizeof(int) * 8 + 1];
 	int evAbsBits[(ABS_CNT - 1) / sizeof(int) * 8 + 1];
 	char fileName[PATH_MAX];
-	bool duplicate;
+	gamepad_bool duplicate;
 	unsigned int gamepadIndex;
 	struct stat statBuf;
 	struct Gamepad_device * deviceRecord;
@@ -302,10 +302,10 @@ void Gamepad_detectDevices() {
 					continue;
 				}
 				
-				duplicate = false;
+				duplicate = gamepad_false;
 				for (gamepadIndex = 0; gamepadIndex < numDevices; gamepadIndex++) {
 					if (!strcmp(((struct Gamepad_devicePrivate *) devices[gamepadIndex]->privateData)->path, fileName)) {
-						duplicate = true;
+						duplicate = gamepad_true;
 						break;
 					}
 				}
@@ -384,7 +384,7 @@ void Gamepad_detectDevices() {
 				}
 				
 				deviceRecord->axisStates = calloc(sizeof(float), deviceRecord->numAxes);
-				deviceRecord->buttonStates = calloc(sizeof(bool), deviceRecord->numButtons);
+				deviceRecord->buttonStates = calloc(sizeof(gamepad_bool), deviceRecord->numButtons);
 				
 				if (Gamepad_deviceAttachCallback != NULL) {
 					Gamepad_deviceAttachCallback(deviceRecord, Gamepad_deviceAttachContext);
@@ -439,13 +439,13 @@ static void processQueuedEvent(struct Gamepad_queuedEvent event) {
 
 void Gamepad_processEvents() {
 	unsigned int eventIndex;
-	static bool inProcessEvents;
+	static gamepad_bool inProcessEvents;
 	
 	if (!inited || inProcessEvents) {
 		return;
 	}
 	
-	inProcessEvents = true;
+	inProcessEvents = gamepad_true;
 	pthread_mutex_lock(&eventQueueMutex);
 	for (eventIndex = 0; eventIndex < eventCount; eventIndex++) {
 		processQueuedEvent(eventQueue[eventIndex]);
@@ -460,6 +460,6 @@ void Gamepad_processEvents() {
 	}
 	eventCount = 0;
 	pthread_mutex_unlock(&eventQueueMutex);
-	inProcessEvents = false;
+	inProcessEvents = gamepad_false;
 }
 
