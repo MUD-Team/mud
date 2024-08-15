@@ -55,15 +55,15 @@ const char * Gamepad_formatLogMessage(const char * format, ...) {
 		}
 }
 
-static void Gamepad_logFuncDefault(int priority, char const * message) {
+static void Gamepad_logFuncDefault(int priority, const char * message) {
     switch (priority)
     {
         case gamepad_log_warning:
         case gamepad_log_error:
-            fprintf(stderr, message);
+            fprintf(stderr, "%s", message);
             break;
         default:
-            fprintf(stdout, message);
+            fprintf(stdout, "%s", message);
 						break;
     }
 }
@@ -105,7 +105,7 @@ void Gamepad_axisMoveFunc(void (* callback)(struct Gamepad_device * device, unsi
 	Gamepad_axisMoveContext = context;
 }
 
-void Gamepad_logFunc(void (* callback)(int priority, char const * format, ...)) {
+void Gamepad_logFunc(void (* callback)(int priority, const char * message)) {
     Gamepad_logCallback = callback;
 }
 
