@@ -30,6 +30,10 @@ extern "C" {
 #define gamepad_true 1
 #define gamepad_false 0
 
+#define gamepad_log_default 0
+#define gamepad_log_warning 1
+#define gamepad_log_error 2
+
 #if defined(_MSC_VER) && (_MSC_VER < 1600)
 #if (_MSC_VER < 1300)
 typedef unsigned char uint8_t;
@@ -299,6 +303,12 @@ void Gamepad_buttonUpFunc(void (* callback)(struct Gamepad_device * device, unsi
    thread from which Gamepad_processEvents() was called. Calling this function with a NULL
    argument will stop any previously registered callback from being called subsequently.  */
 void Gamepad_axisMoveFunc(void (* callback)(struct Gamepad_device * device, unsigned int axisID, float value, float lastValue, double timestamp, void * context), void * context);
+
+/* Registers a function to be called whenever libstem produces a log message */
+void Gamepad_logFunc(void(*callback)(int priority, const char * message));
+
+/* Toggles sending device events to Gamepad_logFunc for debugging purposes */
+void Gamepad_setDebug(gamepad_bool enabled);
 
 /* Adds a new mapping from a descriptive string. Useful to add mappings from 
    https://github.com/gabomdq/SDL_GameControllerDB */

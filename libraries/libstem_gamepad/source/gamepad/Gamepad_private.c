@@ -22,13 +22,58 @@
 
 #include "gamepad/Gamepad.h"
 #include "gamepad/Gamepad_private.h"
+#include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
+
+gamepad_bool Gamepad_debugEvents = gamepad_false;
+
+void Gamepad_setDebug(gamepad_bool enabled)
+{
+	Gamepad_debugEvents = enabled;
+}
+
+const char * Gamepad_formatLogMessage(const char * format, ...) {
+		int buf_size = 128;
+
+    for (;;)
+		{
+			char *buf = calloc(1, buf_size);
+
+			va_list args;
+
+			va_start(args, format);
+			int out_len = vsnprintf(buf, buf_size, format, args);
+			va_end(args);
+
+			if (out_len >= 0 && out_len < buf_size)
+				return buf;
+
+			free(buf);
+
+			buf_size *= 2;
+		}
+}
+
+static void Gamepad_logFuncDefault(int priority, char const * message) {
+    switch (priority)
+    {
+        case gamepad_log_warning:
+        case gamepad_log_error:
+            fprintf(stderr, message);
+            break;
+        default:
+            fprintf(stdout, message);
+						break;
+    }
+}
 
 void (* Gamepad_deviceAttachCallback)(struct Gamepad_device * device, void * context) = NULL;
 void (* Gamepad_deviceRemoveCallback)(struct Gamepad_device * device, void * context) = NULL;
 void (* Gamepad_buttonDownCallback)(struct Gamepad_device * device, unsigned int buttonID, double timestamp, void * context) = NULL;
 void (* Gamepad_buttonUpCallback)(struct Gamepad_device * device, unsigned int buttonID, double timestamp, void * context) = NULL;
 void (* Gamepad_axisMoveCallback)(struct Gamepad_device * device, unsigned int buttonID, float value, float lastValue, double timestamp, void * context) = NULL;
+void (* Gamepad_logCallback)(int priority, const char * message) = Gamepad_logFuncDefault;
 void * Gamepad_deviceAttachContext = NULL;
 void * Gamepad_deviceRemoveContext = NULL;
 void * Gamepad_buttonDownContext = NULL;
@@ -58,6 +103,10 @@ void Gamepad_buttonUpFunc(void (* callback)(struct Gamepad_device * device, unsi
 void Gamepad_axisMoveFunc(void (* callback)(struct Gamepad_device * device, unsigned int axisID, float value, float lastValue, double timestamp, void * context), void * context) {
 	Gamepad_axisMoveCallback = callback;
 	Gamepad_axisMoveContext = context;
+}
+
+void Gamepad_logFunc(void (* callback)(int priority, char const * format, ...)) {
+    Gamepad_logCallback = callback;
 }
 
 #define GAMEPAD_TOTAL_BINDINGS 27

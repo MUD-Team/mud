@@ -69,6 +69,7 @@ extern void (* Gamepad_deviceRemoveCallback)(struct Gamepad_device * device, voi
 extern void (* Gamepad_buttonDownCallback)(struct Gamepad_device * device, unsigned int buttonID, double timestamp, void * context);
 extern void (* Gamepad_buttonUpCallback)(struct Gamepad_device * device, unsigned int buttonID, double timestamp, void * context);
 extern void (* Gamepad_axisMoveCallback)(struct Gamepad_device * device, unsigned int axisID, float value, float lastValue, double timestamp, void * context);
+extern void (* Gamepad_logCallback)(int priority, const char * message);
 extern void * Gamepad_deviceAttachContext;
 extern void * Gamepad_deviceRemoveContext;
 extern void * Gamepad_buttonDownContext;
@@ -76,10 +77,14 @@ extern void * Gamepad_buttonUpContext;
 extern void * Gamepad_axisMoveContext;
 extern struct Gamepad_mapping * Gamepad_mappings;
 extern unsigned int Gamepad_mappingsCount;
+extern gamepad_bool Gamepad_debugEvents;
 
 /* Iterates through a device's mapping and maps true input to SDL output accordingly */
 void assignDeviceBindings(struct Gamepad_device * deviceRecord, const struct Gamepad_mapping * deviceMap);
 /* Finds a suitable controller mapping for the device. Returns NULL if none. */
 const struct Gamepad_mapping * Gamepad_findMapping(struct Gamepad_device * device);
+/* Finds the true name for an XInput device, if present in the mappings. Returns NULL if none. */
+const char * Gamepad_findXInputDeviceName(struct Gamepad_device * device);
+const char * Gamepad_formatLogMessage(const char * format, ...);
 
 #endif

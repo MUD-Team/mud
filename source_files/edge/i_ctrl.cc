@@ -39,6 +39,13 @@
 
 extern ConsoleVariable double_framerate;
 
+static void GamepadDebugCallback(ConsoleVariable *self)
+{
+    Gamepad_setDebug((gamepad_bool)self->d_);
+}
+
+EDGE_DEFINE_CONSOLE_VARIABLE_WITH_CALLBACK(debug_gamepads, "0", kConsoleVariableFlagArchive, GamepadDebugCallback)
+
 static std::vector<sapp_event> s_control_events;
 
 bool no_joystick;                // what a wowser, joysticks completely disabled
@@ -412,6 +419,30 @@ static void HandleGamepadAxisMove(Gamepad_device * device, unsigned int axisID, 
     };
 }
 
+static void HandleGamepadLogEvent(int priority, const char *message)
+{
+    switch (priority)
+    {
+        case gamepad_log_default:
+        {
+            LogPrint(message);
+            break;
+        }
+        case gamepad_log_warning:
+        {
+            LogWarning(message);
+            break;
+        }
+        case gamepad_log_error:
+        {
+            FatalError(message);
+            break;
+        }
+        default:
+            break;
+    }
+}
+
 void HandleMouseMotionEvent(sapp_event *ev)
 {
     int dx, dy;
@@ -594,6 +625,9 @@ void StartupJoystick(void)
         return;
     }
 
+    // register logging function to handle potential Gamepad_init errors
+    Gamepad_logFunc(HandleGamepadLogEvent);
+
     Gamepad_init();
 
     int total_joysticks = Gamepad_numDevices();
@@ -605,6 +639,8 @@ void StartupJoystick(void)
     Gamepad_buttonDownFunc(HandleGamepadButtonPress, nullptr);
     Gamepad_buttonUpFunc(HandleGamepadButtonRelease, nullptr);
     Gamepad_axisMoveFunc(HandleGamepadAxisMove, nullptr);
+
+    Gamepad_setDebug(debug_gamepads.d_);
 
     if (total_joysticks == 0)
         return;

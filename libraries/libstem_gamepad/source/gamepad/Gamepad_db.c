@@ -142,7 +142,7 @@ static gamepad_bool parseu8(char const** line, uint8_t* value) {
 		}
 		while ((digit = getDecimal(**line)) != -1);
 	} else {
-		printf("Invalid hexadecimal digit in CRC16");
+		Gamepad_logCallback(gamepad_log_warning, "Invalid hexadecimal digit in CRC16");
 		return gamepad_false;
 	}
 
@@ -155,7 +155,7 @@ static gamepad_bool parseCrc(char const** line, uint16_t* value) {
 
 	for (size_t i = 0; i < 4; i++) {
 		if ((digit = getHexadecimal(**line)) == -1) {
-			printf("Invalid hexadecimal digit in CRC16");
+			Gamepad_logCallback(gamepad_log_warning, "Invalid hexadecimal digit in CRC16");
 			return gamepad_false;
 		}
 
@@ -229,7 +229,7 @@ static gamepad_bool parseBinding(char const** line, union Gamepad_guid* guid, st
 	} else if (parseControllerButton(line, &bind->output.button)) {
 		bind->outputType = GAMEPAD_BINDINGTYPE_BUTTON;
 	} else {
-		printf("Invalid controller button or axis");
+		Gamepad_logCallback(gamepad_log_warning, "Invalid controller button or axis");
 		return gamepad_false;
 	}
 
@@ -249,7 +249,7 @@ static gamepad_bool parseBinding(char const** line, union Gamepad_guid* guid, st
 		(*line)++;
 
 		if (!parseu8(line, &bind->input.axis.axis)) {
-			printf("Invalid joystick axis number");
+			Gamepad_logCallback(gamepad_log_warning, "Invalid joystick axis number");
 			return gamepad_false;
 		}
 
@@ -275,7 +275,7 @@ static gamepad_bool parseBinding(char const** line, union Gamepad_guid* guid, st
 		(*line)++;
 
 		if (!parseu8(line, &bind->input.button)) {
-			printf("Invalid joystick button number");
+			Gamepad_logCallback(gamepad_log_warning, "Invalid joystick button number");
 			return gamepad_false;
 		}
 	} else if (**line == 'h') {
@@ -283,25 +283,25 @@ static gamepad_bool parseBinding(char const** line, union Gamepad_guid* guid, st
 		(*line)++;
 
 		if (!parseu8(line, &bind->input.hat.hat)) {
-			printf("Invalid joystick button number");
+			Gamepad_logCallback(gamepad_log_warning, "Invalid joystick button number");
 			return gamepad_false;
 		}
 
 		if (**line != '.') {
-			printf("Invalid joystick hat specifier");
+			Gamepad_logCallback(gamepad_log_warning, "Invalid joystick hat specifier");
 			return gamepad_false;
 		}
 
 		(*line)++;
 
 		if (!parseu8(line, &bind->input.hat.mask)) {
-			printf("Invalid joystick button number");
+			Gamepad_logCallback(gamepad_log_warning, "Invalid joystick button number");
 			return gamepad_false;
 		}
 	} else if (**line == 0 || **line == ',') {
 		bind->inputType = GAMEPAD_BINDINGTYPE_NONE;
 	} else {
-		printf("Invalid joystick input");
+		Gamepad_logCallback(gamepad_log_warning, "Invalid joystick input");
 		return gamepad_false;
 	}
 
@@ -331,7 +331,7 @@ static gamepad_bool parseMapping(char const* line, struct Gamepad_mapping * mapp
 			}
 
 			if (j != 16) {
-				printf("Invalid GUID in mapping database: %s", original);
+				Gamepad_logCallback(gamepad_log_warning, Gamepad_formatLogMessage("Invalid GUID in mapping database: %s", original));
 				return gamepad_false;
 			}
 		}
@@ -339,7 +339,7 @@ static gamepad_bool parseMapping(char const* line, struct Gamepad_mapping * mapp
 #undef TRY
 
 		if (*line != ',') {
-			printf("Invalid GUID in mapping database: %s", original);
+			Gamepad_logCallback(gamepad_log_warning, Gamepad_formatLogMessage("Invalid GUID in mapping database: %s", original));
 			return gamepad_false;
 		}
 
@@ -358,7 +358,7 @@ static gamepad_bool parseMapping(char const* line, struct Gamepad_mapping * mapp
 		name = (char*)malloc(len + 1);
 
 		if (name == NULL) {
-			printf("Could not allocate memory for controller mapping name");
+			Gamepad_logCallback(gamepad_log_warning, "Could not allocate memory for controller mapping name");
 			return gamepad_false;
 		}
 
@@ -367,7 +367,7 @@ static gamepad_bool parseMapping(char const* line, struct Gamepad_mapping * mapp
 		mapping->name = name;
 
 		if (*line != ',') {
-			printf("Invalid name in mapping database: %s", original);
+			Gamepad_logCallback(gamepad_log_warning, Gamepad_formatLogMessage("Invalid name in mapping database: %s", original));
 			return gamepad_false;
 		}
 
@@ -423,13 +423,13 @@ static gamepad_bool parseMapping(char const* line, struct Gamepad_mapping * mapp
 			break;
 
 		case GAMEPAD_BINDINGTYPE_HAT:
-			printf("Invalid output binding (Hat): %s", original);
+			Gamepad_logCallback(gamepad_log_warning, Gamepad_formatLogMessage("Invalid output binding (Hat): %s", original));
 			break;
 		}
 
 		if (*line != 0) {
 			if (*line != ',') {
-				printf("Invalid character in binding: %c (%s)", *line, original);
+				Gamepad_logCallback(gamepad_log_warning, Gamepad_formatLogMessage("Invalid character in binding: %c (%s)", *line, original));
 				return gamepad_false;
 			}
 
@@ -448,7 +448,7 @@ gamepad_bool Gamepad_initMappings(void) {
 	mappings = (struct Gamepad_mapping *)malloc(capacity * sizeof(struct Gamepad_mapping));
 
 	if (mappings == NULL) {
-		printf("Could not allocate memory for %u controller mapping(s)", capacity);
+		Gamepad_logCallback(gamepad_log_warning, Gamepad_formatLogMessage("Could not allocate memory for %u controller mapping(s)", capacity));
 		return gamepad_false;
 	}
 
@@ -486,7 +486,7 @@ gamepad_bool Gamepad_addMapping(const char* string) {
 		struct Gamepad_mapping * newMappings = (struct Gamepad_mapping *)realloc(Gamepad_mappings, newSize);
 
 		if (newMappings == NULL) {
-			printf("Could not allocate memory for the mapping");
+			Gamepad_logCallback(gamepad_log_warning, "Could not allocate memory for the mapping");
 			return gamepad_false;
 		}
 
@@ -524,6 +524,26 @@ const struct Gamepad_mapping * Gamepad_findMapping(struct Gamepad_device * devic
 			if (match) {
 				return mapping;
 			}
+		}
+	}
+
+	return NULL;
+}
+
+const char * Gamepad_findXInputDeviceName(struct Gamepad_device * device) {
+	const uint16_t crc = device->guid.standard.crc;
+	const uint16_t vendor = device->guid.standard.vendor;
+	const uint16_t product = device->guid.standard.product;
+
+	for (unsigned int i = 0; i < Gamepad_mappingsCount; i++) {
+		struct Gamepad_mapping * mapping = &Gamepad_mappings[i];
+
+		gamepad_bool match = crc != 0 && mapping->guid.standard.crc != 0 ? crc == mapping->guid.standard.crc : gamepad_true;
+		match      = match && mapping->guid.standard.vendor  == vendor;
+		match      = match && mapping->guid.standard.product == product;
+
+		if (match) {
+			return mapping->name;
 		}
 	}
 

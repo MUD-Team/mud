@@ -112,14 +112,14 @@ static int CreateDeviceNotification(DeviceNotificationData *data)
 	data->wincl.cbSize = sizeof (WNDCLASSEX);
 
 	if (!RegisterClassEx(&data->wincl)) {
-		fprintf(stderr, "Failed to create register class for joystick autodetect");
+		Gamepad_logCallback(gamepad_log_warning, "Failed to create register class for joystick autodetect");
 		CleanupDeviceNotification(data);
 		return -1;
 	}
 
 	data->messageWindow = (HWND)CreateWindowEx(0, "Message", NULL, 0, 0, 0, 0, 0, HWND_MESSAGE, NULL, NULL, NULL);
 	if (!data->messageWindow) {
-		fprintf(stderr, "Failed to create message window for joystick autodetect");
+		Gamepad_logCallback(gamepad_log_warning, "Failed to create message window for joystick autodetect");
 		CleanupDeviceNotification(data);
 		return -1;
 	}
@@ -131,7 +131,7 @@ static int CreateDeviceNotification(DeviceNotificationData *data)
 
 	data->hNotify = RegisterDeviceNotification(data->messageWindow, &dbh, DEVICE_NOTIFY_WINDOW_HANDLE);
 	if (!data->hNotify) {
-		fprintf(stderr, "Failed to create notify device for joystick autodetect");
+		Gamepad_logCallback(gamepad_log_warning, "Failed to create notify device for joystick autodetect");
 		CleanupDeviceNotification(data);
 		return -1;
 	}
@@ -167,22 +167,14 @@ static void CheckDeviceNotification(DeviceNotificationData *data)
 
 #define INPUT_QUEUE_SIZE 32
 #define XINPUT_GAMEPAD_GUIDE 0x400
-
 typedef struct {
-	WORD wButtons;
-	BYTE bLeftTrigger;
-	BYTE bRightTrigger;
-	SHORT sThumbLX;
-	SHORT sThumbLY;
-	SHORT sThumbRX;
-	SHORT sThumbRY;
-	DWORD dwPaddingReserved;
-} XINPUT_GAMEPAD_EX;
-
-typedef struct {
-	DWORD dwPacketNumber;
-	XINPUT_GAMEPAD_EX Gamepad;
-} XINPUT_STATE_EX;
+	XINPUT_CAPABILITIES Capabilities;
+	WORD VendorId;
+	WORD ProductId;
+	WORD VersionNumber;
+	WORD unk1;
+	DWORD unk2;
+} XINPUT_CAPABILITIES_EX;
 
 struct Gamepad_devicePrivate {
 	gamepad_bool isXInput;
@@ -206,14 +198,14 @@ static unsigned int numDevices = 0;
 static unsigned int nextDeviceID = 0;
 static struct Gamepad_device * registeredXInputDevices[4] = { NULL, NULL, NULL, NULL };
 static const char * xInputDeviceNames[4] = {
-	"XInput Controller 1",
-	"XInput Controller 2",
-	"XInput Controller 3",
-	"XInput Controller 4"
+	"Generic XInput Controller 1",
+	"Generic XInput Controller 2",
+	"Generic XInput Controller 3",
+	"Generic XInput Controller 4"
 };
-static DWORD (WINAPI * XInputGetStateEx_proc)(DWORD dwUserIndex, XINPUT_STATE_EX * pState) = NULL;
+
 static DWORD (WINAPI * XInputGetState_proc)(DWORD dwUserIndex, XINPUT_STATE * pState) = NULL;
-static DWORD (WINAPI * XInputGetCapabilities_proc)(DWORD dwUserIndex, DWORD dwFlags, XINPUT_CAPABILITIES * pCapabilities) = NULL;
+static DWORD (WINAPI * XInputGetCapabilitiesEx_proc)(DWORD unk1, DWORD dwUserIndex, DWORD dwFlags, XINPUT_CAPABILITIES_EX * pCapabilities) = NULL;
 
 static LPDIRECTINPUT directInputInterface;
 static gamepad_bool inited = gamepad_false;
@@ -227,34 +219,24 @@ void Gamepad_init() {
 		
 		module = LoadLibrary("XInput1_4.dll");
 		if (module == NULL) {
-			module = LoadLibrary("XInput1_3.dll");
-		}
-		if (module == NULL) {
-			module = LoadLibrary("bin\\XInput1_3.dll");
-		}
-		if (module == NULL) {
-			fprintf(stderr, "Gamepad_init couldn't load XInput1_4.dll or XInput1_3.dll; proceeding with DInput only\n");
+			Gamepad_logCallback(gamepad_log_warning, "Gamepad_init couldn't load XInput1_4.dll; proceeding with DInput only\n");
 			xInputAvailable = gamepad_false;
 		} else {
 			xInputAvailable = gamepad_true;
-			XInputGetStateEx_proc = (DWORD (WINAPI *)(DWORD, XINPUT_STATE_EX *)) GetProcAddress(module, (LPCSTR) 100);
 			XInputGetState_proc = (DWORD (WINAPI *)(DWORD, XINPUT_STATE *)) GetProcAddress(module, "XInputGetState");
-			XInputGetCapabilities_proc = (DWORD (WINAPI *)(DWORD, DWORD, XINPUT_CAPABILITIES *)) GetProcAddress(module, "XInputGetCapabilities");
+			XInputGetCapabilitiesEx_proc = (DWORD (WINAPI *)(DWORD, DWORD, DWORD, XINPUT_CAPABILITIES_EX *)) GetProcAddress(module, (LPCSTR) 108);
 		}
-		
-		//result = DirectInput8Create(GetModuleHandle(NULL), DIRECTINPUT_VERSION, &IID_IDirectInput8, (void **) &directInputInterface, NULL);
-		// Calling DirectInput8Create directly crashes in 64-bit builds for some reason. Loading it with GetProcAddress works though!
 		
 		module = LoadLibrary("DINPUT8.dll");
 		if (module == NULL) {
-			fprintf(stderr, "Gamepad_init fatal error: Couldn't load DINPUT8.dll\n");
-			abort();
+			Gamepad_logCallback(gamepad_log_error, "Gamepad_init fatal error: Couldn't load DINPUT8.dll\n");
+			return; // Shouldn't reach here if program treats gamepad_log_error as a fatal program error
 		}
 		DirectInput8Create_proc = (HRESULT (WINAPI *)(HINSTANCE, DWORD, REFIID, LPVOID *, LPUNKNOWN)) GetProcAddress(module, "DirectInput8Create");
 		result = DirectInput8Create_proc(GetModuleHandle(NULL), DIRECTINPUT_VERSION, &IID_IDirectInput8, (void **) &directInputInterface, NULL);
 		
 		if (result != DI_OK) {
-			fprintf(stderr, "Warning: DirectInput8Create returned 0x%X\n", (unsigned int) result);
+			Gamepad_logCallback(gamepad_log_warning, Gamepad_formatLogMessage("Warning: DirectInput8Create returned 0x%X\n", (unsigned int) result));
 		}
 		
 		inited = gamepad_true;
@@ -468,7 +450,7 @@ static BOOL CALLBACK enumAxesCallback(LPCDIDEVICEOBJECTINSTANCE instance, LPVOID
 		
 	result = IDirectInputDevice8_SetProperty(deviceRecordPrivate->deviceInterface, DIPROP_RANGE, &range.diph);
 	if (result != DI_OK) {
-		fprintf(stderr, "Warning: IDIrectInputDevice8_SetProperty returned 0x%X\n", (unsigned int) result);
+		Gamepad_logCallback(gamepad_log_warning, Gamepad_formatLogMessage("Warning: IDIrectInputDevice8_SetProperty returned 0x%X\n", (unsigned int) result));
 	}
 		
 	deadZone.diph.dwSize = sizeof(deadZone);
@@ -478,7 +460,7 @@ static BOOL CALLBACK enumAxesCallback(LPCDIDEVICEOBJECTINSTANCE instance, LPVOID
 	deadZone.dwData = 0;
 	result = IDirectInputDevice8_SetProperty(deviceRecordPrivate->deviceInterface, DIPROP_DEADZONE, &deadZone.diph);
 	if (result != DI_OK) {
-		fprintf(stderr, "Warning: IDIrectInputDevice8_SetProperty returned 0x%X\n", (unsigned int) result);
+		Gamepad_logCallback(gamepad_log_warning, Gamepad_formatLogMessage("Warning: IDIrectInputDevice8_SetProperty returned 0x%X\n", (unsigned int) result));
 	}
 	return DIENUM_CONTINUE;
 }
@@ -718,8 +700,10 @@ static void buildGuid(struct Gamepad_device * deviceRecord, gamepad_bool isXInpu
 	else {
 		crc = 0;
 
-		for (i = 0; deviceRecord->description[i] != 0; i++) {
-			crc = crc8((uint8_t)crc ^ (uint8_t)deviceRecord->description[i]) ^ crc >> 8;
+		if (deviceRecord->description) {
+			for (i = 0; deviceRecord->description[i] != 0; i++) {
+				crc = crc8((uint8_t)crc ^ (uint8_t)deviceRecord->description[i]) ^ crc >> 8;
+			}
 		}
 
 		deviceRecord->guid.standard.bus = 0x03; // usb
@@ -756,22 +740,22 @@ static BOOL CALLBACK enumDevicesCallback(const DIDEVICEINSTANCE * instance, LPVO
 	
 	result = IDirectInput8_CreateDevice(directInputInterface, &instance->guidInstance, &diDevice, NULL);
 	if (result != DI_OK) {
-		fprintf(stderr, "Warning: IDirectInput8_CreateDevice returned 0x%X\n", (unsigned int) result);
+		Gamepad_logCallback(gamepad_log_warning, Gamepad_formatLogMessage("Warning: IDirectInput8_CreateDevice returned 0x%X\n", (unsigned int) result));
 	}
 	result = IDirectInputDevice8_QueryInterface(diDevice, &IID_IDirectInputDevice8, (LPVOID *) &di8Device);
 	if (result != DI_OK) {
-		fprintf(stderr, "Warning: IDirectInputDevice8_QueryInterface returned 0x%X\n", (unsigned int) result);
+		Gamepad_logCallback(gamepad_log_warning, Gamepad_formatLogMessage("Warning: IDirectInputDevice8_QueryInterface returned 0x%X\n", (unsigned int) result));
 	}
 	IDirectInputDevice8_Release(diDevice);
 	
 	result = IDirectInputDevice8_SetCooperativeLevel(di8Device, GetActiveWindow(), DISCL_NONEXCLUSIVE | DISCL_BACKGROUND);
 	if (result != DI_OK) {
-		fprintf(stderr, "Warning: IDirectInputDevice8_SetCooperativeLevel returned 0x%X\n", (unsigned int) result);
+		Gamepad_logCallback(gamepad_log_warning, Gamepad_formatLogMessage("Warning: IDirectInputDevice8_SetCooperativeLevel returned 0x%X\n", (unsigned int) result));
 	}
 	
 	result = IDirectInputDevice8_SetDataFormat(di8Device, &c_dfDIJoystick2);
 	if (result != DI_OK) {
-		fprintf(stderr, "Warning: IDirectInputDevice8_SetDataFormat returned 0x%X\n", (unsigned int) result);
+		Gamepad_logCallback(gamepad_log_warning, Gamepad_formatLogMessage("Warning: IDirectInputDevice8_SetDataFormat returned 0x%X\n", (unsigned int) result));
 	}
 	
 	bufferSizeProp.diph.dwSize = sizeof(DIPROPDWORD);
@@ -783,7 +767,7 @@ static BOOL CALLBACK enumDevicesCallback(const DIDEVICEINSTANCE * instance, LPVO
 	if (result == DI_POLLEDDEVICE) {
 		buffered = gamepad_false;
 	} else if (result != DI_OK) {
-		fprintf(stderr, "Warning: IDirectInputDevice8_SetProperty returned 0x%X\n", (unsigned int) result);
+		Gamepad_logCallback(gamepad_log_warning, Gamepad_formatLogMessage("Warning: IDirectInputDevice8_SetProperty returned 0x%X\n", (unsigned int) result));
 	}
 	
 	deviceRecord = malloc(sizeof(struct Gamepad_device));
@@ -855,7 +839,7 @@ static void removeDevice(unsigned int deviceIndex) {
 void Gamepad_detectDevices() {
 	HRESULT result;
 	DWORD xResult;
-	XINPUT_CAPABILITIES capabilities;
+	XINPUT_CAPABILITIES_EX capabilities_ex;
 	unsigned int playerIndex, deviceIndex;
 	
 	if (!inited) {
@@ -866,14 +850,14 @@ void Gamepad_detectDevices() {
 	if (s_bWindowsDeviceChanged) {
 		result = IDirectInput_EnumDevices(directInputInterface, DI8DEVCLASS_GAMECTRL, enumDevicesCallback, NULL, DIEDFL_ALLDEVICES);
 		if (result != DI_OK) {
-			fprintf(stderr, "Warning: IDirectInput_EnumDevices returned 0x%X\n", (unsigned int) result);
+			Gamepad_logCallback(gamepad_log_warning, Gamepad_formatLogMessage("Warning: IDirectInput_EnumDevices returned 0x%X\n", (unsigned int) result));
 		}
 		s_bWindowsDeviceChanged = gamepad_false;
 	}
 	
 	if (xInputAvailable) {
 		for (playerIndex = 0; playerIndex < 4; playerIndex++) {
-			xResult = XInputGetCapabilities_proc(playerIndex, 0, &capabilities);
+			xResult = XInputGetCapabilitiesEx_proc(1, playerIndex, 0, &capabilities_ex);
 			if (xResult == ERROR_SUCCESS && registeredXInputDevices[playerIndex] == NULL) {
 				struct Gamepad_device * deviceRecord;
 				struct Gamepad_devicePrivate * deviceRecordPrivate;
@@ -884,11 +868,16 @@ void Gamepad_detectDevices() {
 				deviceRecordPrivate->playerIndex = playerIndex;
 				deviceRecord->privateData = deviceRecordPrivate;
 				deviceRecord->deviceID = nextDeviceID++;
-				deviceRecord->description = xInputDeviceNames[playerIndex];
-				// HACK: XInput doesn't provide any way to get vendor and product ID, nor any way to map player index to
-				// DirectInput device enumeration. All we can do is assume all XInput devices are XBox 360 controllers.
-				deviceRecord->vendorID = 0x45E;
-				deviceRecord->productID = 0x28E;
+				deviceRecord->vendorID = capabilities_ex.VendorId;
+				deviceRecord->productID = capabilities_ex.ProductId;
+				deviceRecord->description = NULL;
+				// Need to build a non-XInput GUID to find the real name, if present
+				buildGuid(deviceRecord, gamepad_false);
+				deviceRecord->description = Gamepad_findXInputDeviceName(deviceRecord);
+				if (!deviceRecord->description) {
+					deviceRecord->description = xInputDeviceNames[playerIndex];
+				}
+				// Create the XInput GUID to actually find the mapping
 				buildGuid(deviceRecord, gamepad_true);
 				// check for valid mapping, but this really shouldn't happen with xinput devices
 				const struct Gamepad_mapping * deviceMap = Gamepad_findMapping(deviceRecord);
@@ -933,14 +922,26 @@ static void updateButtonValue(struct Gamepad_device * device, unsigned int butto
 			if (down) {
 					if (bind->outputType == GAMEPAD_BINDINGTYPE_AXIS && Gamepad_axisMoveCallback != NULL) {
 						Gamepad_axisMoveCallback(device, bind->output.axis.axis, 1.0f, -1.0f, timestamp, Gamepad_axisMoveContext);
+						if (Gamepad_debugEvents) {
+							Gamepad_logCallback(gamepad_log_default, Gamepad_formatLogMessage("%s Axis %u: 1.0\n", device->description, bind->output.axis.axis));
+						}
 					} else if (bind->outputType == GAMEPAD_BINDINGTYPE_BUTTON && Gamepad_buttonDownCallback != NULL) {
 						Gamepad_buttonDownCallback(device, bind->output.button, timestamp, Gamepad_buttonDownContext);
+						if (Gamepad_debugEvents) {
+							Gamepad_logCallback(gamepad_log_default, Gamepad_formatLogMessage("%s Button %u: Down\n", device->description, bind->output.button));
+						}
 					}
 			} else {
 					if (bind->outputType == GAMEPAD_BINDINGTYPE_AXIS && Gamepad_axisMoveCallback != NULL) {
 						Gamepad_axisMoveCallback(device, bind->output.axis.axis, -1.0f, 1.0f, timestamp, Gamepad_axisMoveContext);
+						if (Gamepad_debugEvents) {
+							Gamepad_logCallback(gamepad_log_default, Gamepad_formatLogMessage("%s Axis %u: -1.0\n", device->description, bind->output.axis.axis));
+						}
 					} else if (bind->outputType == GAMEPAD_BINDINGTYPE_BUTTON && Gamepad_buttonUpCallback != NULL) {
 						Gamepad_buttonUpCallback(device, bind->output.button, timestamp, Gamepad_buttonUpContext);
+						if (Gamepad_debugEvents) {
+							Gamepad_logCallback(gamepad_log_default, Gamepad_formatLogMessage("%s Button %u: Up\n", device->description, bind->output.button));
+						}
 					}
 			}
 		}
@@ -955,13 +956,22 @@ static void updateAxisValueFloat(struct Gamepad_device * device, unsigned int ax
 	if (bind && value != lastValue) {
 		if (bind->outputType == GAMEPAD_BINDINGTYPE_AXIS && Gamepad_axisMoveCallback != NULL) {
 			Gamepad_axisMoveCallback(device, bind->output.axis.axis, value, lastValue, timestamp, Gamepad_axisMoveContext);
+			if (Gamepad_debugEvents) {
+				Gamepad_logCallback(gamepad_log_default, Gamepad_formatLogMessage("%s Axis %u: %f\n", device->description, bind->output.axis.axis, value));
+			}
 		}
 		// A little guesswork here, but I'm not sure in which situations a non-hat axis would have a button output in SDL
 		else if (bind->outputType == GAMEPAD_BINDINGTYPE_BUTTON) {
 			if (lastValue < 0 && value > 0 && Gamepad_buttonDownCallback != NULL) {
 				Gamepad_buttonDownCallback(device, bind->output.button, timestamp, Gamepad_buttonDownContext);
+				if (Gamepad_debugEvents) {
+					Gamepad_logCallback(gamepad_log_default, Gamepad_formatLogMessage("%s Button %u: Down\n", device->description, bind->output.button));
+				}
 			} else if (lastValue > 0 && value < 0 && Gamepad_buttonUpCallback != NULL) {
 				Gamepad_buttonUpCallback(device, bind->output.button, timestamp, Gamepad_buttonUpContext);
+				if (Gamepad_debugEvents) {
+					Gamepad_logCallback(gamepad_log_default, Gamepad_formatLogMessage("%s Button %u: Up\n", device->description, bind->output.button));
+				}
 			}
 		}
 	}
@@ -1015,11 +1025,20 @@ static void updateHatValue(struct Gamepad_device* device, unsigned int hatIndex,
 				} else {
 					Gamepad_axisMoveCallback(device, bind->output.axis.axis, -1.0f, 1.0f, timestamp, Gamepad_axisMoveContext);
 				}
+				if (Gamepad_debugEvents) {
+					Gamepad_logCallback(gamepad_log_default, Gamepad_formatLogMessage("%s Axis %u: %f\n", device->description, bind->output.axis.axis, value));
+				}
 			} else if (bind->outputType == GAMEPAD_BINDINGTYPE_BUTTON) {
 				if (button_up_callback && (lastValue & GAMEPAD_HAT_UP)) {
 					Gamepad_buttonUpCallback(device, bind->output.button, timestamp, Gamepad_buttonUpContext);
+					if (Gamepad_debugEvents) {
+						Gamepad_logCallback(gamepad_log_default, Gamepad_formatLogMessage("%s Button %u: Up\n", device->description, bind->output.button));
+					}
 				} else if (button_down_callback && (value & GAMEPAD_HAT_UP)) {
 					Gamepad_buttonDownCallback(device, bind->output.button, timestamp, Gamepad_buttonDownContext);
+					if (Gamepad_debugEvents) {
+						Gamepad_logCallback(gamepad_log_default, Gamepad_formatLogMessage("%s Button %u: Down\n", device->description, bind->output.button));
+					}
 				}
 			}
 		}
@@ -1033,11 +1052,20 @@ static void updateHatValue(struct Gamepad_device* device, unsigned int hatIndex,
 				} else {
 					Gamepad_axisMoveCallback(device, bind->output.axis.axis, -1.0f, 1.0f, timestamp, Gamepad_axisMoveContext);
 				}
+				if (Gamepad_debugEvents) {
+					Gamepad_logCallback(gamepad_log_default, Gamepad_formatLogMessage("%s Axis %u: %f\n", device->description, bind->output.axis.axis, value));
+				}
 			} else if (bind->outputType == GAMEPAD_BINDINGTYPE_BUTTON) {
 				if (button_up_callback && (lastValue & GAMEPAD_HAT_RIGHT)) {
 					Gamepad_buttonUpCallback(device, bind->output.button, timestamp, Gamepad_buttonUpContext);
+					if (Gamepad_debugEvents) {
+						Gamepad_logCallback(gamepad_log_default, Gamepad_formatLogMessage("%s Button %u: Up\n", device->description, bind->output.button));
+					}
 				} else if (button_down_callback && (value & GAMEPAD_HAT_RIGHT)) {
 					Gamepad_buttonDownCallback(device, bind->output.button, timestamp, Gamepad_buttonDownContext);
+					if (Gamepad_debugEvents) {
+						Gamepad_logCallback(gamepad_log_default, Gamepad_formatLogMessage("%s Button %u: Down\n", device->description, bind->output.button));
+					}
 				}
 			}
 		}
@@ -1051,11 +1079,20 @@ static void updateHatValue(struct Gamepad_device* device, unsigned int hatIndex,
 				} else {
 					Gamepad_axisMoveCallback(device, bind->output.axis.axis, -1.0f, 1.0f, timestamp, Gamepad_axisMoveContext);
 				}
+				if (Gamepad_debugEvents) {
+					Gamepad_logCallback(gamepad_log_default, Gamepad_formatLogMessage("%s Axis %u: %f\n", device->description, bind->output.axis.axis, value));
+				}
 			} else if (bind->outputType == GAMEPAD_BINDINGTYPE_BUTTON) {
 				if (button_up_callback && (lastValue & GAMEPAD_HAT_DOWN)) {
 					Gamepad_buttonUpCallback(device, bind->output.button, timestamp, Gamepad_buttonUpContext);
+					if (Gamepad_debugEvents) {
+						Gamepad_logCallback(gamepad_log_default, Gamepad_formatLogMessage("%s Button %u: Up\n", device->description, bind->output.button));
+					}
 				} else if (button_down_callback && (value & GAMEPAD_HAT_DOWN)) {
 					Gamepad_buttonDownCallback(device, bind->output.button, timestamp, Gamepad_buttonDownContext);
+					if (Gamepad_debugEvents) {
+						Gamepad_logCallback(gamepad_log_default, Gamepad_formatLogMessage("%s Button %u: Down\n", device->description, bind->output.button));
+					}
 				}
 			}
 		}
@@ -1069,11 +1106,141 @@ static void updateHatValue(struct Gamepad_device* device, unsigned int hatIndex,
 				} else {
 					Gamepad_axisMoveCallback(device, bind->output.axis.axis, -1.0f, 1.0f, timestamp, Gamepad_axisMoveContext);
 				}
+				if (Gamepad_debugEvents) {
+					Gamepad_logCallback(gamepad_log_default, Gamepad_formatLogMessage("%s Axis %u: %f\n", device->description, bind->output.axis.axis, value));
+				}
 			} else if (bind->outputType == GAMEPAD_BINDINGTYPE_BUTTON) {
 				if (button_up_callback && (lastValue & GAMEPAD_HAT_LEFT)) {
 					Gamepad_buttonUpCallback(device, bind->output.button, timestamp, Gamepad_buttonUpContext);
+					if (Gamepad_debugEvents) {
+						Gamepad_logCallback(gamepad_log_default, Gamepad_formatLogMessage("%s Button %u: Up\n", device->description, bind->output.button));
+					}
 				} else if (button_down_callback && (value & GAMEPAD_HAT_LEFT)) {
 					Gamepad_buttonDownCallback(device, bind->output.button, timestamp, Gamepad_buttonDownContext);
+					if (Gamepad_debugEvents) {
+						Gamepad_logCallback(gamepad_log_default, Gamepad_formatLogMessage("%s Button %u: Down\n", device->description, bind->output.button));
+					}
+				}
+			}
+		}
+	}
+}
+
+static void updateHatValueXInput(struct Gamepad_device* device, char value, double timestamp) {
+	char lastValue = device->hatStates[0];
+
+	device->hatStates[0] = value;
+	const struct Gamepad_binding * bind = NULL;
+
+	unsigned int value_diff = lastValue ^ value;
+	gamepad_bool button_up_callback = (Gamepad_buttonUpCallback != NULL);
+	gamepad_bool button_down_callback = (Gamepad_buttonDownCallback != NULL);
+	gamepad_bool axis_move_callback = (Gamepad_axisMoveCallback != NULL);
+
+	if (value_diff & GAMEPAD_HAT_UP) {
+		bind = device->hatBindings[0];
+		if (bind) {
+			if (bind->outputType == GAMEPAD_BINDINGTYPE_AXIS && axis_move_callback) {
+				if (lastValue < 0) {
+					Gamepad_axisMoveCallback(device, bind->output.axis.axis, 1.0f, -1.0f, timestamp, Gamepad_axisMoveContext);
+				} else {
+					Gamepad_axisMoveCallback(device, bind->output.axis.axis, -1.0f, 1.0f, timestamp, Gamepad_axisMoveContext);
+				}
+				if (Gamepad_debugEvents) {
+					Gamepad_logCallback(gamepad_log_default, Gamepad_formatLogMessage("%s Axis %u: %f\n", device->description, bind->output.axis.axis, value));
+				}
+			} else if (bind->outputType == GAMEPAD_BINDINGTYPE_BUTTON) {
+				if (button_up_callback && (lastValue & GAMEPAD_HAT_UP)) {
+					Gamepad_buttonUpCallback(device, bind->output.button, timestamp, Gamepad_buttonUpContext);
+					if (Gamepad_debugEvents) {
+						Gamepad_logCallback(gamepad_log_default, Gamepad_formatLogMessage("%s Button %u: Up\n", device->description, bind->output.button));
+					}
+				} else if (button_down_callback && (value & GAMEPAD_HAT_UP)) {
+					Gamepad_buttonDownCallback(device, bind->output.button, timestamp, Gamepad_buttonDownContext);
+					if (Gamepad_debugEvents) {
+						Gamepad_logCallback(gamepad_log_default, Gamepad_formatLogMessage("%s Button %u: Down\n", device->description, bind->output.button));
+					}
+				}
+			}
+		}
+	}
+	if (value_diff & GAMEPAD_HAT_RIGHT) {
+		bind = device->hatBindings[1];
+		if (bind) {
+			if (bind->outputType == GAMEPAD_BINDINGTYPE_AXIS && axis_move_callback) {
+				if (lastValue < 0) {
+					Gamepad_axisMoveCallback(device, bind->output.axis.axis, 1.0f, -1.0f, timestamp, Gamepad_axisMoveContext);
+				} else {
+					Gamepad_axisMoveCallback(device, bind->output.axis.axis, -1.0f, 1.0f, timestamp, Gamepad_axisMoveContext);
+				}
+				if (Gamepad_debugEvents) {
+					Gamepad_logCallback(gamepad_log_default, Gamepad_formatLogMessage("%s Axis %u: %f\n", device->description, bind->output.axis.axis, value));
+				}
+			} else if (bind->outputType == GAMEPAD_BINDINGTYPE_BUTTON) {
+				if (button_up_callback && (lastValue & GAMEPAD_HAT_RIGHT)) {
+					Gamepad_buttonUpCallback(device, bind->output.button, timestamp, Gamepad_buttonUpContext);
+					if (Gamepad_debugEvents) {
+						Gamepad_logCallback(gamepad_log_default, Gamepad_formatLogMessage("%s Button %u: Up\n", device->description, bind->output.button));
+					}
+				} else if (button_down_callback && (value & GAMEPAD_HAT_RIGHT)) {
+					Gamepad_buttonDownCallback(device, bind->output.button, timestamp, Gamepad_buttonDownContext);
+					if (Gamepad_debugEvents) {
+						Gamepad_logCallback(gamepad_log_default, Gamepad_formatLogMessage("%s Button %u: Down\n", device->description, bind->output.button));
+					}
+				}
+			}
+		}
+	}
+	if (value_diff & GAMEPAD_HAT_DOWN) {
+		bind = device->hatBindings[2];
+		if (bind) {
+			if (bind->outputType == GAMEPAD_BINDINGTYPE_AXIS && axis_move_callback) {
+				if (lastValue < 0) {
+					Gamepad_axisMoveCallback(device, bind->output.axis.axis, 1.0f, -1.0f, timestamp, Gamepad_axisMoveContext);
+				} else {
+					Gamepad_axisMoveCallback(device, bind->output.axis.axis, -1.0f, 1.0f, timestamp, Gamepad_axisMoveContext);
+				}
+				if (Gamepad_debugEvents) {
+					Gamepad_logCallback(gamepad_log_default, Gamepad_formatLogMessage("%s Axis %u: %f\n", device->description, bind->output.axis.axis, value));
+				}
+			} else if (bind->outputType == GAMEPAD_BINDINGTYPE_BUTTON) {
+				if (button_up_callback && (lastValue & GAMEPAD_HAT_DOWN)) {
+					Gamepad_buttonUpCallback(device, bind->output.button, timestamp, Gamepad_buttonUpContext);
+					if (Gamepad_debugEvents) {
+						Gamepad_logCallback(gamepad_log_default, Gamepad_formatLogMessage("%s Button %u: Up\n", device->description, bind->output.button));
+					}
+				} else if (button_down_callback && (value & GAMEPAD_HAT_DOWN)) {
+					Gamepad_buttonDownCallback(device, bind->output.button, timestamp, Gamepad_buttonDownContext);
+					if (Gamepad_debugEvents) {
+						Gamepad_logCallback(gamepad_log_default, Gamepad_formatLogMessage("%s Button %u: Down\n", device->description, bind->output.button));
+					}
+				}
+			}
+		}
+	}
+	if (value_diff & GAMEPAD_HAT_LEFT) {
+		bind = device->hatBindings[3];
+		if (bind) {
+			if (bind->outputType == GAMEPAD_BINDINGTYPE_AXIS && axis_move_callback) {
+				if (lastValue < 0) {
+					Gamepad_axisMoveCallback(device, bind->output.axis.axis, 1.0f, -1.0f, timestamp, Gamepad_axisMoveContext);
+				} else {
+					Gamepad_axisMoveCallback(device, bind->output.axis.axis, -1.0f, 1.0f, timestamp, Gamepad_axisMoveContext);
+				}
+				if (Gamepad_debugEvents) {
+					Gamepad_logCallback(gamepad_log_default, Gamepad_formatLogMessage("%s Axis %u: %f\n", device->description, bind->output.axis.axis, value));
+				}
+			} else if (bind->outputType == GAMEPAD_BINDINGTYPE_BUTTON) {
+				if (button_up_callback && (lastValue & GAMEPAD_HAT_LEFT)) {
+					Gamepad_buttonUpCallback(device, bind->output.button, timestamp, Gamepad_buttonUpContext);
+					if (Gamepad_debugEvents) {
+						Gamepad_logCallback(gamepad_log_default, Gamepad_formatLogMessage("%s Button %u: Up\n", device->description, bind->output.button));
+					}
+				} else if (button_down_callback && (value & GAMEPAD_HAT_LEFT)) {
+					Gamepad_buttonDownCallback(device, bind->output.button, timestamp, Gamepad_buttonDownContext);
+					if (Gamepad_debugEvents) {
+						Gamepad_logCallback(gamepad_log_default, Gamepad_formatLogMessage("%s Button %u: Down\n", device->description, bind->output.button));
+					}
 				}
 			}
 		}
@@ -1098,22 +1265,8 @@ void Gamepad_processEvents() {
 		
 		if (devicePrivate->isXInput) {
 			XINPUT_STATE state;
-			DWORD xResult;
-			
-			if (XInputGetStateEx_proc != NULL) {
-				XINPUT_STATE_EX stateEx;
-				
-				xResult = XInputGetStateEx_proc(devicePrivate->playerIndex, &stateEx);
-				state.Gamepad.wButtons = stateEx.Gamepad.wButtons;
-				state.Gamepad.sThumbLX = stateEx.Gamepad.sThumbLX;
-				state.Gamepad.sThumbLY = stateEx.Gamepad.sThumbLY;
-				state.Gamepad.sThumbRX = stateEx.Gamepad.sThumbRX;
-				state.Gamepad.sThumbRY = stateEx.Gamepad.sThumbRY;
-				state.Gamepad.bLeftTrigger = stateEx.Gamepad.bLeftTrigger;
-				state.Gamepad.bRightTrigger = stateEx.Gamepad.bRightTrigger;
-			} else {
-				xResult = XInputGetState_proc(devicePrivate->playerIndex, &state);
-			}
+			DWORD xResult = XInputGetState_proc(devicePrivate->playerIndex, &state);
+
 			if (xResult == ERROR_SUCCESS) {
 				const double now = currentTime();
 
@@ -1134,6 +1287,22 @@ void Gamepad_processEvents() {
 				updateAxisValue(device, 3, state.Gamepad.sThumbRX, now);
 				updateAxisValue(device, 4, -state.Gamepad.sThumbRY, now);
 				updateAxisValueFloat(device, 5, state.Gamepad.bRightTrigger / 127.5f - 1.0f, now);
+				char hat = 0;
+				if (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) {
+					hat |= GAMEPAD_HAT_UP;
+				}
+				if (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) {
+					hat |= GAMEPAD_HAT_RIGHT;
+				}
+				if (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) {
+					hat |= GAMEPAD_HAT_DOWN;
+				}
+				if (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) {
+					hat |= GAMEPAD_HAT_LEFT;
+				}
+				if (hat != device->hatStates[0]) {
+					updateHatValueXInput(device, hat, now);
+				}
 			} else {
 				registeredXInputDevices[devicePrivate->playerIndex] = NULL;
 				removeDevice(deviceIndex);
