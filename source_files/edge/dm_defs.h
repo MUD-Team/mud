@@ -167,10 +167,10 @@ constexpr uint16_t kMouse6         = (0x105);
 constexpr uint16_t kMouseWheelUp   = (0x10e);
 constexpr uint16_t kMouseWheelDown = (0x10f);
 
-constexpr uint16_t kGamepadSouth             = (0x110 + 0);
-constexpr uint16_t kGamepadEast             = (0x110 + 1);
-constexpr uint16_t kGamepadWest             = (0x110 + 2);
-constexpr uint16_t kGamepadNorth             = (0x110 + 3);
+constexpr uint16_t kGamepadA             = (0x110 + 0);
+constexpr uint16_t kGamepadB             = (0x110 + 1);
+constexpr uint16_t kGamepadX             = (0x110 + 2);
+constexpr uint16_t kGamepadY             = (0x110 + 3);
 constexpr uint16_t kGamepadBack          = (0x110 + 4);
 constexpr uint16_t kGamepadGuide         = (0x110 + 5);
 constexpr uint16_t kGamepadStart         = (0x110 + 6);

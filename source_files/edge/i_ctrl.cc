@@ -319,7 +319,7 @@ static void HandleGamepadButtonRelease(Gamepad_device *device, unsigned int butt
     InputEvent event;
 
     event.type = kInputEventKeyUp;
-    event.value.key.sym = kGamepadSouth + buttonID;
+    event.value.key.sym = kGamepadA + buttonID;
 
     PostEvent(&event);
 }
@@ -337,7 +337,7 @@ static void HandleGamepadButtonPress(Gamepad_device *device, unsigned int button
     InputEvent event;
 
     event.type = kInputEventKeyDown;
-    event.value.key.sym = kGamepadSouth + buttonID;
+    event.value.key.sym = kGamepadA + buttonID;
 
     PostEvent(&event);
 }
