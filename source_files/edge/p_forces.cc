@@ -45,8 +45,6 @@
 
 constexpr float kPushFactor = 64.0f;
 
-extern ConsoleVariable double_framerate;
-
 std::vector<Force *> active_forces;
 
 static Force *current_force; // for PushThingCallback
@@ -205,12 +203,8 @@ void AddSectorForce(Sector *sec, bool is_wind, float x_mag, float y_mag)
 //
 // Executes all force effects for the current tic.
 //
-void RunForces(bool extra_tic)
+void RunForces()
 {
-    // TODO: review what needs updating here for 70 Hz
-    if (extra_tic && double_framerate.d_)
-        return;
-
     std::vector<Force *>::iterator FI;
 
     for (FI = active_forces.begin(); FI != active_forces.end(); FI++)

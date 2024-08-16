@@ -37,6 +37,7 @@
 #include "im_data.h"
 #include "im_funcs.h"
 #include "m_misc.h" // !!!! model test
+#include "n_network.h"
 #include "p_local.h"
 #include "r_colormap.h"
 #include "r_defs.h"
@@ -595,7 +596,12 @@ static const Image *RendererGetThingSprite2(MapObject *mo, float mx, float my, b
 
     if (frame->rotations_ >= 8)
     {
-        BAMAngle ang = mo->angle_;
+        BAMAngle ang;
+
+        if (uncapped_frames.d_ && mo->interpolate_ && !paused && !time_stop_active && !erraticism_active)
+            ang = epi::BAMInterpolate(mo->old_angle_, mo->angle_, fractional_tic);
+        else
+            ang = mo->angle_;
 
         BAMAngle from_view = PointToAngle(view_x, view_y, mx, my);
 
@@ -687,16 +693,19 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
         return;
 
     // transform the origin point
-    float mx = mo->x, my = mo->y, mz = mo->z;
+    float mx, my, mz;
 
-    // position interpolation
-    if (mo->interpolation_number_ > 1)
+    if (uncapped_frames.d_ && mo->interpolate_ && !paused && !time_stop_active && !erraticism_active)
     {
-        float along = mo->interpolation_position_ / (float)mo->interpolation_number_;
-
-        mx = mo->interpolation_from_.x + (mx - mo->interpolation_from_.x) * along;
-        my = mo->interpolation_from_.y + (my - mo->interpolation_from_.y) * along;
-        mz = mo->interpolation_from_.z + (mz - mo->interpolation_from_.z) * along;
+        mx = glm_lerp(mo->old_x_, mo->x, fractional_tic);
+        my = glm_lerp(mo->old_y_, mo->y, fractional_tic);
+        mz = glm_lerp(mo->old_z_, mo->z, fractional_tic);
+    }
+    else
+    {
+        mx = mo->x;
+        my = mo->y;
+        mz = mo->z;
     }
 
     float tr_x = mx - view_x;

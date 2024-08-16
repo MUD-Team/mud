@@ -68,8 +68,6 @@ extern ImageData *ReadAsEpiBlock(Image *rim);
 
 extern epi::File *OpenUserFileOrLump(ImageDefinition *def);
 
-extern ConsoleVariable double_framerate;
-
 extern void DeleteSkyTextures(void);
 extern void DeleteColourmapTextures(void);
 

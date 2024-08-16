@@ -44,8 +44,6 @@
 extern bool ConsoleResponder(InputEvent *ev);
 extern bool GameResponder(InputEvent *ev);
 
-extern ConsoleVariable double_framerate;
-
 //
 // EVENT HANDLING
 //
@@ -310,7 +308,7 @@ void BuildEventTicCommand(EventTicCommand *cmd)
     // Turning
     if (!strafe)
     {
-        float turn = angle_turn[t_speed] / (double_framerate.d_ ? 2 : 1) * joy_forces[kAxisTurn];
+        float turn = angle_turn[t_speed] * joy_forces[kAxisTurn];
 
         turn *= turn_speed.f_;
 
@@ -332,7 +330,7 @@ void BuildEventTicCommand(EventTicCommand *cmd)
         cmd->mouselook_turn = RoundToInteger(mlook);
     }
 
-    // Forward [ no change for 70Hz ]
+    // Forward
     {
         float forward = forward_move[speed] * joy_forces[kAxisForward];
 
@@ -346,7 +344,7 @@ void BuildEventTicCommand(EventTicCommand *cmd)
         cmd->forward_move = RoundToInteger(forward);
     }
 
-    // Sideways [ no change for 70Hz ]
+    // Sideways
     {
         float side = side_move[speed] * joy_forces[kAxisStrafe];
 

@@ -40,10 +40,10 @@
 // only true if packets are exchanged with a server
 bool network_game = false;
 
-// 70Hz
-EDGE_DEFINE_CONSOLE_VARIABLE(double_framerate, "1", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(busy_wait, "1",
                              kConsoleVariableFlagReadOnly)
+
+EDGE_DEFINE_CONSOLE_VARIABLE(uncapped_frames, "1", kConsoleVariableFlagArchive)
 
 #if !defined(__MINGW32__) && (defined(WIN32) || defined(_WIN32) || defined(_WIN64))
 HANDLE windows_timer = nullptr;
@@ -60,6 +60,7 @@ HANDLE windows_timer = nullptr;
 
 int game_tic;
 int make_tic;
+float fractional_tic;
 
 static int last_update_tic;  // last time NetworkUpdate  was called
 static int last_try_run_tic; // last time TryRunTicCommands was called
@@ -246,13 +247,11 @@ int TryRunTicCommands()
     // decide how many tics to run...
     int tics = make_tic - game_tic;
 
-    // -AJA- been staring at this all day, still can't explain it.
-    //       my best guess is that we *usually* need an extra tic so that
-    //       the ticcmd queue cannot "run away" and we never catch up.
-    if (tics > real_tics + 1)
-        tics = real_tics + 1;
-    else
-        tics = GLM_MAX(GLM_MIN(tics, real_tics), 1);
+    if (tics == 0 && game_tic && uncapped_frames.d_)
+        return 0;
+
+    if (tics < 0)
+        tics = 1;
 
 #ifdef EDGE_DEBUG_TICS
     LogDebug("=== make_tic %d game_tic %d | real %d using %d\n", make_tic, game_tic, real_tics, tics);
@@ -274,7 +273,7 @@ int TryRunTicCommands()
 
 void ResetTics(void)
 {
-    make_tic = game_tic = 0;
+    make_tic = game_tic = fractional_tic = 0;
 
     last_update_tic = last_try_run_tic = GetTime();
 }

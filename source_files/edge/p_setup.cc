@@ -316,6 +316,12 @@ static MapObject *SpawnMapThing(const MapObjectDefinition *info, float x, float 
     if (tag > 0)
         mo->tag_ = tag;
 
+    mo->interpolate_ = false;
+    mo->old_x_ = mo->x;
+    mo->old_y_ = mo->y;
+    mo->old_z_ = mo->z;
+    mo->old_angle_ = mo->angle_;
+
     return mo;
 }
 
@@ -1177,6 +1183,12 @@ static void LoadUDMFSectors()
             }
 
             ss->sound_player = -1;
+
+            ss->old_floor_height = ss->floor_height;
+            ss->interpolated_floor_height = ss->floor_height;
+            ss->old_ceiling_height = ss->ceiling_height;
+            ss->interpolated_ceiling_height = ss->ceiling_height;
+            ss->old_game_tic = -1;
 
             // -AJA- 1999/07/29: Keep sectors with same tag in a list.
             GroupSectorTags(ss, level_sectors, cur_sector);

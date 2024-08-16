@@ -25,6 +25,7 @@
 #include "i_system.h"
 #include "m_argv.h"
 #include "m_misc.h"
+#include "n_network.h"
 #include "r_modes.h"
 #include "version.h"
 
@@ -344,6 +345,9 @@ void FinishFrame(void)
     EDGE_TracyPlot("draw_sector_glow_iterator", (int64_t)ec_frame_stats.draw_sector_glow_iterator);
 
     EDGE_FrameMark;
+
+    if (uncapped_frames.d_)
+        fractional_tic = (float)(GetMilliseconds() * 35 % 1000) / 1000;
 
     if (vsync.CheckModified())
     {

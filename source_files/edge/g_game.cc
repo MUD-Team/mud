@@ -56,8 +56,6 @@
 #include "version.h"
 #include "w_files.h"
 
-extern ConsoleVariable double_framerate;
-
 GameState game_state = kGameStateNothing;
 
 GameAction game_action = kGameActionNothing;
@@ -384,26 +382,6 @@ void DoBigGameStuff(void)
 
 void GameTicker(void)
 {
-    bool extra_tic = (game_tic & 1) == 1;
-
-    if (extra_tic && double_framerate.d_)
-    {
-        switch (game_state)
-        {
-        case kGameStateLevel:
-            // get commands
-            GrabTicCommands();
-
-            //!!!  MapObjectTicker();
-            MapObjectTicker(true);
-            break;
-
-        default:
-            break;
-        }
-        return;
-    }
-
     // ANIMATE FLATS AND TEXTURES GLOBALLY
     AnimationTicker();
 
@@ -415,7 +393,7 @@ void GameTicker(void)
         // get commands
         GrabTicCommands();
 
-        MapObjectTicker(false);
+        MapObjectTicker();
         
         // do player reborns if needed
         CheckPlayersReborn();
