@@ -96,6 +96,7 @@ set (EDGE_LINK_LIBRARIES
   physfs-static
   sokol
   stb
+  libstem_gamepad
 )
 
 if (APPLE)

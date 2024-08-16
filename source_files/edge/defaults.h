@@ -25,8 +25,8 @@
 #define EDGE_DEFAULT_DISPLAYMODE  (2)
 
 // Controls (Key/Mouse Buttons)
-#define EDGE_DEFAULT_KEY_FIRE        (kMouse1 + (kGamepadTriggerRight << 16))
-#define EDGE_DEFAULT_KEY_SECONDATK   ('e' + (kGamepadTriggerLeft << 16))
+#define EDGE_DEFAULT_KEY_FIRE        (kMouse1 + (kGamepadRightTrigger << 16))
+#define EDGE_DEFAULT_KEY_SECONDATK   ('e' + (kGamepadLeftTrigger << 16))
 #define EDGE_DEFAULT_KEY_USE         (kSpace + (kGamepadA << 16))
 #define EDGE_DEFAULT_KEY_UP          (kUpArrow + ('w' << 16))
 #define EDGE_DEFAULT_KEY_DOWN        (kDownArrow + ('s' << 16))
@@ -60,9 +60,6 @@
 // Controls (Analogue)
 #define EDGE_DEFAULT_MOUSE_XAXIS (2 * kAxisTurn - 1)
 #define EDGE_DEFAULT_MOUSE_YAXIS (2 * kAxisMouselook - 1)
-
-#define EDGE_DEFAULT_JOY_XAXIS (2 * kAxisTurn - 1)
-#define EDGE_DEFAULT_JOY_YAXIS (2 * kAxisForward)
 
 // Misc
 #define EDGE_DEFAULT_MENULANGUAGE (0)

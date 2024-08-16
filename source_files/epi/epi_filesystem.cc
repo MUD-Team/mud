@@ -22,8 +22,6 @@
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
 
-static constexpr char null_padding = '\0';
-
 namespace epi
 {
 
@@ -74,9 +72,7 @@ int64_t File::WriteString(std::string_view str)
 {
     EPI_ASSERT(fp_);
     EPI_ASSERT(!str.empty());
-    int64_t written = PHYSFS_writeBytes(fp_, str.data(), str.size());
-    written += PHYSFS_writeBytes(fp_, &null_padding, 1);
-    return written;
+    return PHYSFS_writeBytes(fp_, str.data(), str.size());
 }
 
 bool File::Seek(uint64_t offset)
