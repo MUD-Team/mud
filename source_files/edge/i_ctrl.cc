@@ -37,8 +37,6 @@
 #include "r_modes.h"
 #include "sokol_time.h"
 
-extern ConsoleVariable double_framerate;
-
 static void GamepadDebugCallback(ConsoleVariable *self)
 {
     Gamepad_setDebug((gamepad_bool)self->d_);
@@ -696,7 +694,7 @@ int GetTime(void)
 {
     uint32_t t = (uint32_t)stm_ms(stm_now());
 
-    int factor = (double_framerate.d_ ? 70 : 35);
+    int factor = 35;
 
     // more complex than "t*70/1000" to give more accuracy
     return (t / 1000) * factor + (t % 1000) * factor / 1000;

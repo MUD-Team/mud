@@ -52,8 +52,6 @@ std::vector<SlidingDoorMover *> active_sliders;
 extern std::vector<SectorAnimation> sector_animations;
 extern std::vector<LineAnimation>   line_animations;
 
-extern ConsoleVariable double_framerate;
-
 static bool P_ActivateInStasis(int tag);
 static bool P_StasifySector(int tag);
 
@@ -237,9 +235,6 @@ static move_result_e AttemptMovePlane(Sector *sector, float speed, float dest, i
     bool past = false;
     bool nofit;
 
-    if (double_framerate.d_)
-        speed *= 0.5f;
-
     //
     // check whether we have gone past the destination height
     //
@@ -322,6 +317,15 @@ static bool MovePlane(PlaneMover *plane)
     // RETURNS true if PlaneMover should be removed.
 
     move_result_e res;
+
+    Sector *sec = plane->sector;
+
+    if (sec->old_game_tic != game_tic)
+    {
+        sec->old_ceiling_height = sec->ceiling_height;
+        sec->old_floor_height = sec->floor_height;
+        sec->old_game_tic = game_tic;
+    }
 
     switch (plane->direction)
     {
@@ -406,7 +410,7 @@ static bool MovePlane(PlaneMover *plane)
         break;
 
     case kPlaneDirectionWait:
-        plane->waited -= (!double_framerate.d_ || !(game_tic & 1)) ? 1 : 0;
+        plane->waited--;
         if (plane->waited <= 0)
         {
             int   dir;
@@ -1050,13 +1054,13 @@ static bool MoveSlider(SlidingDoorMover *smov)
 
     Sector *sec = smov->line->front_sector;
 
-    float factor = double_framerate.d_ ? 0.5f : 1.0f;
+    float factor = 1.0f;
 
     switch (smov->direction)
     {
     // WAITING
     case 0:
-        smov->waited -= (!double_framerate.d_ || !(game_tic & 1)) ? 1 : 0;
+        smov->waited--;
         if (smov->waited <= 0)
         {
             if (SliderCanClose(smov->line))
@@ -1281,11 +1285,6 @@ void RunActivePlanes(void)
                                    ((sec_ref->floor_height + sec_ref->ceiling_height) - heightref);
                         float sx = line_ref->length / 32.0f * line_ref->delta_x / line_ref->length *
                                    ((sec_ref->floor_height + sec_ref->ceiling_height) - heightref);
-                        if (double_framerate.d_ && special_ref->scroll_type_ & BoomScrollerTypeDisplace)
-                        {
-                            sy *= 2;
-                            sx *= 2;
-                        }
                         if (special_ref->sector_effect_ & kSectorEffectTypePushThings)
                         {
                             sec->properties.old_push.y += kBoomCarryFactor * sy;
@@ -1333,11 +1332,6 @@ void RunActivePlanes(void)
                                                   : sec_ref->original_height;
                             float sy        = tdy * ((sec_ref->floor_height + sec_ref->ceiling_height) - heightref);
                             float sx        = tdx * ((sec_ref->floor_height + sec_ref->ceiling_height) - heightref);
-                            if (double_framerate.d_ && special_ref->scroll_type_ & BoomScrollerTypeDisplace)
-                            {
-                                sy *= 2;
-                                sx *= 2;
-                            }
                             if (ld->side[0])
                             {
                                 if (ld->side[0]->top.image)
@@ -1396,11 +1390,6 @@ void RunActivePlanes(void)
                                                   : sec_ref->original_height;
                             float sy        = x_speed * ((sec_ref->floor_height + sec_ref->ceiling_height) - heightref);
                             float sx        = y_speed * ((sec_ref->floor_height + sec_ref->ceiling_height) - heightref);
-                            if (double_framerate.d_ && special_ref->scroll_type_ & BoomScrollerTypeDisplace)
-                            {
-                                sy *= 2;
-                                sx *= 2;
-                            }
                             if (ld->side[0])
                             {
                                 if (ld->side[0]->top.image)
@@ -1431,10 +1420,18 @@ void RunActivePlanes(void)
             }
 
             if (pmov->is_ceiling || pmov->is_elevator)
+            {
                 pmov->sector->ceiling_move = nullptr;
+                pmov->sector->old_game_tic = -1;
+                pmov->sector->old_ceiling_height = pmov->sector->ceiling_height;
+            }
 
             if (!pmov->is_ceiling)
+            {
                 pmov->sector->floor_move = nullptr;
+                pmov->sector->old_game_tic = -1;
+                pmov->sector->old_floor_height = pmov->sector->floor_height;
+            }
 
             *PMI = nullptr;
             delete pmov;

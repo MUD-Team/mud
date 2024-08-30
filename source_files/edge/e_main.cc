@@ -78,7 +78,6 @@
 #include "w_files.h"
 #include "w_sprite.h"
 
-extern ConsoleVariable double_framerate;
 extern ConsoleVariable busy_wait;
 
 extern ConsoleVariable gamma_correction;

@@ -38,6 +38,7 @@
 #include "m_bbox.h"
 #include "n_network.h" // NetworkUpdate
 #include "p_local.h"
+#include "p_tick.h"
 #include "r_colormap.h"
 #include "r_defs.h"
 #include "r_effects.h"
@@ -61,8 +62,6 @@ static constexpr uint8_t kMaximumPolygonVertices = 64;
 
 EDGE_DEFINE_CONSOLE_VARIABLE(debug_hall_of_mirrors, "0", kConsoleVariableFlagCheat)
 EDGE_DEFINE_CONSOLE_VARIABLE(force_flat_lighting, "0", kConsoleVariableFlagArchive)
-
-extern ConsoleVariable double_framerate;
 
 static Sector *front_sector;
 static Sector *back_sector;
@@ -806,9 +805,9 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum, float f_m
     sec   = sd->sector;
     other = sidenum ? ld->front_sector : ld->back_sector;
 
-    float slope_fh = sec->floor_height;
+    float slope_fh = sec->interpolated_floor_height;
 
-    float slope_ch = sec->ceiling_height;
+    float slope_ch = sec->interpolated_ceiling_height;
 
     /*RGBAColor sec_fc = sec->properties.fog_color;
     float     sec_fd = sec->properties.fog_density;
@@ -852,8 +851,8 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum, float f_m
 
         AddWallTile(seg, dfloor, &sd->middle, slope_fh, slope_ch,
                     (ld->flags & kLineFlagLowerUnpegged)
-                        ? sec->floor_height + (SafeImageHeight(sd->middle.image) / sd->middle.y_matrix.y)
-                        : sec->ceiling_height,
+                        ? sec->interpolated_floor_height + (SafeImageHeight(sd->middle.image) / sd->middle.y_matrix.y)
+                        : sec->interpolated_ceiling_height,
                     0, f_min, c_max);
         return;
     }
@@ -866,11 +865,11 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum, float f_m
         {
             float zv1 = seg->vertex_1->z;
             float zv2 = seg->vertex_2->z;
-            AddWallTile2(seg, dfloor, sd->bottom.image ? &sd->bottom : &other->floor, sec->floor_height,
-                         (zv1 < 32767.0f && zv1 > -32768.0f) ? zv1 : sec->floor_height, sec->floor_height,
-                         (zv2 < 32767.0f && zv2 > -32768.0f) ? zv2 : sec->floor_height,
-                         (ld->flags & kLineFlagLowerUnpegged) ? sec->ceiling_height
-                                                              : GLM_MAX(sec->floor_height, GLM_MAX(zv1, zv2)),
+            AddWallTile2(seg, dfloor, sd->bottom.image ? &sd->bottom : &other->floor, sec->interpolated_floor_height,
+                         (zv1 < 32767.0f && zv1 > -32768.0f) ? zv1 : sec->interpolated_floor_height, sec->interpolated_floor_height,
+                         (zv2 < 32767.0f && zv2 > -32768.0f) ? zv2 : sec->interpolated_floor_height,
+                         (ld->flags & kLineFlagLowerUnpegged) ? sec->interpolated_ceiling_height
+                                                              : GLM_MAX(sec->interpolated_floor_height, GLM_MAX(zv1, zv2)),
                          0);
         }
         else if (sec->floor_vertex_slope && !other->floor_vertex_slope)
@@ -878,10 +877,10 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum, float f_m
             float zv1 = seg->vertex_1->z;
             float zv2 = seg->vertex_2->z;
             AddWallTile2(seg, dfloor, sd->bottom.image ? &sd->bottom : &sec->floor,
-                         (zv1 < 32767.0f && zv1 > -32768.0f) ? zv1 : other->floor_height, other->floor_height,
-                         (zv2 < 32767.0f && zv2 > -32768.0f) ? zv2 : other->floor_height, other->floor_height,
-                         (ld->flags & kLineFlagLowerUnpegged) ? other->ceiling_height
-                                                              : GLM_MAX(other->floor_height, GLM_MAX(zv1, zv2)),
+                         (zv1 < 32767.0f && zv1 > -32768.0f) ? zv1 : other->interpolated_floor_height, other->interpolated_floor_height,
+                         (zv2 < 32767.0f && zv2 > -32768.0f) ? zv2 : other->interpolated_floor_height, other->interpolated_floor_height,
+                         (ld->flags & kLineFlagLowerUnpegged) ? other->interpolated_ceiling_height
+                                                              : GLM_MAX(other->interpolated_floor_height, GLM_MAX(zv1, zv2)),
                          0);
         }
         else if (!sd->bottom.image && !debug_hall_of_mirrors.d_)
@@ -890,32 +889,32 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum, float f_m
         }
         else
         {
-            AddWallTile(seg, dfloor, &sd->bottom, slope_fh, other->floor_height,
-                        (ld->flags & kLineFlagLowerUnpegged) ? sec->ceiling_height : other->floor_height, 0, f_min,
+            AddWallTile(seg, dfloor, &sd->bottom, slope_fh, other->interpolated_floor_height,
+                        (ld->flags & kLineFlagLowerUnpegged) ? sec->interpolated_ceiling_height : other->interpolated_floor_height, 0, f_min,
                         c_max);
         }
     }
 
-    if ((slope_ch > other->ceiling_height || (sec->ceiling_vertex_slope || other->ceiling_vertex_slope)) &&
+    if ((slope_ch > other->interpolated_ceiling_height || (sec->ceiling_vertex_slope || other->ceiling_vertex_slope)) &&
         !(EDGE_IMAGE_IS_SKY(sec->ceiling) && EDGE_IMAGE_IS_SKY(other->ceiling)))
     {
         if (!sec->ceiling_vertex_slope && other->ceiling_vertex_slope)
         {
             float zv1 = seg->vertex_1->w;
             float zv2 = seg->vertex_2->w;
-            AddWallTile2(seg, dfloor, sd->top.image ? &sd->top : &other->ceiling, sec->ceiling_height,
-                         (zv1 < 32767.0f && zv1 > -32768.0f) ? zv1 : sec->ceiling_height, sec->ceiling_height,
-                         (zv2 < 32767.0f && zv2 > -32768.0f) ? zv2 : sec->ceiling_height,
-                         (ld->flags & kLineFlagUpperUnpegged) ? sec->floor_height : GLM_MIN(zv1, zv2), 0);
+            AddWallTile2(seg, dfloor, sd->top.image ? &sd->top : &other->ceiling, sec->interpolated_ceiling_height,
+                         (zv1 < 32767.0f && zv1 > -32768.0f) ? zv1 : sec->interpolated_ceiling_height, sec->interpolated_ceiling_height,
+                         (zv2 < 32767.0f && zv2 > -32768.0f) ? zv2 : sec->interpolated_ceiling_height,
+                         (ld->flags & kLineFlagUpperUnpegged) ? sec->interpolated_floor_height : GLM_MIN(zv1, zv2), 0);
         }
         else if (sec->ceiling_vertex_slope && !other->ceiling_vertex_slope)
         {
             float zv1 = seg->vertex_1->w;
             float zv2 = seg->vertex_2->w;
-            AddWallTile2(seg, dfloor, sd->top.image ? &sd->top : &sec->ceiling, other->ceiling_height,
-                         (zv1 < 32767.0f && zv1 > -32768.0f) ? zv1 : other->ceiling_height, other->ceiling_height,
-                         (zv2 < 32767.0f && zv2 > -32768.0f) ? zv2 : other->ceiling_height,
-                         (ld->flags & kLineFlagUpperUnpegged) ? other->floor_height : GLM_MIN(zv1, zv2), 0);
+            AddWallTile2(seg, dfloor, sd->top.image ? &sd->top : &sec->ceiling, other->interpolated_ceiling_height,
+                         (zv1 < 32767.0f && zv1 > -32768.0f) ? zv1 : other->interpolated_ceiling_height, other->interpolated_ceiling_height,
+                         (zv2 < 32767.0f && zv2 > -32768.0f) ? zv2 : other->interpolated_ceiling_height,
+                         (ld->flags & kLineFlagUpperUnpegged) ? other->interpolated_floor_height : GLM_MIN(zv1, zv2), 0);
         }
         else if (!sd->top.image && !debug_hall_of_mirrors.d_)
         {
@@ -923,17 +922,17 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum, float f_m
         }
         else
         {
-            AddWallTile(seg, dfloor, &sd->top, other->ceiling_height, slope_ch,
-                        (ld->flags & kLineFlagUpperUnpegged) ? sec->ceiling_height
-                                                             : other->ceiling_height + SafeImageHeight(sd->top.image),
+            AddWallTile(seg, dfloor, &sd->top, other->interpolated_ceiling_height, slope_ch,
+                        (ld->flags & kLineFlagUpperUnpegged) ? sec->interpolated_ceiling_height
+                                                             : other->interpolated_ceiling_height + SafeImageHeight(sd->top.image),
                         0, f_min, c_max);
         }
     }
 
     if (sd->middle.image)
     {
-        float f1 = GLM_MAX(sec->floor_height, other->floor_height);
-        float c1 = GLM_MIN(sec->ceiling_height, other->ceiling_height);
+        float f1 = GLM_MAX(sec->interpolated_floor_height, other->interpolated_floor_height);
+        float c1 = GLM_MIN(sec->interpolated_ceiling_height, other->interpolated_ceiling_height);
 
         float f2, c2;
 
@@ -953,9 +952,9 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum, float f_m
         // hack for transparent doors
         {
             if (lower_invis)
-                f1 = sec->floor_height;
+                f1 = sec->interpolated_floor_height;
             if (upper_invis)
-                c1 = sec->ceiling_height;
+                c1 = sec->interpolated_ceiling_height;
         }
 
         // hack for "see-through" lines (same sector on both sides)
@@ -1002,6 +1001,27 @@ static void RenderSeg(DrawFloor *dfloor, Seg *seg)
 }
 
 static void RendererWalkBspNode(unsigned int bspnum);
+
+static void UpdateSectorInterpolation(Sector *sector)
+{
+    if (uncapped_frames.d_ && !paused && !time_stop_active && !erraticism_active)
+    {
+        // Interpolate between current and last floor/ceiling position if necessary.
+        if (sector->floor_move && !AlmostEquals(sector->floor_height, sector->old_floor_height))
+            sector->interpolated_floor_height = glm_lerp(sector->old_floor_height, sector->floor_height, fractional_tic);
+        else
+            sector->interpolated_floor_height = sector->floor_height;
+        if (sector->ceiling_move && !AlmostEquals(sector->ceiling_height, sector->old_ceiling_height))
+            sector->interpolated_ceiling_height = glm_lerp(sector->old_ceiling_height, sector->ceiling_height, fractional_tic);
+        else
+            sector->interpolated_ceiling_height = sector->ceiling_height;
+    }
+    else
+    {
+        sector->interpolated_floor_height = sector->floor_height;
+        sector->interpolated_ceiling_height = sector->ceiling_height;
+    }
+}
 
 //
 // RendererWalkSeg
@@ -1089,28 +1109,31 @@ static void RendererWalkSeg(DrawSubsector *dsub, Seg *seg)
     if (seg->linedef->blocked)
         OcclusionSet(angle_R, angle_L);
 
+    if (bsector)
+        UpdateSectorInterpolation(bsector);
+
     // --- handle sky (using the depth buffer) ---
 
     if (bsector && EDGE_IMAGE_IS_SKY(fsector->floor) && EDGE_IMAGE_IS_SKY(bsector->floor))
     {
-        if (fsector->floor_height < bsector->floor_height)
+        if (fsector->interpolated_floor_height < bsector->interpolated_floor_height)
         {
-            RenderSkyWall(seg, fsector->floor_height, bsector->floor_height);
+            RenderSkyWall(seg, fsector->interpolated_floor_height, bsector->interpolated_floor_height);
         }
     }
 
     if (EDGE_IMAGE_IS_SKY(fsector->ceiling))
     {
-        if (fsector->ceiling_height < fsector->sky_height &&
-            (!bsector || !EDGE_IMAGE_IS_SKY(bsector->ceiling) || bsector->floor_height >= fsector->ceiling_height))
+        if (fsector->interpolated_ceiling_height < fsector->sky_height &&
+            (!bsector || !EDGE_IMAGE_IS_SKY(bsector->ceiling) || bsector->interpolated_floor_height >= fsector->interpolated_ceiling_height))
         {
-            RenderSkyWall(seg, fsector->ceiling_height, fsector->sky_height);
+            RenderSkyWall(seg, fsector->interpolated_ceiling_height, fsector->sky_height);
         }
         else if (bsector && EDGE_IMAGE_IS_SKY(bsector->ceiling))
         {
-            float max_f = GLM_MAX(fsector->floor_height, bsector->floor_height);
+            float max_f = GLM_MAX(fsector->interpolated_floor_height, bsector->interpolated_floor_height);
 
-            if (bsector->ceiling_height <= max_f && max_f < fsector->sky_height)
+            if (bsector->interpolated_ceiling_height <= max_f && max_f < fsector->sky_height)
             {
                 RenderSkyWall(seg, max_f, fsector->sky_height);
             }
@@ -1118,9 +1141,9 @@ static void RendererWalkSeg(DrawSubsector *dsub, Seg *seg)
     }
     // -AJA- 2004/08/29: Emulate Sky-Flooding TRICK
     else if (!debug_hall_of_mirrors.d_ && bsector && EDGE_IMAGE_IS_SKY(bsector->ceiling) &&
-             seg->sidedef->top.image == nullptr && bsector->ceiling_height < fsector->ceiling_height)
+             seg->sidedef->top.image == nullptr && bsector->interpolated_ceiling_height < fsector->interpolated_ceiling_height)
     {
-        RenderSkyWall(seg, bsector->ceiling_height, fsector->ceiling_height);
+        RenderSkyWall(seg, bsector->interpolated_ceiling_height, fsector->interpolated_ceiling_height);
     }
 }
 
@@ -1446,11 +1469,13 @@ static void RendererWalkSubsector(int num)
     K->floors.clear();
     K->segs.clear();
 
+    UpdateSectorInterpolation(sector);
+
     // --- handle sky (using the depth buffer) ---
 
-    if (EDGE_IMAGE_IS_SKY(sub->sector->floor) && view_z > sub->sector->floor_height)
+    if (EDGE_IMAGE_IS_SKY(sub->sector->floor) && view_z > sub->sector->interpolated_floor_height)
     {
-        RenderSkyPlane(sub, sub->sector->floor_height);
+        RenderSkyPlane(sub, sub->sector->interpolated_floor_height);
     }
 
     if (EDGE_IMAGE_IS_SKY(sub->sector->ceiling) && view_z < sub->sector->sky_height)
@@ -1458,8 +1483,8 @@ static void RendererWalkSubsector(int num)
         RenderSkyPlane(sub, sub->sector->sky_height);
     }
 
-    float floor_h = sector->floor_height;
-    float ceil_h  = sector->ceiling_height;
+    float floor_h = sector->interpolated_floor_height;
+    float ceil_h  = sector->interpolated_ceiling_height;
 
     MapSurface *floor_s = &sector->floor;
     MapSurface *ceil_s  = &sector->ceiling;
@@ -1697,18 +1722,31 @@ static void InitializeCamera(MapObject *mo, bool full_height, float expand_w)
 
     view_x_slope *= widescreen_view_width_multiplier;
 
-    view_x     = mo->x;
-    view_y     = mo->y;
-    view_z     = mo->z;
-    view_angle = mo->angle_;
-
-    if (mo->player_)
-        view_z += mo->player_->view_z_;
+    if (uncapped_frames.d_ && level_time_elapsed && mo->interpolate_ && !paused)
+    {
+        view_x     = glm_lerp(mo->old_x_, mo->x, fractional_tic);
+        view_y     = glm_lerp(mo->old_y_, mo->y, fractional_tic);
+        view_z     = glm_lerp(mo->old_z_, mo->z, fractional_tic);
+        view_angle = epi::BAMInterpolate(mo->old_angle_, mo->angle_, fractional_tic);
+        view_z += glm_lerp(mo->player_->old_view_z_, mo->player_->view_z_, fractional_tic);
+        view_vertical_angle = epi::BAMInterpolate(mo->old_vertical_angle_, mo->vertical_angle_, fractional_tic);
+    }
     else
-        view_z += mo->height_ * 9 / 10;
+    {
+        view_x     = mo->x;
+        view_y     = mo->y;
+        view_z     = mo->z;
+        view_angle = mo->angle_;
+
+        if (mo->player_)
+            view_z += mo->player_->view_z_;
+        else
+            view_z += mo->height_ * 9 / 10;
+
+        view_vertical_angle = mo->vertical_angle_;
+    }
 
     view_subsector      = mo->subsector_;
-    view_vertical_angle = mo->vertical_angle_;
     view_properties     = GetViewPointProperties(view_subsector, view_z);
 
     if (mo->player_)
