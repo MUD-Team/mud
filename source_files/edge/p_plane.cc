@@ -1052,6 +1052,8 @@ static bool MoveSlider(SlidingDoorMover *smov)
 {
     // RETURNS true if SlidingDoorMover should be removed.
 
+    smov->old_opening = smov->opening;
+
     Sector *sec = smov->line->front_sector;
 
     float factor = 1.0f;
@@ -1209,6 +1211,7 @@ bool RunSlidingDoor(Line *door, Line *act_line, MapObject *thing, const LineType
     smov->info        = &special->s_;
     smov->line        = door;
     smov->opening     = 0.0f;
+    smov->old_opening = 0.0f;
     smov->line_length = PointToDistance(0, 0, door->delta_x, door->delta_y);
     smov->target      = smov->line_length * smov->info->distance_;
 
@@ -1422,14 +1425,14 @@ void RunActivePlanes(void)
             if (pmov->is_ceiling || pmov->is_elevator)
             {
                 pmov->sector->ceiling_move = nullptr;
-                pmov->sector->old_game_tic = -1;
+                pmov->sector->old_game_tic = -2;
                 pmov->sector->old_ceiling_height = pmov->sector->ceiling_height;
             }
 
             if (!pmov->is_ceiling)
             {
                 pmov->sector->floor_move = nullptr;
-                pmov->sector->old_game_tic = -1;
+                pmov->sector->old_game_tic = -2;
                 pmov->sector->old_floor_height = pmov->sector->floor_height;
             }
 
