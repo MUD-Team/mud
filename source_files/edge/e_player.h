@@ -146,8 +146,6 @@ class Player
     // Focal origin above r.z
     // will be kFloatUnused until the first think.
     float view_z_;
-
-    // Uncapped test -  Dasho
     float old_view_z_;
 
     // Base height above floor for view_z.  Tracks `std_viewheight' but
