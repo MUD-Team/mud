@@ -362,7 +362,6 @@ class MapObject : public Position
 
     int teleport_tic_ = 0;
 
-    // Uncapped test - Dasho
     bool interpolate_ = false;
 
   public:

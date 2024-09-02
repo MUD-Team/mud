@@ -529,7 +529,15 @@ static void DrawSlidingDoor(DrawFloor *dfloor, float c, float f, float tex_top_h
     /* smov may be nullptr */
     SlidingDoorMover *smov = current_seg->linedef->slider_move;
 
-    float opening = smov ? smov->opening : 0;
+    float opening = 0;
+
+    if (smov)
+    {
+        if (uncapped_frames.d_ && !paused && !time_stop_active && !erraticism_active)
+            opening = glm_lerp(smov->old_opening, smov->opening, fractional_tic);
+        else
+            opening = smov->opening;
+    }
 
     Line *ld = current_seg->linedef;
 

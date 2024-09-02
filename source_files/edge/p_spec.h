@@ -118,6 +118,7 @@ struct SlidingDoorMover
 
     // current distance it has opened
     float opening;
+    float old_opening; // interpolation
 
     // target distance
     float target;
