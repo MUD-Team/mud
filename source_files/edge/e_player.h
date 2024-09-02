@@ -142,7 +142,7 @@ class Player
     // the player thing moves on the 2D map.
     float actual_speed_;
 
-    // Determine POV, including viewpoint bobbing during movement.
+    // Determine POV
     // Focal origin above r.z
     // will be kFloatUnused until the first think.
     float view_z_;
@@ -157,13 +157,6 @@ class Player
 
     // standard viewheight, usually 75% of height.
     float standard_view_height_;
-
-    // bounded/scaled total momentum.
-    float bob_factor_;
-    int   erraticism_bob_ticker_ = 0; // Erraticism bob timer to prevent weapon bob jumps
-
-    // Kick offset for vertangle (in mobj_t)
-    float kick_offset_;
 
     // when > 0, the player has activated zoom
     int zoom_field_of_view_;

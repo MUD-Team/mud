@@ -162,7 +162,6 @@ const DDFCommandList thing_commands[] = {
     DDF_FIELD("SIGHT_SLOPE", dummy_mobj, sight_slope_, DDFMainGetSlope),
     DDF_FIELD("SIGHT_ANGLE", dummy_mobj, sight_angle_, DDFMainGetAngle),
     DDF_FIELD("RIDE_FRICTION", dummy_mobj, ride_friction_, DDFMainGetFloat),
-    DDF_FIELD("BOBBING", dummy_mobj, bobbing_, DDFMainGetPercent),
     DDF_FIELD("IMMUNITY_CLASS", dummy_mobj, immunity_, DDFMainGetBitSet),
     DDF_FIELD("RESISTANCE_CLASS", dummy_mobj, resistance_, DDFMainGetBitSet),
     DDF_FIELD("RESISTANCE_MULTIPLY", dummy_mobj, resist_multiply_, DDFMainGetFloat),
@@ -2016,7 +2015,6 @@ void MapObjectDefinition::CopyDetail(MapObjectDefinition &src)
     // choke_damage
     choke_damage_ = src.choke_damage_;
 
-    bobbing_           = src.bobbing_;
     immunity_          = src.immunity_;
     resistance_        = src.resistance_;
     resist_multiply_   = src.resist_multiply_;
@@ -2149,7 +2147,6 @@ void MapObjectDefinition::Default()
 
     choke_damage_.Default(DamageClass::kDamageClassDefaultMobjChoke);
 
-    bobbing_           = 1.0f;
     immunity_          = 0;
     resistance_        = 0;
     resist_multiply_   = 0.4;

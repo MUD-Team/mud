@@ -1759,8 +1759,6 @@ static void InitializeCamera(MapObject *mo, bool full_height, float expand_w)
 
     if (mo->player_)
     {
-        view_vertical_angle += epi::BAMFromATan(mo->player_->kick_offset_);
-
         // No heads above the ceiling
         if (view_z > mo->player_->map_object_->ceiling_z_ - 2)
             view_z = mo->player_->map_object_->ceiling_z_ - 2;

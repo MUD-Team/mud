@@ -807,9 +807,6 @@ class MapObjectDefinition
     int         gasp_start_;
     DamageClass choke_damage_;
 
-    // controls how much the player bobs when walking.
-    float bobbing_;
-
     // what attack classes we are immune/resistant to (usually none).
     BitSet immunity_;
     BitSet resistance_;

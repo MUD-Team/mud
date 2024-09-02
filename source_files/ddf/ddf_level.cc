@@ -96,7 +96,6 @@ static DDFSpecialFlags map_specials[] = {{"CHEATS", kMapFlagCheats, 0},
                                          {"AUTOAIM", kMapFlagAutoAim, 0},
                                          {"RESET_PLAYER", kMapFlagResetPlayer, 0},
                                          {"LIMIT_ZOOM", kMapFlagLimitZoom, 0},
-                                         {"WEAPON_KICK", kMapFlagKicking, 0},
 
                                          {nullptr, 0, 0}};
 

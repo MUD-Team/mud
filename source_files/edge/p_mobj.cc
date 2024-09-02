@@ -1434,6 +1434,10 @@ static void P_MobjThinker(MapObject *mobj)
         if (!level_flags.enemies_respawn)
             return;
 
+        // check for NO_RESPAWN flag
+        if (mobj->extended_flags_ & kExtendedFlagNoRespawn)
+            return;
+
         mobj->move_count_++;
 
         //
@@ -1896,6 +1900,28 @@ void SpawnBlood(float x, float y, float z, float damage, BAMAngle angle, const M
 FlatDefinition *P_GetThingFlatDef(MapObject *thing)
 {
     return flatdefs.Find(thing->subsector_->sector->floor.image->name_.c_str());
+}
+
+//---------------------------------------------------------------------------
+//
+// FUNC P_IsThingOnLiquidFloor
+//
+//---------------------------------------------------------------------------
+
+// For now, this will mean any floor with an "impact object" that exists when something
+// hits it; this is usually a splash but can be any debris
+
+bool P_IsThingOnLiquidFloor(MapObject *thing)
+{
+    if (thing->flags_ & kMapObjectFlagFloat)
+        return false;
+ 
+    if (thing->z > thing->floor_z_) //are we actually touching the floor
+        return false;
+
+    FlatDefinition *liquid_check = P_GetThingFlatDef(thing);
+
+    return (liquid_check && liquid_check->impactobject_);
 }
 
 //---------------------------------------------------------------------------

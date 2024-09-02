@@ -93,13 +93,10 @@ static const DDFCommandList weapon_commands[] = {
     DDF_FIELD("START_SOUND", dummy_weapon, start_, DDFMainLookupSound),
     DDF_FIELD("NOTHRUST", dummy_weapon, nothrust_, DDFMainGetBoolean),
     DDF_FIELD("FEEDBACK", dummy_weapon, feedback_, DDFMainGetBoolean),
-    DDF_FIELD("KICK", dummy_weapon, kick_, DDFMainGetFloat),
     DDF_FIELD("ZOOM_FACTOR", dummy_weapon, zoom_fov_, DDFWGetZoomFactor),
     DDF_FIELD("REFIRE_INACCURATE", dummy_weapon, refire_inacc_, DDFMainGetBoolean),
     DDF_FIELD("SHOW_CLIP", dummy_weapon, show_clip_, DDFMainGetBoolean),
     DDF_FIELD("SHARED_CLIP", dummy_weapon, shared_clip_, DDFMainGetBoolean),
-    DDF_FIELD("BOBBING", dummy_weapon, bobbing_, DDFMainGetPercent),
-    DDF_FIELD("SWAYING", dummy_weapon, swaying_, DDFMainGetPercent),
     DDF_FIELD("IDLE_WAIT", dummy_weapon, idle_wait_, DDFMainGetTime),
     DDF_FIELD("IDLE_CHANCE", dummy_weapon, idle_chance_, DDFMainGetPercent),
 
@@ -168,7 +165,6 @@ static const DDFActionCode weapon_actions[] = {{"NOTHING", nullptr, nullptr},
                                                {"REFIRE_TO", A_ReFireTo, DDFStateGetJump},
                                                {"NOFIRE", A_NoFire, nullptr},
                                                {"NOFIRE_RETURN", A_NoFireReturn, nullptr},
-                                               {"KICK", A_WeaponKick, DDFStateGetFloat},
                                                {"CHECKRELOAD", A_CheckReload, nullptr},
                                                {"PLAYSOUND", A_WeaponPlaySound, DDFStateGetSound},
                                                {"KILLSOUND", A_WeaponKillSound, nullptr},
@@ -729,8 +725,6 @@ void WeaponDefinition::CopyDetail(WeaponDefinition &src)
         flash_state_[ATK]   = src.flash_state_[ATK];
     }
 
-    kick_ = src.kick_;
-
     up_state_    = src.up_state_;
     down_state_  = src.down_state_;
     ready_state_ = src.ready_state_;
@@ -768,8 +762,6 @@ void WeaponDefinition::CopyDetail(WeaponDefinition &src)
     show_clip_    = src.show_clip_;
     shared_clip_  = src.shared_clip_;
 
-    bobbing_     = src.bobbing_;
-    swaying_     = src.swaying_;
     idle_wait_   = src.idle_wait_;
     idle_chance_ = src.idle_chance_;
 
@@ -805,8 +797,6 @@ void WeaponDefinition::Default(void)
     specials_[2] = (WeaponFlag)(kDefaultWeaponFlags & ~WeaponFlagSwitchAway);
     specials_[3] = (WeaponFlag)(kDefaultWeaponFlags & ~WeaponFlagSwitchAway);
 
-    kick_ = 0.0f;
-
     up_state_    = 0;
     down_state_  = 0;
     ready_state_ = 0;
@@ -841,8 +831,6 @@ void WeaponDefinition::Default(void)
     show_clip_    = false;
     shared_clip_  = false;
 
-    bobbing_     = 1.0f;
-    swaying_     = 1.0f;
     idle_wait_   = 15 * kTicRate;
     idle_chance_ = 0.12f;
 

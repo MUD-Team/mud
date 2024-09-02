@@ -43,13 +43,11 @@
 
 EDGE_DEFINE_CONSOLE_VARIABLE(erraticism, "0", kConsoleVariableFlagArchive)
 
-EDGE_DEFINE_CONSOLE_VARIABLE(view_bobbing, "0", kConsoleVariableFlagArchive)
-
 float room_area;
 
 static constexpr float    kMaximumBob       = 16.0f;
 static constexpr uint8_t  kZoomAngleDivisor = 4;
-static constexpr BAMAngle kMouseLookLimit   = 0x53333355; // 75 degrees
+static constexpr BAMAngle kMouseLookLimit   = BAMAngle(75.0 * 11930464.7084);
 static constexpr float    kCrouchSlowdown   = 0.5f;
 
 static SoundEffect *sfx_jpidle;
@@ -85,33 +83,6 @@ static void CalcHeight(Player *player)
     if (sink_mult < 1.0f)
         player->delta_view_height_ = GLM_MAX(player->delta_view_height_ - 1.0f, -1.0f);
 
-    // calculate the walking / running height adjustment.
-
-    float bob_z = 0;
-
-    // Regular movement bobbing
-    // (needs to be calculated for gun swing even if not on ground).
-    // -AJA- Moved up here, to prevent weapon jumps when running down
-    // stairs.
-
-    if (erraticism.d_)
-        player->bob_factor_ = 12.0f;
-    else
-        player->bob_factor_ = (player->map_object_->momentum_.x * player->map_object_->momentum_.x +
-                               player->map_object_->momentum_.y * player->map_object_->momentum_.y) /
-                              8;
-
-    if (player->bob_factor_ > kMaximumBob)
-        player->bob_factor_ = kMaximumBob;
-
-    // ----CALCULATE BOB EFFECT----
-    if (player->player_state_ == kPlayerAlive && onground)
-    {
-        BAMAngle angle = kBAMAngle90 / 5 * level_time_elapsed;
-
-        bob_z = player->bob_factor_ / 2 * player->map_object_->info_->bobbing_ * epi::BAMSin(angle);
-    }
-
     // ----CALCULATE VIEWHEIGHT----
     if (player->player_state_ == kPlayerAlive)
     {
@@ -122,8 +93,7 @@ static void CalcHeight(Player *player)
             player->view_height_       = player->standard_view_height_;
             player->delta_view_height_ = 0;
         }
-        else if (sink_mult < 1.0f && !(player->map_object_->extended_flags_ & kExtendedFlagCrouching) &&
-                 player->view_height_ < player->standard_view_height_ * sink_mult)
+        else if (sink_mult < 1.0f && player->view_height_ < player->standard_view_height_ * sink_mult)
         {
             player->view_height_ = player->standard_view_height_ * sink_mult;
             if (player->delta_view_height_ <= 0)
@@ -166,20 +136,7 @@ static void CalcHeight(Player *player)
             StartSoundEffect(player->map_object_->info_->falling_sound_, sfx_cat, player->map_object_);
         }
 
-    // don't apply bobbing when jumping, but have a smooth
-    // transition at the end of the jump.
-    if (player->jump_wait_ > 0)
-    {
-        if (player->jump_wait_ >= 6)
-            bob_z = 0;
-        else
-            bob_z *= (6 - player->jump_wait_) / 6.0;
-    }
-
-    if (view_bobbing.d_ > 1)
-        bob_z = 0;
-
-    player->view_z_ = player->view_height_ + bob_z;
+    player->view_z_ = player->view_height_;
 }
 
 void PlayerJump(Player *pl, float dz, int wait)
@@ -437,7 +394,6 @@ static void DeathThink(Player *player)
         player->view_height_ = player->standard_view_height_;
 
     player->delta_view_height_ = 0.0f;
-    player->kick_offset_       = 0.0f;
 
     CalcHeight(player);
 
@@ -805,8 +761,6 @@ bool PlayerThink(Player *player)
         player->attack_sustained_count_++;
     else
         player->attack_sustained_count_ = 0;
-
-    player->kick_offset_ /= 1.6f;
 
     return should_think;
 }

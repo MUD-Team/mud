@@ -60,7 +60,6 @@ void A_SetCrosshair(MapObject *mo);
 void A_TargetJump(MapObject *mo);
 void A_FriendJump(MapObject *mo);
 void A_GunFlash(MapObject *mo);
-void A_WeaponKick(MapObject *mo);
 void A_WeaponUnzoom(MapObject *mo);
 void A_WeaponBecome(MapObject *mo);
 
