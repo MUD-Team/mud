@@ -167,6 +167,8 @@ static void CheckDeviceNotification(DeviceNotificationData *data)
 
 #define INPUT_QUEUE_SIZE 32
 #define XINPUT_GAMEPAD_GUIDE 0x400
+
+#ifndef __WINE_XINPUT_H
 typedef struct {
 	XINPUT_CAPABILITIES Capabilities;
 	WORD VendorId;
@@ -175,6 +177,7 @@ typedef struct {
 	WORD unk1;
 	DWORD unk2;
 } XINPUT_CAPABILITIES_EX;
+#endif
 
 struct Gamepad_devicePrivate {
 	gamepad_bool isXInput;
@@ -483,7 +486,7 @@ static BOOL CALLBACK enumHatsCallback(LPCDIDEVICEOBJECTINSTANCE instance, LPVOID
 	return DIENUM_CONTINUE;
 }
 
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __WINE_XINPUT_H
 #ifndef DIDFT_OPTIONAL
 #define DIDFT_OPTIONAL      0x80000000
 #endif

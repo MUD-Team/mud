@@ -49,7 +49,7 @@ float room_area;
 
 static constexpr float    kMaximumBob       = 16.0f;
 static constexpr uint8_t  kZoomAngleDivisor = 4;
-static constexpr BAMAngle kMouseLookLimit   = 0x53333355; // 75 degrees
+static constexpr BAMAngle kMouseLookLimit   = BAMAngle(75.0 * 11930464.7084);
 static constexpr float    kCrouchSlowdown   = 0.5f;
 
 static SoundEffect *sfx_jpidle;
@@ -122,8 +122,7 @@ static void CalcHeight(Player *player)
             player->view_height_       = player->standard_view_height_;
             player->delta_view_height_ = 0;
         }
-        else if (sink_mult < 1.0f && !(player->map_object_->extended_flags_ & kExtendedFlagCrouching) &&
-                 player->view_height_ < player->standard_view_height_ * sink_mult)
+        else if (sink_mult < 1.0f && player->view_height_ < player->standard_view_height_ * sink_mult)
         {
             player->view_height_ = player->standard_view_height_ * sink_mult;
             if (player->delta_view_height_ <= 0)
