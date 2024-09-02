@@ -693,19 +693,21 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
         return;
 
     // transform the origin point
-    float mx, my, mz;
+    float mx, my, mz, fz;
 
     if (uncapped_frames.d_ && mo->interpolate_ && !paused && !time_stop_active && !erraticism_active)
     {
         mx = glm_lerp(mo->old_x_, mo->x, fractional_tic);
         my = glm_lerp(mo->old_y_, mo->y, fractional_tic);
         mz = glm_lerp(mo->old_z_, mo->z, fractional_tic);
+        fz = glm_lerp(mo->old_floor_z_, mo->floor_z_, fractional_tic);
     }
     else
     {
         mx = mo->x;
         my = mo->y;
         mz = mo->z;
+        fz = mo->floor_z_;
     }
 
     float tr_x = mx - view_x;
@@ -729,7 +731,7 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
     float   sink_mult = 0;
     float   bob_mult  = 0;
     Sector *cur_sec   = mo->subsector_->sector;
-    if (abs(mo->z - cur_sec->floor_height) < 1)
+    if (abs(mz - cur_sec->interpolated_floor_height) < 1)
     {
         sink_mult = cur_sec->sink_depth;
         bob_mult  = cur_sec->bob_depth;
@@ -772,12 +774,12 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
     switch (mo->info_->yalign_)
     {
     case SpriteYAlignmentTopDown:
-        gzt = mo->z + mo->height_ + top_offset * mo->scale_;
+        gzt = mz + mo->height_ + top_offset * mo->scale_;
         gzb = gzt - sprite_height * mo->scale_;
         break;
 
     case SpriteYAlignmentMiddle: {
-        float _mz = mo->z + mo->height_ * 0.5 + top_offset * mo->scale_;
+        float _mz = mz + mo->height_ * 0.5 + top_offset * mo->scale_;
         float dz  = sprite_height * 0.5 * mo->scale_;
 
         gzt = _mz + dz;
@@ -787,7 +789,7 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
 
     case SpriteYAlignmentBottomUp:
     default:
-        gzb = mo->z + top_offset * mo->scale_;
+        gzb = mz + top_offset * mo->scale_;
         gzt = gzb + sprite_height * mo->scale_;
         break;
     }
@@ -812,7 +814,7 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
         // do nothing? just skip the other elseifs below
         y_clipping = kVerticalClipHard;
     }
-    else if (sprite_kludge == 0 && gzb < mo->floor_z_)
+    else if (sprite_kludge == 0 && gzb < fz)
     {
         // explosion ?
         if (mo->info_->flags_ & kMapObjectFlagMissile)
@@ -821,8 +823,8 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
         }
         else
         {
-            gzt += mo->floor_z_ - gzb;
-            gzb = mo->floor_z_;
+            gzt += fz - gzb;
+            gzb = fz;
         }
     }
     else if (sprite_kludge == 0 && gzt > mo->ceiling_z_)
