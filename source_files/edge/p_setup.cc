@@ -2499,7 +2499,7 @@ void LevelSetup(void)
 
     // This needs to be cached somewhere, but it will work here while developing - Dasho
     uint64_t udmf_hash = epi::StringHash64(udmf_string);
-    node_file = epi::PathAppend("cache", epi::StringFormat("%s-%lu.xgl", current_map->name_.c_str(), udmf_hash));
+    node_file = epi::PathAppend("cache", epi::StringFormat("%s-%llu.xgl", current_map->name_.c_str(), udmf_hash));
 
     // get lump for XGL3 nodes from an XWA file
     // shouldn't happen (as during startup we checked for or built these)

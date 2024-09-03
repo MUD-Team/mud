@@ -42,8 +42,8 @@
 #include <windows.h>
 #include <regstr.h>
 #include <dinput.h>
-#include <XInput.h>
-#include <Dbt.h>
+#include <xinput.h>
+#include <dbt.h>
 
 // The following code is from SDL2
 // detects gamepad device remove/attach events without having to poll multiple times per second
@@ -168,7 +168,6 @@ static void CheckDeviceNotification(DeviceNotificationData *data)
 #define INPUT_QUEUE_SIZE 32
 #define XINPUT_GAMEPAD_GUIDE 0x400
 
-#ifndef __WINE_XINPUT_H
 typedef struct {
 	XINPUT_CAPABILITIES Capabilities;
 	WORD VendorId;
@@ -176,8 +175,7 @@ typedef struct {
 	WORD VersionNumber;
 	WORD unk1;
 	DWORD unk2;
-} XINPUT_CAPABILITIES_EX;
-#endif
+} LIBSTEM_XINPUT_CAPABILITIES_EX;
 
 struct Gamepad_devicePrivate {
 	gamepad_bool isXInput;
@@ -208,7 +206,7 @@ static const char * xInputDeviceNames[4] = {
 };
 
 static DWORD (WINAPI * XInputGetState_proc)(DWORD dwUserIndex, XINPUT_STATE * pState) = NULL;
-static DWORD (WINAPI * XInputGetCapabilitiesEx_proc)(DWORD unk1, DWORD dwUserIndex, DWORD dwFlags, XINPUT_CAPABILITIES_EX * pCapabilities) = NULL;
+static DWORD (WINAPI * XInputGetCapabilitiesEx_proc)(DWORD unk1, DWORD dwUserIndex, DWORD dwFlags, LIBSTEM_XINPUT_CAPABILITIES_EX * pCapabilities) = NULL;
 
 static LPDIRECTINPUT directInputInterface;
 static gamepad_bool inited = gamepad_false;
@@ -227,7 +225,7 @@ void Gamepad_init() {
 		} else {
 			xInputAvailable = gamepad_true;
 			XInputGetState_proc = (DWORD (WINAPI *)(DWORD, XINPUT_STATE *)) GetProcAddress(module, "XInputGetState");
-			XInputGetCapabilitiesEx_proc = (DWORD (WINAPI *)(DWORD, DWORD, DWORD, XINPUT_CAPABILITIES_EX *)) GetProcAddress(module, (LPCSTR) 108);
+			XInputGetCapabilitiesEx_proc = (DWORD (WINAPI *)(DWORD, DWORD, DWORD, LIBSTEM_XINPUT_CAPABILITIES_EX *)) GetProcAddress(module, (LPCSTR) 108);
 		}
 		
 		module = LoadLibrary("DINPUT8.dll");
@@ -842,7 +840,7 @@ static void removeDevice(unsigned int deviceIndex) {
 void Gamepad_detectDevices() {
 	HRESULT result;
 	DWORD xResult;
-	XINPUT_CAPABILITIES_EX capabilities_ex;
+	LIBSTEM_XINPUT_CAPABILITIES_EX capabilities_ex;
 	unsigned int playerIndex, deviceIndex;
 	
 	if (!inited) {
