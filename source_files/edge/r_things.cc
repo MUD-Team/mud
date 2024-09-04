@@ -188,10 +188,23 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
     float coord_W = 320.0f * widescreen_view_width_multiplier;
     float coord_H = 200.0f;
 
-    float tx1 = (coord_W - w) / 2.0 + psp->screen_x - image->ScaledOffsetX();
+    float psp_x, psp_y;
+
+    if (uncapped_frames.d_ && !paused)
+    {
+        psp_x = glm_lerp(psp->old_screen_x, psp->screen_x, fractional_tic);
+        psp_y = glm_lerp(psp->old_screen_y, psp->screen_y, fractional_tic);
+    }
+    else
+    {
+        psp_x = psp->screen_x;
+        psp_y = psp->screen_y;
+    }
+
+    float tx1 = (coord_W - w) / 2.0 + psp_x - image->ScaledOffsetX();
     float tx2 = tx1 + w;
 
-    float ty1 = -psp->screen_y + image->ScaledOffsetY() - ((h - image->ScaledHeightActual()) * 0.5f);
+    float ty1 = -psp_y + image->ScaledOffsetY() - ((h - image->ScaledHeightActual()) * 0.5f);
 
     float ty2 = ty1 + h;
 

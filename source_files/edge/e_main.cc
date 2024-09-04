@@ -118,7 +118,6 @@ GameFlags default_game_flags = {
     true,       // cheats
     false,      // limit_zoom
 
-    true,       // kicking
     true,       // weapon_switch
     false,      // team_damage
 };
@@ -322,7 +321,6 @@ static void SetGlobalVariables(void)
     CheckBooleanParameter("items_respawn", &global_flags.items_respawn, false);
     CheckBooleanParameter("monsters", &global_flags.no_monsters, true);
     CheckBooleanParameter("fast", &global_flags.fast_monsters, false);
-    CheckBooleanParameter("kick", &global_flags.kicking, false);
     CheckBooleanParameter("single_tics", &single_tics, false);
     CheckBooleanParameter("blood", &global_flags.more_blood, false);
     CheckBooleanParameter("cheats", &global_flags.cheats, false);

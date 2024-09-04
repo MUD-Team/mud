@@ -477,8 +477,6 @@ class WeaponDefinition
     int            clip_size_[4];   // Amount of shots in a clip (if <= 1, non-clip weapon)
     bool           autofire_[4];    // If true, this is an automatic else it's semiauto
 
-    float kick_;                    // Amount of kick this weapon gives
-
     // range of states used
     std::vector<StateRange> state_grp_;
 
@@ -554,11 +552,6 @@ class WeaponDefinition
 
     // -AJA- 2007/11/12: clip is shared between 1st/2nd attacks.
     bool shared_clip_;
-
-    // controls for weapon bob (up & down) and sway (left & right).
-    // Given as percentages in DDF.
-    float bobbing_;
-    float swaying_;
 
     // -AJA- 2004/11/15: idle states (polish weapon, crack knuckles)
     int   idle_wait_;

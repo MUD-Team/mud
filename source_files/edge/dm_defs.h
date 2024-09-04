@@ -82,7 +82,6 @@ struct GameFlags
     bool cheats;
     bool limit_zoom;
 
-    bool kicking;
     bool weapon_switch;
     bool team_damage;
 };

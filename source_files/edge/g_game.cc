@@ -169,7 +169,6 @@ void LoadLevel_Bits(void)
     HandleLevelFlag(&level_flags.enemies_respawn, kMapFlagRespawn);
     HandleLevelFlag(&level_flags.enemy_respawn_mode, kMapFlagResRespawn);
     HandleLevelFlag(&level_flags.limit_zoom, kMapFlagLimitZoom);
-    HandleLevelFlag(&level_flags.kicking, kMapFlagKicking);
     HandleLevelFlag(&level_flags.weapon_switch, kMapFlagWeaponSwitch);
     HandleLevelFlag(&level_flags.team_damage, kMapFlagTeamDamage);
 

@@ -81,7 +81,7 @@ enum MapFlag
     //kMapFlagExtras       = (1 << 13), // Legacy, no longer used
     kMapFlagLimitZoom    = (1 << 14), // Limit zoom to certain weapons
     //kMapFlagCrouching    = (1 << 15), // Unconditionally on
-    kMapFlagKicking      = (1 << 16), // Weapon recoil
+    //kMapFlagKicking      = (1 << 16), // Legacy, no longer used
     kMapFlagWeaponSwitch = (1 << 17),
     //kMapFlagPassMissile  = (1 << 18), // Legacy, no longer used
     kMapFlagTeamDamage   = (1 << 19),

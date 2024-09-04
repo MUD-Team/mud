@@ -18,6 +18,13 @@
 
 #include "i_video.h"
 
+// Set hints to select dedicated GPU in laptop iGPU/dGPU setups
+#ifdef _WIN32
+#include "epi_windows.h"
+extern "C" __declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
+extern "C" __declspec(dllexport) DWORD AmdPowerXpressRequestHighPerformance = 0x00000001;
+#endif
+
 #include "edge_profiling.h"
 #include "epi_str_compare.h"
 #include "epi_str_util.h"

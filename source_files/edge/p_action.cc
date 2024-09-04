@@ -57,7 +57,7 @@
 #include "r_state.h"
 #include "s_sound.h"
 
-
+extern bool P_IsThingOnLiquidFloor(MapObject *thing);
 extern FlatDefinition *P_GetThingFlatDef(MapObject *thing);
 
 static int AttackSfxCat(const MapObject *mo)
@@ -3390,9 +3390,7 @@ void A_JumpLiquid(MapObject *mo)
     //
     // Note: nothing to do with monsters physically jumping.
 
-    FlatDefinition *flat = P_GetThingFlatDef(mo);
-
-    if (!flat || !flat->impactobject_) // Are we touching a liquid floor?
+    if (!P_IsThingOnLiquidFloor(mo)) // Are we touching a liquid floor?
     {
         return;
     }

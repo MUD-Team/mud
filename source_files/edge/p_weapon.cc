@@ -40,7 +40,6 @@
 #include "w_sprite.h"
 
 
-extern ConsoleVariable view_bobbing;
 extern ConsoleVariable erraticism;
 
 static constexpr uint8_t kMaximumPlayerSpriteLoop = 10;
@@ -49,8 +48,6 @@ static constexpr float   kWeaponSwapSpeed = 6.0f;
 static constexpr uint8_t kWeaponBottom    = 128;
 static constexpr uint8_t kWeaponTop       = 32;
 static constexpr uint8_t kGrinTime        = (kTicRate * 2);
-
-static void BobWeapon(Player *p, WeaponDefinition *info);
 
 static SoundCategory WeaponSoundEffectCategory(Player *p)
 {
@@ -803,6 +800,7 @@ void SetupPlayerSprites(Player *p)
         psp->state      = nullptr;
         psp->next_state = nullptr;
         psp->screen_x = psp->screen_y = 0;
+        psp->old_screen_x = psp->old_screen_y = 0;
         psp->visibility = psp->target_visibility = 1.0f;
     }
 
@@ -827,6 +825,9 @@ void MovePlayerSprites(Player *p)
 
     PlayerSprite *psp = &p->player_sprites_[0];
 
+    p->player_sprites_[kPlayerSpriteFlash].old_screen_x = p->player_sprites_[kPlayerSpriteWeapon].old_screen_x = p->player_sprites_[kPlayerSpriteWeapon].screen_x;
+    p->player_sprites_[kPlayerSpriteFlash].old_screen_y = p->player_sprites_[kPlayerSpriteWeapon].old_screen_y = p->player_sprites_[kPlayerSpriteWeapon].screen_y;
+
     for (int i = 0; i < kTotalPlayerSpriteTypes; i++, psp++)
     {
         // a null state means not active
@@ -843,13 +844,7 @@ void MovePlayerSprites(Player *p)
             psp->tics--;
 
             if (psp->tics > 0)
-            {
-                if (psp->state->action == A_WeaponReady)
-                {
-                    BobWeapon(p, p->weapons_[p->ready_weapon_].info);
-                }
                 break;
-            }
 
             WeaponDefinition *info = nullptr;
             if (p->ready_weapon_ >= 0)
@@ -874,31 +869,6 @@ void MovePlayerSprites(Player *p)
 //----------------------------------------------------------------------------
 //  ACTION HANDLERS
 //----------------------------------------------------------------------------
-
-static void BobWeapon(Player *p, WeaponDefinition *info)
-{
-    if (view_bobbing.d_ == 1 || view_bobbing.d_ == 3 ||
-        (erraticism.d_ && (!p->command_.forward_move && !p->command_.side_move)))
-        return;
-
-    PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
-
-    float new_sx = p->map_object_->momentum_.z ? psp->screen_x : 0;
-    float new_sy = p->map_object_->momentum_.z ? psp->screen_y : 0;
-
-    // bob the weapon based on movement speed
-    if (p->powers_[kPowerTypeJetpack] <= 0) // Don't bob when using jetpack
-    {
-        BAMAngle angle = (128 * (erraticism.d_ ? p->erraticism_bob_ticker_++ : level_time_elapsed)) << 19;
-        new_sx         = p->bob_factor_ * info->swaying_ * epi::BAMCos(angle);
-
-        angle &= (kBAMAngle180 - 1);
-        new_sy = p->bob_factor_ * info->bobbing_ * epi::BAMSin(angle);
-    }
-
-    psp->screen_x = new_sx;
-    psp->screen_y = new_sy;
-}
 
 //
 // A_WeaponReady
@@ -1034,8 +1004,6 @@ void A_WeaponReady(MapObject *mo)
         } // for (ATK)
 
     }     // (! fire_0 && ! fire_1)
-
-    BobWeapon(p, info);
 }
 
 void A_WeaponEmpty(MapObject *mo)
@@ -1253,23 +1221,6 @@ void A_NoFireReturnTA(MapObject *mo)
 void A_NoFireReturnFA(MapObject *mo)
 {
     DoNoFire(mo, 3, true);
-}
-
-void A_WeaponKick(MapObject *mo)
-{
-    Player       *p   = mo->player_;
-    PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
-
-    float kick = 0.05f;
-
-    if (!level_flags.kicking || erraticism.d_)
-        return;
-
-    if (psp->state && psp->state->action_par)
-        kick = ((float *)psp->state->action_par)[0];
-
-    p->delta_view_height_ -= kick;
-    p->kick_offset_ = kick;
 }
 
 //
@@ -1540,12 +1491,6 @@ static void DoWeaponShoot(MapObject *mo, int ATK)
     }
 
     PlayerAttack(mo, attack);
-
-    if (level_flags.kicking && ATK == 0 && !erraticism.d_)
-    {
-        p->delta_view_height_ -= info->kick_;
-        p->kick_offset_ = info->kick_;
-    }
 
     if (mo->target_)
     {

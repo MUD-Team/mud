@@ -78,7 +78,6 @@
 
 // Gameplay Options
 #define EDGE_DEFAULT_AUTOAIM        (0)
-#define EDGE_DEFAULT_KICKING        (0)
 #define EDGE_DEFAULT_WEAPON_SWITCH  (1)
 #define EDGE_DEFAULT_MORE_BLOOD     (0)
 #define EDGE_DEFAULT_RES_RESPAWN    (1) // Resurrect Mode

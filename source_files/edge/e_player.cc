@@ -179,8 +179,6 @@ void Player::Reborn()
 
     cheats_             = 0;
     refire_             = 0;
-    bob_factor_         = 0;
-    kick_offset_        = 0;
     zoom_field_of_view_ = 0;
     bonus_count_        = 0;
     damage_count_       = 0;
