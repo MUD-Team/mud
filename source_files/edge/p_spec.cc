@@ -577,33 +577,8 @@ static void P_LineEffect(Line *target, Line *source, const LineType *special)
     {
         LineAnimation anim;
         anim.target = target;
-        if (special->scroll_type_ == BoomScrollerTypeNone)
-        {
-            anim.side_0_x_speed = -source->side[0]->middle.offset.x / 8.0;
-            anim.side_0_y_speed = source->side[0]->middle.offset.y / 8.0;
-        }
-        else
-        {
-            // BOOM spec states that the front sector is the height reference
-            // for displace/accel scrollers
-            if (source->front_sector)
-            {
-                anim.scroll_sector_reference  = source->front_sector;
-                anim.scroll_special_reference = special;
-                anim.scroll_line_reference    = source;
-                anim.side_0_x_offset_speed    = -source->side[0]->middle.offset.x / 8.0;
-                anim.side_0_y_offset_speed    = source->side[0]->middle.offset.y / 8.0;
-                for (int i = 0; i < total_level_lines; i++)
-                {
-                    if (level_lines[i].tag == source->front_sector->tag)
-                    {
-                        if (!level_lines[i].special || level_lines[i].special->count_ == 1)
-                            anim.permanent = true;
-                    }
-                }
-                anim.last_height = anim.scroll_sector_reference->original_height;
-            }
-        }
+        anim.side_0_x_speed = -source->side[0]->middle.offset.x / 8.0;
+        anim.side_0_y_speed = source->side[0]->middle.offset.y / 8.0;
         line_animations.push_back(anim);
         AddSpecialLine(target);
     }
@@ -642,35 +617,10 @@ static void P_LineEffect(Line *target, Line *source, const LineType *special)
 
         if (x || y)
         {
-            if (special->scroll_type_ == BoomScrollerTypeNone)
-            {
-                anim.side_0_x_speed += x;
-                anim.side_1_x_speed += x;
-                anim.side_0_y_speed += y;
-                anim.side_1_y_speed += y;
-            }
-            else
-            {
-                // BOOM spec states that the front sector is the height
-                // reference for displace/accel scrollers
-                if (source->front_sector)
-                {
-                    anim.scroll_sector_reference  = source->front_sector;
-                    anim.scroll_special_reference = special;
-                    anim.scroll_line_reference    = source;
-                    anim.dynamic_delta_x += x;
-                    anim.dynamic_delta_y += y;
-                    for (int i = 0; i < total_level_lines; i++)
-                    {
-                        if (level_lines[i].tag == source->front_sector->tag)
-                        {
-                            if (!level_lines[i].special || level_lines[i].special->count_ == 1)
-                                anim.permanent = true;
-                        }
-                    }
-                    anim.last_height = anim.scroll_sector_reference->original_height;
-                }
-            }
+            anim.side_0_x_speed += x;
+            anim.side_1_x_speed += x;
+            anim.side_0_y_speed += y;
+            anim.side_1_y_speed += y;
             line_animations.push_back(anim);
             AddSpecialLine(target);
         }
@@ -717,6 +667,8 @@ static void P_LineEffect(Line *target, Line *source, const LineType *special)
         {
             source->side[0]->middle.offset.x = 0;
             source->side[0]->bottom.offset.x = 0;
+            source->side[0]->middle.old_offset.x = 0;
+            source->side[0]->bottom.old_offset.x = 0;
         }
     }
 
@@ -773,43 +725,20 @@ static void SectorEffect(Sector *target, Line *source, const LineType *special)
     {
         SectorAnimation anim;
         anim.target = target;
-        if (special->scroll_type_ == BoomScrollerTypeNone)
+        if (special->sector_effect_ & kSectorEffectTypeScrollFloor)
         {
-            if (special->sector_effect_ & kSectorEffectTypeScrollFloor)
-            {
-                anim.floor_scroll.x -= source->delta_x / 32.0f;
-                anim.floor_scroll.y -= source->delta_y / 32.0f;
-            }
-            if (special->sector_effect_ & kSectorEffectTypeScrollCeiling)
-            {
-                anim.ceil_scroll.x -= source->delta_x / 32.0f;
-                anim.ceil_scroll.y -= source->delta_y / 32.0f;
-            }
-            if (special->sector_effect_ & kSectorEffectTypePushThings)
-            {
-                anim.push.x += source->delta_x / 32.0f * kBoomCarryFactor;
-                anim.push.y += source->delta_y / 32.0f * kBoomCarryFactor;
-            }
+            anim.floor_scroll.x -= source->delta_x / 32.0f;
+            anim.floor_scroll.y -= source->delta_y / 32.0f;
         }
-        else
+        if (special->sector_effect_ & kSectorEffectTypeScrollCeiling)
         {
-            // BOOM spec states that the front sector is the height reference
-            // for displace/accel scrollers
-            if (source->front_sector)
-            {
-                anim.scroll_sector_reference  = source->front_sector;
-                anim.scroll_special_reference = special;
-                anim.scroll_line_reference    = source;
-                for (int i = 0; i < total_level_lines; i++)
-                {
-                    if (level_lines[i].tag == source->front_sector->tag)
-                    {
-                        if (!level_lines[i].special || level_lines[i].special->count_ == 1)
-                            anim.permanent = true;
-                    }
-                }
-                anim.last_height = anim.scroll_sector_reference->original_height;
-            }
+            anim.ceil_scroll.x -= source->delta_x / 32.0f;
+            anim.ceil_scroll.y -= source->delta_y / 32.0f;
+        }
+        if (special->sector_effect_ & kSectorEffectTypePushThings)
+        {
+            anim.push.x += source->delta_x / 32.0f * kBoomCarryFactor;
+            anim.push.y += source->delta_y / 32.0f * kBoomCarryFactor;
         }
         sector_animations.push_back(anim);
         AddSpecialSector(target);
@@ -865,6 +794,7 @@ static void SectorEffect(Sector *target, Line *source, const LineType *special)
             target->floor.offset.x += source->side[0]->bottom.offset.x;
             target->floor.offset.y += source->side[0]->bottom.offset.y;
         }
+        target->floor.old_offset = target->floor.offset;
         target->floor.rotation = angle;
     }
     if (special->sector_effect_ & kSectorEffectTypeAlignCeiling)
@@ -877,6 +807,7 @@ static void SectorEffect(Sector *target, Line *source, const LineType *special)
             target->ceiling.offset.x += source->side[0]->bottom.offset.x;
             target->ceiling.offset.y += source->side[0]->bottom.offset.y;
         }
+        target->ceiling.old_offset = target->ceiling.offset;
         target->ceiling.rotation = angle;
     }
 
@@ -1711,88 +1642,6 @@ void UpdateSpecials()
                     ld->side[1]->bottom.net_scroll.y += line_animations[i].side_1_y_speed;
                 }
             }
-
-            // Update dynamic values
-            struct Sector  *sec_ref     = line_animations[i].scroll_sector_reference;
-            const LineType *special_ref = line_animations[i].scroll_special_reference;
-            Line           *line_ref    = line_animations[i].scroll_line_reference;
-
-            if (!sec_ref || !special_ref || !line_ref)
-                continue;
-
-            if (special_ref->line_effect_ & kLineEffectTypeVectorScroll)
-            {
-                float tdx       = line_animations[i].dynamic_delta_x;
-                float tdy       = line_animations[i].dynamic_delta_y;
-                float heightref = special_ref->scroll_type_ & BoomScrollerTypeDisplace ? line_animations[i].last_height
-                                                                                       : sec_ref->original_height;
-                float sy        = tdy * ((sec_ref->floor_height + sec_ref->ceiling_height) - heightref);
-                float sx        = tdx * ((sec_ref->floor_height + sec_ref->ceiling_height) - heightref);
-                if (ld->side[0])
-                {
-                    if (ld->side[0]->top.image)
-                    {
-                        ld->side[0]->top.net_scroll.x += sx;
-                        ld->side[0]->top.net_scroll.y += sy;
-                    }
-                    if (ld->side[0]->middle.image)
-                    {
-                        ld->side[0]->middle.net_scroll.x += sx;
-                        ld->side[0]->middle.net_scroll.y += sy;
-                    }
-                    if (ld->side[0]->bottom.image)
-                    {
-                        ld->side[0]->bottom.net_scroll.x += sx;
-                        ld->side[0]->bottom.net_scroll.y += sy;
-                    }
-                }
-                if (ld->side[1])
-                {
-                    if (ld->side[1]->top.image)
-                    {
-                        ld->side[1]->top.net_scroll.x += sx;
-                        ld->side[1]->top.net_scroll.y += sy;
-                    }
-                    if (ld->side[1]->middle.image)
-                    {
-                        ld->side[1]->middle.net_scroll.x += sx;
-                        ld->side[1]->middle.net_scroll.y += sy;
-                    }
-                    if (ld->side[1]->bottom.image)
-                    {
-                        ld->side[1]->bottom.net_scroll.x += sx;
-                        ld->side[1]->bottom.net_scroll.y += sy;
-                    }
-                }
-            }
-            if (special_ref->line_effect_ & kLineEffectTypeTaggedOffsetScroll)
-            {
-                float x_speed   = line_animations[i].side_0_x_offset_speed;
-                float y_speed   = line_animations[i].side_0_y_offset_speed;
-                float heightref = special_ref->scroll_type_ & BoomScrollerTypeDisplace ? line_animations[i].last_height
-                                                                                       : sec_ref->original_height;
-                float sy        = x_speed * ((sec_ref->floor_height + sec_ref->ceiling_height) - heightref);
-                float sx        = y_speed * ((sec_ref->floor_height + sec_ref->ceiling_height) - heightref);
-                if (ld->side[0])
-                {
-                    if (ld->side[0]->top.image)
-                    {
-                        ld->side[0]->top.net_scroll.x += sx;
-                        ld->side[0]->top.net_scroll.y += sy;
-                    }
-                    if (ld->side[0]->middle.image)
-                    {
-                        ld->side[0]->middle.net_scroll.x += sx;
-                        ld->side[0]->middle.net_scroll.y += sy;
-                    }
-                    if (ld->side[0]->bottom.image)
-                    {
-                        ld->side[0]->bottom.net_scroll.x += sx;
-                        ld->side[0]->bottom.net_scroll.y += sy;
-                    }
-                }
-            }
-            line_animations[i].last_height = sec_ref->floor_height + sec_ref->ceiling_height;
         }
     }
 
@@ -1890,36 +1739,27 @@ void UpdateSpecials()
         {
             if (ld->side[0]->top.image)
             {
-                ld->side[0]->top.offset.x = fmod(
-                    ld->side[0]->top.offset.x + (ld->side[0]->top.scroll.x + ld->side[0]->top.net_scroll.x) * factor,
-                    ld->side[0]->top.image->actual_width_);
-                ld->side[0]->top.offset.y = fmod(
-                    ld->side[0]->top.offset.y + (ld->side[0]->top.scroll.y + ld->side[0]->top.net_scroll.y) * factor,
-                    ld->side[0]->top.image->actual_height_);
+                ld->side[0]->top.old_offset = ld->side[0]->top.offset;
+                ld->side[0]->top.offset.x = ld->side[0]->top.offset.x + (ld->side[0]->top.scroll.x + ld->side[0]->top.net_scroll.x) * factor;
+                ld->side[0]->top.offset.y = ld->side[0]->top.offset.y + (ld->side[0]->top.scroll.y + ld->side[0]->top.net_scroll.y) * factor;
                 ld->side[0]->top.net_scroll = {{0, 0}};
             }
             if (ld->side[0]->middle.image)
             {
-                ld->side[0]->middle.offset.x =
-                    fmod(ld->side[0]->middle.offset.x +
-                             (ld->side[0]->middle.scroll.x + ld->side[0]->middle.net_scroll.x) * factor,
-                         ld->side[0]->middle.image->actual_width_);
-                ld->side[0]->middle.offset.y =
-                    fmod(ld->side[0]->middle.offset.y +
-                             (ld->side[0]->middle.scroll.y + ld->side[0]->middle.net_scroll.y) * factor,
-                         ld->side[0]->middle.image->actual_height_);
+                ld->side[0]->middle.old_offset = ld->side[0]->middle.offset;
+                ld->side[0]->middle.offset.x = ld->side[0]->middle.offset.x +
+                             (ld->side[0]->middle.scroll.x + ld->side[0]->middle.net_scroll.x) * factor;
+                ld->side[0]->middle.offset.y = ld->side[0]->middle.offset.y +
+                             (ld->side[0]->middle.scroll.y + ld->side[0]->middle.net_scroll.y) * factor;
                 ld->side[0]->middle.net_scroll = {{0, 0}};
             }
             if (ld->side[0]->bottom.image)
             {
-                ld->side[0]->bottom.offset.x =
-                    fmod(ld->side[0]->bottom.offset.x +
-                             (ld->side[0]->bottom.scroll.x + ld->side[0]->bottom.net_scroll.x) * factor,
-                         ld->side[0]->bottom.image->actual_width_);
-                ld->side[0]->bottom.offset.y =
-                    fmod(ld->side[0]->bottom.offset.y +
-                             (ld->side[0]->bottom.scroll.y + ld->side[0]->bottom.net_scroll.y) * factor,
-                         ld->side[0]->bottom.image->actual_height_);
+                ld->side[0]->bottom.old_offset = ld->side[0]->bottom.offset;
+                ld->side[0]->bottom.offset.x = ld->side[0]->bottom.offset.x +
+                             (ld->side[0]->bottom.scroll.x + ld->side[0]->bottom.net_scroll.x) * factor;
+                ld->side[0]->bottom.offset.y = ld->side[0]->bottom.offset.y +
+                             (ld->side[0]->bottom.scroll.y + ld->side[0]->bottom.net_scroll.y) * factor;
                 ld->side[0]->bottom.net_scroll = {{0, 0}};
             }
         }
@@ -1928,36 +1768,27 @@ void UpdateSpecials()
         {
             if (ld->side[1]->top.image)
             {
-                ld->side[1]->top.offset.x = fmod(
-                    ld->side[1]->top.offset.x + (ld->side[1]->top.scroll.x + ld->side[1]->top.net_scroll.x) * factor,
-                    ld->side[1]->top.image->actual_width_);
-                ld->side[1]->top.offset.y = fmod(
-                    ld->side[1]->top.offset.y + (ld->side[1]->top.scroll.y + ld->side[1]->top.net_scroll.y) * factor,
-                    ld->side[1]->top.image->actual_height_);
+                ld->side[1]->top.old_offset = ld->side[1]->top.offset;
+                ld->side[1]->top.offset.x = ld->side[1]->top.offset.x + (ld->side[1]->top.scroll.x + ld->side[1]->top.net_scroll.x) * factor;
+                ld->side[1]->top.offset.y = ld->side[1]->top.offset.y + (ld->side[1]->top.scroll.y + ld->side[1]->top.net_scroll.y) * factor;
                 ld->side[1]->top.net_scroll = {{0, 0}};
             }
             if (ld->side[1]->middle.image)
             {
-                ld->side[1]->middle.offset.x =
-                    fmod(ld->side[1]->middle.offset.x +
-                             (ld->side[1]->middle.scroll.x + ld->side[1]->middle.net_scroll.x) * factor,
-                         ld->side[1]->middle.image->actual_width_);
-                ld->side[1]->middle.offset.y =
-                    fmod(ld->side[1]->middle.offset.y +
-                             (ld->side[1]->middle.scroll.y + ld->side[1]->middle.net_scroll.y) * factor,
-                         ld->side[1]->middle.image->actual_height_);
+                ld->side[1]->middle.old_offset = ld->side[1]->middle.offset;
+                ld->side[1]->middle.offset.x = ld->side[1]->middle.offset.x +
+                             (ld->side[1]->middle.scroll.x + ld->side[1]->middle.net_scroll.x) * factor;
+                ld->side[1]->middle.offset.y = ld->side[1]->middle.offset.y +
+                             (ld->side[1]->middle.scroll.y + ld->side[1]->middle.net_scroll.y) * factor;
                 ld->side[1]->middle.net_scroll = {{0, 0}};
             }
             if (ld->side[1]->bottom.image)
             {
-                ld->side[1]->bottom.offset.x =
-                    fmod(ld->side[1]->bottom.offset.x +
-                             (ld->side[1]->bottom.scroll.x + ld->side[1]->bottom.net_scroll.x) * factor,
-                         ld->side[1]->bottom.image->actual_width_);
-                ld->side[1]->bottom.offset.y =
-                    fmod(ld->side[1]->bottom.offset.y +
-                             (ld->side[1]->bottom.scroll.y + ld->side[1]->bottom.net_scroll.y) * factor,
-                         ld->side[1]->bottom.image->actual_height_);
+                ld->side[1]->bottom.old_offset = ld->side[1]->bottom.offset;
+                ld->side[1]->bottom.offset.x = ld->side[1]->bottom.offset.x +
+                             (ld->side[1]->bottom.scroll.x + ld->side[1]->bottom.net_scroll.x) * factor;
+                ld->side[1]->bottom.offset.y = ld->side[1]->bottom.offset.y +
+                             (ld->side[1]->bottom.scroll.y + ld->side[1]->bottom.net_scroll.y) * factor;
                 ld->side[1]->bottom.net_scroll = {{0, 0}};
             }
         }
@@ -1979,39 +1810,6 @@ void UpdateSpecials()
             sec->floor.net_scroll.y += sector_animations[i].floor_scroll.y;
             sec->ceiling.net_scroll.x += sector_animations[i].ceil_scroll.x;
             sec->ceiling.net_scroll.y += sector_animations[i].ceil_scroll.y;
-
-            // Update dynamic values
-            struct Sector  *sec_ref     = sector_animations[i].scroll_sector_reference;
-            const LineType *special_ref = sector_animations[i].scroll_special_reference;
-            Line           *line_ref    = sector_animations[i].scroll_line_reference;
-
-            if (!sec_ref || !special_ref || !line_ref ||
-                !(special_ref->scroll_type_ & BoomScrollerTypeDisplace ||
-                  special_ref->scroll_type_ & BoomScrollerTypeAccel))
-                continue;
-
-            float heightref = special_ref->scroll_type_ & BoomScrollerTypeDisplace ? sector_animations[i].last_height
-                                                                                   : sec_ref->original_height;
-            float sy        = line_ref->length / 32.0f * line_ref->delta_y / line_ref->length *
-                       ((sec_ref->floor_height + sec_ref->ceiling_height) - heightref);
-            float sx = line_ref->length / 32.0f * line_ref->delta_x / line_ref->length *
-                       ((sec_ref->floor_height + sec_ref->ceiling_height) - heightref);
-            if (special_ref->sector_effect_ & kSectorEffectTypePushThings)
-            {
-                sec->properties.net_push.y += kBoomCarryFactor * sy;
-                sec->properties.net_push.x += kBoomCarryFactor * sx;
-            }
-            if (special_ref->sector_effect_ & kSectorEffectTypeScrollFloor)
-            {
-                sec->floor.net_scroll.y -= sy;
-                sec->floor.net_scroll.x -= sx;
-            }
-            if (special_ref->sector_effect_ & kSectorEffectTypeScrollCeiling)
-            {
-                sec->ceiling.net_scroll.y -= sy;
-                sec->ceiling.net_scroll.x -= sx;
-            }
-            sector_animations[i].last_height = sec_ref->floor_height + sec_ref->ceiling_height;
         }
     }
 
@@ -2044,16 +1842,12 @@ void UpdateSpecials()
             sec->properties.push.z = sec->properties.old_push.z;
         }
 
-        sec->floor.offset.x = fmod(sec->floor.offset.x + (sec->floor.scroll.x + sec->floor.net_scroll.x) * factor,
-                                   sec->floor.image->actual_width_);
-        sec->floor.offset.y = fmod(sec->floor.offset.y + (sec->floor.scroll.y + sec->floor.net_scroll.y) * factor,
-                                   sec->floor.image->actual_height_);
-        sec->ceiling.offset.x =
-            fmod(sec->ceiling.offset.x + (sec->ceiling.scroll.x + sec->ceiling.net_scroll.x) * factor,
-                 sec->ceiling.image->actual_width_);
-        sec->ceiling.offset.y =
-            fmod(sec->ceiling.offset.y + (sec->ceiling.scroll.y + sec->ceiling.net_scroll.y) * factor,
-                 sec->ceiling.image->actual_height_);
+        sec->floor.old_offset = sec->floor.offset;
+        sec->ceiling.old_offset = sec->ceiling.offset;
+        sec->floor.offset.x = sec->floor.offset.x + (sec->floor.scroll.x + sec->floor.net_scroll.x) * factor;
+        sec->floor.offset.y = sec->floor.offset.y + (sec->floor.scroll.y + sec->floor.net_scroll.y) * factor;
+        sec->ceiling.offset.x = sec->ceiling.offset.x + (sec->ceiling.scroll.x + sec->ceiling.net_scroll.x) * factor;
+        sec->ceiling.offset.y = sec->ceiling.offset.y + (sec->ceiling.scroll.y + sec->ceiling.net_scroll.y) * factor;
         sec->properties.push.x = sec->properties.push.x + sec->properties.net_push.x;
         sec->properties.push.y = sec->properties.push.y + sec->properties.net_push.y;
 
@@ -2213,8 +2007,6 @@ void SpawnMapSpecials2(int autotag)
             anim.floor_scroll.x -= dx * secSpecial->f_.scroll_speed_ / 32.0f;
             anim.floor_scroll.y -= dy * secSpecial->f_.scroll_speed_ / 32.0f;
 
-            anim.last_height = sector->original_height;
-
             sector_animations.push_back(anim);
 
             AddSpecialSector(sector);
@@ -2229,8 +2021,6 @@ void SpawnMapSpecials2(int autotag)
 
             anim.ceil_scroll.x -= dx * secSpecial->c_.scroll_speed_ / 32.0f;
             anim.ceil_scroll.y -= dy * secSpecial->c_.scroll_speed_ / 32.0f;
-
-            anim.last_height = sector->original_height;
 
             sector_animations.push_back(anim);
 

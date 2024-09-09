@@ -1023,8 +1023,6 @@ static void LoadUDMFSectors()
             ss->floor_height   = fz;
             ss->ceiling_height = cz;
 
-            ss->original_height = (ss->floor_height + ss->ceiling_height);
-
             ss->floor.translucency = falph;
             ss->floor.x_matrix.x   = 1;
             ss->floor.x_matrix.y   = 0;
@@ -1050,8 +1048,10 @@ static void LoadUDMFSectors()
             // granular offsets
             ss->floor.offset.x += (fx/fx_sc);
             ss->floor.offset.y -= (fy/fy_sc);
+            ss->floor.old_offset = ss->floor.offset;
             ss->ceiling.offset.x += (cx/cx_sc);
             ss->ceiling.offset.y -= (cy/cy_sc);
+            ss->ceiling.old_offset = ss->ceiling.offset;
 
             ss->floor.image = ImageLookup(floor_tex, kImageNamespaceFlat);
 
@@ -1386,6 +1386,9 @@ static void LoadUDMFSideDefs()
             sd->bottom.offset.y += lowy/low_scy;
             sd->middle.offset.y += midy/mid_scy;
             sd->top.offset.y += highy/high_scy;
+            sd->top.old_offset = sd->top.offset;
+            sd->middle.old_offset = sd->middle.offset;
+            sd->bottom.old_offset = sd->bottom.offset;
         }
         else // consume other blocks
         {
@@ -1432,6 +1435,7 @@ static void LoadUDMFSideDefs()
         {
             sd->middle_mask_offset = sd->middle.offset.y;
             sd->middle.offset.y    = 0;
+            sd->middle.old_offset.y = 0;
         }
         ld->front_sector = sd->sector;
         sd->top.translucency = level_line_alphas[i];
@@ -1446,6 +1450,7 @@ static void LoadUDMFSideDefs()
             {
                 sd->middle_mask_offset = sd->middle.offset.y;
                 sd->middle.offset.y    = 0;
+                sd->middle.old_offset.y = 0;
             }
             ld->back_sector = sd->sector;
             sd->top.translucency = level_line_alphas[i];
@@ -1606,7 +1611,7 @@ static void LoadUDMFLineDefs()
                 ld->flags |= kLineFlagBoomPassThrough;
 
             if (ld->special && ld->special->type_ == kLineTriggerNone &&
-                (ld->special->s_xspeed_ || ld->special->s_yspeed_ || ld->special->scroll_type_ > BoomScrollerTypeNone ||
+                (ld->special->s_xspeed_ || ld->special->s_yspeed_ ||
                  ld->special->line_effect_ == kLineEffectTypeVectorScroll ||
                  ld->special->line_effect_ == kLineEffectTypeOffsetScroll ||
                  ld->special->line_effect_ == kLineEffectTypeTaggedOffsetScroll))

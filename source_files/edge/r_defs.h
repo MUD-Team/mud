@@ -145,6 +145,7 @@ struct MapSurface
 
     // current offset and scrolling deltas (world coords)
     vec2s offset;
+    vec2s old_offset;
     vec2s scroll;
 
     vec2s net_scroll = {{0, 0}};
@@ -248,7 +249,6 @@ struct Sector
 
     // For dynamic scroll/push/offset
     bool  old_stored;
-    float original_height;
 
     // Boom door lighting stuff
     int minimum_neighbor_light;
@@ -461,33 +461,19 @@ struct BspNode
 
 struct SectorAnimation
 {
-    Sector         *target                   = nullptr;
-    struct Sector  *scroll_sector_reference  = nullptr;
-    const LineType *scroll_special_reference = nullptr;
-    Line           *scroll_line_reference    = nullptr;
+    Sector      *target                   = nullptr;
     vec2s        floor_scroll             = {{0, 0}};
     vec2s        ceil_scroll              = {{0, 0}};
     vec3s        push                     = {{0, 0, 0}};
-    bool            permanent                = false;
-    float           last_height              = 0.0f;
 };
 
 struct LineAnimation
 {
     Line           *target                   = nullptr;
-    struct Sector  *scroll_sector_reference  = nullptr;
-    const LineType *scroll_special_reference = nullptr;
-    Line           *scroll_line_reference    = nullptr;
     float           side_0_x_speed           = 0.0;
     float           side_1_x_speed           = 0.0;
     float           side_0_y_speed           = 0.0;
     float           side_1_y_speed           = 0.0;
-    float           side_0_x_offset_speed    = 0.0;
-    float           side_0_y_offset_speed    = 0.0;
-    float           dynamic_delta_x          = 0.0;
-    float           dynamic_delta_y          = 0.0;
-    bool            permanent                = false;
-    float           last_height              = 0.0f;
 };
 
 struct LightAnimation
