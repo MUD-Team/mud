@@ -167,7 +167,6 @@ static const DDFCommandList linedef_commands[] = {
     DDF_FIELD("WHEN_APPEAR", dummy_line, appear_, DDFMainGetWhenAppear),
     DDF_FIELD("SPECIAL", dummy_line, special_flags_, DDFLineGetSpecialFlags),
     DDF_FIELD("LINE_EFFECT", dummy_line, line_effect_, DDFLineGetLineEffect),
-    DDF_FIELD("SCROLL_TYPE", dummy_line, scroll_type_, DDFLineGetScrollType),
     DDF_FIELD("LINE_PARTS", dummy_line, line_parts_, DDFLineGetScrollPart),
     DDF_FIELD("SECTOR_EFFECT", dummy_line, sector_effect_, DDFLineGetSectorEffect),
 
@@ -724,41 +723,6 @@ static void DDFLineGetLineEffect(const char *info, void *storage)
     }
 }
 
-static DDFSpecialFlags scroll_type_names[] = {
-    {"DISPLACE", BoomScrollerTypeDisplace, 0}, {"ACCEL", BoomScrollerTypeAccel, 0}, {nullptr, 0, 0}};
-
-//
-// Gets the scroll type flags.
-//
-static void DDFLineGetScrollType(const char *info, void *storage)
-{
-    BoomScrollerType *var = (BoomScrollerType *)storage;
-
-    int flag_value;
-
-    if (DDFCompareName(info, "NONE") == 0)
-    {
-        *var = BoomScrollerTypeNone;
-        return;
-    }
-
-    switch (DDFMainCheckSpecialFlag(info, scroll_type_names, &flag_value, true, false))
-    {
-    case kDDFCheckFlagPositive:
-        *var = (BoomScrollerType)(*var | flag_value);
-        break;
-
-    case kDDFCheckFlagNegative:
-        *var = (BoomScrollerType)(*var & ~flag_value);
-        break;
-
-    case kDDFCheckFlagUser:
-    case kDDFCheckFlagUnknown:
-        DDFWarnError("Unknown scroll type: %s", info);
-        break;
-    }
-}
-
 static DDFSpecialFlags sector_effect_names[] = {
     {"LIGHT_FLOOR", kSectorEffectTypeLightFloor, 0},   {"LIGHT_CEILING", kSectorEffectTypeLightCeiling, 0},
     {"SCROLL_FLOOR", kSectorEffectTypeScrollFloor, 0}, {"SCROLL_CEILING", kSectorEffectTypeScrollCeiling, 0},
@@ -1250,7 +1214,6 @@ void LineType::CopyDetail(LineType &src)
     special_flags_  = src.special_flags_;
     line_effect_    = src.line_effect_;
     line_parts_     = src.line_parts_;
-    scroll_type_    = src.scroll_type_;
     sector_effect_  = src.sector_effect_;
 
     // lobo 2022
@@ -1303,7 +1266,6 @@ void LineType::Default(void)
     special_flags_  = kLineSpecialNone;
     line_effect_    = kLineEffectTypeNONE;
     line_parts_     = kScrollingPartNone;
-    scroll_type_    = BoomScrollerTypeNone;
     sector_effect_  = kSectorEffectTypeNone;
 
     // lobo 2022

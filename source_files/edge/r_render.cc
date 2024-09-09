@@ -372,9 +372,6 @@ static void DrawWallPart(DrawFloor *dfloor, float x1, float y1, float lz1, float
 
     (void)opaque;
 
-    // if (! props)
-    //	props = surf->override_properties ? surf->override_properties :
-    // dfloor->properties;
     if (surf->override_properties)
         props = surf->override_properties;
 
@@ -706,8 +703,19 @@ static void DrawTile(Seg *seg, DrawFloor *dfloor, float lz1, float lz2, float rz
     if (!image)
         image = ImageForHomDetect();
 
-    float tex_top_h = tex_z + surf->offset.y;
-    float x_offset  = surf->offset.x;
+    float offx, offy;
+
+    if (uncapped_frames.d_ && !AlmostEquals(surf->old_offset.x, surf->offset.x) && !paused && !time_stop_active && !erraticism_active)
+        offx = fmod(glm_lerp(surf->old_offset.x, surf->offset.x, fractional_tic), surf->image->actual_width_);
+    else
+        offx = surf->offset.x;
+    if (uncapped_frames.d_ && !AlmostEquals(surf->old_offset.y, surf->offset.y) && !paused && !time_stop_active && !erraticism_active)
+        offy = fmod(glm_lerp(surf->old_offset.y, surf->offset.y, fractional_tic), surf->image->actual_height_);
+    else
+        offy = surf->offset.y;
+
+    float tex_top_h = tex_z + offy;
+    float x_offset  = offx;
 
     if (flags & kWallTileExtraX)
     {
@@ -1356,8 +1364,14 @@ static void RenderPlane(DrawFloor *dfloor, float h, MapSurface *surf, int face_d
     data.v_count  = v_count;
     data.vertices = vertices;
     data.R = data.G = data.B = 1.0f;
-    data.tx0                 = surf->offset.x;
-    data.ty0                 = surf->offset.y;
+    if (uncapped_frames.d_ && !AlmostEquals(surf->old_offset.x, surf->offset.x) && !paused && !time_stop_active && !erraticism_active)
+        data.tx0 = fmod(glm_lerp(surf->old_offset.x, surf->offset.x, fractional_tic), surf->image->actual_width_);
+    else
+        data.tx0 = surf->offset.x;
+    if (uncapped_frames.d_ && !AlmostEquals(surf->old_offset.y, surf->offset.y) && !paused && !time_stop_active && !erraticism_active)
+        data.ty0 = fmod(glm_lerp(surf->old_offset.y, surf->offset.y, fractional_tic), surf->image->actual_height_);
+    else
+        data.ty0 = surf->offset.y;
     data.image_w             = surf->image->ScaledWidthActual();
     data.image_h             = surf->image->ScaledHeightActual();
     data.x_mat               = surf->x_matrix;
@@ -1730,7 +1744,7 @@ static void InitializeCamera(MapObject *mo, bool full_height, float expand_w)
 
     view_x_slope *= widescreen_view_width_multiplier;
 
-    if (uncapped_frames.d_ && level_time_elapsed && mo->interpolate_ && !paused)
+    if (uncapped_frames.d_ && level_time_elapsed && mo->player_ && mo->interpolate_ && !paused)
     {
         view_x     = glm_lerp(mo->old_x_, mo->x, fractional_tic);
         view_y     = glm_lerp(mo->old_y_, mo->y, fractional_tic);

@@ -475,14 +475,6 @@ enum LineSpecial
     kLineSpecialBackSector = (1 << 2),
 };
 
-// BOOM scroll types (didn't want to eat up flags elsewhere)
-enum BoomScrollerType
-{
-    BoomScrollerTypeNone     = 0,
-    BoomScrollerTypeDisplace = (1 << 0),
-    BoomScrollerTypeAccel    = (1 << 1),
-};
-
 class LineType
 {
   public:
@@ -593,7 +585,6 @@ class LineType
     // -AJA- 2000/09/28: BOOM compatibility fields (and more !).
     LineEffectType   line_effect_;
     ScrollingPart    line_parts_;
-    BoomScrollerType scroll_type_;
 
     SectorEffectType sector_effect_;
 
