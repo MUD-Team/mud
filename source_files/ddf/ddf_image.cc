@@ -46,7 +46,6 @@ static const DDFCommandList image_commands[] = {
     DDF_FIELD("SCALE", dummy_image, scale_, DDFMainGetFloat),
     DDF_FIELD("ASPECT", dummy_image, aspect_, DDFMainGetFloat),
     DDF_FIELD("FIX_TRANS", dummy_image, fix_trans_, DDFImageGetFixTrans),
-    DDF_FIELD("IS_FONT", dummy_image, is_font_, DDFMainGetBoolean),
     DDF_FIELD("ROTATE_HUE", dummy_image, hsv_rotation_, DDFMainGetNumeric),
     DDF_FIELD("SATURATION", dummy_image, hsv_saturation_, DDFMainGetNumeric),
     DDF_FIELD("BRIGHTNESS", dummy_image, hsv_value_, DDFMainGetNumeric),
@@ -146,14 +145,7 @@ static void ImageParseField(const char *field, const char *contents, int index, 
 
 static void ImageFinishEntry(void)
 {
-    // Add these automatically so modders don't have to remember them
-    if (dynamic_image->is_font_)
-    {
-        dynamic_image->special_ = (ImageSpecial)(dynamic_image->special_ | kImageSpecialClamp);
-        dynamic_image->special_ = (ImageSpecial)(dynamic_image->special_ | kImageSpecialNoMip);
-    }
 
-    // TODO: check more stuff...
 }
 
 static void ImageClearAll(void)
@@ -301,7 +293,6 @@ void ImageDefinition::CopyDetail(const ImageDefinition &src)
     scale_          = src.scale_;
     aspect_         = src.aspect_;
     fix_trans_      = src.fix_trans_;
-    is_font_        = src.is_font_;
     hsv_rotation_   = src.hsv_rotation_;
     hsv_saturation_ = src.hsv_saturation_;
     hsv_value_      = src.hsv_value_;
@@ -321,7 +312,6 @@ void ImageDefinition::Default()
     scale_          = 1.0f;
     aspect_         = 1.0f;
     fix_trans_      = kTransparencyFixBlacken;
-    is_font_        = false;
     hsv_rotation_   = 0;
     hsv_saturation_ = -1;
     hsv_value_      = 0;

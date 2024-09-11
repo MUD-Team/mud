@@ -24,11 +24,6 @@
 #include "ddf_types.h"
 #include "epi_bitset.h"
 
-inline float DynamicLightCompatibilityRadius(float x)
-{
-    return 10.0f * sqrtf(x);
-}
-
 //
 // Misc. mobj flags
 //
@@ -92,10 +87,10 @@ enum MapObjectFlag
     // On kill, count this enemy object
     // towards intermission kill total.
     // Happy gathering.
-    kMapObjectFlagCountKill = (1 << 22),
+    //kMapObjectFlagCountKill = (1 << 22), // Legacy, no longer used
     // On picking up, count this item object
     // towards intermission item total.
-    kMapObjectFlagCountItem = (1 << 23),
+    //kMapObjectFlagCountItem = (1 << 23), // Legacy, no longer used
     // Special handling: skull in flight.
     // Neither a cacodemon nor a missile.
     kMapObjectFlagSkullFly = (1 << 24),
@@ -208,7 +203,7 @@ enum HyperFlag
     // -AJA- 2007/11/06: gain health when causing damage
     kHyperFlagVampire = (1 << 10),
     // -AJA- 2008/01/11: compatibility for quadratic dlights
-    kHyperFlagQuadraticDynamicLight = (1 << 11),
+    //kHyperFlagQuadraticDynamicLight = (1 << 11), // Legacy, no longer used
     // -AJA- 2009/10/15: HUB system: remember old avatars
     kHyperFlagRememberOldAvatars = (1 << 12),
     // -AJA- 2009/10/22: never autoaim at this monster/thing
@@ -216,7 +211,7 @@ enum HyperFlag
     // -AJA- 2010/06/13: used for RTS command of same name
     kHyperFlagWaitUntilDead = (1 << 14),
     // -AJA- 2010/12/23: force models to tilt by view_angle
-    kHyperFlagForceModelTilt = (1 << 15),
+    // kHyperFlagForceModelTilt = (1 << 15), // Legacy, no longer used
     // -Lobo- 2021/10/24: immortal flag
     kHyperFlagImmortal = (1 << 16),
     // -Lobo- 2021/11/18: floorclip flag
@@ -347,10 +342,10 @@ enum InventoryType
 
 enum CounterType
 {
-    kCounterTypeLives = 0,  // Arbitrarily named Lives counter
-    kCounterTypeScore,      // Arbitrarily named Score counter
-    kCounterTypeMoney,      // Arbitrarily named Money
-    kCounterTypeExperience, // Arbitrarily named EXP counter
+    kCounterType01 = 0,  // Arbitrarily named Lives counter
+    kCounterType02,      // Arbitrarily named Score counter
+    kCounterType03,      // Arbitrarily named Money
+    kCounterType04, // Arbitrarily named EXP counter
     kCounterType05,
     kCounterType06,
     kCounterType07,
@@ -477,18 +472,10 @@ enum PowerType
     kPowerTypeAcidSuit,
     kPowerTypeAllMap,
     kPowerTypeInfrared,
-    // extra powerups (not in Doom)
     kPowerTypeJetpack, // -MH- 1998/06/18  jetpack "fuel" counter
     kPowerTypeNightVision,
     kPowerTypeScuba,
     kPowerTypeTimeStop,
-    kPowerTypeUnused10,
-    kPowerTypeUnused11,
-    kPowerTypeUnused12,
-    kPowerTypeUnused13,
-    kPowerTypeUnused14,
-    kPowerTypeUnused15,
-    // -AJA- Note: Savegame code relies on kTotalPowerTypes == 16.
     kTotalPowerTypes
 };
 
@@ -627,13 +614,10 @@ enum DynamicLightType
 {
     // dynamic lighting disabled
     kDynamicLightTypeNone,
-    // light texture is modulated with wall texture
+    // light texture is modulated with texture
     kDynamicLightTypeModulate,
-    // light texture is simply added to wall
-    kDynamicLightTypeAdd,
-    // backwards compatibility cruft
-    kDynamicLightTypeCompatibilityLinear,
-    kDynamicLightTypeCompatibilityQuadratic,
+    // light texture is simply added
+    kDynamicLightTypeAdd
 };
 
 class DynamicLightDefinition
@@ -857,8 +841,6 @@ class MapObjectDefinition
   public:
     void Default();
     void CopyDetail(MapObjectDefinition &src);
-
-    void DLightCompatibility(void);
 
   private:
     // disable copy construct and assignment operator

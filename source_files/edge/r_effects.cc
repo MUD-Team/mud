@@ -21,6 +21,7 @@
 #include "epi.h"
 #include "i_defs_gl.h"
 #include "m_misc.h"
+#include "n_network.h"
 #include "r_colormap.h"
 #include "r_image.h"
 #include "r_misc.h"
@@ -57,13 +58,21 @@ void FuzzUpdate(void)
             FatalError("Cannot find essential image: FUZZ_MAP\n");
     }
 
-    fuzz_y_offset = ((render_frame_count * 3) & 1023) / 256.0;
+    fuzz_y_offset = ((game_tic * 3) & 1023) / 256.0;
 }
 
 void FuzzAdjust(vec2s *tc, MapObject *mo)
 {
-    tc->x += fmod(mo->x / 520.0, 1.0);
-    tc->y += fmod(mo->y / 520.0, 1.0) + fuzz_y_offset;
+    if (uncapped_frames.d_)
+    {
+        tc->x += fmod(glm_lerp(mo->old_x_, mo->x, fractional_tic) / 520.0, 1.0);
+        tc->y += fmod(glm_lerp(mo->old_y_, mo->y, fractional_tic) / 520.0, 1.0) + fuzz_y_offset;
+    }
+    else
+    {
+        tc->x += fmod(mo->x / 520.0, 1.0);
+        tc->y += fmod(mo->y / 520.0, 1.0) + fuzz_y_offset;
+    }
 }
 
 //--- editor settings ---

@@ -29,7 +29,6 @@
 
 #include "con_main.h"
 #include "con_var.h"
-#include "ddf_font.h"
 #include "ddf_language.h"
 #include "dm_state.h"
 #include "e_input.h"

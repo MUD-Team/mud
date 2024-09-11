@@ -100,16 +100,12 @@ static const DDFCommandList weapon_commands[] = {
     DDF_FIELD("IDLE_WAIT", dummy_weapon, idle_wait_, DDFMainGetTime),
     DDF_FIELD("IDLE_CHANCE", dummy_weapon, idle_chance_, DDFMainGetPercent),
 
-    // -AJA- backwards compatibility cruft...
-    DDF_FIELD("SECOND_ATTACK", dummy_weapon, attack_[1], DDFMainRefAttack),
-
     DDF_FIELD("SOUND1", dummy_weapon, sound1_, DDFMainLookupSound),
     DDF_FIELD("SOUND2", dummy_weapon, sound2_, DDFMainLookupSound),
     DDF_FIELD("SOUND3", dummy_weapon, sound3_, DDFMainLookupSound),
 
     DDF_FIELD("RENDER_INVERT", dummy_weapon, render_invert_, DDFMainGetBoolean),
     DDF_FIELD("Y_ADJUST", dummy_weapon, y_adjust_, DDFMainGetFloat),
-    DDF_FIELD("IGNORE_CROSSHAIR_SCALING", dummy_weapon, ignore_crosshair_scaling_, DDFMainGetBoolean),
 
     {nullptr, nullptr, 0, nullptr}};
 
@@ -171,7 +167,7 @@ static const DDFActionCode weapon_actions[] = {{"NOTHING", nullptr, nullptr},
                                                {"JUMP", A_WeaponJump, DDFStateGetJump},
                                                {"UNZOOM", A_WeaponUnzoom, nullptr},
 
-                                               {"DJNE", A_WeaponDJNE, DDFStateGetJump},
+                                               {"PARTIAL_RELOAD_JUMP", A_WeaponPartialReloadJump, DDFStateGetJump},
 
                                                {"ZOOM", A_WeaponZoom, nullptr},
                                                {"SET_INVULNERABLE", A_SetInvuln, nullptr},
@@ -240,24 +236,14 @@ static const DDFActionCode weapon_actions[] = {{"NOTHING", nullptr, nullptr},
 
 const DDFSpecialFlags ammo_types[] = {{"NOAMMO", kAmmunitionTypeNoAmmo, 0},
 
-                                      {"BULLETS", kAmmunitionTypeBullet, 0},
-                                      {"SHELLS", kAmmunitionTypeShell, 0},
-                                      {"ROCKETS", kAmmunitionTypeRocket, 0},
-                                      {"CELLS", kAmmunitionTypeCell, 0},
-                                      {"PELLETS", kAmmunitionTypePellet, 0},
-                                      {"NAILS", kAmmunitionTypeNail, 0},
-                                      {"GRENADES", kAmmunitionTypeGrenade, 0},
-                                      {"GAS", kAmmunitionTypeGas, 0},
-
-                                      {"AMMO1", kAmmunitionTypeBullet, 0},
-                                      {"AMMO2", kAmmunitionTypeShell, 0},
-                                      {"AMMO3", kAmmunitionTypeRocket, 0},
-                                      {"AMMO4", kAmmunitionTypeCell, 0},
-                                      {"AMMO5", kAmmunitionTypePellet, 0},
-                                      {"AMMO6", kAmmunitionTypeNail, 0},
-                                      {"AMMO7", kAmmunitionTypeGrenade, 0},
-                                      {"AMMO8", kAmmunitionTypeGas, 0},
-
+                                      {"AMMO1", kAmmunitionType1, 0},
+                                      {"AMMO2", kAmmunitionType2, 0},
+                                      {"AMMO3", kAmmunitionType3, 0},
+                                      {"AMMO4", kAmmunitionType4, 0},
+                                      {"AMMO5", kAmmunitionType5, 0},
+                                      {"AMMO6", kAmmunitionType6, 0},
+                                      {"AMMO7", kAmmunitionType7, 0},
+                                      {"AMMO8", kAmmunitionType8, 0},
                                       {"AMMO9", kAmmunitionType9, 0},
                                       {"AMMO10", kAmmunitionType10, 0},
                                       {"AMMO11", kAmmunitionType11, 0},
@@ -767,7 +753,6 @@ void WeaponDefinition::CopyDetail(WeaponDefinition &src)
 
     render_invert_            = src.render_invert_;
     y_adjust_                 = src.y_adjust_;
-    ignore_crosshair_scaling_ = src.ignore_crosshair_scaling_;
 }
 
 //
@@ -836,7 +821,6 @@ void WeaponDefinition::Default(void)
 
     render_invert_            = false;
     y_adjust_                 = 0.0f;
-    ignore_crosshair_scaling_ = false;
 }
 
 // --> Weapon Definition Container

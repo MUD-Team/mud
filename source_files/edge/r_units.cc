@@ -42,7 +42,6 @@
 #include "r_texgl.h"
 #include "sokol_color.h"
 
-EDGE_DEFINE_CONSOLE_VARIABLE(renderer_dumb_sky, "0", kConsoleVariableFlagNone)
 #ifdef APPLE_SILICON
 EDGE_DEFINE_CONSOLE_VARIABLE(renderer_dumb_clamp, "1", kConsoleVariableFlagNone)
 #else

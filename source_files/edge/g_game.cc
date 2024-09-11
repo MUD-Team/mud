@@ -143,9 +143,6 @@ void LoadLevel_Bits(void)
 
     game_state = kGameStateNothing; // FIXME: needed ???
 
-    // -AJA- FIXME: this background camera stuff is a mess
-    background_camera_map_object = nullptr;
-
     for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
     {
         Player *p = players[pnum];
@@ -193,7 +190,6 @@ void LoadLevel_Bits(void)
         if (!p)
             continue;
 
-        p->kill_count_ = p->secret_count_ = p->item_count_ = 0;
         p->map_object_                                     = nullptr;
     }
 
@@ -529,8 +525,6 @@ static void DoCompleted(void)
         Player *p = players[pnum];
         if (!p)
             continue;
-
-        p->level_time_ = level_time_elapsed;
 
         // take away cards and stuff
         PlayerFinishLevel(p, exit_hub_tag > 0);

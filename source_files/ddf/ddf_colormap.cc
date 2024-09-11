@@ -31,7 +31,6 @@ static Colormap dummy_colmap;
 
 static const DDFCommandList colmap_commands[] = {DDF_FIELD("SPECIAL", dummy_colmap, special_, DDFColmapGetSpecial),
                                                  DDF_FIELD("GL_COLOUR", dummy_colmap, gl_color_, DDFMainGetRGB),
-
                                                  {nullptr, nullptr, 0, nullptr}};
 
 //
@@ -59,22 +58,12 @@ static void ColmapStartEntry(const char *name, bool extend)
     if (dynamic_colmap)
     {
         dynamic_colmap->Default();
-
-        if (epi::StringPrefixCaseCompareASCII(name, "TEXT") == 0)
-            dynamic_colmap->special_ = kColorSpecialWhiten;
-
         return;
     }
 
     // not found, create a new one
     dynamic_colmap = new Colormap;
-
     dynamic_colmap->name_ = name;
-
-    // make sure fonts get whitened properly (as the default)
-    if (epi::StringPrefixCaseCompareASCII(name, "TEXT") == 0)
-        dynamic_colmap->special_ = kColorSpecialWhiten;
-
     colormaps.push_back(dynamic_colmap);
 }
 
@@ -83,11 +72,6 @@ static void ColmapParseField(const char *field, const char *contents, int index,
 #if (DDF_DEBUG)
     LogDebug("COLMAP_PARSE: %s = %s;\n", field, contents);
 #endif
-
-    // -AJA- backwards compatibility cruft...
-    if (DDFCompareName(field, "PRIORITY") == 0)
-        return;
-
     if (DDFMainParseField(colmap_commands, field, contents, (uint8_t *)dynamic_colmap))
         return; // OK
 
@@ -127,7 +111,7 @@ void DDFReadColourMaps(const std::string &data)
 {
     DDFReadInfo colm_r;
 
-    colm_r.tag      = "COLOURMAPS";
+    colm_r.tag        = "COLOURMAPS";
     colm_r.short_name = "DDFCOLM";
 
     colm_r.start_entry  = ColmapStartEntry;
@@ -155,10 +139,6 @@ void DDFColmapCleanUp(void)
 
 DDFSpecialFlags colmap_specials[] = {{"FLASH", kColorSpecialNoFlash, true},
                                      {"WHITEN", kColorSpecialWhiten, false},
-
-                                     // -AJA- backwards compatibility cruft...
-                                     {"SKY", 0, 0},
-
                                      {nullptr, 0, 0}};
 
 //
@@ -212,10 +192,7 @@ Colormap::~Colormap()
 void Colormap::CopyDetail(Colormap &src)
 {
     special_ = src.special_;
-
     gl_color_    = src.gl_color_;
-    font_colour_ = src.font_colour_;
-
     analysis_   = nullptr;
 }
 
@@ -225,10 +202,7 @@ void Colormap::CopyDetail(Colormap &src)
 void Colormap::Default()
 {
     special_ = kColorSpecialNone;
-
     gl_color_    = kRGBANoValue;
-    font_colour_ = kRGBANoValue;
-
     analysis_   = nullptr;
 }
 

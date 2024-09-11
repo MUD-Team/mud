@@ -48,7 +48,7 @@ static const DDFCommandList finale_commands[] = {
     DDF_FIELD("MOVIE", dummy_finale, movie_, DDFMainGetString),
     DDF_FIELD("CAST", dummy_finale, docast_, DDFMainGetBoolean),
     DDF_FIELD("BUNNY", dummy_finale, dobunny_, DDFMainGetBoolean),
-    DDF_FIELD("MUSIC", dummy_finale, music_, DDFMainGetNumeric),
+    DDF_FIELD("MUSIC", dummy_finale, music_, DDFMainGetString),
 
     {nullptr, nullptr, 0, nullptr}};
 
@@ -67,12 +67,11 @@ static const DDFCommandList level_commands[] = {
     DDF_FIELD("AUTHOR", dummy_level, author_, DDFMainGetString),
     DDF_FIELD("NAME_GRAPHIC", dummy_level, namegraphic_, DDFMainGetLumpName),
     DDF_FIELD("SKY_TEXTURE", dummy_level, sky_, DDFMainGetLumpName),
-    DDF_FIELD("MUSIC_ENTRY", dummy_level, music_, DDFMainGetNumeric),
+    DDF_FIELD("MUSIC", dummy_level, music_, DDFMainGetString),
     DDF_FIELD("SURROUND_FLAT", dummy_level, surround_, DDFMainGetLumpName),
     DDF_FIELD("NEXT_MAP", dummy_level, next_mapname_, DDFMainGetLumpName),
     DDF_FIELD("SECRET_MAP", dummy_level, secretmapname_, DDFMainGetLumpName),
     DDF_FIELD("AUTOTAG", dummy_level, autotag_, DDFMainGetNumeric),
-    DDF_FIELD("PARTIME", dummy_level, partime_, DDFMainGetTime),
     DDF_FIELD("EPISODE", dummy_level, episode_name_, DDFMainGetString),
     DDF_FIELD("STATS", dummy_level, wistyle_, DDFLevelGetWistyle),
     DDF_FIELD("LEAVING_BACKGROUND", dummy_level, leavingbggraphic_, DDFMainGetLumpName),
@@ -356,7 +355,7 @@ void FinaleDefinition::Default()
 
     docast_  = false;
     dobunny_ = false;
-    music_   = 0;
+    music_.clear();
 }
 
 FinaleDefinition &FinaleDefinition::operator=(FinaleDefinition &rhs)
@@ -387,7 +386,6 @@ void MapDefinition::CopyDetail(MapDefinition &src)
     author_      = src.author_;
 
     music_   = src.music_;
-    partime_ = src.partime_;
 
     episode_name_ = src.episode_name_;
 
@@ -422,8 +420,7 @@ void MapDefinition::Default()
     surround_.clear();
     author_.clear();
 
-    music_   = 0;
-    partime_ = 0;
+    music_.clear();
 
     episode_ = nullptr;
     episode_name_.clear();

@@ -37,7 +37,7 @@
 static std::unordered_set<std::string, epi::ContainerStringHash> blacklisted_directories = 
 {".git", ".github", ".vscode", "autoload", "build", "cache", "cmake", "docs", "edge_defs", "libraries", "savegame", "screenshot", "scripts", "soundfont", "source_files"};
 
-static constexpr const char *known_image_directories[5] = {"flats", "graphics", "skins", "textures", "sprites"};
+static constexpr const char *known_image_directories[4] = {"flats", "graphics", "textures", "sprites"};
 
 static constexpr uint8_t kMaximumRecurseDepth = 10;
 
@@ -160,7 +160,7 @@ static void ProcessSounds()
                 text += sfxname;
                 text += "]\n";
 
-                text += "PACK_NAME = \"";
+                text += "FILE = \"";
                 text += *p;
                 text += "\";\n";
 
@@ -403,8 +403,6 @@ void ProcessPackContents()
                     AddPackImageSmart(texname, kImageSourceGraphic, entry.pack_path_, real_graphics);
                 else if (dir_name == "flats")
                     AddPackImageSmart(texname, kImageSourceGraphic, entry.pack_path_, real_flats);
-                else if (dir_name == "skins") // Not sure about this still
-                    AddPackImageSmart(texname, kImageSourceSprite, entry.pack_path_, real_sprites);
             }
             else
             {

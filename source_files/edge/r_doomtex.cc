@@ -200,10 +200,7 @@ static ImageData *CreateUserFileImage(Image *rim, ImageDefinition *def)
     if (!img)
         FatalError("Error occurred loading image file: %s\n", def->info_.c_str());
 
-    rim->opacity_ = DetermineOpacity(img, &rim->is_empty_);
-
-    if (def->is_font_)
-        return img;
+    rim->opacity_ = DetermineOpacity(img);
 
     if (def->fix_trans_ == kTransparencyFixBlacken)
         BlackenClearAreas(img);

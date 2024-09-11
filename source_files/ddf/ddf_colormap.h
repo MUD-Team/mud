@@ -48,8 +48,6 @@ class Colormap
     // colours for GL renderer
     RGBAColor gl_color_;
 
-    RGBAColor font_colour_; // (computed only, not in DDF)
-
     void *analysis_;
 
   private:

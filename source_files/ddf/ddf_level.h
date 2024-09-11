@@ -59,7 +59,7 @@ class FinaleDefinition
     bool dobunny_;
 
     // Music
-    int music_;
+    std::string music_;
 };
 
 enum MapFlag
@@ -117,9 +117,7 @@ class MapDefinition
     std::string sky_;
     std::string surround_;
 
-    int music_;
-
-    int partime_;
+    std::string music_;
 
     GameDefinition *episode_; // set during DDFCleanUp
     std::string     episode_name_;

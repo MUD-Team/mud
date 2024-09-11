@@ -62,8 +62,6 @@ extern ConsoleVariable field_of_view;
 
 extern int render_frame_count;
 
-extern MapObject *background_camera_map_object;
-
 extern ConsoleVariable pixel_aspect_ratio;
 extern ConsoleVariable monitor_aspect_ratio;
 

@@ -160,7 +160,7 @@ static const DDFCommandList linedef_commands[] = {
     DDF_FIELD("DRAG", dummy_line, drag_, DDFMainGetFloat),
     DDF_FIELD("AMBIENT_SOUND", dummy_line, ambient_sfx_, DDFMainLookupSound),
     DDF_FIELD("ACTIVATE_SOUND", dummy_line, activate_sfx_, DDFMainLookupSound),
-    DDF_FIELD("MUSIC", dummy_line, music_, DDFMainGetNumeric),
+    DDF_FIELD("MUSIC", dummy_line, music_, DDFMainGetString),
     DDF_FIELD("AUTO", dummy_line, autoline_, DDFMainGetBoolean),
     DDF_FIELD("SINGLESIDED", dummy_line, singlesided_, DDFMainGetBoolean),
     DDF_FIELD("TRANSLUCENCY", dummy_line, translucency_, DDFMainGetPercent),
@@ -683,7 +683,6 @@ static DDFSpecialFlags line_effect_names[] = {{"TRANSLUCENT", kLineEffectTypeTra
                                               {"UNBLOCK_THINGS", kLineEffectTypeUnblockThings, 0},
                                               {"BLOCK_SHOTS", kLineEffectTypeBlockShots, 0},
                                               {"BLOCK_SIGHT", kLineEffectTypeBlockSight, 0},
-                                              {"SKY_TRANSFER", kLineEffectTypeSkyTransfer, 0}, // Lobo 2022
                                               {"TAGGED_OFFSET_SCROLL", kLineEffectTypeTaggedOffsetScroll, 0},
                                               {"BLOCK_LAND_MONSTERS", kLineEffectTypeBlockGroundedMonsters, 0},
                                               {"BLOCK_PLAYERS", kLineEffectTypeBlockPlayers, 0},
@@ -1257,7 +1256,7 @@ void LineType::Default(void)
     drag_          = kFloatUnused;
     ambient_sfx_   = nullptr;
     activate_sfx_  = nullptr;
-    music_         = 0;
+    music_.clear();
     autoline_      = false;
     singlesided_   = false;
 

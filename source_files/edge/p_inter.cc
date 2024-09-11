@@ -861,12 +861,7 @@ void TouchSpecialThing(MapObject *special, MapObject *toucher)
     info.lose_them = false;
     DoGiveBenefitList(&info);
 
-    if (special->flags_ & kMapObjectFlagCountItem)
-    {
-        info.player->item_count_++;
-        info.got_it = true;
-    }
-    else if (special->hyper_flags_ & kHyperFlagForcePickup)
+    if (special->hyper_flags_ & kHyperFlagForcePickup)
     {
         info.got_it  = true;
         info.keep_it = false;
@@ -1038,10 +1033,6 @@ void KillMapObject(MapObject *source, MapObject *target, const DamageClass *damt
 
     if (source && source->player_)
     {
-        // count for intermission
-        if (target->flags_ & kMapObjectFlagCountKill)
-            source->player_->kill_count_++;
-
         if (target->info_->kill_benefits_)
         {
             PickupInfo info;
@@ -1076,12 +1067,6 @@ void KillMapObject(MapObject *source, MapObject *target, const DamageClass *damt
                 source->player_->total_frags_++;
             }
         }
-    }
-    else if (InSinglePlayerMatch() && (target->flags_ & kMapObjectFlagCountKill))
-    {
-        // count all monster deaths,
-        // even those caused by other monsters
-        players[console_player]->kill_count_++;
     }
 
     if (target->player_)
@@ -1140,7 +1125,7 @@ void KillMapObject(MapObject *source, MapObject *target, const DamageClass *damt
     if (state == 0)
         state = target->info_->death_state_;
 
-    if (gore_level.d_ == 2 && (target->flags_ & kMapObjectFlagCountKill)) // Hopefully the only things with
+    if (gore_level.d_ == 2 && (target->flags_ & kExtendedFlagMonster)) // Hopefully the only things with
                                                                           // blood/gore_level are monsters and not
                                                                           // "barrels", etc
     {

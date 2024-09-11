@@ -152,9 +152,7 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
 
     if (which == kPlayerSpriteCrosshair)
     {
-        if (!player->weapons_[player->ready_weapon_].info->ignore_crosshair_scaling_)
-            ratio = crosshair_size.f_ / w;
-
+        ratio = crosshair_size.f_ / w;
         w *= ratio;
         h *= ratio;
         is_fuzzy = false;

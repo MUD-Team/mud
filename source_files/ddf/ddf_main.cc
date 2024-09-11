@@ -23,10 +23,8 @@
 #include "cglm/struct.h"
 #include "ddf_anim.h"
 #include "ddf_colormap.h"
-#include "ddf_font.h"
 #include "ddf_image.h"
 #include "ddf_local.h"
-#include "ddf_style.h"
 #include "ddf_switch.h"
 #include "epi.h"
 #include "epi_filesystem.h"
@@ -208,8 +206,6 @@ void DDFInit()
     DDFSFXInit();
     DDFColmapInit();
     DDFImageInit();
-    DDFFontInit();
-    DDFStyleInit();
     DDFAttackInit();
     DDFWeaponInit();
     DDFMobjInit();
@@ -219,7 +215,6 @@ void DDFInit()
     DDFAnimInit();
     DDFGameInit();
     DDFLevelInit();
-    DDFMusicPlaylistInit();
     DDFFlatInit();
     DDFMovieInit();
 }
@@ -288,8 +283,6 @@ void DDFCleanUp()
 {
     DDFLanguageCleanUp();
     DDFImageCleanUp();
-    DDFFontCleanUp();
-    DDFStyleCleanUp();
     DDFMobjCleanUp();
     DDFAttackCleanUp();
     DDFStateCleanUp();
@@ -302,7 +295,6 @@ void DDFCleanUp()
     DDFAnimCleanUp();
     DDFGameCleanUp();
     DDFLevelCleanUp();
-    DDFMusicPlaylistCleanUp();
     DDFFlatCleanUp();
     DDFMovieCleanUp();
 }
@@ -737,16 +729,6 @@ void DDFMainReadFile(DDFReadInfo *readinfo, const std::string &data)
             if (epi::StringPrefixCaseCompareASCII(std::string_view(memfileptr, 8), "#VERSION") == 0)
             {
                 // just ignore it
-                memfileptr += l_len;
-                continue;
-            }
-
-            if (epi::StringPrefixCaseCompareASCII(std::string_view(memfileptr, 13), "#NOPATCHMENUS") == 0)
-            {
-                if (epi::StringCaseCompareASCII(readinfo->short_name, "DDFSTYLE") == 0)
-                {
-                    styledefs.patch_menus_allowed_ = false;
-                }
                 memfileptr += l_len;
                 continue;
             }
@@ -1927,13 +1909,9 @@ static ddf_reader_t ddf_readers[kTotalDDFTypes] = {
     {kDDFTypeSFX, "DDFSFX", "sounds.ddf", "Sounds", DDFReadSFX},
     {kDDFTypeColourMap, "DDFCOLM", "colmap.ddf", "ColourMaps", DDFReadColourMaps},
     {kDDFTypeImage, "DDFIMAGE", "images.ddf", "Images", DDFReadImages},
-    {kDDFTypeFont, "DDFFONT", "fonts.ddf", "Fonts", DDFReadFonts},
-    {kDDFTypeStyle, "DDFSTYLE", "styles.ddf", "Styles", DDFReadStyles},
     {kDDFTypeAttack, "DDFATK", "attacks.ddf", "Attacks", DDFReadAtks},
     {kDDFTypeWeapon, "DDFWEAP", "weapons.ddf", "Weapons", DDFReadWeapons},
     {kDDFTypeThing, "DDFTHING", "things.ddf", "Things", DDFReadThings},
-
-    {kDDFTypePlaylist, "DDFPLAY", "playlist.ddf", "Playlists", DDFReadMusicPlaylist},
     {kDDFTypeLine, "DDFLINE", "lines.ddf", "Lines", DDFReadLines},
     {kDDFTypeSector, "DDFSECT", "sectors.ddf", "Sectors", DDFReadSectors},
     {kDDFTypeSwitch, "DDFSWTH", "switch.ddf", "Switches", DDFReadSwitch},

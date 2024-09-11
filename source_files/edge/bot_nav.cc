@@ -63,19 +63,21 @@ float BotEvaluateBigItem(const MapObject *mo)
         {
         case kBenefitTypeWeapon:
             // crude guess of powerfulness based on ammo
+            // TODO: Figure something else out, this
+            // was Doom-specific - Dasho
             ammotype = B->sub.weap->ammo_[0];
 
             switch (ammotype)
             {
             case kAmmunitionTypeNoAmmo:
                 return 25;
-            case kAmmunitionTypeBullet:
+            case kAmmunitionType1:
                 return 50;
-            case kAmmunitionTypeShell:
+            case kAmmunitionType2:
                 return 60;
-            case kAmmunitionTypeRocket:
+            case kAmmunitionType3:
                 return 70;
-            case kAmmunitionTypeCell:
+            case kAmmunitionType4:
                 return 80;
             default:
                 return 65;

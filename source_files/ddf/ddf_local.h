@@ -261,10 +261,6 @@ void DDFMobjGetPlayer(const char *info, void *storage);
 
 void ThingParseField(const char *field, const char *contents, int index, bool is_last);
 
-// DDFMUS Code
-void DDFMusicPlaylistInit(void);
-void DDFMusicPlaylistCleanUp(void);
-
 // DDFSTAT Code
 void DDFStateInit(void);
 void DDFStateGetAttack(const char *arg, State *cur_state);
@@ -316,14 +312,6 @@ extern const DDFSpecialFlags ammo_types[];
 // DDFCOLM Code -AJA- 1999/07/09.
 void DDFColmapInit(void);
 void DDFColmapCleanUp(void);
-
-// DDFFONT Code -AJA- 2004/11/13.
-void DDFFontInit(void);
-void DDFFontCleanUp(void);
-
-// DDFSTYLE Code -AJA- 2004/11/14.
-void DDFStyleInit(void);
-void DDFStyleCleanUp(void);
 
 // DDFFONT Code -AJA- 2004/11/18.
 void DDFImageInit(void);

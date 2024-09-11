@@ -218,12 +218,6 @@ class Player
     int frags_;
     int total_frags_;
 
-    // For intermission stats.
-    int kill_count_;
-    int item_count_;
-    int secret_count_;
-    int level_time_;
-
     // For screen flashing (red or bright).
     int damage_count_;
     int bonus_count_;

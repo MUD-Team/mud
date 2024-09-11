@@ -428,10 +428,8 @@ const DDFSpecialFlags inv_types[] = {{"INVENTORY01", kInventoryType01, 0}, {"INV
                                      {"INVENTORY97", kInventoryType97, 0}, {"INVENTORY98", kInventoryType98, 0},
                                      {"INVENTORY99", kInventoryType99, 0}, {nullptr, 0, 0}};
 
-const DDFSpecialFlags counter_types[] = {{"LIVES", kCounterTypeLives, 0},     {"SCORE", kCounterTypeScore, 0},
-                                         {"MONEY", kCounterTypeMoney, 0},     {"EXPERIENCE", kCounterTypeExperience, 0},
-                                         {"COUNTER01", kCounterTypeLives, 0}, {"COUNTER02", kCounterTypeScore, 0},
-                                         {"COUNTER03", kCounterTypeMoney, 0}, {"COUNTER04", kCounterTypeExperience, 0},
+const DDFSpecialFlags counter_types[] = {{"COUNTER01", kCounterType01, 0}, {"COUNTER02", kCounterType02, 0},
+                                         {"COUNTER03", kCounterType03, 0}, {"COUNTER04", kCounterType04, 0},
                                          {"COUNTER05", kCounterType05, 0},    {"COUNTER06", kCounterType06, 0},
                                          {"COUNTER07", kCounterType07, 0},    {"COUNTER08", kCounterType08, 0},
                                          {"COUNTER09", kCounterType09, 0},    {"COUNTER10", kCounterType10, 0},
@@ -643,14 +641,6 @@ static void ThingFinishEntry(void)
 {
     DDFStateFinishRange(dynamic_mobj->state_grp_);
 
-    // count-as-kill things are automatically monsters
-    if (dynamic_mobj->flags_ & kMapObjectFlagCountKill)
-        dynamic_mobj->extended_flags_ |= kExtendedFlagMonster;
-
-    // countable items are always pick-up-able
-    if (dynamic_mobj->flags_ & kMapObjectFlagCountItem)
-        dynamic_mobj->hyper_flags_ |= kHyperFlagForcePickup;
-
     // shootable things are always pushable
     if (dynamic_mobj->flags_ & kMapObjectFlagShootable)
         dynamic_mobj->hyper_flags_ |= kHyperFlagPushable;
@@ -709,8 +699,6 @@ static void ThingFinishEntry(void)
     // backwards compatibility: if no idle state, re-use spawn state
     if (dynamic_mobj->idle_state_ == 0)
         dynamic_mobj->idle_state_ = dynamic_mobj->spawn_state_;
-
-    dynamic_mobj->DLightCompatibility();
 
     if (TemplateThing)
     {
@@ -1445,8 +1433,6 @@ static const DDFSpecialFlags normal_specials[] = {
     {"LINKS", kMapObjectFlagNoBlockmap + kMapObjectFlagNoSector, 1},
     {"DAMAGESMOKE", kMapObjectFlagNoBlood, 0},
     {"SHOOTABLE", kMapObjectFlagShootable, 0},
-    {"COUNT_AS_KILL", kMapObjectFlagCountKill, 0},
-    {"COUNT_AS_ITEM", kMapObjectFlagCountItem, 0},
     {"SKULLFLY", kMapObjectFlagSkullFly, 0},
     {"SPECIAL", kMapObjectFlagSpecial, 0},
     {"SECTOR", kMapObjectFlagNoSector, 1},
@@ -1506,7 +1492,6 @@ static DDFSpecialFlags hyper_specials[] = {
     {"INVULNERABLE", kHyperFlagInvulnerable, 0},
     {"VAMPIRE", kHyperFlagVampire, 0},
     {"AUTOAIM", kHyperFlagNoAutoaim, 1},
-    {"TILT", kHyperFlagForceModelTilt, 0},
     {"IMMORTAL", kHyperFlagImmortal, 0},
     {"FLOOR_CLIP", kHyperFlagFloorClip, 0},         // Lobo: new FLOOR_CLIP flag
     {"TRIGGER_LINES", kHyperFlagNoTriggerLines, 1}, // Lobo: Cannot activate doors etc.
@@ -1588,12 +1573,6 @@ void DDFMobjGetSpecial(const char *info)
 static DDFSpecialFlags dlight_type_names[] = {{"NONE", kDynamicLightTypeNone, 0},
                                               {"MODULATE", kDynamicLightTypeModulate, 0},
                                               {"ADD", kDynamicLightTypeAdd, 0},
-
-                                              // backwards compatibility
-                                              {"LINEAR", kDynamicLightTypeCompatibilityLinear, 0},
-                                              {"QUADRATIC", kDynamicLightTypeCompatibilityQuadratic, 0},
-                                              {"CONSTANT", kDynamicLightTypeCompatibilityLinear, 0},
-
                                               {nullptr, 0, 0}};
 
 //
@@ -2176,41 +2155,6 @@ void MapObjectDefinition::Default()
     hear_distance_  = -1;
 
     morphtimeout_ = 0;
-}
-
-void MapObjectDefinition::DLightCompatibility(void)
-{
-    for (int DL = 0; DL < 2; DL++)
-    {
-        int r = epi::GetRGBARed(dlight_[DL].colour_);
-        int g = epi::GetRGBAGreen(dlight_[DL].colour_);
-        int b = epi::GetRGBABlue(dlight_[DL].colour_);
-
-        // dim the colour
-        r = int(r * 0.8f);
-        g = int(g * 0.8f);
-        b = int(b * 0.8f);
-
-        switch (dlight_[DL].type_)
-        {
-        case kDynamicLightTypeCompatibilityQuadratic:
-            dlight_[DL].type_   = kDynamicLightTypeModulate;
-            dlight_[DL].radius_ = DynamicLightCompatibilityRadius(dlight_[DL].radius_);
-            dlight_[DL].colour_ = epi::MakeRGBA(r, g, b);
-
-            hyper_flags_ |= kHyperFlagQuadraticDynamicLight;
-            break;
-
-        case kDynamicLightTypeCompatibilityLinear:
-            dlight_[DL].type_ = kDynamicLightTypeModulate;
-            dlight_[DL].radius_ *= 1.3;
-            dlight_[DL].colour_ = epi::MakeRGBA(r, g, b);
-            break;
-
-        default: // nothing to do
-            break;
-        }
-    }
 }
 
 // --> MapObjectDefinitionContainer class

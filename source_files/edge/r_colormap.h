@@ -39,12 +39,6 @@ enum PaletteTypes
 };
 
 // -AJA- 1999/07/10: Some stuff for colmap.ddf.
-
-void GetColormapRGB(const Colormap *colmap, float *r, float *g, float *b);
-
-RGBAColor GetFontColor(const Colormap *colmap);
-RGBAColor ParseFontColor(const char *name, bool strict = false);
-
 AbstractShader *GetColormapShader(const struct RegionProperties *props, int light_add = 0, Sector *sec = nullptr);
 
 //--- editor settings ---

@@ -48,8 +48,6 @@ struct EventTicCommand
     int8_t   upward_move;
     uint8_t  buttons;
     uint16_t extended_buttons;
-    uint8_t  chat_character;
-    uint8_t  unused2, unused3;
 };
 
 //

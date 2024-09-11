@@ -36,7 +36,6 @@ class Colormap;
 class GameDefinition;
 class MapDefinition;
 class MapObjectDefinition;
-class PlaylistEntry;
 class WeaponDefinition;
 
 #include "ddf_attack.h"
@@ -46,7 +45,6 @@ class WeaponDefinition;
 #include "ddf_level.h"
 #include "ddf_line.h"
 #include "ddf_movie.h"
-#include "ddf_playlist.h"
 #include "ddf_sfx.h"
 #include "ddf_states.h"
 #include "ddf_thing.h"

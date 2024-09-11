@@ -29,6 +29,8 @@
 
 #include <stdint.h>
 
+#include <string>
+
 constexpr uint16_t kMusicBuffer = 1024;
 
 /* abstract base class */
@@ -56,11 +58,11 @@ class AbstractMusicPlayer
 /* VARIABLES */
 
 extern ConsoleVariable music_volume;
-extern int             entry_playing;
+extern std::string     entry_playing;
 
 /* FUNCTIONS */
 
-void ChangeMusic(int entry_number, bool loop);
+void ChangeMusic(std::string_view song_name, bool loop);
 void ResumeMusic(void);
 void PauseMusic(void);
 void StopMusic(void);

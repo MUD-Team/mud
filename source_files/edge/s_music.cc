@@ -45,50 +45,49 @@ bool no_music = false;
 // Current music handle
 static AbstractMusicPlayer *music_player;
 
-int         entry_playing = -1;
+std::string entry_playing = "";
 static bool entry_looped;
 
-void ChangeMusic(int entry_number, bool loop)
+void ChangeMusic(std::string_view song_name, bool loop)
 {
     if (no_music)
         return;
 
-    // -AJA- playlist number 0 reserved to mean "no music"
-    if (entry_number <= 0)
+    if (song_name.empty())
+    {
+        LogWarning("ChangeMusic: no song name given.\n");
+        return;
+    }
+
+    // Consier "NONE" or "STOP" verbatim as directives
+    if (song_name == "NONE" || song_name == "STOP")
     {
         StopMusic();
         return;
     }
 
     // -AJA- don't restart the current song (DOOM compatibility)
-    if (entry_number == entry_playing && entry_looped)
+    // TODO: Is this still the behavior we want? - Dasho
+    if (song_name == entry_playing && entry_looped)
         return;
 
     StopMusic();
 
-    entry_playing = entry_number;
+    entry_playing = song_name;
     entry_looped  = loop;
 
-    // when we cannot find the music entry, no music will play
-    const PlaylistEntry *play = playlist.Find(entry_number);
-    if (!play)
-    {
-        LogWarning("Could not find music entry [%d]\n", entry_number);
-        return;
-    }
-
     // open the file or lump, and read it into memory
-    epi::File *F = OpenPackFile(play->info_, "");
+    epi::File *F = OpenPackFile(entry_playing, "music");
     if (!F)
     {
-        LogWarning("ChangeMusic: pack entry '%s' not found.\n", play->info_.c_str());
+        LogWarning("ChangeMusic: music entry '%s' not found.\n", entry_playing.c_str());
         return;
     }
 
     SoundFormat fmt = kSoundUnknown;
 
     // for FILE and PACK, use the file extension
-    fmt = SoundFilenameToFormat(play->info_);
+    fmt = SoundFilenameToFormat(song_name);
 
     // NOTE: players are responsible for deleting 'F'
     switch (fmt)
@@ -131,7 +130,7 @@ void StopMusic(void)
         music_player = nullptr;
     }
 
-    entry_playing = -1;
+    entry_playing.clear();
     entry_looped  = false;
 }
 
