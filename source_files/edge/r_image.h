@@ -80,11 +80,6 @@ class Image
     // one of the kOpacityXXX values
     int opacity_;
 
-    bool is_font_;
-
-    // For fully transparent images
-    bool is_empty_;
-
     bool grayscale_ = false;
 
     int hsv_rotation_   = 0;
@@ -203,7 +198,6 @@ Image       *ImageContainerLookup(std::list<Image *> &bucket, const char *name, 
 const Image *ImageLookup(const char *name, ImageNamespace = kImageNamespaceGraphic, int flags = 0);
 
 const Image *ImageForDummySprite(void);
-const Image *ImageForDummySkin(void);
 const Image *ImageForHomDetect(void);
 
 //

@@ -288,13 +288,6 @@ static void FillSpriteFrames()
                     continue;
                 }
 
-                // ignore model skins
-                if (spritebase.size() == spr_len + 4 && spritebase[spr_len] == 'S' &&
-                    spritebase[spr_len + 1] == 'K' && spritebase[spr_len + 2] == 'N')
-                {
-                    continue;
-                }
-
                 if (epi::StringCompareMax(sprname, spritebase, spr_len) != 0)
                     continue;
 
@@ -336,13 +329,6 @@ static void FillSpriteFramesUser()
             const char *img_name = images[L]->name_.c_str();
 
             if (strlen(img_name) != spr_len + 2 && strlen(img_name) != spr_len + 4)
-            {
-                continue;
-            }
-
-            // ignore model skins
-            if (strlen(img_name) == spr_len + 4 && img_name[spr_len] == 'S' && img_name[spr_len + 1] == 'K' &&
-                img_name[spr_len + 2] == 'N')
             {
                 continue;
             }

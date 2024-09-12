@@ -48,7 +48,6 @@
 
 EDGE_DEFINE_CONSOLE_VARIABLE(precache_textures, "1", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(precache_sprites, "1", kConsoleVariableFlagArchive)
-EDGE_DEFINE_CONSOLE_VARIABLE(precache_models, "1", kConsoleVariableFlagArchive)
 
 //
 // AddFlatAnimation
@@ -265,11 +264,7 @@ void PrecacheLevelGraphics(void)
 
     if (precache_textures.d_)
         PrecacheTextures();
-
-/*
-    if (precache_models.d_)
-        PrecacheModels();
-*/
+        
     PrecacheSky();
 }
 

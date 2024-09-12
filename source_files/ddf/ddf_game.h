@@ -177,9 +177,8 @@ class GameDefinition
 
     std::vector<std::string> titlepics_;
 
-    int titlemusic_;
+    std::string titlemusic_;
     int titletics_;
-    int special_music_;
 
     LightingModel lighting_;
 

@@ -679,13 +679,6 @@ static void P_LineEffect(Line *target, Line *source, const LineType *special)
         AdjustLightParts(target->side[1], 1, special->line_parts_, &source->front_sector->properties);
     }
 
-    // Lobo 2022: experimental partial sky transfer support
-    if ((special->line_effect_ & kLineEffectTypeSkyTransfer) && source->side[0])
-    {
-        if (source->side[0]->top.image)
-            sky_image = ImageLookup(source->side[0]->top.image->name_.c_str(), kImageNamespaceTexture);
-    }
-
     // experimental: stretch wall texture(s) by line length
     if (special->line_effect_ & kLineEffectTypeStretchWidth)
     {
@@ -1238,7 +1231,7 @@ static bool P_ActivateSpecialLine(Line *line, const LineType *special, int tag, 
         }
     }
 
-    if (special->music_)
+    if (!special->music_.empty())
     {
         ChangeMusic(special->music_, true);
         texSwitch = true;
@@ -1447,16 +1440,11 @@ static inline void PlayerInProperties(Player *player, float bz, float tz, float 
 
     if (special->secret_ && !props->secret_found)
     {
-        player->secret_count_++;
-
         if (!InDeathmatch())
         {
             ImportantConsoleMessageLDF("FoundSecret"); // Lobo: get text from language.ddf
 
             StartSoundEffect(player->map_object_->info_->secretsound_, kCategoryUi, player->map_object_);
-            // StartSoundEffect(player->map_object_->info_->secretsound_,
-            //		P_MobjGetSfxCategory(player->map_object_),
-            // player->map_object_);
         }
 
         props->secret_found = true;

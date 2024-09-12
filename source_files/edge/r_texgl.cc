@@ -177,13 +177,10 @@ GLuint UploadTexture(ImageData *img, int flags, int max_pix)
     return id;
 }
 
-int DetermineOpacity(ImageData *img, bool *is_empty_)
+int DetermineOpacity(ImageData *img)
 {
     if (img->depth_ == 3)
-    {
-        *is_empty_ = false;
         return kOpacitySolid;
-    }
 
     EPI_ASSERT(img->depth_ == 4);
 
@@ -207,7 +204,6 @@ int DetermineOpacity(ImageData *img, bool *is_empty_)
                 empty = false;
         }
 
-    *is_empty_ = empty;
     if (opacity == kOpacityComplex)
         return kOpacityComplex;
     else

@@ -40,7 +40,7 @@ void A_WeaponEmpty(MapObject *mo);
 void A_WeaponShoot(MapObject *mo);
 void A_WeaponEject(MapObject *mo);
 void A_WeaponJump(MapObject *mo);
-void A_WeaponDJNE(MapObject *mo);
+void A_WeaponPartialReloadJump(MapObject *mo);
 void A_Lower(MapObject *mo);
 void A_Raise(MapObject *mo);
 void A_ReFire(MapObject *mo);

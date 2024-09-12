@@ -83,8 +83,6 @@ class ImageDefinition
 
     int fix_trans_; // kTransparencyFixXXX value
 
-    bool is_font_;
-
     // RENDERING specifics:
     float scale_, aspect_;
 

@@ -88,15 +88,15 @@ static bool DoCacheLoad(SoundEffectDefinition *def, SoundData *buf)
     epi::File  *F;
     SoundFormat fmt = kSoundUnknown;
 
-    if (def->pack_name_ != "")
+    if (!def->filename_.empty())
     {
-        F = OpenPackFile(def->pack_name_, "");
+        F = OpenPackFile(def->filename_, "sounds");
         if (!F)
         {
-            DebugOrError("SFX Loader: Missing sound in EPK: '%s'\n", def->pack_name_.c_str());
+            DebugOrError("SFX Loader: Missing sound file: '%s'\n", def->filename_.c_str());
             return false;
         }
-        fmt = SoundFilenameToFormat(def->pack_name_);
+        fmt = SoundFilenameToFormat(def->filename_);
     }
     else
     {
@@ -122,12 +122,6 @@ static bool DoCacheLoad(SoundEffectDefinition *def, SoundData *buf)
         delete[] data;
         WarningOrError("SFX Loader: Ignored short data (%d bytes).\n", length);
         return false;
-    }
-
-    if (def->pack_name_.empty())
-    {
-        // for lumps, we must detect the format from the lump contents
-        fmt = DetectSoundFormat(data, length);
     }
 
     bool OK = false;

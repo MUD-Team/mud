@@ -21,7 +21,6 @@
 #include "epi.h"
 #include "epi_endian.h"
 #include "epi_filesystem.h"
-#include "ddf_playlist.h"
 #include "s_blit.h"
 #include "s_cache.h"
 #include "s_music.h"

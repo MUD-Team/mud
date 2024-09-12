@@ -269,7 +269,7 @@ void BuildEventTicCommand(EventTicCommand *cmd)
 {
     UpdateForces();
 
-    *cmd = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    *cmd = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 
     bool strafe = IsKeyPressed(key_strafe);
     int  speed  = IsKeyPressed(key_speed) ? 1 : 0;
@@ -498,8 +498,6 @@ void BuildEventTicCommand(EventTicCommand *cmd)
     }
     else
         allow_inventory_next = true;
-
-    cmd->chat_character = 0;
 
     for (int k = 0; k < 6; k++)
         ball_deltas[k] = 0;

@@ -8,7 +8,6 @@ add_library(
   ddf_attack.cc
   ddf_colormap.cc
   ddf_flat.cc
-  ddf_font.cc
   ddf_game.cc
   ddf_image.cc
   ddf_language.cc
@@ -16,11 +15,9 @@ add_library(
   ddf_line.cc
   ddf_main.cc
   ddf_movie.cc
-  ddf_playlist.cc
   ddf_sector.cc
   ddf_sfx.cc
   ddf_states.cc
-  ddf_style.cc
   ddf_switch.cc
   ddf_thing.cc
   ddf_weapon.cc

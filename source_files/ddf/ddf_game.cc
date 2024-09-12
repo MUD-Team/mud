@@ -54,9 +54,8 @@ static const DDFCommandList gamedef_commands[] = {
     DDF_FIELD("FIRSTMAP", dummy_gamedef, firstmap_, DDFMainGetLumpName),
     DDF_FIELD("NAME_GRAPHIC", dummy_gamedef, namegraphic_, DDFMainGetLumpName),
     DDF_FIELD("TITLE_MOVIE", dummy_gamedef, titlemovie_, DDFMainGetString),
-    DDF_FIELD("TITLE_MUSIC", dummy_gamedef, titlemusic_, DDFMainGetNumeric),
+    DDF_FIELD("TITLE_MUSIC", dummy_gamedef, titlemusic_, DDFMainGetString),
     DDF_FIELD("TITLE_TIME", dummy_gamedef, titletics_, DDFMainGetTime),
-    DDF_FIELD("SPECIAL_MUSIC", dummy_gamedef, special_music_, DDFMainGetNumeric),
     DDF_FIELD("LIGHTING", dummy_gamedef, lighting_, DDFGameGetLighting),
     DDF_FIELD("DESCRIPTION", dummy_gamedef, description_, DDFMainGetString),
     DDF_FIELD("NO_SKILL_MENU", dummy_gamedef, no_skill_menu_, DDFMainGetBoolean),
@@ -718,7 +717,6 @@ void GameDefinition::CopyDetail(GameDefinition &src)
     titlemusic_ = src.titlemusic_;
     titletics_  = src.titletics_;
 
-    special_music_ = src.special_music_;
     lighting_      = src.lighting_;
     description_   = src.description_;
     default_damage_flash_ = src.default_damage_flash_;
@@ -765,10 +763,9 @@ void GameDefinition::Default()
     titlepics_.clear();
     titlemovie_.clear();
     movie_played_ = false;
-    titlemusic_   = 0;
+    titlemusic_.clear();
     titletics_    = kTicRate * 4;
 
-    special_music_ = 0;
     lighting_      = kLightingModelDoomish;
     description_.clear();
     default_damage_flash_ = SG_RED_RGBA32;

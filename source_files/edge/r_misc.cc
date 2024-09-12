@@ -85,8 +85,6 @@ float view_sine;
 
 Player *view_player;
 
-MapObject *background_camera_map_object = nullptr;
-
 //
 // precalculated math tables
 //

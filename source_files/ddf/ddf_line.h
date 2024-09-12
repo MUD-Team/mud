@@ -400,7 +400,7 @@ enum LineEffectType
     // experimental: make tagged lines (incl) block monster sight
     kLineEffectTypeBlockSight = (1 << 8),
     // experimental: transfer upper texture to SKY
-    kLineEffectTypeSkyTransfer = (1 << 9),
+    //kLineEffectTypeSkyTransfer = (1 << 9), // no longer used
     // make all tagged lines scroll using this sidedef's offsets
     kLineEffectTypeTaggedOffsetScroll = (1 << 10),
     // block land monsters
@@ -565,7 +565,7 @@ class LineType
     // Activation sound (overrides the switch sound)
     struct SoundEffect *activate_sfx_;
 
-    int music_;
+    std::string music_;
 
     // Automatically trigger this line at level start ?
     bool autoline_;

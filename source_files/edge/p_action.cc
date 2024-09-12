@@ -422,8 +422,6 @@ void BringCorpseToLife(MapObject *corpse)
         corpse->target_visibility_ = corpse->alpha_;
     corpse->tag_ = corpse->spawnpoint_.tag;
 
-    corpse->flags_ &= ~kMapObjectFlagCountKill; // Lobo 2023: don't add to killcount
-
     if (corpse->player_)
     {
         corpse->player_->player_state_         = kPlayerAlive;
@@ -573,10 +571,6 @@ void A_DLightSet(MapObject *mo)
     if (st && st->action_par)
     {
         mo->dynamic_light_.r = GLM_MAX(0.0f, ((int *)st->action_par)[0]);
-
-        if (mo->info_->hyper_flags_ & kHyperFlagQuadraticDynamicLight)
-            mo->dynamic_light_.r = DynamicLightCompatibilityRadius(mo->dynamic_light_.r);
-
         mo->dynamic_light_.target = mo->dynamic_light_.r;
     }
 }
@@ -586,12 +580,7 @@ void A_DLightFade(MapObject *mo)
     const State *st = mo->state_;
 
     if (st && st->action_par)
-    {
         mo->dynamic_light_.target = GLM_MAX(0.0f, ((int *)st->action_par)[0]);
-
-        if (mo->info_->hyper_flags_ & kHyperFlagQuadraticDynamicLight)
-            mo->dynamic_light_.target = DynamicLightCompatibilityRadius(mo->dynamic_light_.target);
-    }
 }
 
 void A_DLightRandom(MapObject *mo)
@@ -605,9 +594,6 @@ void A_DLightRandom(MapObject *mo)
 
         // Note: using RandomByte so that gameplay is unaffected
         float qty = low + (high - low) * RandomByte() / 255.0f;
-
-        if (mo->info_->hyper_flags_ & kHyperFlagQuadraticDynamicLight)
-            qty = DynamicLightCompatibilityRadius(qty);
 
         mo->dynamic_light_.r      = GLM_MAX(0.0f, qty);
         mo->dynamic_light_.target = mo->dynamic_light_.r;
@@ -2190,11 +2176,7 @@ static void ObjectSpawning(MapObject *parent, BAMAngle angle)
         // -KM- 1999/01/31 Explode objects over remove them.
         // -AJA- 2000/02/01: Remove now the default.
         if (attack->flags_ & kAttackFlagKillFailedSpawn)
-        {
             KillMapObject(parent, child, nullptr);
-            if (child->flags_ & kMapObjectFlagCountKill)
-                players[console_player]->kill_count_--;
-        }
         else
             RemoveMapObject(child);
 
@@ -2208,11 +2190,7 @@ static void ObjectSpawning(MapObject *parent, BAMAngle angle)
     if (!TryMove(child, child->x, child->y))
     {
         if (attack->flags_ & kAttackFlagKillFailedSpawn)
-        {
             KillMapObject(parent, child, nullptr);
-            if (child->flags_ & kMapObjectFlagCountKill)
-                players[console_player]->kill_count_--;
-        }
         else
             RemoveMapObject(child);
 

@@ -634,8 +634,7 @@ void FinishSky(void)
 
     glDepthMask(GL_FALSE);
 
-    if (!renderer_dumb_sky.d_)
-        glDepthFunc(GL_GREATER);
+    glDepthFunc(GL_GREATER);
 
     if (custom_skybox)
         RenderSkybox();
@@ -651,9 +650,6 @@ void FinishSky(void)
 void RenderSkyPlane(Subsector *sub, float h)
 {
     need_to_draw_sky = true;
-
-    if (renderer_dumb_sky.d_)
-        return;
 
     glNormal3f(0, 0, (view_z > h) ? 1.0f : -1.0f);
 
@@ -691,9 +687,6 @@ void RenderSkyPlane(Subsector *sub, float h)
 void RenderSkyWall(Seg *seg, float h1, float h2)
 {
     need_to_draw_sky = true;
-
-    if (renderer_dumb_sky.d_)
-        return;
 
     float x1 = seg->vertex_1->x;
     float y1 = seg->vertex_1->y;

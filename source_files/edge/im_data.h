@@ -100,34 +100,6 @@ class ImageData
     // lesser values become 0, and greater-or-equal values become 255.
     void ThresholdAlpha(uint8_t alpha = 128);
 
-    // mirror the already-drawn corner (lowest x/y values) into the
-    // other three corners.  When width or height is odd, the middle
-    // column/row must already be drawn.
-    void FourWaySymmetry();
-
-    // Intended for font spritesheets; will turn the background color
-    // (as determined by the first pixel of the image) transparent, if the
-    // background is not already transparent
-    void RemoveBackground();
-
-    // mirror the already-drawn half corner (1/8th of the image)
-    // into the rest of the image.  The source corner has lowest x/y
-    // values, and the triangle piece is where y <= x, including the
-    // pixels along the diagonal where (x == y).
-    // NOTE: the image must be SQUARE (width == height).
-    void EightWaySymmetry();
-
-    // For the IMAGE DDFFONT type, determines the width of a character
-    // by finding the row with the largest distance between the first
-    // and last non-background-colored pixel
-    uint16_t ImageCharacterWidth(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
-
-    // compute the average Hue of the RGB(A) image, storing the
-    // result in the 'hue' array (r, g, b).  The average intensity
-    // will be stored in 'intensity' when given.
-    void AverageHue(uint8_t *hue, uint8_t *intensity = nullptr, int from_x = -1, int to_x = 1000000, int from_y = -1,
-                    int to_y = 1000000);
-
     // compute the average color of the RGB image, based on modal average
     RGBAColor AverageColor(int from_x = -1, int to_x = 1000000, int from_y = -1, int to_y = 1000000);
 

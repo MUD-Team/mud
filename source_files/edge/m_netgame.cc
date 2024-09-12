@@ -26,7 +26,6 @@
 #include "m_netgame.h"
 
 #include "con_main.h"
-#include "ddf_font.h"
 #include "ddf_main.h"
 #include "dm_defs.h"
 #include "dm_state.h"
@@ -44,7 +43,6 @@
 #include "r_draw.h"
 #include "r_modes.h"
 #include "s_sound.h"
-#include "sv_main.h"
 
 
 extern GameFlags default_game_flags;

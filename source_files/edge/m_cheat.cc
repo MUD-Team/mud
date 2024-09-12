@@ -65,7 +65,6 @@ static CheatSequence cheat_powerup[9] = {
     {0, 0}  // -ACB- 1998/07/15  added "give nightvision" cheat
 };
 
-static CheatSequence cheat_music           = {0, 0};
 static CheatSequence cheat_my_position     = {0, 0};
 static CheatSequence cheat_show_stats      = {0, 0};
 static CheatSequence cheat_choppers        = {0, 0};
@@ -146,26 +145,6 @@ void M_ChangeLevelCheat(const char *string)
     DeferredNewGame(params);
 
     ConsoleMessageLDF("LevelChange");
-}
-
-//
-// M_ChangeMusicCheat
-//
-static void M_ChangeMusicCheat(const char *string)
-{
-    int entry_num;
-
-    // User pressed <ESC>
-    if (!string)
-        return;
-
-    entry_num = atoi(string);
-
-    if (!entry_num)
-        return;
-
-    ChangeMusic(entry_num, true);
-    ConsoleMessageLDF("MusChange");
 }
 
 static void CheatGiveWeapons(Player *pl, int key = -2)
@@ -383,11 +362,6 @@ bool CheatResponder(InputEvent *ev)
         // 'clev' change-level cheat
         // StartMenuMessageInput(language["LevelQ"], M_ChangeLevelCheat);
     }
-    else if (CheckCheatSequence(&cheat_music, key))
-    {
-        // 'mus' cheat for changing music
-        // StartMenuMessageInput(language["MusicQ"], M_ChangeMusicCheat);
-    }
     else if (CheckCheatSequence(&cheat_show_stats, key))
     {
         debug_fps      = debug_fps.d_ ? 0 : 1;
@@ -406,7 +380,6 @@ void CheatInitialize(void)
     char temp[16];
 
     // Now what?
-    cheat_music.sequence           = language["idmus"];
     cheat_god.sequence             = language["iddqd"];
     cheat_ammo.sequence            = language["idkfa"];
     cheat_ammo_no_keys.sequence    = language["idfa"];

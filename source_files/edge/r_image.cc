@@ -157,7 +157,6 @@ std::list<Image *> real_sprites;
 const Image *sky_flat_image;
 
 static const Image *dummy_sprite;
-static const Image *dummy_skin;
 static const Image *dummy_hom[2];
 
 // image cache (actually a ring structure)
@@ -195,9 +194,6 @@ static Image *NewImage(int width, int height, int opacity = kOpacityUnknown)
     rim->offset_x_ = rim->offset_y_ = 0;
     rim->scale_x_ = rim->scale_y_ = 1.0f;
     rim->opacity_                 = opacity;
-    rim->is_empty_                = false;
-    rim->is_font_                 = false;
-
     // set initial animation info
     rim->animation_.current = rim;
     rim->animation_.next    = nullptr;
@@ -393,8 +389,6 @@ static Image *AddImageUser(ImageDefinition *def)
 
     rim->source_type_     = kImageSourceUser;
     rim->source_.user.def = def;
-
-    rim->is_font_ = def->is_font_;
 
     rim->hsv_rotation_   = def->hsv_rotation_;
     rim->hsv_saturation_ = def->hsv_saturation_;
@@ -625,13 +619,7 @@ static GLuint LoadImageOGL(Image *rim, bool do_whiten)
     ImageData *tmp_img = ReadAsEpiBlock(rim);
 
     if (rim->opacity_ == kOpacityUnknown)
-        rim->opacity_ = DetermineOpacity(tmp_img, &rim->is_empty_);
-
-    if (rim->is_font_)
-    {
-        tmp_img->RemoveBackground();
-        rim->opacity_ = DetermineOpacity(tmp_img, &rim->is_empty_);
-    }
+        rim->opacity_ = DetermineOpacity(tmp_img);
 
     if (rim->hsv_rotation_ || rim->hsv_saturation_ > -1 || rim->hsv_value_)
         tmp_img->SetHsv(rim->hsv_rotation_, rim->hsv_saturation_, rim->hsv_value_);
@@ -823,11 +811,6 @@ const Image *ImageForDummySprite(void)
     return dummy_sprite;
 }
 
-const Image *ImageForDummySkin(void)
-{
-    return dummy_skin;
-}
-
 const Image *ImageForHomDetect(void)
 {
     return dummy_hom[(render_frame_count & 0x10) ? 1 : 0];
@@ -941,7 +924,6 @@ void ImagePrecache(const Image *image)
 static void W_CreateDummyImages(void)
 {
     dummy_sprite = CreateDummyImage("DUMMY_SPRITE", 0xFFFF00, kTransparentPixelIndex);
-    dummy_skin   = CreateDummyImage("DUMMY_SKIN", 0xFF77FF, 0x993399);
 
     sky_flat_image = CreateDummyImage("DUMMY_SKY", 0x0000AA, 0x55AADD);
 
@@ -1044,8 +1026,6 @@ void AnimateImageSet(const Image **images, int number, int speed)
             dupe_image->actual_height_  = rim->actual_height_;
             dupe_image->actual_width_   = rim->actual_width_;
             dupe_image->cache_          = rim->cache_;
-            dupe_image->is_empty_       = rim->is_empty_;
-            dupe_image->is_font_        = rim->is_font_;
             dupe_image->offset_x_       = rim->offset_x_;
             dupe_image->offset_y_       = rim->offset_y_;
             dupe_image->opacity_        = rim->opacity_;

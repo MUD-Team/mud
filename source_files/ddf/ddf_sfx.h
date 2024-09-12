@@ -47,7 +47,7 @@ class SoundEffectDefinition
     std::string name_;
 
     // full sound lump name (or file name)
-    std::string pack_name_;
+    std::string filename_;
 
     // sfxinfo ID number
     // -AJA- Changed to a SoundEffect.  It serves two purposes: (a) hold the

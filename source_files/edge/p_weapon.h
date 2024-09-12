@@ -40,8 +40,6 @@ enum PlayerSpriteType
     kPlayerSpriteWeapon = 0,
     kPlayerSpriteFlash,
     kPlayerSpriteCrosshair,
-    kPlayerSpriteUnused,
-    // -AJA- Savegame code relies on kTotalPlayerSpriteTypes == 4.
     kTotalPlayerSpriteTypes
 };
 

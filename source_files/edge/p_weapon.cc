@@ -1666,8 +1666,10 @@ void A_WeaponJump(MapObject *mo)
     }
 }
 
-// Lobo: what the hell is this function for?
-void A_WeaponDJNE(MapObject *mo)
+// Dasho: It was never clear what 'DJNE' was for, which was the previous
+// name of this codepointer. As best I can tell, it is meant to be a jump
+// that occurs if you are reloading with a partially full clip
+void A_WeaponPartialReloadJump(MapObject *mo)
 {
     Player       *p   = mo->player_;
     PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
@@ -1678,7 +1680,7 @@ void A_WeaponDJNE(MapObject *mo)
 
     if (!psp->state || !psp->state->action_par)
     {
-        WarningOrError("DJNE used in weapon [%s] without a label !\n", info->name_.c_str());
+        WarningOrError("A_WeaponPartialReloadJump used in weapon [%s] without a label !\n", info->name_.c_str());
         return;
     }
 

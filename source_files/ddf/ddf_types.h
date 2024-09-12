@@ -334,15 +334,14 @@ enum AmmunitionType
 {
     kAmmunitionTypeDontCare = -2, // Only used for SelectNewWeapon()
     kAmmunitionTypeNoAmmo   = -1, // Unlimited for chainsaw / fist.
-    kAmmunitionTypeBullet   = 0,  // Pistol / chaingun ammo.
-    kAmmunitionTypeShell,         // Shotgun / double barreled shotgun.
-    kAmmunitionTypeRocket,        // Missile launcher.
-    kAmmunitionTypeCell,          // Plasma rifle, BFG.
-    // New ammo types
-    kAmmunitionTypePellet,
-    kAmmunitionTypeNail,
-    kAmmunitionTypeGrenade,
-    kAmmunitionTypeGas,
+    kAmmunitionType1        = 0,
+    kAmmunitionType2,
+    kAmmunitionType3,
+    kAmmunitionType4,
+    kAmmunitionType5,
+    kAmmunitionType6,
+    kAmmunitionType7,
+    kAmmunitionType8,
     kAmmunitionType9,
     kAmmunitionType10,
     kAmmunitionType11,
@@ -563,10 +562,6 @@ class WeaponDefinition
 
     // Lobo 2022: sprite Y offset, mainly for Heretic weapons
     float y_adjust_;
-
-    // Lobo 2023:  Video menu option "Crosshair size" is ignored for this
-    // weapons custom crosshair
-    bool ignore_crosshair_scaling_;
 
   public:
     inline int KeyPri(int idx) const // next/prev order value

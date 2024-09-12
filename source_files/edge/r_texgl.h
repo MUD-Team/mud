@@ -33,7 +33,7 @@ enum TextureUploadFlag
 
 GLuint UploadTexture(ImageData *img, int flags = kUploadNone, int max_pix = (1 << 30));
 
-int DetermineOpacity(ImageData *img, bool *is_empty_);
+int DetermineOpacity(ImageData *img);
 
 void BlackenClearAreas(ImageData *img);
 
