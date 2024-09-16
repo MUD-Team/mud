@@ -21,7 +21,6 @@
 #include "epi.h"
 #include "epi_filesystem.h"
 #include "epi_str_util.h"
-#include "m4p.h"
 
 SoundFormat DetectSoundFormat(uint8_t *data, int song_len)
 {
@@ -42,11 +41,6 @@ SoundFormat DetectSoundFormat(uint8_t *data, int song_len)
         return kSoundOGG;
     }
 
-    if ((data[0] == 'P' || data[0] == 'R') && data[1] == 'S' && data[2] == 'I' && data[3] == 'D')
-    {
-        return kSoundSID;
-    }
-
     if (data[0] == 'M' && data[1] == 'U' && data[2] == 'S')
     {
         return kSoundMUS;
@@ -57,65 +51,9 @@ SoundFormat DetectSoundFormat(uint8_t *data, int song_len)
         return kSoundMIDI;
     }
 
-    // XMI MIDI
-    if (song_len > 12 && data[0] == 'F' && data[1] == 'O' && data[2] == 'R' && data[3] == 'M' && data[8] == 'X' &&
-        data[9] == 'D' && data[10] == 'I' && data[11] == 'R')
-    {
-        return kSoundMIDI;
-    }
-
-    // GMF MIDI
-    if (data[0] == 'G' && data[1] == 'M' && data[2] == 'F' && data[3] == '\x1')
-    {
-        return kSoundMIDI;
-    }
-
-    // Electronic Arts MIDI
-    if (song_len > data[0] && data[0] >= 0x5D)
-    {
-        int offset = data[0] - 0x10;
-        if (data[offset] == 'r' && data[offset + 1] == 's' && data[offset + 2] == 'x' && data[offset + 3] == 'x' &&
-            data[offset + 4] == '}' && data[offset + 5] == 'u')
-            return kSoundMIDI;
-    }
-
-    // Reality Adlib Tracker 2
-    if (song_len > 16)
-    {
-        bool        is_rad = true;
-        const char *hdrtxt = "RAD by REALiTY!!";
-        for (int i = 0; i < 16; i++)
-        {
-            if (data[i] != *hdrtxt++)
-            {
-                is_rad = false;
-                break;
-            }
-        }
-        if (is_rad)
-            return kSoundRAD;
-    }
-
-    // Moving on to more specialized or less reliable detections
-
-    if (m4p_TestFromData(data, song_len))
-    {
-        return kSoundM4P;
-    }
-
-    if ((data[0] == 'I' && data[1] == 'D' && data[2] == '3') || (data[0] == 0xFF && ((data[1] >> 4 & 0xF) == 0xF)))
-    {
-        return kSoundMP3;
-    }
-
     if (data[0] == 0x3)
     {
         return kSoundDoom;
-    }
-
-    if (data[0] == 0x0)
-    {
-        return kSoundPCSpeaker;
     }
 
     return kSoundUnknown;
@@ -136,35 +74,16 @@ SoundFormat SoundFilenameToFormat(std::string_view filename)
     if (ext == ".ogg")
         return kSoundOGG;
 
-    if (ext == ".mp3")
-        return kSoundMP3;
-
-    if (ext == ".sid" || ext == ".psid")
-        return kSoundSID;
-
-    // Test MUS vs EA-MIDI MUS ?
     if (ext == ".mus")
         return kSoundMUS;
 
-    if (ext == ".mid" || ext == ".midi" || ext == ".xmi" || ext == ".rmi" || ext == ".rmid")
+    if (ext == ".mid" || ext == ".midi")
         return kSoundMIDI;
-
-    if (ext == ".mod" || ext == ".s3m" || ext == ".xm" || ext == ".it")
-        return kSoundM4P;
-
-    if (ext == ".rad")
-        return kSoundRAD;
 
     // Not sure if these will ever be encountered in the wild, but according to
     // the VGMPF Wiki they are valid DMX file extensions
-    if (ext == ".dsp" || ext == ".pcs" || ext == ".gsp" || ext == ".gsw")
+    if (ext == ".dsp" || ext == ".pcs" || ext == ".gsp" || ext == ".gsw" || ext == ".lmp")
         return kSoundDoom;
-
-    // Will actually result in checking the first byte to further determine if
-    // it's Doom or PC Speaker format; the above kSoundDoom stuff is
-    // unconditional which is why I didn't throw it up there
-    if (ext == ".lmp")
-        return kSoundPCSpeaker;
 
     return kSoundUnknown;
 }

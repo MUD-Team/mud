@@ -225,7 +225,6 @@ void DDFInit()
     DDFLevelInit();
     DDFMusicPlaylistInit();
     DDFFlatInit();
-    DDFFixInit();
     DDFMovieInit();
 }
 
@@ -309,13 +308,12 @@ void DDFCleanUp()
     DDFLevelCleanUp();
     DDFMusicPlaylistCleanUp();
     DDFFlatCleanUp();
-    DDFFixCleanUp();
     DDFMovieCleanUp();
 }
 
 static const char *tag_conversion_table[] = {
     "ANIMATIONS", "DDFANIM",  "ATTACKS", "DDFATK",  "COLOURMAPS", "DDFCOLM",  "FLATS",     "DDFFLAT",
-    "FIXES",      "WADFIXES", "FONTS",   "DDFFONT", "GAMES",      "DDFGAME",  "IMAGES",    "DDFIMAGE",
+    "FONTS",   "DDFFONT", "GAMES",      "DDFGAME",  "IMAGES",    "DDFIMAGE",
     "LANGUAGES",  "DDFLANG",  "LEVELS",  "DDFLEVL", "LINES",      "DDFLINE",  "PLAYLISTS", "DDFPLAY",
     "SECTORS",    "DDFSECT",  "SOUNDS",  "DDFSFX",  "STYLES",     "DDFSTYLE", "SWITCHES",  "DDFSWTH",
     "THINGS",     "DDFTHING", "WEAPONS", "DDFWEAP", "MOVIES",     "DDFMOVIE",

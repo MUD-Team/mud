@@ -34,9 +34,6 @@ static const DDFCommandList sfx_commands[] = {
     DDF_FIELD("LUMP_NAME", dummy_sfx, lump_name_, DDFMainGetLumpName),
     DDF_FIELD("PACK_NAME", dummy_sfx, pack_name_, DDFMainGetString),
     DDF_FIELD("FILE_NAME", dummy_sfx, file_name_, DDFMainGetString),
-    DDF_FIELD("PC_SPEAKER_LUMP", dummy_sfx, pc_speaker_sound_,
-              DDFMainGetString), // Kept for backwards compat
-    DDF_FIELD("PC_SPEAKER_SOUND", dummy_sfx, pc_speaker_sound_, DDFMainGetString),
     DDF_FIELD("SINGULAR", dummy_sfx, singularity_, DDFMainGetNumeric),
     DDF_FIELD("PRIORITY", dummy_sfx, priority_, DDFMainGetNumeric),
     DDF_FIELD("VOLUME", dummy_sfx, volume_, DDFMainGetPercent),
@@ -193,7 +190,6 @@ SoundEffectDefinition::~SoundEffectDefinition()
 void SoundEffectDefinition::CopyDetail(SoundEffectDefinition &src)
 {
     lump_name_        = src.lump_name_;
-    pc_speaker_sound_ = src.pc_speaker_sound_;
     file_name_        = src.file_name_;
     pack_name_        = src.pack_name_;
 
@@ -215,7 +211,6 @@ void SoundEffectDefinition::CopyDetail(SoundEffectDefinition &src)
 void SoundEffectDefinition::Default()
 {
     lump_name_.clear();
-    pc_speaker_sound_.clear();
     file_name_.clear();
     pack_name_.clear();
 

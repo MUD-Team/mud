@@ -25,14 +25,9 @@
 #include "epi_file.h"
 #include "epi_filesystem.h"
 #include "fluidlite.h"
+#include "i_midi.h"
 #include "i_system.h"
 #include "m_misc.h"
-// clang-format off
-#define MidiFraction FluidFraction
-#define MidiSequencer FluidSequencer
-typedef struct MidiRealTimeInterface FluidInterface;
-#include "midi_sequencer_impl.hpp"
-// clang-format on
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
 #include "s_blit.h"
@@ -184,7 +179,7 @@ class FluidPlayer : public AbstractMusicPlayer
     int  status_;
     bool looping_;
 
-    FluidInterface *fluid_interface_;
+    MidiRealTimeInterface *fluid_interface_;
 
     int16_t *mono_buffer_;
 
@@ -204,7 +199,7 @@ class FluidPlayer : public AbstractMusicPlayer
     }
 
   public:
-    FluidSequencer *fluid_sequencer_;
+    MidiSequencer *fluid_sequencer_;
 
     static void rtNoteOn(void *userdata, uint8_t channel, uint8_t note, uint8_t velocity)
     {
@@ -268,8 +263,8 @@ class FluidPlayer : public AbstractMusicPlayer
 
     void SequencerInit()
     {
-        fluid_sequencer_ = new FluidSequencer;
-        fluid_interface_ = new FluidInterface;
+        fluid_sequencer_ = new MidiSequencer;
+        fluid_interface_ = new MidiRealTimeInterface;
         memset(fluid_interface_, 0, sizeof(MidiRealTimeInterface));
 
         fluid_interface_->rtUserData           = this;
@@ -373,7 +368,7 @@ class FluidPlayer : public AbstractMusicPlayer
             fluid_synth_set_gain(edge_fluid, fluid_player_gain.f_);
         }
 
-        while (status_ == kPlaying && !pc_speaker_mode)
+        while (status_ == kPlaying)
         {
             SoundData *buf = SoundQueueGetFreeBuffer(kMusicBuffer, sound_device_stereo ? kMixInterleaved : kMixMono);
 

@@ -203,7 +203,7 @@ class StyleDefinitionContainer : public std::vector<StyleDefinition *>
 
   public:
     // If false, always use DDFFONT based menu entries instead of patch
-    // graphics; this is mostly for wadfixes or other EC-specific modifcations
+    // graphics; this is mostly for EC-specific modifcations
     // for projects not targeting EC
     bool patch_menus_allowed_ = true;
 };

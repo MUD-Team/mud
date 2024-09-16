@@ -90,9 +90,6 @@ void              GetTextureLumpsForWAD(int file, WadTextureResource *res);
 void              ProcessTXHINamespaces(void);
 int               GetDataFileIndexForLump(int lump);
 
-// auxiliary functions to help us deal with when to use skyboxes
-bool DisableStockSkybox(const char *ActualSky);
-
 bool IsLumpInPwad(const char *name);
 
 bool IsLumpInAnyWad(const char *name);
