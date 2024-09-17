@@ -2248,15 +2248,6 @@ void ProcessTXHINamespaces(void)
     }
 }
 
-static const char *UserSkyboxName(const char *base, int face)
-{
-    static char       buffer[64];
-    static const char letters[] = "NESWTB";
-
-    sprintf(buffer, "%s_%c", base, letters[face]);
-    return buffer;
-}
-
 // IsLumpInPwad
 //
 // check if a lump is in a pwad

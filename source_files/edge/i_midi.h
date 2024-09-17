@@ -49,20 +49,17 @@
 
 #pragma once
 
-#include <assert.h>
-#include <errno.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <stdio.h>
+#include <string.h>
 
-#include <algorithm>
 #include <iterator>
 #include <list>
-#include <memory>
 #include <set>
 #include <string>
 #include <vector>
 
+#include "epi.h"
 #include "epi_file.h"
 
 /*! Raw MIDI event hook */
@@ -1674,24 +1671,24 @@ MidiSequencer::~MidiSequencer()
 void MidiSequencer::SetInterface(const MidiRealTimeInterface *intrf)
 {
     // Interface must NOT be nullptr
-    assert(intrf);
+    EPI_ASSERT(intrf);
 
     // Note ON hook is REQUIRED
-    assert(intrf->rt_noteOn);
+    EPI_ASSERT(intrf->rt_noteOn);
     // Note OFF hook is REQUIRED
-    assert(intrf->rt_noteOff || intrf->rt_noteOffVel);
+    EPI_ASSERT(intrf->rt_noteOff || intrf->rt_noteOffVel);
     // Note Aftertouch hook is REQUIRED
-    assert(intrf->rt_noteAfterTouch);
+    EPI_ASSERT(intrf->rt_noteAfterTouch);
     // Channel Aftertouch hook is REQUIRED
-    assert(intrf->rt_channelAfterTouch);
+    EPI_ASSERT(intrf->rt_channelAfterTouch);
     // Controller change hook is REQUIRED
-    assert(intrf->rt_controllerChange);
+    EPI_ASSERT(intrf->rt_controllerChange);
     // Patch change hook is REQUIRED
-    assert(intrf->rt_patchChange);
+    EPI_ASSERT(intrf->rt_patchChange);
     // Pitch bend hook is REQUIRED
-    assert(intrf->rt_pitchBend);
+    EPI_ASSERT(intrf->rt_pitchBend);
     // System Exclusive hook is REQUIRED
-    assert(intrf->rt_systemExclusive);
+    EPI_ASSERT(intrf->rt_systemExclusive);
 
     if (intrf->pcmSampleRate != 0 && intrf->pcmFrameSize != 0)
     {
@@ -1711,7 +1708,7 @@ int MidiSequencer::PlayStream(uint8_t *stream, size_t length)
     size_t   periodSize = 0;
     uint8_t *stream_pos = stream;
 
-    assert(midi_output_interface_->onPcmRender);
+    EPI_ASSERT(midi_output_interface_->onPcmRender);
 
     while (left > 0)
     {
@@ -1732,7 +1729,7 @@ int MidiSequencer::PlayStream(uint8_t *stream, size_t length)
             stream_pos += generateSize * midi_time_.frame_size_;
             count += generateSize;
             left -= generateSize;
-            assert(left <= samples);
+            EPI_ASSERT(left <= samples);
         }
 
         if (midi_time_.time_rest_ <= 0.0)
@@ -3100,7 +3097,7 @@ void MidiSequencer::handleEvent(size_t track, const MidiSequencer::MidiEvent &ev
 
 double MidiSequencer::Tick(double s, double granularity)
 {
-    assert(midi_output_interface_); // MIDI output interface must be defined!
+    EPI_ASSERT(midi_output_interface_); // MIDI output interface must be defined!
 
     s *= midi_tempo_multiplier_;
     midi_current_position_.wait -= s;
@@ -3281,7 +3278,7 @@ bool MidiSequencer::LoadMidi(epi::MemFile *mfr)
     (void)(fsize);
     midi_parsing_errors_string_.clear();
 
-    assert(midi_output_interface_); // MIDI output interface must be defined!
+    EPI_ASSERT(midi_output_interface_); // MIDI output interface must be defined!
 
     midi_at_end_ = false;
     midi_loop_.FullReset();
