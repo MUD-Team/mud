@@ -223,7 +223,7 @@ void FLACPlayer::Stop()
 
 void FLACPlayer::Ticker()
 {
-    while (status_ == kPlaying && !pc_speaker_mode)
+    while (status_ == kPlaying)
     {
         SoundData *buf = SoundQueueGetFreeBuffer(kMusicBuffer, (sound_device_stereo) ? kMixInterleaved : kMixMono);
 

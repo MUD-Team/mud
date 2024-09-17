@@ -108,9 +108,7 @@
 #include "s_blit.h"
 #include "s_cache.h"
 #include "s_fluid.h"
-#include "s_fmm.h"
 #include "s_music.h"
-#include "s_opl.h"
 #include "s_sound.h"
 #include "w_wad.h"
 
@@ -121,7 +119,6 @@ extern ConsoleVariable m_language;
 extern ConsoleVariable crosshair_style;
 extern ConsoleVariable crosshair_color;
 extern ConsoleVariable crosshair_size;
-extern ConsoleVariable opl_instrument_bank;
 extern ConsoleVariable midi_soundfont;
 extern ConsoleVariable video_overlay;
 extern ConsoleVariable erraticism;
@@ -196,7 +193,6 @@ static void OptionMenuChangeMonitorSize(int key_pressed, ConsoleVariable *consol
 static void OptionMenuChangeKicking(int key_pressed, ConsoleVariable *console_variable = nullptr);
 static void OptionMenuChangeWeaponSwitch(int key_pressed, ConsoleVariable *console_variable = nullptr);
 static void OptionMenuChangeMipMap(int key_pressed, ConsoleVariable *console_variable = nullptr);
-static void OptionMenuChangePCSpeakerMode(int key_pressed, ConsoleVariable *console_variable = nullptr);
 
 // -ES- 1998/08/20 Added resolution options
 // -ACB- 1998/08/29 Moved to top and tried different system
@@ -211,7 +207,6 @@ void OptionMenuHostNetGame(int key_pressed, ConsoleVariable *console_variable = 
 
 static void OptionMenuLanguageDrawer(int x, int y, int deltay);
 static void OptionMenuChangeLanguage(int key_pressed, ConsoleVariable *console_variable = nullptr);
-static void OptionMenuChangeMidiPlayer(int key_pressed, ConsoleVariable *console_variable = nullptr);
 static void OptionMenuChangeSoundfont(int key_pressed, ConsoleVariable *console_variable = nullptr);
 static void InitMonitorSize();
 
@@ -526,11 +521,7 @@ static OptionMenuItem soundoptions[] = {
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
     {kOptionMenuItemTypeSwitch, "Stereo", "Off/On/Swapped", 3, &var_sound_stereo, nullptr, "NeedRestart"},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {kOptionMenuItemTypeSwitch, "MIDI Player", "Fluidlite/Opal/FMMIDI", 3, &var_midi_player, OptionMenuChangeMidiPlayer,
-     nullptr},
-    {kOptionMenuItemTypeFunction, "Fluidlite Soundfont", nullptr, 0, nullptr, OptionMenuChangeSoundfont, nullptr},
-    {kOptionMenuItemTypeBoolean, "PC Speaker Mode", YesNo, 2, &pc_speaker_mode, OptionMenuChangePCSpeakerMode,
-     "Music will be Off while this is enabled"},
+    {kOptionMenuItemTypeFunction, "MIDI Soundfont", nullptr, 0, nullptr, OptionMenuChangeSoundfont, nullptr},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
     {kOptionMenuItemTypeBoolean, "Dynamic Reverb", YesNo, 2, &dynamic_reverb, nullptr, nullptr},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
@@ -1978,14 +1969,6 @@ static void OptionMenuChangeWeaponSwitch(int key_pressed, ConsoleVariable *conso
     level_flags.weapon_switch = global_flags.weapon_switch;
 }
 
-static void OptionMenuChangePCSpeakerMode(int key_pressed, ConsoleVariable *console_variable)
-{
-    // Clear SFX cache and restart music
-    StopAllSoundEffects();
-    SoundCacheClearAll();
-    OptionMenuChangeMidiPlayer(0);
-}
-
 //
 // OptionMenuChangeLanguage
 //
@@ -2026,22 +2009,6 @@ static void OptionMenuChangeLanguage(int key_pressed, ConsoleVariable *console_v
 
     // update console_variable
     m_language = language.GetName();
-}
-
-//
-// OptionMenuChangeMidiPlayer
-//
-//
-static void OptionMenuChangeMidiPlayer(int key_pressed, ConsoleVariable *console_variable)
-{
-    PlaylistEntry *playing = playlist.Find(entry_playing);
-    if (var_midi_player == 1 || (playing && (playing->type_ == kDDFMusicIMF280 || playing->type_ == kDDFMusicIMF560 ||
-                                             playing->type_ == kDDFMusicIMF700)))
-        RestartOpal();
-    else if (var_midi_player == 0)
-        RestartFluid();
-    else
-        RestartFMM();
 }
 
 //

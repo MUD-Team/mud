@@ -870,16 +870,6 @@ int UpdateSkyboxTextures(void)
     info->face[kSkyboxNorth] =
         ImageLookup(UserSkyFaceName(sky_image->name_.c_str(), kSkyboxNorth), kImageNamespaceTexture, kImageLookupNull);
 
-    // LOBO 2022:
-    // If we do nothing, our EWAD skybox will be used for all maps.
-    // So we need to disable it if we have a pwad that contains it's
-    // own sky.
-    if (DisableStockSkybox(sky_image->name_.c_str()))
-    {
-        info->face[kSkyboxNorth] = nullptr;
-        // LogPrint("Skybox turned OFF\n");
-    }
-
     // Set colors for culling fog and faux skybox caps - Dasho
     const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
     if (sky_image->source_palette_ >= 0)

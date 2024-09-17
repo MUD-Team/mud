@@ -46,7 +46,6 @@
 #include "ddf_colormap.h"
 #include "ddf_main.h"
 #include "ddf_switch.h"
-#include "ddf_wadfixes.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "dstrings.h"
@@ -71,33 +70,18 @@
 #include "w_files.h"
 #include "w_texture.h"
 
-#define EDGE_ENABLE_STRIFE 0
-
 // Combination of unique lumps needed to best identify an IWAD
 const std::vector<GameCheck> game_checker = {{
     {"Custom", "custom", {"EDGEGAME", "EDGEGAME"}},
     {"Blasphemer", "blasphemer", {"BLASPHEM", "E1M1"}},
     {"Freedoom 1", "freedoom1", {"FREEDOOM", "E1M1"}},
     {"Freedoom 2", "freedoom2", {"FREEDOOM", "MAP01"}},
-    {"REKKR", "rekkr", {"REKCREDS", "E1M1"}},
-    {"HacX", "hacx", {"HACX-R", "MAP01"}},
-    {"Harmony", "harmony", {"0HAWK01", "DBIGFONT"}},         // Original Harmony Release
-    {"Harmony Compat", "harmonyc", {"0HAWK01", "DMAPINFO"}}, // Harmony Compatible Release
-    {"Chex Quest 3M", "chex3vm", {"ENDOOM", "MAP01"}},       // Chex Quest 3: Vanilla Edition
-                                                             // Modder/Doom 2 Base
-    {"Chex Quest 3", "chex3v", {"ENDOOM", "BOSSBACK"}},      // Chex Quest 3: Vanilla Edition
-    {"Chex Quest 1", "chex1", {"ENDOOM", "E4M1"}},
-    {"Heretic", "heretic", {"MUS_E1M1", "E1M1"}},
     {"Plutonia", "plutonia", {"CAMO1", "MAP01"}},
     {"Evilution", "tnt", {"REDTNT2", "MAP01"}},
     {"Doom", "doom", {"BFGGA0", "E2M1"}},
     {"Doom BFG", "doom", {"DMENUPIC", "M_MULTI"}},
-    {"Doom Demo", "doom1", {"SHOTA0", "E1M1"}},
     {"Doom II", "doom2", {"BFGGA0", "MAP01"}},
     {"Doom II BFG", "doom2", {"DMENUPIC", "MAP33"}},
-#if EDGE_ENABLE_STRIFE
-    {"Strife", "strife", {"VELLOGO", "RGELOGO"}} // Dev/internal use - Definitely nowhwere near playable
-#endif
 }};
 
 class WadFile
@@ -928,57 +912,6 @@ int CheckForUniqueGameLumps(epi::File *file)
     delete[] raw_info;
     file->Seek(0, epi::File::kSeekpointStart);
     return -1;
-}
-
-void ProcessFixersForWAD(DataFile *df)
-{
-    // Special handling for Doom 2 BFG Edition
-    if (df->kind_ == kFileKindIWAD || df->kind_ == kFileKindIPackWAD)
-    {
-        if (CheckLumpNumberForName("MAP33") > -1 && CheckLumpNumberForName("DMENUPIC") > -1)
-        {
-            std::string fix_path = epi::PathAppend(game_directory, "edge_fixes/doom2_bfg.epk");
-            if (epi::TestFileAccess(fix_path))
-            {
-                AddPendingFile(fix_path, kFileKindEPK);
-
-                LogPrint("WADFIXES: Applying fixes for Doom 2 BFG Edition\n");
-            }
-            else
-                LogWarning("WADFIXES: Doom 2 BFG Edition detected, but fix not found "
-                           "in edge_fixes directory!\n");
-            return;
-        }
-    }
-
-    std::string fix_checker;
-
-    fix_checker = df->wad_->md5_string_;
-
-    if (fix_checker.empty())
-        return;
-
-    for (size_t i = 0; i < fixdefs.size(); i++)
-    {
-        if (epi::StringCaseCompareASCII(fix_checker, fixdefs[i]->md5_string_) == 0)
-        {
-            std::string fix_path = epi::PathAppend(game_directory, "edge_fixes");
-            fix_path             = epi::PathAppend(fix_path, fix_checker.append(".epk"));
-            if (epi::TestFileAccess(fix_path))
-            {
-                AddPendingFile(fix_path, kFileKindEPK);
-
-                LogPrint("WADFIXES: Applying fixes for %s\n", fixdefs[i]->name_.c_str());
-            }
-            else
-            {
-                LogWarning("WADFIXES: %s defined, but no fix WAD located in "
-                           "edge_fixes!\n",
-                           fixdefs[i]->name_.c_str());
-                return;
-            }
-        }
-    }
 }
 
 void ProcessDehackedInWad(DataFile *df)
@@ -2313,107 +2246,6 @@ void ProcessTXHINamespaces(void)
             ProcessHiresPackSubstitutions(df->pack_, file);
         }
     }
-}
-
-static const char *UserSkyboxName(const char *base, int face)
-{
-    static char       buffer[64];
-    static const char letters[] = "NESWTB";
-
-    sprintf(buffer, "%s_%c", base, letters[face]);
-    return buffer;
-}
-
-// DisableStockSkybox
-//
-// Check if a loaded pwad has a custom sky.
-// If so, turn off our EWAD skybox.
-//
-// Returns true if found
-bool DisableStockSkybox(const char *ActualSky)
-{
-    bool         TurnOffSkybox = false;
-    const Image *tempImage;
-    int          filenum = -1;
-    int          lumpnum = -1;
-
-    // First we should try for "SKY1_N" type names but only
-    // use it if it's in a pwad i.e. a users skybox
-    tempImage = ImageLookup(UserSkyboxName(ActualSky, 0), kImageNamespaceTexture, kImageLookupNull);
-    if (tempImage)
-    {
-        if (tempImage->source_type_ == kImageSourceUser) // from images.ddf
-        {
-            lumpnum = CheckLumpNumberForName(tempImage->name_.c_str());
-
-            if (lumpnum != -1)
-            {
-                filenum = GetDataFileIndexForLump(lumpnum);
-            }
-
-            if (filenum != -1) // make sure we actually have a file
-            {
-                // we only want pwads
-                if (data_files[filenum]->kind_ == kFileKindPWAD || data_files[filenum]->kind_ == kFileKindPackWAD)
-                {
-                    LogDebug("SKYBOX: Sky is: %s. Type:%d lumpnum:%d filenum:%d \n", tempImage->name_.c_str(),
-                             tempImage->source_type_, lumpnum, filenum);
-                    TurnOffSkybox = false;
-                    return TurnOffSkybox; // get out of here
-                }
-            }
-        }
-    }
-
-    // If we're here then there are no user skyboxes.
-    // Lets check for single texture ones instead.
-    tempImage = ImageLookup(ActualSky, kImageNamespaceTexture, kImageLookupNull);
-
-    if (tempImage)                                          // this should always be true but check just in case
-    {
-        if (tempImage->source_type_ == kImageSourceTexture) // Normal doom format sky
-        {
-            filenum = GetDataFileIndexForLump(tempImage->source_.texture.tdef->patches->patch);
-        }
-        else if (tempImage->source_type_ == kImageSourceUser) // texture from images.ddf
-        {
-            LogDebug("SKYBOX: Sky is: %s. Type:%d  \n", tempImage->name_.c_str(), tempImage->source_type_);
-            TurnOffSkybox = true;                             // turn off or not? hmmm...
-            return TurnOffSkybox;
-        }
-        else                                                  // could be a png or jpg i.e. TX_ or HI_
-        {
-            lumpnum = CheckLumpNumberForName(tempImage->name_.c_str());
-            // lumpnum = tempImage->source.graphic.lump;
-            if (lumpnum != -1)
-            {
-                filenum = GetDataFileIndexForLump(lumpnum);
-            }
-        }
-
-        if (tempImage->source_type_ == kImageSourceDummy) // probably a skybox?
-        {
-            TurnOffSkybox = false;
-        }
-
-        if (filenum == 0) // it's the IWAD so we're done
-        {
-            TurnOffSkybox = false;
-        }
-
-        if (filenum != -1) // make sure we actually have a file
-        {
-            // we only want pwads
-            if (data_files[filenum]->kind_ == kFileKindPWAD || data_files[filenum]->kind_ == kFileKindPackWAD)
-            {
-                TurnOffSkybox = true;
-            }
-        }
-    }
-
-    LogDebug("SKYBOX: Sky is: %s. Type:%d lumpnum:%d filenum:%d \n", tempImage->name_.c_str(), tempImage->source_type_,
-             lumpnum, filenum);
-    return TurnOffSkybox;
 }
 
 // IsLumpInPwad

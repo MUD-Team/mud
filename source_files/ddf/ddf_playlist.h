@@ -32,14 +32,7 @@ enum DDFMusicType
     kDDFMusicMIDI,
     kDDFMusicMUS,
     kDDFMusicOGG,
-    kDDFMusicMP3,
-    kDDFMusicSID,
     kDDFMusicFLAC,
-    kDDFMusicM4P,
-    kDDFMusicRAD,
-    kDDFMusicIMF280,
-    kDDFMusicIMF560,
-    kDDFMusicIMF700,
     kTotalDDFMusicTypes
 };
 

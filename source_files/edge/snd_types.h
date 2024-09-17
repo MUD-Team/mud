@@ -28,15 +28,9 @@ enum SoundFormat
     kSoundWAV,
     kSoundFLAC,
     kSoundOGG,
-    kSoundMP3,
-    kSoundM4P,
-    kSoundSID,
-    kSoundRAD,
     kSoundMUS,
     kSoundMIDI,
-    kSoundIMF, // Used with DDFPLAY; not in auto-detection
-    kSoundDoom,
-    kSoundPCSpeaker
+    kSoundDoom
 };
 
 // determine sound format from the file.

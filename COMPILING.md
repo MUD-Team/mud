@@ -112,7 +112,6 @@ Open a web browser, navigate to ```http://localhost:8000```, and play Edge Class
 In all cases (barring the WebGL build per the previous section), the executable will be copied to the root of the project folder upon success. You can either launch the program in place, or copy the following folders and files to a separate directory if desired:
 * autoload
 * edge_base
-* edge_fixes
 * soundfont
 * edge-classic/edge-classic.exe (OS-dependent)
 * edge_defs.epk

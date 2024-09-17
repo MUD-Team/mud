@@ -386,7 +386,7 @@ void OGGPlayer::Stop()
 
 void OGGPlayer::Ticker()
 {
-    while (status_ == kPlaying && !pc_speaker_mode)
+    while (status_ == kPlaying)
     {
         SoundData *buf =
             SoundQueueGetFreeBuffer(kMusicBuffer, (is_stereo_ && sound_device_stereo) ? kMixInterleaved : kMixMono);

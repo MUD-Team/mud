@@ -1811,7 +1811,7 @@ static void AddSingleCommandLineFile(std::string name, bool ignore_unknown)
 
     if (ext == ".wad")
         kind = kFileKindPWAD;
-    else if (ext == ".pk3" || ext == ".epk" || ext == ".zip" || ext == ".vwad")
+    else if (ext == ".pk3" || ext == ".epk" || ext == ".zip")
         kind = kFileKindEPK;
     else if (ext == ".rts")
         kind = kFileKindRTS;
@@ -1871,7 +1871,7 @@ static void AddCommandLineFiles(void)
             // sanity check...
             if (epi::StringCaseCompareASCII(ext, ".wad") == 0 || epi::StringCaseCompareASCII(ext, ".pk3") == 0 ||
                 epi::StringCaseCompareASCII(ext, ".zip") == 0 || epi::StringCaseCompareASCII(ext, ".epk") == 0 ||
-                epi::StringCaseCompareASCII(ext, ".vwad") == 0 || epi::StringCaseCompareASCII(ext, ".ddf") == 0 ||
+                epi::StringCaseCompareASCII(ext, ".ddf") == 0 ||
                 epi::StringCaseCompareASCII(ext, ".deh") == 0 || epi::StringCaseCompareASCII(ext, ".bex") == 0)
             {
                 FatalError("Illegal filename for -script: %s\n", program_argument_list[p].c_str());
@@ -1899,7 +1899,7 @@ static void AddCommandLineFiles(void)
             // sanity check...
             if (epi::StringCaseCompareASCII(ext, ".wad") == 0 || epi::StringCaseCompareASCII(ext, ".epk") == 0 ||
                 epi::StringCaseCompareASCII(ext, ".pk3") == 0 || epi::StringCaseCompareASCII(ext, ".zip") == 0 ||
-                epi::StringCaseCompareASCII(ext, ".vwad") == 0 || epi::StringCaseCompareASCII(ext, ".ddf") == 0 ||
+                epi::StringCaseCompareASCII(ext, ".ddf") == 0 ||
                 epi::StringCaseCompareASCII(ext, ".rts") == 0)
             {
                 FatalError("Illegal filename for -deh: %s\n", program_argument_list[p].c_str());

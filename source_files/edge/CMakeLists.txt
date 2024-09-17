@@ -82,15 +82,9 @@ set (EDGE_SOURCE_FILES
   s_blit.cc
   s_cache.cc
   s_sound.cc
-  s_mp3.cc
   s_music.cc
   s_ogg.cc
   s_fluid.cc
-  s_fmm.cc
-  s_m4p.cc
-  s_opl.cc
-  s_rad.cc
-  s_sid.cc
   s_wav.cc
   s_flac.cc
   sv_chunk.cc
@@ -138,15 +132,10 @@ set (EDGE_LINK_LIBRARIES
   edge_tracy
   ${SDL2_LIBRARIES}
   almostequals
-  crsid
   dr_libs
   fluidlite
-  fmmidi
   HandmadeMath
-  libRAD
-  libvwad
   lua
-  m4p
   minivorbis
   miniz
   pl_mpeg
