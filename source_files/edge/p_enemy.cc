@@ -611,6 +611,7 @@ void A_CubeSpawn(MapObject *cube)
     targ = cube->target_;
 
     // -AJA- 2007/07/28: workaround for DeHackEd patches using S_SPAWNFIRE
+    // MUD: Evaluate if still needed
     if (!targ || !cube->current_attack_ || cube->current_attack_->attackstyle_ != kAttackStyleShootToSpot)
         return;
 

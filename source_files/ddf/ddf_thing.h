@@ -227,7 +227,7 @@ enum HyperFlag
     // -Lobo- 2022/07/07: this thing doesn't cause splashes
     kHyperFlagNoSplash = (1 << 20),
     // -AJA- 2022/10/04: used by DEH_EDGE to workaround issues
-    kHyperFlagDehackedCompatibility = (1 << 21),
+    //kHyperFlagDehackedCompatibility = (1 << 21), // MUD: No longer used
     // -Lobo- 2023/10/19: this thing will not be affected by thrust forces
     kHyperFlagImmovable = (1 << 22),
     // Dasho 2023/12/05: this thing is a MUSINFO Music Changer thing
@@ -236,16 +236,6 @@ enum HyperFlag
     kHyperFlagMusicChanger = (1 << 23),
     // -Lobo- 2024/07/17: this thing can trigger teleports even if NO_TRIGGER_LINES is set
     kHyperFlagTriggerTeleports = (1 << 24),
-};
-
-// MBF21 flags not already covered by extended/hyper flags
-enum MBF21Flag
-{
-    // Gravity affects this thing as if it were 1/8 of the normal value
-    kMBF21FlagLowGravity        = (1 << 0),
-    kMBF21FlagShortMissileRange = (1 << 1),
-    kMBF21FlagForceRadiusDamage = (1 << 4),
-    kMBF21FlagLongMeleeRange    = (1 << 8),
 };
 
 constexpr uint8_t kTotalEffectsSlots = 30;
@@ -736,7 +726,6 @@ class MapObjectDefinition
     int flags_;
     int extended_flags_;
     int hyper_flags_;
-    int mbf21_flags_;
 
     DamageClass explode_damage_;
     float       explode_radius_; // normally zero (radius == damage)
@@ -872,16 +861,6 @@ class MapObjectDefinition
     float hear_distance_;  // lobo 2022: How far this thing can hear
 
     int morphtimeout_;     // lobo 2023: Go to MORPH states when times up
-
-    // DEHEXTRA
-    float gib_health_;
-
-    // MBF 21
-    int infight_group_;
-    int proj_group_;
-    int splash_group_;
-    int fast_speed_;
-    int melee_range_;
 
   public:
     MapObjectDefinition();

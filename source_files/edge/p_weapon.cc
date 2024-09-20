@@ -248,10 +248,6 @@ static bool WeaponCouldAutoFire(Player *p, int idx, int ATK)
     if (!info->attack_state_[ATK])
         return false;
 
-    // MBF21 NOAUTOFIRE flag
-    if (info->specials_[ATK] & WeaponFlagNoAutoFire)
-        return false;
-
     if (info->shared_clip_)
         ATK = 0;
 

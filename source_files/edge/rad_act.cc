@@ -1403,10 +1403,7 @@ void P_ActReplace(MapObject *mo, const MapObjectDefinition *newThing)
 
         mo->radius_ = mo->info_->radius_;
         mo->height_ = mo->info_->height_;
-        if (mo->info_->fast_speed_ > -1 && level_flags.fast_monsters)
-            mo->speed_ = mo->info_->fast_speed_;
-        else
-            mo->speed_ = mo->info_->speed_;
+        mo->speed_ = mo->info_->speed_;
 
         mo->health_ = mo->spawn_health_;       // always top up health to full
 

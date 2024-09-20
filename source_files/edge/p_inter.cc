@@ -1052,7 +1052,7 @@ void KillMapObject(MapObject *source, MapObject *target, const DamageClass *damt
         target->flags_ &= ~kMapObjectFlagNoGravity;
 
     target->flags_ |= kMapObjectFlagCorpse | kMapObjectFlagDropOff;
-    target->height_ /= (4 / (target->mbf21_flags_ & kMBF21FlagLowGravity ? 8 : 1));
+    target->height_ /= 4;
 
     ScriptUpdateMonsterDeaths(target);
 
@@ -1134,9 +1134,7 @@ void KillMapObject(MapObject *source, MapObject *target, const DamageClass *damt
     int  state    = 0;
     bool overkill = false;
 
-    if (target->info_->gib_health_ < 0 && target->health_ < target->info_->gib_health_)
-        overkill = true;
-    else if (target->health_ < -target->spawn_health_)
+    if (target->health_ < -target->spawn_health_)
         overkill = true;
 
     if (weak_spot)
@@ -1179,17 +1177,7 @@ void KillMapObject(MapObject *source, MapObject *target, const DamageClass *damt
         }
     }
 
-    if (target->hyper_flags_ & kHyperFlagDehackedCompatibility)
-    {
-        MapObjectSetState(target, state);
-        target->tics_ -= RandomByteDeterministic() & 3;
-        if (target->tics_ < 1)
-            target->tics_ = 1;
-    }
-    else
-    {
-        MapObjectSetStateDeferred(target, state, RandomByteDeterministic() & 3);
-    }
+    MapObjectSetStateDeferred(target, state, RandomByteDeterministic() & 3);
 
     // Drop stuff. This determines the kind of object spawned
     // during the death frame of a thing.

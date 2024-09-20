@@ -2640,28 +2640,11 @@ static bool RadiusAttackCallback(MapObject *thing, void *data)
     float dx, dy, dz;
     float dist;
 
-    /* 2023/05/01 - Disabled this upon discovering that DEHACKED explosions
-       weren't damaging themeselves in DBP58. I could not find another source
-       port at all where the bomb spot mobj itself would be immune to its own
-       damage. We already have flags for explosion immunity so this can still be
-       mitigated if the situation requires it. - Dasho */
-
-    // ignore the bomb spot itself
-    // if (thing == radius_attack_check.spot)
-    // return true;
-
     if (!(thing->flags_ & kMapObjectFlagShootable))
         return true;
 
     if ((thing->hyper_flags_ & kHyperFlagFriendlyFireImmune) && radius_attack_check.source &&
         (thing->side_ & radius_attack_check.source->side_) != 0)
-    {
-        return true;
-    }
-
-    // MBF21: If in same splash group, don't damage it
-    if (thing->info_->splash_group_ >= 0 && radius_attack_check.source->info_->splash_group_ >= 0 &&
-        (thing->info_->splash_group_ == radius_attack_check.source->info_->splash_group_))
     {
         return true;
     }
@@ -2672,11 +2655,7 @@ static bool RadiusAttackCallback(MapObject *thing, void *data)
     //
     if (thing->info_->extended_flags_ & kExtendedFlagExplodeImmune)
     {
-        if (!radius_attack_check.source)
-            return true;
-        // MBF21 FORCERADIUSDMG flag
-        if (!(radius_attack_check.source->mbf21_flags_ & kMBF21FlagForceRadiusDamage))
-            return true;
+        return true;
     }
 
     // -KM- 1999/01/31 Use thing->height_/2

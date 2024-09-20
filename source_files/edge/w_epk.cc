@@ -27,7 +27,6 @@
 #include "epi_filesystem.h"
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
-#include "l_deh.h"
 #include "miniz.h"
 #include "r_image.h"
 #include "script/compat/lua_compat.h"
@@ -664,19 +663,6 @@ static void ProcessDDFInPack(PackFile *pack)
                 delete[] raw_data;
 
                 DDFAddFile(type, data, source);
-                continue;
-            }
-
-            if (ent.HasExtension(".deh") || ent.HasExtension(".bex"))
-            {
-                LogPrint("Converting DEH file%s: %s\n", pack->is_folder_ ? "" : " in EPK", ent.name_.c_str());
-
-                int            length = -1;
-                const uint8_t *data   = pack->LoadEntry(dir, entry, length);
-
-                ConvertDehacked(data, length, source);
-                delete[] data;
-
                 continue;
             }
         }
