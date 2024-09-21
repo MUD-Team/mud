@@ -64,7 +64,6 @@
 #include "r_image.h"
 #include "rad_trig.h"
 #include "script/compat/lua_compat.h"
-#include "vm_coal.h"
 #include "w_epk.h"
 #include "w_files.h"
 #include "w_texture.h"
@@ -105,9 +104,6 @@ class WadFile
     // texture information
     WadTextureResource wadtex_;
 
-    // COAL scripts
-    int coal_huds_;
-
     // LUA scripts
     int lua_huds_;
 
@@ -123,7 +119,7 @@ class WadFile
   public:
     WadFile()
         : sprite_lumps_(), flat_lumps_(), patch_lumps_(), colormap_lumps_(), tx_lumps_(), hires_lumps_(), xgl_lumps_(),
-          level_markers_(), skin_markers_(), wadtex_(), coal_huds_(-1), lua_huds_(-1),
+          level_markers_(), skin_markers_(), wadtex_(), lua_huds_(-1),
           umapinfo_lump_(-1), animated_(-1), switches_(-1), md5_string_()
     {
         for (int d = 0; d < kTotalDDFTypes; d++)
@@ -534,13 +530,6 @@ static void AddLump(DataFile *df, const char *raw_name, int pos, int size, int f
             wad->wadtex_.texture2 = lump;
         return;
     }
-    else if (strcmp(info.name, "COALHUDS") == 0)
-    {
-        lump_p->kind = kLumpDDFRTS;
-        if (wad != nullptr)
-            wad->coal_huds_ = lump;
-        return;
-    }
     else if (strcmp(info.name, "LUAHUDS") == 0)
     {
         lump_p->kind = kLumpDDFRTS;
@@ -926,28 +915,6 @@ static void ProcessDDFInWad(DataFile *df)
     }
 }
 
-static void ProcessCOALInWad(DataFile *df)
-{
-    std::string bare_filename = epi::GetFilename(df->name_);
-
-    WadFile *wad = df->wad_;
-
-    if (wad->coal_huds_ >= 0)
-    {
-        int lump = wad->coal_huds_;
-
-        SetCOALDetected(true);
-
-        std::string data   = LoadLumpAsString(lump);
-        std::string source = GetLumpNameFromIndex(lump);
-
-        source += " in ";
-        source += bare_filename;
-
-        COALAddScript(0, data, source);
-    }
-}
-
 static void ProcessLuaInWad(DataFile *df)
 {
     std::string bare_filename = epi::GetFilename(df->name_);
@@ -957,8 +924,6 @@ static void ProcessLuaInWad(DataFile *df)
     if (wad->lua_huds_ >= 0)
     {
         int lump = wad->lua_huds_;
-
-        LuaSetLuaHUDDetected(true);
 
         std::string data   = LoadLumpAsString(lump);
         std::string source = GetLumpNameFromIndex(lump);
@@ -1095,7 +1060,6 @@ void ProcessWad(DataFile *df, size_t file_index)
 
     ProcessBoomStuffInWad(df);
     ProcessDDFInWad(df);
-    ProcessCOALInWad(df);
     ProcessLuaInWad(df);
 }
 

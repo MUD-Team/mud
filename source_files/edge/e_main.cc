@@ -85,7 +85,6 @@
 #include "sv_chunk.h"
 #include "sv_main.h"
 #include "version.h"
-#include "vm_coal.h"
 #include "w_files.h"
 #include "w_model.h"
 #include "w_sprite.h"
@@ -607,10 +606,7 @@ void EdgeDisplay(void)
     case kGameStateLevel:
         PaletteTicker();
 
-        if (LuaUseLuaHUD())
-            LuaRunHUD();
-        else
-            COALRunHUD();
+        LuaRunHUD();
 
         if (need_save_screenshot)
         {
@@ -2079,16 +2075,8 @@ static void EdgeStartup(void)
     InitializeSound();
     NetworkInitialize();
     CheatInitialize();
-    if (LuaUseLuaHUD())
-    {
-        LuaInit();
-        LuaLoadScripts();
-    }
-    else
-    {
-        InitializeCOAL();
-        COALLoadScripts();
-    }
+    LuaInit();
+    LuaLoadScripts();
 }
 
 static void InitialState(void)

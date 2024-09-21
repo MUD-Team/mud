@@ -21,7 +21,7 @@ extern ImageData *RGBFromPalettised(ImageData *src, const uint8_t *palette, int 
 
 extern Player *ui_player_who;
 
-extern Player *ui_hud_who;
+Player *ui_hud_who = nullptr;
 
 static int   ui_hud_automap_flags[2]; // 0 = disabled, 1 = enabled
 static float ui_hud_automap_zoom;
@@ -866,58 +866,6 @@ static int HD_get_average_hue(lua_State *L)
     return 1;
 }
 
-// These two aren't really needed anymore with the AverageColor rework, but
-// keeping them in case COALHUDS in the wild use them - Dasho
-static int HD_get_average_top_border_color(lua_State *L)
-{
-    HMM_Vec3       rgb;
-    const char    *name         = luaL_checkstring(L, 1);
-    const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
-    const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
-    if (tmp_img_c->source_palette_ >= 0)
-        what_palette = (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
-    ImageData *tmp_img_data = ReadAsEpiBlock((Image *)tmp_img_c);
-    if (tmp_img_data->depth_ == 1)
-    {
-        ImageData *rgb_img_data = RGBFromPalettised(tmp_img_data, what_palette, tmp_img_c->opacity_);
-        delete tmp_img_data;
-        tmp_img_data = rgb_img_data;
-    }
-    RGBAColor col = tmp_img_data->AverageColor(0, tmp_img_c->actual_width_, tmp_img_c->actual_height_ - 1,
-                                               tmp_img_c->actual_height_);
-    rgb.X         = epi::GetRGBARed(col);
-    rgb.Y         = epi::GetRGBAGreen(col);
-    rgb.Z         = epi::GetRGBABlue(col);
-    delete tmp_img_data;
-
-    LuaPushVector3(L, rgb);
-    return 1;
-}
-static int HD_get_average_bottom_border_color(lua_State *L)
-{
-    HMM_Vec3       rgb;
-    const char    *name         = luaL_checkstring(L, 1);
-    const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
-    const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
-    if (tmp_img_c->source_palette_ >= 0)
-        what_palette = (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
-    ImageData *tmp_img_data = ReadAsEpiBlock((Image *)tmp_img_c);
-    if (tmp_img_data->depth_ == 1)
-    {
-        ImageData *rgb_img_data = RGBFromPalettised(tmp_img_data, what_palette, tmp_img_c->opacity_);
-        delete tmp_img_data;
-        tmp_img_data = rgb_img_data;
-    }
-    RGBAColor col = tmp_img_data->AverageColor(0, tmp_img_c->actual_width_, 0, 1);
-    rgb.X         = epi::GetRGBARed(col);
-    rgb.Y         = epi::GetRGBAGreen(col);
-    rgb.Z         = epi::GetRGBABlue(col);
-    delete tmp_img_data;
-
-    LuaPushVector3(L, rgb);
-    return 1;
-}
-
 // hud.rts_enable(tag)
 //
 static int HD_rts_enable(lua_State *L)
@@ -1052,8 +1000,6 @@ static const luaL_Reg hudlib[] = {{"game_mode", HD_game_mode},
 
                                   // image color functions
                                   {"get_average_color", HD_get_average_color},
-                                  {"get_average_top_border_color", HD_get_average_top_border_color},
-                                  {"get_average_bottom_border_color", HD_get_average_bottom_border_color},
                                   {"get_lightest_color", HD_get_lightest_color},
                                   {"get_darkest_color", HD_get_darkest_color},
                                   {"get_average_hue", HD_get_average_hue},

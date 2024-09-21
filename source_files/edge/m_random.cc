@@ -100,7 +100,7 @@ int RandomByteDeterministic(void)
 //
 // RandomShort
 //
-// Returns a number from 0 to 65535 for COALAPI usage
+// Returns a number from 0 to 65535 for LUAAPI usage
 //
 int RandomShort(void)
 {

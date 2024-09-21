@@ -26,7 +26,6 @@
 #include <math.h>
 
 #include "AlmostEquals.h"
-#include "coal.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "edge_profiling.h"
@@ -54,12 +53,8 @@
 #include "r_units.h"
 #include "script/compat/lua_compat.h"
 #include "sokol_color.h"
-#include "vm_coal.h"
 #include "w_model.h"
 #include "w_sprite.h"
-
-extern coal::VM *ui_vm;
-extern double    COALGetFloat(coal::VM *vm, const char *mod_name, const char *var_name);
 
 extern bool erraticism_active;
 
@@ -222,20 +217,10 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
 
     float ty1 = -psp_y + image->ScaledOffsetY() - ((h - image->ScaledHeightActual()) * 0.5f);
 
-    if (LuaUseLuaHUD())
-    {
-        // Lobo 2022: Apply sprite Y offset, mainly for Heretic weapons.
-        if ((state->flags & kStateFrameFlagWeapon) && (player->ready_weapon_ >= 0))
-            ty1 += LuaGetFloat(LuaGetGlobalVM(), "hud", "universal_y_adjust") +
-                   player->weapons_[player->ready_weapon_].info->y_adjust_;
-    }
-    else
-    {
-        // Lobo 2022: Apply sprite Y offset, mainly for Heretic weapons.
-        if ((state->flags & kStateFrameFlagWeapon) && (player->ready_weapon_ >= 0))
-            ty1 += COALGetFloat(ui_vm, "hud", "universal_y_adjust") +
-                   player->weapons_[player->ready_weapon_].info->y_adjust_;
-    }
+    // Lobo 2022: Apply sprite Y offset, mainly for Heretic weapons.
+    if ((state->flags & kStateFrameFlagWeapon) && (player->ready_weapon_ >= 0))
+        ty1 += LuaGetFloat(LuaGetGlobalVM(), "hud", "universal_y_adjust") +
+                player->weapons_[player->ready_weapon_].info->y_adjust_;
 
     float ty2 = ty1 + h;
 
@@ -660,17 +645,7 @@ void RenderWeaponModel(Player *p)
         lerp = HMM_Clamp(0, lerp, 1);
     }
 
-    float bias = 0.0f;
-
-    if (LuaUseLuaHUD())
-    {
-        bias =
-            LuaGetFloat(LuaGetGlobalVM(), "hud", "universal_y_adjust") + p->weapons_[p->ready_weapon_].info->y_adjust_;
-    }
-    else
-    {
-        bias = COALGetFloat(ui_vm, "hud", "universal_y_adjust") + p->weapons_[p->ready_weapon_].info->y_adjust_;
-    }
+    float bias = LuaGetFloat(LuaGetGlobalVM(), "hud", "universal_y_adjust") + p->weapons_[p->ready_weapon_].info->y_adjust_;
 
     bias /= 5;
     bias += w->model_bias_;

@@ -45,13 +45,7 @@ AJBSP - Copyright (c) 2000-2023 Andrew Apted, et al
 	 	Copyright (c) 1994-1998 Colin Reed
 	 	Copyright (c) 1997-1998 Lee Killough
 
-COAL - Copyright (c) 2021-2024 The EDGE Team
-	   Copyright (c) 2009-2021 Andrew Apted, et al
-       Copyright (c) 1996-1997 Id Software, Inc.
-
 DDF library - Copyright (c) 1999-2024 The EDGE Team
-
-DEH_EDGE library - Copyright (c) 2004-2024 The EDGE Team
 
 EDGE-Classic - Copyright (c) 1999-2024 The EDGE Team
 
