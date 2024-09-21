@@ -47,8 +47,7 @@ enum FileKind
     kFileKindIPackWAD, // IWADs within pack files :/
 
     kFileKindDDF,      // .ddf or .ldf file
-    kFileKindRTS,      // .rts script  file
-    kFileKindDehacked  // .deh or .bex file
+    kFileKindRTS      // .rts script  file
 };
 
 class WadFile;

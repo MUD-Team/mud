@@ -199,15 +199,6 @@ const DDFCommandList thing_commands[] = {
     DDF_FIELD("MORPH_TIMEOUT", dummy_mobj, morphtimeout_,
               DDFMainGetTime),       // Lobo 2023
 
-    // DEHEXTRA
-    DDF_FIELD("GIB_HEALTH", dummy_mobj, gib_health_, DDFMainGetFloat),
-
-    DDF_FIELD("INFIGHTING_GROUP", dummy_mobj, infight_group_, DDFMainGetNumeric),
-    DDF_FIELD("PROJECTILE_GROUP", dummy_mobj, proj_group_, DDFMainGetNumeric),
-    DDF_FIELD("SPLASH_GROUP", dummy_mobj, splash_group_, DDFMainGetNumeric),
-    DDF_FIELD("FAST_SPEED", dummy_mobj, fast_speed_, DDFMainGetNumeric),
-    DDF_FIELD("MELEE_RANGE", dummy_mobj, melee_range_, DDFMainGetNumeric),
-
     // -AJA- backwards compatibility cruft...
     DDF_FIELD("EXPLOD_DAMAGE", dummy_mobj, explode_damage_.nominal_, DDFMainGetFloat),
     DDF_FIELD("EXPLOSION_DAMAGE", dummy_mobj, explode_damage_.nominal_, DDFMainGetFloat),
@@ -1555,13 +1546,10 @@ static DDFSpecialFlags hyper_specials[] = {
     {"TRIGGER_LINES", kHyperFlagNoTriggerLines, 1}, // Lobo: Cannot activate doors etc.
     {"SHOVEABLE", kHyperFlagShoveable, 0},          // Lobo: can be pushed
     {"SPLASH", kHyperFlagNoSplash, 1},              // Lobo: causes no splash on liquids
-    {"DEHACKED_COMPAT", kHyperFlagDehackedCompatibility, 0},
     {"IMMOVABLE", kHyperFlagImmovable, 0},
     {"MUSIC_CHANGER", kHyperFlagMusicChanger, 0},
     {"TRIGGER_TELEPORTS", kHyperFlagTriggerTeleports, 0}, // Lobo: Can always activate teleporters.
     {nullptr, 0, 0}};
-
-static DDFSpecialFlags mbf21_specials[] = {{"LOGRAV", kMBF21FlagLowGravity, 0}, {nullptr, 0, 0}};
 
 //
 // DDFMobjGetSpecial
@@ -1614,14 +1602,6 @@ void DDFMobjGetSpecial(const char *info)
         flag_ptr = &dynamic_mobj->hyper_flags_;
 
         res = DDFMainCheckSpecialFlag(info, hyper_specials, &flag_value, true, false);
-    }
-
-    if (res == kDDFCheckFlagUser || res == kDDFCheckFlagUnknown)
-    {
-        // Try the MBF21 specials...
-        flag_ptr = &dynamic_mobj->mbf21_flags_;
-
-        res = DDFMainCheckSpecialFlag(info, mbf21_specials, &flag_value, true, false);
     }
 
     switch (res)
@@ -2051,7 +2031,6 @@ void MapObjectDefinition::CopyDetail(MapObjectDefinition &src)
     flags_          = src.flags_;
     extended_flags_ = src.extended_flags_;
     hyper_flags_    = src.hyper_flags_;
-    mbf21_flags_    = src.mbf21_flags_;
 
     explode_damage_ = src.explode_damage_;
     explode_radius_ = src.explode_radius_;
@@ -2171,14 +2150,6 @@ void MapObjectDefinition::CopyDetail(MapObjectDefinition &src)
     hear_distance_  = src.hear_distance_;
 
     morphtimeout_ = src.morphtimeout_;
-
-    gib_health_ = src.gib_health_;
-
-    infight_group_ = src.infight_group_;
-    proj_group_    = src.proj_group_;
-    splash_group_  = src.splash_group_;
-    fast_speed_    = src.fast_speed_;
-    melee_range_   = src.melee_range_;
 }
 
 void MapObjectDefinition::Default()
@@ -2215,7 +2186,6 @@ void MapObjectDefinition::Default()
     flags_          = 0;
     extended_flags_ = 0;
     hyper_flags_    = 0;
-    mbf21_flags_    = 0;
 
     explode_damage_.Default(DamageClass::kDamageClassDefaultMobj);
     explode_radius_ = 0;
@@ -2315,18 +2285,10 @@ void MapObjectDefinition::Default()
     spitspot_ = nullptr;
     spitspot_ref_.clear();
 
-    gib_health_ = 0;
-
     sight_distance_ = -1;
     hear_distance_  = -1;
 
     morphtimeout_ = 0;
-
-    infight_group_ = -2;
-    proj_group_    = -2;
-    splash_group_  = -2;
-    fast_speed_    = -1;
-    melee_range_   = -1;
 }
 
 void MapObjectDefinition::DLightCompatibility(void)

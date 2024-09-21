@@ -29,11 +29,13 @@
 
 #include "ddf_game.h"
 #include "ddf_language.h"
-#include "deh_text.h"
 #include "epi_ename.h"
 #include "epi_lexer.h"
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
+
+// MUD: Since Dehacked is gone, only things that already have a map editor ID will be
+// valid 'bossaction' targets (as long as UMAPINFO is still in)
 
 MapList Maps;
 
@@ -181,116 +183,9 @@ static std::unordered_map<int, int16_t> ActorNames = {
     {epi::kENameMBFHelperDog, 888},
     {epi::kENamePlasmaBall1, -1},
     {epi::kENamePlasmaBall2, -1},
-    {epi::kENameEvilSceptre, -1},
-    {epi::kENameUnholyBible, -1},
-    {epi::kENameMusicChanger, -1}, // Doomednums 14101-14165, but I don't think we need this
-    // I'm guessing below here
-    {epi::kENameDeh_Actor_145, 145},
-    {epi::kENameDeh_Actor_146, 146},
-    {epi::kENameDeh_Actor_147, 147},
-    {epi::kENameDeh_Actor_148, 148},
-    {epi::kENameDeh_Actor_149, 149},
-    // DEHEXTRA Actors start here
-    {epi::kENameDeh_Actor_150, 150}, // Extra thing 0
-    {epi::kENameDeh_Actor_151, 151}, // Extra thing 1
-    {epi::kENameDeh_Actor_152, 152}, // Extra thing 2
-    {epi::kENameDeh_Actor_153, 153}, // Extra thing 3
-    {epi::kENameDeh_Actor_154, 154}, // Extra thing 4
-    {epi::kENameDeh_Actor_155, 155}, // Extra thing 5
-    {epi::kENameDeh_Actor_156, 156}, // Extra thing 6
-    {epi::kENameDeh_Actor_157, 157}, // Extra thing 7
-    {epi::kENameDeh_Actor_158, 158}, // Extra thing 8
-    {epi::kENameDeh_Actor_159, 159}, // Extra thing 9
-    {epi::kENameDeh_Actor_160, 160}, // Extra thing 10
-    {epi::kENameDeh_Actor_161, 161}, // Extra thing 11
-    {epi::kENameDeh_Actor_162, 162}, // Extra thing 12
-    {epi::kENameDeh_Actor_163, 163}, // Extra thing 13
-    {epi::kENameDeh_Actor_164, 164}, // Extra thing 14
-    {epi::kENameDeh_Actor_165, 165}, // Extra thing 15
-    {epi::kENameDeh_Actor_166, 166}, // Extra thing 16
-    {epi::kENameDeh_Actor_167, 167}, // Extra thing 17
-    {epi::kENameDeh_Actor_168, 168}, // Extra thing 18
-    {epi::kENameDeh_Actor_169, 169}, // Extra thing 19
-    {epi::kENameDeh_Actor_170, 170}, // Extra thing 20
-    {epi::kENameDeh_Actor_171, 171}, // Extra thing 21
-    {epi::kENameDeh_Actor_172, 172}, // Extra thing 22
-    {epi::kENameDeh_Actor_173, 173}, // Extra thing 23
-    {epi::kENameDeh_Actor_174, 174}, // Extra thing 24
-    {epi::kENameDeh_Actor_175, 175}, // Extra thing 25
-    {epi::kENameDeh_Actor_176, 176}, // Extra thing 26
-    {epi::kENameDeh_Actor_177, 177}, // Extra thing 27
-    {epi::kENameDeh_Actor_178, 178}, // Extra thing 28
-    {epi::kENameDeh_Actor_179, 179}, // Extra thing 29
-    {epi::kENameDeh_Actor_180, 180}, // Extra thing 30
-    {epi::kENameDeh_Actor_181, 181}, // Extra thing 31
-    {epi::kENameDeh_Actor_182, 182}, // Extra thing 32
-    {epi::kENameDeh_Actor_183, 183}, // Extra thing 33
-    {epi::kENameDeh_Actor_184, 184}, // Extra thing 34
-    {epi::kENameDeh_Actor_185, 185}, // Extra thing 35
-    {epi::kENameDeh_Actor_186, 186}, // Extra thing 36
-    {epi::kENameDeh_Actor_187, 187}, // Extra thing 37
-    {epi::kENameDeh_Actor_188, 188}, // Extra thing 38
-    {epi::kENameDeh_Actor_189, 189}, // Extra thing 39
-    {epi::kENameDeh_Actor_190, 190}, // Extra thing 40
-    {epi::kENameDeh_Actor_191, 191}, // Extra thing 41
-    {epi::kENameDeh_Actor_192, 192}, // Extra thing 42
-    {epi::kENameDeh_Actor_193, 193}, // Extra thing 43
-    {epi::kENameDeh_Actor_194, 194}, // Extra thing 44
-    {epi::kENameDeh_Actor_195, 195}, // Extra thing 45
-    {epi::kENameDeh_Actor_196, 196}, // Extra thing 46
-    {epi::kENameDeh_Actor_197, 197}, // Extra thing 47
-    {epi::kENameDeh_Actor_198, 198}, // Extra thing 48
-    {epi::kENameDeh_Actor_199, 199}, // Extra thing 49
-    {epi::kENameDeh_Actor_200, 200}, // Extra thing 50
-    {epi::kENameDeh_Actor_201, 201}, // Extra thing 51
-    {epi::kENameDeh_Actor_202, 202}, // Extra thing 52
-    {epi::kENameDeh_Actor_203, 203}, // Extra thing 53
-    {epi::kENameDeh_Actor_204, 204}, // Extra thing 54
-    {epi::kENameDeh_Actor_205, 205}, // Extra thing 55
-    {epi::kENameDeh_Actor_206, 206}, // Extra thing 56
-    {epi::kENameDeh_Actor_207, 207}, // Extra thing 57
-    {epi::kENameDeh_Actor_208, 208}, // Extra thing 58
-    {epi::kENameDeh_Actor_209, 209}, // Extra thing 59
-    {epi::kENameDeh_Actor_210, 210}, // Extra thing 60
-    {epi::kENameDeh_Actor_211, 211}, // Extra thing 61
-    {epi::kENameDeh_Actor_212, 212}, // Extra thing 62
-    {epi::kENameDeh_Actor_213, 213}, // Extra thing 63
-    {epi::kENameDeh_Actor_214, 214}, // Extra thing 64
-    {epi::kENameDeh_Actor_215, 215}, // Extra thing 65
-    {epi::kENameDeh_Actor_216, 216}, // Extra thing 66
-    {epi::kENameDeh_Actor_217, 217}, // Extra thing 67
-    {epi::kENameDeh_Actor_218, 218}, // Extra thing 68
-    {epi::kENameDeh_Actor_219, 219}, // Extra thing 69
-    {epi::kENameDeh_Actor_220, 220}, // Extra thing 70
-    {epi::kENameDeh_Actor_221, 221}, // Extra thing 71
-    {epi::kENameDeh_Actor_222, 222}, // Extra thing 72
-    {epi::kENameDeh_Actor_223, 223}, // Extra thing 73
-    {epi::kENameDeh_Actor_224, 224}, // Extra thing 74
-    {epi::kENameDeh_Actor_225, 225}, // Extra thing 75
-    {epi::kENameDeh_Actor_226, 226}, // Extra thing 76
-    {epi::kENameDeh_Actor_227, 227}, // Extra thing 77
-    {epi::kENameDeh_Actor_228, 228}, // Extra thing 78
-    {epi::kENameDeh_Actor_229, 229}, // Extra thing 79
-    {epi::kENameDeh_Actor_230, 230}, // Extra thing 80
-    {epi::kENameDeh_Actor_231, 231}, // Extra thing 81
-    {epi::kENameDeh_Actor_232, 232}, // Extra thing 82
-    {epi::kENameDeh_Actor_233, 233}, // Extra thing 83
-    {epi::kENameDeh_Actor_234, 234}, // Extra thing 84
-    {epi::kENameDeh_Actor_235, 235}, // Extra thing 85
-    {epi::kENameDeh_Actor_236, 236}, // Extra thing 86
-    {epi::kENameDeh_Actor_237, 237}, // Extra thing 87
-    {epi::kENameDeh_Actor_238, 238}, // Extra thing 88
-    {epi::kENameDeh_Actor_239, 239}, // Extra thing 89
-    {epi::kENameDeh_Actor_240, 240}, // Extra thing 90
-    {epi::kENameDeh_Actor_241, 241}, // Extra thing 91
-    {epi::kENameDeh_Actor_242, 242}, // Extra thing 92
-    {epi::kENameDeh_Actor_243, 243}, // Extra thing 93
-    {epi::kENameDeh_Actor_244, 244}, // Extra thing 94
-    {epi::kENameDeh_Actor_245, 245}, // Extra thing 95
-    {epi::kENameDeh_Actor_246, 246}, // Extra thing 96
-    {epi::kENameDeh_Actor_247, 247}, // Extra thing 97
-    {epi::kENameDeh_Actor_248, 248}, // Extra thing 98
-    {epi::kENameDeh_Actor_249, 249}, // Extra thing 99
+    {epi::kENameEvilSceptre, 2016},
+    {epi::kENameUnholyBible, 2017},
+    {epi::kENameMusicChanger, 14164}
 };
 
 static void FreeMap(MapEntry *mape)
@@ -610,7 +505,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                 int actor_num   = -1;
                 int actor_check = epi::EName(value, true).GetIndex();
                 if (!ActorNames.count(actor_check))
-                    FatalError("UMAPINFO: Unknown thing type %s\n", value.c_str());
+                    LogWarning("UMAPINFO: Unknown thing type %s\n", value.c_str());
                 else
                     actor_num = ActorNames[actor_check];
                 if (actor_num == -1)

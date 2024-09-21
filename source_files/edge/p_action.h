@@ -30,6 +30,8 @@ class MapObject;
 // Function names in this file deviate from the style guide in order to reflect
 // historical code pointer names and make the Dehacked->DDF->EDGE pipeline
 // easier to track - Dasho
+// MUD: Dehacked is no longer a thing; but a lot of these codepointers will probably
+// go away eventually anyway
 
 // Weapon Action Routine pointers
 void A_Light0(MapObject *mo);

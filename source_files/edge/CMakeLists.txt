@@ -27,7 +27,6 @@ set (EDGE_SOURCE_FILES
   im_filter.cc
   im_data.cc
   im_funcs.cc
-  l_deh.cc
   m_argv.cc
   m_bbox.cc
   m_cheat.cc
@@ -127,7 +126,6 @@ set (EDGE_LINK_LIBRARIES
   edge_ajbsp
   edge_coal  
   edge_ddf
-  edge_deh
   edge_epi
   edge_tracy
   ${SDL2_LIBRARIES}

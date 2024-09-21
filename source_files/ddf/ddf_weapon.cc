@@ -31,8 +31,6 @@
 #include "epi_str_util.h"
 #include "p_action.h"
 
-std::vector<std::string> flag_tests;
-
 static WeaponDefinition *dynamic_weapon;
 
 WeaponDefinitionContainer weapondefs;
@@ -372,8 +370,6 @@ const DDFSpecialFlags ammo_types[] = {{"NOAMMO", kAmmunitionTypeNoAmmo, 0},
 
 static void WeaponStartEntry(const char *name, bool extend)
 {
-    flag_tests.clear();
-
     if (!name || !name[0])
     {
         DDFWarnError("New weapon entry is missing a name!");
@@ -537,21 +533,6 @@ static void WeaponFinishEntry(void)
         dynamic_weapon->zoom_fov_ = RoundToInteger(90 / dynamic_weapon->zoom_factor_);
 
     dynamic_weapon->model_rotate_ *= kBAMAngle1;
-
-    // Check MBF21 weapon flags that don't correlate to DDFWEAP flags
-    for (std::string &flag : flag_tests)
-    {
-        if (epi::StringCaseCompareASCII(flag, "NOTHRUST") == 0)
-            dynamic_weapon->nothrust_ = true;
-        else if (epi::StringCaseCompareASCII(flag, "DANGEROUS") == 0)
-            dynamic_weapon->dangerous_ = true;
-        else if (epi::StringCaseCompareASCII(flag, "FLEEMELEE") == 0)
-            continue; // We don't implement FLEEMELEE, but don't present the
-                      // user with an error as it's a valid MBF21 flag
-        else
-            DDFWarnError("DDFWGetSpecialFlags: Unknown Special: %s", flag.c_str());
-    }
-    flag_tests.clear();
 }
 
 static void WeaponClearAll(void)
@@ -637,7 +618,6 @@ static DDFSpecialFlags weapon_specials[] = {{"SILENT_TO_MONSTERS", WeaponFlagSil
                                             {"FRESH", WeaponFlagFreshReload, 0},
                                             {"MANUAL", WeaponFlagManualReload, 0},
                                             {"PARTIAL", WeaponFlagPartialReload, 0},
-                                            {"NOAUTOFIRE", WeaponFlagNoAutoFire, 0},
                                             {nullptr, WeaponFlagNone, 0}};
 
 //
@@ -693,12 +673,8 @@ static void DDFWGetSpecialFlags(const char *info, void *storage)
         break;
 
     case kDDFCheckFlagUser:
-    case kDDFCheckFlagUnknown: {
-        // Check unknown flags in WeaponFinishEntry as some MBF21 flags
-        // correlate to non-flag variables
-        flag_tests.push_back(info);
+    case kDDFCheckFlagUnknown:
         return;
-    }
     }
 }
 

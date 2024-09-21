@@ -1817,8 +1817,6 @@ static void AddSingleCommandLineFile(std::string name, bool ignore_unknown)
         kind = kFileKindRTS;
     else if (ext == ".ddf" || ext == ".ldf")
         kind = kFileKindDDF;
-    else if (ext == ".deh" || ext == ".bex")
-        kind = kFileKindDehacked;
     else
     {
         if (!ignore_unknown)
@@ -1871,42 +1869,13 @@ static void AddCommandLineFiles(void)
             // sanity check...
             if (epi::StringCaseCompareASCII(ext, ".wad") == 0 || epi::StringCaseCompareASCII(ext, ".pk3") == 0 ||
                 epi::StringCaseCompareASCII(ext, ".zip") == 0 || epi::StringCaseCompareASCII(ext, ".epk") == 0 ||
-                epi::StringCaseCompareASCII(ext, ".ddf") == 0 ||
-                epi::StringCaseCompareASCII(ext, ".deh") == 0 || epi::StringCaseCompareASCII(ext, ".bex") == 0)
+                epi::StringCaseCompareASCII(ext, ".ddf") == 0)
             {
                 FatalError("Illegal filename for -script: %s\n", program_argument_list[p].c_str());
             }
 
             std::string filename = epi::PathAppendIfNotAbsolute(game_directory, program_argument_list[p]);
             AddDataFile(filename, kFileKindRTS);
-        }
-
-        p++;
-    }
-
-    // dehacked/bex....
-
-    p = FindArgument("deh");
-
-    while (p > 0 && p < int(program_argument_list.size()) &&
-           (!ArgumentIsOption(p) || epi::StringCompare(program_argument_list[p], "-deh") == 0))
-    {
-        // the parms after p are Dehacked/BEX filenames,
-        // go until end of parms or another '-' preceded parm
-        if (!ArgumentIsOption(p))
-        {
-            std::string ext = epi::GetExtension(program_argument_list[p]);
-            // sanity check...
-            if (epi::StringCaseCompareASCII(ext, ".wad") == 0 || epi::StringCaseCompareASCII(ext, ".epk") == 0 ||
-                epi::StringCaseCompareASCII(ext, ".pk3") == 0 || epi::StringCaseCompareASCII(ext, ".zip") == 0 ||
-                epi::StringCaseCompareASCII(ext, ".ddf") == 0 ||
-                epi::StringCaseCompareASCII(ext, ".rts") == 0)
-            {
-                FatalError("Illegal filename for -deh: %s\n", program_argument_list[p].c_str());
-            }
-
-            std::string filename = epi::PathAppendIfNotAbsolute(game_directory, program_argument_list[p]);
-            AddDataFile(filename, kFileKindDehacked);
         }
 
         p++;

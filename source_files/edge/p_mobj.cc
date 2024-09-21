@@ -451,7 +451,6 @@ static void ResurrectRespawn(MapObject *mobj)
     mobj->flags_          = info->flags_;
     mobj->extended_flags_ = info->extended_flags_;
     mobj->hyper_flags_    = info->hyper_flags_;
-    mobj->mbf21_flags_    = info->mbf21_flags_;
     mobj->health_         = mobj->spawn_health_;
 
     mobj->visibility_ = info->translucency_;
@@ -1176,7 +1175,7 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props)
                 // don't bounce forever on the floor
                 if (!(mo->flags_ & kMapObjectFlagNoGravity) &&
                     fabs(mo->momentum_.Z) <
-                        kStopSpeed + fabs(gravity / (mo->mbf21_flags_ & kMBF21FlagLowGravity ? 8 : 1)))
+                        kStopSpeed + fabs(gravity))
                 {
                     mo->momentum_.X = mo->momentum_.Y = mo->momentum_.Z = 0;
                 }
@@ -1231,7 +1230,7 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props)
         if (!(mo->flags_ & kMapObjectFlagNoGravity) && !(mo->player_ && mo->player_->powers_[kPowerTypeJetpack] > 0) &&
             !(mo->on_ladder_ >= 0))
         {
-            mo->momentum_.Z -= gravity / (mo->mbf21_flags_ & kMBF21FlagLowGravity ? 8 : 1);
+            mo->momentum_.Z -= gravity;
         }
     }
 
@@ -1269,7 +1268,7 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props)
                 // don't bounce forever on the ceiling
                 if (!(mo->flags_ & kMapObjectFlagNoGravity) &&
                     fabs(mo->momentum_.Z) <
-                        kStopSpeed + fabs(gravity / (mo->mbf21_flags_ & kMBF21FlagLowGravity ? 8 : 1)))
+                        kStopSpeed + fabs(gravity))
                 {
                     mo->momentum_.X = mo->momentum_.Y = mo->momentum_.Z = 0;
                 }
@@ -1313,7 +1312,7 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props)
         if (!(mo->flags_ & kMapObjectFlagNoGravity) && !(mo->player_ && mo->player_->powers_[kPowerTypeJetpack] > 0) &&
             !(mo->on_ladder_ >= 0))
         {
-            mo->momentum_.Z += -gravity / (mo->mbf21_flags_ & kMBF21FlagLowGravity ? 8 : 1);
+            mo->momentum_.Z += -gravity;
         }
     }
 
@@ -2204,13 +2203,9 @@ MapObject *CreateMapObject(float x, float y, float z, const MapObjectDefinition 
 
     mobj->morph_timeout_ = info->morphtimeout_;
 
-    if (level_flags.fast_monsters && info->fast_speed_ > -1)
-        mobj->speed_ = info->fast_speed_;
-
     // -ACB- 1998/06/25 new mobj Stuff (1998/07/11 - invisibility added)
     mobj->extended_flags_    = info->extended_flags_;
     mobj->hyper_flags_       = info->hyper_flags_;
-    mobj->mbf21_flags_       = info->mbf21_flags_;
     mobj->target_visibility_ = mobj->visibility_ = info->translucency_;
 
     mobj->current_attack_ = nullptr;

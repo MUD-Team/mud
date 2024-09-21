@@ -453,9 +453,7 @@ enum WeaponFlag
     WeaponFlagReloadWhileTrigger = (1 << 8),  // allow reload while holding trigger
     WeaponFlagFreshReload        = (1 << 9),  // automatically reload when new ammo is avail
     WeaponFlagManualReload       = (1 << 10), // enables the manual reload key
-    WeaponFlagPartialReload      = (1 << 11), // manual reload: allow partial refill
-    // MBF21 flags:
-    WeaponFlagNoAutoFire = (1 << 12), // Do not fire if switched to while trigger is held
+    WeaponFlagPartialReload      = (1 << 11) // manual reload: allow partial refill
 };
 
 constexpr WeaponFlag kDefaultWeaponFlags = (WeaponFlag)(WeaponFlagReloadWhileTrigger | WeaponFlagManualReload |
