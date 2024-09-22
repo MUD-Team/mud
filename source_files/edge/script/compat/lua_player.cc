@@ -20,7 +20,7 @@
 #include "rad_trig.h"
 #include "s_sound.h"
 
-extern Player *ui_player_who;
+Player *ui_player_who = nullptr;
 
 //------------------------------------------------------------------------
 //  PLAYER MODULE

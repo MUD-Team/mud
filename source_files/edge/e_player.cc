@@ -44,7 +44,6 @@
 #include "p_local.h"
 #include "script/compat/lua_compat.h"
 #include "sokol_color.h"
-#include "vm_coal.h" // For COALEndLevel()
 
 //
 // PLAYER ARRAY
@@ -145,10 +144,7 @@ void PlayerFinishLevel(Player *p, bool keep_cards)
     //  "INTERNAL ERROR: player has a removed attacker"
     p->attacker_ = nullptr;
 
-    if (LuaUseLuaHUD())
-        LuaEndLevel();
-    else
-        COALEndLevel();
+    LuaEndLevel();
 }
 
 //

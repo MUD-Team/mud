@@ -94,9 +94,4 @@ inline void LuaSetBoolean(lua_State *L, const char *module, const char *variable
     lua_pop(L, 1);
 }
 
-// Detects LUA in a pwad or epk
-bool LuaGetLuaHUDDetected();
-void LuaSetLuaHUDDetected(bool detected);
-bool LuaUseLuaHUD();
-
 extern lua_State *global_lua_state;

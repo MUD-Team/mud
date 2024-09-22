@@ -105,9 +105,6 @@ set (EDGE_SOURCE_FILES
   w_sprite.cc
   w_texture.cc
   w_wad.cc
-  vm_coal.cc
-  vm_hud.cc 
-  vm_player.cc
   script/lua_debugger.cc
   script/compat/lua_vm.cc
   script/compat/lua_compat.cc
@@ -124,7 +121,6 @@ endif()
 
 set (EDGE_LINK_LIBRARIES
   edge_ajbsp
-  edge_coal  
   edge_ddf
   edge_epi
   edge_tracy
