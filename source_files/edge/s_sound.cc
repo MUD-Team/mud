@@ -274,7 +274,7 @@ void InitializeSound(void)
     SoundQueueInitialize();
 
     // okidoke, start the ball rolling!
-    SDL_PauseAudioDevice(current_sound_device, 0);
+    SDL_ResumeAudioStreamDevice(current_sound_device);
 }
 
 void ShutdownSound(void)
@@ -282,11 +282,11 @@ void ShutdownSound(void)
     if (no_sound)
         return;
 
-    SDL_PauseAudioDevice(current_sound_device, 1);
+    SDL_PauseAudioStreamDevice(current_sound_device);
 
     // make sure mixing thread is not running our code
-    SDL_LockAudioDevice(current_sound_device);
-    SDL_UnlockAudioDevice(current_sound_device);
+    SDL_LockAudioStream(current_sound_device);
+    SDL_UnlockAudioStream(current_sound_device);
 
     SoundQueueShutdown();
 
@@ -587,7 +587,7 @@ void PrecacheSounds(void)
 
 void ResumeAudioDevice()
 {
-    SDL_PauseAudioDevice(current_sound_device, 0);
+    SDL_PauseAudioStreamDevice(current_sound_device);
 
 #ifdef EDGE_WEB
     // Yield back to main thread for audio processing
@@ -601,7 +601,7 @@ void ResumeAudioDevice()
 void PauseAudioDevice()
 {
     StopAllSoundEffects();
-    SDL_PauseAudioDevice(current_sound_device, 1);
+    SDL_PauseAudioStreamDevice(current_sound_device);
 
 #ifdef EDGE_WEB
     // Yield back to main thread for audio processing

@@ -50,8 +50,11 @@ static uint8_t         *movie_bytes = nullptr;
 
 static bool MovieSetupAudioStream(int rate)
 {
+    const SDL_AudioSpec float_spec = { SDL_AUDIO_F32, sound_device_stereo ? 2 : 1, sound_device_frequency };
+    const SDL_AudioSpec s16_spec = { SDL_AUDIO_S16, sound_device_stereo ? 2 : 1, sound_device_frequency };
+
     movie_audio_stream =
-        SDL_NewAudioStream(AUDIO_F32, 2, rate, AUDIO_S16, sound_device_stereo ? 2 : 1, sound_device_frequency);
+        SDL_CreateAudioStream(&float_spec, &s16_spec);
 
     if (!movie_audio_stream)
     {
@@ -74,15 +77,15 @@ void MovieAudioCallback(plm_t *mpeg, plm_samples_t *samples, void *user)
 {
     (void)mpeg;
     (void)user;
-    SDL_AudioStreamPut(movie_audio_stream, samples->interleaved, sizeof(float) * samples->count * 2);
-    int avail = SDL_AudioStreamAvailable(movie_audio_stream);
+    SDL_PutAudioStreamData(movie_audio_stream, samples->interleaved, sizeof(float) * samples->count * 2);
+    int avail = SDL_GetAudioStreamAvailable(movie_audio_stream);
     if (avail)
     {
         SoundData *movie_buf = SoundQueueGetFreeBuffer(avail / 2, sound_device_stereo ? kMixInterleaved : kMixMono);
         if (movie_buf)
         {
             movie_buf->length_ =
-                SDL_AudioStreamGet(movie_audio_stream, movie_buf->data_left_, avail) / (sound_device_stereo ? 4 : 2);
+                SDL_GetAudioStreamData(movie_audio_stream, movie_buf->data_left_, avail) / (sound_device_stereo ? 4 : 2);
             if (movie_buf->length_ > 0)
                 SoundQueueAddBuffer(movie_buf, sound_device_frequency);
             else
@@ -147,7 +150,7 @@ void PlayMovie(const std::string &name)
 
     if (movie_audio_stream)
     {
-        SDL_FreeAudioStream(movie_audio_stream);
+        SDL_DestroyAudioStream(movie_audio_stream);
         movie_audio_stream = nullptr;
     }
 
@@ -344,15 +347,15 @@ void PlayMovie(const std::string &name)
         {
             switch (sdl_ev.type)
             {
-            case SDL_KEYDOWN:
-            case SDL_MOUSEBUTTONDOWN:
-            case SDL_CONTROLLERBUTTONDOWN:
+            case SDL_EVENT_KEY_DOWN:
+            case SDL_EVENT_MOUSE_BUTTON_DOWN:
+            case SDL_EVENT_GAMEPAD_BUTTON_DOWN:
                 skip_bar_active = true;
                 break;
 
-            case SDL_KEYUP:
-            case SDL_MOUSEBUTTONUP:
-            case SDL_CONTROLLERBUTTONUP:
+            case SDL_EVENT_KEY_UP:
+            case SDL_EVENT_MOUSE_BUTTON_UP:
+            case SDL_EVENT_GAMEPAD_BUTTON_UP:
                 skip_bar_active = false;
                 skip_time       = 0;
                 break;
@@ -425,7 +428,7 @@ void PlayMovie(const std::string &name)
     movie_bytes = nullptr;
     if (movie_audio_stream)
     {
-        SDL_FreeAudioStream(movie_audio_stream);
+        SDL_DestroyAudioStream(movie_audio_stream);
         movie_audio_stream = nullptr;
     }
     if (rgb_data)

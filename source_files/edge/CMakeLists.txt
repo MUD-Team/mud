@@ -124,7 +124,7 @@ set (EDGE_LINK_LIBRARIES
   edge_ddf
   edge_epi
   edge_tracy
-  ${SDL2_LIBRARIES}
+  ${SDL3_LIBRARIES}
   almostequals
   dr_libs
   fluidlite
@@ -167,7 +167,7 @@ else()
 endif()
 
 if(WIN32 AND (MSVC OR CLANG))
-  target_include_directories(edge-classic PRIVATE ${EDGE_LIBRARY_DIR}/sdl2/include)
+  target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/sdl3/include)
 endif()
 
 target_include_directories(edge-classic PRIVATE ./)
@@ -211,19 +211,19 @@ else()
 
 endif()
 
-# Copy appropriate SDL2.dll to local install directory when built with MSVC/Clang
+# Copy appropriate SDL3.dll to local install directory when built with MSVC/Clang
 if (WIN32)
   if(MSVC OR CLANG)
     if (${CMAKE_SIZEOF_VOID_P} MATCHES 8)
-      list(APPEND COPY_FILES "${CMAKE_SOURCE_DIR}/libraries/sdl2/lib/x64/SDL2.dll")
+      list(APPEND COPY_FILES "${CMAKE_SOURCE_DIR}/libraries/sdl3/lib/x64/SDL3.dll")
     else ()
-      list(APPEND COPY_FILES "${CMAKE_SOURCE_DIR}/libraries/sdl2/lib/x86/SDL2.dll")
+      list(APPEND COPY_FILES "${CMAKE_SOURCE_DIR}/libraries/sdl3/lib/x86/SDL3.dll")
     endif ()
   elseif(MSYS)
     if (${CMAKE_SIZEOF_VOID_P} MATCHES 8)
-      list(APPEND COPY_FILES "/mingw64/bin/SDL2.dll")
+      list(APPEND COPY_FILES "/mingw64/bin/SDL3.dll")
     else ()
-      list(APPEND COPY_FILES "/mingw32/bin/SDL2.dll")
+      list(APPEND COPY_FILES "/mingw32/bin/SDL3.dll")
     endif ()
   endif()
 endif()

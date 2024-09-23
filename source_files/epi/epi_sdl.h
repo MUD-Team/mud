@@ -18,10 +18,8 @@
 
 #pragma once
 
-#ifdef _MSC_VER
-#include "SDL.h"
-#elif __APPLE__
+#ifdef __APPLE__ // Not sure if this is still accurate for SDL3
 #include <SDL.h>
 #else
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 #endif

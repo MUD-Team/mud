@@ -36,12 +36,10 @@
 // If true, sound system is off/not working. Changed to false if sound init ok.
 bool no_sound = false;
 
-static SDL_AudioSpec sound_device_check;
-SDL_AudioDeviceID    current_sound_device;
+SDL_AudioStream     *current_sound_device = nullptr;
 
 int  sound_device_frequency;
 int  sound_device_bytes_per_sample;
-int  sound_device_samples_per_buffer;
 bool sound_device_stereo;
 
 static bool audio_is_locked = false;
@@ -51,11 +49,25 @@ extern std::string       game_directory;
 extern std::string       home_directory;
 extern ConsoleVariable   midi_soundfont;
 
-void SoundFillCallback(void *udata, Uint8 *stream, int len)
+static uint8_t *sdl3_mix_buffer = nullptr;
+static int sdl3_mix_size = 0;
+
+void SoundFillCallback(void *userdata, SDL_AudioStream *stream, int additional_amount, int total_amount)
 {
-    (void)udata;
-    SDL_memset(stream, 0, len);
-    MixAllSoundChannels(stream, len);
+    (void)userdata;
+    if (!sdl3_mix_buffer)
+    {
+        sdl3_mix_buffer = (uint8_t *)malloc(additional_amount);
+        sdl3_mix_size = additional_amount;
+    }
+    else if (sdl3_mix_size < additional_amount)
+    {
+        sdl3_mix_buffer = (uint8_t *)realloc(sdl3_mix_buffer, additional_amount);
+        sdl3_mix_size = additional_amount;
+    }
+    memset(sdl3_mix_buffer, 0, additional_amount);
+    MixAllSoundChannels(sdl3_mix_buffer, additional_amount);
+    SDL_PutAudioStreamData(current_sound_device, sdl3_mix_buffer, additional_amount);
 }
 
 static bool TryOpenSound(int want_freq, bool want_stereo)
@@ -66,14 +78,12 @@ static bool TryOpenSound(int want_freq, bool want_stereo)
     LogPrint("StartupSound: trying %d Hz %s\n", want_freq, want_stereo ? "Stereo" : "Mono");
 
     trydev.freq     = want_freq;
-    trydev.format   = AUDIO_S16SYS;
+    trydev.format   = SDL_AUDIO_S16;
     trydev.channels = want_stereo ? 2 : 1;
-    trydev.samples  = 1024;
-    trydev.callback = SoundFillCallback;
 
-    current_sound_device = SDL_OpenAudioDevice(nullptr, 0, &trydev, &sound_device_check, 0);
+    current_sound_device = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &trydev, SoundFillCallback, nullptr);
 
-    if (current_sound_device > 0)
+    if (current_sound_device)
         return true;
 
     LogPrint("  failed: %s\n", SDL_GetError());
@@ -100,12 +110,14 @@ void StartupAudio(void)
 
     if (epi::StringCaseCompareASCII(driver, "default") != 0)
     {
-        SDL_setenv("SDL_AUDIODRIVER", driver.c_str(), 1);
+        SDL_Environment *enviro = SDL_GetEnvironment();
+        if (enviro)
+            SDL_SetEnvironmentVariable(enviro, "SDL_AUDIODRIVER", driver.c_str(), true);
     }
 
     LogPrint("SDL_Audio_Driver: %s\n", driver.c_str());
 
-    if (SDL_InitSubSystem(SDL_INIT_AUDIO) != 0)
+    if (!SDL_InitSubSystem(SDL_INIT_AUDIO))
     {
         LogPrint("StartupSound: Couldn't init SDL AUDIO! %s\n", SDL_GetError());
         no_sound = true;
@@ -132,46 +144,12 @@ void StartupAudio(void)
         return;
     }
 
-    // These checks shouldn't really fail, as SDL2 allows us to force our
-    // desired format and convert silently if needed, but they might end up
-    // being a good safety net - Dasho
-
-    if (sound_device_check.format != AUDIO_S16SYS)
-    {
-        LogPrint("StartupSound: unsupported format: %d\n", sound_device_check.format);
-        SDL_CloseAudioDevice(current_sound_device);
-        no_sound = true;
-        return;
-    }
-
-    if (sound_device_check.channels >= 3)
-    {
-        LogPrint("StartupSound: unsupported channel num: %d\n", sound_device_check.channels);
-        SDL_CloseAudioDevice(current_sound_device);
-
-        no_sound = true;
-        return;
-    }
-
-    if (want_stereo && sound_device_check.channels != 2)
-        LogPrint("StartupSound: stereo sound not available.\n");
-    else if (!want_stereo && sound_device_check.channels != 1)
-        LogPrint("StartupSound: mono sound not available.\n");
-
-    if (sound_device_check.freq < (want_freq - want_freq / 100) ||
-        sound_device_check.freq > (want_freq + want_freq / 100))
-    {
-        LogPrint("StartupSound: %d Hz sound not available.\n", want_freq);
-    }
-
-    sound_device_bytes_per_sample   = (sound_device_check.channels) * 2;
-    sound_device_samples_per_buffer = sound_device_check.size / sound_device_bytes_per_sample;
+    sound_device_bytes_per_sample   = 2 * (want_stereo ? 2 : 1);
 
     EPI_ASSERT(sound_device_bytes_per_sample > 0);
-    EPI_ASSERT(sound_device_samples_per_buffer > 0);
 
-    sound_device_frequency = sound_device_check.freq;
-    sound_device_stereo    = (sound_device_check.channels == 2);
+    sound_device_frequency = want_freq;
+    sound_device_stereo    = want_stereo;
 
     // update Sound Options menu
     if (sound_device_stereo != (var_sound_stereo >= 1))
@@ -192,7 +170,7 @@ void AudioShutdown(void)
 
     no_sound = true;
 
-    SDL_CloseAudioDevice(current_sound_device);
+    SDL_DestroyAudioStream(current_sound_device);
 }
 
 void LockAudio(void)
@@ -203,7 +181,7 @@ void LockAudio(void)
         FatalError("LockAudio: called twice without unlock!\n");
     }
 
-    SDL_LockAudioDevice(current_sound_device);
+    SDL_LockAudioStream(current_sound_device);
     audio_is_locked = true;
 }
 
@@ -211,7 +189,7 @@ void UnlockAudio(void)
 {
     if (audio_is_locked)
     {
-        SDL_UnlockAudioDevice(current_sound_device);
+        SDL_UnlockAudioStream(current_sound_device);
         audio_is_locked = false;
     }
 }

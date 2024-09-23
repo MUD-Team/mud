@@ -104,13 +104,13 @@ else()
 endif()
 
 if (MSVC)
-  set(SDL2_DIR "${CMAKE_SOURCE_DIR}/libraries/sdl2")
+  set(SDL3_DIR "${CMAKE_SOURCE_DIR}/libraries/sdl3")
 endif()
 
-find_package(SDL2 REQUIRED)
+find_package(SDL3 REQUIRED)
 
 if (APPLE)
-  include_directories(${SDL2_INCLUDE_DIR})  
+  include_directories(${SDL3_INCLUDE_DIR})  
   if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm64" AND APPLE)
     add_compile_definitions(APPLE_SILICON)
   elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64" AND APPLE)

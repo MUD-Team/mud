@@ -88,11 +88,11 @@ void GrabCursor(bool enable)
 
     if (grab_state && grab_mouse.d_)
     {
-        SDL_SetRelativeMouseMode(SDL_TRUE);
+        SDL_SetWindowRelativeMouseMode(program_window, true);
     }
     else
     {
-        SDL_SetRelativeMouseMode(SDL_FALSE);
+        SDL_SetWindowRelativeMouseMode(program_window, false);
     }
 }
 
@@ -150,12 +150,14 @@ void StartupGraphics(void)
 
     if (epi::StringCaseCompareASCII(driver, "default") != 0)
     {
-        SDL_setenv("SDL_VIDEODRIVER", driver.c_str(), 1);
+        SDL_Environment *enviro = SDL_GetEnvironment();
+        if (enviro)
+            SDL_SetEnvironmentVariable(enviro, "SDL_VIDEODRIVER", driver.c_str(), true);
     }
 
     LogPrint("SDL_Video_Driver: %s\n", driver.c_str());
 
-    if (SDL_InitSubSystem(SDL_INIT_VIDEO) != 0)
+    if (!SDL_InitSubSystem(SDL_INIT_VIDEO))
         FatalError("Couldn't init SDL VIDEO!\n%s\n", SDL_GetError());
 
     if (FindArgument("nograb") > 0)
@@ -176,11 +178,20 @@ void StartupGraphics(void)
 #endif
 
     // -DS- 2005/06/27 Detect SDL Resolutions
-    SDL_DisplayMode info;
-    SDL_GetDesktopDisplayMode(0, &info);
+    SDL_Point test_point = {0, 0};
 
-    desktop_resolution_width  = info.w;
-    desktop_resolution_height = info.h;
+    SDL_DisplayID test_id = SDL_GetDisplayForPoint(&test_point);
+
+    if (test_id == 0)
+        FatalError("Could not get desktop display mode! %s\n", SDL_GetError());
+
+    const SDL_DisplayMode *info = SDL_GetDesktopDisplayMode(test_id);
+
+    if (!info)
+        FatalError("Could not get desktop display mode! %s\n", SDL_GetError());
+
+    desktop_resolution_width  = info->w;
+    desktop_resolution_height = info->h;
 
     if (current_screen_width > desktop_resolution_width.d_)
         current_screen_width = desktop_resolution_width.d_;
@@ -189,21 +200,21 @@ void StartupGraphics(void)
 
     LogPrint("Desktop resolution: %dx%d\n", desktop_resolution_width.d_, desktop_resolution_height.d_);
 
-    int num_modes = SDL_GetNumDisplayModes(0);
+    int num_modes = 0;
+    SDL_DisplayMode **all_modes = SDL_GetFullscreenDisplayModes(test_id, &num_modes);
 
     for (int i = 0; i < num_modes; i++)
     {
-        SDL_DisplayMode possible_mode;
-        SDL_GetDisplayMode(0, i, &possible_mode);
+        SDL_DisplayMode *possible_mode = all_modes[i];
 
-        if (possible_mode.w > desktop_resolution_width.d_ || possible_mode.h > desktop_resolution_height.d_)
+        if (possible_mode->w > desktop_resolution_width.d_ || possible_mode->h > desktop_resolution_height.d_)
             continue;
 
         DisplayMode test_mode;
 
-        test_mode.width       = possible_mode.w;
-        test_mode.height      = possible_mode.h;
-        test_mode.depth       = SDL_BITSPERPIXEL(possible_mode.format);
+        test_mode.width       = possible_mode->w;
+        test_mode.height      = possible_mode->h;
+        test_mode.depth       = SDL_BITSPERPIXEL(possible_mode->format);
         test_mode.window_mode = kWindowModeFullscreen;
 
         if ((test_mode.width & 15) != 0)
@@ -242,18 +253,21 @@ void StartupGraphics(void)
 
     // Fill in borderless mode scrmode with the native display info
     borderless_mode.window_mode = kWindowModeBorderless;
-    borderless_mode.width       = info.w;
-    borderless_mode.height      = info.h;
-    borderless_mode.depth       = SDL_BITSPERPIXEL(info.format);
+    borderless_mode.width       = info->w;
+    borderless_mode.height      = info->h;
+    borderless_mode.depth       = SDL_BITSPERPIXEL(info->format);
 
     // If needed, also make the default fullscreen toggle mode borderless
     if (toggle_fullscreen_window_mode.d_ == kWindowModeInvalid)
     {
         toggle_fullscreen_window_mode = kWindowModeBorderless;
-        toggle_fullscreen_width       = info.w;
-        toggle_fullscreen_height      = info.h;
-        toggle_fullscreen_depth       = (int)SDL_BITSPERPIXEL(info.format);
+        toggle_fullscreen_width       = info->w;
+        toggle_fullscreen_height      = info->h;
+        toggle_fullscreen_depth       = (int)SDL_BITSPERPIXEL(info->format);
     }
+
+    if (all_modes)
+        SDL_free(all_modes);
 
     LogPrint("StartupGraphics: initialisation OK\n");
 }
@@ -270,10 +284,10 @@ static bool InitializeWindow(DisplayMode *mode)
 #endif
 
     program_window =
-        SDL_CreateWindow(temp_title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, mode->width, mode->height,
+        SDL_CreateWindow(temp_title.c_str(), mode->width, mode->height,
                          SDL_WINDOW_OPENGL |
                              (mode->window_mode == kWindowModeBorderless
-                                  ? (SDL_WINDOW_FULLSCREEN_DESKTOP)
+                                  ? (SDL_WINDOW_BORDERLESS)
                                   : (mode->window_mode == kWindowModeFullscreen ? SDL_WINDOW_FULLSCREEN : 0)) |
                              resizeable);
 
@@ -314,7 +328,7 @@ static bool InitializeWindow(DisplayMode *mode)
     if (vsync.d_ == 2)
     {
         // Fallback to normal VSync if Adaptive doesn't work
-        if (SDL_GL_SetSwapInterval(-1) == -1)
+        if (!SDL_GL_SetSwapInterval(-1))
         {
             vsync = 1;
             SDL_GL_SetSwapInterval(vsync.d_);
@@ -330,7 +344,7 @@ static bool InitializeWindow(DisplayMode *mode)
         FatalError("System only support GL %d.%d. Minimum GL version 2.1 required!\n", GLVersion.major, GLVersion.minor);
 #endif
 
-    return true;
+    return SetScreenSize(mode);
 }
 
 bool SetScreenSize(DisplayMode *mode)
@@ -351,30 +365,32 @@ bool SetScreenSize(DisplayMode *mode)
     }
     else if (mode->window_mode == kWindowModeBorderless)
     {
-        SDL_SetWindowFullscreen(program_window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+        SDL_SetWindowFullscreenMode(program_window, nullptr);
+        SDL_SetWindowFullscreen(program_window, true);
         SDL_GetWindowSize(program_window, &borderless_mode.width, &borderless_mode.height);
-
         LogPrint("SetScreenSize: mode now %dx%d %dbpp\n", mode->width, mode->height, mode->depth);
     }
     else if (mode->window_mode == kWindowModeFullscreen)
     {
-        SDL_SetWindowFullscreen(program_window, SDL_WINDOW_FULLSCREEN);
-        SDL_DisplayMode *new_mode = new SDL_DisplayMode;
-        new_mode->h               = mode->height;
-        new_mode->w               = mode->width;
-        SDL_SetWindowDisplayMode(program_window, new_mode);
-        SDL_SetWindowSize(program_window, mode->width, mode->height);
-        delete new_mode;
-        new_mode = nullptr;
-
-        LogPrint("SetScreenSize: mode now %dx%d %dbpp\n", mode->width, mode->height, mode->depth);
+        SDL_DisplayMode new_mode;
+        if (!SDL_GetClosestFullscreenDisplayMode(SDL_GetDisplayForWindow(program_window), mode->width, mode->height, 0.0f, false, &new_mode))
+        {
+            LogPrint("SetScreenSize: No matching fullscreen mode for %dx%d found!\n", mode->width, mode->height);
+            return false;
+        }
+        else
+        {    
+            SDL_SetWindowFullscreenMode(program_window, &new_mode);
+            SDL_SetWindowFullscreen(program_window, true);
+            SDL_SetWindowSize(program_window, mode->width, mode->height);
+            LogPrint("SetScreenSize: mode now %dx%d %dbpp\n", mode->width, mode->height, mode->depth);
+        }
     }
     else /* kWindowModeWindowed */
     {
-        SDL_SetWindowFullscreen(program_window, 0);
+        SDL_SetWindowFullscreen(program_window, false);
         SDL_SetWindowSize(program_window, mode->width, mode->height);
         SDL_SetWindowPosition(program_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-
         LogPrint("SetScreenSize: mode now %dx%d %dbpp\n", mode->width, mode->height, mode->depth);
     }
 
@@ -412,49 +428,7 @@ static void SwapBuffers(void)
 {
     EDGE_ZoneScoped;
 
-#ifdef _WIN32
-    bool useDwmFlush  = false;
-    int  swapInterval = SDL_GL_GetSwapInterval();
-
-    // If user manually disables vsync, respect that and don't try to check for/execute DwmFlush
-    if (vsync.d_ > 0)
-    {
-        BOOL compositionEnabled = IsWindows8OrGreater();
-        if (compositionEnabled || (SUCCEEDED(DwmIsCompositionEnabled(&compositionEnabled)) && compositionEnabled))
-        {
-            DWM_TIMING_INFO info  = {};
-            info.cbSize           = sizeof(DWM_TIMING_INFO);
-            double dwmRefreshRate = 0;
-            if (SUCCEEDED(DwmGetCompositionTimingInfo(nullptr, &info)))
-                dwmRefreshRate = (double)info.rateRefresh.uiNumerator / (double)info.rateRefresh.uiDenominator;
-
-            SDL_DisplayMode dmode        = {};
-            int             displayindex = SDL_GetWindowDisplayIndex(program_window);
-
-            if (displayindex >= 0)
-                SDL_GetCurrentDisplayMode(displayindex, &dmode);
-
-            if (dmode.refresh_rate > 0 && dwmRefreshRate > 0 && (fabs(dmode.refresh_rate - dwmRefreshRate) < 2))
-            {
-                SDL_GL_SetSwapInterval(0);
-                if (SDL_GL_GetSwapInterval() == 0)
-                    useDwmFlush = true;
-                else
-                    SDL_GL_SetSwapInterval(swapInterval);
-            }
-        }
-    }
-#endif
-
     SDL_GL_SwapWindow(program_window);
-
-#ifdef _WIN32
-    if (useDwmFlush)
-    {
-        DwmFlush();
-        SDL_GL_SetSwapInterval(swapInterval);
-    }
-#endif
 }
 
 void FinishFrame(void)
@@ -510,7 +484,7 @@ void FinishFrame(void)
         if (vsync.d_ == 2)
         {
             // Fallback to normal VSync if Adaptive doesn't work
-            if (SDL_GL_SetSwapInterval(-1) == -1)
+            if (!SDL_GL_SetSwapInterval(-1))
             {
                 vsync = 1;
                 SDL_GL_SetSwapInterval(vsync.d_);
@@ -531,7 +505,7 @@ void ShutdownGraphics(void)
 
     graphics_shutdown = 1;
 
-    if (SDL_WasInit(SDL_INIT_EVERYTHING))
+    if (SDL_WasInit(0))
     {
         DeterminePixelAspect();
 
