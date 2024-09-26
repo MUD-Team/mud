@@ -146,7 +146,9 @@ extern ConsoleVariable force_flat_lighting;
 
 static int monitor_size;
 
-extern int             joystick_device;
+extern int             total_joysticks;
+extern int             selected_joystick;
+extern SDL_JoystickID *connected_joysticks;
 extern ConsoleVariable joystick_deadzone_axis_0;
 extern ConsoleVariable joystick_deadzone_axis_1;
 extern ConsoleVariable joystick_deadzone_axis_2;
@@ -154,8 +156,6 @@ extern ConsoleVariable joystick_deadzone_axis_3;
 extern ConsoleVariable joystick_deadzone_axis_4;
 extern ConsoleVariable joystick_deadzone_axis_5;
 
-extern SDL_Joystick *joystick_info;
-extern int           JoystickGetAxis(int n);
 extern void          OptionMenuNetworkHostBegun(void);
 
 extern int entry_playing;
@@ -476,7 +476,7 @@ static OptionMenuItem analogueoptions[] = {
     {kOptionMenuItemTypeSlider, "Y Sensitivity", nullptr, 0, &mouse_y_sensitivity.f_,
      OptionMenuUpdateConsoleVariableFromFloat, nullptr, &mouse_y_sensitivity, 0.25f, 1.0f, 15.0f, "%0.2f"},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {kOptionMenuItemTypeSwitch, "Gamepad", "None/1/2/3/4/5/6", 5, &joystick_device, nullptr, nullptr},
+    {kOptionMenuItemTypeSwitch, "Gamepad", nullptr, 1, &selected_joystick, nullptr, nullptr},
     {kOptionMenuItemTypeSwitch, "Left Stick X", JoystickAxis, 13, &joystick_axis[0], nullptr, nullptr},
     {kOptionMenuItemTypeSwitch, "Left Stick Y", JoystickAxis, 13, &joystick_axis[1], nullptr, nullptr},
     {kOptionMenuItemTypeSwitch, "Right Stick X", JoystickAxis, 13, &joystick_axis[2], nullptr, nullptr},
@@ -1123,26 +1123,26 @@ void OptionMenuDrawer()
         {
         case kOptionMenuItemTypeBoolean:
         case kOptionMenuItemTypeSwitch: {
-            if (current_menu == &analogue_optmenu && current_menu->items[i].switch_variable == &joystick_device)
+            if (current_menu == &analogue_optmenu && current_menu->items[i].switch_variable == &selected_joystick)
             {
-                if (joystick_device == 0)
+                if (total_joysticks == 0)
                 {
                     HUDWriteText(style, fontType, (current_menu->menu_center) + 15, curry, "None");
                     break;
                 }
                 else
                 {
-                    const char *joyname = SDL_JoystickNameForIndex(joystick_device - 1);
+                    const char *joyname = SDL_GetJoystickNameForID(connected_joysticks[selected_joystick]);
                     if (joyname)
                     {
                         HUDWriteText(style, fontType, (current_menu->menu_center) + 15, curry,
-                                     epi::StringFormat("%d - %s", joystick_device, joyname).c_str());
+                                     epi::StringFormat("%s", joyname).c_str());
                         break;
                     }
                     else
                     {
                         HUDWriteText(style, fontType, (current_menu->menu_center) + 15, curry,
-                                     epi::StringFormat("%d - Not Connected", joystick_device).c_str());
+                                     "Unidentified Gamepad");
                         break;
                     }
                 }

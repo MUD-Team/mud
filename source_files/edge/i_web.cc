@@ -157,7 +157,7 @@ extern "C"
         emscripten_set_pointerlockchange_callback(EMSCRIPTEN_EVENT_TARGET_DOCUMENT, nullptr, 0,
                                                   WebHandlePointerLockChange);
 
-        if (SDL_Init(0) < 0)
+        if (!SDL_Init(0))
             FatalError("Couldn't init SDL!!\n%s\n", SDL_GetError());
 
         executable_path = SDL_GetBasePath();

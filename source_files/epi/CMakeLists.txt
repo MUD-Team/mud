@@ -18,7 +18,7 @@ add_library(
 target_link_libraries(edge_epi PRIVATE almostequals HandmadeMath superfasthash)
 
 if(WIN32 AND (MSVC OR CLANG))
-  target_include_directories(edge_epi PRIVATE ${EDGE_LIBRARY_DIR}/sdl2/include)
+  target_include_directories(edge_epi SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/sdl3/include)
 endif()
 
 target_include_directories(edge_epi PUBLIC ./)

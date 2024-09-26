@@ -87,7 +87,6 @@ BAMAngle listen_angle;
 
 extern int sound_device_frequency;
 extern int sound_device_bytes_per_sample;
-extern int sound_device_samples_per_buffer;
 
 extern bool sound_device_stereo;
 
@@ -473,10 +472,13 @@ void MixAllSoundChannels(void *stream, int len)
     if (sound_device_stereo)
         samples *= 2;
 
-    // check that we're not getting too much data
-    EPI_ASSERT(pairs <= sound_device_samples_per_buffer);
+    EPI_ASSERT(mix_buffer);
 
-    EPI_ASSERT(mix_buffer && samples <= mix_buffer_length);
+    if (samples > mix_buffer_length)
+    {
+        mix_buffer_length = samples;
+        mix_buffer = (int *)realloc(mix_buffer, mix_buffer_length * sizeof(int));
+    }
 
     // clear mixer buffer
     memset(mix_buffer, 0, mix_buffer_length * sizeof(int));
@@ -511,8 +513,8 @@ void InitializeSoundChannels(int total)
         mix_channels[i] = new SoundChannel();
 
     // allocate mixer buffer
-    mix_buffer_length = sound_device_samples_per_buffer * (sound_device_stereo ? 2 : 1);
-    mix_buffer        = new int[mix_buffer_length];
+    mix_buffer_length = 1024 * (sound_device_stereo ? 2 : 1);
+    mix_buffer        = (int *)malloc(mix_buffer_length * sizeof(int));
 }
 
 void FreeSoundChannels(void)

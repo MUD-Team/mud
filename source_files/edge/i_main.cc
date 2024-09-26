@@ -25,13 +25,17 @@
 #include "m_argv.h"
 #include "version.h"
 
+#ifdef _WIN32
+#include <SDL3/SDL_main.h>
+#endif
+
 std::string executable_path = ".";
 
 extern "C"
 {
     int main(int argc, char *argv[])
     {
-        if (SDL_Init(0) < 0)
+        if (!SDL_Init(0))
             FatalError("Couldn't init SDL!!\n%s\n", SDL_GetError());
 
         executable_path = SDL_GetBasePath();

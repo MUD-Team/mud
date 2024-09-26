@@ -656,10 +656,10 @@ File *FileOpen(std::string_view name, unsigned int flags)
 
 bool OpenDirectory(const std::string &src)
 {
-    // A result of 0 is 'success', but that only means SDL was able to launch
-    // some kind of process to attempt to handle the path. -1 is the only result
+    // A result of true is 'success', but that only means SDL was able to launch
+    // some kind of process to attempt to handle the path. False is the only result
     // that is guaranteed to be an 'error'
-    if (SDL_OpenURL(StringFormat("file:///%s", src.c_str()).c_str()) == -1)
+    if (!SDL_OpenURL(StringFormat("file:///%s", src.c_str()).c_str()))
     {
         LogWarning("OpenDirectory failed to open requested path %s\nError: %s\n", src.c_str(), SDL_GetError());
         return false;

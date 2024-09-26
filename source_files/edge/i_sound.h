@@ -25,4 +25,4 @@
 
 extern std::vector<std::string> available_soundfonts;
 
-extern SDL_AudioDeviceID current_sound_device;
+extern SDL_AudioStream *current_sound_device;
